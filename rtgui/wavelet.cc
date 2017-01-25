@@ -59,6 +59,8 @@ std::vector<GradientMilestone> makeWholeHueRange()
 
 Wavelet::Wavelet() :
     FoldableToolPanel (this, "wavelet", M ("TP_WAVELET_LABEL"), true, true),
+    walistener (NULL),
+    lastlabFilename (""),
     curveEditorG (new CurveEditorGroup (options.lastWaveletCurvesDir, M ("TP_WAVELET_CONTEDIT"))),
     CCWcurveEditorG (new CurveEditorGroup (options.lastWaveletCurvesDir, M ("TP_WAVELET_CCURVE"))),
     CCWcurveEditorT (new CurveEditorGroup (options.lastWaveletCurvesDir, M ("TP_RETINEX_TRANSMISSION"))),
@@ -97,7 +99,7 @@ Wavelet::Wavelet() :
     gamma (Gtk::manage (new Adjuster (M ("TP_WAVELET_COMPGAMMA"), 0.4, 2.0, 0.01, 1.0))),
     sup (Gtk::manage (new Adjuster (M ("TP_WAVELET_SUPE"), -100, 350, 1, 0))),
     sky (Gtk::manage (new Adjuster (M ("TP_WAVELET_SKY"), -100., 100.0, 1., 0.))),
-    thres (Gtk::manage (new Adjuster (M ("TP_WAVELET_LEVELS"), 4, 9, 1, 7))), //3
+    thres (Gtk::manage (new Adjuster (M ("TP_WAVELET_LEVELS"), 4, 9, 1, 7))),
     chroma (Gtk::manage (new Adjuster (M ("TP_WAVELET_CHRO"), 1, 9, 1, 5))),
     chro (Gtk::manage (new Adjuster (M ("TP_WAVELET_CHR"), 0., 100., 1., 0.))),
     contrast (Gtk::manage (new Adjuster (M ("TP_WAVELET_CONTRA"), -100, 100, 1, 0))),
@@ -155,6 +157,9 @@ Wavelet::Wavelet() :
     dirD (Gtk::manage (new Adjuster (M ("TP_WAVELET_DIRD"), -100, 100, 1, -30))),
     shapedetcolor (Gtk::manage (new Adjuster (M ("TP_WAVELET_SHAPEDETCOLOR"), -100, 100, 1, 0))),
     sizelab (Gtk::manage (new Adjuster (M ("TP_WAVELET_SIZELAB"), 1.0, 4.0, 0.1, 1))),
+    vart (Gtk::manage (new Adjuster (M ("TP_WAVELET_VART"), 50, 500, 1, 200))),
+    scale (Gtk::manage (new Adjuster (M ("TP_WAVELET_SCA"), 1, 8, 1, 3))),
+    offs (Gtk::manage (new Adjuster (M ("TP_WAVELET_OFFS"), -1000, 5000, 1, 0))),
 
     Lmethod (Gtk::manage (new MyComboBoxText())),
     CHmethod (Gtk::manage (new MyComboBoxText())),
@@ -247,6 +252,8 @@ Wavelet::Wavelet() :
     nextmaxT = 0.;
 
     nextnlevel = 7.;
+
+    std::vector<double> defaultCurve;
 
     expsettings->signal_button_release_event().connect_notify ( sigc::bind ( sigc::mem_fun (this, &Wavelet::foldAllButMe), expsettings) );
 
@@ -519,7 +526,7 @@ Wavelet::Wavelet() :
 
     opaCurveEditorG->setCurveListener (this);
 
-    std::vector<double> defaultCurve;
+    // std::vector<double> defaultCurve;
 
     rtengine::WaveletParams::getDefaultOpacityCurveRG (defaultCurve);
     opacityShapeRG = static_cast<FlatCurveEditor*> (opaCurveEditorG->addCurve (CT_Flat, "", nullptr, false, false));
@@ -771,9 +778,7 @@ Wavelet::Wavelet() :
     offs->setAdjusterListener (this);
     str->setAdjusterListener (this);
     neigh->setAdjusterListener (this);
-    vart  = Gtk::manage (new Adjuster (M ("TP_WAVELET_VART"), 50, 500, 1, 200));
     vart->setAdjusterListener (this);
-    scale  = Gtk::manage (new Adjuster (M ("TP_WAVELET_SCA"), 1, 8, 1, 3));
     scale->setAdjusterListener (this);
 
     expsettingreti->signal_button_release_event().connect_notify ( sigc::bind ( sigc::mem_fun (this, &Wavelet::foldAllButMe), expsettingreti) );
@@ -1749,13 +1754,13 @@ void Wavelet::read (const ProcParams* pp, const ParamsEdited* pedited)
      *                               Set the GUI reflecting the given ProcParams
      *
      *****************************************************************************************************/
-    /*    if (pp->wavelet.inpute.substr (0, 5) != "file:" && !inputeFile->get_filename().empty()) {
-            inputeFile->set_filename (pp->wavelet.inpute);
-        }
+    if (pp->wavelet.inpute.substr (0, 5) != "file:" && !inputeFile->get_filename().empty()) {
+        inputeFile->set_filename (pp->wavelet.inpute);
+    }
 
-        oldip = pp->wavelet.inpute.substr (5); // cut of "file:"
-        inputeFile->set_filename (pp->wavelet.inpute.substr (5));
-    */
+    oldip = pp->wavelet.inpute.substr (5); // cut of "file:"
+    inputeFile->set_filename (pp->wavelet.inpute.substr (5));
+
     //HSmethod->set_active (1);   // Note: default values are controlled in rtengine::ProcParams::SetDefaults
     if (pp->wavelet.HSmethod == "without") {
         HSmethod->set_active (0);
@@ -2499,16 +2504,16 @@ void Wavelet::autoOpenCurve ()
 
 void Wavelet::write (ProcParams* pp, ParamsEdited* pedited)
 {
-    /*
-        //  pp->wavelet.input = inputFile->get_filename();
-        if (Glib::file_test (inputeFile->get_filename (), Glib::FILE_TEST_EXISTS) && !Glib::file_test (inputeFile->get_filename (), Glib::FILE_TEST_IS_DIR)) {
-            pp->wavelet.inpute = "file:" + inputeFile->get_filename ();
-        } else {
-            pp->wavelet.inpute = "file:lab.dat";    // just a directory
-        }
 
-        Glib::ustring p = Glib::path_get_dirname (inputeFile->get_filename ());
-    */
+    //  pp->wavelet.input = inputFile->get_filename();
+    if (Glib::file_test (inputeFile->get_filename (), Glib::FILE_TEST_EXISTS) && !Glib::file_test (inputeFile->get_filename (), Glib::FILE_TEST_IS_DIR)) {
+        pp->wavelet.inpute = "file:" + inputeFile->get_filename ();
+    } else {
+        pp->wavelet.inpute = "file:lab.dat";    // just a directory
+    }
+
+    Glib::ustring p = Glib::path_get_dirname (inputeFile->get_filename ());
+
     pp->wavelet.enabled        = getEnabled();
     pp->wavelet.avoid          = avoid->get_active ();
     pp->wavelet.tmr            = tmr->get_active ();
@@ -2640,7 +2645,7 @@ void Wavelet::write (ProcParams* pp, ParamsEdited* pedited)
     }
 
     if (pedited) {
-        //   pedited->wavelet.inpute = inChanged;
+        pedited->wavelet.inpute = inChanged;
 
         pedited->wavelet.enabled         = !get_inconsistent();
         pedited->wavelet.retinexMethod    = retinexMethod->get_active_text() != M ("GENERAL_UNCHANGED");
@@ -3353,7 +3358,7 @@ void Wavelet::retinexMethodproChanged()
 
 void Wavelet::inputeChanged()
 {
-    /*
+
     Glib::ustring profname;
     inChanged = true;
     profname = inputeFile->get_filename ();
@@ -3363,7 +3368,7 @@ void Wavelet::inputeChanged()
     }
 
     oldip = profname;
-    */
+
 }
 
 
@@ -4276,55 +4281,57 @@ void Wavelet::neutral2_pressed ()
 
 void Wavelet::savelabPressed ()
 {
-    /*
+
     if (!walistener) {
         return;
     }
 
 
-        Gtk::FileChooserDialog dialog(M("TP_WAVELET_SAVELAB"), Gtk::FILE_CHOOSER_ACTION_SAVE);
-        bindCurrentFolder (dialog, options.lastProfilingReferenceDir);
-        dialog.set_current_name (lastlabFilename);
+    Gtk::FileChooserDialog dialog (M ("TP_WAVELET_SAVELAB"), Gtk::FILE_CHOOSER_ACTION_SAVE);
 
-        dialog.add_button(Gtk::StockID("gtk-cancel"), Gtk::RESPONSE_CANCEL);
-        dialog.add_button(Gtk::StockID("gtk-save"), Gtk::RESPONSE_OK);
+    bindCurrentFolder (dialog, options.lastProfilingReferenceDir);
+    dialog.set_current_name (lastlabFilename);
+
+    dialog.add_button (Gtk::StockID ("gtk-cancel"), Gtk::RESPONSE_CANCEL);
+    dialog.add_button (Gtk::StockID ("gtk-save"), Gtk::RESPONSE_OK);
 
 
-        Gtk::FileFilter filter_mer;
-        filter_mer.set_name(M("FILECHOOSER_FILTER_MER"));
-        filter_mer.add_pattern("*.mer");
-        dialog.add_filter(filter_mer);
+    Glib::RefPtr<Gtk::FileFilter> filter_mer = Gtk::FileFilter::create();
 
-        dialog.show_all_children();
+    filter_mer->set_name (M ("FILECHOOSER_FILTER_MER"));
+    filter_mer->add_pattern ("*.mer");
+    dialog.add_filter (filter_mer);
 
-        bool done = false;
-        //activation watermark or HDR
-        //CLmethod->set_active (2);
-        //CLmethodUpdateUI() ;
+    dialog.show_all_children();
 
-        do {
-            int result = dialog.run();
+    bool done = false;
+    //activation watermark or HDR
+    //CLmethod->set_active (2);
+    //CLmethodUpdateUI() ;
 
-            if (result != Gtk::RESPONSE_OK) {
-                done = true;
-            } else {
-                std::string fname = dialog.get_filename();
-                Glib::ustring ext = getExtension(fname);
+    do {
+        int result = dialog.run();
 
-                if (ext != "mer") {
-                    fname += ".mer";
-                }
+        if (result != Gtk::RESPONSE_OK) {
+            done = true;
+        } else {
+            std::string fname = dialog.get_filename();
+            Glib::ustring ext = getExtension (fname);
 
-                if (confirmOverwrite(dialog, fname)) {
-                    walistener->savelabReference (fname);
-                    lastlabFilename = Glib::path_get_basename (fname);
-                    done = true;
-                }
+            if (ext != "mer") {
+                fname += ".mer";
             }
-        } while (!done);
 
-        return;
-        */
+            if (confirmOverwrite (dialog, fname)) {
+                walistener->savelabReference (fname);
+                lastlabFilename = Glib::path_get_basename (fname);
+                done = true;
+            }
+        }
+    } while (!done);
+
+    return;
+
 }
 
 

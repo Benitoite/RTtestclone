@@ -556,6 +556,7 @@ void ToolPanelCoordinator::updateToolState()
         wavelet->updateToolState (temp);
         wavelet->setExpanded (true);
     }
+
 }
 
 void ToolPanelCoordinator::readOptions ()
