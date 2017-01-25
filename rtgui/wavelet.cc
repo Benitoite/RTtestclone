@@ -790,7 +790,7 @@ Wavelet::Wavelet() :
     CCWcurveEditorT->setCurveListener (this);
 
     rtengine::WaveletParams::getDefaultCCWCurveT (defaultCurve);
-    cTshape = static_cast<FlatCurveEditor*> (CCWcurveEditorT->addCurve (CT_Flat, "", NULL, false));
+    cTshape = static_cast<FlatCurveEditor*> (CCWcurveEditorT->addCurve (CT_Flat, "", nullptr, false, false));
 
     cTshape->setIdentityValue (0.);
     cTshape->setResetCurve (FlatCurveType (defaultCurve.at (0)), defaultCurve);
@@ -804,7 +804,7 @@ Wavelet::Wavelet() :
     CCWcurveEditorgainT->setCurveListener (this);
 
     rtengine::WaveletParams::getDefaultCCWgainCurveT (defaultCurve);
-    cTgainshape = static_cast<FlatCurveEditor*> (CCWcurveEditorgainT->addCurve (CT_Flat, "", NULL, false));
+    cTgainshape = static_cast<FlatCurveEditor*> (CCWcurveEditorgainT->addCurve (CT_Flat, "", nullptr, false, false));
 
     cTgainshape->setIdentityValue (0.);
     cTgainshape->setResetCurve (FlatCurveType (defaultCurve.at (0)), defaultCurve);
@@ -1168,7 +1168,7 @@ Wavelet::Wavelet() :
     CCWcurveEditormerg->setCurveListener (this);
 
     rtengine::WaveletParams::getDefaultmergCurveT (defaultCurve);
-    cmergshape = static_cast<FlatCurveEditor*> (CCWcurveEditormerg->addCurve (CT_Flat, "", NULL, false));
+    cmergshape = static_cast<FlatCurveEditor*> (CCWcurveEditormerg->addCurve (CT_Flat, "", nullptr, false, false));
 
     cmergshape->setIdentityValue (0.);
     cmergshape->setResetCurve (FlatCurveType (defaultCurve.at (0)), defaultCurve);
@@ -1181,7 +1181,7 @@ Wavelet::Wavelet() :
     CCWcurveEditormerg2->setCurveListener (this);
 
     rtengine::WaveletParams::getDefaultmerg2CurveT (defaultCurve);
-    cmerg2shape = static_cast<FlatCurveEditor*> (CCWcurveEditormerg2->addCurve (CT_Flat, "", NULL, false));
+    cmerg2shape = static_cast<FlatCurveEditor*> (CCWcurveEditormerg2->addCurve (CT_Flat, "", nullptr, false, false));
 
     cmerg2shape->setIdentityValue (0.);
     cmerg2shape->setResetCurve (FlatCurveType (defaultCurve.at (0)), defaultCurve);
@@ -1307,7 +1307,7 @@ Wavelet::Wavelet() :
     CCWcurveEditorsty->setTooltip (M ("TP_WAVELET_STYLCURVE_TOOLTIP"));
 
     rtengine::WaveletParams::getDefaultstyCurveT (defaultCurve);
-    cstyshape = static_cast<FlatCurveEditor*> (CCWcurveEditorsty->addCurve (CT_Flat, "", NULL, false));
+    cstyshape = static_cast<FlatCurveEditor*> (CCWcurveEditorsty->addCurve (CT_Flat, "", nullptr, false, false));
 
     cstyshape->setIdentityValue (0.);
     cstyshape->setResetCurve (FlatCurveType (defaultCurve.at (0)), defaultCurve);
@@ -1320,7 +1320,7 @@ Wavelet::Wavelet() :
     CCWcurveEditorsty2->setTooltip (M ("TP_WAVELET_STYLCURVE_TOOLTIP"));
 
     rtengine::WaveletParams::getDefaultsty2CurveT (defaultCurve);
-    cstyshape2 = static_cast<FlatCurveEditor*> (CCWcurveEditorsty2->addCurve (CT_Flat, "", NULL, false));
+    cstyshape2 = static_cast<FlatCurveEditor*> (CCWcurveEditorsty2->addCurve (CT_Flat, "", nullptr, false, false));
 
     cstyshape2->setIdentityValue (0.);
     cstyshape2->setResetCurve (FlatCurveType (defaultCurve.at (0)), defaultCurve);
