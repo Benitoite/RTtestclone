@@ -194,6 +194,8 @@ FILECHOOSER_FILTER_ANY;All files
 FILECHOOSER_FILTER_COLPROF;Color profiles
 FILECHOOSER_FILTER_CURVE;Curve files
 FILECHOOSER_FILTER_LCP;Lens correction profiles
+FILECHOOSER_FILTER_MERGE;Merge files
+FILECHOOSER_FILTER_MER;Merge files
 FILECHOOSER_FILTER_PP;Processing profiles
 FILECHOOSER_FILTER_SAME;Same format as current photo
 FILECHOOSER_FILTER_TIFF;TIFF files
@@ -598,7 +600,7 @@ HISTORY_MSG_363;W - Residual - Compression strength
 HISTORY_MSG_364;W - Final - Contrast balance
 HISTORY_MSG_365;W - Final - Delta balance
 HISTORY_MSG_366;W - Residual - Compression gamma
-HISTORY_MSG_367;W - Final - 'After' contrast curve
+HISTORY_MSG_367;W - Final - Final contrast curve
 HISTORY_MSG_368;W - Final - Contrast balance
 HISTORY_MSG_369;W - Final - Balance method
 HISTORY_MSG_370;W - Final - Local contrast curve
@@ -671,10 +673,63 @@ HISTORY_MSG_436;Retinex - M - Radius
 HISTORY_MSG_437;Retinex - M - Method
 HISTORY_MSG_438;Retinex - M - Equalizer
 HISTORY_MSG_439;Retinex - Process
-HISTORY_MSG_440;CbDL - Method
-HISTORY_MSG_441;Retinex - Gain transmission
-HISTORY_MSG_442;Retinex - Scale
-HISTORY_MSG_443;Output Black Point Compensation
+HISTORY_MSG_440;Retinex - Gain transmission
+HISTORY_MSG_441;Retinex - Scale
+HISTORY_MSG_442;W - Unsharp method
+HISTORY_MSG_443;W - Merge luma
+HISTORY_MSG_444;W - Merge chroma
+HISTORY_MSG_445;W - Reti - gain
+HISTORY_MSG_446;W - Reti - brightness
+HISTORY_MSG_447;W - Reti - strength
+HISTORY_MSG_448;W - Reti - radius
+HISTORY_MSG_449;W - Reti - contrast
+HISTORY_MSG_450;W - Reti - threshold
+HISTORY_MSG_451;W - Retinex method
+HISTORY_MSG_452;W - Reti - transmission
+HISTORY_MSG_453;W - Reti - chroma
+HISTORY_MSG_454;W - Reti - process
+HISTORY_MSG_455;W - merge - enabled
+HISTORY_MSG_456;W - merge - file
+HISTORY_MSG_457;W - merge - type
+HISTORY_MSG_458;W - merge - preview
+HISTORY_MSG_459;W - merge - H shift
+HISTORY_MSG_460;W - merge - V shift
+HISTORY_MSG_461;W - merge - blend L
+HISTORY_MSG_462;W - merge - blend C
+HISTORY_MSG_463;W - merge - reset
+HISTORY_MSG_464;W - es - sharp method
+HISTORY_MSG_465;W - Reti - enabled
+HISTORY_MSG_466;W - merge - method
+HISTORY_MSG_467;W - Reti - radius
+HISTORY_MSG_468;W - Reti - highlight
+HISTORY_MSG_469;W - Reti - H tonal width
+HISTORY_MSG_470;W - Reti - shadows
+HISTORY_MSG_471;W - Reti - S tonal width
+HISTORY_MSG_472;W - Reti - Scale
+HISTORY_MSG_473;W - Residual - Toning color bal
+HISTORY_MSG_474;W - es - Edge detection
+HISTORY_MSG_475;W - merge - gradient luma
+HISTORY_MSG_476;W - merge - merge curve
+HISTORY_MSG_477;W - Reti - gain curve
+HISTORY_MSG_478;CbDL - method
+HISTORY_MSG_479;W - merge - save size
+HISTORY_MSG_480;W - merge - luminance style
+HISTORY_MSG_481;W - merge - chroma
+HISTORY_MSG_482;W - merge - residual style
+HISTORY_MSG_483;W - merge - style targ/prot
+HISTORY_MSG_484;W - merge - shape detection curve hdr
+HISTORY_MSG_485;W - merge - style detection color
+HISTORY_MSG_486;W - merge - dirV
+HISTORY_MSG_487;W - merge - dirH
+HISTORY_MSG_488;W - merge - dirD
+HISTORY_MSG_489;W - merge - SH curve
+HISTORY_MSG_490;W - merge - luma curve++
+HISTORY_MSG_491;W - merge - luminance hdr
+HISTORY_MSG_492;W - merge - residual hdr
+HISTORY_MSG_493;W - merge - position
+HISTORY_MSG_494;W - merge - shape method
+HISTORY_MSG_495;W - merge - Neural index
+HISTORY_MSG_496;W - merge - shape detection curve sty
 HISTORY_NEWSNAPSHOT;Add
 HISTORY_NEWSNAPSHOT_TOOLTIP;Shortcut: <b>Alt-s</b>
 HISTORY_SNAPSHOT;Snapshot
@@ -730,6 +785,7 @@ MAIN_BUTTON_PUTTOQUEUE_TOOLTIP;Put current image to processing queue.\nShortcut:
 MAIN_BUTTON_SAVE_TOOLTIP;Save current image.\nShortcut: <b>Ctrl+s</b>
 MAIN_BUTTON_SENDTOEDITOR;Edit image in external editor
 MAIN_BUTTON_SENDTOEDITOR_TOOLTIP;Edit current image in external editor.\nShortcut: <b>Ctrl+e</b>
+MAIN_BUTTON_SENDTOLAB_TOOLTIP;Save L*a*b datas for merge files (*.mer).\nWavelet levels and Merge files must be enabled.\nEdit L*a*b* data image in external editor.
 MAIN_BUTTON_SHOWHIDESIDEPANELS_TOOLTIP;Show/hide all side panels.\nShortcut: <b>m</b>
 MAIN_BUTTON_UNFULLSCREEN;Exit fullscreen
 MAIN_FRAME_BATCHQUEUE;Queue
@@ -1838,9 +1894,25 @@ TP_WAVELET_BALANCE;Contrast balance d/v-h
 TP_WAVELET_BALANCE_TOOLTIP;Alters the balance between the wavelet directions: vertical-horizontal and diagonal.\nIf contrast, chroma or residual tone mapping are activated, the effect due to balance is amplified.
 TP_WAVELET_BALCHRO;Chroma balance
 TP_WAVELET_BALCHRO_TOOLTIP;If enabled, the 'Contrast balance' curve or slider also modifies chroma balance.
+TP_WAVELET_BALMERCH;Merge chroma first (% merge luma)
+TP_WAVELET_BALMERCH_TOOLTIP;Merge chroma style first image in current.\n*High values are preferred
+TP_WAVELET_BALMERRES;Merge Residual style
+TP_WAVELET_BALMERRES2;Merge Residual hdr++
+TP_WAVELET_BALMERRES_TOOLTIP;Merge residual first image in Current image.\n*Low values are preferred
+TP_WAVELET_BALMERRES2_TOOLTIP;Merge residual first image in Current image.\n*Same values as levels are preferred
+TP_WAVELET_BALMFR_TOOLTIP;Allow to merge, 2 files to create special effects with different possible styles.\n*The current image is the file you want to apply effects.\n*The first image is the file that contains the effects to apply (shapes, colors).\n*The files can be of different type and size. But if the size is different (for example to reduce the memory requirements), the quality will be low.\n*Choose a high number of levels (7 8 9) will increase the effects
+TP_WAVELET_BALMERLUM_TOOLTIP;Apply on luminance for each level of image containing effects(first)
+TP_WAVELET_BALMERLUM2_TOOLTIP;Apply on luminance for each level of first image (overexposed)
 TP_WAVELET_BANONE;None
 TP_WAVELET_BASLI;Slider
 TP_WAVELET_BATYPE;Contrast balance method
+TP_WAVELET_BLEND;Threshold blend Luma
+TP_WAVELET_BLEND_TOOLTIP;Blend luma - current and first images
+TP_WAVELET_BLENDC;Threshold blend Chroma
+TP_WAVELET_BLENDC_TOOLTIP;Blend chroma - current and first images.\nNegatives values changes colors
+TP_WAVELET_VERTSH;Vertical shift (percent)
+TP_WAVELET_HORIZSH;Horizontal shift (percent)
+TP_WAVELET_VERTSH_TOOLTIP;*Watermark: Move first image into current image.\nif first image size >= to current, no action.\n*HDR : allows desalignement (vert:+-1 - hor:+-1) pixels between first and second image.\nHDR++ : allows desalignement (vert:+-5 - hor:+-5) pixels between first and second image
 TP_WAVELET_CBENAB;Toning and Color Balance
 TP_WAVELET_CB_TOOLTIP;For strong values product color-toning by combining it or not with levels decomposition 'toning'\nFor low values you can change the white balance of the background (sky, ...) without changing that of the front plane, generally more contrasted
 TP_WAVELET_CCURVE;Local contrast
@@ -1854,12 +1926,14 @@ TP_WAVELET_CHRO_TOOLTIP;Sets the wavelet level which will be the threshold betwe
 TP_WAVELET_CHR_TOOLTIP;Adjusts chroma as a function of "contrast levels" and "chroma-contrast link strength"
 TP_WAVELET_CHSL;Sliders
 TP_WAVELET_CHTYPE;Chrominance method
+TP_WAVELET_CLAR;Sharp-mask and Clarity
+TP_WAVELET_CLARI_TOOLTIP;Use sharp-mask resulting from the wavelet decomposition.\n*sharpening (background black - Process below - low levels).\n*clarity (Background residual - Process above - high levels)
 TP_WAVELET_COLORT;Opacity Red-Green
 TP_WAVELET_COMPCONT;Contrast
 TP_WAVELET_COMPGAMMA;Compression gamma
 TP_WAVELET_COMPGAMMA_TOOLTIP;Adjusting the gamma of the residual image allows you to equilibrate the data and histogram.
 TP_WAVELET_COMPTM;Tone mapping
-TP_WAVELET_CONTEDIT;'After' contrast curve
+TP_WAVELET_CONTEDIT;Final contrast curve
 TP_WAVELET_CONTR;Gamut
 TP_WAVELET_CONTRA;Contrast
 TP_WAVELET_CONTRAST_MINUS;Contrast -
@@ -1871,6 +1945,8 @@ TP_WAVELET_CURVEEDITOR_CH;Contrast levels=f(Hue)
 TP_WAVELET_CURVEEDITOR_CH_TOOLTIP;Modifies each level's contrast as a function of hue.\nTake care not to overwrite changes made with the Gamut sub-tool's hue controls.\nThe curve will only have an effect when wavelet contrast level sliders are non-zero.
 TP_WAVELET_CURVEEDITOR_CL;L
 TP_WAVELET_CURVEEDITOR_CL_TOOLTIP;Applies a final contrast luminance curve at the end of the wavelet treatment.
+TP_WAVELET_CURVEEDITOR_STYH;Style hue (first)
+TP_WAVELET_CURVEEDITOR_STYH_TOOLTIP;Modifies the merge file taking into account the colors of the image "first"
 TP_WAVELET_CURVEEDITOR_HH;HH
 TP_WAVELET_CURVEEDITOR_HH_TOOLTIP;Modifies the residual image's hue as a function of hue.
 TP_WAVELET_DALL;All directions
@@ -1881,13 +1957,20 @@ TP_WAVELET_DAUB6;D6 - standard plus
 TP_WAVELET_DAUB10;D10 - medium
 TP_WAVELET_DAUB14;D14 - high
 TP_WAVELET_DAUB_TOOLTIP;Changes Daubechies coefficients:\nD4 = Standard,\nD14 = Often best performance, 10% more time-intensive.\n\nAffects edge detection as well as the general quality of the firsts levels. However the quality is not strictly related to this coefficient and can vary with images and uses.
+TP_WAVELET_DIRV;Vertical direction
+TP_WAVELET_DIRH;Horizontal direction
+TP_WAVELET_DIRD;Diagonal direction
+TP_WAVELET_DIRV_TOOLTIP;Apply on each direction for each level (luma and chroma) of image containing effects (first)
 TP_WAVELET_DONE;Vertical
 TP_WAVELET_DTHR;Diagonal
 TP_WAVELET_DTWO;Horizontal
 TP_WAVELET_EDCU;Curve
 TP_WAVELET_EDGCONT;Local contrast
 TP_WAVELET_EDGCONT_TOOLTIP;Adjusting the points to the left decreases contrast, and to the right increases it.\nBottom-left, Top-Left, Top-Right, Bottom-right represent respectively local contast for low values, mean, mean+stdev, maxima
-TP_WAVELET_EDGE;Edge Sharpness
+TP_WAVELET_EDGE;Edge Sharpness and Clarity
+TP_WAVELET_EDG1;Edge Sharpness
+TP_WAVELET_EDG2;Sharp-mask and Clarity
+TP_WAVELET_EDG3;Edge detection
 TP_WAVELET_EDGEAMPLI;Base amplification
 TP_WAVELET_EDGEDETECT;Gradient sensitivity
 TP_WAVELET_EDGEDETECTTHR;Threshold low (noise)
@@ -1900,11 +1983,16 @@ TP_WAVELET_EDGTHRESH;Detail
 TP_WAVELET_EDGTHRESH_TOOLTIP;Change the repartition between the first levels and the others. The higher the threshold the more the action is centred on the first levels. Be careful with negative values, they increase the action of high levels and can introduce artifacts.
 TP_WAVELET_EDRAD;Radius
 TP_WAVELET_EDRAD_TOOLTIP;This radius adjustment is very different from those in other sharpening tools. Its value is compared to each level through a complex function. In this sense, a value of zero still has an effect.
+TP_WAVELET_EDSH;Edge sharpness
+TP_WAVELET_EDSH_TOOLTIP;Use level decomposition and special algorithm to increase sharpness
 TP_WAVELET_EDSL;Threshold Sliders
 TP_WAVELET_EDTYPE;Local contrast method
 TP_WAVELET_EDVAL;Strength
 TP_WAVELET_FINAL;Final Touchup
 TP_WAVELET_FINEST;Finest
+TP_WAVELET_BALM;Merge first
+TP_WAVELET_GAINF;Gain and offset (brightness)
+TP_WAVELET_GAUSF;Gaussian mask
 TP_WAVELET_HIGHLIGHT;Highlight luminance range
 TP_WAVELET_HS1;Whole luminance range
 TP_WAVELET_HS2;Shadows/Highlights
@@ -1912,15 +2000,18 @@ TP_WAVELET_HUESKIN;Skin hue
 TP_WAVELET_HUESKIN_TOOLTIP;The bottom points set the beginning of the transition zone, and the upper points the end of it, where the effect is at its maximum.\n\nIf you need to move the area significantly, or if there are artifacts, then the <b>white balance is incorrect</b>.
 TP_WAVELET_HUESKY;Sky hue
 TP_WAVELET_HUESKY_TOOLTIP;The bottom points set the beginning of the transition zone, and the upper points the end of it, where the effect is at its maximum.\n\nIf you need to move the area significantly, or if there are artifacts, then the <b>white balance is incorrect</b>.
+TP_WAVELET_HUESKINSTY;Style hue (current)
+TP_WAVELET_HUESKINSTY_TOOLTIP;Target or protect merge image taking into account the colors of the current image (act on luma and chroma)
 TP_WAVELET_ITER;Delta balance levels
 TP_WAVELET_ITER_TOOLTIP;Left: increase low levels and reduce high levels,\nRight: reduce low levels and increase high levels.
+TP_WAVELET_INPUTE_TOOLTIP;Load L*a*b* datas (*.mer) to be merge with Current
 TP_WAVELET_LABEL;Wavelet Levels
 TP_WAVELET_LARGEST;Coarsest
 TP_WAVELET_LEVCH;Chroma
 TP_WAVELET_LEVDIR_ALL;All levels in all directions
 TP_WAVELET_LEVDIR_INF;Below or equal the level
 TP_WAVELET_LEVDIR_ONE;One level
-TP_WAVELET_LEVDIR_SUP;Above the level
+TP_WAVELET_LEVDIR_SUP;Above or equal the level
 TP_WAVELET_LEVELS;Wavelet levels
 TP_WAVELET_LEVELS_TOOLTIP;Choose the number of detail levels the image is to be decomposed into. More levels require more RAM and require a longer processing time.
 TP_WAVELET_LEVF;Contrast
@@ -1931,12 +2022,34 @@ TP_WAVELET_LEVTWO;Level 3
 TP_WAVELET_LEVZERO;Level 1
 TP_WAVELET_LINKEDG;Link with Edge Sharpness' Strength
 TP_WAVELET_LIPST;Enhanced algoritm
+TP_WAVELET_LOAD;Load L*a*b and Merge Watermark-HDR
+TP_WAVELET_LOAD_ZERO;Load L*a*b and Merge for Style
+TP_WAVELET_LOAD_ZEROHDR;Load L*a*b and Merge for HDR++
 TP_WAVELET_LOWLIGHT;Shadow luminance range
 TP_WAVELET_MEDGREINF;First level
 TP_WAVELET_MEDI;Reduce artifacts in blue sky
-TP_WAVELET_MEDILEV;Edge detection
 TP_WAVELET_MEDILEV_TOOLTIP;When you enable Edge Detection, it is recommanded:\n- to disabled low contrast levels to avoid artifacts,\n- to use high values of gradient sensitivity.\n\nYou can modulate the strength with 'refine' from Denoise and Refine.
+TP_WAVELET_MERGE;Merge files and Watermark
+TP_WAVELET_MERGEB_METHOD;Merge method
+TP_WAVELET_BLEND_WAT;Watermark
+TP_WAVELET_BLEND_HDR1;Curve
+TP_WAVELET_BLEND_HDR2;Sliders
+TP_WAVELET_MCURVE;Merge luma curve
+TP_WAVELET_MCURVE2;Merge luma curve ++
+TP_WAVELET_MCURVE2_TOOLTIP;Take into account luminance of first image
+TP_WAVELET_MCURVE_TOOLTIP;Merge luminance between current and first image in function luma first image
+TP_WAVELET_MERGE_TOOLTIP;*Can be used for create Watermark (or Sharp-mask with the same file) or merge 2 files (HDR) or merge 2 files for Style or merge 2 files (HDR++).\n*This possibility (hdr and hdr++) is currently limited by the lack of local control. In addition the algorithm must be greatly improved.\nI recommand:a) threat 'first' image overexposed (near neutral) and Save L*a*b* HDR or Save L*a*b* for style or HDR++, and then open current image underexposed (near neutral), and then merge.\n*For Style the first image (style) should not be too small
+TP_WAVELET_MERG_METHOD;Merge type
+TP_WAVELET_MERG_METHOD2;Position in Wavelet process
+TP_WAVELET_MERGMET2_TOOLTIP;If you select "begin", all wavelet threatment will concern re-assembly image.\nIf you select "end", only current image will be threated.
+TP_WAVELET_ZERO_BEF;Begin
+TP_WAVELET_ZERO_AFT;End
+TP_WAVELET_MERGEINPUTLABEL;Select file to merge
+TP_WAVELET_MERGEINPUT_TOOLTIP;Select file data
+TP_WAVELET_MERGELABEL;MERGE FILES
+TP_WAVELET_FILTER_MERGE;
 TP_WAVELET_NEUTRAL;Neutral
+TP_WAVELET_NEUTRAL2;Reset
 TP_WAVELET_NOIS;Denoise
 TP_WAVELET_NOISE;Denoise and Refine
 TP_WAVELET_NPHIGH;High
@@ -1957,16 +2070,63 @@ TP_WAVELET_RESCHRO;Chroma
 TP_WAVELET_RESCON;Shadows
 TP_WAVELET_RESCONH;Highlights
 TP_WAVELET_RESID;Residual Image
+TP_WAVELET_RETI;Retinex in Wavelet
+TP_WAVELET_RETI_TOOLTIP;Retinex implanted in Wavelet.\nSame algoritm (simplified)as 'Retinex exposure', can threat TIF and JPG.\nCan be exploited in the process 'Residual image' and 'Final'
+TP_WAVE_NONE;None
+TP_WAVELET_ST2CURVE;Shape detection hdr
+TP_WAVELET_ST2CURVE2;Shape detection style
+TP_WAVRETI_FIN;Retinex 'Final Touchup' actived
+TP_WAVRETI_METHOD;Retinex method
+TP_WAVRETI_METHODPRO;Process located in
+TP_WAVE_RESIDU;Residual
+TP_WAVE_FINA;Final Touchup
+TP_WAVRETI_METHOD_TOOLTIP;Low = Reinforce low light,\nUniform = Equalize action,\nHigh = Reinforce high light.
+TP_WAVRETI_METHODPRO_TOOLTIP;Locate the Retinex Process either in Residual or in Final touchup
+TP_WAVELET_VIEW_METHOD;Preview and Save Method
+TP_WAVELET_VIEW_TOOLTIP;This method allows to:\n*Save datas for Watermark (or Sharp mask)- Wavelet settings will be automatically positionned (Background=black, Process=below, level=7), you can change Level (sharp-mask about 3).\n*Save datas for HDR - Wavelet settings will be automatically positionned (Background=residual, Process=above, level=2), you can change Level, level=1 produce no blur.\n*Save data for style and HDR++ -Wavelet settings will be automatically positionned (Background=grey, Process=all, level=1).\n*Load datas and merge - load *.mer and present merge menu.\n*Load datas and merge for style - load *.mer and present merge style menu.\n*Load datas and merge for HDR++ - load *.mer and present merge hdr menu
+TP_WAVELET_VIEW_CURR;Merge image
+TP_WAVELET_VIEW_CUNO;Current image
+TP_WAVELET_VIEW_PREV;First image
+TP_WAVELET_VIEW_SAVE;Save data
+TP_WAVELET_VIEW2_TOOLTIP;First image is the image load with L*a*b* datas before merging.\nSave data, position to allow saving datas in the process.\nMerge image, is the current image merge with first.\n
+TP_WAVELET_SAVE_WATER;Save L*a*b for Watermark
+TP_WAVELET_SAVE_HDR;Save L*a*b for HDR
+TP_WAVELET_SAVE_ZERO;Save L*a*b for Style and HDR++
+TP_WAVELET_SIZELAB;Size of image
+TP_WAVELET_SCA;Scale
+TP_WAVELET_SHAF;Shape and texture
+TP_WAVELET_SHAPMETHOD_TOOLTIP;Changes the way you calculate the texture, to better take into account in merging. The calculation is based on a neuronal design by combining several levels (3 or 4) decomposition in one.
+TP_WAVELET_SHAPN;Normal
+TP_WAVELET_SHAPT;Neural three
+TP_WAVELET_SHAPF;Neural four
+TP_WAVELET_SHAPIND;Neural index
+TP_WAVELET_SHAPIND_TOOLTIP;Changes the combination of levels.\nThere is no hierarchy between the index levels, nor between 'neural three' or 'neural four'..just try
+TP_WAVELET_STR;Strength
+TP_WAVELET_CHRRT;Chroma
+TP_WAVELET_NEIGH;Radius
+TP_WAVELET_VART;Contrast
+TP_WAVELET_GAIN;Gain
+TP_WAVELET_GRAD;Gradient luma
+TP_WAVELET_GRAD_TOOLTIP;Change luma merge variation
+TP_WAVELET_OFFS;Offset (brightness)
+TP_WAVELET_LIMD;Threshold
 TP_WAVELET_SAT;Saturated chroma
+TP_WAVELET_SAVELAB;Save L*a*b datas (*.mer)
+TP_WAVELET_SAVELAB_TOOLTIP;Open a dialog box *.mer.\nSave L*a*b* datas at the end of wavelet threatment.\nThese datas can then be retrieved to be merged with another image.
 TP_WAVELET_SETTINGS;Wavelet Settings
+TP_WAVELET_SHAPEDETCOLOR;Style targetting/protection
+TP_WAVELET_SHAPEDETCOLOR_TOOLTIP;At -100 tones selected are targetted.\nAt 0 all tones are treated equally.\nAt +100 tones selected are protected while all other tones are affected
 TP_WAVELET_SKIN;Skin targetting/protection
 TP_WAVELET_SKIN_TOOLTIP;At -100 skin-tones are targetted.\nAt 0 all tones are treated equally.\nAt +100 skin-tones are protected while all other tones are affected.
 TP_WAVELET_SKY;Sky targetting/protection
 TP_WAVELET_SKY_TOOLTIP;At -100 sky-tones are targetted.\nAt 0 all tones are treated equally.\nAt +100 sky-tones are protected while all other tones are affected.
 TP_WAVELET_STREN;Strength
 TP_WAVELET_STRENGTH;Strength
+TP_WAVELET_STYLCURVE_TOOLTIP;Apply on current image : the abscissa represents a Gaussian function of the luminance (or chroma) of each level.\nThe near-zero values tend to preserve the structure of the current image
 TP_WAVELET_SUPE;Extra
+TP_WAVELET_TC;Toning and color balance
 TP_WAVELET_THR;Shadows threshold
+TP_WAVELET_TRANSMISSIONGAIN;Transmission
 TP_WAVELET_THRESHOLD;Highlight levels
 TP_WAVELET_THRESHOLD2;Shadow levels
 TP_WAVELET_THRESHOLD2_TOOLTIP;Only levels between 9 and 9 minus the value will be affected by the shadow luminance range. Other levels will be fully treated. The highest level possible is limited by the highlight level value (9 minus highlight level value).
@@ -1981,7 +2141,19 @@ TP_WAVELET_TMSTRENGTH;Compression strength
 TP_WAVELET_TMSTRENGTH_TOOLTIP;Control the strength of tone mapping or contrast compression of the residual image. When the value is different from 0, the Strength and Gamma sliders of the Tone Mapping tool in the Exposure tab will become grayed out.
 TP_WAVELET_TMTYPE;Compression method
 TP_WAVELET_TON;Toning
+TP_WAVELET_TRANF;Transmission
 TP_WBALANCE_AUTO;Auto
+TP_WAVELET_USH;None
+TP_WAVELET_USH_TOOLTIP;If you select Sharp-mask, wavelet settings will be automatically positioned :\nBackground=black, Process=below, level=3...you can change level\nIf you select Clarity, wavelet settings will be automatically positioned :\nBackground=residual, Process=above, level=7..you can change level and wavelet levels
+TP_WAVELET_SHA;Sharp mask
+TP_WAVELET_CLA;Clarity
+TP_WAVELET_USHARP;Sharp method
+TP_WAVELET_USHARP_TOOLTIP;Origin : the source file is the file before Wavelet.\nWavelet : the source file is the file including wavelet threatment
+TP_WAVELET_USHARNONE;None
+TP_WAVELET_USHARORIG;Origin
+TP_WAVELET_USHARWAVE;Wavelet
+TP_WAVELET_MERGEL;Merge Luma
+TP_WAVELET_MERGEC;Merge Chroma
 TP_WBALANCE_CAMERA;Camera
 TP_WBALANCE_CLOUDY;Cloudy
 TP_WBALANCE_CUSTOM;Custom

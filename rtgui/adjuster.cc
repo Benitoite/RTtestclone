@@ -27,7 +27,7 @@
 
 #define MIN_RESET_BUTTON_HEIGHT 17
 
-static double one2one(double val)
+static double one2one (double val)
 {
     return val;
 }
@@ -35,8 +35,8 @@ static double one2one(double val)
 Adjuster::Adjuster (Glib::ustring vlabel, double vmin, double vmax, double vstep, double vdefault, Gtk::Image *imgIcon1, Gtk::Image *imgIcon2, double2double_fun slider2value_, double2double_fun value2slider_)
 {
 
-    set_hexpand(true);
-    set_vexpand(false);
+    set_hexpand (true);
+    set_vexpand (false);
     label = nullptr;
     adjusterListener = nullptr;
     afterReset = false;
@@ -47,13 +47,13 @@ Adjuster::Adjuster (Glib::ustring vlabel, double vmin, double vmax, double vstep
     imageIcon1 = imgIcon1;
 
     if (imageIcon1) {
-        setExpandAlignProperties(imageIcon1, false, false, Gtk::ALIGN_CENTER, Gtk::ALIGN_CENTER);
+        setExpandAlignProperties (imageIcon1, false, false, Gtk::ALIGN_CENTER, Gtk::ALIGN_CENTER);
     }
 
     imageIcon2 = imgIcon2;
 
     if (imageIcon2) {
-        setExpandAlignProperties(imageIcon2, false, false, Gtk::ALIGN_CENTER, Gtk::ALIGN_CENTER);
+        setExpandAlignProperties (imageIcon2, false, false, Gtk::ALIGN_CENTER, Gtk::ALIGN_CENTER);
     }
 
     slider2value = slider2value_ ? slider2value_ : one2one;
@@ -65,74 +65,74 @@ Adjuster::Adjuster (Glib::ustring vlabel, double vmin, double vmax, double vstep
 
     delay = options.adjusterMinDelay;
 
-    set_column_spacing(0);
-    set_column_homogeneous(false);
-    set_row_spacing(0);
-    set_row_homogeneous(false);
+    set_column_spacing (0);
+    set_column_homogeneous (false);
+    set_row_spacing (0);
+    set_row_homogeneous (false);
 
     editedCheckBox = nullptr;
 
     if (!vlabel.empty()) {
         adjustmentName = vlabel;
         label = Gtk::manage (new Gtk::Label (adjustmentName));
-        setExpandAlignProperties(label, true, false, Gtk::ALIGN_START, Gtk::ALIGN_BASELINE);
+        setExpandAlignProperties (label, true, false, Gtk::ALIGN_START, Gtk::ALIGN_BASELINE);
     }
 
     reset = Gtk::manage (new Gtk::Button ());
     reset->add (*Gtk::manage (new RTImage ("gtk-undo-ltr-small.png", "gtk-undo-rtl-small.png")));
-    setExpandAlignProperties(reset, false, false, Gtk::ALIGN_CENTER, Gtk::ALIGN_CENTER);
+    setExpandAlignProperties (reset, false, false, Gtk::ALIGN_CENTER, Gtk::ALIGN_CENTER);
     reset->set_relief (Gtk::RELIEF_NONE);
-    reset->set_tooltip_text (M("ADJUSTER_RESET_TO_DEFAULT"));
-    reset->get_style_context()->add_class(GTK_STYLE_CLASS_FLAT);
-    reset->set_can_focus(false);
+    reset->set_tooltip_text (M ("ADJUSTER_RESET_TO_DEFAULT"));
+    reset->get_style_context()->add_class (GTK_STYLE_CLASS_FLAT);
+    reset->set_can_focus (false);
 
     spin = Gtk::manage (new MySpinButton ());
-    setExpandAlignProperties(spin, false, false, Gtk::ALIGN_CENTER, Gtk::ALIGN_CENTER);
-    spin->set_input_purpose(Gtk::INPUT_PURPOSE_DIGITS);
+    setExpandAlignProperties (spin, false, false, Gtk::ALIGN_CENTER, Gtk::ALIGN_CENTER);
+    spin->set_input_purpose (Gtk::INPUT_PURPOSE_DIGITS);
 
     reset->set_size_request (-1, spin->get_height() > MIN_RESET_BUTTON_HEIGHT ? spin->get_height() : MIN_RESET_BUTTON_HEIGHT);
 
     slider = Gtk::manage (new MyHScale ());
-    setExpandAlignProperties(slider, true, false, Gtk::ALIGN_FILL, Gtk::ALIGN_CENTER);
+    setExpandAlignProperties (slider, true, false, Gtk::ALIGN_FILL, Gtk::ALIGN_CENTER);
     slider->set_draw_value (false);
     //slider->set_has_origin(false);  // ------------------ This will remove the colored part on the left of the slider's knob
 
     if (vlabel.empty()) {
         // No label, everything goes in a single row
-        attach_next_to(*slider, Gtk::POS_LEFT, 1, 1);
+        attach_next_to (*slider, Gtk::POS_LEFT, 1, 1);
 
         if (imageIcon1) {
-            attach_next_to(*imageIcon1, *slider, Gtk::POS_LEFT, 1, 1);
+            attach_next_to (*imageIcon1, *slider, Gtk::POS_LEFT, 1, 1);
         }
 
         if (imageIcon2) {
-            attach_next_to(*imageIcon2, *slider, Gtk::POS_RIGHT, 1, 1);
-            attach_next_to(*spin, *imageIcon2, Gtk::POS_RIGHT, 1, 1);
+            attach_next_to (*imageIcon2, *slider, Gtk::POS_RIGHT, 1, 1);
+            attach_next_to (*spin, *imageIcon2, Gtk::POS_RIGHT, 1, 1);
         } else {
-            attach_next_to(*spin, *slider, Gtk::POS_RIGHT, 1, 1);
+            attach_next_to (*spin, *slider, Gtk::POS_RIGHT, 1, 1);
         }
 
-        attach_next_to(*reset, *spin, Gtk::POS_RIGHT, 1, 1);
+        attach_next_to (*reset, *spin, Gtk::POS_RIGHT, 1, 1);
     } else {
         // A label is provided, spreading the widgets in 2 rows
-        attach_next_to(*label, Gtk::POS_LEFT, 1, 1);
-        attach_next_to(*spin, Gtk::POS_RIGHT, 1, 1);
+        attach_next_to (*label, Gtk::POS_LEFT, 1, 1);
+        attach_next_to (*spin, Gtk::POS_RIGHT, 1, 1);
         // A second HBox is necessary
-        grid = Gtk::manage(new Gtk::Grid());
-        grid->attach_next_to(*slider, Gtk::POS_LEFT, 1, 1);
+        grid = Gtk::manage (new Gtk::Grid());
+        grid->attach_next_to (*slider, Gtk::POS_LEFT, 1, 1);
 
         if (imageIcon1) {
-            grid->attach_next_to(*imageIcon1, *slider, Gtk::POS_LEFT, 1, 1);
+            grid->attach_next_to (*imageIcon1, *slider, Gtk::POS_LEFT, 1, 1);
         }
 
         if (imageIcon2) {
-            grid->attach_next_to(*imageIcon2, Gtk::POS_RIGHT, 1, 1);
-            grid->attach_next_to(*reset, *imageIcon2, Gtk::POS_RIGHT, 1, 1);
+            grid->attach_next_to (*imageIcon2, Gtk::POS_RIGHT, 1, 1);
+            grid->attach_next_to (*reset, *imageIcon2, Gtk::POS_RIGHT, 1, 1);
         } else {
-            grid->attach_next_to(*reset, *slider, Gtk::POS_RIGHT, 1, 1);
+            grid->attach_next_to (*reset, *slider, Gtk::POS_RIGHT, 1, 1);
         }
 
-        attach_next_to(*grid, *label, Gtk::POS_BOTTOM, 2, 1);
+        attach_next_to (*grid, *label, Gtk::POS_BOTTOM, 2, 1);
     }
 
     setLimits (vmin, vmax, vstep, vdefault);
@@ -142,9 +142,9 @@ Adjuster::Adjuster (Glib::ustring vlabel, double vmin, double vmax, double vstep
     editedState = defEditedState = Irrelevant;
     autoState = Irrelevant;
 
-    sliderChange = slider->signal_value_changed().connect( sigc::mem_fun(*this, &Adjuster::sliderChanged) );
-    spinChange = spin->signal_value_changed().connect ( sigc::mem_fun(*this, &Adjuster::spinChanged), true);
-    reset->signal_button_release_event().connect_notify( sigc::mem_fun(*this, &Adjuster::resetPressed) );
+    sliderChange = slider->signal_value_changed().connect ( sigc::mem_fun (*this, &Adjuster::sliderChanged) );
+    spinChange = spin->signal_value_changed().connect ( sigc::mem_fun (*this, &Adjuster::spinChanged), true);
+    reset->signal_button_release_event().connect_notify ( sigc::mem_fun (*this, &Adjuster::resetPressed) );
 
     show_all ();
 }
@@ -167,16 +167,16 @@ void Adjuster::addAutoButton (Glib::ustring tooltip)
     if (!automatic) {
         automatic = new Gtk::CheckButton ();
         //automatic->add (*Gtk::manage (new RTImage ("processing.png")));
-        automatic->set_tooltip_markup(tooltip.length() ? Glib::ustring::compose("<b>%1</b>\n\n%2", M("GENERAL_AUTO"), tooltip) : M("GENERAL_AUTO"));
-        setExpandAlignProperties(automatic, false, false, Gtk::ALIGN_CENTER, Gtk::ALIGN_CENTER);
-        autoChange = automatic->signal_toggled().connect( sigc::mem_fun(*this, &Adjuster::autoToggled) );
+        automatic->set_tooltip_markup (tooltip.length() ? Glib::ustring::compose ("<b>%1</b>\n\n%2", M ("GENERAL_AUTO"), tooltip) : M ("GENERAL_AUTO"));
+        setExpandAlignProperties (automatic, false, false, Gtk::ALIGN_CENTER, Gtk::ALIGN_CENTER);
+        autoChange = automatic->signal_toggled().connect ( sigc::mem_fun (*this, &Adjuster::autoToggled) );
 
         if (grid) {
             // Hombre, adding the checbox next to the reset button because adding it next to the spin button (as before)
             // would diminish the available size for the label and would require a much heavier reorganization of the grid !
-            grid->attach_next_to(*automatic, *reset, Gtk::POS_RIGHT, 1, 1);
+            grid->attach_next_to (*automatic, *reset, Gtk::POS_RIGHT, 1, 1);
         } else {
-            attach_next_to(*automatic, *reset, Gtk::POS_RIGHT, 1, 1);
+            attach_next_to (*automatic, *reset, Gtk::POS_RIGHT, 1, 1);
         }
     }
 }
@@ -184,22 +184,22 @@ void Adjuster::addAutoButton (Glib::ustring tooltip)
 void Adjuster::delAutoButton ()
 {
     if (automatic) {
-        removeIfThere(grid, automatic);
+        removeIfThere (grid, automatic);
         delete automatic;
         automatic = nullptr;
     }
 }
 
-void Adjuster::throwOnButtonRelease(bool throwOnBRelease)
+void Adjuster::throwOnButtonRelease (bool throwOnBRelease)
 {
 
     if (throwOnBRelease) {
         if (!buttonReleaseSlider.connected()) {
-            buttonReleaseSlider = slider->signal_button_release_event().connect_notify( sigc::mem_fun(*this, &Adjuster::sliderReleased) );
+            buttonReleaseSlider = slider->signal_button_release_event().connect_notify ( sigc::mem_fun (*this, &Adjuster::sliderReleased) );
         }
 
         if (!buttonReleaseSpin.connected()) {
-            buttonReleaseSpin = spin->signal_button_release_event().connect_notify( sigc::mem_fun(*this, &Adjuster::spinReleased) );    // Use the same callback hook
+            buttonReleaseSpin = spin->signal_button_release_event().connect_notify ( sigc::mem_fun (*this, &Adjuster::spinReleased) );  // Use the same callback hook
         }
     } else {
         if (buttonReleaseSlider.connected()) {
@@ -233,17 +233,17 @@ void Adjuster::autoToggled ()
         // If not used in the BatchEditor panel
         if (automatic->get_active()) {
             // Disable the slider and spin button
-            spin->set_sensitive(false);
-            slider->set_sensitive(false);
+            spin->set_sensitive (false);
+            slider->set_sensitive (false);
         } else {
             // Enable the slider and spin button
-            spin->set_sensitive(true);
-            slider->set_sensitive(true);
+            spin->set_sensitive (true);
+            slider->set_sensitive (true);
         }
     }
 
     if (adjusterListener != nullptr && !blocked) {
-        adjusterListener->adjusterAutoToggled(this, automatic->get_active());
+        adjusterListener->adjusterAutoToggled (this, automatic->get_active());
     }
 }
 
@@ -289,13 +289,13 @@ void Adjuster::resetValue (bool toInitial)
 
     if (toInitial) {
         // resetting to the initial editing value, when the image has been loaded
-        slider->set_value (addMode ? defaultVal : value2slider(defaultVal));
+        slider->set_value (addMode ? defaultVal : value2slider (defaultVal));
     } else {
         // resetting to the slider default value
         if (addMode) {
             slider->set_value (0.);
         } else {
-            slider->set_value (value2slider(ctorDefaultVal));
+            slider->set_value (value2slider (ctorDefaultVal));
         }
     }
 }
@@ -305,16 +305,16 @@ void Adjuster::resetPressed (GdkEventButton* event)
 {
 
     if ((event != nullptr) && (event->state & GDK_CONTROL_MASK) && (event->button == 1)) {
-        resetValue(true);
+        resetValue (true);
     } else {
-        resetValue(false);
+        resetValue (false);
     }
 }
 
 double Adjuster::shapeValue (double a)
 {
 
-    return round(a * pow(double(10), digits)) / pow(double(10), digits);
+    return round (a * pow (double (10), digits)) / pow (double (10), digits);
 }
 
 void Adjuster::setLimits (double vmin, double vmax, double vstep, double vdefault)
@@ -323,23 +323,23 @@ void Adjuster::setLimits (double vmin, double vmax, double vstep, double vdefaul
     sliderChange.block (true);
     spinChange.block (true);
 
-    for (digits = 0; fabs(vstep * pow(double(10), digits) - floor(vstep * pow(double(10), digits))) > 0.000000000001; digits++);
+    for (digits = 0; fabs (vstep * pow (double (10), digits) - floor (vstep * pow (double (10), digits))) > 0.000000000001; digits++);
 
     spin->set_digits (digits);
     spin->set_increments (vstep, 2.0 * vstep);
     spin->set_range (vmin, vmax);
     spin->updateSize();
-    spin->set_value (shapeValue(vdefault));
+    spin->set_value (shapeValue (vdefault));
     slider->set_digits (digits);
     slider->set_increments (vstep, 2.0 * vstep);
-    slider->set_range (addMode ? vmin : value2slider(vmin), addMode ? vmax : value2slider(vmax));
-    slider->set_value (addMode ? shapeValue(vdefault) : value2slider(shapeValue(vdefault)));
+    slider->set_range (addMode ? vmin : value2slider (vmin), addMode ? vmax : value2slider (vmax));
+    slider->set_value (addMode ? shapeValue (vdefault) : value2slider (shapeValue (vdefault)));
     //defaultVal = shapeValue (vdefault);
     sliderChange.block (false);
     spinChange.block (false);
 }
 
-void Adjuster::setAddMode(bool addM)
+void Adjuster::setAddMode (bool addM)
 {
     if (addM != addMode) {
         // Switching the Adjuster to the new mode
@@ -353,10 +353,10 @@ void Adjuster::setAddMode(bool addM)
                 range = -range;
             }
 
-            setLimits(-range, range, vStep, 0);
+            setLimits (-range, range, vStep, 0);
         } else {
             // Switching to the absolute mode
-            setLimits(vMin, vMax, vStep, defaultVal);
+            setLimits (vMin, vMax, vStep, defaultVal);
         }
     }
 }
@@ -369,7 +369,7 @@ void Adjuster::spinChanged ()
     }
 
     sliderChange.block (true);
-    slider->set_value (addMode ? spin->get_value () : value2slider(spin->get_value ()));
+    slider->set_value (addMode ? spin->get_value () : value2slider (spin->get_value ()));
     sliderChange.block (false);
 
     if (delay == 0) {
@@ -383,7 +383,7 @@ void Adjuster::spinChanged ()
         }
     } else {
         eventPending = true;
-        delayConnection = Glib::signal_timeout().connect (sigc::mem_fun(*this, &Adjuster::notifyListener), delay);
+        delayConnection = Glib::signal_timeout().connect (sigc::mem_fun (*this, &Adjuster::notifyListener), delay);
     }
 
     if (editedState == UnEdited) {
@@ -409,7 +409,7 @@ void Adjuster::sliderChanged ()
     }
 
     spinChange.block (true);
-    spin->set_value (addMode ? slider->get_value () : slider2value(slider->get_value ()));
+    spin->set_value (addMode ? slider->get_value () : slider2value (slider->get_value ()));
     spinChange.block (false);
 
     if (delay == 0 || afterReset) {
@@ -423,7 +423,7 @@ void Adjuster::sliderChanged ()
         }
     } else {
         eventPending = true;
-        delayConnection = Glib::signal_timeout().connect (sigc::mem_fun(*this, &Adjuster::notifyListener), delay);
+        delayConnection = Glib::signal_timeout().connect (sigc::mem_fun (*this, &Adjuster::notifyListener), delay);
     }
 
     if (!afterReset && editedState == UnEdited) {
@@ -447,7 +447,7 @@ void Adjuster::setValue (double a)
     spinChange.block (true);
     sliderChange.block (true);
     spin->set_value (shapeValue (a));
-    slider->set_value (addMode ? shapeValue(a) : value2slider(shapeValue (a)));
+    slider->set_value (addMode ? shapeValue (a) : value2slider (shapeValue (a)));
     sliderChange.block (false);
     spinChange.block (false);
     afterReset = false;
@@ -456,20 +456,20 @@ void Adjuster::setValue (double a)
 void Adjuster::setAutoValue (bool a)
 {
     if (automatic) {
-        bool oldVal = autoChange.block(true);
-        automatic->set_active(a);
-        autoChange.block(oldVal);
+        bool oldVal = autoChange.block (true);
+        automatic->set_active (a);
+        autoChange.block (oldVal);
 
         if (!editedCheckBox) {
             // If not used in the BatchEditor panel
             if (a) {
                 // Disable the slider and spin button
-                spin->set_sensitive(false);
-                slider->set_sensitive(false);
+                spin->set_sensitive (false);
+                slider->set_sensitive (false);
             } else {
                 // Enable the slider and spin button
-                spin->set_sensitive(true);
-                slider->set_sensitive(true);
+                spin->set_sensitive (true);
+                slider->set_sensitive (true);
             }
         }
     }
@@ -491,7 +491,7 @@ bool Adjuster::notifyListenerAutoToggled ()
 {
 
     if (adjusterListener != nullptr && !blocked) {
-        adjusterListener->adjusterAutoToggled(this, automatic->get_active());
+        adjusterListener->adjusterAutoToggled (this, automatic->get_active());
     }
 
     return false;
@@ -538,31 +538,31 @@ void Adjuster::showEditedCB ()
 {
 
     if (label) {
-        removeIfThere(this, label, false);
+        removeIfThere (this, label, false);
     }
 
     if (!editedCheckBox) {
-        editedCheckBox = Gtk::manage(new Gtk::CheckButton (adjustmentName));
-        editedCheckBox->set_vexpand(false);
+        editedCheckBox = Gtk::manage (new Gtk::CheckButton (adjustmentName));
+        editedCheckBox->set_vexpand (false);
 
         if (grid) {
-            editedCheckBox->set_hexpand(true);
-            editedCheckBox->set_halign(Gtk::ALIGN_START);
-            editedCheckBox->set_valign(Gtk::ALIGN_CENTER);
-            attach_next_to(*editedCheckBox, *spin, Gtk::POS_LEFT, 1, 1);
+            editedCheckBox->set_hexpand (true);
+            editedCheckBox->set_halign (Gtk::ALIGN_START);
+            editedCheckBox->set_valign (Gtk::ALIGN_CENTER);
+            attach_next_to (*editedCheckBox, *spin, Gtk::POS_LEFT, 1, 1);
         } else {
-            editedCheckBox->set_hexpand(false);
-            editedCheckBox->set_halign(Gtk::ALIGN_START);
-            editedCheckBox->set_valign(Gtk::ALIGN_CENTER);
+            editedCheckBox->set_hexpand (false);
+            editedCheckBox->set_halign (Gtk::ALIGN_START);
+            editedCheckBox->set_valign (Gtk::ALIGN_CENTER);
 
             if (imageIcon1) {
-                attach_next_to(*editedCheckBox, *imageIcon1, Gtk::POS_LEFT, 1, 1);
+                attach_next_to (*editedCheckBox, *imageIcon1, Gtk::POS_LEFT, 1, 1);
             } else {
-                attach_next_to(*editedCheckBox, *slider, Gtk::POS_LEFT, 1, 1);
+                attach_next_to (*editedCheckBox, *slider, Gtk::POS_LEFT, 1, 1);
             }
         }
 
-        editedChange = editedCheckBox->signal_toggled().connect( sigc::mem_fun(*this, &Adjuster::editedToggled) );
+        editedChange = editedCheckBox->signal_toggled().connect ( sigc::mem_fun (*this, &Adjuster::editedToggled) );
         editedCheckBox->show();
     }
 }

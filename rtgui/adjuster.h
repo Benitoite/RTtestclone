@@ -33,7 +33,7 @@ public:
     virtual void adjusterAutoToggled (Adjuster* a, bool newval) {}
 };
 
-typedef double(*double2double_fun)(double val);
+typedef double (*double2double_fun) (double val);
 
 class Adjuster : public Gtk::Grid
 {
@@ -85,7 +85,7 @@ public:
     virtual ~Adjuster ();
 
     // Add an "Automatic" checkbox next to the reset button.
-    void addAutoButton(Glib::ustring tooltip = "");
+    void addAutoButton (Glib::ustring tooltip = "");
     // Remove the "Automatic" checkbox next to the reset button.
     void delAutoButton();
     // Send back the value of og the Auto checkbox
@@ -99,7 +99,7 @@ public:
     void setAutoInconsistent (bool i)
     {
         if (automatic) {
-            automatic->set_inconsistent(i);
+            automatic->set_inconsistent (i);
         }
     }
     bool getAutoInconsistent ()
@@ -115,7 +115,7 @@ public:
     // return the value trimmed to the limits at construction time
     double getValue ()
     {
-        return shapeValue(spin->get_value ());
+        return shapeValue (spin->get_value ());
     }
     // return the value trimmed to the limits at construction time
     int getIntValue ()
@@ -127,7 +127,7 @@ public:
     Glib::ustring getTextValue ()
     {
         if (addMode) {
-            return Glib::ustring::compose("<i>%1</i>", spin->get_text ());
+            return Glib::ustring::compose ("<i>%1</i>", spin->get_text ());
         } else {
             return spin->get_text ();
         }
@@ -135,31 +135,31 @@ public:
 
     void setLabel (Glib::ustring lbl)
     {
-        label->set_label(lbl);
+        label->set_label (lbl);
     }
     void setValue (double a);
     void setLimits (double vmin, double vmax, double vstep, double vdefault);
     void setEnabled (bool enabled);
     void setDefault (double def);
     // will let the adjuster throw it's "changed" signal when the mouse button is released. Can work altogether with the delay value.
-    void throwOnButtonRelease(bool throwOnBRelease = true);
+    void throwOnButtonRelease (bool throwOnBRelease = true);
     void setNbDisplayedChars (int nbr)
     {
-        spin->set_width_chars(nbr);
-        spin->set_max_width_chars(nbr);
+        spin->set_width_chars (nbr);
+        spin->set_max_width_chars (nbr);
     }
     void setEditedState (EditedState eState);
     EditedState getEditedState ();
     void setDefaultEditedState (EditedState eState);
     void showEditedCB ();
-    bool block(bool isBlocked)
+    bool block (bool isBlocked)
     {
         bool oldValue = blocked;
         blocked = isBlocked;
         return oldValue;
     }
 
-    void setAddMode(bool addM);
+    void setAddMode (bool addM);
     bool getAddMode()
     {
         return addMode;

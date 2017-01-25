@@ -91,6 +91,7 @@ protected:
     LUTf hltonecurve;
     LUTf shtonecurve;
     LUTf tonecurve;
+    float chaut, redaut, blueaut, maxredaut, maxblueaut,  minredaut, minblueaut, nresi, highresi, chromina, sigma, lumema;
 
     LUTf lumacurve;
     LUTf chroma_acurve;
@@ -129,6 +130,12 @@ protected:
     NoiseCurve noiseLCurve;
     NoiseCurve noiseCCurve;
     WavCurve wavCLVCurve;
+    WavretiCurve wavRETCurve;
+    WavretigainCurve wavRETgainCurve;
+    WavmergCurve wavMERCurve;
+    Wavmerg2Curve wavMER2Curve;
+    WavstyCurve wavSTYCurve;
+    Wavsty2Curve wavSTY2Curve;
     WavOpacityCurveRG waOpacityCurveRG;
     WavOpacityCurveBY waOpacityCurveBY;
     WavOpacityCurveW waOpacityCurveW;
@@ -218,7 +225,7 @@ public:
         *dst = params;
     }
 
-    void        startProcessing(int changeCode);
+    void        startProcessing (int changeCode);
     ProcParams* beginUpdateParams ();
     void        endUpdateParams (ProcEvent change);  // must be called after beginUpdateParams, triggers update
     void        endUpdateParams (int changeFlags);
@@ -299,7 +306,7 @@ public:
     {
         aeListener = ael;
     }
-    void setHistogramListener(HistogramListener *h)
+    void setHistogramListener (HistogramListener *h)
     {
         hListener = h;
     }
@@ -323,10 +330,13 @@ public:
     {
         dehaListener = adh;
     }
+
     void setWaveletListener  (WaveletListener* awa)
     {
         awavListener = awa;
     }
+
+    void savelabReference (const Glib::ustring& fname);
 
     void saveInputICCReference (const Glib::ustring& fname, bool apply_wb);
 
@@ -336,7 +346,7 @@ public:
     }
 
     struct DenoiseInfoStore {
-        DenoiseInfoStore () : chM(0), max_r{}, max_b{}, ch_M{}, valid(false)  {}
+        DenoiseInfoStore () : chM (0), max_r{}, max_b{}, ch_M{}, valid (false)  {}
         float chM;
         float max_r[9];
         float max_b[9];

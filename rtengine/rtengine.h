@@ -315,6 +315,7 @@ class WaveletListener
 public :
     virtual ~WaveletListener() {}
     virtual void wavChanged (double nlevel) {}
+    virtual void minmaxChanged (double cdma, double cdmin, double mini, double maxi, double Tmean, double Tsigma, double Tmin, double Tmax) {}
 
 };
 
@@ -365,7 +366,7 @@ public:
     virtual void        endUpdateParams (ProcEvent change) = 0;
     virtual void        endUpdateParams (int changeFlags) = 0;
     // Starts a minimal update
-    virtual void        startProcessing(int changeCode) = 0;
+    virtual void        startProcessing (int changeCode) = 0;
     /** Stops image processing. When it returns, the image processing is already stopped. */
     virtual void        stopProcessing () = 0;
     /** Sets the scale of the preview image. The larger the number is, the faster the image updates are (typical values are 4-5).
@@ -402,6 +403,7 @@ public:
     virtual void        getAutoCrop (double ratio, int &x, int &y, int &w, int &h) = 0;
 
     virtual void        saveInputICCReference (const Glib::ustring& fname, bool apply_wb) = 0;
+    virtual void        savelabReference (const Glib::ustring& fname) = 0;
 
     virtual void        setProgressListener     (ProgressListener* l) = 0;
     virtual void        setSizeListener         (SizeListener* l) = 0;
@@ -496,7 +498,7 @@ public:
                    * @param img is the result of the last ProcessingJob
                    * @return the next ProcessingJob to process */
     virtual ProcessingJob* imageReady (IImage16* img) = 0;
-    virtual void error(Glib::ustring message) = 0;
+    virtual void error (Glib::ustring message) = 0;
 };
 /** This function performs all the image processinf steps corresponding to the given ProcessingJob. It runs in the background, thus it returns immediately,
    * When it finishes, it calls the BatchProcessingListener with the resulting image and asks for the next job. It the listener gives a new job, it goes on

@@ -609,6 +609,7 @@ void Options::setDefaults ()
 
     rtSettings.darkFramesPath = "";
     rtSettings.flatFieldsPath = "";
+    rtSettings.mergePath = "";
 #ifdef WIN32
     const gchar* sysRoot = g_getenv ("SystemRoot"); // Returns e.g. "c:\Windows"
 
@@ -689,6 +690,7 @@ void Options::setDefaults ()
     lastIccDir = rtSettings.iccDirectory;
     lastDarkframeDir = rtSettings.darkFramesPath;
     lastFlatfieldDir = rtSettings.flatFieldsPath;
+    lastmergeDir = rtSettings.mergePath;
 //  rtSettings.bw_complementary = true;
     // There is no reasonable default for curves. We can still suppose that they will take place
     // in a subdirectory of the user's own ProcParams presets, i.e. in a subdirectory
@@ -1454,11 +1456,11 @@ int Options::readFromFile (Glib::ustring fname)
                 }
 
                 if (keyFile.has_key ("Color Management", "PrinterIntent")) {
-                    rtSettings.printerIntent   = static_cast<rtengine::RenderingIntent>(keyFile.get_integer("Color Management", "PrinterIntent"));
+                    rtSettings.printerIntent   = static_cast<rtengine::RenderingIntent> (keyFile.get_integer ("Color Management", "PrinterIntent"));
                 }
 
                 if (keyFile.has_key ("Color Management", "PrinterBPC")) {
-                    rtSettings.printerBPC           = keyFile.get_boolean("Color Management", "PrinterBPC");
+                    rtSettings.printerBPC           = keyFile.get_boolean ("Color Management", "PrinterBPC");
                 }
 
                 if (keyFile.has_key ("Color Management", "PrinterProfile")) {
@@ -1486,7 +1488,7 @@ int Options::readFromFile (Glib::ustring fname)
                 }
 
                 if (keyFile.has_key ("Color Management", "MonitorBPC")) {
-                    rtSettings.monitorBPC           = keyFile.get_boolean("Color Management", "MonitorBPC");
+                    rtSettings.monitorBPC           = keyFile.get_boolean ("Color Management", "MonitorBPC");
                 }
 
                 if (keyFile.has_key ("Color Management", "CRI")) {
@@ -1825,7 +1827,7 @@ bool Options::safeDirGet (const Glib::KeyFile& keyFile, const Glib::ustring& sec
                           const Glib::ustring& entryName, Glib::ustring& destination)
 {
     try {
-    
+
         if (keyFile.has_key (section, entryName) && !keyFile.get_string (section, entryName).empty ()) {
             destination = keyFile.get_string (section, entryName);
             return true;
@@ -1869,6 +1871,7 @@ int Options::saveToFile (Glib::ustring fname)
         keyFile.set_string  ("General", "Version", VERSION);
         keyFile.set_string  ("General", "DarkFramesPath", rtSettings.darkFramesPath);
         keyFile.set_string  ("General", "FlatFieldsPath", rtSettings.flatFieldsPath);
+        keyFile.set_string  ("General", "mergePath", rtSettings.mergePath);
         keyFile.set_boolean ("General", "Verbose", rtSettings.verbose);
         keyFile.set_double ("General", "BotLeft", rtSettings.bot_left);
         keyFile.set_double ("General", "TopLeft", rtSettings.top_left);
@@ -2142,6 +2145,7 @@ int Options::saveToFile (Glib::ustring fname)
         keyFile.set_string ("Dialogs", "LastIccDir", lastIccDir);
         keyFile.set_string ("Dialogs", "LastDarkframeDir", lastDarkframeDir);
         keyFile.set_string ("Dialogs", "LastFlatfieldDir", lastFlatfieldDir);
+        keyFile.set_string ("Dialogs", "LastmergeDir", lastmergeDir);
         keyFile.set_string ("Dialogs", "LastRgbCurvesDir", lastRgbCurvesDir);
         keyFile.set_string ("Dialogs", "LastLabCurvesDir", lastLabCurvesDir);
         keyFile.set_string ("Dialogs", "LastRetinexDir", lastRetinexDir);

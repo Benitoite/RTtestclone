@@ -24,6 +24,7 @@
 #include "rt_math.h"
 // "ceil" rounding
 #define SKIPS(a,b) ((a) / (b) + ((a) % (b) > 0))
+#include <fstream>
 
 namespace rtengine
 {
@@ -31,15 +32,15 @@ namespace rtengine
 extern const Settings* settings;
 
 Crop::Crop (ImProcCoordinator* parent, EditDataProvider *editDataProvider, bool isDetailWindow)
-    : PipetteBuffer(editDataProvider), origCrop(nullptr), laboCrop(nullptr), labnCrop(nullptr),
-      cropImg(nullptr), cbuf_real(nullptr), cshmap(nullptr), transCrop(nullptr), cieCrop(nullptr), cbuffer(nullptr),
-      updating(false), newUpdatePending(false), skip(10), padding(0),
-      cropx(0), cropy(0), cropw(-1), croph(-1),
-      trafx(0), trafy(0), trafw(-1), trafh(-1),
-      rqcropx(0), rqcropy(0), rqcropw(-1), rqcroph(-1),
-      borderRequested(32), upperBorder(0), leftBorder(0),
-      cropAllocated(false),
-      cropImageListener(nullptr), parent(parent), isDetailWindow(isDetailWindow)
+    : PipetteBuffer (editDataProvider), origCrop (nullptr), laboCrop (nullptr), labnCrop (nullptr),
+      cropImg (nullptr), cbuf_real (nullptr), cshmap (nullptr), transCrop (nullptr), cieCrop (nullptr), cbuffer (nullptr),
+      updating (false), newUpdatePending (false), skip (10), padding (0),
+      cropx (0), cropy (0), cropw (-1), croph (-1),
+      trafx (0), trafy (0), trafw (-1), trafh (-1),
+      rqcropx (0), rqcropy (0), rqcropw (-1), rqcroph (-1),
+      borderRequested (32), upperBorder (0), leftBorder (0),
+      cropAllocated (false),
+      cropImageListener (nullptr), parent (parent), isDetailWindow (isDetailWindow)
 {
     parent->crops.push_back (this);
 }
@@ -47,7 +48,7 @@ Crop::Crop (ImProcCoordinator* parent, EditDataProvider *editDataProvider, bool 
 Crop::~Crop ()
 {
 
-    MyMutex::MyLock cropLock(cropMutex);
+    MyMutex::MyLock cropLock (cropMutex);
 
     std::vector<Crop*>::iterator i = std::find (parent->crops.begin(), parent->crops.end(), this);
 
@@ -55,14 +56,14 @@ Crop::~Crop ()
         parent->crops.erase (i);
     }
 
-    MyMutex::MyLock processingLock(parent->mProcessing);
+    MyMutex::MyLock processingLock (parent->mProcessing);
     freeAll ();
 }
 
 void Crop::destroy ()
 {
-    MyMutex::MyLock lock(cropMutex);
-    MyMutex::MyLock processingLock(parent->mProcessing);
+    MyMutex::MyLock lock (cropMutex);
+    MyMutex::MyLock processingLock (parent->mProcessing);
     freeAll();
 }
 
@@ -70,7 +71,7 @@ void Crop::setListener (DetailedCropListener* il)
 {
     // We can make reads in the IF, because the mProcessing lock is only needed for change
     if (cropImageListener != il) {
-        MyMutex::MyLock lock(cropMutex);
+        MyMutex::MyLock lock (cropMutex);
         cropImageListener = il;
     }
 }
@@ -85,9 +86,9 @@ EditUniqueID Crop::getCurrEditID()
  * Delete the edit image buffer if there's no subscriber anymore.
  * If allocation has to be done, it is deferred to Crop::update
  */
-void Crop::setEditSubscriber(EditSubscriber* newSubscriber)
+void Crop::setEditSubscriber (EditSubscriber* newSubscriber)
 {
-    MyMutex::MyLock lock(cropMutex);
+    MyMutex::MyLock lock (cropMutex);
 
     // At this point, editCrop.dataProvider->currSubscriber is the old subscriber
     EditSubscriber *oldSubscriber = PipetteBuffer::dataProvider ? PipetteBuffer::dataProvider->getCurrSubscriber() : nullptr;
@@ -113,7 +114,7 @@ void Crop::setEditSubscriber(EditSubscriber* newSubscriber)
 
 void Crop::update (int todo)
 {
-    MyMutex::MyLock cropLock(cropMutex);
+    MyMutex::MyLock cropLock (cropMutex);
 
     ProcParams& params = parent->params;
 //       CropGUIListener* cropgl;
@@ -150,12 +151,13 @@ void Crop::update (int todo)
     int widIm = parent->fw;//full image
     int heiIm = parent->fh;
 
+
     bool needstransform  = parent->ipf.needsTransform();
 
     if (todo & (M_INIT | M_LINDENOISE)) {
-        MyMutex::MyLock lock(parent->minit);  // Also used in improccoord
+        MyMutex::MyLock lock (parent->minit); // Also used in improccoord
 
-        int tr = getCoarseBitMask(params.coarse);
+        int tr = getCoarseBitMask (params.coarse);
 
         if (!needsinitupdate) {
             setCropSizes (rqcropx, rqcropy, rqcropw, rqcroph, skip, true);
@@ -163,6 +165,9 @@ void Crop::update (int todo)
 
         //  printf("x=%d y=%d crow=%d croh=%d skip=%d\n",rqcropx, rqcropy, rqcropw, rqcroph, skip);
         //  printf("trafx=%d trafyy=%d trafwsk=%d trafHs=%d \n",trafx, trafy, trafw*skip, trafh*skip);
+        //  printf("x=%d y=%d crow=%d croh=%d skip=%d cropW=%d cropH=%d leftb=%d upperb=%d\n", rqcropx, rqcropy, rqcropw, rqcroph, skip, cropw, croph, leftBorder, upperBorder);
+        // printf("trafx=%d trafyy=%d trafwsk=%d trafHs=%d \n", trafx, trafy, trafw * skip, trafh * skip);
+
 
         Imagefloat *calclum = nullptr;//for Luminance denoise curve
         NoiseCurve noiseLCurve;
@@ -170,17 +175,17 @@ void Crop::update (int todo)
         float autoNR = (float) settings->nrauto;//
         float autoNRmax = (float) settings->nrautomax;//
 
-        params.dirpyrDenoise.getCurves(noiseLCurve, noiseCCurve);
+        params.dirpyrDenoise.getCurves (noiseLCurve, noiseCCurve);
 
         int tilesize;
         int overlap;
 
-        if(settings->leveldnti == 0) {
+        if (settings->leveldnti == 0) {
             tilesize = 1024;
             overlap = 128;
         }
 
-        if(settings->leveldnti == 1) {
+        if (settings->leveldnti == 1) {
             tilesize = 768;
             overlap = 96;
         }
@@ -201,35 +206,35 @@ void Crop::update (int todo)
         int *centerTile_X = new int [numtiles_W];
         int *centerTile_Y = new int [numtiles_H];
 
-        for(int cX = 0; cX < numtiles_W; cX++) {
+        for (int cX = 0; cX < numtiles_W; cX++) {
             centerTile_X[cX] = tileWskip / 2 + tileWskip * cX;
         }
 
-        for(int cY = 0; cY < numtiles_H; cY++) {
+        for (int cY = 0; cY < numtiles_H; cY++) {
             centerTile_Y[cY] = tileHskip / 2 + tileHskip * cY;
         }
 
-        if(settings->leveldnautsimpl == 1) {
-            if(params.dirpyrDenoise.Cmethod == "MAN" || params.dirpyrDenoise.Cmethod == "PON" )  {
+        if (settings->leveldnautsimpl == 1) {
+            if (params.dirpyrDenoise.Cmethod == "MAN" || params.dirpyrDenoise.Cmethod == "PON" )  {
                 PreviewProps pp (trafx, trafy, trafw * skip, trafh * skip, skip);
                 parent->imgsrc->getImage (parent->currWB, tr, origCrop, pp, params.toneCurve, params.icm, params.raw );
             }
         } else {
-            if(params.dirpyrDenoise.C2method == "MANU")  {
+            if (params.dirpyrDenoise.C2method == "MANU")  {
                 PreviewProps pp (trafx, trafy, trafw * skip, trafh * skip, skip);
                 parent->imgsrc->getImage (parent->currWB, tr, origCrop, pp, params.toneCurve, params.icm, params.raw );
             }
         }
 
-        if((settings->leveldnautsimpl == 1 && params.dirpyrDenoise.Cmethod == "PRE") || (settings->leveldnautsimpl == 0 && params.dirpyrDenoise.C2method == "PREV")) {
+        if ((settings->leveldnautsimpl == 1 && params.dirpyrDenoise.Cmethod == "PRE") || (settings->leveldnautsimpl == 0 && params.dirpyrDenoise.C2method == "PREV")) {
             PreviewProps pp (trafx, trafy, trafw * skip, trafh * skip, skip);
             parent->imgsrc->getImage (parent->currWB, tr, origCrop, pp, params.toneCurve, params.icm, params.raw );
 
-            if((!isDetailWindow) && parent->adnListener && skip == 1 && params.dirpyrDenoise.enabled) {
+            if ((!isDetailWindow) && parent->adnListener && skip == 1 && params.dirpyrDenoise.enabled) {
                 float lowdenoise = 1.f;
                 int levaut = settings->leveldnaut;
 
-                if(levaut == 1) { //Standard
+                if (levaut == 1) { //Standard
                     lowdenoise = 0.7f;
                 }
 
@@ -240,16 +245,16 @@ void Crop::update (int todo)
                 int poscenterX = 0;
                 int poscenterY = 0;
 
-                for(int cc = 0; cc < numtiles_W; cc++) {
-                    if(abs(centerTile_X[cc] - CenterPreview_X) < minimuX) {
-                        minimuX = abs(centerTile_X[cc] - CenterPreview_X);
+                for (int cc = 0; cc < numtiles_W; cc++) {
+                    if (abs (centerTile_X[cc] - CenterPreview_X) < minimuX) {
+                        minimuX = abs (centerTile_X[cc] - CenterPreview_X);
                         poscenterX = cc;
                     }
                 }
 
-                for(int cc = 0; cc < numtiles_H; cc++) {
-                    if(abs(centerTile_Y[cc] - CenterPreview_Y) < minimuY) {
-                        minimuY = abs(centerTile_Y[cc] - CenterPreview_Y);
+                for (int cc = 0; cc < numtiles_H; cc++) {
+                    if (abs (centerTile_Y[cc] - CenterPreview_Y) < minimuY) {
+                        minimuY = abs (centerTile_Y[cc] - CenterPreview_Y);
                         poscenterY = cc;
                     }
                 }
@@ -257,20 +262,20 @@ void Crop::update (int todo)
                 //  printf("TileCX=%d  TileCY=%d  prevX=%d  prevY=%d \n",centerTile_X[poscenterX],centerTile_Y[poscenterY],CenterPreview_X,CenterPreview_Y);
                 int crW;
 
-                if(settings->leveldnv == 0) {
+                if (settings->leveldnv == 0) {
                     crW = 100;
                 }
 
-                if(settings->leveldnv == 1) {
+                if (settings->leveldnv == 1) {
                     crW = 250;
                 }
 
                 //  if(settings->leveldnv ==2) {crW=int(tileWskip/2);crH=int((tileWskip/2));}//adapted to scale of preview
-                if(settings->leveldnv == 2) {
-                    crW = int(tileWskip / 2);
+                if (settings->leveldnv == 2) {
+                    crW = int (tileWskip / 2);
                 }
 
-                if(settings->leveldnv == 3) {
+                if (settings->leveldnv == 3) {
                     crW = tileWskip - 10;
                 }
 
@@ -292,7 +297,7 @@ void Crop::update (int todo)
                     adjustr = 1.f / 1.2f;
                 }
 
-                if(parent->adnListener) {
+                if (parent->adnListener) {
                     parent->adnListener->noiseTilePrev (centerTile_X[poscenterX], centerTile_Y[poscenterY], CenterPreview_X, CenterPreview_Y, crW, trafw * skip);
                 }
 
@@ -309,19 +314,21 @@ void Crop::update (int todo)
                 int H = origCrop->getHeight();
                 Imagefloat *provicalc = new Imagefloat ((W + 1) / 2, (H + 1) / 2); //for denoise curves
 
-                for(int ii = 0; ii < H; ii += 2) {
-                    for(int jj = 0; jj < W; jj += 2) {
-                        provicalc->r(ii >> 1, jj >> 1) = origCrop->r(ii, jj);
-                        provicalc->g(ii >> 1, jj >> 1) = origCrop->g(ii, jj);
-                        provicalc->b(ii >> 1, jj >> 1) = origCrop->b(ii, jj);
+                for (int ii = 0; ii < H; ii += 2) {
+                    for (int jj = 0; jj < W; jj += 2) {
+                        provicalc->r (ii >> 1, jj >> 1) = origCrop->r (ii, jj);
+                        provicalc->g (ii >> 1, jj >> 1) = origCrop->g (ii, jj);
+                        provicalc->b (ii >> 1, jj >> 1) = origCrop->b (ii, jj);
                     }
                 }
 
-                parent->imgsrc->convertColorSpace(provicalc, params.icm, parent->currWB);//for denoise luminance curve
+                parent->imgsrc->convertColorSpace (provicalc, params.icm, parent->currWB); //for denoise luminance curve
 
                 float maxr = 0.f;
                 float maxb = 0.f;
-                float chaut, redaut, blueaut, maxredaut, maxblueaut, minredaut, minblueaut, chromina, sigma, lumema, sigma_L, redyel, skinc, nsknc;
+                //             float chaut, redaut, blueaut, maxredaut, maxblueaut, minredaut, minblueaut, chromina, sigma, lumema, sigma_L, redyel, skinc, nsknc;
+                float chaut, redaut, blueaut, maxredaut, maxblueaut, minredaut, minblueaut, nresi, highresi, chromina, sigma, lumema, sigma_L, redyel, skinc, nsknc;
+
                 int Nb;
 
                 chaut = 0.f;
@@ -331,19 +338,22 @@ void Crop::update (int todo)
                 maxblueaut = 0.f;
                 minredaut = 0.f;
                 minblueaut = 0.f;
-                LUTf gamcurve(65536, 0);
+                LUTf gamcurve (65536, 0);
                 float gam, gamthresh, gamslope;
-                parent->ipf.RGB_denoise_infoGamCurve(params.dirpyrDenoise, parent->imgsrc->isRAW(), gamcurve, gam, gamthresh, gamslope);
-                parent->ipf.RGB_denoise_info(origCrop, provicalc, parent->imgsrc->isRAW(), gamcurve, gam, gamthresh, gamslope, params.dirpyrDenoise, parent->imgsrc->getDirPyrDenoiseExpComp(), chaut, Nb, redaut, blueaut, maxredaut, maxblueaut, minredaut, minblueaut, chromina, sigma, lumema, sigma_L, redyel, skinc, nsknc, true);
+                parent->ipf.RGB_denoise_infoGamCurve (params.dirpyrDenoise, parent->imgsrc->isRAW(), gamcurve, gam, gamthresh, gamslope);
+                parent->ipf.RGB_denoise_info (origCrop, provicalc, parent->imgsrc->isRAW(), gamcurve, gam, gamthresh, gamslope, params.dirpyrDenoise, parent->imgsrc->getDirPyrDenoiseExpComp(), chaut, Nb, redaut, blueaut, maxredaut, maxblueaut, minredaut, minblueaut, nresi, highresi, chromina, sigma, lumema, sigma_L, redyel, skinc, nsknc, true);
+
+//                parent->ipf.RGB_denoise_infoGamCurve(params.dirpyrDenoise, parent->imgsrc->isRAW(), gamcurve, gam, gamthresh, gamslope);
+//                parent->ipf.RGB_denoise_info(origCrop, provicalc, parent->imgsrc->isRAW(), gamcurve, gam, gamthresh, gamslope, params.dirpyrDenoise, parent->imgsrc->getDirPyrDenoiseExpComp(), chaut, Nb, redaut, blueaut, maxredaut, maxblueaut, minredaut, minblueaut, chromina, sigma, lumema, sigma_L, redyel, skinc, nsknc, true);
 //                  printf("redy=%f skin=%f pcskin=%f\n",redyel, skinc,nsknc);
 //                  printf("DCROP skip=%d cha=%4.0f Nb=%d red=%4.0f bl=%4.0f redM=%4.0f bluM=%4.0f  L=%4.0f sigL=%4.0f Ch=%4.0f Si=%4.0f\n",skip, chaut,Nb, redaut,blueaut, maxredaut, maxblueaut, lumema, sigma_L, chromina, sigma);
                 float multip = 1.f;
 
-                if(!parent->imgsrc->isRAW()) {
+                if (!parent->imgsrc->isRAW()) {
                     multip = 2.f;    //take into account gamma for TIF / JPG approximate value...not good for gamma=1
                 }
 
-                float maxmax = max(maxredaut, maxblueaut);
+                float maxmax = max (maxredaut, maxblueaut);
                 float delta;
                 int mode = 0;
                 //  float redyel, skinc, nsknc;
@@ -351,18 +361,18 @@ void Crop::update (int todo)
                 parent->ipf.calcautodn_info (chaut, delta, Nb, levaut, maxmax, lumema, chromina, mode, lissage, redyel, skinc, nsknc);
 
 
-                if(maxredaut > maxblueaut) {
+                if (maxredaut > maxblueaut) {
                     //  maxr=(maxredaut-chaut)/((autoNRmax*multip*adjustr)/2.f);
                     maxr = (delta) / ((autoNRmax * multip * adjustr * lowdenoise) / 2.f);
 
-                    if(minblueaut <= minredaut  && minblueaut < chaut) {
+                    if (minblueaut <= minredaut  && minblueaut < chaut) {
                         maxb = (-chaut + minblueaut) / (autoNRmax * multip * adjustr * lowdenoise);
                     }
                 } else {
                     //  maxb=(maxblueaut-chaut)/((autoNRmax*multip*adjustr)/2.f);
                     maxb = (delta) / ((autoNRmax * multip * adjustr * lowdenoise) / 2.f);
 
-                    if(minredaut <= minblueaut  && minredaut < chaut) {
+                    if (minredaut <= minblueaut  && minredaut < chaut) {
                         maxr = (-chaut + minredaut) / (autoNRmax * multip * adjustr * lowdenoise);
                     }
                 }//maxb mxr - empirical evaluation red / blue
@@ -371,35 +381,35 @@ void Crop::update (int todo)
                 params.dirpyrDenoise.chroma = chaut / (autoNR * multip * adjustr * lowdenoise);
                 params.dirpyrDenoise.redchro = maxr;
                 params.dirpyrDenoise.bluechro = maxb;
-                parent->adnListener->chromaChanged(params.dirpyrDenoise.chroma, params.dirpyrDenoise.redchro, params.dirpyrDenoise.bluechro);
+                parent->adnListener->chromaChanged (params.dirpyrDenoise.chroma, params.dirpyrDenoise.redchro, params.dirpyrDenoise.bluechro);
 
                 delete provicalc;
             }
         }
 
-        if(skip == 1 && params.dirpyrDenoise.enabled && !parent->denoiseInfoStore.valid && ((settings->leveldnautsimpl == 1 && params.dirpyrDenoise.Cmethod == "AUT")  || (settings->leveldnautsimpl == 0 && params.dirpyrDenoise.C2method == "AUTO"))) {
+        if (skip == 1 && params.dirpyrDenoise.enabled && !parent->denoiseInfoStore.valid && ((settings->leveldnautsimpl == 1 && params.dirpyrDenoise.Cmethod == "AUT")  || (settings->leveldnautsimpl == 0 && params.dirpyrDenoise.C2method == "AUTO"))) {
             MyTime t1aue, t2aue;
             t1aue.set();
 
             int crW, crH;
 
-            if(settings->leveldnv == 0) {
+            if (settings->leveldnv == 0) {
                 crW = 100;
                 crH = 100;
             }
 
-            if(settings->leveldnv == 1) {
+            if (settings->leveldnv == 1) {
                 crW = 250;
                 crH = 250;
             }
 
             //  if(settings->leveldnv ==2) {crW=int(tileWskip/2);crH=int((tileWskip/2));}//adapted to scale of preview
-            if(settings->leveldnv == 2) {
-                crW = int(tileWskip / 2);
-                crH = int(tileHskip / 2);
+            if (settings->leveldnv == 2) {
+                crW = int (tileWskip / 2);
+                crH = int (tileHskip / 2);
             }
 
-            if(settings->leveldnv == 3) {
+            if (settings->leveldnv == 3) {
                 crW = tileWskip - 10;
                 crH = tileHskip - 10;
             }
@@ -407,13 +417,13 @@ void Crop::update (int todo)
             float lowdenoise = 1.f;
             int levaut = settings->leveldnaut;
 
-            if(levaut == 1) { //Standard
+            if (levaut == 1) { //Standard
                 lowdenoise = 0.7f;
             }
 
-            LUTf gamcurve(65536, 0);
+            LUTf gamcurve (65536, 0);
             float gam, gamthresh, gamslope;
-            parent->ipf.RGB_denoise_infoGamCurve(params.dirpyrDenoise, parent->imgsrc->isRAW(), gamcurve, gam, gamthresh, gamslope);
+            parent->ipf.RGB_denoise_infoGamCurve (params.dirpyrDenoise, parent->imgsrc->isRAW(), gamcurve, gam, gamthresh, gamslope);
             int Nb[9];
 #ifdef _OPENMP
             #pragma omp parallel
@@ -436,26 +446,30 @@ void Crop::update (int todo)
                 #pragma omp for schedule(dynamic) collapse(2) nowait
 #endif
 
-                for(int wcr = 0; wcr <= 2; wcr++) {
-                    for(int hcr = 0; hcr <= 2; hcr++) {
+                for (int wcr = 0; wcr <= 2; wcr++) {
+                    for (int hcr = 0; hcr <= 2; hcr++) {
                         PreviewProps ppP (coordW[wcr] , coordH[hcr], crW, crH, 1);
                         parent->imgsrc->getImage (parent->currWB, tr, origCropPart, ppP, params.toneCurve, params.icm, params.raw );
 
                         // we only need image reduced to 1/4 here
-                        for(int ii = 0; ii < crH; ii += 2) {
-                            for(int jj = 0; jj < crW; jj += 2) {
-                                provicalc->r(ii >> 1, jj >> 1) = origCropPart->r(ii, jj);
-                                provicalc->g(ii >> 1, jj >> 1) = origCropPart->g(ii, jj);
-                                provicalc->b(ii >> 1, jj >> 1) = origCropPart->b(ii, jj);
+                        for (int ii = 0; ii < crH; ii += 2) {
+                            for (int jj = 0; jj < crW; jj += 2) {
+                                provicalc->r (ii >> 1, jj >> 1) = origCropPart->r (ii, jj);
+                                provicalc->g (ii >> 1, jj >> 1) = origCropPart->g (ii, jj);
+                                provicalc->b (ii >> 1, jj >> 1) = origCropPart->b (ii, jj);
                             }
                         }
 
-                        parent->imgsrc->convertColorSpace(provicalc, params.icm, parent->currWB);//for denoise luminance curve
+                        parent->imgsrc->convertColorSpace (provicalc, params.icm, parent->currWB); //for denoise luminance curve
 
                         float pondcorrec = 1.0f;
-                        float chaut = 0.f, redaut = 0.f, blueaut = 0.f, maxredaut = 0.f, maxblueaut = 0.f, minredaut = 0.f, minblueaut = 0.f, chromina = 0.f, sigma = 0.f, lumema = 0.f, sigma_L = 0.f, redyel = 0.f, skinc = 0.f, nsknc = 0.f;
+                        //        float chaut = 0.f, redaut = 0.f, blueaut = 0.f, maxredaut = 0.f, maxblueaut = 0.f, minredaut = 0.f, minblueaut = 0.f, chromina = 0.f, sigma = 0.f, lumema = 0.f, sigma_L = 0.f, redyel = 0.f, skinc = 0.f, nsknc = 0.f;
+                        float chaut = 0.f, redaut = 0.f, blueaut = 0.f, maxredaut = 0.f, maxblueaut = 0.f, minredaut = 0.f, minblueaut = 0.f, nresi = 0.f, highresi = 0.f, chromina = 0.f, sigma = 0.f, lumema = 0.f, sigma_L = 0.f, redyel = 0.f, skinc = 0.f, nsknc = 0.f;
+
                         int nb = 0;
-                        parent->ipf.RGB_denoise_info(origCropPart, provicalc, parent->imgsrc->isRAW(), gamcurve, gam, gamthresh, gamslope, params.dirpyrDenoise, parent->imgsrc->getDirPyrDenoiseExpComp(), chaut, nb, redaut, blueaut, maxredaut, maxblueaut, minredaut, minblueaut, chromina, sigma, lumema, sigma_L, redyel, skinc, nsknc);
+                        parent->ipf.RGB_denoise_info (origCropPart, provicalc, parent->imgsrc->isRAW(), gamcurve, gam, gamthresh, gamslope, params.dirpyrDenoise, parent->imgsrc->getDirPyrDenoiseExpComp(), chaut, nb, redaut, blueaut, maxredaut, maxblueaut, minredaut, minblueaut, nresi, highresi, chromina, sigma, lumema, sigma_L, redyel, skinc, nsknc);
+
+                        //     parent->ipf.RGB_denoise_info(origCropPart, provicalc, parent->imgsrc->isRAW(), gamcurve, gam, gamthresh, gamslope, params.dirpyrDenoise, parent->imgsrc->getDirPyrDenoiseExpComp(), chaut, nb, redaut, blueaut, maxredaut, maxblueaut, minredaut, minblueaut, chromina, sigma, lumema, sigma_L, redyel, skinc, nsknc);
 
                         //printf("DCROP skip=%d cha=%f red=%f bl=%f redM=%f bluM=%f chrom=%f sigm=%f lum=%f\n",skip, chaut,redaut,blueaut, maxredaut, maxblueaut, chromina, sigma, lumema);
                         Nb[hcr * 3 + wcr] = nb;
@@ -494,7 +508,7 @@ void Crop::update (int todo)
 
             float multip = 1.f;
 
-            if(!parent->imgsrc->isRAW()) {
+            if (!parent->imgsrc->isRAW()) {
                 multip = 2.f;    //take into account gamma for TIF / JPG approximate value...not good fot gamma=1
             }
 
@@ -521,15 +535,15 @@ void Crop::update (int todo)
             int lissage = settings->leveldnliss;
 
             for (int k = 0; k < 9; k++) {
-                float maxmax = max(parent->denoiseInfoStore.max_r[k], parent->denoiseInfoStore.max_b[k]);
+                float maxmax = max (parent->denoiseInfoStore.max_r[k], parent->denoiseInfoStore.max_b[k]);
                 parent->ipf.calcautodn_info (parent->denoiseInfoStore.ch_M[k], delta[k], Nb[k], levaut, maxmax, lumL[k], chromC[k], mode, lissage, ry[k], sk[k], pcsk[k]);
                 //  printf("ch_M=%f delta=%f\n",ch_M[k], delta[k]);
             }
 
             for (int k = 0; k < 9; k++) {
-                if(parent->denoiseInfoStore.max_r[k] > parent->denoiseInfoStore.max_b[k]) {
+                if (parent->denoiseInfoStore.max_r[k] > parent->denoiseInfoStore.max_b[k]) {
                     Max_R[k] = (delta[k]) / ((autoNRmax * multip * adjustr * lowdenoise) / 2.f);
-                    Min_B[k] = -(parent->denoiseInfoStore.ch_M[k] - min_b[k]) / (autoNRmax * multip * adjustr * lowdenoise);
+                    Min_B[k] = - (parent->denoiseInfoStore.ch_M[k] - min_b[k]) / (autoNRmax * multip * adjustr * lowdenoise);
                     Max_B[k] = 0.f;
                     Min_R[k] = 0.f;
                 } else {
@@ -548,19 +562,19 @@ void Crop::update (int todo)
                 MinRMoy += Min_R[k];
                 MinBMoy += Min_B[k];
 
-                if(Max_R[k] > MaxR) {
+                if (Max_R[k] > MaxR) {
                     MaxR = Max_R[k];
                 }
 
-                if(Max_B[k] > MaxB) {
+                if (Max_B[k] > MaxB) {
                     MaxB = Max_B[k];
                 }
 
-                if(Min_R[k] < MinR) {
+                if (Min_R[k] < MinR) {
                     MinR = Min_R[k];
                 }
 
-                if(Min_B[k] < MinB) {
+                if (Min_B[k] < MinB) {
                     MinB = Min_B[k];
                 }
             }
@@ -571,7 +585,7 @@ void Crop::update (int todo)
             MinBMoy /= 9;
             MinRMoy /= 9;
 
-            if(MaxR > MaxB) {
+            if (MaxR > MaxB) {
                 maxr = MaxRMoy + (MaxR - MaxRMoy) * 0.66f; //#std Dev
                 //maxb=MinB;
                 maxb = MinBMoy + (MinB - MinBMoy) * 0.66f;
@@ -585,55 +599,56 @@ void Crop::update (int todo)
             params.dirpyrDenoise.redchro = maxr;
             params.dirpyrDenoise.bluechro = maxb;
             parent->denoiseInfoStore.valid = true;
-            if(parent->adnListener) {
-                parent->adnListener->chromaChanged(params.dirpyrDenoise.chroma, params.dirpyrDenoise.redchro, params.dirpyrDenoise.bluechro);
+
+            if (parent->adnListener) {
+                parent->adnListener->chromaChanged (params.dirpyrDenoise.chroma, params.dirpyrDenoise.redchro, params.dirpyrDenoise.bluechro);
             }
 
             if (settings->verbose) {
                 t2aue.set();
-                printf("Info denoise auto performed in %d usec:\n", t2aue.etime(t1aue));
+                printf ("Info denoise auto performed in %d usec:\n", t2aue.etime (t1aue));
             }
 
             //end evaluate noise
         }
 
         //  if(params.dirpyrDenoise.Cmethod=="AUT" || params.dirpyrDenoise.Cmethod=="PON") {//reinit origCrop after Auto
-        if((settings->leveldnautsimpl == 1 && params.dirpyrDenoise.Cmethod == "AUT")  || (settings->leveldnautsimpl == 0 && params.dirpyrDenoise.C2method == "AUTO")) { //reinit origCrop after Auto
+        if ((settings->leveldnautsimpl == 1 && params.dirpyrDenoise.Cmethod == "AUT")  || (settings->leveldnautsimpl == 0 && params.dirpyrDenoise.C2method == "AUTO")) { //reinit origCrop after Auto
             PreviewProps pp (trafx, trafy, trafw * skip, trafh * skip, skip);
             parent->imgsrc->getImage (parent->currWB, tr, origCrop, pp, params.toneCurve, params.icm, params.raw );
         }
 
         DirPyrDenoiseParams denoiseParams = params.dirpyrDenoise;
 
-        if(params.dirpyrDenoise.Lmethod == "CUR") {
-            if(noiseLCurve) {
+        if (params.dirpyrDenoise.Lmethod == "CUR") {
+            if (noiseLCurve) {
                 denoiseParams.luma = 0.5f;    //very small value to init process - select curve or slider
             } else {
                 denoiseParams.luma = 0.0f;
             }
-        } else if(denoiseParams.Lmethod == "SLI") {
+        } else if (denoiseParams.Lmethod == "SLI") {
             noiseLCurve.Reset();
         }
 
-        if((noiseLCurve || noiseCCurve ) && skip == 1 && denoiseParams.enabled)   { //only allocate memory if enabled and skip
+        if ((noiseLCurve || noiseCCurve ) && skip == 1 && denoiseParams.enabled)   { //only allocate memory if enabled and skip
             // we only need image reduced to 1/4 here
             int W = origCrop->getWidth();
             int H = origCrop->getHeight();
             calclum = new Imagefloat ((W + 1) / 2, (H + 1) / 2); //for denoise curves
 
-            for(int ii = 0; ii < H; ii += 2) {
-                for(int jj = 0; jj < W; jj += 2) {
-                    calclum->r(ii >> 1, jj >> 1) = origCrop->r(ii, jj);
-                    calclum->g(ii >> 1, jj >> 1) = origCrop->g(ii, jj);
-                    calclum->b(ii >> 1, jj >> 1) = origCrop->b(ii, jj);
+            for (int ii = 0; ii < H; ii += 2) {
+                for (int jj = 0; jj < W; jj += 2) {
+                    calclum->r (ii >> 1, jj >> 1) = origCrop->r (ii, jj);
+                    calclum->g (ii >> 1, jj >> 1) = origCrop->g (ii, jj);
+                    calclum->b (ii >> 1, jj >> 1) = origCrop->b (ii, jj);
                 }
             }
 
-            parent->imgsrc->convertColorSpace(calclum, params.icm, parent->currWB);//for denoise luminance curve
+            parent->imgsrc->convertColorSpace (calclum, params.icm, parent->currWB); //for denoise luminance curve
         }
 
-        if(skip != 1) if(parent->adnListener) {
-                parent->adnListener->noiseChanged(0.f, 0.f);
+        if (skip != 1) if (parent->adnListener) {
+                parent->adnListener->noiseChanged (0.f, 0.f);
             }
 
         if (todo & M_LINDENOISE) {
@@ -641,26 +656,26 @@ void Crop::update (int todo)
                 int kall = 0;
 
                 float chaut, redaut, blueaut, maxredaut, maxblueaut, nresi, highresi;
-                parent->ipf.RGB_denoise(kall, origCrop, origCrop, calclum, parent->denoiseInfoStore.ch_M, parent->denoiseInfoStore.max_r, parent->denoiseInfoStore.max_b, parent->imgsrc->isRAW(), /*Roffset,*/ denoiseParams, parent->imgsrc->getDirPyrDenoiseExpComp(), noiseLCurve, noiseCCurve, chaut, redaut, blueaut, maxredaut, maxblueaut, nresi, highresi);
+                parent->ipf.RGB_denoise (kall, origCrop, origCrop, calclum, parent->denoiseInfoStore.ch_M, parent->denoiseInfoStore.max_r, parent->denoiseInfoStore.max_b, parent->imgsrc->isRAW(), /*Roffset,*/ denoiseParams, parent->imgsrc->getDirPyrDenoiseExpComp(), noiseLCurve, noiseCCurve, chaut, redaut, blueaut, maxredaut, maxblueaut, nresi, highresi);
 
                 if (parent->adnListener) {
-                    parent->adnListener->noiseChanged(nresi, highresi);
+                    parent->adnListener->noiseChanged (nresi, highresi);
                 }
 
                 if (settings->leveldnautsimpl == 1) {
                     if ((denoiseParams.Cmethod == "AUT" || denoiseParams.Cmethod == "PRE") && (parent->adnListener)) { // force display value of sliders
-                        parent->adnListener->chromaChanged(denoiseParams.chroma, denoiseParams.redchro, denoiseParams.bluechro);
+                        parent->adnListener->chromaChanged (denoiseParams.chroma, denoiseParams.redchro, denoiseParams.bluechro);
                     }
                 } else {
-                    if((denoiseParams.C2method == "AUTO" || denoiseParams.C2method == "PREV") && (parent->adnListener)) { // force display value of sliders
-                        parent->adnListener->chromaChanged(denoiseParams.chroma, denoiseParams.redchro, denoiseParams.bluechro);
+                    if ((denoiseParams.C2method == "AUTO" || denoiseParams.C2method == "PREV") && (parent->adnListener)) { // force display value of sliders
+                        parent->adnListener->chromaChanged (denoiseParams.chroma, denoiseParams.redchro, denoiseParams.bluechro);
                     }
                 }
 
             }
         }
 
-        parent->imgsrc->convertColorSpace(origCrop, params.icm, parent->currWB);
+        parent->imgsrc->convertColorSpace (origCrop, params.icm, parent->currWB);
 
         delete [] min_r;
         delete [] min_b;
@@ -675,7 +690,7 @@ void Crop::update (int todo)
     }
 
     // has to be called after setCropSizes! Tools prior to this point can't handle the Edit mechanism, but that shouldn't be a problem.
-    createBuffer(cropw, croph);
+    createBuffer (cropw, croph);
 
     // transform
     if (needstransform || ((todo & (M_TRANSFORM | M_RGBCURVE))  && params.dirpyrequalizer.cbdlMethod == "bef" && params.dirpyrequalizer.enabled && !params.colorappearance.enabled)) {
@@ -684,11 +699,12 @@ void Crop::update (int todo)
         }
 
         if (needstransform)
-            parent->ipf.transform (baseCrop, transCrop, cropx / skip, cropy / skip, trafx / skip, trafy / skip, SKIPS(parent->fw, skip), SKIPS(parent->fh, skip), parent->getFullWidth(), parent->getFullHeight(),
+            parent->ipf.transform (baseCrop, transCrop, cropx / skip, cropy / skip, trafx / skip, trafy / skip, SKIPS (parent->fw, skip), SKIPS (parent->fh, skip), parent->getFullWidth(), parent->getFullHeight(),
                                    parent->imgsrc->getMetaData()->getFocalLen(), parent->imgsrc->getMetaData()->getFocalLen35mm(),
                                    parent->imgsrc->getMetaData()->getFocusDist(), parent->imgsrc->getRotateDegree(), false);
-        else
-            baseCrop->copyData(transCrop);
+        else {
+            baseCrop->copyData (transCrop);
+        }
 
         if (transCrop) {
             baseCrop = transCrop;
@@ -705,29 +721,29 @@ void Crop::update (int todo)
 
         const int W = baseCrop->getWidth();
         const int H = baseCrop->getHeight();
-        LabImage labcbdl(W, H);
-        parent->ipf.rgb2lab(*baseCrop, labcbdl, params.icm.working);
+        LabImage labcbdl (W, H);
+        parent->ipf.rgb2lab (*baseCrop, labcbdl, params.icm.working);
         parent->ipf.dirpyrequalizer (&labcbdl, skip);
-        parent->ipf.lab2rgb(labcbdl, *baseCrop, params.icm.working);
+        parent->ipf.lab2rgb (labcbdl, *baseCrop, params.icm.working);
 
     }
 
     // blurmap for shadow & highlights
     if ((todo & M_BLURMAP) && params.sh.enabled) {
-        double radius = sqrt (double(SKIPS(parent->fw, skip) * SKIPS(parent->fw, skip) + SKIPS(parent->fh, skip) * SKIPS(parent->fh, skip))) / 2.0;
+        double radius = sqrt (double (SKIPS (parent->fw, skip) * SKIPS (parent->fw, skip) + SKIPS (parent->fh, skip) * SKIPS (parent->fh, skip))) / 2.0;
         double shradius = params.sh.radius;
 
         if (!params.sh.hq) {
             shradius *= radius / 1800.0;
         }
 
-        if(!cshmap) {
+        if (!cshmap) {
             cshmap = new SHMap (cropw, croph, true);
         }
 
         cshmap->update (baseCrop, shradius, parent->ipf.lumimul, params.sh.hq, skip);
 
-        if(parent->shmap->min_f < 65535.f) { // don't call forceStat with wrong values
+        if (parent->shmap->min_f < 65535.f) { // don't call forceStat with wrong values
             cshmap->forceStat (parent->shmap->max_f, parent->shmap->min_f, parent->shmap->avg);
         }
     }
@@ -749,7 +765,7 @@ void Crop::update (int todo)
     if (todo & M_RGBCURVE) {
         double rrm, ggm, bbm;
         DCPProfile::ApplyState as;
-        DCPProfile *dcpProf = parent->imgsrc->getDCP(params.icm, parent->currWB, as);
+        DCPProfile *dcpProf = parent->imgsrc->getDCP (params.icm, parent->currWB, as);
 
         LUTu histToneCurve;
         parent->ipf.rgbProc (baseCrop, laboCrop, this, parent->hltonecurve, parent->shtonecurve, parent->tonecurve, cshmap,
@@ -777,7 +793,7 @@ void Crop::update (int todo)
     // apply luminance operations
     if (todo & (M_LUMINANCE + M_COLOR)) {
         //I made a little change here. Rather than have luminanceCurve (and others) use in/out lab images, we can do more if we copy right here.
-        labnCrop->CopyFrom(laboCrop);
+        labnCrop->CopyFrom (laboCrop);
 
 
         //parent->ipf.luminanceCurve (labnCrop, labnCrop, parent->lumacurve);
@@ -795,24 +811,24 @@ void Crop::update (int todo)
         parent->ipf.chromiLuminanceCurve (this, 1, labnCrop, labnCrop, parent->chroma_acurve, parent->chroma_bcurve, parent->satcurve, parent->lhskcurve,  parent->clcurve, parent->lumacurve, utili, autili, butili, ccutili, cclutili, clcutili, dummy, dummy);
         parent->ipf.vibrance (labnCrop);
 
-        if((params.colorappearance.enabled && !params.colorappearance.tonecie) ||  (!params.colorappearance.enabled)) {
-            parent->ipf.EPDToneMap(labnCrop, 5, 1);
+        if ((params.colorappearance.enabled && !params.colorappearance.tonecie) ||  (!params.colorappearance.enabled)) {
+            parent->ipf.EPDToneMap (labnCrop, 5, 1);
         }
 
         //parent->ipf.EPDToneMap(labnCrop, 5, 1);    //Go with much fewer than normal iterates for fast redisplay.
         // for all treatments Defringe, Sharpening, Contrast detail , Microcontrast they are activated if "CIECAM" function are disabled
         if (skip == 1) {
-            if((params.colorappearance.enabled && !settings->autocielab)  || (!params.colorappearance.enabled)) {
+            if ((params.colorappearance.enabled && !settings->autocielab)  || (!params.colorappearance.enabled)) {
                 parent->ipf.impulsedenoise (labnCrop);
             }
 
-            if((params.colorappearance.enabled && !settings->autocielab) || (!params.colorappearance.enabled) ) {
+            if ((params.colorappearance.enabled && !settings->autocielab) || (!params.colorappearance.enabled) ) {
                 parent->ipf.defringe (labnCrop);
             }
 
             parent->ipf.MLsharpen (labnCrop);
 
-            if((params.colorappearance.enabled && !settings->autocielab)  || (!params.colorappearance.enabled)) {
+            if ((params.colorappearance.enabled && !settings->autocielab)  || (!params.colorappearance.enabled)) {
                 parent->ipf.MLmicrocontrast (labnCrop);
                 parent->ipf.sharpening (labnCrop, (float**)cbuffer, params.sharpening);
             }
@@ -821,46 +837,46 @@ void Crop::update (int todo)
         //   if (skip==1) {
         WaveletParams WaveParams = params.wavelet;
 
-        if(params.dirpyrequalizer.cbdlMethod == "aft") {
-            if(((params.colorappearance.enabled && !settings->autocielab)  || (!params.colorappearance.enabled))) {
+        if (params.dirpyrequalizer.cbdlMethod == "aft") {
+            if (((params.colorappearance.enabled && !settings->autocielab)  || (!params.colorappearance.enabled))) {
                 parent->ipf.dirpyrequalizer (labnCrop, skip);
                 //  parent->ipf.Lanczoslab (labnCrop,labnCrop , 1.f/skip);
             }
         }
 
         int kall = 0;
-        int minwin = min(labnCrop->W, labnCrop->H);
+        int minwin = min (labnCrop->W, labnCrop->H);
         int maxlevelcrop = 10;
 
         //  if(cp.mul[9]!=0)maxlevelcrop=10;
         // adap maximum level wavelet to size of crop
-        if(minwin * skip < 1024) {
+        if (minwin * skip < 1024) {
             maxlevelcrop = 9;    //sampling wavelet 512
         }
 
-        if(minwin * skip < 512) {
+        if (minwin * skip < 512) {
             maxlevelcrop = 8;    //sampling wavelet 256
         }
 
-        if(minwin * skip < 256) {
+        if (minwin * skip < 256) {
             maxlevelcrop = 7;    //sampling 128
         }
 
-        if(minwin * skip < 128) {
+        if (minwin * skip < 128) {
             maxlevelcrop = 6;
         }
 
-        if(minwin < 64) {
+        if (minwin < 64) {
             maxlevelcrop = 5;
         }
 
         int realtile;
 
-        if(params.wavelet.Tilesmethod == "big") {
+        if (params.wavelet.Tilesmethod == "big") {
             realtile = 22;
         }
 
-        if(params.wavelet.Tilesmethod == "lit") {
+        if (params.wavelet.Tilesmethod == "lit") {
             realtile = 12;
         }
 
@@ -872,33 +888,267 @@ void Crop::update (int todo)
         parent->ipf.Tile_calc (tilesize, overlap, kall, labnCrop->W, labnCrop->H, numtiles_W, numtiles_H, tilewidth, tileheight, tileWskip, tileHskip);
         //now we have tile dimensions, overlaps
         //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        int minsizetile = min(tilewidth, tileheight);
+        int minsizetile = min (tilewidth, tileheight);
         int maxlev2 = 10;
 
-        if(minsizetile < 1024 && maxlevelcrop == 10) {
+        if (minsizetile < 1024 && maxlevelcrop == 10) {
             maxlev2 = 9;
         }
 
-        if(minsizetile < 512) {
+        if (minsizetile < 512) {
             maxlev2 = 8;
         }
 
-        if(minsizetile < 256) {
+        if (minsizetile < 256) {
             maxlev2 = 7;
         }
 
-        if(minsizetile < 128) {
+        if (minsizetile < 128) {
             maxlev2 = 6;
         }
 
-        int maxL = min(maxlev2, maxlevelcrop);
+        int maxL = min (maxlev2, maxlevelcrop);
 
-        if(parent->awavListener) {
-            parent->awavListener->wavChanged(float(maxL));
+        if (parent->awavListener) {
+            parent->awavListener->wavChanged (float (maxL));
         }
 
-        if((params.wavelet.enabled)) {
+
+        //merge images
+        //common datas
+        LabImage * mergelabpart;
+        LabImage * cropmergelab;
+        LabImage * mergelab;
+        int pos = 0;
+        float maxx;
+        struct E {
+            int W, H, sk;
+        } e;
+        int disp = 0;
+        int newsizH, newsizW;
+        int deltapix = 0;
+        int wat_hdr = 0;
+        int Lwa, Hwa;
+        bool sav = (params.wavelet.mergMethod == "savwat" || params.wavelet.mergMethod == "savhdr" || params.wavelet.mergMethod == "savzero");
+        bool zero = (params.wavelet.mergMethod == "loadzero"  || params.wavelet.mergMethod == "loadzerohdr");
+        bool zerono = (params.wavelet.mergMethod != "loadzero"  && params.wavelet.mergMethod != "loadzerohdr");
+
+        if (params.wavelet.mergMethod == "load" || zero) {
+            sav = false;
+        }
+
+        //  if(sav) printf("save\n");else printf("autre\n");
+        if (params.wavelet.expmerge && sav == false ) { //params.wavelet.mergevMethod != "save") {
+            bool toto = true;
+            bool merguez = false;
+            Glib::ustring  inpu;
+            inpu = params.wavelet.inpute;
+            //printf("fichier=%s\n", inpu.c_str());
+            inpu = inpu.substr (5);
+            ofstream fout;
+            ifstream fin;
+            pos = inpu.find ("mer");
+
+            if (pos > 2) { //open file Lab datas with its own size
+                MyMutex* merMutex = NULL;
+                merMutex = new MyMutex;
+                merMutex->lock ();
+
+                fin.open (inpu.c_str(), ios::binary);
+                fin.read (reinterpret_cast<char *> (&e), sizeof (e));
+                // printf("DWcrop mergelabpart=%d DH=%d\n", e.W, e.H);
+                newsizH = e.H;
+                newsizW = e.W;
+                wat_hdr = e.sk;
+                mergelabpart = new LabImage (newsizW, newsizH);
+
+                for (int ir = 0; ir < e.H; ir++)
+                    for (int jr = 0; jr < e.W; jr++) {
+                        struct X {
+                            float L, a, b, ma;
+                        } x;
+                        fin.read (reinterpret_cast<char *> (&x), sizeof (x));
+                        mergelabpart->L[ir][jr] = x.L;
+                        mergelabpart->a[ir][jr] = x.a;
+                        mergelabpart->b[ir][jr] = x.b;
+                        maxx = x.ma;
+                    }
+
+                //    printf("maxx=%f\n", maxx);
+                fin.close();
+                merMutex->unlock ();
+                delete merMutex;
+
+                if (params.wavelet.mergMethod != "loadzerohdr"  || (params.wavelet.mergMethod == "loadzerohdr" && newsizW != widIm)) {
+                    mergelab = new LabImage (widIm, heiIm);
+                    float LT = 1000.f;
+                    float aT = 0.f;
+                    float bT = 0.f; //red
+#ifdef _OPENMP
+                    #pragma omp parallel for
+#endif
+
+                    for (int ir = 0; ir < (heiIm); ir++)
+                        for (int jr = 0; jr < (widIm); jr++) { //fill with color
+                            mergelab->L[ir][jr] = LT;
+                            mergelab->a[ir][jr] = aT;
+                            mergelab->b[ir][jr] = bT;
+
+                        }
+
+                    //put  datas mergelab inside megelabtotal
+                    float percenthig = (float) params.wavelet.balanhig;
+                    float percentleft = (float) params.wavelet.balanleft;
+
+                    if (zero) {
+                        percenthig = percentleft = 0.f;
+                    }
+
+                    Lwa = newsizW;
+                    Hwa = newsizH;
+
+                    if (Lwa >= widIm) {
+                        Lwa = widIm;
+                    }
+
+                    if (Hwa >= heiIm) {
+                        Hwa = heiIm;
+                    }
+
+                    int difwM = widIm - Lwa;
+                    int difw = (int) ((percentleft * difwM) / 100.f);
+                    //    printf("widIM=%d eW=%d difwM=%d difw=%d\n",  widIm, e.W, difwM, difw);
+                    int difhM = heiIm - Hwa;
+                    int difh = (int) ((percenthig * difhM) / 100.f);
+                    //  printf("dcrop difh + Hwa=%d difw + Lwa=%d\n",difh + Hwa,difw + Lwa);
+#ifdef _OPENMP
+                    #pragma omp parallel for
+#endif
+
+                    for (int ir = difh ; ir < (difh + Hwa); ir++)
+                        for (int jr = difw ; jr < (difw + Lwa); jr++) { //
+                            mergelab->L[ir][jr] = mergelabpart->L[ir - difh][jr - difw];
+                            mergelab->a[ir][jr] = mergelabpart->a[ir - difh][jr - difw];
+                            mergelab->b[ir][jr] = mergelabpart->b[ir - difh][jr - difw];
+                        }
+                } else if (params.wavelet.mergMethod == "loadzerohdr"  && newsizW == widIm) {
+                    //  if(newsizW != widIm) {
+                    //     return;    //exit if bad selection
+                    //  }
+
+                    mergelab = new LabImage (newsizW, newsizH);
+                    float LT = 1000.f;
+                    float aT = 0.f;
+                    float bT = 0.f; //red
+                    Lwa = newsizW;
+                    Hwa = newsizH;
+
+#ifdef _OPENMP
+                    #pragma omp parallel for
+#endif
+
+                    for (int ir = 0; ir < (newsizH); ir++)
+                        for (int jr = 0; jr < (newsizW); jr++) { //fill with color
+                            mergelab->L[ir][jr] = LT;
+                            mergelab->a[ir][jr] = aT;
+                            mergelab->b[ir][jr] = bT;
+
+                        }
+
+                    //put  datas mergelab inside megelabtotal
+
+                    float percenthig = (float) params.wavelet.balanhig;
+                    float percentleft = (float) params.wavelet.balanleft;
+                    int maxshift = 10;
+
+                    int deltawe = maxshift * (percentleft - 50.f) / 100.f; //if pcwe = 50  deltawe = 0 ; if pcwe = 100  deltawe = 2;if pcwe = 0  deltawe = -2
+                    int deltahi = maxshift * (percenthig - 50.f) / 100.f;
+                    int absw = abs (deltawe);
+                    int absh = abs (deltahi);
+                    //  printf("DCROP delE=%d delH=%d absw=%d absh=%d\n", deltawe, deltahi, absw, absh);
+
+                    for (int ir = absh; ir < (newsizH - absh); ir++)
+                        for (int jr = absw; jr < (newsizW - absw); jr++) { //new image
+                            mergelab->L[ir][jr] = mergelabpart->L[ir - deltahi][jr - deltawe];
+                            mergelab->a[ir][jr] = mergelabpart->a[ir - deltahi][jr - deltawe];
+                            mergelab->b[ir][jr] = mergelabpart->b[ir - deltahi][jr - deltawe];
+                        }
+                }
+
+                delete mergelabpart;
+            }
+
+        }
+
+        //end load Lab datas for merge
+
+
+        //begin threatment datas Lab for merge
+        if (params.wavelet.expmerge && !sav) { //params.wavelet.mergevMethod != "save") {
+
+            if (pos > 2) {
+
+                bool merguez = true;
+                cropmergelab = new LabImage (labnCrop->W, labnCrop->H);
+
+                if (merguez) { //merge images
+                    disp = 0;
+
+                    if (params.wavelet.mergevMethod == "first") { //old image for watermark
+                        disp = 1;
+                    }
+
+                    if (params.wavelet.mergevMethod == "cuno") { //current image no merge
+                        disp = 2;
+                    }
+
+                    if (disp != 2) {
+#ifdef _OPENMP
+                        #pragma omp parallel for
+#endif
+
+                        for (int ir = 0; ir < (labnCrop->H); ir++)
+                            for (int jr = 0; jr < (labnCrop->W); jr++) { //take into account crop
+                                int irfull, jrfull;
+                                irfull = (ir) * skip + rqcropy - skip * upperBorder;
+                                jrfull = (jr) * skip + rqcropx - skip * leftBorder;
+                                irfull = LIM (irfull, 0, heiIm - 1);
+                                jrfull = LIM (jrfull, 0, widIm - 1);
+                                cropmergelab->L[ir][jr] = mergelab->L[irfull][jrfull];
+                                cropmergelab->a[ir][jr] = mergelab->a[irfull][jrfull];
+                                cropmergelab->b[ir][jr] = mergelab->b[irfull][jrfull];
+
+                                if (disp == 1) {
+                                    labnCrop->L[ir][jr] = cropmergelab->L[ir][jr];    //merge 100%
+                                    labnCrop->a[ir][jr] = cropmergelab->a[ir][jr];    //merge 100%
+                                    labnCrop->b[ir][jr] = cropmergelab->b[ir][jr];    //merge 100%
+                                }
+
+                            }
+                    }
+                }
+
+                delete mergelab;
+            }
+        }
+
+        //end threatment datas Lab for merge
+
+
+        int merge_two[6] = {0, 0, 0, 0, 0, 0};
+        int mtwo;
+
+
+
+        if ((params.wavelet.enabled)) {
             WavCurve wavCLVCurve;
+            WavretiCurve wavRETCurve;
+            WavretigainCurve wavRETgainCurve;
+            WavmergCurve wavMERCurve;
+            Wavmerg2Curve wavMER2Curve;
+            WavstyCurve wavSTYCurve;
+            Wavsty2Curve wavSTY2Curve;
+
             WavOpacityCurveRG waOpacityCurveRG;
             WavOpacityCurveBY waOpacityCurveBY;
             WavOpacityCurveW waOpacityCurveW;
@@ -906,35 +1156,242 @@ void Crop::update (int todo)
             LUTf wavclCurve;
             LUTu dummy;
 
-            params.wavelet.getCurves(wavCLVCurve, waOpacityCurveRG, waOpacityCurveBY, waOpacityCurveW, waOpacityCurveWL);
+            params.wavelet.getCurves (wavCLVCurve, wavRETCurve,  wavRETgainCurve, wavMERCurve, wavMER2Curve, wavSTYCurve, wavSTY2Curve, waOpacityCurveRG, waOpacityCurveBY, waOpacityCurveW, waOpacityCurveWL);
+            LabImage *unshar;
+            Glib::ustring provis;
+            float minCD, maxCD, mini, maxi, Tmean, Tsigma, Tmin, Tmax;
+            minCD = maxCD = maxi = mini = Tmean = Tsigma = Tmin = Tmax = 0.f;
+            float *****stylev;
+            LabImage *styres;
+            int stytype = 0;
 
-            parent->ipf.ip_wavelet(labnCrop, labnCrop, kall, WaveParams, wavCLVCurve, waOpacityCurveRG, waOpacityCurveBY, waOpacityCurveW, waOpacityCurveWL, parent->wavclCurve, wavcontlutili, skip);
+            //params.wavelet.mergevMethod == "cuno" // no threatment
+            if (params.wavelet.expmerge && params.wavelet.mergevMethod == "curr") { //merge datas for Watermark if not preview old datas
+
+                //   unshar = new LabImage (labnCrop->W, labnCrop->H);
+                //   unshar->CopyFrom(labnCrop);
+
+                if (pos > 2) {
+                    float mLY, mCY;
+                    float m_L = (float) (WaveParams.blend / 100.f);
+                    float m_C = (float) (WaveParams.blendc / 100.f);
+                    float gra = WaveParams.grad / 150.f;
+                    mLY = m_L;
+                    mCY = m_C;
+
+                    if (params.wavelet.mergBMethod == "hdr1" && wavMERCurve  && (zerono)) {
+
+                        float Mlc;
+#ifdef _OPENMP
+                        #pragma omp parallel for
+#endif
+
+                        for (int x = 0; x < labnCrop->H; x++)
+                            for (int y = 0; y < labnCrop->W; y++) {
+                                Mlc = 1.4f * wavMERCurve[cropmergelab->L[x][y] / 65.f] - 0.5f;
+                                labnCrop->L[x][y] =  Mlc * (cropmergelab->L[x][y]) + labnCrop->L[x][y];
+                                labnCrop->a[x][y] =  m_C * (cropmergelab->a[x][y]) + labnCrop->a[x][y];
+                                labnCrop->b[x][y] =  m_C * (cropmergelab->b[x][y]) + labnCrop->b[x][y];
+                            }
+                    }
+
+                    if (params.wavelet.mergBMethod == "hdr2") { //
+
+                        float Mlv;
+#ifdef _OPENMP
+                        #pragma omp parallel for
+#endif
+
+                        for (int x = 0; x < labnCrop->H; x++)
+                            for (int y = 0; y < labnCrop->W; y++) {
+                                Mlv = (m_L / 33000.f) * (gra - 1.f) * cropmergelab->L[x][y] + m_L;
+                                labnCrop->L[x][y] =  Mlv * (cropmergelab->L[x][y]) + labnCrop->L[x][y];
+                                labnCrop->a[x][y] =  m_C * (cropmergelab->a[x][y]) + labnCrop->a[x][y];
+                                labnCrop->b[x][y] =  m_C * (cropmergelab->b[x][y]) + labnCrop->b[x][y];
+                            }
+                    }
+
+                    if (zero) {
+                        stytype = 1;
+                        int lab = 3;
+                        int leve =  params.wavelet.thres;
+                        int dir = 3;
+                        int hei = (cropmergelab->H) / 2 + 1; //fh / 2;
+                        int wid = (cropmergelab->W) / 2 + 1; //fw / 2;
+
+                        merge_two[0] = int ( wid * ((float)Lwa / (float)widIm)); //
+                        merge_two[1] = int ( hei * ((float)Hwa / (float)heiIm)) ; //
+                        int wid1 = merge_two[0] + 1;
+                        int hei1 = merge_two[1] + 1;
+
+                        if (merge_two[0] > wid) {
+                            merge_two[0] = wid;
+                        }
+
+                        if (merge_two[1] > hei) {
+                            merge_two[1] = hei;
+                        }
+
+                        //  printf("he=%d wi=%d\n",hei,wid);
+                        if (stytype == 1) {
+                            stylev = new float****[lab];
+
+                            for (int y = 0; y < lab; y++) {
+                                stylev[y] = new float***[dir];
+
+                                for (int d = 0; d < dir; d++) {
+                                    stylev[y][d] = new float**[leve];
+
+                                    for (int k = 0; k < leve; k++) {
+                                        stylev[y][d][k] = new float*[hei1];
+
+                                        for (int i = 0; i < hei1; i++) {
+                                            stylev[y][d][k][i] = new float[wid1];
+                                        }
+                                    }
+                                }
+                            }
+
+                            styres = new LabImage (wid1, hei1);
+
+                            parent->ipf.ip_wavelet (cropmergelab, cropmergelab, stylev, styres, stytype, NULL, mtwo, merge_two, 1, kall, WaveParams, wavMER2Curve, wavCLVCurve, wavRETCurve, wavRETgainCurve, wavSTYCurve, wavSTY2Curve, waOpacityCurveRG, waOpacityCurveBY, waOpacityCurveW, waOpacityCurveWL, parent->wavclCurve, wavcontlutili, skip, minCD, maxCD, mini, maxi, Tmean, Tsigma, Tmin, Tmax);
+                        }
+
+                        stytype = 2;
+
+                        if (stytype == 2) {
+
+                            parent->ipf.ip_wavelet (labnCrop, labnCrop, stylev, styres, stytype, cropmergelab, mtwo, merge_two, 1, kall, WaveParams, wavMER2Curve, wavCLVCurve, wavRETCurve, wavRETgainCurve, wavSTYCurve, wavSTY2Curve, waOpacityCurveRG, waOpacityCurveBY, waOpacityCurveW, waOpacityCurveWL, parent->wavclCurve, wavcontlutili, skip, minCD, maxCD, mini, maxi, Tmean, Tsigma, Tmin, Tmax);
+
+                            for (int y = 0; y < lab; y++) {
+                                for (int i = 0; i < dir; i++) {
+                                    for (int j = 0; j < leve; j++) {
+                                        for (int l = 0; l < hei1; l++) {
+                                            delete [] stylev[y][i][j][l];
+                                        }
+                                    }
+                                }
+                            }
+
+                            for (int y = 0; y < lab; y++) {
+                                for (int i = 0; i < dir; i++) {
+                                    for (int j = 0; j < leve; j++) {
+                                        delete [] stylev[y][i][j];
+                                    }
+                                }
+                            }
+
+                            for (int y = 0; y < lab; y++) {
+                                for (int i = 0; i < dir; i++) {
+                                    delete [] stylev[y][i];
+                                }
+                            }
+
+                            for (int y = 0; y < lab; y++) {
+                                delete [] stylev[y];
+                            }
+
+                            delete [] stylev;
+                            delete  styres;
+
+                        }
+                    }
+
+
+
+                    delete cropmergelab;
+
+                }
+
+                //   delete unshar;
+                //   unshar    = NULL;
+
+            }
+
+
+
+
+
+            if (WaveParams.ushamethod != "none" && WaveParams.expedge && WaveParams.CLmethod != "all" && zerono) {
+
+                unshar = new LabImage (labnCrop->W, labnCrop->H);
+                provis = params.wavelet.CLmethod;
+                params.wavelet.CLmethod = "all";
+
+                parent->ipf.ip_wavelet (labnCrop, labnCrop, stylev, styres, stytype, NULL, mtwo, merge_two, 1, kall, WaveParams, wavMER2Curve, wavCLVCurve, wavRETCurve, wavRETgainCurve, wavSTYCurve, wavSTY2Curve, waOpacityCurveRG, waOpacityCurveBY, waOpacityCurveW, waOpacityCurveWL, parent->wavclCurve, wavcontlutili, skip, minCD, maxCD, mini, maxi, Tmean, Tsigma, Tmin, Tmax);
+                unshar->CopyFrom (labnCrop);
+
+                params.wavelet.CLmethod = provis;
+
+            }
+
+            //     if(params.wavelet.mergMethod != "loadzero" || (params.wavelet.mergMethod == "loadzero" &&  !params.wavelet.expmerge)) {
+            if (zerono || (zero &&  !params.wavelet.expmerge)) {
+                parent->ipf.ip_wavelet (labnCrop, labnCrop, stylev, styres, stytype, NULL, mtwo, merge_two, 0, kall, WaveParams, wavMER2Curve, wavCLVCurve, wavRETCurve, wavRETgainCurve, wavSTYCurve, wavSTY2Curve, waOpacityCurveRG, waOpacityCurveBY, waOpacityCurveW, waOpacityCurveWL, parent->wavclCurve, wavcontlutili, skip, minCD, maxCD, mini, maxi, Tmean, Tsigma, Tmin, Tmax);
+            }
+
+            if (parent->awavListener) {
+
+                parent->awavListener->minmaxChanged (maxCD, minCD, mini, maxi, Tmean, Tsigma, Tmin, Tmax);
+
+            }
+
+            if (WaveParams.ushamethod != "none"  && WaveParams.expedge && WaveParams.CLmethod != "all" && zerono) {
+
+                float mL = (float) (WaveParams.mergeL / 100.f);
+                float mC = (float) (WaveParams.mergeC / 100.f);
+                float mL0;
+                float mC0;
+
+                if ((WaveParams.CLmethod == "one" || WaveParams.CLmethod == "inf")  && WaveParams.Backmethod == "black") {
+                    mL0 = mC0 = 0.f;
+                    mL = -mL;
+                    mC = -mC;
+                } else if (WaveParams.CLmethod == "sup" && WaveParams.Backmethod == "resid") {
+                    mL0 = mL;
+                    mC0 = mC;
+                } else {
+                    mL0 = mL = mC0 = mC = 0.f;
+                }
+
+#ifdef _OPENMP
+                #pragma omp parallel for
+#endif
+
+                for (int x = 0; x < labnCrop->H; x++)
+                    for (int y = 0; y < labnCrop->W; y++) {
+                        labnCrop->L[x][y] = (1.f + mL0) * (unshar->L[x][y]) - mL * labnCrop->L[x][y];
+                        labnCrop->a[x][y] = (1.f + mC0) * (unshar->a[x][y]) - mC * labnCrop->a[x][y];
+                        labnCrop->b[x][y] = (1.f + mC0) * (unshar->b[x][y]) - mC * labnCrop->b[x][y];
+                    }
+
+                delete unshar;
+                unshar    = NULL;
+            }
         }
 
-        //     }
 
-        //   }
-        if(params.colorappearance.enabled) {
+        if (params.colorappearance.enabled) {
             float fnum = parent->imgsrc->getMetaData()->getFNumber  ();        // F number
             float fiso = parent->imgsrc->getMetaData()->getISOSpeed () ;       // ISO
             float fspeed = parent->imgsrc->getMetaData()->getShutterSpeed () ; // Speed
             double fcomp = parent->imgsrc->getMetaData()->getExpComp  ();      // Compensation +/-
             double adap; // Scene's luminosity adaptation factor
 
-            if(fnum < 0.3f || fiso < 5.f || fspeed < 0.00001f) { //if no exif data or wrong
+            if (fnum < 0.3f || fiso < 5.f || fspeed < 0.00001f) { //if no exif data or wrong
                 adap = 2000.;
             } else {
-                double E_V = fcomp + log2 (double((fnum * fnum) / fspeed / (fiso / 100.f)));
+                double E_V = fcomp + log2 (double ((fnum * fnum) / fspeed / (fiso / 100.f)));
                 E_V += params.toneCurve.expcomp;// exposure compensation in tonecurve ==> direct EV
-                E_V += log2(params.raw.expos);// exposure raw white point ; log2 ==> linear to EV
-                adap = pow(2., E_V - 3.); // cd / m2
+                E_V += log2 (params.raw.expos); // exposure raw white point ; log2 ==> linear to EV
+                adap = pow (2., E_V - 3.); // cd / m2
                 // end calculation adaptation scene luminosity
             }
 
             int begh = 0, endh = labnCrop->H;
             bool execsharp = false;
 
-            if(skip == 1) {
+            if (skip == 1) {
                 execsharp = true;
             }
 
@@ -942,9 +1399,9 @@ void Crop::update (int todo)
                 cieCrop = new CieImage (cropw, croph);
             }
 
-            if(settings->ciecamfloat) {
+            if (settings->ciecamfloat) {
                 float d; // not used after this block
-                parent->ipf.ciecam_02float (cieCrop, float(adap), begh, endh, 1, 2, labnCrop, &params, parent->customColCurve1, parent->customColCurve2, parent->customColCurve3,
+                parent->ipf.ciecam_02float (cieCrop, float (adap), begh, endh, 1, 2, labnCrop, &params, parent->customColCurve1, parent->customColCurve2, parent->customColCurve3,
                                             dummy, dummy, parent->CAMBrightCurveJ, parent->CAMBrightCurveQ, parent->CAMMean, 5, 1, execsharp, d, skip, 1);
             } else {
                 double dd; // not used after this block
@@ -1083,12 +1540,12 @@ bool Crop::setCropSizes (int rcx, int rcy, int rcw, int rch, int skip, bool inte
     rqcroph = rch;
 
     // store and set requested crop size
-    int rqx1 = LIM(rqcropx, 0, parent->fullw - 1);
-    int rqy1 = LIM(rqcropy, 0, parent->fullh - 1);
+    int rqx1 = LIM (rqcropx, 0, parent->fullw - 1);
+    int rqy1 = LIM (rqcropy, 0, parent->fullh - 1);
     int rqx2 = rqx1 + rqcropw - 1;
     int rqy2 = rqy1 + rqcroph - 1;
-    rqx2 = LIM(rqx2, 0, parent->fullw - 1);
-    rqy2 = LIM(rqy2, 0, parent->fullh - 1);
+    rqx2 = LIM (rqx2, 0, parent->fullw - 1);
+    rqy2 = LIM (rqy2, 0, parent->fullh - 1);
 
     this->skip = skip;
 
@@ -1098,10 +1555,10 @@ bool Crop::setCropSizes (int rcx, int rcy, int rcw, int rch, int skip, bool inte
     int bx2 = rqx2 + skip * borderRequested;
     int by2 = rqy2 + skip * borderRequested;
     // clip it to fit into image area
-    bx1 = LIM(bx1, 0, parent->fullw - 1);
-    by1 = LIM(by1, 0, parent->fullh - 1);
-    bx2 = LIM(bx2, 0, parent->fullw - 1);
-    by2 = LIM(by2, 0, parent->fullh - 1);
+    bx1 = LIM (bx1, 0, parent->fullw - 1);
+    by1 = LIM (by1, 0, parent->fullh - 1);
+    bx2 = LIM (bx2, 0, parent->fullw - 1);
+    by2 = LIM (by2, 0, parent->fullh - 1);
     int bw = bx2 - bx1 + 1;
     int bh = by2 - by1 + 1;
 
@@ -1114,17 +1571,18 @@ bool Crop::setCropSizes (int rcx, int rcy, int rcw, int rch, int skip, bool inte
     int orW, orH;
     parent->imgsrc->getSize (cp, orW, orH);
 
-    int cw = SKIPS(bw, skip);
-    int ch = SKIPS(bh, skip);
+    int cw = SKIPS (bw, skip);
+    int ch = SKIPS (bh, skip);
 
-    leftBorder  = SKIPS(rqx1 - bx1, skip);
-    upperBorder = SKIPS(rqy1 - by1, skip);
+    leftBorder  = SKIPS (rqx1 - bx1, skip);
+    upperBorder = SKIPS (rqy1 - by1, skip);
 
     if (settings->verbose) {
         printf ("setsizes starts (%d, %d, %d, %d, %d, %d)\n", orW, orH, trafw, trafh, cw, ch);
     }
 
     EditType editType = ET_PIPETTE;
+
     if (const auto editProvider = PipetteBuffer::getDataProvider ()) {
         if (const auto editSubscriber = editProvider->getCurrSubscriber ()) {
             editType = editSubscriber->getEditingType ();
@@ -1142,11 +1600,11 @@ bool Crop::setCropSizes (int rcx, int rcy, int rcw, int rch, int skip, bool inte
             origCrop = new Imagefloat;
         }
 
-        origCrop->allocate(trafw, trafh); // Resizing the buffer (optimization)
+        origCrop->allocate (trafw, trafh); // Resizing the buffer (optimization)
 
         // if transCrop doesn't exist yet, it'll be created where necessary
         if (transCrop) {
-            transCrop->allocate(cropw, croph);
+            transCrop->allocate (cropw, croph);
         }
 
         if (laboCrop) {
@@ -1165,7 +1623,7 @@ bool Crop::setCropSizes (int rcx, int rcy, int rcw, int rch, int skip, bool inte
             cropImg = new Image8;
         }
 
-        cropImg->allocate(cropw, croph); // Resizing the buffer (optimization)
+        cropImg->allocate (cropw, croph); // Resizing the buffer (optimization)
 
         //cieCrop is only used in Crop::update, it is destroyed now but will be allocated on first use
         if (cieCrop) {
@@ -1187,18 +1645,18 @@ bool Crop::setCropSizes (int rcx, int rcy, int rcw, int rch, int skip, bool inte
         }
 
         cbuffer = new float*[croph];
-        cbuf_real = new float[(croph + 2)*cropw];
+        cbuf_real = new float[ (croph + 2)*cropw];
 
         for (int i = 0; i < croph; i++) {
             cbuffer[i] = cbuf_real + cropw * i + cropw;
         }
 
-        if(params.sh.enabled) {
+        if (params.sh.enabled) {
             cshmap = new SHMap (cropw, croph, true);
         }
 
         if (editType == ET_PIPETTE) {
-            PipetteBuffer::resize(cropw, croph);
+            PipetteBuffer::resize (cropw, croph);
         } else if (PipetteBuffer::bufferCreated()) {
             PipetteBuffer::flush();
         }

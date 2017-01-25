@@ -28,6 +28,20 @@
 #include "colorprovider.h"
 #include "guiutils.h"
 #include "options.h"
+#include "toolpanel.h"
+//#include "../rtengine/imagedata.h"
+//#include <memory>
+
+
+class WavelListener
+{
+
+public:
+    virtual ~WavelListener() {}
+    virtual Glib::ustring GetCurrentImageFilePath() = 0;
+    virtual void savelabReference (Glib::ustring fname) {}
+};
+
 
 class Wavelet :
     public ToolParamBlock,
@@ -56,9 +70,36 @@ public:
     void updateToolState (std::vector<int> &tpOpen);
     void write (rtengine::procparams::ProcParams* pp, ParamsEdited* pedited = nullptr);
     void writeOptions (std::vector<int> &tpOpen);
+    void retinexMethodChanged();
+    void retinexMethodproChanged();
+    void shapMethodChanged();
+    void minmaxChanged (double cdma, double cdmin, double mini, double maxi, double Tmean, double Tsigma, double Tmin, double Tmax);
+    bool minmaxComputed_ ();
+    void updateLabel      ();
+    void updateTrans      ();
+
+    void setWavelListener (WavelListener* ipl)
+    {
+        walistener = ipl;
+    }
+
+    void inputeChanged ();
+    void mFile_Reset        ();
+    void savelabPressed ();
 
 private:
     void foldAllButMe (GdkEventButton* event, MyExpander *expander);
+    /*    MyFileChooserButton* ipDialog;
+        std::auto_ptr<FileChooserLastFolderPersister> ipDialogPersister;
+        sigc::connection   ipc;
+        Gtk::RadioButton*  ifromfile;
+        Glib::ustring      oldip;
+        Gtk::Button*        saveRef;
+        Glib::ustring lastRefFilename;
+    */
+    Glib::ustring lastlabFilename;
+
+    Glib::ustring      oldip;
 
     virtual void colorForValue (double valX, double valY, enum ColorCaller::ElemType elemType, int callerId, ColorCaller* caller);
     void BAmethodChanged ();
@@ -71,9 +112,16 @@ private:
     void EDmethodChanged ();
     void HSmethodChanged ();
     void LmethodChanged ();
+    void mergevMethodChanged ();
+    void mergMethodChanged ();
+    void mergBMethodChanged ();
+    void mergMethod2Changed ();
+
     void MedgreinfChanged ();
     void TMmethodChanged ();
     void TilesmethodChanged ();
+    void usharpmethodChanged ();
+    void ushamethodChanged ();
     void avoidToggled ();
     void cbenabToggled ();
     void contrastMinusPressed ();
@@ -86,6 +134,7 @@ private:
     void medianlevToggled ();
     void neutralPressed ();
     void neutral_pressed ();
+    void neutral2_pressed       ();
     void neutralchPressed ();
     void tmrToggled ();
     void updatewavLabel ();
@@ -111,15 +160,28 @@ private:
     void cbenabUpdateUI ();
     void lipstUpdateUI ();
 
-    void enableToggled(MyExpander *expander);
+    void enableToggled (MyExpander *expander);
 
     CurveEditorGroup* const curveEditorG;
 
     CurveEditorGroup* const CCWcurveEditorG;
+    CurveEditorGroup* const CCWcurveEditorT;
+    CurveEditorGroup* const CCWcurveEditorgainT;
+    CurveEditorGroup* const CCWcurveEditormerg;
+    CurveEditorGroup* const CCWcurveEditormerg2;
+    CurveEditorGroup* const CCWcurveEditorsty;
+    CurveEditorGroup* const CCWcurveEditorsty2;
+    CurveEditorGroup* const curveEditorsty;
+
     CurveEditorGroup* const curveEditorRES;
     CurveEditorGroup* const curveEditorGAM;
+    Gtk::HSeparator* const separatorCB;
     Gtk::HSeparator* const separatorNeutral;
     Gtk::HSeparator* const separatoredge;
+    Gtk::HSeparator* const separatorRT;
+    Gtk::HSeparator* const separatorsty;
+    Gtk::HSeparator* const separatorsty2;
+    Gtk::HSeparator* const separatorsty3;
 
     CurveEditorGroup* const opaCurveEditorG;
     FlatCurveEditor* opacityShapeRG;
@@ -134,6 +196,14 @@ private:
     DiagonalCurveEditor* clshape;
 
     FlatCurveEditor* ccshape;
+    FlatCurveEditor* cTshape;
+    FlatCurveEditor* cTgainshape;
+    FlatCurveEditor* cmergshape;
+    FlatCurveEditor* cmerg2shape;
+    FlatCurveEditor* cstyshape;
+    FlatCurveEditor* cstyshape2;
+    FlatCurveEditor* shstyshape;
+
     Gtk::CheckButton* const median;
     Gtk::CheckButton* const medianlev;
     Gtk::CheckButton* const linkedg;
@@ -142,9 +212,17 @@ private:
     Gtk::CheckButton* const avoid;
     Gtk::CheckButton* const tmr;
 
+    Gtk::Button *mFileReset;
+    Gtk::Button* savelab;
+    Gtk::Button* neutral2;
+
+
     Gtk::Button* const neutralchButton;
     Adjuster* correction[9];
     Adjuster* correctionch[9];
+    Adjuster* balmer[9];
+    Adjuster* balmer2[9];
+
     Adjuster* const rescon;
     Adjuster* const resconH;
     Adjuster* const reschro;
@@ -165,15 +243,41 @@ private:
     Adjuster* const strength;
     Adjuster* const balance;
     Adjuster* const iter;
+    Adjuster* const mergeL;
+    Adjuster* const mergeC;
+
     Adjuster* greenlow;
     Adjuster* bluelow;
     Adjuster* greenmed;
     Adjuster* bluemed;
     Adjuster* greenhigh;
     Adjuster* bluehigh;
+    Adjuster* balanleft;
+    Adjuster* balanhig;
+    Adjuster* sizelab;
+    Adjuster* dirV;
+    Adjuster* dirH;
+    Adjuster* dirD;
+    Adjuster* balmerch;
+    Adjuster* shapedetcolor;
+    Adjuster* balmerres;
+    Adjuster* balmerres2;
+    Adjuster* blend;
+    Adjuster* blendc;
+    Adjuster* grad;
+    Adjuster* offs;
+    Adjuster* str;
+    Adjuster* neigh;
+    Adjuster* vart;
+    Adjuster* limd;
+    Adjuster* chrrt;
+    Adjuster* scale;
+    Adjuster* gain;
+
 
     ThresholdAdjuster* const hueskin;
     ThresholdAdjuster* const hueskin2;
+    ThresholdAdjuster* const hueskinsty;
     ThresholdAdjuster* const hllev;
     ThresholdAdjuster* const bllev;
     ThresholdAdjuster* const pastlev;
@@ -191,6 +295,13 @@ private:
     Adjuster* const edgedetectthr2;
     Adjuster* const edgesensi;
     Adjuster* const edgeampli;
+    Adjuster* const highlights;
+    Adjuster* const h_tonalwidth;
+    Adjuster* const shadows;
+    Adjuster* const s_tonalwidth;
+    Adjuster* const radius;
+    Adjuster* const shapind;
+
     MyComboBoxText* const Lmethod;
     sigc::connection  Lmethodconn;
     MyComboBoxText* const CHmethod;
@@ -219,13 +330,63 @@ private:
     sigc::connection  Dirmethodconn;
     MyComboBoxText* const Medgreinf;
     sigc::connection  MedgreinfConn;
+    MyComboBoxText* const usharpmethod;
+    sigc::connection  usharpmethodconn;
+    MyComboBoxText* const ushamethod;
+    sigc::connection  ushamethodconn;
+    MyComboBoxText* const shapMethod;
+    sigc::connection  shapMethodConn;
+    MyComboBoxText* const retinexMethod;
+    sigc::connection retinexMethodConn;
+    MyComboBoxText*   retinexMethodpro;
+    sigc::connection retinexMethodproConn;
+    MyComboBoxText* const mergMethod;
+    sigc::connection  mergMethodConn;
+    MyComboBoxText* const  mergMethod2;
+    sigc::connection  mergMethod2Conn;
+    MyComboBoxText* const mergevMethod;
+    sigc::connection  mergevMethodConn;
+    MyComboBoxText* const mergBMethod;
+    sigc::connection  mergBMethodConn;
+
     Gtk::Frame* const chanMixerHLFrame;
     Gtk::Frame* const chanMixerMidFrame;
     Gtk::Frame* const chanMixerShadowsFrame;
+    Gtk::Frame* const gainFrame;
+    Gtk::Frame* const tranFrame;
+    Gtk::Frame* const gaussFrame;
+    Gtk::Frame* const balMFrame;
+    Gtk::Frame* const shaFrame;
 
     Gtk::Label* const wavLabels;
     Gtk::Label* const labmC;
     Gtk::Label* const labmNP;
+    Gtk::Label* const labmdh;
+    Gtk::Label* const labmdhpro;
+    Gtk::Label* const labretifin;
+    Gtk::Label* const labmmg1;
+    Gtk::Label* const labmmg2;
+    Gtk::Label* const labmmg;
+    Gtk::Label* const labmmgB;
+    Gtk::Label* const mMLabels;
+    Gtk::Label* const transLabels;
+    Gtk::Label* const transLabels2;
+    Gtk::Label* const usharpLabel;
+    Gtk::Label* const inLabel;
+
+    double nextmin;
+    double nextmax;
+    double nextminiT;
+    double nextmaxiT;
+    double nextmeanT;
+    double nextminT;
+    double nextmaxT;
+    double nextsigma;
+    double nextmergeL;
+    double nextmergeC;
+    double nextL;
+    double nextC;
+
     MyExpander* const expchroma;
     MyExpander* const expcontrast;
     MyExpander* const expedge;
@@ -235,16 +396,42 @@ private:
     MyExpander* const expresid;
     MyExpander* const expsettings;
     MyExpander* const exptoning;
+    MyExpander* const expreti;
+    MyExpander* const expmerge;
+    MyExpander* const expsettingreti;
+    MyExpander* const expTCresi;
+    MyExpander* const expedg1;
+    MyExpander* const expedg2;
+    MyExpander* const expedg3;
 
     Gtk::HBox* const neutrHBox;
+    Gtk::HBox* const usharpHBox;
+    Gtk::HBox* const dhbox;
+    Gtk::HBox* const dhboxpro;
+    Gtk::HBox* const mg1box;
+    Gtk::HBox* const mg2box;
+    Gtk::HBox* const hbin;
+    Gtk::HBox* const mgbox;
+    Gtk::HBox* const neutrHBox2;
+    Gtk::HBox* const labretifinbox;
+    Gtk::HBox* const mgBbox;
 
-    sigc::connection enableChromaConn, enableContrastConn, enableEdgeConn, enableFinalConn;
-    sigc::connection enableNoiseConn, enableResidConn, enableToningConn;
+    Gtk::VBox* const mgVBox;
+    bool inChanged;
+
+    bool b_filter_asCurrent;
+    MyFileChooserButton *inputeFile;
+
+    WavelListener*  walistener;
+
+    sigc::connection enableChromaConn, enableContrastConn, enableEdgeConn,  enableEdge3Conn, enableFinalConn, enableTCConn;
+    sigc::connection enableNoiseConn, enableResidConn, enableToningConn, enableMergeConn, enableretiConn;
     sigc::connection medianConn, avoidConn, tmrConn, medianlevConn, linkedgConn, lipstConn, cbenabConn, neutralconn;
-    sigc::connection neutralPressedConn;
+    sigc::connection neutralPressedConn, neutral2conn;
     sigc::connection contrastPlusPressedConn;
     sigc::connection contrastMinusPressedConn;
     sigc::connection neutralchPressedConn;
+    sigc::connection inFile;
 
     bool lastmedian, lastmedianlev, lastlinkedg, lastavoid, lastlipst, lasttmr, lastcbenab;
     int nextnlevel;

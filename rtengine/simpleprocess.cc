@@ -29,6 +29,8 @@
 #include "rawimagesource.h"
 #include "../rtgui/multilangmgr.h"
 #include "mytime.h"
+#include <fstream>
+
 #undef THREAD_PRIORITY_NORMAL
 
 namespace rtengine
@@ -40,7 +42,7 @@ IImage16* processImage (ProcessingJob* pjob, int& errorCode, ProgressListener* p
 
     errorCode = 0;
 
-    ProcessingJobImpl* job = static_cast<ProcessingJobImpl*>(pjob);
+    ProcessingJobImpl* job = static_cast<ProcessingJobImpl*> (pjob);
 
     if (pl) {
         pl->setProgressStr ("PROGRESSBAR_PROCESSING");
@@ -63,7 +65,7 @@ IImage16* processImage (ProcessingJob* pjob, int& errorCode, ProgressListener* p
     // acquire image from imagesource
     ImageSource* imgsrc = ii->getImageSource ();
 
-    int tr = getCoarseBitMask(params.coarse);
+    int tr = getCoarseBitMask (params.coarse);
     int fw, fh;
     imgsrc->getFullSize (fw, fh, tr);
 
@@ -102,13 +104,13 @@ IImage16* processImage (ProcessingJob* pjob, int& errorCode, ProgressListener* p
     ImProcFunctions ipf (&params, true);
 
     PreviewProps pp (0, 0, fw, fh, 1);
-    imgsrc->preprocess( params.raw, params.lensProf, params.coarse, params.dirpyrDenoise.enabled);
+    imgsrc->preprocess ( params.raw, params.lensProf, params.coarse, params.dirpyrDenoise.enabled);
 
     if (params.toneCurve.autoexp) {// this enabled HLRecovery
-        LUTu histRedRaw(256), histGreenRaw(256), histBlueRaw(256);
-        imgsrc->getRAWHistogram(histRedRaw, histGreenRaw, histBlueRaw);
+        LUTu histRedRaw (256), histGreenRaw (256), histBlueRaw (256);
+        imgsrc->getRAWHistogram (histRedRaw, histGreenRaw, histBlueRaw);
 
-        if (ToneCurveParams::HLReconstructionNecessary(histRedRaw, histGreenRaw, histBlueRaw) && !params.toneCurve.hrenabled) {
+        if (ToneCurveParams::HLReconstructionNecessary (histRedRaw, histGreenRaw, histBlueRaw) && !params.toneCurve.hrenabled) {
             params.toneCurve.hrenabled = true;
             // WARNING: Highlight Reconstruction is being forced 'on', should we force a method here too?
         }
@@ -118,13 +120,13 @@ IImage16* processImage (ProcessingJob* pjob, int& errorCode, ProgressListener* p
         pl->setProgress (0.20);
     }
 
-    imgsrc->demosaic( params.raw);
+    imgsrc->demosaic ( params.raw);
 
     if (pl) {
         pl->setProgress (0.30);
     }
 
-    if(params.retinex.enabled) { //enabled Retinex
+    if (params.retinex.enabled) { //enabled Retinex
         LUTf cdcurve (65536, 0);
         LUTf mapcurve (65536, 0);
         LUTu dummy;
@@ -134,18 +136,18 @@ IImage16* processImage (ProcessingJob* pjob, int& errorCode, ProgressListener* p
         bool mapcontlutili = false;
         bool useHsl = false;
 //        multi_array2D<float, 3> conversionBuffer(1, 1);
-        multi_array2D<float, 4> conversionBuffer(1, 1);
-        imgsrc->retinexPrepareBuffers(params.icm, params.retinex, conversionBuffer, dummy);
-        imgsrc->retinexPrepareCurves(params.retinex, cdcurve, mapcurve, dehatransmissionCurve, dehagaintransmissionCurve, dehacontlutili, mapcontlutili, useHsl, dummy, dummy );
+        multi_array2D<float, 4> conversionBuffer (1, 1);
+        imgsrc->retinexPrepareBuffers (params.icm, params.retinex, conversionBuffer, dummy);
+        imgsrc->retinexPrepareCurves (params.retinex, cdcurve, mapcurve, dehatransmissionCurve, dehagaintransmissionCurve, dehacontlutili, mapcontlutili, useHsl, dummy, dummy );
         float minCD, maxCD, mini, maxi, Tmean, Tsigma, Tmin, Tmax;
-        imgsrc->retinex( params.icm, params.retinex, params.toneCurve, cdcurve, mapcurve, dehatransmissionCurve, dehagaintransmissionCurve, conversionBuffer, dehacontlutili, mapcontlutili, useHsl, minCD, maxCD, mini, maxi, Tmean, Tsigma, Tmin, Tmax, dummy);
+        imgsrc->retinex ( params.icm, params.retinex, params.toneCurve, cdcurve, mapcurve, dehatransmissionCurve, dehagaintransmissionCurve, conversionBuffer, dehacontlutili, mapcontlutili, useHsl, minCD, maxCD, mini, maxi, Tmean, Tsigma, Tmin, Tmax, dummy);
     }
 
     if (pl) {
         pl->setProgress (0.40);
     }
 
-    imgsrc->HLRecovery_Global( params.toneCurve );
+    imgsrc->HLRecovery_Global ( params.toneCurve );
 
 
     if (pl) {
@@ -159,25 +161,25 @@ IImage16* processImage (ProcessingJob* pjob, int& errorCode, ProgressListener* p
         currWB = imgsrc->getWB ();
     } else if (params.wb.method == "Auto") {
         double rm, gm, bm;
-        imgsrc->getAutoWBMultipliers(rm, gm, bm);
-        currWB.update(rm, gm, bm, params.wb.equal);
+        imgsrc->getAutoWBMultipliers (rm, gm, bm);
+        currWB.update (rm, gm, bm, params.wb.equal);
     }
 
     NoiseCurve noiseLCurve;
     NoiseCurve noiseCCurve;
     Imagefloat *calclum = nullptr ;
-    params.dirpyrDenoise.getCurves(noiseLCurve, noiseCCurve);
+    params.dirpyrDenoise.getCurves (noiseLCurve, noiseCCurve);
     float autoNR = (float) settings->nrauto;//
     float autoNRmax = (float) settings->nrautomax;//
     int tilesize;
     int overlap;
 
-    if(settings->leveldnti == 0) {
+    if (settings->leveldnti == 0) {
         tilesize = 1024;
         overlap = 128;
     }
 
-    if(settings->leveldnti == 1) {
+    if (settings->leveldnti == 1) {
         tilesize = 768;
         overlap = 96;
     }
@@ -188,7 +190,7 @@ IImage16* processImage (ProcessingJob* pjob, int& errorCode, ProgressListener* p
     ipf.Tile_calc (tilesize, overlap, 2, fw, fh, numtiles_W, numtiles_H, tilewidth, tileheight, tileWskip, tileHskip);
     int nbtl = numtiles_W * numtiles_H;
 
-    if((settings->leveldnautsimpl == 1 && params.dirpyrDenoise.Cmethod == "AUT") || (settings->leveldnautsimpl == 0 && params.dirpyrDenoise.C2method == "AUTO")) {
+    if ((settings->leveldnautsimpl == 1 && params.dirpyrDenoise.Cmethod == "AUT") || (settings->leveldnautsimpl == 0 && params.dirpyrDenoise.C2method == "AUTO")) {
         nbtl = 9;
     }
 
@@ -204,28 +206,28 @@ IImage16* processImage (ProcessingJob* pjob, int& errorCode, ProgressListener* p
     float *pcsk = new float [nbtl];
 
     //  printf("expert=%d\n",settings->leveldnautsimpl);
-    if(settings->leveldnautsimpl == 1 && params.dirpyrDenoise.Cmethod == "PON") {
+    if (settings->leveldnautsimpl == 1 && params.dirpyrDenoise.Cmethod == "PON") {
         MyTime t1pone, t2pone;
         t1pone.set();
         int crW, crH;
 
-        if(settings->leveldnv == 0) {
+        if (settings->leveldnv == 0) {
             crW = 100;
             crH = 100;
         }
 
-        if(settings->leveldnv == 1) {
+        if (settings->leveldnv == 1) {
             crW = 250;
             crH = 250;
         }
 
-        if(settings->leveldnv == 2) {
-            crW = int(tileWskip / 2);
-            crH = int(tileHskip / 2);
+        if (settings->leveldnv == 2) {
+            crW = int (tileWskip / 2);
+            crH = int (tileHskip / 2);
         }
 
         //  if(settings->leveldnv ==2) {crW=int(tileWskip/2);crH=int(1.15f*(tileWskip/2));}//adapted to scale of preview
-        if(settings->leveldnv == 3) {
+        if (settings->leveldnv == 3) {
             crW = tileWskip - 10;
             crH = tileHskip - 10;
         }
@@ -233,7 +235,7 @@ IImage16* processImage (ProcessingJob* pjob, int& errorCode, ProgressListener* p
         float lowdenoise = 1.f;
         int levaut = settings->leveldnaut;
 
-        if(levaut == 1) { //Standard
+        if (levaut == 1) { //Standard
             lowdenoise = 0.7f;
         }
 
@@ -242,9 +244,9 @@ IImage16* processImage (ProcessingJob* pjob, int& errorCode, ProgressListener* p
 //      Imagefloat *origCropPart;//init auto noise
 //          origCropPart = new Imagefloat (crW, crH);//allocate memory
         if (params.dirpyrDenoise.enabled) {//evaluate Noise
-            LUTf gamcurve(65536, 0);
+            LUTf gamcurve (65536, 0);
             float gam, gamthresh, gamslope;
-            ipf.RGB_denoise_infoGamCurve(params.dirpyrDenoise, imgsrc->isRAW(), gamcurve, gam, gamthresh, gamslope);
+            ipf.RGB_denoise_infoGamCurve (params.dirpyrDenoise, imgsrc->isRAW(), gamcurve, gam, gamthresh, gamslope);
             #pragma omp parallel
             {
                 Imagefloat *origCropPart;//init auto noise
@@ -253,27 +255,29 @@ IImage16* processImage (ProcessingJob* pjob, int& errorCode, ProgressListener* p
                 int skipP = 1;
                 #pragma omp for schedule(dynamic) collapse(2) nowait
 
-                for(int wcr = 0; wcr < numtiles_W; wcr++) {
-                    for(int hcr = 0; hcr < numtiles_H; hcr++) {
+                for (int wcr = 0; wcr < numtiles_W; wcr++) {
+                    for (int hcr = 0; hcr < numtiles_H; hcr++) {
                         int beg_tileW = wcr * tileWskip + tileWskip / 2.f - crW / 2.f;
                         int beg_tileH = hcr * tileHskip + tileHskip / 2.f - crH / 2.f;
                         PreviewProps ppP (beg_tileW , beg_tileH, crW, crH, skipP);
                         imgsrc->getImage (currWB, tr, origCropPart, ppP, params.toneCurve, params.icm, params.raw );
 
                         // we only need image reduced to 1/4 here
-                        for(int ii = 0; ii < crH; ii += 2) {
-                            for(int jj = 0; jj < crW; jj += 2) {
-                                provicalc->r(ii >> 1, jj >> 1) = origCropPart->r(ii, jj);
-                                provicalc->g(ii >> 1, jj >> 1) = origCropPart->g(ii, jj);
-                                provicalc->b(ii >> 1, jj >> 1) = origCropPart->b(ii, jj);
+                        for (int ii = 0; ii < crH; ii += 2) {
+                            for (int jj = 0; jj < crW; jj += 2) {
+                                provicalc->r (ii >> 1, jj >> 1) = origCropPart->r (ii, jj);
+                                provicalc->g (ii >> 1, jj >> 1) = origCropPart->g (ii, jj);
+                                provicalc->b (ii >> 1, jj >> 1) = origCropPart->b (ii, jj);
                             }
                         }
 
-                        imgsrc->convertColorSpace(provicalc, params.icm, currWB);//for denoise luminance curve
+                        imgsrc->convertColorSpace (provicalc, params.icm, currWB); //for denoise luminance curve
                         float maxr = 0.f;
                         float maxb = 0.f;
                         float pondcorrec = 1.0f;
-                        float chaut, redaut, blueaut, maxredaut, maxblueaut, minredaut, minblueaut, chromina, sigma, lumema, sigma_L, redyel, skinc, nsknc;
+                        float chaut, redaut, blueaut, maxredaut, maxblueaut, minredaut, minblueaut, nresi, highresi, chromina, sigma, lumema, sigma_L, redyel, skinc, nsknc;
+
+//                       float chaut, redaut, blueaut, maxredaut, maxblueaut, minredaut, minblueaut, chromina, sigma, lumema, sigma_L, redyel, skinc, nsknc;
                         int Nb;
                         chaut = 0.f;
                         redaut = 0.f;
@@ -282,7 +286,10 @@ IImage16* processImage (ProcessingJob* pjob, int& errorCode, ProgressListener* p
                         maxblueaut = 0.f;
                         chromina = 0.f;
                         sigma = 0.f;
-                        ipf.RGB_denoise_info(origCropPart, provicalc, imgsrc->isRAW(), gamcurve, gam, gamthresh, gamslope, params.dirpyrDenoise, imgsrc->getDirPyrDenoiseExpComp(), chaut, Nb, redaut, blueaut, maxredaut, maxblueaut, minredaut, minblueaut, chromina, sigma, lumema, sigma_L, redyel, skinc, nsknc);
+                        ipf.RGB_denoise_info (origCropPart, provicalc, imgsrc->isRAW(), gamcurve, gam, gamthresh, gamslope, params.dirpyrDenoise, imgsrc->getDirPyrDenoiseExpComp(), chaut, Nb, redaut, blueaut, maxredaut, maxblueaut, minredaut, minblueaut, nresi, highresi, chromina, sigma, lumema, sigma_L, redyel, skinc, nsknc);
+//                       ipf.RGB_denoise_info(origCropPart, provicalc, imgsrc->isRAW(), gamcurve, gam, gamthresh, gamslope, params.dirpyrDenoise, imgsrc->getDirPyrDenoiseExpComp(), chaut, Nb, redaut, blueaut, maxredaut, maxblueaut, minredaut, minblueaut, nresi, highresi, chromina, sigma, lumema, sigma_L, redyel, skinc, nsknc);
+
+                        //     ipf.RGB_denoise_info(origCropPart, provicalc, imgsrc->isRAW(), gamcurve, gam, gamthresh, gamslope, params.dirpyrDenoise, imgsrc->getDirPyrDenoiseExpComp(), chaut, Nb, redaut, blueaut, maxredaut, maxblueaut, minredaut, minblueaut, chromina, sigma, lumema, sigma_L, redyel, skinc, nsknc);
                         float multip = 1.f;
                         float adjustr = 1.f;
 
@@ -304,27 +311,27 @@ IImage16* processImage (ProcessingJob* pjob, int& errorCode, ProgressListener* p
                             adjustr = 1.f / 1.2f;
                         }
 
-                        if(!imgsrc->isRAW()) {
+                        if (!imgsrc->isRAW()) {
                             multip = 2.f;    //take into account gamma for TIF / JPG approximate value...not good fot gamma=1
                         }
 
-                        float maxmax = max(maxredaut, maxblueaut);
+                        float maxmax = max (maxredaut, maxblueaut);
                         float delta;
                         int mode = 2;
                         int lissage = settings->leveldnliss;
                         ipf.calcautodn_info (chaut, delta, Nb, levaut, maxmax, lumema, chromina, mode, lissage, redyel, skinc, nsknc);
 
                         //    printf("PROCESS cha=%f red=%f bl=%f redM=%f bluM=%f chrom=%f sigm=%f lum=%f sigL=%f\n",chaut,redaut,blueaut, maxredaut, maxblueaut, chromina, sigma, lumema, sigma_L);
-                        if(maxredaut > maxblueaut) {
+                        if (maxredaut > maxblueaut) {
                             maxr = (delta) / ((autoNRmax * multip * adjustr * lowdenoise) / 2.f);
 
-                            if(minblueaut <= minredaut  && minblueaut < chaut) {
+                            if (minblueaut <= minredaut  && minblueaut < chaut) {
                                 maxb = (-chaut + minblueaut) / (autoNRmax * multip * adjustr * lowdenoise);
                             }
                         } else {
                             maxb = (delta) / ((autoNRmax * multip * adjustr * lowdenoise) / 2.f);
 
-                            if(minredaut <= minblueaut  && minredaut < chaut) {
+                            if (minredaut <= minblueaut  && minredaut < chaut) {
                                 maxr = (-chaut + minredaut) / (autoNRmax * multip * adjustr * lowdenoise);
                             }
                         }//maxb mxr - empirical evaluation red / blue
@@ -347,45 +354,45 @@ IImage16* processImage (ProcessingJob* pjob, int& errorCode, ProgressListener* p
 
             int liss = settings->leveldnliss; //smooth result around mean
 
-            if(liss == 2 || liss == 3) {
+            if (liss == 2 || liss == 3) {
                 // I smooth only mean and not delta (max)
                 float nchm = 0.f;
                 float koef = 0.4f; //between 0.1 to 0.9
 
-                if(liss == 3) {
+                if (liss == 3) {
                     koef = 0.0f;    //quasi auto for mean Ch
                 }
 
-                for(int wcr = 0; wcr < numtiles_W; wcr++) {
-                    for(int hcr = 0; hcr < numtiles_H; hcr++) {
+                for (int wcr = 0; wcr < numtiles_W; wcr++) {
+                    for (int hcr = 0; hcr < numtiles_H; hcr++) {
                         nchm += ch_M[hcr * numtiles_W + wcr];
                     }
                 }
 
                 nchm /= (numtiles_H * numtiles_W);
 
-                for(int wcr = 0; wcr < numtiles_W; wcr++) {
-                    for(int hcr = 0; hcr < numtiles_H; hcr++) {
+                for (int wcr = 0; wcr < numtiles_W; wcr++) {
+                    for (int hcr = 0; hcr < numtiles_H; hcr++) {
                         ch_M[hcr * numtiles_W + wcr] = nchm + (ch_M[hcr * numtiles_W + wcr] - nchm) * koef;
                     }
                 }
             }
 
-            if(liss == 3) { //same as auto but with much cells
+            if (liss == 3) { //same as auto but with much cells
                 float MaxR = 0.f;
                 float MaxB = 0.f;
                 float MaxRMoy = 0.f;
                 float MaxBMoy = 0.f;
 
-                for(int k = 0; k < nbtl; k++) {
+                for (int k = 0; k < nbtl; k++) {
                     MaxBMoy += max_b[k];
                     MaxRMoy += max_r[k];
 
-                    if(max_r[k] > MaxR) {
+                    if (max_r[k] > MaxR) {
                         MaxR = max_r[k];
                     }
 
-                    if(max_b[k] > MaxB) {
+                    if (max_b[k] > MaxB) {
                         MaxB = max_b[k];
                     }
 
@@ -394,8 +401,8 @@ IImage16* processImage (ProcessingJob* pjob, int& errorCode, ProgressListener* p
                 MaxBMoy /= nbtl;
                 MaxRMoy /= nbtl;
 
-                for(int k = 0; k < nbtl; k++) {
-                    if(MaxR > MaxB) {
+                for (int k = 0; k < nbtl; k++) {
+                    if (MaxR > MaxB) {
                         max_r[k] = MaxRMoy + (MaxR - MaxRMoy) * 0.66f; //#std Dev
                         //max_b[k]=MinB;
                         max_b[k] = MaxBMoy + (MaxB - MaxBMoy) * 0.66f;
@@ -411,35 +418,35 @@ IImage16* processImage (ProcessingJob* pjob, int& errorCode, ProgressListener* p
 
             if (settings->verbose) {
                 t2pone.set();
-                printf("Info denoise ponderated performed in %d usec:\n", t2pone.etime(t1pone));
+                printf ("Info denoise ponderated performed in %d usec:\n", t2pone.etime (t1pone));
             }
 
         }
     }
 
 
-    if((settings->leveldnautsimpl == 1 && params.dirpyrDenoise.Cmethod == "AUT")  || (settings->leveldnautsimpl == 0 && params.dirpyrDenoise.C2method == "AUTO")) {
+    if ((settings->leveldnautsimpl == 1 && params.dirpyrDenoise.Cmethod == "AUT")  || (settings->leveldnautsimpl == 0 && params.dirpyrDenoise.C2method == "AUTO")) {
         MyTime t1aue, t2aue;
         t1aue.set();
         int crW, crH;
 
-        if(settings->leveldnv == 0) {
+        if (settings->leveldnv == 0) {
             crW = 100;
             crH = 100;
         }
 
-        if(settings->leveldnv == 1) {
+        if (settings->leveldnv == 1) {
             crW = 250;
             crH = 250;
         }
 
-        if(settings->leveldnv == 2) {
-            crW = int(tileWskip / 2);
-            crH = int(tileHskip / 2);
+        if (settings->leveldnv == 2) {
+            crW = int (tileWskip / 2);
+            crH = int (tileHskip / 2);
         }
 
         //  if(settings->leveldnv ==2) {crW=int(tileWskip/2);crH=int(1.15f*(tileWskip/2));}//adapted to scale of preview
-        if(settings->leveldnv == 3) {
+        if (settings->leveldnv == 3) {
             crW = tileWskip - 10;
             crH = tileHskip - 10;
         }
@@ -447,14 +454,14 @@ IImage16* processImage (ProcessingJob* pjob, int& errorCode, ProgressListener* p
         float lowdenoise = 1.f;
         int levaut = settings->leveldnaut;
 
-        if(levaut == 1) { //Standard
+        if (levaut == 1) { //Standard
             lowdenoise = 0.7f;
         }
 
         if (params.dirpyrDenoise.enabled) {//evaluate Noise
-            LUTf gamcurve(65536, 0);
+            LUTf gamcurve (65536, 0);
             float gam, gamthresh, gamslope;
-            ipf.RGB_denoise_infoGamCurve(params.dirpyrDenoise, imgsrc->isRAW(), gamcurve, gam, gamthresh, gamslope);
+            ipf.RGB_denoise_infoGamCurve (params.dirpyrDenoise, imgsrc->isRAW(), gamcurve, gam, gamthresh, gamslope);
             int Nb[9];
             int  coordW[3];//coordonate of part of image to mesure noise
             int  coordH[3];
@@ -474,24 +481,27 @@ IImage16* processImage (ProcessingJob* pjob, int& errorCode, ProgressListener* p
 
                 #pragma omp for schedule(dynamic) collapse(2) nowait
 
-                for(int wcr = 0; wcr <= 2; wcr++) {
-                    for(int hcr = 0; hcr <= 2; hcr++) {
+                for (int wcr = 0; wcr <= 2; wcr++) {
+                    for (int hcr = 0; hcr <= 2; hcr++) {
                         PreviewProps ppP (coordW[wcr] , coordH[hcr], crW, crH, 1);
                         imgsrc->getImage (currWB, tr, origCropPart, ppP, params.toneCurve, params.icm, params.raw);
 
                         // we only need image reduced to 1/4 here
-                        for(int ii = 0; ii < crH; ii += 2) {
-                            for(int jj = 0; jj < crW; jj += 2) {
-                                provicalc->r(ii >> 1, jj >> 1) = origCropPart->r(ii, jj);
-                                provicalc->g(ii >> 1, jj >> 1) = origCropPart->g(ii, jj);
-                                provicalc->b(ii >> 1, jj >> 1) = origCropPart->b(ii, jj);
+                        for (int ii = 0; ii < crH; ii += 2) {
+                            for (int jj = 0; jj < crW; jj += 2) {
+                                provicalc->r (ii >> 1, jj >> 1) = origCropPart->r (ii, jj);
+                                provicalc->g (ii >> 1, jj >> 1) = origCropPart->g (ii, jj);
+                                provicalc->b (ii >> 1, jj >> 1) = origCropPart->b (ii, jj);
                             }
                         }
 
-                        imgsrc->convertColorSpace(provicalc, params.icm, currWB);//for denoise luminance curve
+                        imgsrc->convertColorSpace (provicalc, params.icm, currWB); //for denoise luminance curve
                         int nb = 0;
-                        float chaut = 0.f, redaut = 0.f, blueaut = 0.f, maxredaut = 0.f, maxblueaut = 0.f, minredaut = 0.f, minblueaut = 0.f, chromina = 0.f, sigma = 0.f, lumema = 0.f, sigma_L = 0.f, redyel = 0.f, skinc = 0.f, nsknc = 0.f;
-                        ipf.RGB_denoise_info(origCropPart, provicalc, imgsrc->isRAW(), gamcurve, gam, gamthresh, gamslope,  params.dirpyrDenoise, imgsrc->getDirPyrDenoiseExpComp(), chaut, nb, redaut, blueaut, maxredaut, maxblueaut, minredaut, minblueaut, chromina, sigma, lumema, sigma_L, redyel, skinc, nsknc);
+                        float chaut = 0.f, redaut = 0.f, blueaut = 0.f, maxredaut = 0.f, maxblueaut = 0.f, minredaut = 0.f, minblueaut = 0.f, nresi = 0.f, highresi = 0.f, chromina = 0.f, sigma = 0.f, lumema = 0.f, sigma_L = 0.f, redyel = 0.f, skinc = 0.f, nsknc = 0.f;
+
+                        ipf.RGB_denoise_info (origCropPart, provicalc, imgsrc->isRAW(), gamcurve, gam, gamthresh, gamslope,  params.dirpyrDenoise, imgsrc->getDirPyrDenoiseExpComp(), chaut, nb, redaut, blueaut, maxredaut, maxblueaut, minredaut, minblueaut, nresi, highresi, chromina, sigma, lumema, sigma_L, redyel, skinc, nsknc);
+
+                        //    ipf.RGB_denoise_info(origCropPart, provicalc, imgsrc->isRAW(), gamcurve, gam, gamthresh, gamslope,  params.dirpyrDenoise, imgsrc->getDirPyrDenoiseExpComp(), chaut, nb, redaut, blueaut, maxredaut, maxblueaut, minredaut, minblueaut, chromina, sigma, lumema, sigma_L, redyel, skinc, nsknc);
                         Nb[hcr * 3 + wcr] = nb;
                         ch_M[hcr * 3 + wcr] = chaut;
                         max_r[hcr * 3 + wcr] = maxredaut;
@@ -545,7 +555,7 @@ IImage16* processImage (ProcessingJob* pjob, int& errorCode, ProgressListener* p
                 adjustr = 1.f / 1.2f;
             }
 
-            if(!imgsrc->isRAW()) {
+            if (!imgsrc->isRAW()) {
                 multip = 2.f;    //take into account gamma for TIF / JPG approximate value...not good fot gamma=1
             }
 
@@ -553,17 +563,17 @@ IImage16* processImage (ProcessingJob* pjob, int& errorCode, ProgressListener* p
             int mode = 1;
             int lissage = settings->leveldnliss;
 
-            for(int k = 0; k < 9; k++) {
-                float maxmax = max(max_r[k], max_b[k]);
+            for (int k = 0; k < 9; k++) {
+                float maxmax = max (max_r[k], max_b[k]);
                 ipf.calcautodn_info (ch_M[k], delta[k], Nb[k], levaut, maxmax, lumL[k], chromC[k], mode, lissage, ry[k], sk[k], pcsk[k] );
                 //  printf("ch_M=%f delta=%f\n",ch_M[k], delta[k]);
             }
 
-            for(int k = 0; k < 9; k++) {
-                if(max_r[k] > max_b[k]) {
+            for (int k = 0; k < 9; k++) {
+                if (max_r[k] > max_b[k]) {
                     //printf("R delta=%f  koef=%f\n",delta[k],autoNRmax*multip*adjustr*lowdenoise);
                     Max_R[k] = (delta[k]) / ((autoNRmax * multip * adjustr * lowdenoise) / 2.f);
-                    Min_B[k] = -(ch_M[k] - min_b[k]) / (autoNRmax * multip * adjustr * lowdenoise);
+                    Min_B[k] = - (ch_M[k] - min_b[k]) / (autoNRmax * multip * adjustr * lowdenoise);
                     Max_B[k] = 0.f;
                     Min_R[k] = 0.f;
                 } else {
@@ -575,7 +585,7 @@ IImage16* processImage (ProcessingJob* pjob, int& errorCode, ProgressListener* p
                 }
             }
 
-            for(int k = 0; k < 9; k++) {
+            for (int k = 0; k < 9; k++) {
                 //  printf("ch_M= %f Max_R=%f Max_B=%f min_r=%f min_b=%f\n",ch_M[k],Max_R[k], Max_B[k],Min_R[k], Min_B[k]);
                 chM += ch_M[k];
                 MaxBMoy += Max_B[k];
@@ -583,19 +593,19 @@ IImage16* processImage (ProcessingJob* pjob, int& errorCode, ProgressListener* p
                 MinRMoy += Min_R[k];
                 MinBMoy += Min_B[k];
 
-                if(Max_R[k] > MaxR) {
+                if (Max_R[k] > MaxR) {
                     MaxR = Max_R[k];
                 }
 
-                if(Max_B[k] > MaxB) {
+                if (Max_B[k] > MaxB) {
                     MaxB = Max_B[k];
                 }
 
-                if(Min_R[k] < MinR) {
+                if (Min_R[k] < MinR) {
                     MinR = Min_R[k];
                 }
 
-                if(Min_B[k] < MinB) {
+                if (Min_B[k] < MinB) {
                     MinB = Min_B[k];
                 }
 
@@ -607,7 +617,7 @@ IImage16* processImage (ProcessingJob* pjob, int& errorCode, ProgressListener* p
             MinBMoy /= 9;
             MinRMoy /= 9;
 
-            if(MaxR > MaxB) {
+            if (MaxR > MaxB) {
                 maxr = MaxRMoy + (MaxR - MaxRMoy) * 0.66f; //#std Dev
                 //  maxb=MinB;
                 maxb = MinBMoy + (MinB - MinBMoy) * 0.66f;
@@ -628,7 +638,7 @@ IImage16* processImage (ProcessingJob* pjob, int& errorCode, ProgressListener* p
 
         if (settings->verbose) {
             t2aue.set();
-            printf("Info denoise auto performed in %d usec:\n", t2aue.etime(t1aue));
+            printf ("Info denoise auto performed in %d usec:\n", t2aue.etime (t1aue));
         }
 
         //end evaluate noise
@@ -664,7 +674,7 @@ IImage16* processImage (ProcessingJob* pjob, int& errorCode, ProgressListener* p
     // at this stage, we can flush the raw data to free up quite an important amount of memory
     // commented out because it makes the application crash when batch processing...
     // TODO: find a better place to flush rawData and rawRGB
-    if(flush) {
+    if (flush) {
         imgsrc->flushRawData();
         imgsrc->flushRGB();
     }
@@ -679,13 +689,13 @@ IImage16* processImage (ProcessingJob* pjob, int& errorCode, ProgressListener* p
 
     DirPyrDenoiseParams denoiseParams = params.dirpyrDenoise;   // make a copy because we cheat here
 
-    if(denoiseParams.Lmethod == "CUR") {
-        if(noiseLCurve) {
+    if (denoiseParams.Lmethod == "CUR") {
+        if (noiseLCurve) {
             denoiseParams.luma = 0.5f;
         } else {
             denoiseParams.luma = 0.0f;
         }
-    } else if(denoiseParams.Lmethod == "SLI") {
+    } else if (denoiseParams.Lmethod == "SLI") {
         noiseLCurve.Reset();
     }
 
@@ -694,15 +704,15 @@ IImage16* processImage (ProcessingJob* pjob, int& errorCode, ProgressListener* p
         calclum = new Imagefloat ((fw + 1) / 2, (fh + 1) / 2); //for luminance denoise curve
         #pragma omp parallel for
 
-        for(int ii = 0; ii < fh; ii += 2) {
-            for(int jj = 0; jj < fw; jj += 2) {
-                calclum->r(ii >> 1, jj >> 1) = baseImg->r(ii, jj);
-                calclum->g(ii >> 1, jj >> 1) = baseImg->g(ii, jj);
-                calclum->b(ii >> 1, jj >> 1) = baseImg->b(ii, jj);
+        for (int ii = 0; ii < fh; ii += 2) {
+            for (int jj = 0; jj < fw; jj += 2) {
+                calclum->r (ii >> 1, jj >> 1) = baseImg->r (ii, jj);
+                calclum->g (ii >> 1, jj >> 1) = baseImg->g (ii, jj);
+                calclum->b (ii >> 1, jj >> 1) = baseImg->b (ii, jj);
             }
         }
 
-        imgsrc->convertColorSpace(calclum, params.icm, currWB);
+        imgsrc->convertColorSpace (calclum, params.icm, currWB);
     }
 
     if (denoiseParams.enabled) {
@@ -711,7 +721,7 @@ IImage16* processImage (ProcessingJob* pjob, int& errorCode, ProgressListener* p
 //      ipf.RGB_denoise(baseImg, baseImg, calclum, imgsrc->isRAW(), denoiseParams, params.defringe, imgsrc->getDirPyrDenoiseExpComp(), noiseLCurve, lldenoiseutili);
         float chaut, redaut, blueaut, maxredaut, maxblueaut, nresi, highresi;
         int kall = 2;
-        ipf.RGB_denoise(kall, baseImg, baseImg, calclum, ch_M, max_r, max_b, imgsrc->isRAW(), denoiseParams, imgsrc->getDirPyrDenoiseExpComp(), noiseLCurve, noiseCCurve, chaut, redaut, blueaut, maxredaut, maxblueaut, nresi, highresi);
+        ipf.RGB_denoise (kall, baseImg, baseImg, calclum, ch_M, max_r, max_b, imgsrc->isRAW(), denoiseParams, imgsrc->getDirPyrDenoiseExpComp(), noiseLCurve, noiseCCurve, chaut, redaut, blueaut, maxredaut, maxblueaut, nresi, highresi);
 
     }
 
@@ -727,7 +737,7 @@ IImage16* processImage (ProcessingJob* pjob, int& errorCode, ProgressListener* p
     delete [] sk;
     delete [] pcsk;
 
-    imgsrc->convertColorSpace(baseImg, params.icm, currWB);
+    imgsrc->convertColorSpace (baseImg, params.icm, currWB);
 
     // perform first analysis
     LUTu hist16 (65536);
@@ -747,10 +757,10 @@ IImage16* processImage (ProcessingJob* pjob, int& errorCode, ProgressListener* p
     if (params.dirpyrequalizer.cbdlMethod == "bef" && params.dirpyrequalizer.enabled && !params.colorappearance.enabled) {
         const int W = baseImg->getWidth();
         const int H = baseImg->getHeight();
-        LabImage labcbdl(W, H);
-        ipf.rgb2lab(*baseImg, labcbdl, params.icm.working);
+        LabImage labcbdl (W, H);
+        ipf.rgb2lab (*baseImg, labcbdl, params.icm.working);
         ipf.dirpyrequalizer (&labcbdl, 1);
-        ipf.lab2rgb(labcbdl, *baseImg, params.icm.working);
+        ipf.lab2rgb (labcbdl, *baseImg, params.icm.working);
     }
 
     // update blurmap
@@ -758,7 +768,7 @@ IImage16* processImage (ProcessingJob* pjob, int& errorCode, ProgressListener* p
 
     if (params.sh.enabled) {
         shmap = new SHMap (fw, fh, true);
-        double radius = sqrt (double(fw * fw + fh * fh)) / 2.0;
+        double radius = sqrt (double (fw * fw + fh * fh)) / 2.0;
         double shradius = params.sh.radius;
 
         if (!params.sh.hq) {
@@ -775,7 +785,7 @@ IImage16* processImage (ProcessingJob* pjob, int& errorCode, ProgressListener* p
     LUTf curve (65536, 0);
     LUTf satcurve (65536, 0);
     LUTf lhskcurve (65536, 0);
-    LUTf lumacurve(32770, 0); // lumacurve[32768] and lumacurve[32769] will be set to 32768 and 32769 later to allow linear interpolation
+    LUTf lumacurve (32770, 0); // lumacurve[32768] and lumacurve[32769] will be set to 32768 and 32769 later to allow linear interpolation
     LUTf clcurve (65536, 0);
     LUTf clToningcurve;
     LUTf cl2Toningcurve;
@@ -804,7 +814,7 @@ IImage16* processImage (ProcessingJob* pjob, int& errorCode, ProgressListener* p
 
     bool opautili = false;
 
-    if(params.colorToning.enabled) {
+    if (params.colorToning.enabled) {
         TMatrix wprof = iccStore->workingSpaceMatrix (params.icm.working);
         double wp[3][3] = {
             {wprof[0][0], wprof[0][1], wprof[0][2]},
@@ -817,35 +827,35 @@ IImage16* processImage (ProcessingJob* pjob, int& errorCode, ProgressListener* p
             {wiprof[1][0], wiprof[1][1], wiprof[1][2]},
             {wiprof[2][0], wiprof[2][1], wiprof[2][2]}
         };
-        params.colorToning.getCurves(ctColorCurve, ctOpacityCurve, wp, wip, opautili);
+        params.colorToning.getCurves (ctColorCurve, ctOpacityCurve, wp, wip, opautili);
         clToningcurve (65536, 0);
-        CurveFactory::curveToning(params.colorToning.clcurve, clToningcurve, 1);
+        CurveFactory::curveToning (params.colorToning.clcurve, clToningcurve, 1);
         cl2Toningcurve (65536, 0);
-        CurveFactory::curveToning(params.colorToning.cl2curve, cl2Toningcurve, 1);
+        CurveFactory::curveToning (params.colorToning.cl2curve, cl2Toningcurve, 1);
     }
 
     LabImage* labView = new LabImage (fw, fh);
 
-    if(params.blackwhite.enabled) {
+    if (params.blackwhite.enabled) {
         CurveFactory::curveBW (params.blackwhite.beforeCurve, params.blackwhite.afterCurve, hist16, dummy, customToneCurvebw1, customToneCurvebw2, 1);
     }
 
     double rrm, ggm, bbm;
     float autor, autog, autob;
-    float satLimit = float(params.colorToning.satProtectionThreshold) / 100.f * 0.7f + 0.3f;
-    float satLimitOpacity = 1.f - (float(params.colorToning.saturatedOpacity) / 100.f);
+    float satLimit = float (params.colorToning.satProtectionThreshold) / 100.f * 0.7f + 0.3f;
+    float satLimitOpacity = 1.f - (float (params.colorToning.saturatedOpacity) / 100.f);
 
-    if(params.colorToning.enabled  && params.colorToning.autosat) { //for colortoning evaluation of saturation settings
+    if (params.colorToning.enabled  && params.colorToning.autosat) { //for colortoning evaluation of saturation settings
         float moyS = 0.f;
         float eqty = 0.f;
         ipf.moyeqt (baseImg, moyS, eqty);//return image : mean saturation and standard dev of saturation
         float satp = ((moyS + 1.5f * eqty) - 0.3f) / 0.7f; //1.5 sigma ==> 93% pixels with high saturation -0.3 / 0.7 convert to Hombre scale
 
-        if(satp >= 0.92f) {
+        if (satp >= 0.92f) {
             satp = 0.92f;    //avoid values too high (out of gamut)
         }
 
-        if(satp <= 0.15f) {
+        if (satp <= 0.15f) {
             satp = 0.15f;    //avoid too low values
         }
 
@@ -856,14 +866,14 @@ IImage16* processImage (ProcessingJob* pjob, int& errorCode, ProgressListener* p
 
     autor = -9000.f; // This will ask to compute the "auto" values for the B&W tool (have to be inferior to -5000)
     DCPProfile::ApplyState as;
-    DCPProfile *dcpProf = imgsrc->getDCP(params.icm, currWB, as);
+    DCPProfile *dcpProf = imgsrc->getDCP (params.icm, currWB, as);
 
     LUTu histToneCurve;
 
     ipf.rgbProc (baseImg, labView, nullptr, curve1, curve2, curve, shmap, params.toneCurve.saturation, rCurve, gCurve, bCurve, satLimit , satLimitOpacity, ctColorCurve, ctOpacityCurve, opautili, clToningcurve, cl2Toningcurve, customToneCurve1, customToneCurve2, customToneCurvebw1, customToneCurvebw2, rrm, ggm, bbm, autor, autog, autob, expcomp, hlcompr, hlcomprthresh, dcpProf, as, histToneCurve);
 
     if (settings->verbose) {
-        printf("Output image / Auto B&W coefs:   R=%.2f   G=%.2f   B=%.2f\n", autor, autog, autob);
+        printf ("Output image / Auto B&W coefs:   R=%.2f   G=%.2f   B=%.2f\n", autor, autog, autob);
     }
 
     // if clut was used and size of clut cache == 1 we free the memory used by the clutstore (default clut cache size = 1 for 32 bit OS)
@@ -900,7 +910,7 @@ IImage16* processImage (ProcessingJob* pjob, int& errorCode, ProgressListener* p
     // start tile processing...???
 
 
-    if(params.labCurve.contrast != 0) { //only use hist16 for contrast
+    if (params.labCurve.contrast != 0) { //only use hist16 for contrast
         hist16.clear();
 
 #ifdef _OPENMP
@@ -915,7 +925,7 @@ IImage16* processImage (ProcessingJob* pjob, int& errorCode, ProgressListener* p
 
             for (int i = 0; i < fh; i++)
                 for (int j = 0; j < fw; j++) {
-                    hist16thr[(int)((labView->L[i][j]))]++;
+                    hist16thr[ (int) ((labView->L[i][j]))]++;
                 }
 
             #pragma omp critical
@@ -929,7 +939,7 @@ IImage16* processImage (ProcessingJob* pjob, int& errorCode, ProgressListener* p
     CurveFactory::complexLCurve (params.labCurve.brightness, params.labCurve.contrast, params.labCurve.lcurve, hist16, lumacurve, dummy, 1, utili);
 
     bool clcutili;
-    CurveFactory::curveCL(clcutili, params.labCurve.clcurve, clcurve, 1);
+    CurveFactory::curveCL (clcutili, params.labCurve.clcurve, clcurve, 1);
 
     bool autili, butili, ccutili, cclutili;
     CurveFactory::complexsgnCurve (autili, butili, ccutili, cclutili, params.labCurve.acurve, params.labCurve.bcurve, params.labCurve.cccurve,
@@ -937,34 +947,34 @@ IImage16* processImage (ProcessingJob* pjob, int& errorCode, ProgressListener* p
 
     ipf.chromiLuminanceCurve (nullptr, 1, labView, labView, curve1, curve2, satcurve, lhskcurve, clcurve, lumacurve, utili, autili, butili, ccutili, cclutili, clcutili, dummy, dummy);
 
-    if((params.colorappearance.enabled && !params.colorappearance.tonecie) || (!params.colorappearance.enabled)) {
-        ipf.EPDToneMap(labView, 5, 1);
+    if ((params.colorappearance.enabled && !params.colorappearance.tonecie) || (!params.colorappearance.enabled)) {
+        ipf.EPDToneMap (labView, 5, 1);
     }
 
 
-    ipf.vibrance(labView);
+    ipf.vibrance (labView);
 
-    if((params.colorappearance.enabled && !settings->autocielab) || (!params.colorappearance.enabled)) {
+    if ((params.colorappearance.enabled && !settings->autocielab) || (!params.colorappearance.enabled)) {
         ipf.impulsedenoise (labView);
     }
 
     // for all treatments Defringe, Sharpening, Contrast detail ,Microcontrast they are activated if "CIECAM" function are disabled
 
-    if((params.colorappearance.enabled && !settings->autocielab) || (!params.colorappearance.enabled)) {
+    if ((params.colorappearance.enabled && !settings->autocielab) || (!params.colorappearance.enabled)) {
         ipf.defringe (labView);
     }
 
     if (params.sharpenEdge.enabled) {
-        ipf.MLsharpen(labView);
+        ipf.MLsharpen (labView);
     }
 
     if (params.sharpenMicro.enabled) {
-        if((params.colorappearance.enabled && !settings->autocielab) ||  (!params.colorappearance.enabled)) {
+        if ((params.colorappearance.enabled && !settings->autocielab) ||  (!params.colorappearance.enabled)) {
             ipf.MLmicrocontrast (labView);    //!params.colorappearance.sharpcie
         }
     }
 
-    if(((params.colorappearance.enabled && !settings->autocielab) || (!params.colorappearance.enabled)) && params.sharpening.enabled) {
+    if (((params.colorappearance.enabled && !settings->autocielab) || (!params.colorappearance.enabled)) && params.sharpening.enabled) {
 
         float **buffer = new float*[fh];
 
@@ -981,29 +991,438 @@ IImage16* processImage (ProcessingJob* pjob, int& errorCode, ProgressListener* p
         delete [] buffer;
     }
 
+
+    //end threatment datas Lab for merge
+
+
     WaveletParams WaveParams = params.wavelet;
     WavCurve wavCLVCurve;
+    WavretiCurve wavRETCurve;
+    WavretigainCurve wavRETgainCurve;
+    WavmergCurve wavMERCurve;
+    Wavmerg2Curve wavMER2Curve;
+    WavstyCurve wavSTYCurve;
+    Wavsty2Curve wavSTY2Curve;
     WavOpacityCurveRG waOpacityCurveRG;
     WavOpacityCurveBY waOpacityCurveBY;
     WavOpacityCurveW waOpacityCurveW;
     WavOpacityCurveWL waOpacityCurveWL;
 
-    params.wavelet.getCurves(wavCLVCurve, waOpacityCurveRG, waOpacityCurveBY, waOpacityCurveW, waOpacityCurveWL );
+    params.wavelet.getCurves (wavCLVCurve, wavRETCurve, wavRETgainCurve, wavMERCurve, wavMER2Curve, wavSTYCurve, wavSTY2Curve, waOpacityCurveRG, waOpacityCurveBY, waOpacityCurveW, waOpacityCurveWL);
 
 
     // directional pyramid wavelet
-    if(params.dirpyrequalizer.cbdlMethod == "aft") {
-        if((params.colorappearance.enabled && !settings->autocielab)  || !params.colorappearance.enabled) {
+    if (params.dirpyrequalizer.cbdlMethod == "aft") {
+        if ((params.colorappearance.enabled && !settings->autocielab)  || !params.colorappearance.enabled) {
             ipf.dirpyrequalizer (labView, 1);    //TODO: this is the luminance tonecurve, not the RGB one
         }
     }
 
+    int kall = 2;
     bool wavcontlutili = false;
 
-    CurveFactory::curveWavContL(wavcontlutili, params.wavelet.wavclCurve, wavclCurve,/* hist16C, dummy,*/ 1);
+    CurveFactory::curveWavContL (wavcontlutili, params.wavelet.wavclCurve, wavclCurve,/* hist16C, dummy,*/ 1);
 
-    if(params.wavelet.enabled) {
-        ipf.ip_wavelet(labView, labView, 2, WaveParams, wavCLVCurve, waOpacityCurveRG, waOpacityCurveBY, waOpacityCurveW,  waOpacityCurveWL, wavclCurve, wavcontlutili, 1);
+//   if(params.wavelet.enabled) {
+    //      ipf.ip_wavelet(labView, labView, 2, WaveParams, wavCLVCurve, waOpacityCurveRG, waOpacityCurveBY, waOpacityCurveW,  waOpacityCurveWL, wavclCurve, wavcontlutili, 1);
+    //merge images
+    LabImage * mergelabpart;
+    LabImage * mergelab;
+    LabImage * cropmergelab;
+    int pos;
+    float maxx;
+    struct E {
+        int W, H, sk;
+    } e;
+    int disp = 0;
+    int newsizH, newsizW;
+    int Lwa, Hwa;
+    bool sav = (params.wavelet.mergMethod == "savwat" || params.wavelet.mergMethod == "savhdr" || params.wavelet.mergMethod == "savzero");
+    bool zero = (params.wavelet.mergMethod == "loadzero"  || params.wavelet.mergMethod == "loadzerohdr");
+    bool zerono = (params.wavelet.mergMethod != "loadzero"  && params.wavelet.mergMethod != "loadzerohdr");
+
+    if (params.wavelet.mergMethod == "load" || zero) {
+        sav = false;
+    }
+
+
+    if (params.wavelet.expmerge && sav == false) { //load Lab datas
+        bool toto = true;
+        bool merguez = false;
+        Glib::ustring  inpu;
+        inpu = params.wavelet.inpute;
+        printf ("fichier improc=%s\n", inpu.c_str());
+        inpu = inpu.substr (5);
+        ofstream fout;
+        ifstream fin;
+        pos = inpu.find ("mer");
+
+
+        if (pos > 2) {
+            fin.open (inpu.c_str(), ios::binary);
+            fin.read (reinterpret_cast<char *> (&e), sizeof (e));
+            //  printf("DW=%d DH=%d\n", e.W, e.H);
+            mergelabpart = new LabImage (e.W, e.H);
+            newsizH = e.H;
+            newsizW = e.W;
+
+            for (int ir = 0; ir < e.H; ir++)
+                for (int jr = 0; jr < e.W; jr++) {
+                    struct X {
+                        float L, a, b, ma;
+                    } x;
+                    fin.read (reinterpret_cast<char *> (&x), sizeof (x));
+                    mergelabpart->L[ir][jr] = x.L;
+                    mergelabpart->a[ir][jr] = x.a;
+                    mergelabpart->b[ir][jr] = x.b;
+                    maxx = x.ma;
+
+                }
+
+            //     printf("maxx=%f\n", maxx);
+            fin.close();
+
+            if (params.wavelet.mergMethod != "loadzerohdr"  || (params.wavelet.mergMethod == "loadzerohdr" && newsizW != fw)) {
+
+                mergelab = new LabImage (fw, fh);
+                float LT = 0.f;
+                float aT = 0.f;
+                float bT = 0.f;
+
+#ifdef _OPENMP
+                #pragma omp parallel for
+#endif
+
+                for (int ir = 0; ir < fh; ir++)
+                    for (int jr = 0; jr < fw; jr++) { //fill with color
+                        mergelab->L[ir][jr] = LT;
+                        mergelab->a[ir][jr] = aT;
+                        mergelab->b[ir][jr] = bT;
+
+                    }
+
+                //put  datas mergelab inside megelabtotal
+                float percenthig = (float) params.wavelet.balanhig;
+                float percentleft = (float) params.wavelet.balanleft;
+
+                if (zero) {
+                    percenthig = percentleft = 0.f;
+                }
+
+                Lwa = e.W;
+                Hwa = e.H;
+
+                if (Lwa > fw) {
+                    Lwa = fw;
+                }
+
+                if (Hwa > fh) {
+                    Hwa = fh;
+                }
+
+                int difwM = fw - Lwa;
+                int difw = (int) ((percentleft * difwM) / 100.f);
+                //  printf("widIM=%d eW=%d difwM=%d difw=%d\n",  widIm, e.W, difwM, difw);
+                int difhM = fh - Hwa;
+                int difh = (int) ((percenthig * difhM) / 100.f);
+#ifdef _OPENMP
+                #pragma omp parallel for
+#endif
+
+                for (int ir = difh ; ir < (difh + Hwa); ir++)
+                    for (int jr = difw ; jr < (difw + Lwa); jr++) { //
+                        mergelab->L[ir][jr] = mergelabpart->L[ir - difh][jr - difw];
+                        mergelab->a[ir][jr] = mergelabpart->a[ir - difh][jr - difw];
+                        mergelab->b[ir][jr] = mergelabpart->b[ir - difh][jr - difw];
+                    }
+
+            } else if (params.wavelet.mergMethod == "loadzerohdr" && newsizW == fw) {
+
+                mergelab = new LabImage (newsizW, newsizH);
+                float LT = 1000.f;
+                float aT = 0.f;
+                float bT = 0.f; //red
+                Lwa = newsizW;
+                Hwa = newsizH;
+#ifdef _OPENMP
+                #pragma omp parallel for
+#endif
+
+                for (int ir = 0; ir < (newsizH); ir++)
+                    for (int jr = 0; jr < (newsizW); jr++) { //fill with color
+                        mergelab->L[ir][jr] = LT;
+                        mergelab->a[ir][jr] = aT;
+                        mergelab->b[ir][jr] = bT;
+
+                    }
+
+                float percenthig = (float) params.wavelet.balanhig;
+                float percentleft = (float) params.wavelet.balanleft;
+                int maxshift = 10;
+
+                int deltawe = maxshift * (percentleft - 50.f) / 100.f; //if pcwe = 50  deltawe = 0 ; if pcwe = 100  deltawe = 2;if pcwe = 0  deltawe = -2
+                int deltahi = maxshift * (percenthig - 50.f) / 100.f;
+                int absw = abs (deltawe);
+                int absh = abs (deltahi);
+
+                for (int ir = absh; ir < (newsizH - absh); ir++)
+                    for (int jr = absw; jr < (newsizW - absw); jr++) { //new image
+                        mergelab->L[ir][jr] = mergelabpart->L[ir - deltahi][jr - deltawe];
+                        mergelab->a[ir][jr] = mergelabpart->a[ir - deltahi][jr - deltawe];
+                        mergelab->b[ir][jr] = mergelabpart->b[ir - deltahi][jr - deltawe];
+                    }
+
+            }
+
+
+
+            delete mergelabpart;
+
+        }
+    }
+
+//end load Lab datas for merge
+    if (params.wavelet.expmerge && sav == false) {
+
+        if (pos > 2) {
+            bool merguez = true;
+            cropmergelab = new LabImage (labView->W, labView->H);
+
+            if (merguez) { //merge images
+                disp = 0;
+
+                if (params.wavelet.mergevMethod == "first") {
+                    disp = 1;
+                }
+
+                if (params.wavelet.mergevMethod == "cuno") { //current image no merge
+                    disp = 2;
+                }
+
+                float highl = 32768.f * (float) (params.wavelet.blend) / 100.f;
+                float minhighl = 10000000.f;
+                int pi, pj;
+                float ref;
+
+                if (disp != 2) {
+#ifdef _OPENMP
+                    #pragma omp parallel for
+#endif
+
+                    for (int ir = 0; ir < (labView->H); ir++)
+                        for (int jr = 0; jr < (labView->W); jr++) {
+                            int irfull, jrfull;
+                            irfull = (ir) * 1;
+                            jrfull = (jr) * 1;
+                            irfull = LIM (irfull, 0, fh - 1);
+                            jrfull = LIM (jrfull, 0, fw - 1);
+
+                            cropmergelab->L[ir][jr] = mergelab->L[irfull][jrfull];
+                            cropmergelab->a[ir][jr] = mergelab->a[irfull][jrfull];
+                            cropmergelab->b[ir][jr] = mergelab->b[irfull][jrfull];
+
+                            if (disp == 1) {
+                                labView->L[ir][jr] = cropmergelab->L[ir][jr];    //merge 100%
+                                labView->a[ir][jr] = cropmergelab->a[ir][jr];    //merge 100%
+                                labView->b[ir][jr] = cropmergelab->b[ir][jr];    //merge 100%
+                            }
+
+                        }
+                }
+            }
+
+            delete mergelab;
+        }
+    }
+
+    int merge_two[6] = {0, 0, 0, 0, 0, 0};
+
+    int mtwo;
+
+    if ((params.wavelet.enabled)) {
+        LabImage *unshar;
+        Glib::ustring provis;
+        float minCD, maxCD, mini, maxi, Tmean, Tsigma, Tmin, Tmax;
+        float *****stylev;
+        LabImage *styres;
+        int stytype = 0;
+
+        if (params.wavelet.expmerge && params.wavelet.mergevMethod == "curr") { //merge datas for Watermark if not preview old datas
+
+            if (pos > 2) {
+
+                float m_L = (float) (WaveParams.blend / 100.f);
+                float m_C = (float) (WaveParams.blendc / 100.f);
+                float gra = WaveParams.grad / 150.f;
+
+                if (params.wavelet.mergBMethod == "hdr1" && wavMERCurve && zerono) {
+                    float Mlc;
+#ifdef _OPENMP
+                    #pragma omp parallel for
+#endif
+
+                    for (int x = 0; x < labView->H; x++)
+                        for (int y = 0; y < labView->W; y++) {
+                            Mlc = 1.4f * wavMERCurve[cropmergelab->L[x][y] / 65.f] - 0.5f;
+                            labView->L[x][y] =  Mlc * (cropmergelab->L[x][y]) + labView->L[x][y];
+                            labView->a[x][y] =  m_C * (cropmergelab->a[x][y]) + labView->a[x][y];
+                            labView->b[x][y] =  m_C * (cropmergelab->b[x][y]) + labView->b[x][y];
+                        }
+                }
+
+                if (params.wavelet.mergBMethod == "hdr2") {
+                    float Mlv;
+#ifdef _OPENMP
+                    #pragma omp parallel for
+#endif
+
+                    for (int x = 0; x < labView->H; x++)
+                        for (int y = 0; y < labView->W; y++) {
+                            Mlv = (m_L / 33000.f) * (gra - 1.f) * cropmergelab->L[x][y] + m_L;
+                            labView->L[x][y] =  Mlv * (cropmergelab->L[x][y]) + labView->L[x][y];
+                            labView->a[x][y] =  m_C * (cropmergelab->a[x][y]) + labView->a[x][y];
+                            labView->b[x][y] =  m_C * (cropmergelab->b[x][y]) + labView->b[x][y];
+                        }
+                }
+
+
+                if (zero) {
+                    stytype = 1;
+                    int lab = 3;
+                    int leve =  params.wavelet.thres;
+                    int dir = 3;
+                    int hei = (cropmergelab->H) / 2 + 1; //fh / 2;
+                    int wid = (cropmergelab->W) / 2 + 1; //fw / 2;
+                    merge_two[0] = int ( wid * ((float)Lwa / (float)fw)); // wid;
+                    merge_two[1] = int ( hei * ((float)Hwa / (float)fh)); //hei
+                    int wid1 = merge_two[0] + 1;
+                    int hei1 = merge_two[1] + 1;
+
+                    if (merge_two[0] > wid) {
+                        merge_two[0] = wid;
+                    }
+
+                    if (merge_two[1] > hei) {
+                        merge_two[1] = hei;
+                    }
+
+                    if (stytype == 1) {
+                        stylev = new float****[lab];
+
+                        for (int y = 0; y < lab; y++) {
+                            stylev[y] = new float***[dir];
+
+                            for (int d = 0; d < dir; d++) {
+                                stylev[y][d] = new float**[leve];
+
+                                for (int k = 0; k < leve; k++) {
+                                    stylev[y][d][k] = new float*[hei1];
+
+                                    for (int i = 0; i < hei1; i++) {
+                                        stylev[y][d][k][i] = new float[wid1];
+                                    }
+                                }
+                            }
+                        }
+
+                        styres = new LabImage (wid1, hei1);
+
+                        ipf.ip_wavelet (cropmergelab, cropmergelab, stylev, styres, stytype, NULL, mtwo, merge_two, 1, kall, WaveParams, wavMER2Curve, wavCLVCurve, wavRETCurve, wavRETgainCurve, wavSTYCurve, wavSTY2Curve, waOpacityCurveRG, waOpacityCurveBY, waOpacityCurveW,  waOpacityCurveWL, wavclCurve, wavcontlutili, 1, minCD, maxCD, mini, maxi, Tmean, Tsigma, Tmin, Tmax);
+//                        ipf.ip_wavelet(cropmergelab, cropmergelab, stylev, styres, stytype, NULL, mtwo, merge_two, 1, kall, WaveParams, wavMER2Curve, wavCLVCurve, wavRETCurve, wavRETgainCurve, wavSTYCurve, wavSTY2Curve, waOpacityCurveRG, waOpacityCurveBY, waOpacityCurveW,  waOpacityCurveWL, wavclCurve, wavcontlutili, 1, minCD, maxCD, mini, maxi, Tmean, Tsigma, Tmin, Tmax);
+
+                    }
+
+                    stytype = 2;
+
+                    if (stytype == 2) {
+
+                        ipf.ip_wavelet (labView, labView, stylev, styres, stytype, cropmergelab, mtwo, merge_two, 1, kall, WaveParams, wavMER2Curve, wavCLVCurve, wavRETCurve, wavRETgainCurve, wavSTYCurve, wavSTY2Curve, waOpacityCurveRG, waOpacityCurveBY, waOpacityCurveW,  waOpacityCurveWL, wavclCurve, wavcontlutili, 1, minCD, maxCD, mini, maxi, Tmean, Tsigma, Tmin, Tmax);
+
+                        for (int y = 0; y < lab; y++) {
+                            for (int i = 0; i < dir; i++) {
+                                for (int j = 0; j < leve; j++) {
+                                    for (int l = 0; l < hei1; l++) {
+                                        delete [] stylev[y][i][j][l];
+                                    }
+                                }
+                            }
+                        }
+
+                        for (int y = 0; y < lab; y++) {
+                            for (int i = 0; i < dir; i++) {
+                                for (int j = 0; j < leve; j++) {
+                                    delete [] stylev[y][i][j];
+                                }
+                            }
+                        }
+
+                        for (int y = 0; y < lab; y++) {
+                            for (int i = 0; i < dir; i++) {
+                                delete [] stylev[y][i];
+                            }
+                        }
+
+                        for (int y = 0; y < lab; y++) {
+                            delete [] stylev[y];
+                        }
+
+                        delete [] stylev;
+                        delete  styres;
+                    }
+                }
+
+
+                delete cropmergelab;
+            }
+        }
+
+
+        if (WaveParams.ushamethod != "none" && WaveParams.expedge && WaveParams.CLmethod != "all" && zerono) {
+            unshar = new LabImage (fw, fh);
+            provis = params.wavelet.CLmethod;
+            params.wavelet.CLmethod = "all";
+            ipf.ip_wavelet (labView, labView, stylev, styres, stytype, NULL, mtwo, merge_two, 1, kall, WaveParams,  wavMER2Curve, wavCLVCurve, wavRETCurve, wavRETgainCurve, wavSTYCurve, wavSTY2Curve, waOpacityCurveRG, waOpacityCurveBY, waOpacityCurveW,  waOpacityCurveWL, wavclCurve, wavcontlutili, 1, minCD, maxCD, mini, maxi, Tmean, Tsigma, Tmin, Tmax);
+            unshar->CopyFrom (labView);
+            params.wavelet.CLmethod = provis;
+        }
+
+        if (zerono || (zero &&  !params.wavelet.expmerge)) {
+            ipf.ip_wavelet (labView, labView, stylev, styres, stytype, NULL, mtwo, merge_two, 1, kall, WaveParams, wavMER2Curve, wavCLVCurve, wavRETCurve, wavRETgainCurve, wavSTYCurve, wavSTY2Curve, waOpacityCurveRG, waOpacityCurveBY, waOpacityCurveW,  waOpacityCurveWL, wavclCurve, wavcontlutili, 1, minCD, maxCD, mini, maxi, Tmean, Tsigma, Tmin, Tmax);
+        }
+
+        if (WaveParams.ushamethod != "none" && WaveParams.expedge && WaveParams.CLmethod != "all" && zerono) {
+            float mL = (float) (WaveParams.mergeL / 100.f);
+            float mC = (float) (WaveParams.mergeC / 100.f);
+            float mL0;
+            float mC0;
+
+            if ((WaveParams.CLmethod == "one" || WaveParams.CLmethod == "inf")  && WaveParams.Backmethod == "black") {
+                mL0 = mC0 = 0.f;
+                mL = -mL;
+                mC = -mC;
+            } else if (WaveParams.CLmethod == "sup" && WaveParams.Backmethod == "resid") {
+                mL0 = mL;
+                mC0 = mC;
+            } else {
+                mL0 = mL = mC0 = mC = 0.f;
+            }
+
+#ifdef _OPENMP
+            #pragma omp parallel for
+#endif
+
+            for (int x = 0; x < fh; x++)
+                for (int y = 0; y < fw; y++) {
+                    labView->L[x][y] = (1.f + mL0) * (unshar->L[x][y]) - mL * labView->L[x][y];
+                    labView->a[x][y] = (1.f + mC0) * (unshar->a[x][y]) - mC * labView->a[x][y];
+                    labView->b[x][y] = (1.f + mC0) * (unshar->b[x][y]) - mC * labView->b[x][y];
+                }
+
+            delete unshar;
+            unshar    = NULL;
+
+        }
+
     }
 
     wavCLVCurve.Reset();
@@ -1013,7 +1432,7 @@ IImage16* processImage (ProcessingJob* pjob, int& errorCode, ProgressListener* p
     int f_w = 1, f_h = 1;
     int begh = 0, endh = fh;
 
-    if(params.colorappearance.tonecie || params.colorappearance.enabled) {
+    if (params.colorappearance.tonecie || params.colorappearance.enabled) {
         f_w = fw;
         f_h = fh;
     }
@@ -1032,21 +1451,21 @@ IImage16* processImage (ProcessingJob* pjob, int& errorCode, ProgressListener* p
         customColCurve3,
         1);
 
-    if(params.colorappearance.enabled) {
+    if (params.colorappearance.enabled) {
         double adap;
         float fnum = imgsrc->getMetaData()->getFNumber  ();// F number
         float fiso = imgsrc->getMetaData()->getISOSpeed () ;// ISO
         float fspeed = imgsrc->getMetaData()->getShutterSpeed () ;//speed
         float fcomp = imgsrc->getMetaData()->getExpComp  ();//compensation + -
 
-        if(fnum < 0.3f || fiso < 5.f || fspeed < 0.00001f) {
+        if (fnum < 0.3f || fiso < 5.f || fspeed < 0.00001f) {
             adap = 2000.;
         }//if no exif data or wrong
         else {
             float E_V = fcomp + log2 ((fnum * fnum) / fspeed / (fiso / 100.f));
             E_V += params.toneCurve.expcomp;// exposure compensation in tonecurve ==> direct EV
-            E_V += log2(params.raw.expos);// exposure raw white point ; log2 ==> linear to EV
-            adap = powf(2.f, E_V - 3.f); //cd / m2
+            E_V += log2 (params.raw.expos); // exposure raw white point ; log2 ==> linear to EV
+            adap = powf (2.f, E_V - 3.f); //cd / m2
         }
 
         LUTf CAMBrightCurveJ;
@@ -1054,17 +1473,17 @@ IImage16* processImage (ProcessingJob* pjob, int& errorCode, ProgressListener* p
         float CAMMean = NAN;
 
         if (params.sharpening.enabled) {
-            if(settings->ciecamfloat) {
+            if (settings->ciecamfloat) {
                 float d;
-                ipf.ciecam_02float (cieView, float(adap), begh, endh, 1, 2, labView, &params, customColCurve1, customColCurve2, customColCurve3, dummy, dummy, CAMBrightCurveJ, CAMBrightCurveQ, CAMMean, 5, 1, true, d, 1, 1);
+                ipf.ciecam_02float (cieView, float (adap), begh, endh, 1, 2, labView, &params, customColCurve1, customColCurve2, customColCurve3, dummy, dummy, CAMBrightCurveJ, CAMBrightCurveQ, CAMMean, 5, 1, true, d, 1, 1);
             } else {
                 double dd;
                 ipf.ciecam_02 (cieView, adap, begh, endh, 1, 2, labView, &params, customColCurve1, customColCurve2, customColCurve3, dummy, dummy, CAMBrightCurveJ, CAMBrightCurveQ, CAMMean, 5, 1, true, dd, 1, 1);
             }
         } else {
-            if(settings->ciecamfloat) {
+            if (settings->ciecamfloat) {
                 float d;
-                ipf.ciecam_02float (cieView, float(adap), begh, endh, 1, 2, labView, &params, customColCurve1, customColCurve2, customColCurve3, dummy, dummy, CAMBrightCurveJ, CAMBrightCurveQ, CAMMean, 5, 1, true, d, 1, 1);
+                ipf.ciecam_02float (cieView, float (adap), begh, endh, 1, 2, labView, &params, customColCurve1, customColCurve2, customColCurve3, dummy, dummy, CAMBrightCurveJ, CAMBrightCurveQ, CAMMean, 5, 1, true, d, 1, 1);
             } else {
                 double dd;
                 ipf.ciecam_02 (cieView, adap, begh, endh, 1, 2, labView, &params, customColCurve1, customColCurve2, customColCurve3, dummy, dummy, CAMBrightCurveJ, CAMBrightCurveQ, CAMMean, 5, 1, true, dd, 1, 1);
@@ -1087,7 +1506,7 @@ IImage16* processImage (ProcessingJob* pjob, int& errorCode, ProgressListener* p
     }
 
     int imw, imh;
-    double tmpScale = ipf.resizeScale(&params, fw, fh, imw, imh);
+    double tmpScale = ipf.resizeScale (&params, fw, fh, imw, imh);
     bool labResize = params.resize.enabled && params.resize.method != "Nearest" && tmpScale != 1.0;
     LabImage *tmplab;
 
@@ -1100,11 +1519,11 @@ IImage16* processImage (ProcessingJob* pjob, int& errorCode, ProgressListener* p
         cw = params.crop.w;
         ch = params.crop.h;
 
-        if(labResize) { // crop lab data
-            tmplab = new LabImage(cw, ch);
+        if (labResize) { // crop lab data
+            tmplab = new LabImage (cw, ch);
 
-            for(int row = 0; row < ch; row++) {
-                for(int col = 0; col < cw; col++) {
+            for (int row = 0; row < ch; row++) {
+                for (int col = 0; col < cw; col++) {
                     tmplab->L[row][col] = labView->L[row + cy][col + cx];
                     tmplab->a[row][col] = labView->a[row + cy][col + cx];
                     tmplab->b[row][col] = labView->b[row + cy][col + cx];
@@ -1120,16 +1539,16 @@ IImage16* processImage (ProcessingJob* pjob, int& errorCode, ProgressListener* p
 
     if (labResize) { // resize lab data
         // resize image
-        tmplab = new LabImage(imw, imh);
+        tmplab = new LabImage (imw, imh);
         ipf.Lanczos (labView, tmplab, tmpScale);
         delete labView;
         labView = tmplab;
         cw = labView->W;
         ch = labView->H;
 
-        if(params.prsharpening.enabled) {
-            for(int i = 0; i < ch; i++)
-                for(int j = 0; j < cw; j++) {
+        if (params.prsharpening.enabled) {
+            for (int i = 0; i < ch; i++)
+                for (int j = 0; j < cw; j++) {
                     labView->L[i][j] = labView->L[i][j] < 0.f ? 0.f : labView->L[i][j];
                 }
 
@@ -1155,7 +1574,7 @@ IImage16* processImage (ProcessingJob* pjob, int& errorCode, ProgressListener* p
     bool useLCMS = false;
     bool bwonly = params.blackwhite.enabled && !params.colorToning.enabled && !autili && !butili ;
 
-    if(params.icm.gamma != "default" || params.icm.freegamma) { // if select gamma output between BT709, sRGB, linear, low, high, 2.2 , 1.8
+    if (params.icm.gamma != "default" || params.icm.freegamma) { // if select gamma output between BT709, sRGB, linear, low, high, 2.2 , 1.8
 
         GammaValues ga;
         //  if(params.blackwhite.enabled) params.toneCurve.hrenabled=false;
@@ -1176,7 +1595,7 @@ IImage16* processImage (ProcessingJob* pjob, int& errorCode, ProgressListener* p
         readyImg = ipf.lab2rgb16 (labView, cx, cy, cw, ch, params.icm, bwonly);
 
         if (settings->verbose) {
-            printf("Output profile_: \"%s\"\n", params.icm.output.c_str());
+            printf ("Output profile_: \"%s\"\n", params.icm.output.c_str());
         }
     }
 
@@ -1185,15 +1604,15 @@ IImage16* processImage (ProcessingJob* pjob, int& errorCode, ProgressListener* p
 
 
 
-    if(bwonly) { //force BW r=g=b
+    if (bwonly) { //force BW r=g=b
         if (settings->verbose) {
-            printf("Force BW\n");
+            printf ("Force BW\n");
         }
 
         for (int ccw = 0; ccw < cw; ccw++) {
             for (int cch = 0; cch < ch; cch++) {
-                readyImg->r(cch, ccw) = readyImg->g(cch, ccw);
-                readyImg->b(cch, ccw) = readyImg->g(cch, ccw);
+                readyImg->r (cch, ccw) = readyImg->g (cch, ccw);
+                readyImg->b (cch, ccw) = readyImg->g (cch, ccw);
             }
         }
     }
@@ -1220,7 +1639,7 @@ IImage16* processImage (ProcessingJob* pjob, int& errorCode, ProgressListener* p
     if (customGamma) {
         if (!useLCMS) {
             // use corrected sRGB profile in order to apply a good TRC if present, otherwise use LCMS2 profile generated by lab2rgb16 w/ gamma
-            ProfileContent pc(jprof);
+            ProfileContent pc (jprof);
             readyImg->setOutputProfile (pc.data, pc.length);
         }
     } else {
@@ -1229,15 +1648,15 @@ IImage16* processImage (ProcessingJob* pjob, int& errorCode, ProgressListener* p
         if (params.icm.output != "" && params.icm.output != ColorManagementParams::NoICMString) {
 
             // if iccStore->getProfile send back an object, then iccStore->getContent will do too
-            cmsHPROFILE jprof = iccStore->getProfile(params.icm.output); //get outProfile
+            cmsHPROFILE jprof = iccStore->getProfile (params.icm.output); //get outProfile
 
             if (jprof == nullptr) {
                 if (settings->verbose) {
-                    printf("\"%s\" ICC output profile not found!\n - use LCMS2 substitution\n", params.icm.output.c_str());
+                    printf ("\"%s\" ICC output profile not found!\n - use LCMS2 substitution\n", params.icm.output.c_str());
                 }
             } else {
                 if (settings->verbose) {
-                    printf("Using \"%s\" output profile\n", params.icm.output.c_str());
+                    printf ("Using \"%s\" output profile\n", params.icm.output.c_str());
                 }
 
                 ProfileContent pc = iccStore->getContent (params.icm.output);
@@ -1287,7 +1706,7 @@ void batchProcessingThread (ProcessingJob* job, BatchProcessingListener* bpl, bo
         IImage16* img = processImage (currentJob, errorCode, bpl, tunnelMetaData, true);
 
         if (errorCode) {
-            bpl->error (M("MAIN_MSG_CANNOTLOAD"));
+            bpl->error (M ("MAIN_MSG_CANNOTLOAD"));
             currentJob = nullptr;
         } else {
             try {
@@ -1306,10 +1725,10 @@ void startBatchProcessing (ProcessingJob* job, BatchProcessingListener* bpl, boo
     if (bpl)
 #if __GNUC__ == 4 && __GNUC_MINOR__ == 8 && defined( WIN32 ) && defined(__x86_64__)
         // See Issue 2384 "Very bad response time on win7/64 using gcc 4.8 when queue is running"
-        Glib::Thread::create(sigc::bind(sigc::ptr_fun(batchProcessingThread), job, bpl, tunnelMetaData), 0, true, true, Glib::THREAD_PRIORITY_NORMAL);
+        Glib::Thread::create (sigc::bind (sigc::ptr_fun (batchProcessingThread), job, bpl, tunnelMetaData), 0, true, true, Glib::THREAD_PRIORITY_NORMAL);
 
 #else
-        Glib::Thread::create(sigc::bind(sigc::ptr_fun(batchProcessingThread), job, bpl, tunnelMetaData), 0, true, true, Glib::THREAD_PRIORITY_LOW);
+        Glib::Thread::create (sigc::bind (sigc::ptr_fun (batchProcessingThread), job, bpl, tunnelMetaData), 0, true, true, Glib::THREAD_PRIORITY_LOW);
 #endif
 
 }

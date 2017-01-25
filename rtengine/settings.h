@@ -50,6 +50,7 @@ public:
     bool            verbose;
     Glib::ustring   darkFramesPath;         ///< The default directory for dark frames
     Glib::ustring   flatFieldsPath;         ///< The default directory for flat fields
+    Glib::ustring   mergePath;         ///< The default directory for merge files
     Glib::ustring   adobe;                  // default name of AdobeRGB1998
     Glib::ustring   prophoto;               // default name of Prophoto
     Glib::ustring   prophoto10;             // default name of Prophoto

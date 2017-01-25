@@ -63,7 +63,7 @@ protected:
     BatchQueueListener* listener;
 
     Glib::ustring autoCompleteFileName (const Glib::ustring& fileName, const Glib::ustring& format);
-    Glib::ustring getTempFilenameForParams( const Glib::ustring &filename );
+    Glib::ustring getTempFilenameForParams ( const Glib::ustring &filename );
     bool saveBatchQueue ();
     void notifyListener (bool queueEmptied);
 
@@ -76,14 +76,14 @@ public:
     void headItems (const std::vector<ThumbBrowserEntryBase *>& items);
     void tailItems (const std::vector<ThumbBrowserEntryBase *>& items);
     void selectAll ();
-    void openItemInEditor(ThumbBrowserEntryBase* item);
+    void openItemInEditor (ThumbBrowserEntryBase* item);
     void openLastSelectedItemInEditor();
 
     void startProcessing ();
 
     bool hasJobs ()
     {
-        MYREADERLOCK(l, entryRW);
+        MYREADERLOCK (l, entryRW);
         return (!fd.empty());
     }
 

@@ -56,6 +56,7 @@ private:
 
     Glib::ustring lastSaveAsFileName;
     bool realized;
+    Glib::ustring lastRefFilename;
 
 protected:
     MyProgressBar  *progressLabel;
@@ -90,6 +91,7 @@ protected:
 
     ImageAreaPanel* iareapanel;
     PreviewHandler* previewHandler;
+    PreviewHandler* previewHandler2;
     PreviewHandler* beforePreviewHandler;   // for the before-after view
     Navigator* navigator;
     ImageAreaPanel* beforeIarea;    // for the before-after view
@@ -193,6 +195,7 @@ public:
     void openNextEditorImage ();
     void openPreviousEditorImage ();
     void syncFileBrowser ();
+    std::string fname2;// = dialog.get_filename();
 
     void tbTopPanel_1_visible (bool visible);
     bool CheckSidePanelsVisibility();
@@ -209,7 +212,7 @@ public:
     {
         return isProcessing;
     }
-    void updateProfiles(const Glib::ustring &printerProfile, rtengine::RenderingIntent printerIntent, bool printerBPC);
+    void updateProfiles (const Glib::ustring &printerProfile, rtengine::RenderingIntent printerIntent, bool printerBPC);
     void updateTPVScrollbar (bool hide);
     void updateTabsUsesIcons (bool useIcons);
     void updateHistogramPosition (int oldPosition, int newPosition);
