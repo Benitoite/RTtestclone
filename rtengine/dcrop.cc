@@ -22,9 +22,20 @@
 #include "mytime.h"
 #include "refreshmap.h"
 #include "rt_math.h"
-// "ceil" rounding
-#define SKIPS(a,b) ((a) / (b) + ((a) % (b) > 0))
 #include <fstream>
+
+
+namespace
+{
+
+// "ceil" rounding
+template<typename T>
+constexpr T skips (T a, T b)
+{
+    return a / b + static_cast<bool> (a % b);
+}
+
+}
 
 namespace rtengine
 {
@@ -32,9 +43,22 @@ namespace rtengine
 extern const Settings* settings;
 
 Crop::Crop (ImProcCoordinator* parent, EditDataProvider *editDataProvider, bool isDetailWindow)
+/*
+<<<<<<< HEAD
     : PipetteBuffer (editDataProvider), origCrop (nullptr), laboCrop (nullptr), labnCrop (nullptr),
       cropImg (nullptr), cbuf_real (nullptr), cshmap (nullptr), transCrop (nullptr), cieCrop (nullptr), cbuffer (nullptr),
       updating (false), newUpdatePending (false), skip (10), padding (0),
+      cropx (0), cropy (0), cropw (-1), croph (-1),
+      trafx (0), trafy (0), trafw (-1), trafh (-1),
+      rqcropx (0), rqcropy (0), rqcropw (-1), rqcroph (-1),
+      borderRequested (32), upperBorder (0), leftBorder (0),
+      cropAllocated (false),
+      cropImageListener (nullptr), parent (parent), isDetailWindow (isDetailWindow)
+=======
+*/
+    : PipetteBuffer (editDataProvider), origCrop (nullptr), laboCrop (nullptr), labnCrop (nullptr),
+      cropImg (nullptr), cbuf_real (nullptr), cshmap (nullptr), transCrop (nullptr), cieCrop (nullptr), cbuffer (nullptr),
+      updating (false), newUpdatePending (false), skip (10),
       cropx (0), cropy (0), cropw (-1), croph (-1),
       trafx (0), trafy (0), trafw (-1), trafh (-1),
       rqcropx (0), rqcropy (0), rqcropw (-1), rqcroph (-1),
@@ -110,6 +134,12 @@ void Crop::setEditSubscriber (EditSubscriber* newSubscriber)
     }
 
     // If oldSubscriber == NULL && newSubscriber != NULL && newSubscriber->getEditingType() == ET_PIPETTE-> the image will be allocated when necessary
+}
+
+bool Crop::hasListener()
+{
+    MyMutex::MyLock cropLock (cropMutex);
+    return cropImageListener;
 }
 
 void Crop::update (int todo)
@@ -699,7 +729,7 @@ void Crop::update (int todo)
         }
 
         if (needstransform)
-            parent->ipf.transform (baseCrop, transCrop, cropx / skip, cropy / skip, trafx / skip, trafy / skip, SKIPS (parent->fw, skip), SKIPS (parent->fh, skip), parent->getFullWidth(), parent->getFullHeight(),
+            parent->ipf.transform (baseCrop, transCrop, cropx / skip, cropy / skip, trafx / skip, trafy / skip, skips (parent->fw, skip), skips (parent->fh, skip), parent->getFullWidth(), parent->getFullHeight(),
                                    parent->imgsrc->getMetaData()->getFocalLen(), parent->imgsrc->getMetaData()->getFocalLen35mm(),
                                    parent->imgsrc->getMetaData()->getFocusDist(), parent->imgsrc->getRotateDegree(), false);
         else {
@@ -730,7 +760,7 @@ void Crop::update (int todo)
 
     // blurmap for shadow & highlights
     if ((todo & M_BLURMAP) && params.sh.enabled) {
-        double radius = sqrt (double (SKIPS (parent->fw, skip) * SKIPS (parent->fw, skip) + SKIPS (parent->fh, skip) * SKIPS (parent->fh, skip))) / 2.0;
+        double radius = sqrt (double (skips (parent->fw, skip) * skips (parent->fw, skip) + skips (parent->fh, skip) * skips (parent->fh, skip))) / 2.0;
         double shradius = params.sh.radius;
 
         if (!params.sh.hq) {
@@ -1571,11 +1601,11 @@ bool Crop::setCropSizes (int rcx, int rcy, int rcw, int rch, int skip, bool inte
     int orW, orH;
     parent->imgsrc->getSize (cp, orW, orH);
 
-    int cw = SKIPS (bw, skip);
-    int ch = SKIPS (bh, skip);
+    int cw = skips (bw, skip);
+    int ch = skips (bh, skip);
 
-    leftBorder  = SKIPS (rqx1 - bx1, skip);
-    upperBorder = SKIPS (rqy1 - by1, skip);
+    leftBorder  = skips (rqx1 - bx1, skip);
+    upperBorder = skips (rqy1 - by1, skip);
 
     if (settings->verbose) {
         printf ("setsizes starts (%d, %d, %d, %d, %d, %d)\n", orW, orH, trafw, trafh, cw, ch);
@@ -1744,5 +1774,22 @@ void Crop::fullUpdate ()
     parent->updaterThreadStart.unlock ();
 }
 
+int Crop::get_skip()
+{
+    MyMutex::MyLock lock (cropMutex);
+    return skip;
 }
 
+int Crop::getLeftBorder()
+{
+    MyMutex::MyLock lock (cropMutex);
+    return leftBorder;
+}
+
+int Crop::getUpperBorder()
+{
+    MyMutex::MyLock lock (cropMutex);
+    return upperBorder;
+}
+
+}

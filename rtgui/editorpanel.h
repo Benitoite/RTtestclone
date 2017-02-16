@@ -45,20 +45,105 @@ struct EditorPanelIdleHelper {
 };
 
 class RTWindow;
-class EditorPanel : public Gtk::VBox,
+class EditorPanel final :
+    public Gtk::VBox,
     public PParamsChangeListener,
     public rtengine::ProgressListener,
     public ThumbnailListener,
     public HistoryBeforeLineListener,
     public rtengine::HistogramListener
 {
+public:
+    explicit EditorPanel (FilePanel* filePanel = nullptr);
+    ~EditorPanel ();
+
+    void open (Thumbnail* tmb, rtengine::InitialImage* isrc);
+    void setAspect ();
+    void on_realize ();
+    void leftPaneButtonReleased (GdkEventButton *event);
+    void rightPaneButtonReleased (GdkEventButton *event);
+
+    void setParent (RTWindow* p)
+    {
+        parent = p;
+    }
+    void writeOptions();
+
+    void showTopPanel (bool show);
+    bool isRealized()
+    {
+        return realized;
+    }
+    // progresslistener interface
+    void setProgress (double p);
+    void setProgressStr (Glib::ustring str);
+    void setProgressState (bool inProcessing);
+    void error (Glib::ustring title, Glib::ustring descr);
+    void displayError (Glib::ustring title, Glib::ustring descr);  // this is called by error in the gtk thread
+    void refreshProcessingState (bool inProcessing); // this is called by setProcessingState in the gtk thread
+
+    // PParamsChangeListener interface
+    void procParamsChanged (rtengine::procparams::ProcParams* params, rtengine::ProcEvent ev, Glib::ustring descr, ParamsEdited* paramsEdited = nullptr);
+
+    // thumbnaillistener interface
+    void procParamsChanged (Thumbnail* thm, int whoChangedIt);
+
+    // HistoryBeforeLineListener
+    void historyBeforeLineChanged (const rtengine::procparams::ProcParams& params);
+
+    // HistogramListener
+    void histogramChanged (LUTu & histRed, LUTu & histGreen, LUTu & histBlue, LUTu & histLuma, LUTu & histToneCurve, LUTu & histLCurve, LUTu & histCCurve,/* LUTu & histCLurve, LUTu & histLLCurve,*/ LUTu & histLCAM, LUTu & histCCAM,
+                           LUTu & histRedRaw, LUTu & histGreenRaw, LUTu & histBlueRaw, LUTu & histChroma, LUTu & histLRETI);
+
+    // event handlers
+    void info_toggled ();
+    void hideHistoryActivated ();
+    void tbRightPanel_1_toggled ();
+    void tbTopPanel_1_toggled ();
+    void beforeAfterToggled ();
+    void tbBeforeLock_toggled();
+    void saveAsPressed ();
+    void queueImgPressed ();
+    void sendToGimpPressed ();
+    void openNextEditorImage ();
+    void openPreviousEditorImage ();
+    void syncFileBrowser ();
+
+    void tbTopPanel_1_visible (bool visible);
+    bool CheckSidePanelsVisibility();
+    void tbShowHideSidePanels_managestate();
+    void toggleSidePanels();
+    void toggleSidePanelsZoomFit();
+
+    void saveProfile ();
+    Glib::ustring getShortName ();
+    Glib::ustring getFileName ();
+    bool handleShortcutKey (GdkEventKey* event);
+
+    bool getIsProcessing() const
+    {
+        return isProcessing;
+    }
+    void updateProfiles (const Glib::ustring &printerProfile, rtengine::RenderingIntent printerIntent, bool printerBPC);
+    void updateTPVScrollbar (bool hide);
+    void updateTabsUsesIcons (bool useIcons);
+    void updateHistogramPosition (int oldPosition, int newPosition);
+
+    Gtk::Paned* catalogPane;
+
 private:
+    void close ();
+
+    BatchQueueEntry*    createBatchQueueEntry ();
+    bool                idle_imageSaved (ProgressConnector<int> *pc, rtengine::IImage16* img, Glib::ustring fname, SaveFormat sf);
+    bool                idle_saveImage (ProgressConnector<rtengine::IImage16*> *pc, Glib::ustring fname, SaveFormat sf);
+    bool                idle_sendToGimp ( ProgressConnector<rtengine::IImage16*> *pc, Glib::ustring fname);
+    bool                idle_sentToGimp (ProgressConnector<int> *pc, rtengine::IImage16* img, Glib::ustring filename);
 
     Glib::ustring lastSaveAsFileName;
     bool realized;
     Glib::ustring lastRefFilename;
 
-protected:
     MyProgressBar  *progressLabel;
     Gtk::ToggleButton* info;
     Gtk::ToggleButton* hidehp;
@@ -124,13 +209,6 @@ protected:
 
     EditorPanelIdleHelper* epih;
 
-    void close ();
-
-    BatchQueueEntry*    createBatchQueueEntry ();
-    bool                idle_imageSaved (ProgressConnector<int> *pc, rtengine::IImage16* img, Glib::ustring fname, SaveFormat sf);
-    bool                idle_saveImage (ProgressConnector<rtengine::IImage16*> *pc, Glib::ustring fname, SaveFormat sf);
-    bool                idle_sendToGimp ( ProgressConnector<rtengine::IImage16*> *pc, Glib::ustring fname);
-    bool                idle_sentToGimp (ProgressConnector<int> *pc, rtengine::IImage16* img, Glib::ustring filename);
     int err;
 
     time_t processingStartedTime;
@@ -138,86 +216,7 @@ protected:
     sigc::connection ShowHideSidePanelsconn;
 
     bool isProcessing;
-
-
-public:
-    explicit EditorPanel (FilePanel* filePanel = nullptr);
-    virtual ~EditorPanel ();
-
-    void open (Thumbnail* tmb, rtengine::InitialImage* isrc);
-    void setAspect ();
-    void on_realize ();
-    void leftPaneButtonReleased (GdkEventButton *event);
-    void rightPaneButtonReleased (GdkEventButton *event);
-
-    void setParent (RTWindow* p)
-    {
-        parent = p;
-    }
-    void writeOptions();
-
-    void showTopPanel (bool show);
-    bool isRealized()
-    {
-        return realized;
-    }
-    // progresslistener interface
-    void setProgress (double p);
-    void setProgressStr (Glib::ustring str);
-    void setProgressState (bool inProcessing);
-    void error (Glib::ustring title, Glib::ustring descr);
-    void displayError (Glib::ustring title, Glib::ustring descr);  // this is called by error in the gtk thread
-    void refreshProcessingState (bool inProcessing); // this is called by setProcessingState in the gtk thread
-
-    // PParamsChangeListener interface
-    void procParamsChanged (rtengine::procparams::ProcParams* params, rtengine::ProcEvent ev, Glib::ustring descr, ParamsEdited* paramsEdited = nullptr);
-
-    // thumbnaillistener interface
-    void procParamsChanged (Thumbnail* thm, int whoChangedIt);
-
-    // HistoryBeforeLineListener
-    void historyBeforeLineChanged (const rtengine::procparams::ProcParams& params);
-
-    // HistogramListener
-    void histogramChanged (LUTu & histRed, LUTu & histGreen, LUTu & histBlue, LUTu & histLuma, LUTu & histToneCurve, LUTu & histLCurve, LUTu & histCCurve,/* LUTu & histCLurve, LUTu & histLLCurve,*/ LUTu & histLCAM, LUTu & histCCAM,
-                           LUTu & histRedRaw, LUTu & histGreenRaw, LUTu & histBlueRaw, LUTu & histChroma, LUTu & histLRETI);
-
-    // event handlers
-    void info_toggled ();
-    void hideHistoryActivated ();
-    void tbRightPanel_1_toggled ();
-    void tbTopPanel_1_toggled ();
-    void beforeAfterToggled ();
-    void tbBeforeLock_toggled();
-    void saveAsPressed ();
-    void queueImgPressed ();
-    void sendToGimpPressed ();
-    void openNextEditorImage ();
-    void openPreviousEditorImage ();
-    void syncFileBrowser ();
-    std::string fname2;// = dialog.get_filename();
-
-    void tbTopPanel_1_visible (bool visible);
-    bool CheckSidePanelsVisibility();
-    void tbShowHideSidePanels_managestate();
-    void toggleSidePanels();
-    void toggleSidePanelsZoomFit();
-
-    void saveProfile ();
-    Glib::ustring getShortName ();
-    Glib::ustring getFileName ();
-    bool handleShortcutKey (GdkEventKey* event);
-
-    bool getIsProcessing() const
-    {
-        return isProcessing;
-    }
-    void updateProfiles (const Glib::ustring &printerProfile, rtengine::RenderingIntent printerIntent, bool printerBPC);
-    void updateTPVScrollbar (bool hide);
-    void updateTabsUsesIcons (bool useIcons);
-    void updateHistogramPosition (int oldPosition, int newPosition);
-
-    Gtk::Paned *catalogPane;
+    IdleRegister idle_register;
 };
 
 #endif

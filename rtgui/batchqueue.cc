@@ -85,6 +85,8 @@ BatchQueue::BatchQueue (FileCatalog* aFileCatalog) : processing (nullptr), fileC
 
 BatchQueue::~BatchQueue ()
 {
+    idle_register.destroy();
+
     MYWRITERLOCK (l, entryRW);
 
     // The listener merges parameters with old values, so delete afterwards
@@ -956,7 +958,7 @@ void BatchQueue::notifyListener (bool queueEmptied)
         }
         params->queueEmptied = queueEmptied;
         params->queueError = false;
-        add_idle (bqnotifylistenerUI, params);
+        idle_register.add (bqnotifylistenerUI, params);
     }
 }
 
@@ -986,6 +988,6 @@ void BatchQueue::error (Glib::ustring msg)
         params->queueEmptied = false;
         params->queueError = true;
         params->queueErrorMessage = msg;
-        add_idle (bqnotifylistenerUI, params);
+        idle_register.add (bqnotifylistenerUI, params);
     }
 }
