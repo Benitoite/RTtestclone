@@ -523,6 +523,8 @@ int refreshmap[rtengine::NUMOFEVENTS] = {
     DIRPYREQUALIZER,     //EvWavshapMethod
     DIRPYREQUALIZER,     //EvWavshapind
     DIRPYREQUALIZER,     //EvWavsty2Curve
-    OUTPUTPROFILE       //EvOBPCompens
+    OUTPUTPROFILE,       //EvOBPCompens
+    ALLNORAW          // EvWBtempBias
+
 };
 

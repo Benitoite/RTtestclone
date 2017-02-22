@@ -524,6 +524,7 @@ enum ProcEvent {
     EvWavshapind = 494,
     EvWavsty2Curve = 495,
     EvOBPCompens = 496,
+    EvWBtempBias = 497,
     NUMOFEVENTS
 };
 }
