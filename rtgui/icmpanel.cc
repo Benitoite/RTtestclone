@@ -174,7 +174,7 @@ ICMPanel::ICMPanel () : FoldableToolPanel (this, "icm", M ("TP_ICM_LABEL")), iun
     wnames = Gtk::manage (new MyComboBoxText ());
     wVBox->pack_start (*wnames, Gtk::PACK_SHRINK);
 
-    std::vector<Glib::ustring> wpnames = rtengine::getWorkingProfiles ();
+    std::vector<Glib::ustring> wpnames = rtengine::ICCStore::getWorkingProfiles();
 
     for (size_t i = 0; i < wpnames.size(); i++) {
         wnames->append (wpnames[i]);
@@ -201,7 +201,7 @@ ICMPanel::ICMPanel () : FoldableToolPanel (this, "icm", M ("TP_ICM_LABEL")), iun
     onames->append (M ("TP_ICM_NOICM"));
     onames->set_active (0);
 
-    std::vector<Glib::ustring> opnames = iccStore->getProfiles (rtengine::ICCStore::ProfileType::OUTPUT);
+    std::vector<Glib::ustring> opnames = ICCStore::getInstance()->getProfiles (rtengine::ICCStore::ProfileType::OUTPUT);
 
     for (size_t i = 0; i < opnames.size(); i++) {
         onames->append (opnames[i]);
@@ -240,7 +240,7 @@ ICMPanel::ICMPanel () : FoldableToolPanel (this, "icm", M ("TP_ICM_LABEL")), iun
 
     oVBox->pack_start (*gaHBox, Gtk::PACK_EXPAND_WIDGET);
 
-    std::vector<Glib::ustring> wpgamma = rtengine::getGamma ();
+    std::vector<Glib::ustring> wpgamma = rtengine::ICCStore::getGamma();
 
     for (size_t i = 0; i < wpgamma.size(); i++) {
         wgamma->append (wpgamma[i]);
@@ -341,7 +341,7 @@ ICMPanel::ICMPanel () : FoldableToolPanel (this, "icm", M ("TP_ICM_LABEL")), iun
 
 void ICMPanel::updateRenderingIntent (const Glib::ustring &profile)
 {
-    const uint8_t supportedIntents = rtengine::iccStore->getOutputIntents (profile);
+    const uint8_t supportedIntents = rtengine::ICCStore::getInstance()->getOutputIntents (profile);
     const bool supportsPerceptual = supportedIntents & 1 << INTENT_PERCEPTUAL;
     const bool supportsRelative   = supportedIntents & 1 << INTENT_RELATIVE_COLORIMETRIC;
     const bool supportsSaturation = supportedIntents & 1 << INTENT_SATURATION;
@@ -1065,7 +1065,7 @@ void ICMPanel::setRawMeta (bool raw, const rtengine::ImageData* pMeta)
     iembedded->set_active (!raw);
     icamera->set_sensitive (raw);
     camName = pMeta->getCamera();
-    icameraICC->set_sensitive (raw && (iccStore->getStdProfile (pMeta->getCamera()) != nullptr || DCPStore::getInstance()->getStdProfile (pMeta->getCamera()) != nullptr));
+    icameraICC->set_sensitive (raw && (ICCStore::getInstance()->getStdProfile (pMeta->getCamera()) != nullptr || DCPStore::getInstance()->getStdProfile (pMeta->getCamera()) != nullptr));
     iembedded->set_sensitive (!raw);
 
     enableListener ();

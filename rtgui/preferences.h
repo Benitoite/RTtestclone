@@ -24,6 +24,7 @@
 #include "options.h"
 #include <vector>
 #include "rtwindow.h"
+#include "dynamicprofilepanel.h"
 
 class Preferences : public Gtk::Dialog, public ProfileStoreListener
 {
@@ -203,15 +204,20 @@ class Preferences : public Gtk::Dialog, public ProfileStoreListener
     Gtk::CheckButton* ckbHideTPVScrollbar;
     Gtk::CheckButton* ckbUseIconNoText;
 
+    DynamicProfilePanel *dynProfilePanel;
+
     Glib::ustring storedValueRaw;
     Glib::ustring storedValueImg;
 
     Options moptions;
-//    sigc::connection tconn, sconn, fconn, addc, setc, dfconn, ffconn, bpconn, rpconn, ipconn;
-    sigc::connection tconn, sconn, fconn, usethcon, addc, setc, dfconn, ffconn, mgconn, bpconn, rpconn, ipconn;
+//    sigc::connection tconn, sconn, fconn, usethcon, addc, setc, dfconn, ffconn, mgconn, bpconn, rpconn, ipconn;
+    sigc::connection tconn, sconn, fconn, cpfconn, addc, setc, dfconn, ffconn, bpconn, rpconn, ipconn, usethcon, mgconn;
     sigc::connection autoMonProfileConn, sndEnableConn, langAutoDetectConn, autocielabConn;
     Glib::ustring initialTheme;
-    Glib::ustring initialFont;
+    Glib::ustring initialFontFamily;
+    int initialFontSize;
+    bool newFont;
+    bool newCPFont;
 
     void fillPreferences ();
     void storePreferences ();
@@ -223,6 +229,7 @@ class Preferences : public Gtk::Dialog, public ProfileStoreListener
     void workflowUpdate();
     void themeChanged  ();
     void fontChanged   ();
+    void cpFontChanged ();
     void forRAWComboChanged ();
     void forImageComboChanged ();
     void layoutComboChanged ();
@@ -243,6 +250,7 @@ class Preferences : public Gtk::Dialog, public ProfileStoreListener
     Gtk::Widget* getBatchProcPanel ();
     Gtk::Widget* getPerformancePanel ();
     Gtk::Widget* getSoundPanel ();
+    Gtk::Widget* getDynProfilePanel ();
 
 public:
     explicit Preferences (RTWindow *rtwindow);

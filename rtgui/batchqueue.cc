@@ -34,6 +34,7 @@
 #include "guiutils.h"
 #include "rtimage.h"
 #include <sys/time.h>
+
 using namespace std;
 using namespace rtengine;
 
@@ -235,7 +236,7 @@ bool BatchQueue::saveBatchQueue ()
 
         // The column's header is mandatory (the first line will be skipped when loaded)
         file << "input image full path|param file full path|output image full path|file format|jpeg quality|jpeg subsampling|"
-             << "png bit depth|png compression|tiff bit depth|uncompressed tiff|save output params|force format options|<end of line>"
+             << "png bit depth|png compression|tiff bit depth|uncompressed tiff|save output params|force format options|fast export|<end of line>"
              << std::endl;
 
         // method is already running with entryLock, so no need to lock again
@@ -250,6 +251,7 @@ bool BatchQueue::saveBatchQueue ()
                  << saveFormat.pngBits << '|' << saveFormat.pngCompression << '|'
                  << saveFormat.tiffBits << '|'  << saveFormat.tiffUncompressed << '|'
                  << saveFormat.saveParams << '|' << entry->forceFormatOpts << '|'
+                 << entry->job->fastPipeline() << '|'
                  << std::endl;
         }
     }
@@ -315,6 +317,7 @@ bool BatchQueue::loadBatchQueue ()
             const auto tiffUncompressed = nextIntOr (options.saveFormat.tiffUncompressed);
             const auto saveParams = nextIntOr (options.saveFormat.saveParams);
             const auto forceFormatOpts = nextIntOr (options.forceFormatOpts);
+            const auto fast = nextIntOr(false);
 
             rtengine::procparams::ProcParams pparams;
 
@@ -328,7 +331,7 @@ bool BatchQueue::loadBatchQueue ()
                 continue;
             }
 
-            auto job = rtengine::ProcessingJob::create (source, thumb->getType () == FT_Raw, pparams);
+            auto job = rtengine::ProcessingJob::create (source, thumb->getType () == FT_Raw, pparams, fast);
 
             auto prevh = getMaxThumbnailHeight ();
             auto prevw = prevh;
@@ -797,7 +800,7 @@ Glib::ustring BatchQueue::calcAutoFileNameBase (const Glib::ustring& origFileNam
 
                 if (options.savePathTemplate[ix] == 'p') {
                     ix++;
-                    int i = options.savePathTemplate[ix] - '0';
+                    unsigned int i = options.savePathTemplate[ix] - '0';
 
                     if (i < pa.size()) {
                         path = path + pa[pa.size() - i - 1] + '/';
@@ -806,7 +809,7 @@ Glib::ustring BatchQueue::calcAutoFileNameBase (const Glib::ustring& origFileNam
                     ix++;
                 } else if (options.savePathTemplate[ix] == 'd') {
                     ix++;
-                    int i = options.savePathTemplate[ix] - '0';
+                    unsigned i = options.savePathTemplate[ix] - '0';
 
                     if (i < da.size()) {
                         path = path + da[da.size() - i - 1];

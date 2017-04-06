@@ -165,6 +165,8 @@ protected:
     AutoCamListener* acListener;
     AutoBWListener* abwListener;
     AutoWBListener* awbListener;
+    FrameCountListener *frameCountListener;
+    ImageTypeListener *imageTypeListener;
 
     AutoColorTonListener* actListener;
     AutoChromaListener* adnListener;
@@ -344,6 +346,15 @@ public:
     }
 
     void savelabReference (const Glib::ustring& fname);
+    void setFrameCountListener  (FrameCountListener* fcl)
+    {
+        frameCountListener = fcl;
+    }
+
+    void setImageTypeListener  (ImageTypeListener* itl)
+    {
+        imageTypeListener = itl;
+    }
 
     void saveInputICCReference (const Glib::ustring& fname, bool apply_wb);
 

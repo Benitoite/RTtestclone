@@ -32,7 +32,6 @@
 //#include "../rtengine/imagedata.h"
 //#include <memory>
 
-
 class WavelListener
 {
 
@@ -43,6 +42,8 @@ public:
 };
 
 
+
+
 class Wavelet :
     public ToolParamBlock,
     public ThresholdAdjusterListener,
@@ -51,10 +52,14 @@ class Wavelet :
     public ColorProvider,
     public rtengine::WaveletListener,
     public FoldableToolPanel
+
+
 {
 public:
     Wavelet ();
     virtual ~Wavelet ();
+
+
 
     bool wavComputed_ ();
     void adjusterChanged (ThresholdAdjuster* a, double newBottom, double newTop);
@@ -161,34 +166,34 @@ private:
     void lipstUpdateUI ();
 
     void enableToggled (MyExpander *expander);
+    WavelListener*  walistener;
 
     CurveEditorGroup* const curveEditorG;
-
     CurveEditorGroup* const CCWcurveEditorG;
+    CurveEditorGroup* const curveEditorRES;
+    CurveEditorGroup* const curveEditorGAM;
     CurveEditorGroup* const CCWcurveEditorT;
-    CurveEditorGroup* const CCWcurveEditorgainT;
+    CurveEditorGroup*  const CCWcurveEditorgainT;
     CurveEditorGroup* const CCWcurveEditormerg;
     CurveEditorGroup* const CCWcurveEditormerg2;
     CurveEditorGroup* const CCWcurveEditorsty;
     CurveEditorGroup* const CCWcurveEditorsty2;
-    CurveEditorGroup* const curveEditorsty;
+    CurveEditorGroup*  const curveEditorsty;
+    CurveEditorGroup* const opaCurveEditorG;
+    CurveEditorGroup* const opacityCurveEditorG;
+    CurveEditorGroup* const opacityCurveEditorW;
+    CurveEditorGroup* const opacityCurveEditorWL;
 
-    CurveEditorGroup* const curveEditorRES;
-    CurveEditorGroup* const curveEditorGAM;
-    Gtk::HSeparator* const separatorCB;
+    Gtk::HSeparator*  const separatorCB;
     Gtk::HSeparator* const separatorNeutral;
     Gtk::HSeparator* const separatoredge;
     Gtk::HSeparator* const separatorRT;
     Gtk::HSeparator* const separatorsty;
     Gtk::HSeparator* const separatorsty2;
-    Gtk::HSeparator* const separatorsty3;
+    Gtk::HSeparator*  const separatorsty3;
 
-    CurveEditorGroup* const opaCurveEditorG;
     FlatCurveEditor* opacityShapeRG;
-    CurveEditorGroup* const opacityCurveEditorG;
     FlatCurveEditor* opacityShapeBY;
-    CurveEditorGroup* const opacityCurveEditorW;
-    CurveEditorGroup* const opacityCurveEditorWL;
     FlatCurveEditor* opacityShape;
     FlatCurveEditor* opacityShapeWL;
     FlatCurveEditor* hhshape;
@@ -214,10 +219,11 @@ private:
 
     Gtk::Button *mFileReset;
     Gtk::Button* savelab;
-    Gtk::Button* neutral2;
 
 
-    Gtk::Button* const neutralchButton;
+    Gtk::Button*  const neutralchButton;
+    Gtk::Button* const neutral2;
+
     Adjuster* correction[9];
     Adjuster* correctionch[9];
     Adjuster* balmer[9];
@@ -245,6 +251,7 @@ private:
     Adjuster* const iter;
     Adjuster* const mergeL;
     Adjuster* const mergeC;
+
 
     Adjuster* greenlow;
     Adjuster* bluelow;
@@ -422,7 +429,6 @@ private:
     bool b_filter_asCurrent;
     MyFileChooserButton *inputeFile;
 
-    WavelListener*  walistener;
 
     sigc::connection enableChromaConn, enableContrastConn, enableEdgeConn,  enableEdge3Conn, enableFinalConn, enableTCConn;
     sigc::connection enableNoiseConn, enableResidConn, enableToningConn, enableMergeConn, enableretiConn;
@@ -436,3 +442,5 @@ private:
     bool lastmedian, lastmedianlev, lastlinkedg, lastavoid, lastlipst, lasttmr, lastcbenab;
     int nextnlevel;
 };
+
+

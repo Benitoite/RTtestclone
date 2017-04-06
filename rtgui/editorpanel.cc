@@ -96,12 +96,12 @@ private:
 
         profileBox.append (M ("PREFERENCES_PROFILE_NONE"));
 #ifdef WIN32
-        profileBox.append (M ("MONITOR_PROFILE_SYSTEM") + " (" + rtengine::iccStore->getDefaultMonitorProfileName() + ")");
+        profileBox.append (M ("MONITOR_PROFILE_SYSTEM") + " (" + rtengine::ICCStore::getInstance()->getDefaultMonitorProfileName() + ")");
         profileBox.set_active (options.rtSettings.autoMonitorProfile ? 1 : 0);
 #else
         profileBox.set_active (0);
 #endif
-        const std::vector<Glib::ustring> profiles = rtengine::iccStore->getProfiles (rtengine::ICCStore::ProfileType::MONITOR);
+        const std::vector<Glib::ustring> profiles = rtengine::ICCStore::getInstance()->getProfiles (rtengine::ICCStore::ProfileType::MONITOR);
 
         for (const auto profile : profiles) {
             profileBox.append (profile);
@@ -180,7 +180,7 @@ private:
 //#ifdef WIN32
 
         if (profileBox.get_active_row_number () == 1) {
-            profile = rtengine::iccStore->getDefaultMonitorProfileName ();
+            profile = rtengine::ICCStore::getInstance()->getDefaultMonitorProfileName ();
 
             if (profile.empty ()) {
                 profile = options.rtSettings.monitorProfile;
@@ -214,7 +214,7 @@ private:
             profileBox.set_tooltip_text ("");
 
         } else {
-            const uint8_t supportedIntents = rtengine::iccStore->getProofIntents (profile);
+            const uint8_t supportedIntents = rtengine::ICCStore::getInstance()->getProofIntents (profile);
             const bool supportsRelativeColorimetric = supportedIntents & 1 << INTENT_RELATIVE_COLORIMETRIC;
             const bool supportsPerceptual = supportedIntents & 1 << INTENT_PERCEPTUAL;
             const bool supportsAbsoluteColorimetric = supportedIntents & 1 << INTENT_ABSOLUTE_COLORIMETRIC;
@@ -395,7 +395,7 @@ public:
 };
 
 EditorPanel::EditorPanel (FilePanel* filePanel)
-    : realized (false), iHistoryShow (nullptr), iHistoryHide (nullptr), iTopPanel_1_Show (nullptr), iTopPanel_1_Hide (nullptr), iRightPanel_1_Show (nullptr), iRightPanel_1_Hide (nullptr), iBeforeLockON (nullptr), iBeforeLockOFF (nullptr), beforePreviewHandler (nullptr), beforeIarea (nullptr), beforeBox (nullptr), afterBox (nullptr), afterHeaderBox (nullptr), parent (nullptr), openThm (nullptr), ipc (nullptr), beforeIpc (nullptr), isProcessing (false), catalogPane (nullptr)
+    : catalogPane (nullptr), realized (false), iHistoryShow (nullptr), iHistoryHide (nullptr), iTopPanel_1_Show (nullptr), iTopPanel_1_Hide (nullptr), iRightPanel_1_Show (nullptr), iRightPanel_1_Hide (nullptr), iBeforeLockON (nullptr), iBeforeLockOFF (nullptr), beforePreviewHandler (nullptr), beforeIarea (nullptr), beforeBox (nullptr), afterBox (nullptr), afterHeaderBox (nullptr), parent (nullptr), openThm (nullptr), ipc (nullptr), beforeIpc (nullptr), isProcessing (false)
 {
 
     epih = new EditorPanelIdleHelper;
@@ -1082,7 +1082,7 @@ void EditorPanel::setProgress (double p)
     spparams *s = new spparams;
     s->val = p;
     s->pProgress = progressLabel;
-    idle_register.add(setprogressStrUI, s);
+    idle_register.add (setprogressStrUI, s);
 }
 
 void EditorPanel::setProgressStr (Glib::ustring str)
@@ -1091,7 +1091,7 @@ void EditorPanel::setProgressStr (Glib::ustring str)
     s->str = str;
     s->val = -1;
     s->pProgress = progressLabel;
-    idle_register.add(setprogressStrUI, s);
+    idle_register.add (setprogressStrUI, s);
 }
 
 // This is only called from the ThreadUI, so within the gtk thread

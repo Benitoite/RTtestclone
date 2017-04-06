@@ -289,7 +289,7 @@ void RawImageSource::MSR (float** luminance, float** originalLuminance, float **
                 }
             }
 
-            float varx;
+            float varx = 0.f;
             float limdx, ilimdx;
 
             if (gradvart != 0) {
@@ -361,7 +361,7 @@ void RawImageSource::MSR (float** luminance, float** originalLuminance, float **
                 src[i] = &srcBuffer[i * W_L];
             }
 
-            int h_th, s_th;
+            int h_th = 0, s_th = 0;
 
             int shHighlights = deh.highlights;
             int shShadows = deh.shadows;
@@ -843,7 +843,7 @@ void ImProcFunctions::MSRWav (float** luminance, const float* const *originalLum
         float         mean, stddv, maxtr, mintr;
         float         delta;
         constexpr float eps = 2.f;
-        constexpr bool useHsl = false; //never used
+        //   constexpr bool useHsl = false; //never used
         constexpr bool useHslLin = false;//never used
         const float offse = deh.offs;
         const float chrT = deh.chrrt / 100.f;
@@ -1175,7 +1175,9 @@ void ImProcFunctions::MSRWav (float** luminance, const float* const *originalLum
         // I call mean_stddv2 instead of mean_stddv ==> logBetaGain
 
         mean_stddv2 ( luminance, mean, stddv, W_L, H_L, maxtr, mintr);
-        float asig, bsig, amax, bmax, amin, bmin;
+        float asig = 0.f, bsig = 0.f, amax = 0.f, bmax = 0.f, amin = 0.f, bmin = 0.f;
+
+
 
         const bool hasWavRetGainCurve = wavRETgainCcurve && mean != 0.f && stddv != 0.f;
 

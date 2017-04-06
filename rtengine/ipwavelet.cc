@@ -177,7 +177,7 @@ SSEFUNCTION void ImProcFunctions::ip_wavelet (LabImage * lab, LabImage * dst, fl
     // init variables to display Munsell corrections
     MunsellDebugInfo* MunsDebugInfo = new MunsellDebugInfo();
 #endif
-    TMatrix wiprof = iccStore->workingSpaceInverseMatrix (params->icm.working);
+    TMatrix wiprof = ICCStore::getInstance()->workingSpaceInverseMatrix (params->icm.working);
     double wip[3][3] = {
         {wiprof[0][0], wiprof[0][1], wiprof[0][2]},
         {wiprof[1][0], wiprof[1][1], wiprof[1][2]},
@@ -314,7 +314,7 @@ SSEFUNCTION void ImProcFunctions::ip_wavelet (LabImage * lab, LabImage * dst, fl
         cp.edgampl = (float) params->wavelet.edgeampli;
     }
 
-    int N = imheight * imwidth;
+    //int N = imheight * imwidth;
     int maxmul = params->wavelet.thres;
     cp.maxilev = maxmul;
     static const float scales[10] = {1.f, 2.f, 4.f, 8.f, 16.f, 32.f, 64.f, 128.f, 256.f, 512.f};
@@ -808,7 +808,7 @@ SSEFUNCTION void ImProcFunctions::ip_wavelet (LabImage * lab, LabImage * dst, fl
                 int width  = tileright - tileleft;
                 int height = tilebottom - tiletop;
                 LabImage * labco;
-                float **Lold;
+                float **Lold = nullptr;
                 float *LoldBuffer = nullptr;
 
                 if (numtiles == 1) { // untiled processing => we can use output buffer for labco
@@ -995,7 +995,7 @@ SSEFUNCTION void ImProcFunctions::ip_wavelet (LabImage * lab, LabImage * dst, fl
                     if (!Ldecomp->memoryAllocationFailed) {
 
                         float madL[8][3];
-                        bool memoryAllocationFailed = false;
+                        //      bool memoryAllocationFailed = false;
 
 #ifdef _RT_NESTED_OPENMP
                         #pragma omp parallel for schedule(dynamic) collapse(2) num_threads(wavNestedLevels) if(wavNestedLevels>1)
@@ -1083,10 +1083,11 @@ SSEFUNCTION void ImProcFunctions::ip_wavelet (LabImage * lab, LabImage * dst, fl
                             float* noisevarlum = NULL;  // we need a dummy to pass it to WaveletDenoiseAllL
 
                             //   if(minlevwavL!=2) {//disabled Denoise for 2 levels
+                            WaveletDenoiseAllL (*Ldecomp, noisevarlum, madL, vari, minlevwavL, edge);
 
-                            if (!WaveletDenoiseAllL (*Ldecomp, noisevarlum, madL, vari, minlevwavL, edge)) { //
-                                memoryAllocationFailed = true;
-                            }
+                            //                          if (!WaveletDenoiseAllL (*Ldecomp, noisevarlum, madL, vari, minlevwavL, edge)) { //
+                            //                              memoryAllocationFailed = true;
+                            //                          }
 
                             //  }
                         }
@@ -1601,7 +1602,7 @@ SSEFUNCTION void ImProcFunctions::ip_wavelet (LabImage * lab, LabImage * dst, fl
 
     if (tata) {
         bool merg = false;
-        bool toto = true;
+        //    bool toto = true;
         // merg = cp.mergeena;
         Glib::ustring inp;
         inp = params->wavelet.inpute;
@@ -1768,7 +1769,8 @@ void ImProcFunctions::Averneur ( float ***tempneur, int datalen, int lvl, int di
     #pragma omp parallel num_threads(wavNestedLevels) if(wavNestedLevels>1)
 #endif
     {
-        float lmax = 0.f, lmin = 0.f;
+        float lmax = 0.f;
+        //  float lmin = 0.f;
 #ifdef _RT_NESTED_OPENMP
         #pragma omp for reduction(+:averaP,countP) nowait
 #endif
@@ -1839,7 +1841,7 @@ void ImProcFunctions::Sigma ( float *  RESTRICT DataList, int datalen, float ave
 
 void ImProcFunctions::Textur ( float *  RESTRICT DataList, int datalen, float averagePlus, float sigmaPlus, float &textp)
 {
-    int countP = 0, countN = 0;
+//   int countP = 0, countN = 0;
     float TP = 0.f;
 //   float thres = 5.f;//different fom zero to take into account only data large enough
 
@@ -1865,20 +1867,18 @@ void ImProcFunctions::Neuraltwo (float *** tempneur, float neuthree[3][3], int W
 {
     //  StopWatch Stop1("Neuraltwo");
 
-    int dirr = 0;
-    int indnk;
-//    int indnklev[maxlvl];
-    const float eps = 0.01f;
-
-    float ava[4], avb[4], avLP[4], avLN[4];
-    float maxL[4], minL[4], maxa[4], maxb[4];
+//   int dirr = 0;
+    int indnk = 0;
+    //  float ava[4], avb[4];
+    float avLP[4], avLN[4];
+    float maxL[4] ; //maxa[4], maxb[4]; // minL[4],
     float sigP[4], sigN[4];
-    float texP[4], texN[4];
-    float AvL, AvN, SL, SN, maxLP, maxLN, MADL, textplus[8], textneg[8], textsom[8];
-    float madLlev[10];
+    float texP[4];// texN[4];
+    float AvL, SL, maxLP, textplus[8];
+//   float madLlev[10];
 
-    float thr = params->wavelet.thres;
-    int nk = 0;
+//    float thr = params->wavelet.thres;
+//   int nk = 0;
     float maxtex = 0.f;
 
     for (int lvl = 0; lvl < maxlvl; lvl++) {
@@ -1944,6 +1944,7 @@ void ImProcFunctions::Neuraltwo (float *** tempneur, float neuthree[3][3], int W
         }
     }
 
+// delete [] indnklev;
 
 }
 
@@ -2043,14 +2044,14 @@ void ImProcFunctions::Evalab (float ** WavCoeffs_ab,  int level, const struct co
 void ImProcFunctions::Eval2 (float ** WavCoeffs_L,  int level, const struct cont_params& cp,
                              int W_L, int H_L, int skip_L, int ind, float *mean, float *meanN, float *sigma, float *sigmaN, float *MaxP, float *MaxN, float *madL, float *textp, float *textn)
 {
-    const float eps = 0.01f;
+//   const float eps = 0.01f;
 
-    float ava[4], avb[4], avLP[4], avLN[4];
-    float maxL[4], minL[4], maxa[4], maxb[4];
+    float avLP[4], avLN[4];
+    float maxL[4], minL[4];
     float sigP[4], sigN[4];
     float AvL, AvN, SL, SN, maxLP, maxLN, MADL;
-    float madLlev[10];
-    float thr = params->wavelet.thres;
+//   float madLlev[10];
+//   float thr = params->wavelet.thres;
 
     for (int dir = 1; dir < 4; dir++) {
         Aver (WavCoeffs_L[dir], W_L * H_L,  avLP[dir], avLN[dir], maxL[dir], minL[dir]);
@@ -2432,7 +2433,7 @@ void ImProcFunctions::WaveletmergeL (LabImage * labco, int posit, bool first, fl
             int dir = 3;
             int hei = H_L;
             int wid = W_L;
-            int *indnklev = new int[9];
+            //       int *indnklev = new int[9];
             float **mea = new float* [9];
 
             for (int i = 0; i < 9; i++) {
@@ -2451,7 +2452,7 @@ void ImProcFunctions::WaveletmergeL (LabImage * labco, int posit, bool first, fl
                 maxi[i] = new float[3];
             }
 
-            float ***tempneur;
+            float ***tempneur = nullptr;
             float neuthree[10][3] = {
                 {0.f, 1.f, 0.f},
                 {0.2f, 0.7f, 0.1f},
@@ -2565,7 +2566,7 @@ void ImProcFunctions::WaveletmergeL (LabImage * labco, int posit, bool first, fl
             float kh = (float)H_L / hh;
 
             //printf("WAV RESI HH WW H=%d W=%d hh=%d ww=%d \n", H_L, W_L, hh, ww);
-            float limit[3];
+            //    float limit[3];
             //   printf("mea=%f sig=%f max=%f\n", mean[level], sigma[level], MaxP[level]);
             const float skinprotsty = params->wavelet.shapedetcolor;
             const float skinprotnegsty = -skinprotsty;
@@ -3470,7 +3471,7 @@ void ImProcFunctions::WaveletmergeAB (LabImage * labco, int posit, bool first, f
             float *sigmaNab = new float [9];
             float *MaxPab = new float [9];
             float *MaxNab = new float [9];
-            int ind;
+            int ind = 0;
 
             Evaluateab (WaveletCoeffs_ab, cp, ind, meanab, meanNab, sigmaab, sigmaNab, MaxPab, MaxNab);
 
@@ -3488,7 +3489,7 @@ void ImProcFunctions::WaveletmergeAB (LabImage * labco, int posit, bool first, f
             float kw = (float)W_L / ww;
             float kh = (float)H_L / hh;
             //  printf("H=%d W=%d h=%d w=%d kh=%f kw=%f Hcal=%f Wcal=%f\n", H_L, W_L, hh, ww, kh, kw, hh*kh, ww*kw);
-            float limit;
+            //       float limit = 0.f;
             const float skinprotsty = params->wavelet.shapedetcolor;
             const float skinprotnegsty = -skinprotsty;
             const float factorHardsty = (1.f - skinprotnegsty / 100.f);
@@ -3508,7 +3509,7 @@ void ImProcFunctions::WaveletmergeAB (LabImage * labco, int posit, bool first, f
                     float ** WavCoeffs_ab = WaveletCoeffs_ab.level_coeffs (lvl);
                     //  printf("meanab=%f\n", meanab[lvl]);
 
-                    limit = cp.shapedetectcolor / 50.f * meanab[lvl];
+                    //       limit = cp.shapedetectcolor / 50.f * meanab[lvl];
 #ifdef _RT_NESTED_OPENMP
                     #pragma omp for nowait
 #endif
@@ -4146,7 +4147,7 @@ void ImProcFunctions::ContAllL (float * koeLi[12], float * maxkoeLi, bool lipsch
     float bedstr = 1.f - 10.f * aedstr;
 
     if (cp.val > 0  && cp.edgeena) {
-        float * koe;
+        float * koe = nullptr;
         float maxkoe = 0.f;
 
         if (!lipschitz) {
@@ -4315,7 +4316,7 @@ void ImProcFunctions::ContAllL (float * koeLi[12], float * maxkoeLi, bool lipsch
             float asig = 0.166f / sigma[level];
             float bsig = 0.5f - asig * mean[level];
             float amean = 0.5f / mean[level];
-            float absciss;
+            float absciss = 0.f;
             float kinterm;
             float kmul;
             int borderL = 1;

@@ -1,3 +1,14 @@
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Warray-bounds"
+#pragma GCC diagnostic ignored "-Wsign-compare"
+#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
+#pragma GCC diagnostic ignored "-Wparentheses"
+#if (__GNUC__ == 6)
+#pragma GCC diagnostic ignored "-Wmisleading-indentation"
+#endif
+#endif
+
 /*RT*/#include <glib.h>
 /*RT*/#include <glib/gstdio.h>
 /*RT*/#undef MAX
@@ -251,7 +262,11 @@ void CLASS derror()
     if (feof(ifp))
       fprintf (stderr,_("Unexpected end of file\n"));
     else
+#ifdef WIN32
+      fprintf (stderr,_("Corrupt data near 0x%I64x\n"), (INT64) ftello(ifp));
+#else
       fprintf (stderr,_("Corrupt data near 0x%llx\n"), (INT64) ftello(ifp));
+#endif
   }
   data_error++;
 /*RT Issue 2467  longjmp (failure, 1);*/
@@ -1840,8 +1855,8 @@ void CLASS parse_hasselblad_gain()
       not be seen as clipped).
     */
 
-    ushort raw_h, count, ch_count, u16;
-    int i, offset;
+    ushort raw_h;
+    int offset;
     off_t base;
 
     base = ftell(ifp);
@@ -5897,7 +5912,7 @@ int CLASS parse_tiff_ifd (int base)
 	break;
       case 33422:			/* CFAPattern */
 	if (filters == 9) {
-	  FORC(36) ((char *)xtrans)[c] = fgetc(ifp) & 3;
+	  FORC(36) ((int *)xtrans)[c] = fgetc(ifp) & 3;
 	  break;
 	}
       case 64777:			/* Kodak P-series */
@@ -8578,7 +8593,7 @@ void CLASS identify()
 	parse_fuji (i);
     }
     load_raw = &CLASS unpacked_load_raw;
-    fseek (ifp, 100+28*(shot_select > 0), SEEK_SET);
+    fseek (ifp, 100+28*(shot_select > 0 && shot_select < is_raw), SEEK_SET);
     parse_tiff (data_offset = get4());
     parse_tiff (thumb_offset+12);
 /*RT*/    exif_base = thumb_offset+12;
@@ -9020,11 +9035,8 @@ canon_a5:
     }
     if (fuji_layout) raw_width *= is_raw;
     if (filters == 9)
-      FORC(36) ((char *)xtrans)[c] =
+      FORC(36) ((int *)xtrans)[c] =
 	xtrans_abs[(c/6+top_margin) % 6][(c+left_margin) % 6];
-	if(filters == 9 && raw_height * raw_width * 2 != raw_size) {
-        xtransCompressed = true;
-	}
   } else if (!strcmp(model,"KD-400Z")) {
     height = 1712;
     width  = 2312;
@@ -9495,7 +9507,7 @@ dng_skip:
 	adobe_coeff (make, model);
   if(!strncmp(make, "Samsung", 7) && !strncmp(model, "NX1",3))
 	adobe_coeff (make, model);
-  if(!strncmp(make, "Pentax", 6) && (!strncmp(model, "K10D",4) || !strncmp(model, "K-70",4)))
+  if((!strncmp(make, "Pentax", 6) && (!strncmp(model, "K10D",4) || !strncmp(model, "K-70",4) || !strncmp(model, "K-1",3))) && filters != 0)
 	adobe_coeff (make, model);
   if(!strncmp(make, "Leica", 5) && !strncmp(model, "Q",1))
     adobe_coeff (make, model);
@@ -9874,7 +9886,7 @@ struct tiff_hdr {
   char desc[512], make[64], model[64], soft[32], date[20], artist[64];
 };
 
-#include "xtranscompressed.cc"
+#include "fujicompressed.cc"
 
 /* RT: Delete from here */
 /*RT*/#undef SQR
@@ -9884,3 +9896,6 @@ struct tiff_hdr {
 /*RT*/#undef LIM
 /*RT*/#undef ULIM
 /*RT*/#undef CLIP
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif

@@ -39,11 +39,23 @@
 #define DEFPROFILE_IMG      "Neutral"
 // Profile name to use for internal values' profile
 #define DEFPROFILE_INTERNAL "Neutral"
+// Special name for the Dynamic profile
+#define DEFPROFILE_DYNAMIC  "Dynamic"
 
-class SaveFormat
+struct SaveFormat
 {
+    SaveFormat() :
+        format("jpg"),
+        pngBits(8),
+        pngCompression(6),
+        jpegQuality(90),
+        jpegSubSamp(2),
+        tiffBits(8),
+        tiffUncompressed(true),
+        saveParams(true)
+    {
+    }
 
-public:
     Glib::ustring format;
     int pngBits;
     int pngCompression;
@@ -52,7 +64,6 @@ public:
     int tiffBits;
     bool tiffUncompressed;
     bool saveParams;
-    SaveFormat () : format("jpg"), pngBits(8), pngCompression(6), jpegQuality(90), jpegSubSamp(2), tiffBits(8), tiffUncompressed(true), saveParams(true) {};
 };
 
 enum ThFileType {FT_Invalid = -1, FT_None = 0, FT_Raw = 1, FT_Jpeg = 2, FT_Tiff = 3, FT_Png = 4, FT_Custom = 5, FT_Tiff16 = 6, FT_Png16 = 7, FT_Custom16 = 8};
@@ -277,6 +288,7 @@ public:
     int           fastexport_resize_dataspec;
     int           fastexport_resize_width;
     int           fastexport_resize_height;
+    bool fastexport_use_fast_pipeline;
 
     // Dialog settings
     Glib::ustring lastIccDir;
@@ -307,7 +319,7 @@ public:
     void        setDefaults     ();
     int         readFromFile    (Glib::ustring fname);
     int         saveToFile      (Glib::ustring fname);
-    static bool load            ();
+    static bool load            (bool lightweight = false);
     static void save            ();
 
     // if multiUser=false, send back the global profile path

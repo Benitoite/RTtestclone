@@ -1072,6 +1072,14 @@ Camera constants:
         "ranges": { "white": 4050 } // nominal 4080-4093
     },
 
+    { // Quality C, color data guessed to be same with X-A3
+        "make_model": "FUJIFILM GFX 50S",
+        "dcraw_matrix": [ 12407,-5222,-1086,-2971,11116,2120,-294,1029,5284 ], // copy from X-A3 DNGv9.8 D65
+        "raw_crop": [ 0, 0, 8280, 6208 ], // full raw 9216X6210 - usefull 8280x6208
+      //  "raw_crop": [ 6, 6, 8264, 6200 ], // fuji official JPEG 8256X6192 10,11,9,8 - experimental crop to match with official
+        "ranges": { "white": 16300 }
+    },
+
     { // Quality A
         "make_model": "FUJIFILM S1",
         "dcraw_matrix": [ 12297,-4882,-1202,-2106,10691,1623,-88,1312,4790 ] // DNG_v8.5 D65
@@ -1758,6 +1766,11 @@ Camera constants:
         "make_model": "PENTAX K-x",
         "dcraw_matrix": [ 8843,-2837,-625,-5025,12644,2668,-411,1234,7410 ], // adobe dcp d65
         "ranges": { "white": 4080 } // nominal at ISO200 4094
+    },
+
+    { // Quality C, only Raw crop
+        "make_model": [ "RICOH PENTAX KP", "PENTAX KP" ],
+        "raw_crop": [ 52, 28, 6032, 4028 ]
     },
 
     { // Quality B, Intemediate ISO samples missing, Pentax_DNG WLtags are after BL sutraction and not valid

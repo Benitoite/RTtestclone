@@ -2,10 +2,12 @@
 
 #include "clutstore.h"
 
+#include "iccstore.h"
+#include "imagefloat.h"
 #include "opthelper.h"
 #include "rt_math.h"
-#include "imagefloat.h"
 #include "stdimagesource.h"
+
 #include "../rtgui/options.h"
 
 namespace
@@ -30,7 +32,7 @@ bool loadFile(
     bool res = false;
 
     if (fw == fh) {
-        unsigned int level = 1;
+        int level = 1;
 
         while (level * level * level < fw) {
             ++level;
@@ -284,7 +286,7 @@ void rtengine::HaldCLUT::splitClutFilename(
     profile_name = "sRGB";
 
     if (!name.empty()) {
-        for (const auto& working_profile : rtengine::getWorkingProfiles()) {
+        for (const auto& working_profile : rtengine::ICCStore::getWorkingProfiles()) {
             if (
                 !working_profile.empty() // This isn't strictly needed, but an empty wp name should be skipped anyway
                 && std::search(name.rbegin(), name.rend(), working_profile.rbegin(), working_profile.rend()) == name.rbegin()

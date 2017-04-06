@@ -22,6 +22,7 @@
 #include "options.h"
 #include "../rtengine/rt_math.h"
 #include "../rtengine/utils.h"
+#include "../rtengine/icons.h"
 #include "rtimage.h"
 #include "multilangmgr.h"
 
@@ -213,34 +214,6 @@ void thumbInterp (const unsigned char* src, int sw, int sh, unsigned char* dst, 
         rtengine::nearestInterp (src, sw, sh, dst, dw, dh);
     } else if (options.thumbInterp == 1) {
         rtengine::bilinearInterp (src, sw, sh, dst, dw, dh);
-    }
-}
-
-Glib::ustring removeExtension (const Glib::ustring& filename)
-{
-
-    Glib::ustring bname = Glib::path_get_basename(filename);
-    size_t lastdot = bname.find_last_of ('.');
-    size_t lastwhitespace = bname.find_last_of (" \t\f\v\n\r");
-
-    if (lastdot != bname.npos && (lastwhitespace == bname.npos || lastdot > lastwhitespace)) {
-        return filename.substr (0, filename.size() - (bname.size() - lastdot));
-    } else {
-        return filename;
-    }
-}
-
-Glib::ustring getExtension (const Glib::ustring& filename)
-{
-
-    Glib::ustring bname = Glib::path_get_basename(filename);
-    size_t lastdot = bname.find_last_of ('.');
-    size_t lastwhitespace = bname.find_last_of (" \t\f\v\n\r");
-
-    if (lastdot != bname.npos && (lastwhitespace == bname.npos || lastdot > lastwhitespace)) {
-        return filename.substr (filename.size() - (bname.size() - lastdot) + 1, filename.npos);
-    } else {
-        return "";
     }
 }
 
@@ -589,11 +562,11 @@ void ExpanderBox::hideBox()
 
 void MyExpander::init()
 {
-    inconsistentPBuf = Gdk::Pixbuf::create_from_file(RTImage::findIconAbsolutePath("expanderInconsistent.png"));
-    enabledPBuf = Gdk::Pixbuf::create_from_file(RTImage::findIconAbsolutePath("expanderEnabled.png"));
-    disabledPBuf = Gdk::Pixbuf::create_from_file(RTImage::findIconAbsolutePath("expanderDisabled.png"));
-    openedPBuf = Gdk::Pixbuf::create_from_file(RTImage::findIconAbsolutePath("expanderOpened.png"));
-    closedPBuf = Gdk::Pixbuf::create_from_file(RTImage::findIconAbsolutePath("expanderClosed.png"));
+    inconsistentPBuf = Gdk::Pixbuf::create_from_file(rtengine::findIconAbsolutePath("expanderInconsistent.png"));
+    enabledPBuf = Gdk::Pixbuf::create_from_file(rtengine::findIconAbsolutePath("expanderEnabled.png"));
+    disabledPBuf = Gdk::Pixbuf::create_from_file(rtengine::findIconAbsolutePath("expanderDisabled.png"));
+    openedPBuf = Gdk::Pixbuf::create_from_file(rtengine::findIconAbsolutePath("expanderOpened.png"));
+    closedPBuf = Gdk::Pixbuf::create_from_file(rtengine::findIconAbsolutePath("expanderClosed.png"));
 }
 
 MyExpander::MyExpander(bool useEnabled, Gtk::Widget* titleWidget) :
@@ -1505,7 +1478,7 @@ void BackBuffer::copyRGBCharData(const unsigned char *srcData, int srcX, int src
         return;
     }
 
-    for (unsigned int i = 0; i < (unsigned int)(srcH); ++i) {
+    for (int i = 0; i < srcH; ++i) {
         if (dstY + i >= surfH) {
             break;
         }
@@ -1513,7 +1486,7 @@ void BackBuffer::copyRGBCharData(const unsigned char *srcData, int srcX, int src
         src = srcData + i * srcRowStride;
         dst = dstData + ((dstY + i) * surfW + dstX) * 4;
 
-        for (unsigned int j = 0; j < (unsigned int)(srcW); ++j) {
+        for (int j = 0; j < srcW; ++j) {
             if (dstX + j >= surfW) {
                 break;
             }
@@ -1647,8 +1620,8 @@ void BackBuffer::copySurface(Cairo::RefPtr<Cairo::Context> crDest, Gdk::Rectangl
         int offsetY = rtengine::LIM<int>(offset.y, 0, surface->get_height());
 
         // now copy the off-screen Surface to the destination Surface
-        int srcSurfW = surface->get_width();
-        int srcSurfH = surface->get_height();
+        // int srcSurfW = surface->get_width();
+        // int srcSurfH = surface->get_height();
         //printf("srcSurf:  w: %d, h: %d\n", srcSurfW, srcSurfH);
         crDest->set_line_width(0.);
 

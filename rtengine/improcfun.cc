@@ -80,9 +80,9 @@ void ImProcFunctions::updateColorProfiles (const Glib::ustring& monitorProfile, 
     cmsHPROFILE monitor = nullptr;
     if (!monitorProfile.empty()) {
 #if !defined(__APPLE__) // No support for monitor profiles on OS X, all data is sRGB
-        monitor = iccStore->getProfile (monitorProfile);
+        monitor = ICCStore::getInstance()->getProfile (monitorProfile);
 #else
-        monitor = iccStore->getProfile ("RT_sRGB");
+        monitor = ICCStore::getInstance()->getProfile ("RT_sRGB");
 #endif
     }
 
@@ -97,7 +97,7 @@ void ImProcFunctions::updateColorProfiles (const Glib::ustring& monitorProfile, 
         if (softProof) {
             cmsHPROFILE oprof = nullptr;
             if (!settings->printerProfile.empty()) {
-                oprof = iccStore->getProfile(settings->printerProfile);
+                oprof = ICCStore::getInstance()->getProfile(settings->printerProfile);
             }
 
             if (oprof) {
@@ -137,7 +137,7 @@ void ImProcFunctions::updateColorProfiles (const Glib::ustring& monitorProfile, 
 void ImProcFunctions::firstAnalysis (const Imagefloat* const original, const ProcParams &params, LUTu & histogram)
 {
 
-    TMatrix wprof = iccStore->workingSpaceMatrix (params.icm.working);
+    TMatrix wprof = ICCStore::getInstance()->workingSpaceMatrix (params.icm.working);
 
     lumimul[0] = wprof[1][0];
     lumimul[1] = wprof[1][1];
@@ -246,9 +246,7 @@ void ImProcFunctions::ciecam_02 (CieImage* ncie, double adap, int begh, int endh
         //end preparate histogram
         int width = lab->W, height = lab->H;
         float minQ = 10000.f;
-        float minM = 10000.f;
         float maxQ = -1000.f;
-        float maxM = -1000.f;
         float w_h;
         float a_w;
         float c_;
@@ -256,9 +254,9 @@ void ImProcFunctions::ciecam_02 (CieImage* ncie, double adap, int begh, int endh
         double Yw;
         Yw = 1.0;
         double Xw, Zw;
-        double f, c, nc, yb, la, xw, yw, zw, f2, c2, nc2, yb2, la2;
+        double f, c, nc, yb = 0., la, xw, yw, zw, f2 = 0., c2 = 0., nc2 = 0., yb2 = 0., la2;
         double fl, n, nbb, ncb, aw;
-        double xwd, ywd, zwd;
+        double xwd = 0., ywd, zwd = 0.;
         int alg = 0;
         bool algepd = false;
         float sum = 0.f;
@@ -557,7 +555,7 @@ void ImProcFunctions::ciecam_02 (CieImage* ncie, double adap, int begh, int endh
 #endif
         {
             //matrix for current working space
-            TMatrix wiprof = iccStore->workingSpaceInverseMatrix (params->icm.working);
+            TMatrix wiprof = ICCStore::getInstance()->workingSpaceInverseMatrix (params->icm.working);
             double wip[3][3] = {
                 {wiprof[0][0], wiprof[0][1], wiprof[0][2]},
                 {wiprof[1][0], wiprof[1][1], wiprof[1][2]},
@@ -1199,9 +1197,7 @@ void ImProcFunctions::ciecam_02 (CieImage* ncie, double adap, int begh, int endh
                     float t_l = static_cast<float>(params->dirpyrequalizer.hueskin.value[1]) / 100.0f;
                     float b_r = static_cast<float>(params->dirpyrequalizer.hueskin.value[2]) / 100.0f;
                     float t_r = static_cast<float>(params->dirpyrequalizer.hueskin.value[3]) / 100.0f;
-                    int choice = 0;
 
-                    bool alread = false;
                     float artifact = (float) settings->artifact_cbdl;
 
                     if(artifact > 6.f) {
@@ -1216,7 +1212,6 @@ void ImProcFunctions::ciecam_02 (CieImage* ncie, double adap, int begh, int endh
                     float chrom = 50.f;
                     {
                         ImProcFunctions::badpixcam (ncie, artifact, 5, 2 , b_l, t_l, t_r, b_r, params->dirpyrequalizer.skinprotect , chrom, hotbad);    //enabled remove artifacts for cbDL
-                        alread = true;
                     }
                 }
             }
@@ -1287,7 +1282,7 @@ void ImProcFunctions::ciecam_02 (CieImage* ncie, double adap, int begh, int endh
             #pragma omp parallel default(shared) firstprivate(lab,xw2,yw2,zw2,chr,yb,la2,yb2, height,width,begh, endh, nc2,f2,c2, gamu, highlight,pW)
 #endif
             {
-                TMatrix wiprofa = iccStore->workingSpaceInverseMatrix (params->icm.working);
+                TMatrix wiprofa = ICCStore::getInstance()->workingSpaceInverseMatrix (params->icm.working);
                 double wipa[3][3] = {
                     {wiprofa[0][0], wiprofa[0][1], wiprofa[0][2]},
                     {wiprofa[1][0], wiprofa[1][1], wiprofa[1][2]},
@@ -1479,7 +1474,7 @@ void ImProcFunctions::ciecam_02float (CieImage* ncie, float adap, int begh, int 
         float Yw;
         Yw = 1.0;
         double Xw, Zw;
-        float f, nc, yb, la, c, xw, yw, zw, f2, c2, nc2, yb2;
+        float f, nc, yb = 0.f, la, c, xw, yw, zw, f2 = 1.f, c2 = 1.f, nc2 = 1.f, yb2;
         float fl, n, nbb, ncb, aw; //d
         float xwd, ywd, zwd;
         int alg = 0;
@@ -1658,24 +1653,10 @@ void ImProcFunctions::ciecam_02float (CieImage* ncie, float adap, int begh, int 
         // extracting datas from 'params' to avoid cache flush (to be confirmed)
         const ColorAppearanceParams::eTCModeId curveMode = params->colorappearance.curveMode;
         const bool hasColCurve1 = bool(customColCurve1);
-        bool t1L = false;
-        bool t1B = false;
-
-        if (hasColCurve1 && curveMode == ColorAppearanceParams::TC_MODE_LIGHT) {
-            t1L = true;
-        }
-
-        if(hasColCurve1 && curveMode == ColorAppearanceParams::TC_MODE_BRIGHT) {
-            t1B = true;
-        }
+        const bool t1L = hasColCurve1 && curveMode == ColorAppearanceParams::TC_MODE_LIGHT;
 
         const ColorAppearanceParams::eTCModeId curveMode2 = params->colorappearance.curveMode2;
         const bool hasColCurve2 = bool(customColCurve2);
-        bool t2B = false;
-
-        if(hasColCurve2 && curveMode2 == ColorAppearanceParams::TC_MODE_BRIGHT) {
-            t2B = true;
-        }
 
         const ColorAppearanceParams::eCTCModeId curveMode3 = params->colorappearance.curveMode3;
         const bool hasColCurve3 = bool(customColCurve3);
@@ -1891,7 +1872,7 @@ void ImProcFunctions::ciecam_02float (CieImage* ncie, float adap, int begh, int 
 
 
         //matrix for current working space
-        TMatrix wiprof = iccStore->workingSpaceInverseMatrix (params->icm.working);
+        TMatrix wiprof = ICCStore::getInstance()->workingSpaceInverseMatrix (params->icm.working);
         const float wip[3][3] = {
             {(float)wiprof[0][0], (float)wiprof[0][1], (float)wiprof[0][2]},
             {(float)wiprof[1][0], (float)wiprof[1][1], (float)wiprof[1][2]},
@@ -2472,10 +2453,9 @@ void ImProcFunctions::ciecam_02float (CieImage* ncie, float adap, int begh, int 
 
                     // gamut control in Lab mode; I must study how to do with cIECAM only
                     if(gamu == 1) {
-                        float HH, Lprov1, Chprov1;
+                        float Lprov1, Chprov1;
                         Lprov1 = Ll / 327.68f;
                         Chprov1 = sqrtf(SQR(aa) + SQR(bb)) / 327.68f;
-                        HH = xatan2f(bb, aa);
                         float2  sincosval;
 
                         if(Chprov1 == 0.0f) {
@@ -2953,9 +2933,7 @@ void ImProcFunctions::rgbProc (Imagefloat* working, LabImage* lab, PipetteBuffer
     BENCHFUN
     Imagefloat *tmpImage = nullptr;
 
-    // NOTE: We're getting all 3 pointers here, but this function may not need them all, so one could optimize this
     Imagefloat* editImgFloat = nullptr;
-    LabImage* editLab = nullptr;
     PlanarWhateverData<float>* editWhatever = nullptr;
     EditUniqueID editID = pipetteBuffer ? pipetteBuffer->getEditID() : EUID_None;
 
@@ -2966,7 +2944,6 @@ void ImProcFunctions::rgbProc (Imagefloat* working, LabImage* lab, PipetteBuffer
                 break;
 
             case (BT_LABIMAGE):
-                editLab = pipetteBuffer->getLabBuffer();
                 break;
 
             case (BT_SINGLEPLANE_FLOAT):
@@ -2975,7 +2952,7 @@ void ImProcFunctions::rgbProc (Imagefloat* working, LabImage* lab, PipetteBuffer
         }
     }
 
-    int h_th, s_th;
+    int h_th = 0, s_th = 0;
 
     if (shmap) {
         h_th = shmap->max_f - params->sh.htonalwidth * (shmap->max_f - shmap->avg) / 100;
@@ -2986,8 +2963,8 @@ void ImProcFunctions::rgbProc (Imagefloat* working, LabImage* lab, PipetteBuffer
     bool processLCE = params->sh.enabled && shmap && params->sh.localcontrast > 0;
     double lceamount = params->sh.localcontrast / 200.0;
 
-    TMatrix wprof = iccStore->workingSpaceMatrix (params->icm.working);
-    TMatrix wiprof = iccStore->workingSpaceInverseMatrix (params->icm.working);
+    TMatrix wprof = ICCStore::getInstance()->workingSpaceMatrix (params->icm.working);
+    TMatrix wiprof = ICCStore::getInstance()->workingSpaceInverseMatrix (params->icm.working);
 
     float toxyz[3][3] = {
         {
@@ -3030,10 +3007,10 @@ void ImProcFunctions::rgbProc (Imagefloat* working, LabImage* lab, PipetteBuffer
                         params->chmixer.green[0] != 0 || params->chmixer.green[1] != 100 || params->chmixer.green[2] != 0 ||
                         params->chmixer.blue[0] != 0  || params->chmixer.blue[1] != 0    || params->chmixer.blue[2] != 100);
 
-    FlatCurve* hCurve;
-    FlatCurve* sCurve;
-    FlatCurve* vCurve;
-    FlatCurve* bwlCurve;
+    FlatCurve* hCurve = nullptr;
+    FlatCurve* sCurve = nullptr;
+    FlatCurve* vCurve = nullptr;
+    FlatCurve* bwlCurve = nullptr;
 
     FlatCurveType hCurveType = (FlatCurveType)params->hsvequalizer.hcurve.at(0);
     FlatCurveType sCurveType = (FlatCurveType)params->hsvequalizer.scurve.at(0);
@@ -3087,7 +3064,7 @@ void ImProcFunctions::rgbProc (Imagefloat* working, LabImage* lab, PipetteBuffer
 
     std::shared_ptr<HaldCLUT> hald_clut;
     bool clutAndWorkingProfilesAreSame = false;
-    TMatrix xyz2clut, clut2xyz;
+    TMatrix xyz2clut = {}, clut2xyz = {};
 #ifdef __SSE2__
     vfloat v_work2xyz[3][3] ALIGNED16;
     vfloat v_xyz2clut[3][3] ALIGNED16;
@@ -3102,8 +3079,8 @@ void ImProcFunctions::rgbProc (Imagefloat* working, LabImage* lab, PipetteBuffer
             clutAndWorkingProfilesAreSame = hald_clut->getProfile() == params->icm.working;
 
             if ( !clutAndWorkingProfilesAreSame ) {
-                xyz2clut = iccStore->workingSpaceInverseMatrix( hald_clut->getProfile() );
-                clut2xyz = iccStore->workingSpaceMatrix( hald_clut->getProfile() );
+                xyz2clut = ICCStore::getInstance()->workingSpaceInverseMatrix( hald_clut->getProfile() );
+                clut2xyz = ICCStore::getInstance()->workingSpaceMatrix( hald_clut->getProfile() );
 
 #ifdef __SSE2__
 
@@ -3274,12 +3251,9 @@ void ImProcFunctions::rgbProc (Imagefloat* working, LabImage* lab, PipetteBuffer
         tmpImage = new Imagefloat(working->getWidth(), working->getHeight());
     }
 
-    int W = working->getWidth();
-    int H = working->getHeight();
-
     // For tonecurve histogram
     int toneCurveHistSize = histToneCurve ? histToneCurve.getSize() : 0;
-    int histToneCurveCompression;
+    int histToneCurveCompression = 0;
 
     if(toneCurveHistSize > 0) {
         histToneCurve.clear();
@@ -3310,7 +3284,7 @@ void ImProcFunctions::rgbProc (Imagefloat* working, LabImage* lab, PipetteBuffer
         int tH;
 
         // Allocating buffer for the PipetteBuffer
-        float *editIFloatTmpR, *editIFloatTmpG, *editIFloatTmpB, *editWhateverTmp;
+        float *editIFloatTmpR = nullptr, *editIFloatTmpG = nullptr, *editIFloatTmpB = nullptr, *editWhateverTmp = nullptr;
 
         if (editImgFloat) {
             editIFloatBuffer = (char *) malloc(3 * sizeof(float) * TS * TS + 20 * 64 + 63);
@@ -3952,7 +3926,7 @@ void ImProcFunctions::rgbProc (Imagefloat* working, LabImage* lab, PipetteBuffer
                     else if (params->colorToning.method == "Lab" && opautili) {
                         int algm = 0;
                         bool twocol = true;//true=500 color   false=2 color
-                        int metchrom;
+                        int metchrom = 0;
 
                         if      (params->colorToning.twocolor == "Std"  ) {
                             metchrom = 0;
@@ -3968,7 +3942,7 @@ void ImProcFunctions::rgbProc (Imagefloat* working, LabImage* lab, PipetteBuffer
                             twocol = false;
                         }
 
-                        float iplow, iphigh;
+                        float iplow = 0.f, iphigh = 0.f;
 
                         if(!twocol) {
                             iplow = (float)ctColorCurve.low;
@@ -4660,7 +4634,7 @@ void ImProcFunctions::rgbProc (Imagefloat* working, LabImage* lab, PipetteBuffer
             else if (params->colorToning.method == "Lab"  && opautili) {
                 int algm = 0;
                 bool twocol = true;
-                int metchrom;
+                int metchrom = 0;
 
                 if      (params->colorToning.twocolor == "Std"  ) {
                     metchrom = 0;
@@ -4676,7 +4650,7 @@ void ImProcFunctions::rgbProc (Imagefloat* working, LabImage* lab, PipetteBuffer
                     twocol = false;
                 }
 
-                float iplow, iphigh;
+                float iplow = 0.f, iphigh = 0.f;
 
                 if(!twocol) {
                     iplow = (float)ctColorCurve.low;
@@ -5205,8 +5179,6 @@ void ImProcFunctions::toning2col (float r, float g, float b, float &ro, float &g
     Color::rgb2hsv(r, g, b, h, s, v);
     float ksat = 1.f;
     float ksatlow = 1.f;
-    float s_0 = 0.55f;
-    float s_1 = 0.85f;
     /*
         if(mode==0) {//color
             if(s < s_0) ksat=SQR((1.f/s_0)*s);
@@ -5223,7 +5195,7 @@ void ImProcFunctions::toning2col (float r, float g, float b, float &ro, float &g
     float aa, bb, cc;
     //fixed value of reducac =0.4;
     secondeg_end (reducac, iplow, aa, bb, cc);
-    float aab, bbb, ccb;
+    float aab, bbb;
 
     secondeg_begin (0.7f, iplow, aab, bbb);
 
@@ -5458,9 +5430,6 @@ SSEFUNCTION void ImProcFunctions::chromiLuminanceCurve (PipetteBuffer *pipetteBu
     // lhskcurve.dump("lh_curve");
     //init Flatcurve for C=f(H)
 
-    // NOTE: We're getting all 3 pointers here, but this function may not need them all, so one could optimize this
-    Imagefloat* editImgFloat = nullptr;
-    LabImage* editLab = nullptr;
     PlanarWhateverData<float>* editWhatever = nullptr;
     EditUniqueID editID = EUID_None;
     bool editPipette = false;
@@ -5473,11 +5442,9 @@ SSEFUNCTION void ImProcFunctions::chromiLuminanceCurve (PipetteBuffer *pipetteBu
 
             switch  (pipetteBuffer->getDataProvider()->getCurrSubscriber()->getPipetteBufferType()) {
                 case (BT_IMAGEFLOAT):
-                    editImgFloat = pipetteBuffer->getImgFloatBuffer();
                     break;
 
                 case (BT_LABIMAGE):
-                    editLab = pipetteBuffer->getLabBuffer();
                     break;
 
                 case (BT_SINGLEPLANE_FLOAT):
@@ -5642,14 +5609,14 @@ SSEFUNCTION void ImProcFunctions::chromiLuminanceCurve (PipetteBuffer *pipetteBu
     const bool gamutLch = settings->gamutLch;
     const float amountchroma = (float) settings->amchroma;
 
-    TMatrix wiprof = iccStore->workingSpaceInverseMatrix (params->icm.working);
+    TMatrix wiprof = ICCStore::getInstance()->workingSpaceInverseMatrix (params->icm.working);
     double wip[3][3] = {
         {wiprof[0][0], wiprof[0][1], wiprof[0][2]},
         {wiprof[1][0], wiprof[1][1], wiprof[1][2]},
         {wiprof[2][0], wiprof[2][1], wiprof[2][2]}
     };
 
-    TMatrix wprof = iccStore->workingSpaceMatrix (params->icm.working);
+    TMatrix wprof = ICCStore::getInstance()->workingSpaceMatrix (params->icm.working);
     double wp[3][3] = {
         {wprof[0][0], wprof[0][1], wprof[0][2]},
         {wprof[1][0], wprof[1][1], wprof[1][2]},
@@ -6404,7 +6371,6 @@ void ImProcFunctions::EPDToneMapCIE(CieImage *ncie, float a_w, float c_, float w
     float sca = params->epd.scale;
     float gamm = params->epd.gamma;
     float rew = params->epd.reweightingIterates;
-    unsigned int i, N = Wid * Hei;
     float Qpro = ( 4.0 / c_)  * ( a_w + 4.0 ) ; //estimate Q max if J=100.0
     float *Qpr = ncie->Q_p[0];
 
@@ -6519,7 +6485,7 @@ void ImProcFunctions::EPDToneMap(LabImage *lab, unsigned int Iterates, int skip)
     float *L = lab->L[0];
     float *a = lab->a[0];
     float *b = lab->b[0];
-    unsigned int i, N = lab->W * lab->H;
+    size_t N = lab->W * lab->H;
     EdgePreservingDecomposition epd(lab->W, lab->H);
 
     //Due to the taking of logarithms, L must be nonnegative. Further, scale to 0 to 1 using nominal range of L, 0 to 15 bit.
@@ -6531,7 +6497,7 @@ void ImProcFunctions::EPDToneMap(LabImage *lab, unsigned int Iterates, int skip)
         float lmaxL = 0.f;
         #pragma omp for
 
-        for(i = 0; i < N; i++) {
+        for(size_t i = 0; i < N; i++) {
             if(L[i] < lminL) {
                 lminL = L[i];
             }
@@ -6542,15 +6508,15 @@ void ImProcFunctions::EPDToneMap(LabImage *lab, unsigned int Iterates, int skip)
         }
 
         #pragma omp critical
+        {
+            if(lminL < minL) {
+                minL = lminL;
+            }
 
-        if(lminL < minL) {
-            minL = lminL;
+            if(lmaxL > maxL) {
+                maxL = lmaxL;
+            }
         }
-
-        if(lmaxL > maxL) {
-            maxL = lmaxL;
-        }
-
     }
 
     if(minL > 0.0f) {
@@ -6559,7 +6525,7 @@ void ImProcFunctions::EPDToneMap(LabImage *lab, unsigned int Iterates, int skip)
 
     #pragma omp parallel for
 
-    for(i = 0; i < N; i++)
+    for(size_t i = 0; i < N; ++i)
         //{L[i] = (L[i] - minL)/32767.0f;
     {
         L[i] = (L[i] - minL) / maxL;
@@ -6594,7 +6560,7 @@ void ImProcFunctions::EPDToneMap(LabImage *lab, unsigned int Iterates, int skip)
     #pragma omp parallel for            // removed schedule(dynamic,10)
 #endif
 
-    for(int ii = 0; ii < N; ii++) {
+    for(size_t ii = 0; ii < N; ++ii) {
         a[ii] *= s;
         b[ii] *= s;
         L[ii] = L[ii] * maxL * (1.f / gamm) + minL;
@@ -6730,7 +6696,7 @@ void ImProcFunctions::getAutoExp  (const LUTu &histogram, int histcompr, double 
 
 
     // compute clipping points based on the original histograms (linear, without exp comp.)
-    int clipped = 0;
+    unsigned int clipped = 0;
     int rawmax = (imax) - 1;
 
     while (histogram[rawmax] + clipped <= 0 && rawmax > 1) {
@@ -6739,17 +6705,15 @@ void ImProcFunctions::getAutoExp  (const LUTu &histogram, int histcompr, double 
     }
 
     //compute clipped white point
-    int clippable = (int)(sum * clip / 100.f );
-    int somm = sum;
+    unsigned int clippable = (int)(sum * clip / 100.f );
     clipped = 0;
     int whiteclip = (imax) - 1;
 
-    while (whiteclip > 1 && histogram[whiteclip] + clipped <= clippable) {
+    while (whiteclip > 1 && (histogram[whiteclip] + clipped) <= clippable) {
         clipped += histogram[whiteclip];
         whiteclip--;
     }
 
-    int clipwh = clipped;
     //compute clipped black point
     clipped = 0;
     int shc = 0;
@@ -6758,8 +6722,6 @@ void ImProcFunctions::getAutoExp  (const LUTu &histogram, int histcompr, double 
         clipped += histogram[shc];
         shc++;
     }
-
-    int clipbl = clipped;
 
     //rescale to 65535 max
     rawmax <<= histcompr;
@@ -6776,7 +6738,6 @@ void ImProcFunctions::getAutoExp  (const LUTu &histogram, int histcompr, double 
     //compute exposure compensation as geometric mean of the amount that
     //sets the mean or median at middle gray, and the amount that sets the estimated top
     //of the histogram at or near clipping.
-    float expo = log(midgray * scale / (ave - shc + midgray * shc));
     //float expcomp1 = (log(/*(median/ave)*//*(hidev/lodev)*/midgray*scale/(ave-shc+midgray*shc))+log((hidev/lodev)))/log(2.f);
     float expcomp1 = (log(/*(median/ave)*//*(hidev/lodev)*/midgray * scale / (ave - shc + midgray * shc))) / log(2.f);
     float expcomp2;
@@ -6924,7 +6885,7 @@ double ImProcFunctions::getAutoDistor  (const Glib::ustring &fname, int thumb_si
             return 0.0;
         }
 
-        Thumbnail* raw =   rtengine::Thumbnail::loadFromRaw      (fname, ri, w_raw, h_raw, 1, 1.0, FALSE);
+        Thumbnail* raw =   rtengine::Thumbnail::loadFromRaw      (fname, ri, w_raw, h_raw, 1, 1.0, FALSE, 0);
 
         if (!raw) {
             delete thumb;
@@ -6983,7 +6944,7 @@ double ImProcFunctions::getAutoDistor  (const Glib::ustring &fname, int thumb_si
 
 void ImProcFunctions::rgb2lab(const Imagefloat &src, LabImage &dst, const Glib::ustring &workingSpace)
 {
-    TMatrix wprof = iccStore->workingSpaceMatrix( workingSpace );
+    TMatrix wprof = ICCStore::getInstance()->workingSpaceMatrix( workingSpace );
     const float wp[3][3] = {
         {static_cast<float>(wprof[0][0]), static_cast<float>(wprof[0][1]), static_cast<float>(wprof[0][2])},
         {static_cast<float>(wprof[1][0]), static_cast<float>(wprof[1][1]), static_cast<float>(wprof[1][2])},
@@ -7009,7 +6970,7 @@ void ImProcFunctions::rgb2lab(const Imagefloat &src, LabImage &dst, const Glib::
 
 SSEFUNCTION void ImProcFunctions::lab2rgb(const LabImage &src, Imagefloat &dst, const Glib::ustring &workingSpace)
 {
-    TMatrix wiprof = iccStore->workingSpaceInverseMatrix( workingSpace );
+    TMatrix wiprof = ICCStore::getInstance()->workingSpaceInverseMatrix( workingSpace );
     const float wip[3][3] = {
         {static_cast<float>(wiprof[0][0]), static_cast<float>(wiprof[0][1]), static_cast<float>(wiprof[0][2])},
         {static_cast<float>(wiprof[1][0]), static_cast<float>(wiprof[1][1]), static_cast<float>(wiprof[1][2])},

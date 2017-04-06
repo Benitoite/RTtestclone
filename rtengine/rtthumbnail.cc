@@ -50,7 +50,7 @@ namespace
             return false;
         }
 
-        const std::size_t length =
+        const ssize_t length =
             fdata(raw_image.get_thumbOffset(), raw_image.get_file())[1] != 0xD8 && raw_image.is_ppmThumb()
                 ? raw_image.get_thumbWidth() * raw_image.get_thumbHeight() * (raw_image.get_thumbBPS() / 8) * 3
                 : raw_image.get_thumbLength();
@@ -176,7 +176,8 @@ Thumbnail* Thumbnail::loadFromImage (const Glib::ustring& fname, int &w, int &h,
 Thumbnail* Thumbnail::loadQuickFromRaw (const Glib::ustring& fname, RawMetaDataLocation& rml, int &w, int &h, int fixwh, bool rotate, bool inspectorMode)
 {
     RawImage *ri = new RawImage(fname);
-    int r = ri->loadRaw(false, false);
+    unsigned int imageNum = 0;
+    int r = ri->loadRaw(false, imageNum, false);
 
     if( r ) {
         delete ri;
@@ -253,7 +254,7 @@ Thumbnail* Thumbnail::loadQuickFromRaw (const Glib::ustring& fname, RawMetaDataL
         std::string fname = ri->get_filename();
         std::string suffix = fname.length() > 4 ? fname.substr(fname.length() - 3) : "";
 
-        for (int i = 0; i < suffix.length(); i++) {
+        for (unsigned int i = 0; i < suffix.length(); i++) {
             suffix[i] = std::tolower(suffix[i]);
         }
 
@@ -290,7 +291,9 @@ RawMetaDataLocation Thumbnail::loadMetaDataFromRaw (const Glib::ustring& fname)
     rml.ciffLength = -1;
 
     RawImage ri(fname);
-    int r = ri.loadRaw(false);
+    unsigned int imageNum = 0;
+
+    int r = ri.loadRaw(false, imageNum);
 
     if( !r ) {
         rml.exifBase = ri.get_exifBase();
@@ -301,10 +304,12 @@ RawMetaDataLocation Thumbnail::loadMetaDataFromRaw (const Glib::ustring& fname)
     return rml;
 }
 
-Thumbnail* Thumbnail::loadFromRaw (const Glib::ustring& fname, RawMetaDataLocation& rml, int &w, int &h, int fixwh, double wbEq, bool rotate)
+Thumbnail* Thumbnail::loadFromRaw (const Glib::ustring& fname, RawMetaDataLocation& rml, int &w, int &h, int fixwh, double wbEq, bool rotate, int imageNum)
 {
     RawImage *ri = new RawImage (fname);
-    int r = ri->loadRaw(1, 0);
+    unsigned int tempImageNum = 0;
+
+    int r = ri->loadRaw(1, tempImageNum, 0);
 
     if( r ) {
         delete ri;
@@ -495,8 +500,8 @@ Thumbnail* Thumbnail::loadFromRaw (const Glib::ustring& fname, RawMetaDataLocati
 
         for (int row = 0; row < high; row++)
             for (int col = 0; col < wide; col++) {
-                unsigned ur = r = fw + (row - col) * step;
-                unsigned uc = c = (row + col) * step;
+                int ur = r = fw + (row - col) * step;
+                int uc = c = (row + col) * step;
 
                 if (ur > tmph - 2 || uc > tmpw - 2) {
                     continue;
@@ -545,9 +550,9 @@ Thumbnail* Thumbnail::loadFromRaw (const Glib::ustring& fname, RawMetaDataLocati
 
 
     if (ri->get_FujiWidth() != 0) {
-        tpp->scale = (double) (height - ri->get_FujiWidth()) / sqrt(0.5) / h;
+        tpp->scale = (double) (height - ri->get_FujiWidth()) * 2.0 / (rotate_90 ? w : h);
     } else {
-        tpp->scale = (double) height / h;
+        tpp->scale = (double) height / (rotate_90 ? w : h);
     }
 
     // generate histogram for auto exposure
@@ -770,21 +775,37 @@ void Thumbnail::init ()
                 cam2xyz[i][j] += xyz_sRGB[i][k] * colorMatrix[k][j];
             }
 
-    camProfile = iccStore->createFromMatrix (cam2xyz, false, "Camera");
+    camProfile = ICCStore::getInstance()->createFromMatrix (cam2xyz, false, "Camera");
 }
 
 Thumbnail::Thumbnail () :
-    iColorMatrix{}, cam2xyz{}, scale(1.0), colorMatrix{}, isRaw(true),
-    camProfile(nullptr), thumbImg(nullptr),
-    camwbRed(1.0), camwbGreen(1.0), camwbBlue(1.0),
-    redAWBMul(-1.0), greenAWBMul(-1.0), blueAWBMul(-1.0),
-    autoWBTemp(2700), autoWBGreen(1.0), wbEqual(-1.0), wbTempBias(0.0),
-    embProfileLength(0), embProfileData(nullptr), embProfile(nullptr),
-    redMultiplier(1.0), greenMultiplier(1.0), blueMultiplier(1.0),
+    camProfile(nullptr),
+    iColorMatrix{},
+    cam2xyz{},
+    thumbImg(nullptr),
+    camwbRed(1.0),
+    camwbGreen(1.0),
+    camwbBlue(1.0),
+    redAWBMul(-1.0),
+    greenAWBMul(-1.0),
+    blueAWBMul(-1.0),
+    autoWBTemp(2700),
+    autoWBGreen(1.0),
+    wbEqual(-1.0),
+    wbTempBias(0.0),
+    aeHistCompression(3),
+    embProfileLength(0),
+    embProfileData(nullptr),
+    embProfile(nullptr),
+    redMultiplier(1.0),
+    greenMultiplier(1.0),
+    blueMultiplier(1.0),
+    scale(1.0),
     defGain(1.0),
     scaleForSave(8192),
     gammaCorrected(false),
-    aeHistCompression(3)
+    colorMatrix{},
+    isRaw(true)
 {
 }
 
@@ -954,7 +975,6 @@ IImage8* Thumbnail::processImage (const procparams::ProcParams& params, int rhei
 
     LUTu hist16 (65536);
 
-    double gamma = isRaw ? Color::sRGBGamma : 0;  // usually in ImageSource, but we don't have that here
     ipf.firstAnalysis (baseImg, params, hist16);
 
     // perform transform
@@ -962,7 +982,7 @@ IImage8* Thumbnail::processImage (const procparams::ProcParams& params, int rhei
         Imagefloat* trImg = new Imagefloat (fw, fh);
         int origFW;
         int origFH;
-        double tscale;
+        double tscale = 0.0;
         getDimensions(origFW, origFH, tscale);
         ipf.transform (baseImg, trImg, 0, 0, 0, 0, fw, fh, origFW * tscale + 0.5, origFH * tscale + 0.5, focalLen, focalLen35mm, focusDist, 0, true); // Raw rotate degree not detectable here
         delete baseImg;
@@ -1033,13 +1053,13 @@ IImage8* Thumbnail::processImage (const procparams::ProcParams& params, int rhei
     bool opautili = false;
 
     if(params.colorToning.enabled) {
-        TMatrix wprof = iccStore->workingSpaceMatrix (params.icm.working);
+        TMatrix wprof = ICCStore::getInstance()->workingSpaceMatrix (params.icm.working);
         double wp[3][3] = {
             {wprof[0][0], wprof[0][1], wprof[0][2]},
             {wprof[1][0], wprof[1][1], wprof[1][2]},
             {wprof[2][0], wprof[2][1], wprof[2][2]}
         };
-        TMatrix wiprof = iccStore->workingSpaceInverseMatrix (params.icm.working);
+        TMatrix wiprof = ICCStore::getInstance()->workingSpaceInverseMatrix (params.icm.working);
         double wip[3][3] = {
             {wiprof[0][0], wiprof[0][1], wiprof[0][2]},
             {wiprof[1][0], wiprof[1][1], wiprof[1][2]},
@@ -1188,7 +1208,6 @@ IImage8* Thumbnail::processImage (const procparams::ProcParams& params, int rhei
         LUTf CAMBrightCurveQ;
         float CAMMean;
         int sk;
-        int scale;
         sk = 16;
         int rtt = 0;
         CieImage* cieView = new CieImage (fw, fh);

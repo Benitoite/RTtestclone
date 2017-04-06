@@ -418,6 +418,10 @@ bool FileBrowserEntry::pressNotify   (int button, int type, int bstate, int x, i
     int ix = x - startx - ofsX;
     int iy = y - starty - ofsY;
 
+    if (tm == TMNone) {
+        return b;
+    }
+
     if (!b && selected && inside (x, y)) {
         if (button == 1 && type == GDK_BUTTON_PRESS && state == SNormal) {
             if (onArea (CropTopLeft, ix, iy)) {
@@ -631,6 +635,7 @@ bool FileBrowserEntry::onArea (CursorArea a, int x, int y)
                y1 < cropParams.y + cropParams.h - 1 &&
                x1 > cropParams.x &&
                x1 < cropParams.x + cropParams.w - 1;
+    default: /* do nothing */ ;
     }
 
     return false;

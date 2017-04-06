@@ -2,7 +2,7 @@
   This file is part of RawTherapee.
 
   Copyright (c) 2016-2017 TooWaBoo
-  Version 2.44 - requires RT 5.0
+  Version 2.50 - requires RT 5.0 (Gtk+ >= 3.20)
 
   RawTherapee is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -58,7 +58,7 @@
 @define-color bg-button-border rgba(0,0,0,.60);
 @define-color bg-entry-border rgba(0,0,0,.40);
 @define-color view-grid-border rgba(255,255,255,0.15);
-@define-color headline-big rgb(190,190,190);
+@define-color headline-big rgb(195,195,195);
 @define-color headline-hl rgb(230,230,230);
 @define-color headline-frame rgb(215,215,215);
 /***********************************************************************************************/
@@ -76,10 +76,10 @@
 }
 
 #ToolPanelNotebook {
-    min-width: 23em;
+    min-width: 24.08334em;
 }
 #HistoryPanel {
-    min-width: 17.83334em;
+    min-width: 18em;
 }
 
 window.background {
@@ -456,8 +456,8 @@ menu separator {
 }
 
 #MyExpander separator {
-    background-color: shade(@bg-grey,.7);
-    margin: 0.33334em 0.66667em;
+    background-color: @view-grid-border;
+    margin: 0.33334em 0;
 }
 
 #PlacesPaned .view.separator {
@@ -488,7 +488,8 @@ menu separator {
 }
 
 #PartialPasteHeader label {
-    color: @headline-frame;
+    color: @headline-big;
+    font-weight: bold;
 }
 #PartialPasteHeader {
     margin: 0.5em 0 0 0;
@@ -788,9 +789,18 @@ window.csd:not(.fullscreen) #MainNotebook > header.top {
     margin-bottom: 0.33334em;
 }
 
+#ToolPanelNotebook > header tab {
+    margin-left: 0;
+    margin-right: 0;
+    padding: 0 0.33334em;
+}
+#ToolPanelNotebook > header tab + tab {
+    margin-left: 0.33333em;
+}
+
 #ToolPanelNotebook > header tab image{
     min-height: 2.5em;
-    min-width: calc(1.66667em + 6px);
+    min-width: 2em;
     padding: 0;
     margin: 0;
 }
@@ -891,6 +901,11 @@ window.csd:not(.fullscreen) #MainNotebook > header.top {
     margin: 0;
 }
 
+#MetaPanelNotebook combobox button {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    border-left: none;
+}
 #MetaPanelNotebook combobox + button,
 #MetaPanelNotebook combobox + button + button {
     margin-left: 0.16667em;
@@ -1016,12 +1031,13 @@ window.csd:not(.fullscreen) #MainNotebook > header.top {
     margin-right: 0;
 }
 
-#EditorTopPanel > box > button.image-button:not(:nth-child(6)) {
+#EditorTopPanel > box:nth-child(9) > button.image-button:not(:nth-child(6)) {
     min-width: 0;
     padding-left: 0.33334em;
     padding-right: 0.33334em;
 }
-#EditorTopPanel > box > button.image-button:nth-child(6) {
+
+#EditorTopPanel > box:nth-child(9) > button.image-button:nth-child(6) {
     -gtk-icon-shadow: none;
 }
 #EditorTopPanel > box > box > button {
@@ -1084,6 +1100,9 @@ window.csd:not(.fullscreen) #MainNotebook > header.top {
     background-color: shade(@bg-grey,.85);
     border-color: @bg-dark-grey;
     background-image: none;
+}
+#ThresholdAdjuster {
+    margin: 0.08334em 0 0.16667em 0;
 }
 
 #ToolPanelNotebook scrolledwindow viewport.frame {
@@ -1338,13 +1357,14 @@ button.MiddleH {
 }
 /**/
 
-/* Base format for Toolbox and dialogs */
+/* Button base format for Toolbox and dialogs */
 dialog button,
 #MyExpander button,
 #BatchQueueButtonsMainContainer button {
     min-height: 1.66667em;
     min-width: 0;
     padding: 0 0.375em;
+    margin: 0.08334em 0;
 }
 combobox .combo,
 dialog combobox .combo,
@@ -1372,6 +1392,13 @@ dialog combobox .combo,
     margin-left: 0.33334em;
 }
 
+buttonbox:not(.dialog-action-area) button{
+    margin: 0.08334em 0 0.33334em 0.16667em;
+}
+#PrefNotebook buttonbox:not(.dialog-action-area) {
+    margin-right: -5px;
+}
+
 /* Arrow toggle combo button */
 #IopsPanel button:not(.flat).Left + button:not(.flat).Right,
 #MyExpander button:not(.flat).Left + button:not(.flat).Right {
@@ -1390,13 +1417,6 @@ dialog combobox .combo,
 }
 /**/
 
-/* Add extra top and bottom space to buttons in toolbox & Preferences*/
-#PrefNotebook stack > box:nth-child(4) combobox,
-#MyExpander button.flat,
-#MyExpander button {
-    margin-top: 0.08334em;
-    margin-bottom: 0.08334em;
-}
 /**/
 #MyExpander button.text-button label {
     margin: 0;/* x */
@@ -1451,6 +1471,7 @@ window .view button {
     min-height: 2em;
     min-width: 1.33334em;
     padding: 0 0.33334em;
+    margin: 0;
 }
 dialog .view button.text-button label,
 window .view button.text-button label {
@@ -1474,10 +1495,10 @@ dialog .view button {
     color: @headline-hl;
 }
 
-dialog .view header button:not(:last-child):not(:only-child),
-window .view header button:not(:last-child):not(:only-child),
-.path-bar button:not(:last-child):not(:only-child) {
-    border-right: none;
+dialog .view header button:not(:first-child):not(:only-child),
+window .view header button:not(:first-child):not(:only-child),
+.path-bar button:not(:first-child):not(:only-child) {
+    border-left: none;
 }
 dialog .view header button,
 window .view header button,
@@ -1486,6 +1507,7 @@ window .view header button,
 }
 
 #pathbarbox button:last-child {
+    min-height: 2em;
     min-width: 2em;
     margin: 0;
     padding: 0;
@@ -1517,7 +1539,7 @@ popover button.text-button {
     border: 0.08334em solid @border-color;
     box-shadow: none;
     background-image: none;
-    margin: 0;
+    margin: 0.083334em 0;
     min-height: 1.66667em;
     padding: 0 0.66667em;
 }
@@ -1607,17 +1629,14 @@ headerbar button.titlebutton.close:active{
 /*** end ***************************************************************************************/
 
 /*** Ckeckbox & Radio **************************************************************************/
-checkbox {
-    padding:0;
-    margin:0;
-    min-height: 2em;
-}
+checkbox,
 checkbutton,
 radiobutton {
     padding: 0;
     margin: 0;
     min-height: 2em;
 }
+
 check,
 radio {
     border: calc(0.083334em + 0.18px) solid shade(@text-color, .9);
@@ -1660,16 +1679,6 @@ frame > checkbutton check{
     min-height: 1.4em;
     margin-left: 0.5em;
 }
-#PrefNotebook checkbutton {
-    min-height: 1.16667em;
-}
-#PrefNotebook stack > box:nth-child(3) checkbutton,
-#PrefNotebook stack > box:nth-child(4) checkbutton {
-    min-height: 1.83334em;
-}
-#PrefNotebook radiobutton {
-    min-height: 2em;
-}
 
 #MyExpander button + checkbutton:last-child {
     margin-left: 0.33334em;
@@ -1680,7 +1689,7 @@ frame > checkbutton check{
 /*** Entry & Spinbutton ************************************************************************/
 #MyExpander entry,
 entry {
-    margin: 0;
+    margin: 0.08334em 0;
     padding: 0 0.33334em;
     min-height: 1.66667em;
     min-width: 0;
@@ -1691,7 +1700,7 @@ entry {
 }
 
 spinbutton {
-    margin: 0;
+    margin: 0.08334em 0;
     padding: 0;
     min-height: 1.66667em;
     min-width: 0;
@@ -1850,5 +1859,4 @@ headerbar .title:backdrop {
     color: alpha(@winTitle,.60);
 }
 /**/
-
 /*** end ***************************************************************************************/

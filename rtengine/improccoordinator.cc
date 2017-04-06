@@ -40,19 +40,16 @@ ImProcCoordinator::ImProcCoordinator ()
       softProof (false), gamutCheck (false), scale (10), highDetailPreprocessComputed (false), highDetailRawComputed (false),
       allocated (false), bwAutoR (-9000.f), bwAutoG (-9000.f), bwAutoB (-9000.f), CAMMean (NAN),
 
-      ctColorCurve(),
       hltonecurve (65536),
       shtonecurve (65536),
       tonecurve (65536, 0), //,1);
-      chaut (0.f), redaut (0.f), blueaut (0.f), maxredaut (0.f), maxblueaut (0.f), minredaut (0.f), minblueaut (0.f), nresi (0.f),
-      chromina (0.f), sigma (0.f), lumema (0.f),
-
       lumacurve (32770, 0), // lumacurve[32768] and lumacurve[32769] will be set to 32768 and 32769 later to allow linear interpolation
       chroma_acurve (65536, 0),
       chroma_bcurve (65536, 0),
       satcurve (65536, 0),
       lhskcurve (65536, 0),
       clcurve (65536, 0),
+      conversionBuffer (1, 1),
       wavclCurve (65536, 0),
       clToningcurve (65536, 0),
       cl2Toningcurve (65536, 0),
@@ -94,20 +91,21 @@ ImProcCoordinator::ImProcCoordinator ()
       fw (0), fh (0), tr (0),
       fullw (1), fullh (1),
       pW (-1), pH (-1),
-      plistener (nullptr), imageListener (nullptr), aeListener (nullptr), acListener (nullptr), abwListener (nullptr), actListener (nullptr), adnListener (nullptr), awavListener (nullptr), dehaListener (nullptr), hListener (nullptr),
+      plistener (nullptr), imageListener (nullptr), aeListener (nullptr), acListener (nullptr), abwListener (nullptr), awbListener (nullptr), actListener (nullptr), adnListener (nullptr), awavListener (nullptr), dehaListener (nullptr), hListener (nullptr),
       resultValid (false), lastOutputProfile ("BADFOOD"), lastOutputIntent (RI__COUNT), lastOutputBPC (false), thread (nullptr), changeSinceLast (0), updaterRunning (false), destroying (false), utili (false), autili (false), wavcontlutili (false),
       butili (false), ccutili (false), cclutili (false), clcutili (false), opautili (false), conversionBuffer (1, 1), colourToningSatLimit (0.f), colourToningSatLimitOpacity (0.f)
       =======
       */
+      ctColorCurve(),
       rcurvehist (256), rcurvehistCropped (256), rbeforehist (256),
       gcurvehist (256), gcurvehistCropped (256), gbeforehist (256),
       bcurvehist (256), bcurvehistCropped (256), bbeforehist (256),
       fw (0), fh (0), tr (0),
       fullw (1), fullh (1),
       pW (-1), pH (-1),
-      plistener (nullptr), imageListener (nullptr), aeListener (nullptr), acListener (nullptr), abwListener (nullptr), awbListener (nullptr), actListener (nullptr), adnListener (nullptr), awavListener (nullptr), dehaListener (nullptr), hListener (nullptr),
-      resultValid (false), lastOutputProfile ("BADFOOD"), lastOutputIntent (RI__COUNT), lastOutputBPC (false), thread (nullptr), changeSinceLast (0), updaterRunning (false), destroying (false), utili (false), autili (false), wavcontlutili (false),
-      butili (false), ccutili (false), cclutili (false), clcutili (false), opautili (false), conversionBuffer (1, 1), colourToningSatLimit (0.f), colourToningSatLimitOpacity (0.f)
+      plistener (nullptr), imageListener (nullptr), aeListener (nullptr), acListener (nullptr), abwListener (nullptr), awbListener (nullptr), frameCountListener (nullptr), imageTypeListener (nullptr), actListener (nullptr), adnListener (nullptr), awavListener (nullptr), dehaListener (nullptr), hListener (nullptr),
+      resultValid (false), lastOutputProfile ("BADFOOD"), lastOutputIntent (RI__COUNT), lastOutputBPC (false), thread (nullptr), changeSinceLast (0), updaterRunning (false), destroying (false), utili (false), autili (false),
+      butili (false), ccutili (false), cclutili (false), clcutili (false), opautili (false), wavcontlutili (false), colourToningSatLimit (0.f), colourToningSatLimitOpacity (0.f)
 {}
 
 void ImProcCoordinator::assign (ImageSource* imgsrc)
@@ -201,8 +199,14 @@ void ImProcCoordinator::updatePreviewImage (int todo, Crop* cropCall)
 
     progress ("Applying white balance, color correction & sRGB conversion...", 100 * readyphase / numofphases);
 
+    if (frameCountListener) {
+        frameCountListener->FrameCountChanged (imgsrc->getFrameCount(), params.raw.bayersensor.imageNum);
+    }
+
     // raw auto CA is bypassed if no high detail is needed, so we have to compute it when high detail is needed
     if ( (todo & M_PREPROC) || (!highDetailPreprocessComputed && highDetailNeeded)) {
+        imgsrc->setCurrentFrame (params.raw.bayersensor.imageNum);
+
         imgsrc->preprocess ( rp, params.lensProf, params.coarse );
         imgsrc->getRAWHistogram ( histRedRaw, histGreenRaw, histBlueRaw );
 
@@ -225,6 +229,10 @@ void ImProcCoordinator::updatePreviewImage (int todo, Crop* cropCall)
     */
     // If high detail (=100%) is newly selected, do a demosaic update, since the last was just with FAST
 
+    if (imageTypeListener) {
+        imageTypeListener->imageTypeChanged (imgsrc->isRAW(), imgsrc->getSensorType() == ST_BAYER, imgsrc->getSensorType() == ST_FUJI_XTRANS);
+    }
+
     if (   (todo & M_RAW)
             || (!highDetailRawComputed && highDetailNeeded)
             || ( params.toneCurve.hrenabled && params.toneCurve.method != "Color" && imgsrc->IsrgbSourceModified())
@@ -232,7 +240,7 @@ void ImProcCoordinator::updatePreviewImage (int todo, Crop* cropCall)
 
         if (settings->verbose) {
             if (imgsrc->getSensorType() == ST_BAYER) {
-                printf ("Demosaic Bayer image using method: %s\n", rp.bayersensor.method.c_str());
+                printf ("Demosaic Bayer image n.%d using method: %s\n", rp.bayersensor.imageNum + 1, rp.bayersensor.method.c_str());
             } else if (imgsrc->getSensorType() == ST_FUJI_XTRANS) {
                 printf ("Demosaic X-Trans image with using method: %s\n", rp.xtranssensor.method.c_str());
             }
@@ -479,13 +487,13 @@ void ImProcCoordinator::updatePreviewImage (int todo, Crop* cropCall)
         opautili = false;
 
         if (params.colorToning.enabled) {
-            TMatrix wprof = iccStore->workingSpaceMatrix (params.icm.working);
+            TMatrix wprof = ICCStore::getInstance()->workingSpaceMatrix (params.icm.working);
             double wp[3][3] = {
                 {wprof[0][0], wprof[0][1], wprof[0][2]},
                 {wprof[1][0], wprof[1][1], wprof[1][2]},
                 {wprof[2][0], wprof[2][1], wprof[2][2]}
             };
-            TMatrix wiprof = iccStore->workingSpaceInverseMatrix (params.icm.working);
+            TMatrix wiprof = ICCStore::getInstance()->workingSpaceInverseMatrix (params.icm.working);
             double wip[3][3] = {
                 {wiprof[0][0], wiprof[0][1], wiprof[0][2]},
                 {wiprof[1][0], wiprof[1][1], wiprof[1][2]},
@@ -704,17 +712,17 @@ void ImProcCoordinator::updatePreviewImage (int todo, Crop* cropCall)
 
 
         //merge images
-        LabImage * mergelabpart;
-        LabImage * mergelab;
-        LabImage * cropmergelab;
-        int pos;
-        float maxx;
+        LabImage * mergelabpart = nullptr;
+        LabImage * mergelab = nullptr;
+        LabImage * cropmergelab = nullptr;
+        int pos = 0;
+        //   float maxx;
         struct E {
             int W, H, sk;
         } e;
         int disp = 0;
         int newsizH, newsizW;
-        int Lwa, Hwa;
+        int Lwa = 0, Hwa = 0;
         bool sav = (params.wavelet.mergMethod == "savwat" || params.wavelet.mergMethod == "savhdr" || params.wavelet.mergMethod == "savzero");
         bool zero = (params.wavelet.mergMethod == "loadzero"  || params.wavelet.mergMethod == "loadzerohdr");
         bool zerono = (params.wavelet.mergMethod != "loadzero"  && params.wavelet.mergMethod != "loadzerohdr");
@@ -724,8 +732,8 @@ void ImProcCoordinator::updatePreviewImage (int todo, Crop* cropCall)
         }
 
         if (params.wavelet.expmerge && sav == false) { //params.wavelet.mergevMethod != "save") {//load Lab datas
-            bool toto = true;
-            bool merguez = false;
+            //  bool toto = true;
+            //  bool merguez = false;
             Glib::ustring  inpu;
             inpu = params.wavelet.inpute;
             //    printf("fichier improc=%s\n", inpu.c_str());
@@ -758,7 +766,7 @@ void ImProcCoordinator::updatePreviewImage (int todo, Crop* cropCall)
                         mergelabpart->L[ir][jr] = x.L;
                         mergelabpart->a[ir][jr] = x.a;
                         mergelabpart->b[ir][jr] = x.b;
-                        maxx = x.ma;
+                        //      maxx = x.ma;
 
                     }
 
@@ -887,10 +895,10 @@ void ImProcCoordinator::updatePreviewImage (int todo, Crop* cropCall)
                     }
 
 
-                    float highl = 32768.f * (float) (params.wavelet.blend) / 100.f;
-                    float minhighl = 10000000.f;
-                    int pi, pj;
-                    float ref;
+                    //     float highl = 32768.f * (float) (params.wavelet.blend) / 100.f;
+                    //     float minhighl = 10000000.f;
+                    //    int pi, pj;
+                    //    float ref;
 
                     if (disp != 2) {
 #ifdef _OPENMP
@@ -926,18 +934,18 @@ void ImProcCoordinator::updatePreviewImage (int todo, Crop* cropCall)
 //end threatment datas merge : only for histogram
         int merge_two[6] = {0, 0, 0, 0, 0, 0};
 
-        int mtwo;
+        int mtwo = 0;
 
         if ((params.wavelet.enabled)) {
             WaveletParams WaveParams = params.wavelet;
             WaveParams.getCurves (wavCLVCurve, wavRETCurve, wavRETgainCurve, wavMERCurve, wavMER2Curve, wavSTYCurve, wavSTY2Curve, waOpacityCurveRG, waOpacityCurveBY, waOpacityCurveW, waOpacityCurveWL);
             int kall = 0;
             progress ("Wavelet...", 100 * readyphase / numofphases);
-            LabImage *unshar;
+            LabImage *unshar = nullptr;
             Glib::ustring provis;
             float minCD, maxCD, mini, maxi, Tmean, Tsigma, Tmin, Tmax;
-            float *****stylev;
-            LabImage *styres;
+            float *****stylev = nullptr;
+            LabImage *styres = nullptr;
             int stytype = 0;
 
             if (params.wavelet.expmerge && params.wavelet.mergevMethod == "curr") { //merge datas for Watermark if not preview old datas
@@ -945,13 +953,13 @@ void ImProcCoordinator::updatePreviewImage (int todo, Crop* cropCall)
                 //   unshar->CopyFrom(nprevl);
 
                 if (pos > 2) {
-                    float mLY, mCY;
+                    //      float mLY, mCY;
 
                     float m_L = (float) (WaveParams.blend / 100.f);
                     float m_C = (float) (WaveParams.blendc / 100.f);
                     float gra = WaveParams.grad / 150.f;
-                    mLY = m_L;
-                    mCY = m_C;
+                    //     mLY = m_L;
+                    //     mCY = m_C;
 
                     if (params.wavelet.mergBMethod == "hdr1"  && wavMERCurve && zerono) {
 
@@ -1245,7 +1253,7 @@ void ImProcCoordinator::updatePreviewImage (int todo, Crop* cropCall)
         MyMutex::MyLock prevImgLock (previmg->getMutex());
 
         try {
-            // Computing the preview image, i.e. converting from WCS->Monitor color space (soft-proofing disabled) or WCS->Output profile->Monitor color space (soft-proofing enabled)
+            // Computing the preview image, i.e. converting from WCS->Monitor color space (soft-proofing disabled) or WCS->Printer profile->Monitor color space (soft-proofing enabled)
             ipf.lab2monitorRgb (nprevl, previmg);
 
             // Computing the internal image for analysis, i.e. conversion from WCS->Output profile
@@ -1277,6 +1285,7 @@ void ImProcCoordinator::updatePreviewImage (int todo, Crop* cropCall)
         updateLRGBHistograms ();
         hListener->histogramChanged (histRed, histGreen, histBlue, histLuma, histToneCurve, histLCurve, histCCurve, /*histCLurve, histLLCurve,*/ histLCAM, histCCAM, histRedRaw, histGreenRaw, histBlueRaw, histChroma, histLRETI);
     }
+
 }
 
 
@@ -1595,7 +1604,7 @@ void ImProcCoordinator::savelabReference (const Glib::ustring& fname)
 
     MyMutex::MyLock lock (mProcessing);
 
-    int err;
+//   int err;
 
     if (!params.wavelet.enabled) {
         // return;
@@ -1612,8 +1621,8 @@ void ImProcCoordinator::savelabReference (const Glib::ustring& fname)
     printf ("save file improc=%s\n", fname.c_str());
 
 
-    rtengine::ProcessingJob* job = rtengine::ProcessingJob::create (getInitialImage(), params);
-    rtengine::IImage16* res = rtengine::processImage (job, err,  0);
+//   rtengine::ProcessingJob* job = rtengine::ProcessingJob::create (getInitialImage(), params);
+//   rtengine::IImage16* res = rtengine::processImage (job, err,  0);
 //   printf("OK savelab\n");
 }
 
