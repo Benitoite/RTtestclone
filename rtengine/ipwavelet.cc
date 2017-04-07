@@ -363,7 +363,8 @@ SSEFUNCTION void ImProcFunctions::ip_wavelet (LabImage * lab, LabImage * dst, fl
         cp.EDmet = 2;
     }
 
-    cp.cbena = params->wavelet.expTCresi;
+
+    cp.cbena = params->wavelet.cbenab;
     cp.blhigh = (float)params->wavelet.bluehigh;
     cp.grhigh = (float)params->wavelet.greenhigh;
     cp.blmed = (float)params->wavelet.bluemed;

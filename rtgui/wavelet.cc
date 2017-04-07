@@ -2411,8 +2411,8 @@ void Wavelet::read (const ProcParams* pp, const ParamsEdited* pedited)
         //DirmethodUpdateUI();
         //LmethodUpdateUI();
         enabledUpdateUI ();
-        // medianlevUpdateUI ();
-        // cbenabUpdateUI ();
+        medianlevUpdateUI ();
+        cbenabUpdateUI ();
         retinexMethodChanged ();
         retinexMethodproChanged ();
         mergevMethodChanged ();
@@ -4810,7 +4810,6 @@ void Wavelet::cbenabUpdateUI ()
 
 void Wavelet::cbenabToggled ()
 {
-    /*
     if (multiImage) {
         if (cbenab->get_inconsistent()) {
             cbenab->set_inconsistent (false);
@@ -4828,14 +4827,14 @@ void Wavelet::cbenabToggled ()
 
     if (listener && (multiImage || getEnabled ())) {
         if (cbenab->get_inconsistent() ) {
-            listener->panelChanged (EvWavcbenab, M("GENERAL_UNCHANGED"));
+            listener->panelChanged (EvWavcbenab, M ("GENERAL_UNCHANGED"));
         } else if (cbenab->get_active () ) {
-            listener->panelChanged (EvWavcbenab, M("GENERAL_ENABLED"));
+            listener->panelChanged (EvWavcbenab, M ("GENERAL_ENABLED"));
         } else {
-            listener->panelChanged (EvWavcbenab, M("GENERAL_DISABLED"));
+            listener->panelChanged (EvWavcbenab, M ("GENERAL_DISABLED"));
         }
     }
-    */
+
 }
 
 
