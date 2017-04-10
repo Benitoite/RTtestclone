@@ -587,10 +587,10 @@ SSEFUNCTION void ImProcFunctions::ip_wavelet (LabImage * lab, LabImage * dst, fl
     cp.lev3s = static_cast<float> (params->wavelet.level3noise.value[0]);
     cp.lev3n = static_cast<float> (params->wavelet.level3noise.value[1]);
 
-//   cp.detectedge = params->wavelet.medianlev;
-    cp.detectedge   = false;
+    cp.detectedge = params->wavelet.medianlev;
+//    cp.detectedge   = false;
     // cp.detectedge = params->wavelet.medianlev;
-    cp.detectedge = params->wavelet.expedg3;
+//    cp.detectedge = params->wavelet.expedg3;
 
     //printf("low=%f mean=%f sd=%f max=%f\n",cp.edg_low,cp.edg_mean,cp.edg_sd,cp.edg_max);
     int minwin = min (imwidth, imheight);

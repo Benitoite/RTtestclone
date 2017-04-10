@@ -2084,6 +2084,7 @@ TP_WAVELET_EDGE;Edge Sharpness and Clarity
 TP_WAVELET_EDG1;Edge Sharpness
 TP_WAVELET_EDG2;Sharp-mask and Clarity
 TP_WAVELET_EDG3;Edge detection
+TP_WAVELET_MEDILEV;Edge detection
 TP_WAVELET_EDGEAMPLI;Base amplification
 TP_WAVELET_EDGEDETECT;Gradient sensitivity
 TP_WAVELET_EDGEDETECTTHR;Threshold low (noise)

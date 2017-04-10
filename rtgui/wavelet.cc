@@ -577,31 +577,7 @@ Wavelet::Wavelet() :
 
 // Edge Sharpness
     ToolParamBlock* const edgBox = Gtk::manage (new ToolParamBlock());
-
-    expedg1->signal_button_release_event().connect_notify ( sigc::bind ( sigc::mem_fun (this, &Wavelet::foldAllButMe), expedg1) );
-    expedg1->set_tooltip_text (M ("TP_WAVELET_EDSH_TOOLTIP"));
-
-    expedg2->signal_button_release_event().connect_notify ( sigc::bind ( sigc::mem_fun (this, &Wavelet::foldAllButMe), expedg2) );
-    expedg2->set_tooltip_text (M ("TP_WAVELET_CLARI_TOOLTIP"));
-
-    expedg3->signal_button_release_event().connect_notify ( sigc::bind ( sigc::mem_fun (this, &Wavelet::foldAllButMe), expedg3) );
-    enableEdge3Conn = expedg3->signal_enabled_toggled().connect ( sigc::bind ( sigc::mem_fun (this, &Wavelet::enableToggled), expedg3) );
-    expedg3->set_tooltip_text (M ("TP_WAVELET_MEDILEV_TOOLTIP"));
-
-    Gtk::VBox * edgBoxM = Gtk::manage (new Gtk::VBox());
-    edgBoxM->set_border_width (1);
-    edgBoxM->set_spacing (1);
-
-
-
-    Gtk::VBox * edgBoxdet = Gtk::manage (new Gtk::VBox());
-    edgBoxdet->set_border_width (1);
-    edgBoxdet->set_spacing (1);
-
-    Gtk::VBox * edgBoxS = Gtk::manage (new Gtk::VBox());
-    edgBoxS->set_border_width (1);
-    edgBoxS->set_spacing (1);
-
+    ToolParamBlock* const edgBoxS = Gtk::manage (new ToolParamBlock());
 
     edgval->setAdjusterListener (this);
     edgBox->pack_start (*edgval);
@@ -643,6 +619,7 @@ Wavelet::Wavelet() :
     edgcont->setBgGradient (milestones2);
     edgcont->set_tooltip_markup (M ("TP_WAVELET_EDGCONT_TOOLTIP"));
 
+
     // <-- Edge Sharpness  Local Contrast curve
     CCWcurveEditorG->setCurveListener (this);
 
@@ -662,36 +639,38 @@ Wavelet::Wavelet() :
 
     medianlev->set_active (true);
     medianlevConn = medianlev->signal_toggled().connect ( sigc::mem_fun (*this, &Wavelet::medianlevToggled) );
+    medianlev->set_tooltip_text (M ("TP_WAVELET_MEDILEV_TOOLTIP"));
 
     Gtk::HSeparator* const separatored1 = Gtk::manage (new  Gtk::HSeparator());
     edgBox->pack_start (*separatored1, Gtk::PACK_SHRINK, 2);
 
     Gtk::HBox* const eddebox = Gtk::manage (new Gtk::HBox());
     edgBox->pack_start (*eddebox);
+    edgBox->pack_start (*medianlev);
 
     edgedetect->setAdjusterListener (this);
     edgedetect->set_tooltip_text (M ("TP_WAVELET_EDGEDETECT_TOOLTIP"));
-    edgBoxdet->pack_start (*edgedetect);
+    edgBox->pack_start (*edgedetect);
 
     edgedetectthr->setAdjusterListener (this);
     edgedetectthr->set_tooltip_text (M ("TP_WAVELET_EDGEDETECTTHR_TOOLTIP"));
-    edgBoxdet->pack_start (*edgedetectthr);
+    edgBox->pack_start (*edgedetectthr);
 
     edgedetectthr2->setAdjusterListener (this);
-    edgBoxdet->pack_start (*edgedetectthr2);
+    edgBox->pack_start (*edgedetectthr2);
 
     edgBox->pack_start (*separatoredge, Gtk::PACK_SHRINK, 2);
 
     lipst->set_active (true);
     lipstConn = lipst->signal_toggled().connect ( sigc::mem_fun (*this, &Wavelet::lipstToggled) );
 //  lipst->set_tooltip_text (M("TP_WAVELET_LIPST_TOOLTIP"));
-    edgBoxdet->pack_start (*lipst);
+    edgBox->pack_start (*lipst);
 
     edgesensi->setAdjusterListener (this);
-    edgBoxdet->pack_start (*edgesensi);
+    edgBox->pack_start (*edgesensi);
 
     edgeampli->setAdjusterListener (this);
-    edgBoxdet->pack_start (*edgeampli);
+    edgBox->pack_start (*edgeampli);
 
     Gtk::VBox* const ctboxES = Gtk::manage (new Gtk::VBox());
 
@@ -709,10 +688,8 @@ Wavelet::Wavelet() :
     ctboxNP->pack_start (*NPmethod);
     ctboxES->pack_start (*ctboxNP);
 
-    edgBoxdet->pack_start (*ctboxES);
+    edgBox->pack_start (*ctboxES);
 
-    expedg3->add (*edgBoxdet);
-    edgBox->pack_start (*expedg3);
 
     ushamethod->append (M ("TP_WAVELET_USH"));
     ushamethod->append (M ("TP_WAVELET_SHA"));
@@ -736,12 +713,13 @@ Wavelet::Wavelet() :
     nextmergeL = mergeL->getValue();
     nextmergeC = mergeC->getValue();
 
+    /*
     expedg1->add (*edgBox);
     edgBoxM->pack_start (*expedg1);
 
     expedg2->add (*edgBoxS);
     edgBoxM->pack_start (*expedg2);
-
+    */
 
 
 //Retinex in Wavelet
@@ -1515,7 +1493,7 @@ Wavelet::Wavelet() :
 
     expedge->add (*edgBox);
     expedge->setLevel (2);
-    expedge->add (*edgBoxM);
+//    expedge->add (*edgBoxM);
     pack_start (*expedge);
 
     expreti->add (*retiBox);
@@ -4747,32 +4725,32 @@ void Wavelet::medianlevUpdateUI ()
 
 void Wavelet::medianlevToggled ()
 {
-    /*
-        if (multiImage) {
-            if (medianlev->get_inconsistent()) {
-                medianlev->set_inconsistent (false);
-                medianlevConn.block (true);
-                medianlev->set_active (false);
-                medianlevConn.block (false);
-            } else if (lastmedianlev) {
-                medianlev->set_inconsistent (true);
-            }
 
-            lastmedianlev = medianlev->get_active ();
+    if (multiImage) {
+        if (medianlev->get_inconsistent()) {
+            medianlev->set_inconsistent (false);
+            medianlevConn.block (true);
+            medianlev->set_active (false);
+            medianlevConn.block (false);
+        } else if (lastmedianlev) {
+            medianlev->set_inconsistent (true);
         }
 
-        medianlevUpdateUI();
+        lastmedianlev = medianlev->get_active ();
+    }
 
-        if (listener && (multiImage || getEnabled ())) {
-            if (medianlev->get_inconsistent()) {
-                listener->panelChanged (EvWavmedianlev, M("GENERAL_UNCHANGED"));
-            } else if (medianlev->get_active () ) {
-                listener->panelChanged (EvWavmedianlev, M("GENERAL_ENABLED"));
-            } else {
-                listener->panelChanged (EvWavmedianlev, M("GENERAL_DISABLED"));
-            }
+    medianlevUpdateUI();
+
+    if (listener && (multiImage || getEnabled ())) {
+        if (medianlev->get_inconsistent()) {
+            listener->panelChanged (EvWavmedianlev, M ("GENERAL_UNCHANGED"));
+        } else if (medianlev->get_active () ) {
+            listener->panelChanged (EvWavmedianlev, M ("GENERAL_ENABLED"));
+        } else {
+            listener->panelChanged (EvWavmedianlev, M ("GENERAL_DISABLED"));
         }
-        */
+    }
+
 }
 
 void Wavelet::linkedgToggled ()
