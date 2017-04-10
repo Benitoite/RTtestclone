@@ -57,7 +57,7 @@ class Wavelet :
 {
 public:
     Wavelet ();
-    virtual ~Wavelet ();
+    ~Wavelet ();
 
 
 
@@ -441,6 +441,8 @@ private:
 
     bool lastmedian, lastmedianlev, lastlinkedg, lastavoid, lastlipst, lasttmr, lastcbenab;
     int nextnlevel;
+
+    IdleRegister idle_register;
 };
 
 

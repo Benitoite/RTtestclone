@@ -38,18 +38,12 @@ Glib::RefPtr<Gdk::Pixbuf> MyExpander::disabledPBuf;
 Glib::RefPtr<Gdk::Pixbuf> MyExpander::openedPBuf;
 Glib::RefPtr<Gdk::Pixbuf> MyExpander::closedPBuf;
 
-guint add_idle (GSourceFunc function, gpointer data)
-{
-    return gdk_threads_add_idle(function, data);
-    //gtk_main_iteration_do(false);
-}
-
 IdleRegister::~IdleRegister()
 {
     destroy();
 }
 
-void IdleRegister::add(GSourceFunc function, gpointer data)
+void IdleRegister::add(GSourceFunc function, gpointer data, gint priority)
 {
     struct DataWrapper {
         IdleRegister* const self;
@@ -79,7 +73,7 @@ void IdleRegister::add(GSourceFunc function, gpointer data)
     };
 
     mutex.lock();
-    ids[data_wrapper] = add_idle(dispatch, data_wrapper);
+    ids[data_wrapper] = gdk_threads_add_idle_full(priority, dispatch, data_wrapper, nullptr);
     mutex.unlock();
 }
 
@@ -1460,8 +1454,6 @@ bool BackBuffer::setDrawRectangle(Cairo::Format format, int newX, int newY, int 
  */
 void BackBuffer::copyRGBCharData(const unsigned char *srcData, int srcX, int srcY, int srcW, int srcH, int srcRowStride, int dstX, int dstY)
 {
-    const unsigned char *src;
-    unsigned char *dst;
     unsigned char r, g, b;
 
     if (!surface) {
@@ -1483,8 +1475,8 @@ void BackBuffer::copyRGBCharData(const unsigned char *srcData, int srcX, int src
             break;
         }
 
-        src = srcData + i * srcRowStride;
-        dst = dstData + ((dstY + i) * surfW + dstX) * 4;
+        const unsigned char *src = srcData + i * srcRowStride;
+        unsigned char *dst = dstData + ((dstY + i) * surfW + dstX) * 4;
 
         for (int j = 0; j < srcW; ++j) {
             if (dstX + j >= surfW) {

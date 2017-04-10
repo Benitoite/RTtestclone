@@ -37,8 +37,6 @@
 #include "../rtgui/ppversion.h"
 #include "improccoordinator.h"
 #include <locale.h>
-//#define BENCHMARK
-#include "StopWatch.h"
 
 
 namespace
@@ -57,6 +55,74 @@ namespace
 
         return raw_image.get_thumbOffset() + length <= raw_image.get_file()->size;
     }
+
+
+void scale_colors(rtengine::RawImage *ri, float scale_mul[4], float cblack[4])
+{
+    DCraw::dcrawImage_t image = ri->get_image();
+    if(ri->isBayer()) {
+        const int height = ri->get_iheight();
+        const int width = ri->get_iwidth();
+        for(int row = 0; row < height; ++row) {
+            unsigned c0 = ri->FC(row,0);
+            unsigned c1 = ri->FC(row,1);
+            int col = 0;
+            for(; col < width - 1; col += 2) {
+                float val0 = image[row * width + col][c0];
+                float val1 = image[row * width + col + 1][c1];
+                val0 -= cblack[c0];
+                val1 -= cblack[c1];
+                val0 *= scale_mul[c0];
+                val1 *= scale_mul[c1];
+                image[row * width + col][c0] = rtengine::CLIP(val0);
+                image[row * width + col + 1][c1] = rtengine::CLIP(val1);
+            }
+            if(col < width) { // in case width is odd
+                float val0 = image[row * width + col][c0];
+                val0 -= cblack[c0];
+                val0 *= scale_mul[c0];
+                image[row * width + col][c0] = rtengine::CLIP(val0);
+            }
+        }
+    } else if(ri->isXtrans()) {
+        const int height = ri->get_iheight();
+        const int width = ri->get_iwidth();
+        unsigned c[6];
+        for(int row = 0; row < height; ++row) {
+            for(int i = 0; i < 6; ++i) {
+                c[i] = ri->XTRANSFC(row,i);
+            }
+
+            int col = 0;
+            for(; col < width - 5; col += 6) {
+                for(int i = 0; i < 6; ++i) {
+                    const unsigned ccol = c[i];
+                    float val = image[row * width + col + i][ccol];
+                    val -= cblack[ccol];
+                    val *= scale_mul[ccol];
+                    image[row * width + col + i][ccol] = rtengine::CLIP(val);
+                }
+            }
+            for(; col < width; ++col) { // remaining columns
+                const unsigned ccol = ri->XTRANSFC(row,col);
+                float val = image[row * width + col][ccol];
+                val -= cblack[ccol];
+                val *= scale_mul[ccol];
+                image[row * width + col][ccol] = rtengine::CLIP(val);
+            }
+        }
+    } else {
+        const int size = ri->get_iheight() * ri->get_iwidth();
+        for (int i = 0; i < size; ++i) {
+            for (int j = 0; j < 4; ++j) {
+                float val = image[i][j];
+                val -= cblack[j];
+                val *= scale_mul[j];
+                image[i][j] = rtengine::CLIP(val);
+            }
+        }
+    }
+}
 
 }
 
@@ -333,17 +399,23 @@ Thumbnail* Thumbnail::loadFromRaw (const Glib::ustring& fname, RawMetaDataLocati
     tpp->greenMultiplier = ri->get_pre_mul(1);
     tpp->blueMultiplier = ri->get_pre_mul(2);
 
-    ri->scale_colors();
+    //ri->scale_colors();
+    float pre_mul[4], scale_mul[4], cblack[4];
+    ri->get_colorsCoeff(pre_mul, scale_mul, cblack, false);
+    scale_colors(ri, scale_mul, cblack);
+    
     ri->pre_interpolate();
 
     rml.exifBase = ri->get_exifBase();
     rml.ciffBase = ri->get_ciffBase();
     rml.ciffLength = ri->get_ciffLen();
 
-    tpp->camwbRed = tpp->redMultiplier / ri->get_pre_mul(0);
-    tpp->camwbGreen = tpp->greenMultiplier / ri->get_pre_mul(1);
-    tpp->camwbBlue = tpp->blueMultiplier / ri->get_pre_mul(2);
-    tpp->defGain = 1.0 / min(ri->get_pre_mul(0), ri->get_pre_mul(1), ri->get_pre_mul(2));
+    tpp->camwbRed = tpp->redMultiplier / pre_mul[0]; //ri->get_pre_mul(0);
+    tpp->camwbGreen = tpp->greenMultiplier / pre_mul[1]; //ri->get_pre_mul(1);
+    tpp->camwbBlue = tpp->blueMultiplier / pre_mul[2]; //ri->get_pre_mul(2);
+    //tpp->defGain = 1.0 / min(ri->get_pre_mul(0), ri->get_pre_mul(1), ri->get_pre_mul(2));
+    tpp->defGain = max(scale_mul[0], scale_mul[1], scale_mul[2], scale_mul[3]) / min(scale_mul[0], scale_mul[1], scale_mul[2], scale_mul[3]);
+
     tpp->gammaCorrected = true;
 
     unsigned filter = ri->get_filters();
@@ -859,8 +931,6 @@ IImage8* Thumbnail::quickProcessImage (const procparams::ProcParams& params, int
 IImage8* Thumbnail::processImage (const procparams::ProcParams& params, int rheight, TypeInterpolation interp, std::string camName,
                                   double focalLen, double focalLen35mm, float focusDist, float shutter, float fnumber, float iso, std::string expcomp_, double& myscale)
 {
-    BENCHFUN
-
     // check if the WB's equalizer value has changed
     if (wbEqual < (params.wb.equal - 5e-4) || wbEqual > (params.wb.equal + 5e-4) || wbTempBias < (params.wb.tempBias - 5e-4) || wbTempBias > (params.wb.tempBias + 5e-4)) {
         wbEqual = params.wb.equal;
@@ -894,7 +964,6 @@ IImage8* Thumbnail::processImage (const procparams::ProcParams& params, int rhei
     gm = camwbGreen / gm;
     bm = camwbBlue / bm;
     double mul_lum = 0.299 * rm + 0.587 * gm + 0.114 * bm;
-    double logDefGain = 0.0;
     float rmi, gmi, bmi;
 
     rmi = rm * defGain / mul_lum;
@@ -1013,6 +1082,7 @@ IImage8* Thumbnail::processImage (const procparams::ProcParams& params, int rhei
     int     hlcomprthresh = params.toneCurve.hlcomprthresh;
 
     if (params.toneCurve.autoexp && aeHistogram) {
+        double logDefGain = 0.0;
         ipf.getAutoExp (aeHistogram, aeHistCompression, logDefGain, params.toneCurve.clip, expcomp, bright, contr, black, hlcompr, hlcomprthresh);
     }
 
@@ -1417,7 +1487,7 @@ unsigned char* Thumbnail::getGrayscaleHistEQ (int trim_width)
 
     // to utilize the 8 bit color range of the thumbnail we brighten it and apply gamma correction
     unsigned char* tmpdata = new unsigned char[thumbImg->getHeight() * trim_width];
-    int ix = 0, max;
+    int ix = 0;
 
     if (gammaCorrected) {
         // if it's gamma correct (usually a RAW), we have the problem that there is a lot noise etc. that makes the maximum way too high.
@@ -1501,7 +1571,7 @@ unsigned char* Thumbnail::getGrayscaleHistEQ (int trim_width)
         }
     } else {
         // If it's not gamma corrected (usually a JPG) we take the normal maximum
-        max = 0;
+        int max = 0;
 
         if (thumbImg->getType() == sImage8) {
             Image8 *image = static_cast<Image8*>(thumbImg);

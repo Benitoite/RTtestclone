@@ -1037,44 +1037,43 @@ void EditorPanel::procParamsChanged (rtengine::procparams::ProcParams* params, r
 //        saveLabel->set_markup (Glib::ustring("<span foreground=\"#AA0000\" weight=\"bold\">") + M("MAIN_BUTTON_SAVE") + "</span>");
 }
 
-struct spsparams {
-    bool inProcessing;
-    EditorPanelIdleHelper* epih;
-};
-
-int setProgressStateUIThread (void* data)
-{
-
-    spsparams* p = static_cast<spsparams*> (data);
-
-    if (p->epih->destroyed) {
-        if (p->epih->pending == 1) {
-            delete p->epih;
-        } else {
-            p->epih->pending--;
-        }
-
-        delete p;
-
-        return 0;
-    }
-
-    p->epih->epanel->refreshProcessingState (p->inProcessing);
-    p->epih->pending--;
-    delete p;
-
-    return 0;
-}
-
 void EditorPanel::setProgressState (bool inProcessing)
 {
+    struct spsparams {
+        bool inProcessing;
+        EditorPanelIdleHelper* epih;
+    };
 
     epih->pending++;
 
     spsparams* p = new spsparams;
     p->inProcessing = inProcessing;
     p->epih = epih;
-    g_idle_add (setProgressStateUIThread, p);
+
+    const auto func = [] (gpointer data) -> gboolean {
+        spsparams* const p = static_cast<spsparams*> (data);
+
+        if (p->epih->destroyed)
+        {
+            if (p->epih->pending == 1) {
+                delete p->epih;
+            } else {
+                p->epih->pending--;
+            }
+
+            delete p;
+
+            return 0;
+        }
+
+        p->epih->epanel->refreshProcessingState (p->inProcessing);
+        p->epih->pending--;
+        delete p;
+
+        return FALSE;
+    };
+
+    idle_register.add (func, p);
 }
 
 void EditorPanel::setProgress (double p)
@@ -1146,12 +1145,6 @@ void EditorPanel::refreshProcessingState (bool inProcessingP)
     setprogressStrUI (s);
 }
 
-struct errparams {
-    Glib::ustring descr;
-    Glib::ustring title;
-    EditorPanelIdleHelper* epih;
-};
-
 void EditorPanel::displayError (Glib::ustring title, Glib::ustring descr)
 {
     GtkWidget* msgd = gtk_message_dialog_new_with_markup (nullptr,
@@ -1167,38 +1160,44 @@ void EditorPanel::displayError (Glib::ustring title, Glib::ustring descr)
     gtk_widget_show_all (msgd);
 }
 
-int disperrorUI (void* data)
-{
-    errparams* p = static_cast<errparams*> (data);
-
-    if (p->epih->destroyed) {
-        if (p->epih->pending == 1) {
-            delete p->epih;
-        } else {
-            p->epih->pending--;
-        }
-
-        delete p;
-
-        return 0;
-    }
-
-    p->epih->epanel->displayError (p->title, p->descr);
-    p->epih->pending--;
-    delete p;
-
-    return 0;
-}
-
 void EditorPanel::error (Glib::ustring title, Glib::ustring descr)
 {
+    struct errparams {
+        Glib::ustring descr;
+        Glib::ustring title;
+        EditorPanelIdleHelper* epih;
+    };
 
     epih->pending++;
-    errparams* p = new errparams;
+    errparams* const p = new errparams;
     p->descr = descr;
     p->title = title;
     p->epih = epih;
-    g_idle_add (disperrorUI, p);
+
+    const auto func = [] (gpointer data) -> gboolean {
+        errparams* const p = static_cast<errparams*> (data);
+
+        if (p->epih->destroyed)
+        {
+            if (p->epih->pending == 1) {
+                delete p->epih;
+            } else {
+                p->epih->pending--;
+            }
+
+            delete p;
+
+            return 0;
+        }
+
+        p->epih->epanel->displayError (p->title, p->descr);
+        p->epih->pending--;
+        delete p;
+
+        return FALSE;
+    };
+
+    idle_register.add (func, p);
 }
 
 void EditorPanel::info_toggled ()
@@ -2134,12 +2133,6 @@ void EditorPanel::updateHistogramPosition (int oldPosition, int newPosition)
             // No histogram
             if (!oldPosition) {
                 // An histogram actually exist, we delete it
-                if      (oldPosition == 1) {
-                    removeIfThere (leftbox, histogramPanel, false);
-                } else if (oldPosition == 2) {
-                    removeIfThere (vboxright, histogramPanel, false);
-                }
-
                 delete histogramPanel;
                 histogramPanel = nullptr;
             }
@@ -2189,3 +2182,4 @@ void EditorPanel::updateHistogramPosition (int oldPosition, int newPosition)
 
     iareapanel->imageArea->setPointerMotionHListener (histogramPanel);
 }
+
