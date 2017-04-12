@@ -645,7 +645,7 @@ SSEFUNCTION void ImProcFunctions::ip_wavelet (LabImage * lab, LabImage * dst, fl
     // begin tile processing of image
 
     //output buffer
-    int realtile;
+    int realtile = 0;
 
     if (params->wavelet.Tilesmethod == "big") {
         realtile = 22;

@@ -779,11 +779,11 @@ Gtk::Widget* Preferences::getColorManagementPanel ()
     setExpandAlignProperties (monBPC, false, false, Gtk::ALIGN_START, Gtk::ALIGN_CENTER);
     monBPC->set_active (true);
 
-#if defined(WIN32) // Auto-detection not implemented for Linux, see issue 851
-    cbAutoMonProfile = Gtk::manage (new Gtk::CheckButton (M ("PREFERENCES_AUTOMONPROFILE")));
-    setExpandAlignProperties (cbAutoMonProfile, false, false, Gtk::ALIGN_START, Gtk::ALIGN_CENTER);
-    autoMonProfileConn  = cbAutoMonProfile->signal_toggled().connect (sigc::mem_fun (*this, &Preferences::autoMonProfileToggled));
-#endif
+//#if defined(WIN32) // Auto-detection not implemented for Linux, see issue 851
+    cbAutoMonProfile = Gtk::manage (new Gtk::CheckButton (M("PREFERENCES_AUTOMONPROFILE")));
+    setExpandAlignProperties(cbAutoMonProfile, false, false, Gtk::ALIGN_START, Gtk::ALIGN_CENTER);
+    autoMonProfileConn  = cbAutoMonProfile->signal_toggled().connect (sigc::mem_fun(*this, &Preferences::autoMonProfileToggled));
+//#endif
 
     int row = 0;
     gmonitor->attach (*mplabel, 0, row, 1, 1);
@@ -795,18 +795,18 @@ Gtk::Widget* Preferences::getColorManagementPanel ()
     gmonitor->attach (*monProfile, 1, row, 1, 1);
 #endif
     ++row;
-#if defined(WIN32)
+//#if defined(WIN32)
     gmonitor->attach (*cbAutoMonProfile, 1, row, 1, 1);
     ++row;
-#endif
+//#endif
     gmonitor->attach (*milabel, 0, row, 1, 1);
     gmonitor->attach (*monIntent, 1, row, 1, 1);
     ++row;
     gmonitor->attach (*monBPC, 0, row, 2, 1);
 
-#if defined(WIN32)
+//#if defined(WIN32)
     autoMonProfileToggled();
-#endif
+//#endif
 
     fmonitor->add (*gmonitor);
 
@@ -855,9 +855,9 @@ Gtk::Widget* Preferences::getColorManagementPanel ()
     ++row;
     gprinter->attach (*prtBPC, 0, row, 2, 1);
 
-#if defined(WIN32)
+//#if defined(WIN32)
     autoMonProfileToggled();
-#endif
+//#endif
 
     fprinter->add (*gprinter);
 
@@ -1718,9 +1718,9 @@ void Preferences::storePreferences ()
     }
 
     moptions.rtSettings.monitorBPC = monBPC->get_active ();
-#if defined(WIN32)
+//#if defined(WIN32)
     moptions.rtSettings.autoMonitorProfile  = cbAutoMonProfile->get_active ();
-#endif
+//#endif
 #endif
 
     moptions.rtSettings.iccDirectory        = iccDir->get_filename ();
@@ -1876,9 +1876,9 @@ void Preferences::fillPreferences ()
     }
 
     monBPC->set_active (moptions.rtSettings.monitorBPC);
-#if defined(WIN32)
-    cbAutoMonProfile->set_active (moptions.rtSettings.autoMonitorProfile);
-#endif
+//#if defined(WIN32)
+    cbAutoMonProfile->set_active(moptions.rtSettings.autoMonitorProfile);
+//#endif
 #endif
 
     if (Glib::file_test (moptions.rtSettings.iccDirectory, Glib::FILE_TEST_IS_DIR)) {
@@ -2088,12 +2088,12 @@ void Preferences::savePressed () {
 }
 */
 
-#if defined(WIN32)
+//#if defined(WIN32)
 void Preferences::autoMonProfileToggled ()
 {
     monProfile->set_sensitive (!cbAutoMonProfile->get_active());
 }
-#endif
+//#endif
 /*
 void Preferences::autocielabToggled () {
 //  cbAutocielab->set_sensitive(cbAutocielab->get_active());

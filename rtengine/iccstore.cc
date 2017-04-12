@@ -307,58 +307,7 @@ public:
         }
     }
 
-    void findDefaultMonitorProfile()
-    {
-        // Determine the first monitor default profile of operating system, if selected
-
-        defaultMonitorProfile.clear();
-
-#ifdef WIN32
-        // Get current main monitor. Could be fine tuned to get the current windows monitor(multi monitor setup),
-        // but problem is that we live in RTEngine with no GUI window to query around
-        HDC hDC = GetDC (nullptr);
-
-        if (hDC != nullptr) {
-            if (SetICMMode (hDC, ICM_ON)) {
-                char profileName[MAX_PATH + 1];
-                DWORD profileLength = MAX_PATH;
-
-                if (GetICMProfileA (hDC, &profileLength, profileName)) {
-                    defaultMonitorProfile = Glib::ustring (profileName);
-                    defaultMonitorProfile = Glib::path_get_basename (defaultMonitorProfile);
-                    size_t pos = defaultMonitorProfile.rfind (".");
-
-                    if (pos != Glib::ustring::npos) {
-                        defaultMonitorProfile = defaultMonitorProfile.substr (0, pos);
-                    }
-                }
-
-                // might fail if e.g. the monitor has no profile
-            }
-
-            ReleaseDC (NULL, hDC);
-        }
-
-#else
-        // TODO: Add other OS specific code here
-#endif
-
-        if (options.rtSettings.verbose) {
-            printf ("Default monitor profile is: %s\n", defaultMonitorProfile.c_str());
-        }
-    }
-
-    cmsHPROFILE getDefaultMonitorProfile()
-    {
-        return getProfile (defaultMonitorProfile);
-    }
-
-    Glib::ustring getDefaultMonitorProfileName() const
-    {
-        return defaultMonitorProfile;
-    }
-
-    cmsHPROFILE workingSpace (const Glib::ustring& name) const
+    cmsHPROFILE workingSpace(const Glib::ustring& name) const
     {
         const ProfileMap::const_iterator r = wProfiles.find (name);
 
@@ -497,7 +446,6 @@ public:
             ? r->second
             : ProfileContent();
     }
-//>>>>>>> dev
 
     cmsHPROFILE getXYZProfile() const
     {
@@ -635,22 +583,7 @@ void rtengine::ICCStore::init (const Glib::ustring& usrICCDir, const Glib::ustri
     implementation->init (usrICCDir, stdICCDir, loadAll);
 }
 
-void rtengine::ICCStore::findDefaultMonitorProfile()
-{
-    implementation->findDefaultMonitorProfile();
-}
-
-cmsHPROFILE rtengine::ICCStore::getDefaultMonitorProfile() const
-{
-    return implementation->getDefaultMonitorProfile();
-}
-
-Glib::ustring rtengine::ICCStore::getDefaultMonitorProfileName() const
-{
-    return implementation->getDefaultMonitorProfileName();
-}
-
-cmsHPROFILE rtengine::ICCStore::workingSpace (const Glib::ustring& name) const
+cmsHPROFILE rtengine::ICCStore::workingSpace(const Glib::ustring& name) const
 {
     return implementation->workingSpace (name);
 }
@@ -1162,7 +1095,6 @@ cmsHPROFILE rtengine::ICCStore::createCustomGammaOutputProfile (const procparams
     } else if (icm.working == "ProPhoto"  && rtengine::ICCStore::getInstance()->outputProfileExist (options.rtSettings.prophoto10) &&  pro) {
         outProfile = options.rtSettings.prophoto10;
     } else if (icm.working == "Rec2020"   && rtengine::ICCStore::getInstance()->outputProfileExist (options.rtSettings.rec2020)           ) {
-//>>>>>>> dev
         outProfile = options.rtSettings.rec2020;
     } else {
         // Should not occurs
