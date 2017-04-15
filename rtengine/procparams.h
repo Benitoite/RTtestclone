@@ -1302,6 +1302,7 @@ public:
         bool pixelShiftExp0;
         bool pixelShiftLmmse;
         bool pixelShiftEqualBright;
+        bool pixelShiftEqualBrightChannel;
         bool pixelShiftNonGreenCross;
         bool pixelShiftNonGreenCross2;
         bool pixelShiftNonGreenAmaze;
