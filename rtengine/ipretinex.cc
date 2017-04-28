@@ -895,7 +895,7 @@ void ImProcFunctions::MSRWav (float** luminance, const float* const *originalLum
 
         const float shHighlights = (100.f - deh.highlights) / 100.f;
         const float shShadows = (100.f - deh.shadows) / 100.f;
-        const int mapmet = (deh.highlights > 0 || deh.shadows > 0) ? 4 : 0;
+        const int mapmet = (chrome == 0 && (deh.highlights > 0 || deh.shadows > 0)) ? 4 : 0;//no action if chroma
         const double shradius = mapmet == 4 ? deh.radius : 40.;
         constexpr int it = 1;//in case of !!
 
