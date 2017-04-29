@@ -67,6 +67,7 @@ void ParamsEdited::set (bool v)
     retinex.gam    = v;
     retinex.slope    = v;
     retinex.neigh    = v;
+    retinex.chrrt    = v;
     retinex.gain    = v;
     retinex.offs    = v;
     retinex.vart    = v;
@@ -653,6 +654,7 @@ void ParamsEdited::initFrom (const std::vector<rtengine::procparams::ProcParams>
         retinex.gam = retinex.gam && p.retinex.gam == other.retinex.gam;
         retinex.slope = retinex.slope && p.retinex.slope == other.retinex.slope;
         retinex.neigh = retinex.neigh && p.retinex.neigh == other.retinex.neigh;
+        retinex.chrrt = retinex.chrrt && p.retinex.chrrt == other.retinex.chrrt;
         retinex.gain = retinex.gain && p.retinex.gain == other.retinex.gain;
         retinex.offs = retinex.offs && p.retinex.offs == other.retinex.offs;
         retinex.vart = retinex.vart && p.retinex.vart == other.retinex.vart;
@@ -1338,6 +1340,10 @@ void ParamsEdited::combine (rtengine::procparams::ProcParams& toEdit, const rten
         toEdit.retinex.medianmap  = mods.retinex.medianmap;
     }
 
+    if (retinex.chrrt) {
+        toEdit.retinex.chrrt  = mods.retinex.chrrt;
+    }
+	
     if (retinex.neigh) {
         toEdit.retinex.neigh   = dontforceSet && options.baBehav[ADDSET_RETI_NEIGH] ? toEdit.retinex.neigh + mods.retinex.neigh : mods.retinex.neigh;
     }

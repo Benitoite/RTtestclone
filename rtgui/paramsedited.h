@@ -67,6 +67,7 @@ public:
     bool gam;
     bool slope;
     bool neigh;
+    bool chrrt;
     bool gain;
     bool offs;
     bool retinexMethod;

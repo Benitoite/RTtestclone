@@ -31,6 +31,7 @@ protected:
     Adjuster* grads;
     Adjuster* iter;
     Adjuster* neigh;
+    Adjuster* chrrt;
     Adjuster* gain;
     Adjuster* offs;
     Adjuster* vart;

@@ -318,6 +318,7 @@ public:
     double  gam;
     double  slope;
     int     neigh;
+    int     chrrt;
     int     gain;
     int     offs;
     int     highlights;

@@ -163,6 +163,7 @@ void RetinexParams::setDefaults()
     gam        = 1.30;
     slope   = 3.;
     neigh      = 80;
+    chrrt      = 0;
     gain        = 50;
     offs    = 0;
     vart    = 200;
@@ -1724,6 +1725,10 @@ int ProcParams::save (const Glib::ustring &fname, const Glib::ustring &fname2, b
             keyFile.set_integer ("Retinex", "Neigh",               retinex.neigh);
         }
 
+        if (!pedited || pedited->retinex.chrrt) {
+            keyFile.set_integer ("Retinex", "Chrrt",               retinex.chrrt);
+        }
+		
         if (!pedited || pedited->retinex.gain) {
             keyFile.set_integer ("Retinex", "Gain",               retinex.gain);
         }
@@ -4545,6 +4550,14 @@ int ProcParams::load (const Glib::ustring &fname, ParamsEdited* pedited)
                 }
             }
 
+            if (keyFile.has_key ("Retinex", "Chrrt"))     {
+                retinex.chrrt   = keyFile.get_integer ("Retinex", "Chrrt");
+
+                if (pedited) {
+                    pedited->retinex.chrrt = true;
+                }
+            }
+			
             if (keyFile.has_key ("Retinex", "Str"))     {
                 retinex.str   = keyFile.get_integer ("Retinex", "Str");
 
@@ -8879,6 +8892,7 @@ bool ProcParams::operator== (const ProcParams& other)
         && retinex.gam == other.retinex.gam
         && retinex.slope == other.retinex.slope
         && retinex.neigh == other.retinex.neigh
+        && retinex.chrrt == other.retinex.chrrt
         && retinex.gain == other.retinex.gain
         && retinex.limd == other.retinex.limd
         && retinex.highl == other.retinex.highl
