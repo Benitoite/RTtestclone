@@ -152,7 +152,7 @@ namespace rtengine
 
 extern const Settings* settings;
 
-void RawImageSource::MSR (float** luminance, float** originalLuminance, float **exLuminance,  LUTf & mapcurve, bool &mapcontlutili, int width, int height, RetinexParams deh, const RetinextransmissionCurve & dehatransmissionCurve, const RetinexgaintransmissionCurve & dehagaintransmissionCurve, float &minCD, float &maxCD, float &mini, float &maxi, float &Tmean, float &Tsigma, float &Tmin, float &Tmax)
+void RawImageSource::MSR (float** luminance, float** originalLuminance, float **exLuminance,  LUTf & mapcurve, bool &mapcontlutili, int width, int height, int chrome, RetinexParams deh, const RetinextransmissionCurve & dehatransmissionCurve, const RetinexgaintransmissionCurve & dehagaintransmissionCurve, float &minCD, float &maxCD, float &mini, float &maxi, float &Tmean, float &Tsigma, float &Tmin, float &Tmax)
 {
 
     if (deh.enabled) {//enabled
@@ -168,6 +168,7 @@ void RawImageSource::MSR (float** luminance, float** originalLuminance, float **
         int scal = 3;//disabled scal
         int nei = (int) (2.8f * deh.neigh); //def = 220
         float vart = (float)deh.vart / 100.f;//variance
+        float chrT = (float) deh.chrrt / 100.f;
         float gradvart = (float)deh.grad;
         float gradstr = (float)deh.grads;
         float strength = (float) deh.str / 100.f; // Blend with original L channel data
@@ -347,7 +348,11 @@ void RawImageSource::MSR (float** luminance, float** originalLuminance, float **
                 }
             }
 
-            float strengthx = ks * strength;
+            // float strengthx = ks * strength;
+            const float maxclip = (chrome == 0 ? 32768.f : 50000.f);
+
+            const float strengthx = ks * strength * (chrome == 0 ? 1.f : chrT);
+
 
             constexpr auto maxRetinexScales = 8;
             float RetinexScales[maxRetinexScales];
@@ -422,7 +427,7 @@ void RawImageSource::MSR (float** luminance, float** originalLuminance, float **
                 pond /= log (elogt);
             }
 
-            auto shmap = ((mapmet == 2 || mapmet == 3 || mapmet == 4) && it == 1) ? new SHMap (W_L, H_L, true) : nullptr;
+            auto shmap = ((mapmet == 2 || mapmet == 3 || mapmet == 4) && it == 1 && chrome == 0) ? new SHMap (W_L, H_L, true) : nullptr;//
 
             float *buffer = new float[W_L * H_L];;
 
@@ -466,7 +471,7 @@ void RawImageSource::MSR (float** luminance, float** originalLuminance, float **
                     }
                 }
 
-                if (((mapmet == 2 && scale > 2) || mapmet == 3 || mapmet == 4) && it == 1) {
+                if (((mapmet == 2 && scale > 2) || mapmet == 3 || mapmet == 4) && it == 1 && chrome == 0) {//
                     shmap->updateL (out, shradius, true, 1);
                     h_th = shmap->max_f - deh.htonalwidth * (shmap->max_f - shmap->avg) / 100;
                     s_th = deh.stonalwidth * (shmap->avg - shmap->min_f) / 100;
@@ -479,7 +484,7 @@ void RawImageSource::MSR (float** luminance, float** originalLuminance, float **
 
 #endif
 
-                if (mapmet > 0 && mapcontlutili && it == 1) {
+                if (mapmet > 0 && mapcontlutili && it == 1 && chrome == 0) {//
                     // TODO: When rgbcurvespeedup branch is merged into master we can simplify the code by
                     // 1) in rawimagesource.retinexPrepareCurves() insert
                     //    mapcurve *= 0.5f;
@@ -498,7 +503,7 @@ void RawImageSource::MSR (float** luminance, float** originalLuminance, float **
 
                 }
 
-                if (((mapmet == 2 && scale > 2) || mapmet == 3 || mapmet == 4) && it == 1) {
+                if (((mapmet == 2 && scale > 2) || mapmet == 3 || mapmet == 4) && it == 1 && chrome == 0) {//
                     float hWeight = (100.f - shHighlights) / 100.f;
                     float sWeight = (100.f - shShadows) / 100.f;
 #ifdef _OPENMP
@@ -555,7 +560,7 @@ void RawImageSource::MSR (float** luminance, float** originalLuminance, float **
                 }
             }
 
-            if (mapmet > 1) {
+            if (mapmet > 1 && chrome == 0) {
                 if (shmap) {
                     delete shmap;
                 }
@@ -760,44 +765,48 @@ void RawImageSource::MSR (float** luminance, float** originalLuminance, float **
 
                         cdmax = cd > cdmax ? cd : cdmax;
                         cdmin = cd < cdmin ? cd : cdmin;
-
                         float str = strengthx;
 
-                        if (lhutili && it == 1) { // S=f(H)
-                            {
-                                float HH = exLuminance[i][j];
-                                float valparam;
+                        if (chrome == 1) {
+                            luminance[i][j] = LIM ( cd, 0.f, maxclip ) * str + (1.f - str) * originalLuminance[i][j];
+                        } else {
 
-                                if (useHsl || useHslLin) {
-                                    valparam = float ((shcurve->getVal (HH) - 0.5f));
-                                } else {
-                                    valparam = float ((shcurve->getVal (Color::huelab_to_huehsv2 (HH)) - 0.5f));
+
+                            if (lhutili && it == 1) { // S=f(H)
+                                {
+                                    float HH = exLuminance[i][j];
+                                    float valparam;
+
+                                    if (useHsl || useHslLin) {
+                                        valparam = float ((shcurve->getVal (HH) - 0.5f));
+                                    } else {
+                                        valparam = float ((shcurve->getVal (Color::huelab_to_huehsv2 (HH)) - 0.5f));
+                                    }
+
+                                    str *= (1.f + 2.f * valparam);
                                 }
+                            }
 
-                                str *= (1.f + 2.f * valparam);
+                            if (higplus && exLuminance[i][j] > 65535.f * hig) {
+                                str *= hig;
+                            }
+
+                            if (viewmet == 0) {
+                                luminance[i][j] = intp (str, clipretinex ( cd, 0.f, 32768.f ), originalLuminance[i][j]);
+                            } else if (viewmet == 1) {
+                                luminance[i][j] = out[i][j];
+                            } else if (viewmet == 4) {
+                                luminance[i][j] = originalLuminance[i][j] + str * (originalLuminance[i][j] - out[i][j]);//unsharp
+                            } else if (viewmet == 2) {
+                                if (tran[i][j] <= mean) {
+                                    luminance[i][j] = azb + aza * tran[i][j];    //auto values
+                                } else {
+                                    luminance[i][j] = bzb + bza * tran[i][j];
+                                }
+                            } else { /*if(viewmet == 3) */
+                                luminance[i][j] = 1000.f + tran[i][j] * 700.f;    //arbitrary values to help display log values which are between -20 to + 30 - usage values -4 + 5
                             }
                         }
-
-                        if (higplus && exLuminance[i][j] > 65535.f * hig) {
-                            str *= hig;
-                        }
-
-                        if (viewmet == 0) {
-                            luminance[i][j] = intp (str, clipretinex ( cd, 0.f, 32768.f ), originalLuminance[i][j]);
-                        } else if (viewmet == 1) {
-                            luminance[i][j] = out[i][j];
-                        } else if (viewmet == 4) {
-                            luminance[i][j] = originalLuminance[i][j] + str * (originalLuminance[i][j] - out[i][j]);//unsharp
-                        } else if (viewmet == 2) {
-                            if (tran[i][j] <= mean) {
-                                luminance[i][j] = azb + aza * tran[i][j];    //auto values
-                            } else {
-                                luminance[i][j] = bzb + bza * tran[i][j];
-                            }
-                        } else { /*if(viewmet == 3) */
-                            luminance[i][j] = 1000.f + tran[i][j] * 700.f;    //arbitrary values to help display log values which are between -20 to + 30 - usage values -4 + 5
-                        }
-
                     }
 
 #ifdef _OPENMP
@@ -895,7 +904,7 @@ void ImProcFunctions::MSRWav (float** luminance, const float* const *originalLum
 
         const float shHighlights = (100.f - deh.highlights) / 100.f;
         const float shShadows = (100.f - deh.shadows) / 100.f;
-        const int mapmet = (chrome == 0 && (deh.highlights > 0 || deh.shadows > 0)) ? 4 : 0;//no action if chroma
+        const int mapmet = ((deh.highlights > 0 || deh.shadows > 0)) ? 4 : 0;//no action if chroma     //chrome == 0 &&
         const double shradius = mapmet == 4 ? deh.radius : 40.;
         constexpr int it = 1;//in case of !!
 

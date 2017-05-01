@@ -70,6 +70,7 @@ Retinex::Retinex () : FoldableToolPanel (this, "retinex", M ("TP_RETINEX_LABEL")
     chrrt = Gtk::manage (new Adjuster (M ("TP_RETINEX_CHRRT"), 0, 100., 1., 0.));
     setExpandAlignProperties (str, true, false, Gtk::ALIGN_FILL, Gtk::ALIGN_START);
     retinexGrid->attach (*chrrt, 0, 2, 1, 1);
+    chrrt->set_tooltip_markup (M ("TP_RETINEX_CHROMA_TOOLTIP"));
     chrrt->show ();
 	
     neigh = Gtk::manage (new Adjuster (M ("TP_RETINEX_NEIGHBOR"), 6, 100., 1., 80.));
@@ -107,7 +108,7 @@ Retinex::Retinex () : FoldableToolPanel (this, "retinex", M ("TP_RETINEX_LABEL")
     viewMethodConn = viewMethod->signal_changed().connect ( sigc::mem_fun (*this, &Retinex::viewMethodChanged) );
     viewMethod->set_tooltip_markup (M ("TP_RETINEX_VIEW_METHOD_TOOLTIP"));
     viewgrid->attach (*viewMethod, 1, 0, 1, 1);
-    retinexGrid->attach (*viewgrid, 0, 5, 1, 1);
+    retinexGrid->attach (*viewgrid, 0, 6, 1, 1);
 
     //-------------
 
