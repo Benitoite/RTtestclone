@@ -578,6 +578,7 @@ Wavelet::Wavelet() :
 // Edge Sharpness
     ToolParamBlock* const edgBox = Gtk::manage (new ToolParamBlock());
     ToolParamBlock* const edgBoxS = Gtk::manage (new ToolParamBlock());
+//    ToolParamBlock* const edgBoxM = Gtk::manage (new ToolParamBlock());
 
     edgval->setAdjusterListener (this);
     edgBox->pack_start (*edgval);
@@ -705,6 +706,8 @@ Wavelet::Wavelet() :
 
     usharpHBox->pack_start (*usharpLabel, Gtk::PACK_SHRINK, 0);
     usharpHBox->pack_start (*ushamethod);
+//   usharpHBox->pack_start (*usharpmethod);
+
     mergeL->setAdjusterListener (this);
     mergeC->setAdjusterListener (this);
     edgBoxS->pack_start (*usharpHBox);
@@ -714,13 +717,12 @@ Wavelet::Wavelet() :
     nextmergeC = mergeC->getValue();
 
     /*
-    expedg1->add (*edgBox);
-    edgBoxM->pack_start (*expedg1);
+        expedg1->add (*edgBoxS);
+        edgBoxS->pack_start (*expedg1);
 
-    expedg2->add (*edgBoxS);
-    edgBoxM->pack_start (*expedg2);
+        expedg2->add (*edgBoxS);
+        edgBoxM->pack_start (*expedg2);
     */
-
 
 //Retinex in Wavelet
     Gtk::VBox * retiBox = Gtk::manage (new Gtk::VBox());
@@ -1495,6 +1497,16 @@ Wavelet::Wavelet() :
     expedge->setLevel (2);
 //    expedge->add (*edgBoxM);
     pack_start (*expedge);
+
+    expedg1->add (*edgBoxS);
+    expedg1->setLevel (2);
+    pack_start (*expedg1);
+
+    /*
+        expedg2->add (*edgBoxM);
+        expedg2->setLevel (2);
+        pack_start (*expedg2);
+    */
 
     expreti->add (*retiBox);
     pack_start (*expreti);

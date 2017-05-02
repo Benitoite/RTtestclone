@@ -2089,7 +2089,7 @@ TP_WAVELET_EDCU;Curve
 TP_WAVELET_EDGCONT;Local contrast
 TP_WAVELET_EDGCONT_TOOLTIP;Adjusting the points to the left decreases contrast, and to the right increases it.\nBottom-left, Top-Left, Top-Right, Bottom-right represent respectively local contast for low values, mean, mean+stdev, maxima
 TP_WAVELET_EDGE;Edge Sharpness and Clarity
-TP_WAVELET_EDG1;Edge Sharpness
+TP_WAVELET_EDG1;Sharp-mask and Clarity
 TP_WAVELET_EDG2;Sharp-mask and Clarity
 TP_WAVELET_EDG3;Edge detection
 TP_WAVELET_MEDILEV;Edge detection
