@@ -523,7 +523,7 @@ Gtk::Widget* Preferences::getProcParamsPanel ()
     mvbpp->pack_start ( *fdf , Gtk::PACK_SHRINK, 4);
 
     //dfconn = darkFrameDir->signal_file_set().connect ( sigc::mem_fun(*this, &Preferences::darkFrameChanged), true);
-    dfconn = darkFrameDir->signal_current_folder_changed().connect ( sigc::mem_fun (*this, &Preferences::darkFrameChanged), true);
+    dfconn = darkFrameDir->signal_selection_changed().connect ( sigc::mem_fun(*this, &Preferences::darkFrameChanged), true);
 
     // FLATFIELD
     Gtk::Frame* fff = Gtk::manage (new Gtk::Frame (M ("PREFERENCES_FLATFIELD")) );
@@ -540,25 +540,7 @@ Gtk::Widget* Preferences::getProcParamsPanel ()
     mvbpp->pack_start ( *fff , Gtk::PACK_SHRINK, 4);
 
     //ffconn = flatFieldDir->signal_file_set().connect ( sigc::mem_fun(*this, &Preferences::flatFieldChanged), true);
-    ffconn = flatFieldDir->signal_current_folder_changed().connect ( sigc::mem_fun (*this, &Preferences::flatFieldChanged), true);
-
-
-    // MERGE FILES
-    Gtk::Frame* fmg = Gtk::manage (new Gtk::Frame (M ("PREFERENCES_MERGE")) );
-    Gtk::HBox* hb43mg = Gtk::manage (new Gtk::HBox ());
-    mergeDir = Gtk::manage (new Gtk::FileChooserButton (M ("PREFERENCES_MERGEDIR"), Gtk::FILE_CHOOSER_ACTION_SELECT_FOLDER));
-    Gtk::Label *mgLab = Gtk::manage (new Gtk::Label (M ("PREFERENCES_MERGEDIR") + ":"));
-    hb43mg->pack_start (*mgLab , Gtk::PACK_SHRINK, 4 );
-    hb43mg->pack_start (*mergeDir);
-    mgLabel = Gtk::manage (new Gtk::Label ("Found:"));
-    Gtk::VBox* vbmg = Gtk::manage (new Gtk::VBox ());
-    vbmg->pack_start ( *hb43mg, Gtk::PACK_SHRINK, 4);
-    // vbmg->pack_start( *mgLabel, Gtk::PACK_SHRINK, 4 );
-    fmg->add ( *vbmg );
-    mvbpp->pack_start ( *fmg , Gtk::PACK_SHRINK, 4);
-    mvbpp->set_border_width (4);
-
-    mgconn = mergeDir->signal_current_folder_changed().connect ( sigc::mem_fun (*this, &Preferences::mergeChanged), true);
+    ffconn = flatFieldDir->signal_selection_changed().connect ( sigc::mem_fun(*this, &Preferences::flatFieldChanged), true);
 
     //Cluts Dir
     Gtk::Frame* clutsDirFrame = Gtk::manage (new Gtk::Frame (M ("PREFERENCES_FILMSIMULATION")) );
