@@ -216,16 +216,20 @@ rtengine::ProfileContent::ProfileContent (const Glib::ustring& fileName)
         return;
     }
 
-    fseek (f, 0, SEEK_END);
-    const long length = ftell (f);
-    fseek (f, 0, SEEK_SET);
-    char* d = new char[length + 1];
-    fread (d, length, 1, f);
-    d[length] = 0;
-    fclose (f);
+    fseek(f, 0, SEEK_END);
+    long length = ftell(f);
+    if(length > 0) {
+        char* d = new char[length + 1];
+        fseek(f, 0, SEEK_SET);
+        length = fread(d, length, 1, f);
+        d[length] = 0;
+        data.assign(d, length);
+        delete[] d;
+    } else {
+        data.clear();
+    }
+    fclose(f);
 
-    data.assign (d, length);
-    delete[] d;
 }
 
 rtengine::ProfileContent::ProfileContent (cmsHPROFILE hProfile)
@@ -277,7 +281,32 @@ public:
         }
     }
 
-    void init (const Glib::ustring& usrICCDir, const Glib::ustring& rtICCDir, bool loadAll)
+    ~Implementation()
+    {
+        for (auto &p : wProfiles) {
+            if (p.second) {
+                cmsCloseProfile(p.second);
+            }
+        }
+        for (auto &p : wProfilesGamma) {
+            if (p.second) {
+                cmsCloseProfile(p.second);
+            }
+        }
+        for (auto &p : fileProfiles) {
+            if(p.second) {
+                cmsCloseProfile(p.second);
+            }
+        }
+        if(srgb) {
+            cmsCloseProfile(srgb);
+        }
+        if(xyz) {
+            cmsCloseProfile(xyz);
+        }
+    }
+
+    void init(const Glib::ustring& usrICCDir, const Glib::ustring& rtICCDir, bool loadAll)
     {
         // Reads all profiles from the given profiles dir
 
@@ -1207,11 +1236,10 @@ cmsHPROFILE rtengine::ICCStore::createCustomGammaOutputProfile (const procparams
     }
 
     // Calculate output profile's rTRC gTRC bTRC
-    cmsToneCurve* GammaTRC = nullptr;
-    GammaTRC = cmsBuildParametricToneCurve (nullptr, 5, Parameters);
-    cmsWriteTag (outputProfile, cmsSigRedTRCTag, (void*)GammaTRC );
-    cmsWriteTag (outputProfile, cmsSigGreenTRCTag, (void*)GammaTRC );
-    cmsWriteTag (outputProfile, cmsSigBlueTRCTag, (void*)GammaTRC );
+    cmsToneCurve* GammaTRC = cmsBuildParametricToneCurve(nullptr, 5, Parameters);
+    cmsWriteTag(outputProfile, cmsSigRedTRCTag,(void*)GammaTRC );
+    cmsWriteTag(outputProfile, cmsSigGreenTRCTag,(void*)GammaTRC );
+    cmsWriteTag(outputProfile, cmsSigBlueTRCTag,(void*)GammaTRC );
 
     if (GammaTRC) {
         cmsFreeToneCurve (GammaTRC);

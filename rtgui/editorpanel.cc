@@ -214,10 +214,12 @@ private:
         spGamutCheck.show ();
     }
 
+#if !defined(__APPLE__)
     void profileBoxChanged ()
     {
         updateParameters ();
     }
+#endif
 
     void intentBoxChanged (int)
     {
@@ -466,7 +468,11 @@ public:
 };
 
 EditorPanel::EditorPanel (FilePanel* filePanel)
-    : catalogPane (nullptr), realized (false), iHistoryShow (nullptr), iHistoryHide (nullptr), iTopPanel_1_Show (nullptr), iTopPanel_1_Hide (nullptr), iRightPanel_1_Show (nullptr), iRightPanel_1_Hide (nullptr), iBeforeLockON (nullptr), iBeforeLockOFF (nullptr), beforePreviewHandler (nullptr), beforeIarea (nullptr), beforeBox (nullptr), afterBox (nullptr), afterHeaderBox (nullptr), parent (nullptr), openThm (nullptr), ipc (nullptr), beforeIpc (nullptr), isProcessing (false)
+//<<<<<<< HEAD
+ //   : catalogPane (nullptr), realized (false), iHistoryShow (nullptr), iHistoryHide (nullptr), iTopPanel_1_Show (nullptr), iTopPanel_1_Hide (nullptr), iRightPanel_1_Show (nullptr), iRightPanel_1_Hide (nullptr), iBeforeLockON (nullptr), iBeforeLockOFF (nullptr), beforePreviewHandler (nullptr), beforeIarea (nullptr), beforeBox (nullptr), afterBox (nullptr), afterHeaderBox (nullptr), parent (nullptr), openThm (nullptr), ipc (nullptr), beforeIpc (nullptr), isProcessing (false)
+//=======
+    : catalogPane(nullptr), realized(false), tbBeforeLock(nullptr), iHistoryShow(nullptr), iHistoryHide(nullptr), iTopPanel_1_Show(nullptr), iTopPanel_1_Hide(nullptr), iRightPanel_1_Show(nullptr), iRightPanel_1_Hide(nullptr), iBeforeLockON(nullptr), iBeforeLockOFF(nullptr), previewHandler(nullptr), beforePreviewHandler(nullptr), beforeIarea(nullptr), beforeBox(nullptr), afterBox(nullptr), beforeLabel(nullptr), afterLabel(nullptr), beforeHeaderBox(nullptr), afterHeaderBox(nullptr), parent(nullptr), openThm(nullptr), isrc(nullptr), ipc(nullptr), beforeIpc(nullptr), err(0), isProcessing(false)
+//>>>>>>> dev
 {
 
     epih = new EditorPanelIdleHelper;
@@ -1706,6 +1712,8 @@ bool EditorPanel::idle_saveImage (ProgressConnector<rtengine::IImage16*> *pc, Gl
         else if (sf.format == "jpg")
             ld->startFunc (sigc::bind (sigc::mem_fun (img, &rtengine::IImage16::saveAsJPEG), fname, sf.jpegQuality, sf.jpegSubSamp),
                            sigc::bind (sigc::mem_fun (*this, &EditorPanel::idle_imageSaved), ld, img, fname, sf));
+        else
+            delete ld;
     } else {
         Glib::ustring msg_ = Glib::ustring ("<b>") + fname + ": Error during image processing\n</b>";
         Gtk::MessageDialog msgd (*parent, msg_, true, Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK, true);

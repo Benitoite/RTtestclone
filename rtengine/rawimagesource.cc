@@ -443,29 +443,33 @@ RawImageSource::RawImageSource ()
     , chmax{}
     , hlmax{}
     , clmax{}
-    , initialGain (0.0)
-    , camInitialGain (0.0)
-    , defGain (0.0)
-    , ri (nullptr)
-    , lc00 (0.0)
-    , lc01 (0.0)
-    , lc02 (0.0)
-    , lc10 (0.0)
-    , lc11 (0.0)
-    , lc12 (0.0)
-    , lc20 (0.0)
-    , lc21 (0.0)
-    , lc22 (0.0)
-    , cache (nullptr)
-    , threshold (0)
-    , rawData (0, 0)
-    , green (0, 0)
-    , red (0, 0)
-    , blue (0, 0)
+    , initialGain(0.0)
+    , camInitialGain(0.0)
+    , defGain(0.0)
+    , ri(nullptr)
+    , lc00(0.0)
+    , lc01(0.0)
+    , lc02(0.0)
+    , lc10(0.0)
+    , lc11(0.0)
+    , lc12(0.0)
+    , lc20(0.0)
+    , lc21(0.0)
+    , lc22(0.0)
+    , cache(nullptr)
+    , threshold(0)
+    , rawData(0, 0)
+    , green(0, 0)
+    , red(0, 0)
+    , blue(0, 0)
+    , rawDirty(true)
 {
     camProfile = nullptr;
     embProfile = nullptr;
     rgbSourceModified = false;
+    for(int i = 0; i < 4; ++i) {
+        psRedBrightness[i] = psGreenBrightness[i] = psBlueBrightness[i] = 1.f;
+    }
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -2041,6 +2045,7 @@ void RawImageSource::preprocess  (const RAWParams &raw, const LensProfParams &le
         delete bitmapBads;
     }
 
+    rawDirty = true;
     return;
 }
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -2113,7 +2118,7 @@ void RawImageSource::demosaic (const RAWParams &raw)
 
 
 //void RawImageSource::retinexPrepareBuffers(ColorManagementParams cmp, RetinexParams retinexParams, multi_array2D<float, 3> &conversionBuffer, LUTu &lhist16RETI)
-void RawImageSource::retinexPrepareBuffers (ColorManagementParams cmp, RetinexParams retinexParams, multi_array2D<float, 4> &conversionBuffer, LUTu &lhist16RETI)
+void RawImageSource::retinexPrepareBuffers(ColorManagementParams cmp, const RetinexParams &retinexParams, multi_array2D<float, 4> &conversionBuffer, LUTu &lhist16RETI)
 {
     bool useHsl = (retinexParams.retinexcolorspace == "HSLLOG" || retinexParams.retinexcolorspace == "HSLLIN");
     conversionBuffer[0] (W - 2 * border, H - 2 * border);
@@ -2215,7 +2220,7 @@ void RawImageSource::retinexPrepareBuffers (ColorManagementParams cmp, RetinexPa
             }
     }
     */
-    if (retinexParams.gammaretinex != "none" && retinexParams.str != 0) { //gamma
+    if(retinexParams.gammaretinex != "none" && retinexParams.str != 0 && retinexgamtab) {//gamma
 
 #ifdef _OPENMP
         #pragma omp parallel for
@@ -2367,7 +2372,11 @@ void RawImageSource::retinexPrepareBuffers (ColorManagementParams cmp, RetinexPa
 
 }
 
-void RawImageSource::retinexPrepareCurves (RetinexParams retinexParams, LUTf &cdcurve, LUTf &mapcurve, RetinextransmissionCurve &retinextransmissionCurve, RetinexgaintransmissionCurve &retinexgaintransmissionCurve, bool &retinexcontlutili, bool &mapcontlutili, bool &useHsl, LUTu & lhist16RETI, LUTu & histLRETI)
+//<<<<<<< HEAD
+//void RawImageSource::retinexPrepareCurves (RetinexParams retinexParams, LUTf &cdcurve, LUTf &mapcurve, RetinextransmissionCurve &retinextransmissionCurve, RetinexgaintransmissionCurve &retinexgaintransmissionCurve, bool &retinexcontlutili, bool &mapcontlutili, bool &useHsl, LUTu & lhist16RETI, LUTu & histLRETI)
+//=======
+void RawImageSource::retinexPrepareCurves(const RetinexParams &retinexParams, LUTf &cdcurve, LUTf &mapcurve, RetinextransmissionCurve &retinextransmissionCurve, RetinexgaintransmissionCurve &retinexgaintransmissionCurve, bool &retinexcontlutili, bool &mapcontlutili, bool &useHsl, LUTu & lhist16RETI, LUTu & histLRETI)
+//>>>>>>> dev
 {
     useHsl = (retinexParams.retinexcolorspace == "HSLLOG" || retinexParams.retinexcolorspace == "HSLLIN");
 
@@ -2382,7 +2391,11 @@ void RawImageSource::retinexPrepareCurves (RetinexParams retinexParams, LUTf &cd
     retinexParams.getCurves (retinextransmissionCurve, retinexgaintransmissionCurve);
 }
 
-void RawImageSource::retinex (ColorManagementParams cmp, RetinexParams deh, ToneCurveParams Tc, LUTf & cdcurve, LUTf & mapcurve, const RetinextransmissionCurve & dehatransmissionCurve, const RetinexgaintransmissionCurve & dehagaintransmissionCurve, multi_array2D<float, 4> &conversionBuffer, bool dehacontlutili, bool mapcontlutili, bool useHsl, float &minCD, float &maxCD, float &mini, float &maxi, float &Tmean, float &Tsigma, float &Tmin, float &Tmax, LUTu &histLRETI)
+//<<<<<<< HEAD
+//void RawImageSource::retinex (ColorManagementParams cmp, RetinexParams deh, ToneCurveParams Tc, LUTf & cdcurve, LUTf & mapcurve, const RetinextransmissionCurve & dehatransmissionCurve, const RetinexgaintransmissionCurve & dehagaintransmissionCurve, multi_array2D<float, 4> &conversionBuffer, bool dehacontlutili, bool mapcontlutili, bool useHsl, float &minCD, float &maxCD, float &mini, float &maxi, float &Tmean, float &Tsigma, float &Tmin, float &Tmax, LUTu &histLRETI)
+//=======
+void RawImageSource::retinex(ColorManagementParams cmp, const RetinexParams &deh, ToneCurveParams Tc, LUTf & cdcurve, LUTf & mapcurve, const RetinextransmissionCurve & dehatransmissionCurve, const RetinexgaintransmissionCurve & dehagaintransmissionCurve, multi_array2D<float, 4> &conversionBuffer, bool dehacontlutili, bool mapcontlutili, bool useHsl, float &minCD, float &maxCD, float &mini, float &maxi, float &Tmean, float &Tsigma, float &Tmin, float &Tmax, LUTu &histLRETI)
+//>>>>>>> dev
 {
     MyTime t4, t5;
     t4.set();
@@ -5191,15 +5204,15 @@ void RawImageSource::getAutoWBMultipliers (double &rm, double &gm, double &bm)
         }
     }
 
-    if ( settings->verbose ) {
-        printf ("AVG: %g %g %g\n", avg_r / rn, avg_g / gn, avg_b / bn);
+    if( settings->verbose ) {
+        printf ("AVG: %g %g %g\n", avg_r / std::max(1, rn), avg_g / std::max(1, gn), avg_b / std::max(1, bn));
     }
 
     //    return ColorTemp (pow(avg_r/rn, 1.0/6.0)*img_r, pow(avg_g/gn, 1.0/6.0)*img_g, pow(avg_b/bn, 1.0/6.0)*img_b);
 
-    double reds   = avg_r / rn * refwb_red;
-    double greens = avg_g / gn * refwb_green;
-    double blues  = avg_b / bn * refwb_blue;
+    double reds   = avg_r / std::max(1, rn) * refwb_red;
+    double greens = avg_g / std::max(1, gn) * refwb_green;
+    double blues  = avg_b / std::max(1, bn) * refwb_blue;
 
     redAWBMul   = rm = imatrices.rgb_cam[0][0] * reds + imatrices.rgb_cam[0][1] * greens + imatrices.rgb_cam[0][2] * blues;
     greenAWBMul = gm = imatrices.rgb_cam[1][0] * reds + imatrices.rgb_cam[1][1] * greens + imatrices.rgb_cam[1][2] * blues;
@@ -5321,9 +5334,9 @@ ColorTemp RawImageSource::getSpotWB (std::vector<Coord2D> &red, std::vector<Coor
                 }
             }
 
-            rloc /= rnbrs;
-            gloc /= gnbrs;
-            bloc /= bnbrs;
+            rloc /= std::max(1, rnbrs);
+            gloc /= std::max(1, gnbrs);
+            bloc /= std::max(1, bnbrs);
 
             if (rloc * initialGain < 64000. && gloc * initialGain < 64000. && bloc * initialGain < 64000.) {
                 reds += rloc;
@@ -5357,9 +5370,9 @@ ColorTemp RawImageSource::getSpotWB (std::vector<Coord2D> &red, std::vector<Coor
                 }
             }
 
-            rloc /= rnbrs;
-            gloc /= gnbrs;
-            bloc /= bnbrs;
+            rloc /= std::max(rnbrs, 1);
+            gloc /= std::max(gnbrs, 1);
+            bloc /= std::max(bnbrs, 1);
 
             if (rloc * initialGain < 64000. && gloc * initialGain < 64000. && bloc * initialGain < 64000.) {
                 reds += rloc;
@@ -5393,9 +5406,9 @@ ColorTemp RawImageSource::getSpotWB (std::vector<Coord2D> &red, std::vector<Coor
                 }
             }
 
-            rloc /= rnbrs;
-            gloc /= gnbrs;
-            bloc /= bnbrs;
+            rloc /= std::max(rnbrs, 1);
+            gloc /= std::max(gnbrs, 1);
+            bloc /= std::max(bnbrs, 1);
 
             if (rloc * initialGain < 64000. && gloc * initialGain < 64000. && bloc * initialGain < 64000.) {
                 reds += rloc;
@@ -5409,9 +5422,9 @@ ColorTemp RawImageSource::getSpotWB (std::vector<Coord2D> &red, std::vector<Coor
     if (2u * rn < red.size()) {
         return ColorTemp (equal);
     } else {
-        reds = reds / rn * refwb_red;
-        greens = greens / rn * refwb_green;
-        blues = blues / rn * refwb_blue;
+        reds = reds / std::max(1u, rn) * refwb_red;
+        greens = greens / std::max(1u, rn) * refwb_green;
+        blues = blues / std::max(1u, rn) * refwb_blue;
 
         double rm = imatrices.rgb_cam[0][0] * reds + imatrices.rgb_cam[0][1] * greens + imatrices.rgb_cam[0][2] * blues;
         double gm = imatrices.rgb_cam[1][0] * reds + imatrices.rgb_cam[1][1] * greens + imatrices.rgb_cam[1][2] * blues;
