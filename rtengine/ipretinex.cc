@@ -848,7 +848,6 @@ void ImProcFunctions::MSRWav (float** luminance, const float* const *originalLum
 {
     BENCHFUN
     bool py = true;
-
     if (py) {//enabled
         float         mean, stddv, maxtr, mintr;
         float         delta;

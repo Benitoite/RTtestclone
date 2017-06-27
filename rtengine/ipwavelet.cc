@@ -1529,13 +1529,15 @@ SSEFUNCTION void ImProcFunctions::ip_wavelet (LabImage * lab, LabImage * dst, fl
     omp_set_nested (oldNested);
 #endif
 
-    if(numtiles != 1) {
-        dst->CopyFrom(dsttmp);
-        delete dsttmp;
+//    if(numtiles != 1) {
+      //  dst->CopyFrom(dsttmp);
+//        delete dsttmp;
  //   }
 
-
+//if(cp.retiena) printf("RETINEX\n");
+//if(params->wavelet.retinexMethodpro == "fina") printf("Fina\n");
     if (cp.retiena  && params->wavelet.retinexMethodpro == "fina") {
+		printf("RETI\n");
         int W_L =  imwidth;
         int H_L =  imheight;
 
@@ -1674,11 +1676,15 @@ SSEFUNCTION void ImProcFunctions::ip_wavelet (LabImage * lab, LabImage * dst, fl
         }
     }
 
+    if(numtiles != 1) {
+        dst->CopyFrom(dsttmp);
+        delete dsttmp;
+    }
 
 
 
 
-}//end o
+//}//end o
 
 
 

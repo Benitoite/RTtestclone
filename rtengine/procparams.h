@@ -474,7 +474,7 @@ public:
     int            deconviter;
     int            deconvdamping;
 
-    SharpeningParams() : threshold (20, 80, 2000, 1200, false) {};
+    SharpeningParams();
 };
 class SharpenEdgeParams
 {
@@ -509,7 +509,7 @@ public:
     bool           pastsattog;
     std::vector<double> skintonescurve;
 
-    VibranceParams() : psthreshold (0, 75,  false) {};
+    VibranceParams();
 };
 
 /**
@@ -697,7 +697,6 @@ public:
     bool    enabled;
     bool    enhance;
     bool    median;
-    bool    autochroma;
 
     bool    perform;
     double  luma;
@@ -990,7 +989,6 @@ public:
     bool          applyLookTable;
     bool          applyBaselineExposureOffset;
     bool          applyHueSatMap;
-    bool          blendCMSMatrix; // setting no longer used
     int dcpIlluminant;
     Glib::ustring working;
     Glib::ustring output;

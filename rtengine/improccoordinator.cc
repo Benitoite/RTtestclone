@@ -83,19 +83,6 @@ ImProcCoordinator::ImProcCoordinator ()
       rCurve(),
       gCurve(),
       bCurve(),
-      /*
-      <<<<<<< HEAD
-      rcurvehist (256), rcurvehistCropped (256), rbeforehist (256),
-      gcurvehist (256), gcurvehistCropped (256), gbeforehist (256),
-      bcurvehist (256), bcurvehistCropped (256), bbeforehist (256),
-      fw (0), fh (0), tr (0),
-      fullw (1), fullh (1),
-      pW (-1), pH (-1),
-      plistener (nullptr), imageListener (nullptr), aeListener (nullptr), acListener (nullptr), abwListener (nullptr), awbListener (nullptr), actListener (nullptr), adnListener (nullptr), awavListener (nullptr), dehaListener (nullptr), hListener (nullptr),
-      resultValid (false), lastOutputProfile ("BADFOOD"), lastOutputIntent (RI__COUNT), lastOutputBPC (false), thread (nullptr), changeSinceLast (0), updaterRunning (false), destroying (false), utili (false), autili (false), wavcontlutili (false),
-      butili (false), ccutili (false), cclutili (false), clcutili (false), opautili (false), conversionBuffer (1, 1), colourToningSatLimit (0.f), colourToningSatLimitOpacity (0.f)
-      =======
-      */
       ctColorCurve(),
       rcurvehist (256), rcurvehistCropped (256), rbeforehist (256),
       gcurvehist (256), gcurvehistCropped (256), gbeforehist (256),
@@ -416,10 +403,9 @@ void ImProcCoordinator::updatePreviewImage (int todo, Crop* cropCall)
 
         if (needstransform)
             ipf.transform (orig_prev, oprevi, 0, 0, 0, 0, pW, pH, fw, fh, imgsrc->getMetaData()->getFocalLen(),
-                           imgsrc->getMetaData()->getFocalLen35mm(), imgsrc->getMetaData()->getFocusDist(), imgsrc->getRotateDegree(), false);
-        else {
-            orig_prev->copyData (oprevi);
-        }
+                           imgsrc->getMetaData()->getFocalLen35mm(), imgsrc->getMetaData()->getFocusDist(), imgsrc->getMetaData()->getFNumber(), imgsrc->getRotateDegree(), false);
+        else
+            orig_prev->copyData(oprevi);
     }
 
     if ((todo & (M_TRANSFORM | M_RGBCURVE))  && params.dirpyrequalizer.cbdlMethod == "bef" && params.dirpyrequalizer.enabled && !params.colorappearance.enabled) {
@@ -1679,7 +1665,7 @@ void ImProcCoordinator::saveInputICCReference (const Glib::ustring& fname, bool 
     if (ipf.needsTransform()) {
         Imagefloat* trImg = new Imagefloat (fW, fH);
         ipf.transform (im, trImg, 0, 0, 0, 0, fW, fH, fW, fH, imgsrc->getMetaData()->getFocalLen(), imgsrc->getMetaData()->getFocalLen35mm(),
-                       imgsrc->getMetaData()->getFocusDist(), imgsrc->getRotateDegree(), true);
+                       imgsrc->getMetaData()->getFocusDist(), imgsrc->getMetaData()->getFNumber(), imgsrc->getRotateDegree(), true);
         delete im;
         im = trImg;
     }
