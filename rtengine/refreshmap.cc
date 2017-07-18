@@ -499,8 +499,8 @@ int refreshmap[rtengine::NUMOFEVENTS] = {
     DIRPYREQUALIZER,  // EvWavshadows
     DIRPYREQUALIZER,  // EvWavs_tonalwidth
     DIRPYREQUALIZER,  // EvWavscale
-    DIRPYREQUALIZER,  // EvWavenaTCresi
-    DIRPYREQUALIZER,  // EvWavenaedge3
+//   DIRPYREQUALIZER,  // EvWavenaTCresi
+//   DIRPYREQUALIZER,  // EvWavenaedge3
     DIRPYREQUALIZER,  // EvWavgrad
     DIRPYREQUALIZER,  // EvWavmergCurve
     DIRPYREQUALIZER,  // EvWavCTgainCurve

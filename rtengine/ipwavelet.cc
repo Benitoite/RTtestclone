@@ -1095,7 +1095,7 @@ SSEFUNCTION void ImProcFunctions::ip_wavelet (LabImage * lab, LabImage * dst, fl
 
                         ind = 1;
                         //Flat curve for Contrast=f(H) in levels
-                        FlatCurve* ChCurve = new FlatCurve(params->wavelet.Chcurve); //curve C=f(H)
+                        FlatCurve* ChCurve = new FlatCurve (params->wavelet.Chcurve); //curve C=f(H)
                         bool Chutili = false;
 
                         if (!ChCurve || ChCurve->isIdentity()) {
@@ -1146,7 +1146,7 @@ SSEFUNCTION void ImProcFunctions::ip_wavelet (LabImage * lab, LabImage * dst, fl
                 }
 
                 //Flat curve for H=f(H) in residual image
-                FlatCurve* hhCurve = new FlatCurve(params->wavelet.hhcurve); //curve H=f(H)
+                FlatCurve* hhCurve = new FlatCurve (params->wavelet.hhcurve); //curve H=f(H)
                 bool hhutili = false;
 
                 if (!hhCurve || hhCurve->isIdentity()) {
@@ -1530,14 +1530,14 @@ SSEFUNCTION void ImProcFunctions::ip_wavelet (LabImage * lab, LabImage * dst, fl
 #endif
 
 //    if(numtiles != 1) {
-      //  dst->CopyFrom(dsttmp);
+    //  dst->CopyFrom(dsttmp);
 //        delete dsttmp;
- //   }
+//   }
 
 //if(cp.retiena) printf("RETINEX\n");
 //if(params->wavelet.retinexMethodpro == "fina") printf("Fina\n");
     if (cp.retiena  && params->wavelet.retinexMethodpro == "fina") {
-		printf("RETI\n");
+        printf ("RETI\n");
         int W_L =  imwidth;
         int H_L =  imheight;
 
@@ -1676,8 +1676,8 @@ SSEFUNCTION void ImProcFunctions::ip_wavelet (LabImage * lab, LabImage * dst, fl
         }
     }
 
-    if(numtiles != 1) {
-        dst->CopyFrom(dsttmp);
+    if (numtiles != 1) {
+        dst->CopyFrom (dsttmp);
         delete dsttmp;
     }
 
@@ -2331,7 +2331,7 @@ void ImProcFunctions::EPDToneMapResid (float * WavCoeffs_L0,  unsigned int Itera
     }
 
 
-    epd2.CompressDynamicRange(WavCoeffs_L0, (float)sca / skip, edgest, Compression, DetailBoost, Iterates, rew);
+    epd2.CompressDynamicRange (WavCoeffs_L0, (float)sca / skip, edgest, Compression, DetailBoost, Iterates, rew);
 
     //Restore past range, also desaturate a bit per Mantiuk's Color correction for tone mapping.
 #ifdef _RT_NESTED_OPENMP
@@ -4970,12 +4970,14 @@ void ImProcFunctions::ContAllAB (LabImage * labco, int maxlvl, float ** varhue, 
 
     if (useChannelA) {
         useOpacity = cp.opaRG;
-        if(level < 9) {
+
+        if (level < 9) {
             mulOpacity = cp.mulopaRG[level];
         }
     } else {
         useOpacity = cp.opaBY;
-        if(level < 9) {
+
+        if (level < 9) {
             mulOpacity = cp.mulopaBY[level];
         }
     }

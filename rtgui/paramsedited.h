@@ -683,9 +683,7 @@ public:
     bool expcontrast;
     bool expchroma;
     bool expedge;
-    bool expedg3;
     bool expresid;
-    bool expTCresi;
     bool expfinal;
     bool exptoning;
     bool expnoise;

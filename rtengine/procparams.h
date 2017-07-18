@@ -1089,21 +1089,21 @@ public:
     double grad;
 
     int iter;
-    bool expcontrast;
-    bool expchroma;
     int c[9];
     int ch[9];
     int bm[9];
     int bm2[9];
+
+    bool expcontrast;
+    bool expchroma;
     bool expedge;
-    bool expedg3;
     bool expresid;
-    bool expTCresi;
     bool expfinal;
     bool exptoning;
     bool expnoise;
     bool expmerge;
     bool expreti;
+
 
     Glib::ustring Lmethod;
     Glib::ustring CLmethod;

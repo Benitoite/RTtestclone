@@ -553,13 +553,15 @@ void ParamsEdited::set (bool v)
 //  wavelet.enares = v;
     wavelet.expfinal = v;
     wavelet.expcontrast = v;
-    wavelet.expTCresi = v;
     wavelet.expchroma = v;
     wavelet.expedge = v;
-    wavelet.expedg3 = v;
     wavelet.expresid = v;
     wavelet.exptoning = v;
     wavelet.expnoise = v;
+    wavelet.expmerge = v;
+    wavelet.expreti = v;
+
+
 
     for (int i = 0; i < 9; i++) {
         wavelet.c[i] = v;
@@ -1133,9 +1135,7 @@ void ParamsEdited::initFrom (const std::vector<rtengine::procparams::ProcParams>
         wavelet.expcontrast = wavelet.expcontrast && p.wavelet.expcontrast == other.wavelet.expcontrast;
         wavelet.expchroma = wavelet.expchroma && p.wavelet.expchroma == other.wavelet.expchroma;
         wavelet.expedge = wavelet.expedge && p.wavelet.expedge == other.wavelet.expedge;
-        wavelet.expedg3 = wavelet.expedg3 && p.wavelet.expedg3 == other.wavelet.expedg3;
         wavelet.expresid = wavelet.expresid && p.wavelet.expresid == other.wavelet.expresid;
-        wavelet.expTCresi = wavelet.expTCresi && p.wavelet.expTCresi == other.wavelet.expTCresi;
         wavelet.expfinal = wavelet.expfinal && p.wavelet.expfinal == other.wavelet.expfinal;
         wavelet.exptoning = wavelet.exptoning && p.wavelet.exptoning == other.wavelet.exptoning;
         wavelet.expnoise = wavelet.expnoise && p.wavelet.expnoise == other.wavelet.expnoise;
@@ -1339,7 +1339,7 @@ void ParamsEdited::combine (rtengine::procparams::ProcParams& toEdit, const rten
     if (retinex.chrrt) {
         toEdit.retinex.chrrt  = mods.retinex.chrrt;
     }
-	
+
     if (retinex.neigh) {
         toEdit.retinex.neigh   = dontforceSet && options.baBehav[ADDSET_RETI_NEIGH] ? toEdit.retinex.neigh + mods.retinex.neigh : mods.retinex.neigh;
     }
@@ -3069,9 +3069,6 @@ void ParamsEdited::combine (rtengine::procparams::ProcParams& toEdit, const rten
         toEdit.wavelet.expcontrast   = mods.wavelet.expcontrast;
     }
 
-    if (wavelet.expTCresi) {
-        toEdit.wavelet.expTCresi   = mods.wavelet.expTCresi;
-    }
 
     if (wavelet.expchroma) {
         toEdit.wavelet.expchroma   = mods.wavelet.expchroma;
@@ -3081,9 +3078,6 @@ void ParamsEdited::combine (rtengine::procparams::ProcParams& toEdit, const rten
         toEdit.wavelet.expedge   = mods.wavelet.expedge;
     }
 
-    if (wavelet.expedg3) {
-        toEdit.wavelet.expedg3   = mods.wavelet.expedg3;
-    }
 
     if (wavelet.expreti) {
         toEdit.wavelet.expreti   = mods.wavelet.expreti;

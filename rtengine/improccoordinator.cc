@@ -404,8 +404,9 @@ void ImProcCoordinator::updatePreviewImage (int todo, Crop* cropCall)
         if (needstransform)
             ipf.transform (orig_prev, oprevi, 0, 0, 0, 0, pW, pH, fw, fh, imgsrc->getMetaData()->getFocalLen(),
                            imgsrc->getMetaData()->getFocalLen35mm(), imgsrc->getMetaData()->getFocusDist(), imgsrc->getMetaData()->getFNumber(), imgsrc->getRotateDegree(), false);
-        else
-            orig_prev->copyData(oprevi);
+        else {
+            orig_prev->copyData (oprevi);
+        }
     }
 
     if ((todo & (M_TRANSFORM | M_RGBCURVE))  && params.dirpyrequalizer.cbdlMethod == "bef" && params.dirpyrequalizer.enabled && !params.colorappearance.enabled) {
@@ -614,7 +615,7 @@ void ImProcCoordinator::updatePreviewImage (int todo, Crop* cropCall)
             lhist16 += lhist16thr;
         }
 #ifdef _OPENMP
-            static_cast<void>(numThreads); // to silence cppcheck warning
+        static_cast<void> (numThreads); // to silence cppcheck warning
 #endif
         CurveFactory::complexLCurve (params.labCurve.brightness, params.labCurve.contrast, params.labCurve.lcurve, lhist16, lumacurve, histLCurve, scale == 1 ? 1 : 16, utili);
     }

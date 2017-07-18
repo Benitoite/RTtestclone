@@ -58,10 +58,10 @@ std::vector<GradientMilestone> makeWholeHueRange()
 
 
 Wavelet::Wavelet() :
+//<<<<<<< HEAD
     FoldableToolPanel (this, "wavelet", M ("TP_WAVELET_LABEL"), true, true),
     lastlabFilename (""),
     walistener (NULL),
-
     curveEditorG (new CurveEditorGroup (options.lastWaveletCurvesDir, M ("TP_WAVELET_CONTEDIT"))),
     CCWcurveEditorG (new CurveEditorGroup (options.lastWaveletCurvesDir, M ("TP_WAVELET_CCURVE"))),
     curveEditorRES (new CurveEditorGroup (options.lastWaveletCurvesDir)),
@@ -209,22 +209,22 @@ Wavelet::Wavelet() :
     usharpLabel (Gtk::manage (new Gtk::Label (M ("TP_WAVELET_USHARP") + ":"))),
     inLabel (Gtk::manage (new Gtk::Label (M ("GENERAL_FILE")))),
 
-    expchroma (new MyExpander (true, M ("TP_WAVELET_LEVCH"))),
-    expcontrast (new MyExpander (true, M ("TP_WAVELET_LEVF"))),
-    expedge (new MyExpander (true, M ("TP_WAVELET_EDGE"))),
-    expfinal (new MyExpander (true, M ("TP_WAVELET_FINAL"))),
-    expgamut (new MyExpander (false, M ("TP_WAVELET_CONTR"))),
-    expnoise (new MyExpander (true, M ("TP_WAVELET_NOISE"))),
-    expresid (new MyExpander (true, M ("TP_WAVELET_RESID"))),
     expsettings (new MyExpander (false, M ("TP_WAVELET_SETTINGS"))),
+    expcontrast (new MyExpander (true, M ("TP_WAVELET_LEVF"))),
+    expchroma (new MyExpander (true, M ("TP_WAVELET_LEVCH"))),
     exptoning (new MyExpander (true, M ("TP_WAVELET_TON"))),
+    expnoise (new MyExpander (true, M ("TP_WAVELET_NOISE"))),
+    expedge (new MyExpander (true, M ("TP_WAVELET_EDGE"))),
     expreti (new MyExpander (true, M ("TP_WAVELET_RETI"))),
+    expgamut (new MyExpander (false, M ("TP_WAVELET_CONTR"))),
+    expresid (new MyExpander (true, M ("TP_WAVELET_RESID"))),
     expmerge (new MyExpander (true, M ("TP_WAVELET_MERGE"))),
+    expfinal (new MyExpander (true, M ("TP_WAVELET_FINAL"))),
     expsettingreti (new MyExpander (false, M ("TP_RETINEX_SETTINGS"))),
-    expTCresi (new MyExpander (true, M ("TP_WAVELET_TC"))),
     expedg1 (new MyExpander (false, M ("TP_WAVELET_EDG1"))),
-    expedg2 (new MyExpander (false, M ("TP_WAVELET_EDG2"))),
-    expedg3 (new MyExpander (false, M ("TP_WAVELET_EDG3"))),
+
+
+
 
 
     neutrHBox (Gtk::manage (new Gtk::HBox())),
@@ -252,7 +252,100 @@ Wavelet::Wavelet() :
     nextsigma = 0.;
     nextminT = 0.;
     nextmaxT = 0.;
+    /*
+    =======
+        FoldableToolPanel(this, "wavelet", M("TP_WAVELET_LABEL"), true, true),
+        curveEditorG(new CurveEditorGroup(options.lastWaveletCurvesDir, M("TP_WAVELET_CONTEDIT"))),
+        CCWcurveEditorG(new CurveEditorGroup(options.lastWaveletCurvesDir, M("TP_WAVELET_CCURVE"))),
+        curveEditorRES(new CurveEditorGroup(options.lastWaveletCurvesDir)),
+        curveEditorGAM(new CurveEditorGroup(options.lastWaveletCurvesDir)),
+        separatorNeutral(Gtk::manage(new Gtk::HSeparator())),
+        separatoredge(Gtk::manage(new Gtk::HSeparator())),
+        opaCurveEditorG(new CurveEditorGroup(options.lastWaveletCurvesDir, M("TP_WAVELET_COLORT"))),
+        opacityCurveEditorG(new CurveEditorGroup(options.lastWaveletCurvesDir, M("TP_WAVELET_OPACITY"))),
+        opacityCurveEditorW(new CurveEditorGroup(options.lastWaveletCurvesDir, M("TP_WAVELET_OPACITYW"))),
+        opacityCurveEditorWL(new CurveEditorGroup(options.lastWaveletCurvesDir, M("TP_WAVELET_OPACITYWL"))),
+        median(Gtk::manage(new Gtk::CheckButton(M("TP_WAVELET_MEDI")))),
+        medianlev(Gtk::manage(new Gtk::CheckButton(M("TP_WAVELET_MEDILEV")))),
+        linkedg(Gtk::manage(new Gtk::CheckButton(M("TP_WAVELET_LINKEDG")))),
+        cbenab(Gtk::manage(new Gtk::CheckButton(M("TP_WAVELET_CBENAB")))),
+        lipst(Gtk::manage(new Gtk::CheckButton(M("TP_WAVELET_LIPST")))),
+        avoid(Gtk::manage(new Gtk::CheckButton(M("TP_WAVELET_AVOID")))),
+        tmr(Gtk::manage(new Gtk::CheckButton(M("TP_WAVELET_BALCHRO")))),
+        neutralchButton(Gtk::manage(new Gtk::Button(M("TP_WAVELET_NEUTRAL")))),
+        rescon(Gtk::manage(new Adjuster(M("TP_WAVELET_RESCON"), -100, 100, 1, 0))),
+        resconH(Gtk::manage(new Adjuster(M("TP_WAVELET_RESCONH"), -100, 100, 1, 0))),
+        reschro(Gtk::manage(new Adjuster(M("TP_WAVELET_RESCHRO"), -100, 100, 1, 0))),
+        tmrs(Gtk::manage(new Adjuster(M("TP_WAVELET_TMSTRENGTH"), -1.0, 2.0, 0.01, 0.0))),
+        gamma(Gtk::manage(new Adjuster(M("TP_WAVELET_COMPGAMMA"), 0.4, 2.0, 0.01, 1.0))),
+        sup(Gtk::manage(new Adjuster(M("TP_WAVELET_SUPE"), -100, 350, 1, 0))),
+        sky(Gtk::manage(new Adjuster(M("TP_WAVELET_SKY"), -100., 100.0, 1., 0.))),
+        thres(Gtk::manage(new Adjuster(M("TP_WAVELET_LEVELS"), 4, 9, 1, 7))),//3
+        chroma(Gtk::manage(new Adjuster(M("TP_WAVELET_CHRO"), 1, 9, 1, 5))),
+        chro(Gtk::manage(new Adjuster(M("TP_WAVELET_CHR"), 0., 100., 1., 0.))),
+        contrast(Gtk::manage(new Adjuster(M("TP_WAVELET_CONTRA"), -100, 100, 1, 0))),
+        thr(Gtk::manage(new Adjuster(M("TP_WAVELET_THR"), 0, 100, 1, 35))),
+        thrH(Gtk::manage(new Adjuster(M("TP_WAVELET_THRH"), 0, 100, 1, 65))),
+        skinprotect(Gtk::manage( new Adjuster(M("TP_WAVELET_SKIN"), -100, 100, 1, 0.) )),
+        edgrad(Gtk::manage( new Adjuster(M("TP_WAVELET_EDRAD"), 0, 100, 1, 15) )),
+        edgval(Gtk::manage( new Adjuster(M("TP_WAVELET_EDVAL"), 0, 100, 1, 0) )),
+        edgthresh(Gtk::manage(new Adjuster(M("TP_WAVELET_EDGTHRESH"), -50, 100, 1, 10 ))),
+        strength(Gtk::manage(new Adjuster(M("TP_WAVELET_STRENGTH"), 0, 100, 1, 100))),
+        balance(Gtk::manage(new Adjuster(M("TP_WAVELET_BALANCE"), -30, 100, 1, 0))),
+        iter(Gtk::manage(new Adjuster(M("TP_WAVELET_ITER"), -3, 3, 1, 0))),
+        hueskin(Gtk::manage(new ThresholdAdjuster(M("TP_WAVELET_HUESKIN"), -314., 314., -5., 25., 170., 120., 0, false))),
+        hueskin2(Gtk::manage(new ThresholdAdjuster(M("TP_WAVELET_HUESKY"), -314., 314., -260., -250, -130., -140., 0, false))),
+        hllev(Gtk::manage(new ThresholdAdjuster(M("TP_WAVELET_HIGHLIGHT"), 0., 100., 50., 75., 100., 98., 0, false))),
+        bllev(Gtk::manage(new ThresholdAdjuster(M("TP_WAVELET_LOWLIGHT"), 0., 100., 0., 2., 50., 25., 0, false))),
+        pastlev(Gtk::manage(new ThresholdAdjuster(M("TP_WAVELET_PASTEL"), 0., 70., 0., 2., 30., 20., 0, false))),
+        satlev(Gtk::manage(new ThresholdAdjuster(M("TP_WAVELET_SAT"), 0., 130., 30., 45., 130., 100., 0, false))),
+        edgcont(Gtk::manage(new ThresholdAdjuster(M("TP_WAVELET_EDGCONT"), 0., 100., options.rtSettings.bot_left, options.rtSettings.top_left, options.rtSettings.bot_right, options.rtSettings.top_right, 0., false))),
+        level0noise(Gtk::manage(new ThresholdAdjuster(M("TP_WAVELET_LEVZERO"), -30., 100., 0., M("TP_WAVELET_STREN"), 1., 0., 100., 0., M("TP_WAVELET_NOIS"), 1., nullptr, false))),
+        level1noise(Gtk::manage(new ThresholdAdjuster(M("TP_WAVELET_LEVONE"), -30., 100., 0., M("TP_WAVELET_STREN"), 1., 0., 100., 0., M("TP_WAVELET_NOIS"), 1., nullptr, false))),
+        level2noise(Gtk::manage(new ThresholdAdjuster(M("TP_WAVELET_LEVTWO"), -30., 100., 0., M("TP_WAVELET_STREN"), 1., 0., 100., 0., M("TP_WAVELET_NOIS"), 1., nullptr, false))),
+        level3noise(Gtk::manage(new ThresholdAdjuster(M("TP_WAVELET_LEVTHRE"), -30., 100., 0., M("TP_WAVELET_STREN"), 1., 0., 100., 0., M("TP_WAVELET_NOIS"), 1., nullptr, false))),
+        threshold(Gtk::manage(new Adjuster(M("TP_WAVELET_THRESHOLD"), 1, 9, 1, 5))),
+        threshold2(Gtk::manage(new Adjuster(M("TP_WAVELET_THRESHOLD2"), 1, 9, 1, 4))),
+        edgedetect(Gtk::manage(new Adjuster(M("TP_WAVELET_EDGEDETECT"), 0, 100, 1, 90))),
+        edgedetectthr(Gtk::manage(new Adjuster(M("TP_WAVELET_EDGEDETECTTHR"), 0, 100, 1, 20))),
+        edgedetectthr2(Gtk::manage(new Adjuster(M("TP_WAVELET_EDGEDETECTTHR2"), -10, 100, 1, 0))),
+        edgesensi(Gtk::manage(new Adjuster(M("TP_WAVELET_EDGESENSI"), 0, 100, 1, 60))),
+        edgeampli(Gtk::manage(new Adjuster(M("TP_WAVELET_EDGEAMPLI"), 0, 100, 1, 10))),
+        Lmethod(Gtk::manage(new MyComboBoxText())),
+        CHmethod(Gtk::manage(new MyComboBoxText())),
+        CHSLmethod(Gtk::manage(new MyComboBoxText())),
+        EDmethod(Gtk::manage(new MyComboBoxText())),
+        BAmethod(Gtk::manage(new MyComboBoxText())),
+        NPmethod(Gtk::manage(new MyComboBoxText())),
+        TMmethod(Gtk::manage(new MyComboBoxText())),
+        HSmethod(Gtk::manage(new MyComboBoxText())),
+        CLmethod(Gtk::manage(new MyComboBoxText())),
+        Backmethod(Gtk::manage(new MyComboBoxText())),
+        Tilesmethod(Gtk::manage(new MyComboBoxText())),
+        daubcoeffmethod(Gtk::manage(new MyComboBoxText())),
+        Dirmethod(Gtk::manage(new MyComboBoxText())),
+        Medgreinf(Gtk::manage(new MyComboBoxText())),
+        chanMixerHLFrame(Gtk::manage(new Gtk::Frame(M("TP_COLORTONING_HIGHLIGHT")))),
+        chanMixerMidFrame(Gtk::manage(new Gtk::Frame(M("TP_COLORTONING_MIDTONES")))),
+        chanMixerShadowsFrame(Gtk::manage(new Gtk::Frame(M("TP_COLORTONING_SHADOWS")))),
+        wavLabels(Gtk::manage(new Gtk::Label("---", Gtk::ALIGN_CENTER))),
+        labmC(Gtk::manage(new Gtk::Label(M("TP_WAVELET_CTYPE") + ":"))),
+        labmNP(Gtk::manage(new Gtk::Label(M("TP_WAVELET_NPTYPE") + ":"))),
+        expchroma(Gtk::manage(new MyExpander(true, M("TP_WAVELET_LEVCH")))),
+        expcontrast(Gtk::manage(new MyExpander(true, M("TP_WAVELET_LEVF")))),
+        expedge(Gtk::manage(new MyExpander(true, M("TP_WAVELET_EDGE")))),
+        expfinal(Gtk::manage(new MyExpander(true, M("TP_WAVELET_FINAL")))),
+        expgamut(Gtk::manage(new MyExpander(false, M("TP_WAVELET_CONTR")))),
+        expnoise(Gtk::manage(new MyExpander(true, M("TP_WAVELET_NOISE")))),
+        expresid(Gtk::manage(new MyExpander(true, M("TP_WAVELET_RESID")))),
+        expsettings(Gtk::manage(new MyExpander(false, M("TP_WAVELET_SETTINGS")))),
+        exptoning(Gtk::manage(new MyExpander(true, M("TP_WAVELET_TON")))),
+        neutrHBox(Gtk::manage(new Gtk::HBox()))
+    {
+        CurveListener::setMulti(true);
+    >>>>>>> 5f97800
 
+    */
     nextnlevel = 7.;
 
     std::vector<double> defaultCurve;
@@ -274,6 +367,8 @@ Wavelet::Wavelet() :
     expedge->signal_button_release_event().connect_notify ( sigc::bind ( sigc::mem_fun (this, &Wavelet::foldAllButMe), expedge) );
     enableEdgeConn = expedge->signal_enabled_toggled().connect ( sigc::bind ( sigc::mem_fun (this, &Wavelet::enableToggled), expedge) );
 
+    expedg1->signal_button_release_event().connect_notify ( sigc::bind ( sigc::mem_fun (this, &Wavelet::foldAllButMe), expedg1) );
+
     expreti->signal_button_release_event().connect_notify ( sigc::bind ( sigc::mem_fun (this, &Wavelet::foldAllButMe), expreti) );
     enableretiConn = expreti->signal_enabled_toggled().connect ( sigc::bind ( sigc::mem_fun (this, &Wavelet::enableToggled), expreti) );
     expreti->set_tooltip_text (M ("TP_WAVELET_RETI_TOOLTIP"));
@@ -289,6 +384,9 @@ Wavelet::Wavelet() :
 
     expfinal->signal_button_release_event().connect_notify ( sigc::bind ( sigc::mem_fun (this, &Wavelet::foldAllButMe), expfinal) );
     enableFinalConn = expfinal->signal_enabled_toggled().connect ( sigc::bind ( sigc::mem_fun (this, &Wavelet::enableToggled), expfinal) );
+
+    expsettingreti->signal_button_release_event().connect_notify ( sigc::bind ( sigc::mem_fun (this, &Wavelet::foldAllButMe), expsettingreti) );
+
 
 // Wavelet Settings
     ToolParamBlock* const settingsBox = Gtk::manage (new ToolParamBlock());
@@ -577,7 +675,6 @@ Wavelet::Wavelet() :
 
 // Edge Sharpness
     ToolParamBlock* const edgBox = Gtk::manage (new ToolParamBlock());
-    ToolParamBlock* const edgBoxS = Gtk::manage (new ToolParamBlock());
 //    ToolParamBlock* const edgBoxM = Gtk::manage (new ToolParamBlock());
 
     edgval->setAdjusterListener (this);
@@ -710,19 +807,15 @@ Wavelet::Wavelet() :
 
     mergeL->setAdjusterListener (this);
     mergeC->setAdjusterListener (this);
+
+    ToolParamBlock* const edgBoxS = Gtk::manage (new ToolParamBlock());
+
     edgBoxS->pack_start (*usharpHBox);
     edgBoxS->pack_start (*mergeL);
     edgBoxS->pack_start (*mergeC);
     nextmergeL = mergeL->getValue();
     nextmergeC = mergeC->getValue();
 
-    /*
-        expedg1->add (*edgBoxS);
-        edgBoxS->pack_start (*expedg1);
-
-        expedg2->add (*edgBoxS);
-        edgBoxM->pack_start (*expedg2);
-    */
 
 //Retinex in Wavelet
     Gtk::VBox * retiBox = Gtk::manage (new Gtk::VBox());
@@ -763,7 +856,6 @@ Wavelet::Wavelet() :
     vart->setAdjusterListener (this);
     scale->setAdjusterListener (this);
 
-    expsettingreti->signal_button_release_event().connect_notify ( sigc::bind ( sigc::mem_fun (this, &Wavelet::foldAllButMe), expsettingreti) );
 
     limd->setAdjusterListener (this);
     chrrt->setAdjusterListener (this);
@@ -986,8 +1078,6 @@ Wavelet::Wavelet() :
     Gtk::VBox* const chanMixerMidBox = Gtk::manage (new Gtk::VBox());
     Gtk::VBox* const chanMixerShadowsBox = Gtk::manage (new Gtk::VBox());
 
-    expTCresi->signal_button_release_event().connect_notify ( sigc::bind ( sigc::mem_fun (this, &Wavelet::foldAllButMe), expTCresi) );
-    enableTCConn = expTCresi->signal_enabled_toggled().connect ( sigc::bind ( sigc::mem_fun (this, &Wavelet::enableToggled), expTCresi) );
 
 
     cbenab->set_active (true);
@@ -1473,6 +1563,7 @@ Wavelet::Wavelet() :
 
 //-----------------------------
 
+//<<<<<<< HEAD
     expsettings->add (*settingsBox);
     expsettings->setLevel (2);
     pack_start (*expsettings);
@@ -1495,18 +1586,12 @@ Wavelet::Wavelet() :
 
     expedge->add (*edgBox);
     expedge->setLevel (2);
-//    expedge->add (*edgBoxM);
     pack_start (*expedge);
 
     expedg1->add (*edgBoxS);
     expedg1->setLevel (2);
     pack_start (*expedg1);
 
-    /*
-        expedg2->add (*edgBoxM);
-        expedg2->setLevel (2);
-        pack_start (*expedg2);
-    */
 
     expreti->add (*retiBox);
     pack_start (*expreti);
@@ -1525,6 +1610,45 @@ Wavelet::Wavelet() :
     expfinal->add (*finalBox);
     expfinal->setLevel (2);
     pack_start (*expfinal);
+    /*
+    =======
+    expsettings->add(*settingsBox, false);
+    expsettings->setLevel(2);
+    pack_start (*expsettings);
+
+    expcontrast->add(*levBox, false);
+    expcontrast->setLevel(2);
+    pack_start (*expcontrast);
+
+    expchroma->add(*chBox, false);
+    expchroma->setLevel(2);
+    pack_start (*expchroma);
+
+    exptoning->add(*tonBox, false);
+    exptoning->setLevel(2);
+    pack_start (*exptoning);
+
+    expnoise->add(*noiseBox, false);
+    expnoise->setLevel(2);
+    pack_start (*expnoise);
+
+    expedge->add(*edgBox, false);
+    expedge->setLevel(2);
+    pack_start (*expedge);
+
+    expgamut->add(*conBox, false);
+    expgamut->setLevel(2);
+    pack_start (*expgamut);
+
+    expresid->add(*resBox, false);
+    expresid->setLevel(2);
+    pack_start(*expresid);
+
+    expfinal->add(*finalBox, false);
+    expfinal->setLevel(2);
+    pack_start(*expfinal);
+    >>>>>>> 5f97800
+    */
 }
 
 
@@ -1548,6 +1672,7 @@ Wavelet::~Wavelet ()
     delete curveEditorG;
     delete opacityCurveEditorW;
     delete opacityCurveEditorWL;
+
 }
 
 
@@ -1741,11 +1866,9 @@ void Wavelet::read (const ProcParams* pp, const ParamsEdited* pedited)
     enableChromaConn.block (true);
     enableContrastConn.block (true);
     enableEdgeConn.block (true);
-    enableEdge3Conn.block (true);
     enableFinalConn.block (true);
     enableNoiseConn.block (true);
     enableResidConn.block (true);
-    enableTCConn.block (true);
     enableToningConn.block (true);
     enableMergeConn.block (true);
     mergevMethodConn.block (true);
@@ -1985,10 +2108,9 @@ void Wavelet::read (const ProcParams* pp, const ParamsEdited* pedited)
     expcontrast->setEnabled (pp->wavelet.expcontrast);
     expchroma->setEnabled (pp->wavelet.expchroma);
     expedge->setEnabled (pp->wavelet.expedge);
-    expedg3->setEnabled (pp->wavelet.expedg3);
     expreti->setEnabled (pp->wavelet.expreti);
     expresid->setEnabled (pp->wavelet.expresid);
-    expTCresi->setEnabled (pp->wavelet.expTCresi);
+//    expTCresi->setEnabled (pp->wavelet.expTCresi);
     expmerge->setEnabled (pp->wavelet.expmerge);
     expfinal->setEnabled (pp->wavelet.expfinal);
     exptoning->setEnabled (pp->wavelet.exptoning);
@@ -2217,10 +2339,9 @@ void Wavelet::read (const ProcParams* pp, const ParamsEdited* pedited)
         expcontrast->set_inconsistent   (!pedited->wavelet.expcontrast);
         expchroma->set_inconsistent   (!pedited->wavelet.expchroma);
         expedge->set_inconsistent   (!pedited->wavelet.expedge);
-        expedg3->set_inconsistent   (!pedited->wavelet.expedg3);
         expreti->set_inconsistent   (!pedited->wavelet.expreti);
         expresid->set_inconsistent   (!pedited->wavelet.expresid);
-        expTCresi->set_inconsistent   (!pedited->wavelet.expTCresi);
+//       expTCresi->set_inconsistent   (!pedited->wavelet.expTCresi);
         expmerge->set_inconsistent   (!pedited->wavelet.expmerge);
         expfinal->set_inconsistent   (!pedited->wavelet.expfinal);
         exptoning->set_inconsistent   (!pedited->wavelet.exptoning);
@@ -2456,11 +2577,9 @@ void Wavelet::read (const ProcParams* pp, const ParamsEdited* pedited)
     enableChromaConn.block (false);
     enableContrastConn.block (false);
     enableEdgeConn.block (false);
-    enableEdge3Conn.block (false);
     enableFinalConn.block (false);
     enableNoiseConn.block (false);
     enableResidConn.block (false);
-    enableTCConn.block (false);
     enableMergeConn.block (false);
     enableToningConn.block (false);
     retinexMethodConn.block (false);
@@ -2517,6 +2636,7 @@ void Wavelet::write (ProcParams* pp, ParamsEdited* pedited)
         pp->wavelet.inpute = "file:lab.dat";    // just a directory
     }
 
+//printf("save Wave\n");
     Glib::ustring p = Glib::path_get_dirname (inputeFile->get_filename ());
 
     pp->wavelet.enabled        = getEnabled();
@@ -2621,10 +2741,9 @@ void Wavelet::write (ProcParams* pp, ParamsEdited* pedited)
     pp->wavelet.expcontrast    = expcontrast->getEnabled();
     pp->wavelet.expchroma      = expchroma->getEnabled();
     pp->wavelet.expedge        = expedge->getEnabled();
-    pp->wavelet.expedg3        = expedg3->getEnabled();
     pp->wavelet.expreti        = expreti->getEnabled();
     pp->wavelet.expresid       = expresid->getEnabled();
-    pp->wavelet.expTCresi    = expTCresi->getEnabled();
+//   pp->wavelet.expTCresi    = expTCresi->getEnabled();
     pp->wavelet.expmerge       = expmerge->getEnabled();
     pp->wavelet.expfinal       = expfinal->getEnabled();
     pp->wavelet.exptoning      = exptoning->getEnabled();
@@ -2776,10 +2895,9 @@ void Wavelet::write (ProcParams* pp, ParamsEdited* pedited)
         pedited->wavelet.expcontrast     = !expcontrast->get_inconsistent();
         pedited->wavelet.expchroma       = !expchroma->get_inconsistent();
         pedited->wavelet.expedge         = !expedge->get_inconsistent();
-        pedited->wavelet.expedg3         = !expedg3->get_inconsistent();
         pedited->wavelet.expreti         = !expreti->get_inconsistent();
         pedited->wavelet.expresid        = !expresid->get_inconsistent();
-        pedited->wavelet.expTCresi     = !expTCresi->get_inconsistent();
+//        pedited->wavelet.expTCresi     = !expTCresi->get_inconsistent();
         pedited->wavelet.expmerge        = !expmerge->get_inconsistent();
         pedited->wavelet.expfinal        = !expfinal->get_inconsistent();
         pedited->wavelet.exptoning       = !exptoning->get_inconsistent();
@@ -5062,16 +5180,13 @@ void Wavelet::foldAllButMe (GdkEventButton* event, MyExpander *expander)
         exptoning->set_expanded (exptoning == expander);
         expnoise->set_expanded (expnoise == expander);
         expedge->set_expanded (expedge == expander);
+        expedg1->set_expanded (expedg1 == expander);
         expreti->set_expanded (expreti == expander);
         expgamut->set_expanded (expgamut == expander);
         expresid->set_expanded (expresid == expander);
         expmerge->set_expanded (expmerge == expander);
         expfinal->set_expanded (expfinal == expander);
         expsettingreti->set_expanded (expsettingreti == expander);
-        expTCresi->set_expanded (expTCresi == expander);
-        expedg1->set_expanded (expedg1 == expander);
-        expedg2->set_expanded (expedg2 == expander);
-        expedg3->set_expanded (expedg3 == expander);
 
     }
 }
@@ -5100,12 +5215,8 @@ void Wavelet::enableToggled (MyExpander *expander)
             event = EvWavenanoise;
         } else if (expander == expedge) {
             event = EvWavenaedge;
-        } else if (expander == expedg3) {
-            event = EvWavenaedge3;
         } else if (expander == expreti) {
             event = EvWavenareti;
-        } else if (expander == expTCresi) {
-            event = EvWavenaTCresi;
         } else if (expander == expresid) {
             event = EvWavenares;
         } else if (expander == expmerge) {
@@ -5128,6 +5239,8 @@ void Wavelet::enableToggled (MyExpander *expander)
     }
 }
 
+
+
 void Wavelet::writeOptions (std::vector<int> &tpOpen)
 {
     tpOpen.push_back (expsettings->get_expanded ());
@@ -5136,38 +5249,32 @@ void Wavelet::writeOptions (std::vector<int> &tpOpen)
     tpOpen.push_back (exptoning->get_expanded ());
     tpOpen.push_back (expnoise->get_expanded ());
     tpOpen.push_back (expedge->get_expanded ());
+    tpOpen.push_back (expedg1->get_expanded ());
     tpOpen.push_back (expreti->get_expanded ());
     tpOpen.push_back (expgamut->get_expanded ());
     tpOpen.push_back (expresid->get_expanded ());
     tpOpen.push_back (expmerge->get_expanded ());
     tpOpen.push_back (expfinal->get_expanded ());
     tpOpen.push_back (expsettingreti->get_expanded ());
-    tpOpen.push_back (expTCresi->get_expanded ());
-    tpOpen.push_back (expedg1->get_expanded ());
-    tpOpen.push_back (expedg2->get_expanded ());
-    tpOpen.push_back (expedg3->get_expanded ());
 
 }
 
 void Wavelet::updateToolState (std::vector<int> &tpOpen)
 {
-    if (tpOpen.size() == 16) {
+    if (tpOpen.size() >= 13) {
         expsettings->set_expanded (tpOpen.at (0));
         expcontrast->set_expanded (tpOpen.at (1));
         expchroma->set_expanded (tpOpen.at (2));
         exptoning->set_expanded (tpOpen.at (3));
         expnoise->set_expanded (tpOpen.at (4));
         expedge->set_expanded (tpOpen.at (5));
-        expreti->set_expanded (tpOpen.at (6));
-        expgamut->set_expanded (tpOpen.at (7));
-        expresid->set_expanded (tpOpen.at (8));
-        expmerge->set_expanded (tpOpen.at (9));
-        expfinal->set_expanded (tpOpen.at (10));
-        expsettingreti->set_expanded (tpOpen.at (11));
-        expTCresi->set_expanded (tpOpen.at (12));
-        expedg1->set_expanded (tpOpen.at (13));
-        expedg2->set_expanded (tpOpen.at (14));
-        expedg3->set_expanded (tpOpen.at (15));
+        expedg1->set_expanded (tpOpen.at (6));
+        expreti->set_expanded (tpOpen.at (7));
+        expgamut->set_expanded (tpOpen.at (8));
+        expresid->set_expanded (tpOpen.at (9));
+        expmerge->set_expanded (tpOpen.at (10));
+        expfinal->set_expanded (tpOpen.at (11));
+        expsettingreti->set_expanded (tpOpen.at (12));
 
     }
 }

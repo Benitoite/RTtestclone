@@ -699,7 +699,7 @@ EditorPanel::EditorPanel (FilePanel* filePanel)
         iops->attach_next_to (*sendtogimp, Gtk::POS_LEFT, 1, 1);
     }
 
-    if (!gimpPlugin) {
+    if (!gimpPlugin && !simpleEditor) {
         iops->attach_next_to (*queueimg, Gtk::POS_LEFT, 1, 1);
     }
 
@@ -1605,10 +1605,10 @@ bool EditorPanel::handleShortcutKey (GdkEventKey* event)
                 }
                 return true;
 
-                case GDK_KEY_b:
-                    if (!simpleEditor) {
-                        queueImgPressed();
-                    }
+            case GDK_KEY_b:
+                if (!gimpPlugin && !simpleEditor) {
+                    queueImgPressed();
+                }
 
                     return true;
 

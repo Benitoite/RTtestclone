@@ -200,7 +200,7 @@ Retinex::Retinex () : FoldableToolPanel (this, "retinex", M ("TP_RETINEX_LABEL")
 
 
 
-    expsettings = new MyExpander (false, M ("TP_RETINEX_SETTINGS"));
+    expsettings = Gtk::manage(new MyExpander(false, M ("TP_RETINEX_SETTINGS")));
     setExpandAlignProperties (expsettings, true, false, Gtk::ALIGN_FILL, Gtk::ALIGN_START);
     expsettings->signal_button_release_event().connect_notify ( sigc::bind ( sigc::mem_fun (this, &Retinex::foldAllButMe), expsettings) );
 
@@ -480,7 +480,7 @@ Retinex::Retinex () : FoldableToolPanel (this, "retinex", M ("TP_RETINEX_LABEL")
 
     //--------------------------
 
-    expsettings->add (*settingsGrid);
+    expsettings->add (*settingsGrid, false);
     expsettings->setLevel (2);
     pack_start (*expsettings);
 

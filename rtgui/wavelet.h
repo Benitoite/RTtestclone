@@ -394,22 +394,21 @@ private:
     double nextL;
     double nextC;
 
-    MyExpander* const expchroma;
-    MyExpander* const expcontrast;
-    MyExpander* const expedge;
-    MyExpander* const expfinal;
-    MyExpander* const expgamut;
-    MyExpander* const expnoise;
-    MyExpander* const expresid;
+
+
     MyExpander* const expsettings;
+    MyExpander* const expcontrast;
+    MyExpander* const expchroma;
     MyExpander* const exptoning;
+    MyExpander* const expnoise;
+    MyExpander* const expedge;
     MyExpander* const expreti;
+    MyExpander* const expgamut;
+    MyExpander* const expresid;
     MyExpander* const expmerge;
+    MyExpander* const expfinal;
     MyExpander* const expsettingreti;
-    MyExpander* const expTCresi;
     MyExpander* const expedg1;
-    MyExpander* const expedg2;
-    MyExpander* const expedg3;
 
     Gtk::HBox* const neutrHBox;
     Gtk::HBox* const usharpHBox;
@@ -430,7 +429,7 @@ private:
     MyFileChooserButton *inputeFile;
 
 
-    sigc::connection enableChromaConn, enableContrastConn, enableEdgeConn,  enableEdge3Conn, enableFinalConn, enableTCConn;
+    sigc::connection enableChromaConn, enableContrastConn, enableEdgeConn, enableFinalConn;
     sigc::connection enableNoiseConn, enableResidConn, enableToningConn, enableMergeConn, enableretiConn;
     sigc::connection medianConn, avoidConn, tmrConn, medianlevConn, linkedgConn, lipstConn, cbenabConn, neutralconn;
     sigc::connection neutralPressedConn, neutral2conn;
