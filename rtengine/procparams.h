@@ -319,7 +319,6 @@ public:
     double  slope;
     int     neigh;
     int     chrrt;
-    int     gain;
     int     offs;
     int     highlights;
     int     htonalwidth;
@@ -335,7 +334,6 @@ public:
     int     vart;
     int     limd;
     int     highl;
-    double     baselog;
     int     skal;
     bool    medianmap;
     RetinexParams ();
@@ -1350,7 +1348,6 @@ public:
     int ff_clipControl;
 
     bool ca_autocorrect;
-    double caautostrength;
     double cared;
     double cablue;
 

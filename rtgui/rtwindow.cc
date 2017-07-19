@@ -124,17 +124,23 @@ RTWindow::RTWindow ()
 
     set_title_decorated("");
     set_resizable(true);
-    set_resize_mode(Gtk::ResizeMode::RESIZE_QUEUE);
     set_decorated(true);
     set_default_size(options.windowWidth, options.windowHeight);
     set_modal(false);
 
+    Gdk::Rectangle lMonitorRect;
+    get_screen()->get_monitor_geometry(std::min(options.windowMonitor, Gdk::Screen::get_default()->get_n_monitors() - 1), lMonitorRect);
     if (options.windowMaximized) {
+        move(lMonitorRect.get_x(), lMonitorRect.get_y());
         maximize();
-        //get_style_context()->add_class("maximized");
     } else {
         unmaximize();
-        move(options.windowX, options.windowY);
+        resize(options.windowWidth, options.windowHeight);
+        if(options.windowX <= lMonitorRect.get_x() + lMonitorRect.get_width() && options.windowY <= lMonitorRect.get_y() + lMonitorRect.get_height()) {
+            move(options.windowX, options.windowY);
+        } else {
+            move(lMonitorRect.get_x(), lMonitorRect.get_y());
+        }
     }
 
     on_delete_has_run = false;
@@ -146,6 +152,7 @@ RTWindow::RTWindow ()
     if(simpleEditor) {
         epanel = Gtk::manage( new EditorPanel (nullptr) );
         epanel->setParent (this);
+        epanel->setParentWindow(this);
         add (*epanel);
         show_all ();
 
@@ -164,7 +171,6 @@ RTWindow::RTWindow ()
         mainNB->set_name ("MainNotebook");
         mainNB->set_scrollable (true);
         mainNB->signal_switch_page().connect_notify( sigc::mem_fun(*this, &RTWindow::on_mainNB_switch_page) );
-
 
         // Editor panel
         fpanel =  new FilePanel () ;
@@ -203,28 +209,9 @@ RTWindow::RTWindow ()
         mainNB->append_page (*bpanel, *lbq);
 
 
-        // Editor panel, single-tab mode only
-        epanel = Gtk::manage ( new EditorPanel (fpanel) );
-        epanel->setParent (this);
-
-        // decorate tab
-        Gtk::Grid* editorLabelGrid = Gtk::manage (new Gtk::Grid ());
-        setExpandAlignProperties(editorLabelGrid, false, false, Gtk::ALIGN_CENTER, Gtk::ALIGN_CENTER);
-        Gtk::Label* el = Gtk::manage (new Gtk::Label( Glib::ustring(" ") + M("MAIN_FRAME_EDITOR") ));
-
-        if (options.mainNBVertical) {
-            el->set_angle (90);
-            editorLabelGrid->attach_next_to(*Gtk::manage (new RTImage ("rt-logo-small.png")), Gtk::POS_TOP, 1, 1);
-            editorLabelGrid->attach_next_to(*el, Gtk::POS_TOP, 1, 1);
-        } else {
-            editorLabelGrid->attach_next_to(*Gtk::manage (new RTImage ("rt-logo-small.png")), Gtk::POS_RIGHT, 1, 1);
-            editorLabelGrid->attach_next_to(*el, Gtk::POS_RIGHT, 1, 1);
+        if(isSingleTabMode()) {
+            createSetmEditor();
         }
-
-        editorLabelGrid->set_tooltip_markup (M("MAIN_FRAME_EDITOR_TOOLTIP"));
-        editorLabelGrid->show_all ();
-        epanel->tbTopPanel_1_visible(true); //show the toggle Top Panel button
-        mainNB->append_page (*epanel, *editorLabelGrid);
 
         mainNB->set_current_page (mainNB->page_num (*fpanel));
 
@@ -290,10 +277,6 @@ RTWindow::RTWindow ()
                 fpanel->fileCatalog->openRequested({thm});
             }
         }
-    }
-
-    if (!isSingleTabMode() && !simpleEditor) {
-        epanel->hide();
     }
 }
 
@@ -363,12 +346,21 @@ void RTWindow::on_realize ()
     }
 }
 
+bool RTWindow::on_configure_event(GdkEventConfigure* event)
+{
+    if (!is_maximized() && is_visible()) {
+        get_size(options.windowWidth, options.windowHeight);
+        get_position (options.windowX, options.windowY);
+    }
+
+    return Gtk::Widget::on_configure_event(event);
+}
+
 bool RTWindow::on_window_state_event(GdkEventWindowState* event)
 {
     if (event->changed_mask & GDK_WINDOW_STATE_MAXIMIZED) {
         options.windowMaximized = event->new_window_state & GDK_WINDOW_STATE_MAXIMIZED;
     }
-
     return Gtk::Widget::on_window_state_event(event);
 }
 
@@ -409,8 +401,10 @@ void RTWindow::addEditorPanel (EditorPanel* ep, const std::string &name)
         EditWindow * wndEdit = EditWindow::getInstance(this);
         wndEdit->show();
         wndEdit->addEditorPanel(ep, name);
+        wndEdit->toFront();
     } else {
         ep->setParent (this);
+        ep->setParentWindow(this);
 
         // construct closeable tab for the image
         Gtk::Grid* titleGrid = Gtk::manage (new Gtk::Grid ());
@@ -485,6 +479,7 @@ bool RTWindow::selectEditorPanel(const std::string &name)
 
         if (wndEdit->selectEditorPanel(name)) {
             set_title_decorated(name);
+            wndEdit->toFront();
             return true;
         }
     } else {
@@ -608,9 +603,13 @@ bool RTWindow::on_delete_event(GdkEventAny* event)
 
     // Check if any editor is still processing, and do NOT quit if so. Otherwise crashes and inconsistent caches
     bool isProcessing = false;
+    EditWindow* editWindow = nullptr;
 
     if (isSingleTabMode() || simpleEditor) {
         isProcessing = epanel->getIsProcessing();
+    } else if (options.multiDisplayMode > 0) {
+        editWindow = EditWindow::getInstance(this, false);
+        isProcessing = editWindow->isProcessing();
     } else {
         int pageCount = mainNB->get_n_pages();
 
@@ -637,9 +636,13 @@ bool RTWindow::on_delete_event(GdkEventAny* event)
         epanel->saveProfile();
         epanel->writeOptions ();
     } else {
-        // Storing the options of the last EditorPanel before Gtk destroys everything
-        // Look at the active panel first, if any, otherwise look at the first one (sorted on the filename)
-        if (epanels.size()) {
+        if (options.multiDisplayMode > 0 && editWindow) {
+            editWindow->closeOpenEditors();
+            editWindow->writeOptions();
+        } else if (epanels.size()) {
+            // Storing the options of the last EditorPanel before Gtk destroys everything
+            // Look at the active panel first, if any, otherwise look at the first one (sorted on the filename)
+
             int page = mainNB->get_current_page();
             Gtk::Widget *w = mainNB->get_nth_page(page);
             bool optionsWritten = false;
@@ -667,6 +670,8 @@ bool RTWindow::on_delete_event(GdkEventAny* event)
         get_size(options.windowWidth, options.windowHeight);
         get_position (options.windowX, options.windowY);
     }
+
+    options.windowMonitor = get_screen()->get_monitor_at_window(get_window());
 
     Options::save ();
     hide();
@@ -778,7 +783,9 @@ void RTWindow::MoveFileBrowserToEditor()
 
 void RTWindow::updateProfiles(const Glib::ustring &printerProfile, rtengine::RenderingIntent printerIntent, bool printerBPC)
 {
-    epanel->updateProfiles(printerProfile, printerIntent, printerBPC);
+    if(epanel) {
+        epanel->updateProfiles(printerProfile, printerIntent, printerBPC);
+    }
 
     for(auto panel : epanels) {
         panel.second->updateProfiles(printerProfile, printerIntent, printerBPC);
@@ -788,7 +795,9 @@ void RTWindow::updateProfiles(const Glib::ustring &printerProfile, rtengine::Ren
 void RTWindow::updateTPVScrollbar (bool hide)
 {
     fpanel->updateTPVScrollbar (hide);
-    epanel->updateTPVScrollbar (hide);
+    if(epanel) {
+        epanel->updateTPVScrollbar (hide);
+    }
 
     for(auto panel : epanels) {
         panel.second->updateTPVScrollbar (hide);
@@ -798,7 +807,9 @@ void RTWindow::updateTPVScrollbar (bool hide)
 void RTWindow::updateTabsUsesIcons (bool useIcons)
 {
     fpanel->updateTabsUsesIcons (useIcons);
-    epanel->updateTabsUsesIcons (useIcons);
+    if(epanel) {
+        epanel->updateTabsUsesIcons (useIcons);
+    }
 
     for(auto panel : epanels) {
         panel.second->updateTabsUsesIcons (useIcons);
@@ -817,8 +828,9 @@ void RTWindow::updateFBToolBarVisibility (bool showFilmStripToolBar)
 
 void RTWindow::updateHistogramPosition (int oldPosition, int newPosition)
 {
-    epanel->updateHistogramPosition (oldPosition, newPosition);
-
+    if(epanel) {
+        epanel->updateHistogramPosition (oldPosition, newPosition);
+    }
     for(auto panel : epanels) {
         panel.second->updateHistogramPosition (oldPosition, newPosition);
     }
@@ -842,7 +854,7 @@ void RTWindow::set_title_decorated(Glib::ustring fname)
     set_title(versionStr + subtitle);
 }
 
-void RTWindow::CloseOpenEditors()
+void RTWindow::closeOpenEditors()
 {
     std::map<Glib::ustring, EditorPanel*>::const_iterator itr;
     itr = epanels.begin();
@@ -861,4 +873,49 @@ bool RTWindow::isEditorPanel(Widget* panel)
 bool RTWindow::isEditorPanel(guint pageNum)
 {
     return isEditorPanel(mainNB->get_nth_page(pageNum));
+}
+
+void RTWindow::setEditorMode(bool tabbedUI)
+{
+    MoveFileBrowserToMain();
+    closeOpenEditors();
+    SetMainCurrent();
+
+    if(tabbedUI) {
+        mainNB->remove_page(*epanel);
+        epanel = nullptr;
+        set_title_decorated("");
+    } else {
+        createSetmEditor();
+        epanel->show_all();
+        set_title_decorated("");
+    }
+}
+
+void RTWindow::createSetmEditor()
+{
+    // Editor panel, single-tab mode only
+    epanel = Gtk::manage ( new EditorPanel (fpanel) );
+    epanel->setParent (this);
+    epanel->setParentWindow(this);
+
+    // decorate tab
+    Gtk::Grid* const editorLabelGrid = Gtk::manage (new Gtk::Grid ());
+    setExpandAlignProperties(editorLabelGrid, false, false, Gtk::ALIGN_CENTER, Gtk::ALIGN_CENTER);
+    Gtk::Label* const el = Gtk::manage (new Gtk::Label( Glib::ustring(" ") + M("MAIN_FRAME_EDITOR") ));
+
+    const auto pos = options.mainNBVertical ? Gtk::POS_TOP : Gtk::POS_RIGHT;
+
+    if (options.mainNBVertical) {
+        el->set_angle(90);
+    }
+
+    editorLabelGrid->attach_next_to(*Gtk::manage (new RTImage ("rt-logo-small.png")), pos, 1, 1);
+    editorLabelGrid->attach_next_to(*el, pos, 1, 1);
+
+    editorLabelGrid->set_tooltip_markup (M("MAIN_FRAME_EDITOR_TOOLTIP"));
+    editorLabelGrid->show_all ();
+    epanel->tbTopPanel_1_visible(true); //show the toggle Top Panel button
+    mainNB->append_page (*epanel, *editorLabelGrid);
+
 }

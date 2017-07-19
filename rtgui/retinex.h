@@ -32,12 +32,10 @@ protected:
     Adjuster* iter;
     Adjuster* neigh;
     Adjuster* chrrt;
-    Adjuster* gain;
     Adjuster* offs;
     Adjuster* vart;
     Adjuster* limd;
     Adjuster* highl;
-    Adjuster* baselog;
     Adjuster* skal;
     Adjuster* gam;
     Adjuster* slope;
@@ -125,7 +123,7 @@ public:
     void ColorSpaceUpdateUI();
     void writeOptions (std::vector<int> &tpOpen);
     void updateToolState (std::vector<int> &tpOpen);
-    void setAdjusterBehavior (bool strAdd, bool neighAdd, bool limdAdd, bool gainAdd, bool offsAdd, bool vartAdd, bool gamAdd, bool slopeAdd);
+    void setAdjusterBehavior (bool strAdd, bool neighAdd, bool limdAdd, bool offsAdd, bool vartAdd, bool gamAdd, bool slopeAdd);
     void updateCurveBackgroundHistogram (LUTu & histToneCurve, LUTu & histLCurve, LUTu & histCCurve,/* LUTu & histCLurve, LUTu & histLLCurve,*/ LUTu & histLCAM, LUTu & histCCAM, LUTu & histRed, LUTu & histGreen, LUTu & histBlue, LUTu & histLuma, LUTu & histLRETI);
 
     virtual void colorForValue (double valX, double valY, enum ColorCaller::ElemType elemType, int callerId, ColorCaller* caller);

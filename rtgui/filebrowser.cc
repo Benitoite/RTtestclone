@@ -600,20 +600,22 @@ void FileBrowser::addEntry_ (FileBrowserEntry* entry)
     {
         MYWRITERLOCK(l, entryRW);
 
-        std::vector<ThumbBrowserEntryBase*>::iterator i = fd.begin();
-
-        while (i != fd.end() && *entry < * ((FileBrowserEntry*)*i)) {
-            ++i;
-        }
-
-        fd.insert (i, entry);
+        fd.insert(
+            std::lower_bound(
+                fd.begin(),
+                fd.end(),
+                entry,
+                [](const ThumbBrowserEntryBase* a, const ThumbBrowserEntryBase* b)
+                {
+                    return *a < *b;
+                }
+            ),
+            entry
+        );
 
         initEntry (entry);
     }
     redraw ();
-
-    // newly added item might have been already trashed in a previous session
-    trash_changed().emit();
 }
 
 FileBrowserEntry* FileBrowser::delEntry (const Glib::ustring& fname)

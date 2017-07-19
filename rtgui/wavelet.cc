@@ -5275,7 +5275,6 @@ void Wavelet::updateToolState (std::vector<int> &tpOpen)
         expmerge->set_expanded (tpOpen.at (10));
         expfinal->set_expanded (tpOpen.at (11));
         expsettingreti->set_expanded (tpOpen.at (12));
-
     }
 }
 

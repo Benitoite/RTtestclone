@@ -97,7 +97,7 @@ class Preferences : public Gtk::Dialog, public ProfileStoreListener
     Gtk::RadioButton* edOther;
     Gtk::FileChooserButton* darkFrameDir;
     Gtk::FileChooserButton* flatFieldDir;
-    Gtk::FileChooserButton* mergeDir;
+//    Gtk::FileChooserButton* mergeDir;
     Gtk::FileChooserButton* clutsDir;
     Gtk::Label *dfLabel;
     Gtk::Label *ffLabel;
@@ -272,7 +272,7 @@ public:
     void moveExtDownPressed ();
     void darkFrameChanged ();
     void flatFieldChanged ();
-    void mergeChanged ();
+//    void mergeChanged ();
     void clearProfilesPressed ();
     void clearThumbImagesPressed ();
     void clearAllPressed ();

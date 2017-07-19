@@ -176,7 +176,6 @@ void RetinexParams::setDefaults()
     slope   = 3.;
     neigh      = 80;
     chrrt      = 0;
-    gain        = 50;
     offs    = 0;
     vart    = 200;
     limd = 8;
@@ -187,7 +186,6 @@ void RetinexParams::setDefaults()
     stonalwidth   = 80;
     radius        = 40;
 
-    baselog = 2.71828;
     skal = 3;
     retinexMethod = "high";
     mapMethod = "none";
@@ -1131,7 +1129,6 @@ void RAWParams::setDefaults()
     ff_clipControl = 0;
     cared = 0;
     cablue = 0;
-    caautostrength = 2;
     ca_autocorrect = false;
     hotPixelFilter = false;
     deadPixelFilter = false;
@@ -1749,10 +1746,6 @@ int ProcParams::save (const Glib::ustring &fname, const Glib::ustring &fname2, b
             keyFile.set_integer ("Retinex", "Chrrt",               retinex.chrrt);
         }
 
-        if (!pedited || pedited->retinex.gain) {
-            keyFile.set_integer ("Retinex", "Gain",               retinex.gain);
-        }
-
         if (!pedited || pedited->retinex.offs) {
             keyFile.set_integer ("Retinex", "Offs",               retinex.offs);
         }
@@ -1767,10 +1760,6 @@ int ProcParams::save (const Glib::ustring &fname, const Glib::ustring &fname2, b
 
         if (!pedited || pedited->retinex.highl) {
             keyFile.set_integer ("Retinex", "highl",               retinex.highl);
-        }
-
-        if (!pedited || pedited->retinex.baselog) {
-            keyFile.set_double ("Retinex", "baselog",               retinex.baselog);
         }
 
         if (!pedited || pedited->retinex.skal) {
@@ -3740,10 +3729,6 @@ int ProcParams::save (const Glib::ustring &fname, const Glib::ustring &fname2, b
             keyFile.set_boolean ("RAW", "CA", raw.ca_autocorrect );
         }
 
-        if (!pedited || pedited->raw.caAutoStrength) {
-            keyFile.set_double  ("RAW", "CAAutoStrength", raw.caautostrength );
-        }
-
         if (!pedited || pedited->raw.caRed) {
             keyFile.set_double  ("RAW", "CARed", raw.cared );
         }
@@ -4630,14 +4615,6 @@ int ProcParams::load (const Glib::ustring &fname, ParamsEdited* pedited)
                 }
             }
 
-            if (keyFile.has_key ("Retinex", "Gain"))     {
-                retinex.gain   = keyFile.get_integer ("Retinex", "Gain");
-
-                if (pedited) {
-                    pedited->retinex.gain = true;
-                }
-            }
-
             if (keyFile.has_key ("Retinex", "Offs"))     {
                 retinex.offs   = keyFile.get_integer ("Retinex", "Offs");
 
@@ -4667,14 +4644,6 @@ int ProcParams::load (const Glib::ustring &fname, ParamsEdited* pedited)
 
                 if (pedited) {
                     pedited->retinex.highl = true;
-                }
-            }
-
-            if (keyFile.has_key ("Retinex", "baselog"))     {
-                retinex.baselog   = keyFile.get_double ("Retinex", "baselog");
-
-                if (pedited) {
-                    pedited->retinex.baselog = true;
                 }
             }
 
@@ -8240,14 +8209,6 @@ int ProcParams::load (const Glib::ustring &fname, ParamsEdited* pedited)
                 }
             }
 
-            if (keyFile.has_key ("RAW", "CAAutoStrength"))                    {
-                raw.caautostrength = keyFile.get_double ("RAW", "CAAutoStrength" );
-
-                if (pedited) {
-                    pedited->raw.caAutoStrength = true;
-                }
-            }
-
             if (keyFile.has_key ("RAW", "CARed"))                    {
                 raw.cared = keyFile.get_double ("RAW", "CARed" );
 
@@ -8970,7 +8931,6 @@ bool ProcParams::operator== (const ProcParams& other)
         && retinex.slope == other.retinex.slope
         && retinex.neigh == other.retinex.neigh
         && retinex.chrrt == other.retinex.chrrt
-        && retinex.gain == other.retinex.gain
         && retinex.limd == other.retinex.limd
         && retinex.highl == other.retinex.highl
         && retinex.highlights == other.retinex.highlights
@@ -8978,8 +8938,6 @@ bool ProcParams::operator== (const ProcParams& other)
         && retinex.shadows == other.retinex.shadows
         && retinex.stonalwidth == other.retinex.stonalwidth
         && retinex.radius == other.retinex.radius
-
-        && retinex.baselog == other.retinex.baselog
         && retinex.skal == other.retinex.skal
         && retinex.offs == other.retinex.offs
         && retinex.retinexMethod == other.retinex.retinexMethod
@@ -9256,7 +9214,6 @@ bool ProcParams::operator== (const ProcParams& other)
         && raw.expos == other.raw.expos
         && raw.preser == other.raw.preser
         && raw.ca_autocorrect == other.raw.ca_autocorrect
-        && raw.caautostrength == other.raw.caautostrength
         && raw.cared == other.raw.cared
         && raw.cablue == other.raw.cablue
         && raw.hotPixelFilter == other.raw.hotPixelFilter

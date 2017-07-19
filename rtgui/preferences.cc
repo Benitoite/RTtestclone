@@ -1765,7 +1765,7 @@ void Preferences::storePreferences ()
 
     moptions.rtSettings.darkFramesPath =   darkFrameDir->get_filename();
     moptions.rtSettings.flatFieldsPath =   flatFieldDir->get_filename();
-    moptions.rtSettings.mergePath =   mergeDir->get_filename();
+//    moptions.rtSettings.mergePath =   mergeDir->get_filename();
 
     moptions.clutsDir = clutsDir->get_filename();
 
@@ -2017,8 +2017,8 @@ void Preferences::fillPreferences ()
     flatFieldDir->set_current_folder ( moptions.rtSettings.flatFieldsPath );
     flatFieldChanged ();
 
-    mergeDir->set_current_folder ( moptions.rtSettings.mergePath );
-    mergeChanged ();
+//    mergeDir->set_current_folder ( moptions.rtSettings.mergePath );
+//    mergeChanged ();
 
     clutsDir->set_current_folder ( moptions.clutsDir );
 
@@ -2372,18 +2372,8 @@ void Preferences::switchFontTo (const Glib::ustring &newFontFamily, const int ne
 void Preferences::workflowUpdate ()
 {
 
-    if (moptions.tabbedUI != options.tabbedUI) {
-        parent->MoveFileBrowserToMain();
-        parent->CloseOpenEditors();
-        parent->SetMainCurrent();
-
-        if (moptions.tabbedUI) {
-            parent->epanel->hide();
-            parent->set_title_decorated ("");
-        } else {
-            parent->epanel->show_all();
-            parent->set_title_decorated (parent->epanel->getFileName());
-        }
+    if(moptions.tabbedUI != options.tabbedUI) {
+        parent->setEditorMode(moptions.tabbedUI);
     }
 
     if (moptions.hideTPVScrollbar != options.hideTPVScrollbar) {
@@ -2520,15 +2510,15 @@ void Preferences::flatFieldChanged ()
     //}
 }
 
-void Preferences::mergeChanged ()
-{
-    //Glib::ustring s(flatFieldDir->get_filename());
-    Glib::ustring s (mergeDir->get_current_folder());
-    //if( s.compare( rtengine::ffm.getPathname()) !=0 ){
-    rtengine::ffm.init ( s );
-    updateMGinfos();
-    //}
-}
+//void Preferences::mergeChanged ()
+//{
+//    //Glib::ustring s(flatFieldDir->get_filename());
+//    Glib::ustring s (mergeDir->get_current_folder());
+//    //if( s.compare( rtengine::ffm.getPathname()) !=0 ){
+//    rtengine::ffm.init ( s );
+//    updateMGinfos();
+//    //}
+//}
 
 void Preferences::updateDFinfos()
 {
