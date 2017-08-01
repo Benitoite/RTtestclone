@@ -47,20 +47,22 @@ private:
     std::string method;
     static void clip (double &temp, double &green);
     static void clip (double &temp, double &green, double &equal);
-    int XYZtoCorColorTemp(double x0, double y0 , double z0, double &temp) const;
+    int XYZtoCorColorTemp (double x0, double y0 , double z0, double &temp) const;
     void temp2mul (double temp, double green, double equal, double& rmul, double& gmul, double& bmul) const;
 
 public:
 
-    ColorTemp () : temp(-1.), green(-1.), equal (1.), method("Custom") {}
-    explicit ColorTemp (double e) : temp(-1.), green(-1.), equal (e), method("Custom") {}
+    ColorTemp () : temp (-1.), green (-1.), equal (1.), method ("Custom") {}
+    explicit ColorTemp (double e) : temp (-1.), green (-1.), equal (e), method ("Custom") {}
     ColorTemp (double t, double g, double e, const Glib::ustring &m);
     ColorTemp (double mulr, double mulg, double mulb, double e);
+    static void tempxy (double &temp, float **Tx, float **Ty, float **TYY);
 
-    void update (const double rmul, const double gmul, const double bmul, const double equal, const double tempBias=0.0)
+    void update (const double rmul, const double gmul, const double bmul, const double equal, const double tempBias = 0.0)
     {
         this->equal = equal;
         mul2temp (rmul, gmul, bmul, this->equal, temp, green);
+
         if (tempBias != 0.0 && tempBias >= -1.0 && tempBias <= 1.0) {
             temp += temp * tempBias;
         }
@@ -97,17 +99,17 @@ public:
     void mul2temp (const double rmul, const double gmul, const double bmul, const double equal, double& temp, double& green) const;
     static void temp2mulxyz (double tem, double gree, const std::string &method, double &Xxyz, double &Zxyz);
 
-    static void cieCAT02(double Xw, double Yw, double Zw, double &CAM02BB00, double &CAM02BB01, double &CAM02BB02, double &CAM02BB10, double &CAM02BB11, double &CAM02BB12, double &CAM02BB20, double &CAM02BB21, double &CAM02BB22, double adap );
+    static void cieCAT02 (double Xw, double Yw, double Zw, double &CAM02BB00, double &CAM02BB01, double &CAM02BB02, double &CAM02BB10, double &CAM02BB11, double &CAM02BB12, double &CAM02BB20, double &CAM02BB21, double &CAM02BB22, double adap );
     //static    void CAT02 (Imagefloat* baseImg, const ProcParams* params);
     //static void ciecam_02 (LabImage* lab, const ProcParams* params);
 
     bool operator== (const ColorTemp& other) const
     {
-        return fabs(temp - other.temp) < 1e-10 && fabs(green - other.green) < 1e-10;
+        return fabs (temp - other.temp) < 1e-10 && fabs (green - other.green) < 1e-10;
     }
     bool operator!= (const ColorTemp& other) const
     {
-        return !(*this == other);
+        return ! (*this == other);
     }
 
     static double blackbody_spect (double wavelength, double temperature);
@@ -141,6 +143,7 @@ public:
     static const double Flash6000_spect[97];
     static const double Flash6500_spect[97];
 
+
     //spectral data 8 color Colorchecker24
     static double get_spectral_color (double wavelength, const double* array)
     {
@@ -148,6 +151,7 @@ public:
         return (array[wlm]);
     }
 
+//    static const double ColorchechredA1_spect[97];
     static const double ColorchechredC3_spect[97];
     static const double ColorchechOraA2_spect[97];
     static const double ColorchechYelD3_spect[97];
@@ -167,6 +171,21 @@ public:
     static const double ColorchechGreD1_spect[97];
     static const double ColorchechSGBlaN3_6_spect[97];//ColorChecker SG  N3
     static const double JDC468_GraK14_44_spect[97];//468  K14
+    static const double JDC468_BluM5_spect[97]; //468 M5
+    static const double JDC468_BluD6_spect[97]; //468 D6
+    static const double JDC468_BluF4_spect[97]; //468 F4
+    static const double JDC468_RedG21va_spect[97]; //468 G21 modifié
+    static const double JDC468_RedI9_spect[97]; //468 I9
+    static const double JDC468_GreI8_spect[97]; //468 I8
+    static const double JDC468_OraO18_spect[97]; //468 O18
+    static const double JDC468_OraD17_spect[97]; //468 D17
+    static const double Fictif_61greyspect[97];//468 K15
+    static const double JDC468_K15_87greyspect[97];
+    static const double JDC468_YelN10_spect[97]; //468 N10
+    static const double JDC468_GreN7_spect[97]; //468 N7
+    static const double JDC468_GreA10_spect[97]; //468 A10
+    static const double JDC468_GreK7_spect[97]; //468 K7
+    static const double JDC468_PurE24_spect[97]; //468 E24
     static const double JDC468_BluH10_spect[97];//468  H10
     static const double ColabSkin35_15_17_spect[97];//Skin L 35
     static const double ColabSkin57_22_18_spect[97];//Skin L 57

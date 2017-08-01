@@ -67,6 +67,8 @@ protected:
 
     ColorTemp currWB;
     ColorTemp autoWB;
+    ColorTemp currWBloc;
+    ColorTemp autoWBloc;
 
     double lastAwbEqual;
     double lastAwbTempBias;
@@ -136,6 +138,8 @@ protected:
     WavOpacityCurveWL waOpacityCurveWL;
     RetinextransmissionCurve dehatransmissionCurve;
     RetinexgaintransmissionCurve dehagaintransmissionCurve;
+    double ptemp, pgreen;
+    int wbauto;
 
     ColorAppearance customColCurve1;
     ColorAppearance customColCurve2;
@@ -157,6 +161,7 @@ protected:
     AutoExpListener* aeListener;
     AutoCamListener* acListener;
     AutoBWListener* abwListener;
+    localrgbListener* alorgbListener;
     AutoWBListener* awbListener;
     FrameCountListener *frameCountListener;
     ImageTypeListener *imageTypeListener;
@@ -211,6 +216,7 @@ protected:
     void process ();
     float colourToningSatLimit;
     float colourToningSatLimitOpacity;
+    int wbm;
 
 public:
 
@@ -223,7 +229,7 @@ public:
         *dst = params;
     }
 
-    void        startProcessing(int changeCode);
+    void        startProcessing (int changeCode);
     ProcParams* beginUpdateParams ();
     void        endUpdateParams (ProcEvent change);  // must be called after beginUpdateParams, triggers update
     void        endUpdateParams (int changeFlags);
@@ -304,7 +310,7 @@ public:
     {
         aeListener = ael;
     }
-    void setHistogramListener(HistogramListener *h)
+    void setHistogramListener (HistogramListener *h)
     {
         hListener = h;
     }
@@ -316,6 +322,11 @@ public:
     {
         abwListener = abw;
     }
+    void setlocalrgbListener   (localrgbListener* alorgb)
+    {
+        alorgbListener = alorgb;
+    }
+
     void setAutoWBListener   (AutoWBListener* awb)
     {
         awbListener = awb;
@@ -355,7 +366,7 @@ public:
     }
 
     struct DenoiseInfoStore {
-        DenoiseInfoStore () : chM(0), max_r{}, max_b{}, ch_M{}, valid(false)  {}
+        DenoiseInfoStore () : chM (0), max_r{}, max_b{}, ch_M{}, valid (false)  {}
         float chM;
         float max_r[9];
         float max_b[9];

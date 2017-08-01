@@ -1635,6 +1635,57 @@ TP_LENSPROFILE_LABEL;Lens Correction Profile
 TP_LENSPROFILE_USECA;Chromatic aberration correction
 TP_LENSPROFILE_USEDIST;Distortion correction
 TP_LENSPROFILE_USEVIGN;Vignetting correction
+TP_LOCALLAB_CENTER_X;Center X
+TP_LOCALLAB_CENTER_Y;Center Y
+TP_LOCALLAB_CIRCRADIUS;Spot size
+TP_LOCALLAB_QUAL_METHOD;Global quality
+TP_LOCALLAB_STD;Standard
+TP_LOCALLAB_ENH;Enhanced
+TP_LOCALLAB_ENHDEN;Enhanced + chroma denoise
+TP_LOCALLAB_INDSL;Independent (mouse + sliders)
+TP_LOCALLAB_IND;Independent (mouse)
+TP_LOCALLAB_SYMSL;Symmetrical (mouse + sliders)
+TP_LOCALLAB_SYM;Symmetrical (mouse)
+TP_LOCALLAB_TRANSIT;Transition
+TP_LOCALLAB_TRANSIT_TOOLTIP;Adjust smoothness of transition between affected and unaffected areas.
+TP_LOCALLAB_THRES;Threshold chroma
+TP_LOCALLAB_PROXI;Iterations
+TP_LOCALLAB_ARTIF;Reduce artifacts - Improve algoritm
+TP_LOCALLAB_ARTIF_TOOLTIP;Only active for Color-light, Exposure, Retinex, Vibrance, ToneMapping, CBDL.
+TP_LOCALLAB_ANBSPOT;Help to Move Control point
+TP_LOCALLAB_ANBSPOT_TOOLTIP;Provisory control (I hope somebody can help to manage events!! and suppress this bad function)
+TP_LOCALLAB_NBSPOT;Control points
+TP_LOCALLAB_NBSPOT_TOOLTIP;Add multiple control points and select
+TP_LOCALLAB_SETTINGS;Settings
+TP_LOCAL_HEIGHT;Bottom
+TP_LOCAL_HEIGHT_T;Top
+TP_LOCAL_WIDTH;Right
+TP_LOCAL_WIDTH_L;Left
+TP_LOCALLAB_STYPE;Shape method
+TP_LOCALLAB_STYPE_TOOLTIP;You can choose between:\nSymmetrical - left handle linked to right, top handle linked to bottom.\nIndependent - all handles are independent.
+TP_LOCALRGB_LABEL;White Balance
+TP_LOCALRGB_WB;White balance
+TP_LOCALRGB_CAM;Color appearance (auto)
+TP_LOCALRGB_TTLABEL;WB all Temp=%1 Tint=%2 Equ=%3
+TP_LOCALRGB_METLABEL;Last auto Method=%1
+TP_LOCALRGB_TTLABEL_TOOLTIP;Display full image White Balance settings
+TP_LOCALRGBWB_NONE;0-None
+TP_LOCALRGBWB_MAN;1-Custom
+TP_LOCALRGBWB_AUT;2-Auto Grey Demosaic
+TP_LOCALRGBWB_AUTEDGROB;7-Auto Edge + Robust
+TP_LOCALRGBWB_AUTEDGSDW;8-Auto Edge + Std deviation
+TP_LOCALRGBWB_AUTITC;9-Auto Iterate Temperature Correlation
+TP_LOCALRGBWB_AUTEDG;3-Auto Edge
+TP_LOCALRGBWB_AUTOLD;4-Auto Grey Old
+TP_LOCALRGBWB_AUTOROBUST;5-Auto Robust Color
+TP_LOCALRGBWB_AUTOSDW;6-Auto Standard Deviation
+TP_LOCALWBCAM_NONE;none
+TP_LOCALWBCAM_TOOLTIP;Only on auto mode, except "Auto grey Old"\n.Introduce Color appearance to improve WB (equal energy)
+TP_LOCALWBCAM_GAM;gamma sRGB
+TP_LOCALWBCAM_CAT02;Cat02
+TP_LOCALWBCAM_GACAT;Cat02 and gamma
+TP_LOCALRGBWB_GAMMA;Gamma for Auto(except old)
+TP_LOCALRGB_MLABEL_TOOLTIP;Display Current WB settings for full image\nDisplay Last Auto WB method even sliders changed.
 TP_NEUTRAL;Reset
 TP_NEUTRAL_TIP;Resets exposure sliders to neutral values.\nApplies to the same controls that Auto Levels applies to, regardless of whether you used Auto Levels or not.
 TP_PCVIGNETTE_FEATHER;Feather

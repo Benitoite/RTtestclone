@@ -289,6 +289,35 @@ void ParamsEdited::set (bool v)
     gradient.strength = v;
     gradient.centerX = v;
     gradient.centerY = v;
+
+    localwb.enabled = v;
+    localwb.degree = v;
+    localwb.locY = v;
+    localwb.locX = v;
+    localwb.locYT = v;
+    localwb.locXL = v;
+    localwb.centerX = v;
+    localwb.centerY = v;
+    localwb.circrad = v;
+    localwb.thres = v;
+    localwb.proxi = v;
+    localwb.nbspot = v;
+    localwb.anbspot = v;
+    localwb.retrab = v;
+    localwb.hueref = v;
+    localwb.chromaref = v;
+    localwb.lumaref = v;
+    localwb.Smethod = v;
+    localwb.sensi = v;
+    localwb.qualityMethod = v;
+    localwb.wbMethod = v;
+    localwb.wbcamMethod = v;
+    localwb.expwb = v;
+    localwb.temp = v;
+    localwb.green = v;
+    localwb.equal = v;
+    localwb.gamma = v;
+
     pcvignette.enabled = v;
     pcvignette.strength = v;
     pcvignette.feather = v;
@@ -507,11 +536,11 @@ void ParamsEdited::set (bool v)
     wavelet.exptoning = v;
     wavelet.expnoise = v;
 
-    for(int i = 0; i < 9; i++) {
+    for (int i = 0; i < 9; i++) {
         wavelet.c[i] = v;
     }
 
-    for(int i = 0; i < 9; i++) {
+    for (int i = 0; i < 9; i++) {
         wavelet.ch[i] = v;
     }
 
@@ -520,7 +549,7 @@ void ParamsEdited::set (bool v)
     dirpyrequalizer.cbdlMethod = v;
 
 
-    for(int i = 0; i < 6; i++) {
+    for (int i = 0; i < 6; i++) {
         dirpyrequalizer.mult[i] = v;
     }
 
@@ -813,6 +842,34 @@ void ParamsEdited::initFrom (const std::vector<rtengine::procparams::ProcParams>
         gradient.strength = gradient.strength && p.gradient.strength == other.gradient.strength;
         gradient.centerX = gradient.centerX && p.gradient.centerX == other.gradient.centerX;
         gradient.centerY = gradient.centerY && p.gradient.centerY == other.gradient.centerY;
+
+        localwb.enabled = localwb.enabled && p.localwb.enabled == other.localwb.enabled;
+        localwb.degree = localwb.degree && p.localwb.degree == other.localwb.degree;
+        localwb.locY = localwb.locY && p.localwb.locY == other.localwb.locY;
+        localwb.locX = localwb.locX && p.localwb.locX == other.localwb.locX;
+        localwb.locYT = localwb.locYT && p.localwb.locYT == other.localwb.locYT;
+        localwb.locXL = localwb.locXL && p.localwb.locXL == other.localwb.locXL;
+        localwb.Smethod = localwb.Smethod && p.localwb.Smethod == other.localwb.Smethod;
+        localwb.centerX = localwb.centerX && p.localwb.centerX == other.localwb.centerX;
+        localwb.centerY = localwb.centerY && p.localwb.centerY == other.localwb.centerY;
+        localwb.circrad = localwb.circrad && p.localwb.circrad == other.localwb.circrad;
+        localwb.thres = localwb.thres && p.localwb.thres == other.localwb.thres;
+        localwb.proxi = localwb.proxi && p.localwb.proxi == other.localwb.proxi;
+        localwb.sensi = localwb.sensi && p.localwb.sensi == other.localwb.sensi;
+        localwb.nbspot = localwb.nbspot && p.localwb.nbspot == other.localwb.nbspot;
+        localwb.anbspot = localwb.anbspot && p.localwb.anbspot == other.localwb.anbspot;
+        localwb.retrab = localwb.retrab && p.localwb.retrab == other.localwb.retrab;
+        localwb.hueref = localwb.hueref && p.localwb.hueref == other.localwb.hueref;
+        localwb.chromaref = localwb.chromaref && p.localwb.chromaref == other.localwb.chromaref;
+        localwb.lumaref = localwb.lumaref && p.localwb.lumaref == other.localwb.lumaref;
+        localwb.qualityMethod = localwb.qualityMethod && p.localwb.qualityMethod == other.localwb.qualityMethod;
+        localwb.expwb = localwb.expwb && p.localwb.expwb == other.localwb.expwb;
+        localwb.temp = localwb.temp && p.localwb.temp == other.localwb.temp;
+        localwb.green = localwb.green && p.localwb.green == other.localwb.green;
+        localwb.wbMethod = localwb.wbMethod && p.localwb.wbMethod == other.localwb.wbMethod;
+        localwb.gamma = localwb.gamma && p.localwb.gamma == other.localwb.gamma;
+        localwb.wbcamMethod = localwb.wbcamMethod && p.localwb.wbcamMethod == other.localwb.wbcamMethod;
+
         pcvignette.enabled = pcvignette.enabled && p.pcvignette.enabled == other.pcvignette.enabled;
         pcvignette.strength = pcvignette.strength && p.pcvignette.strength == other.pcvignette.strength;
         pcvignette.feather = pcvignette.feather && p.pcvignette.feather == other.pcvignette.feather;
@@ -1025,11 +1082,11 @@ void ParamsEdited::initFrom (const std::vector<rtengine::procparams::ProcParams>
         wavelet.exptoning = wavelet.exptoning && p.wavelet.exptoning == other.wavelet.exptoning;
         wavelet.expnoise = wavelet.expnoise && p.wavelet.expnoise == other.wavelet.expnoise;
 
-        for(int i = 0; i < 9; i++) {
+        for (int i = 0; i < 9; i++) {
             wavelet.c[i] = wavelet.c[i] && p.wavelet.c[i] == other.wavelet.c[i];
         }
 
-        for(int i = 0; i < 9; i++) {
+        for (int i = 0; i < 9; i++) {
             wavelet.ch[i] = wavelet.ch[i] && p.wavelet.ch[i] == other.wavelet.ch[i];
         }
 
@@ -1037,7 +1094,7 @@ void ParamsEdited::initFrom (const std::vector<rtengine::procparams::ProcParams>
         dirpyrequalizer.gamutlab = dirpyrequalizer.gamutlab && p.dirpyrequalizer.gamutlab == other.dirpyrequalizer.gamutlab;
         dirpyrequalizer.cbdlMethod = dirpyrequalizer.cbdlMethod && p.dirpyrequalizer.cbdlMethod == other.dirpyrequalizer.cbdlMethod;
 
-        for(int i = 0; i < 6; i++) {
+        for (int i = 0; i < 6; i++) {
             dirpyrequalizer.mult[i] = dirpyrequalizer.mult[i] && p.dirpyrequalizer.mult[i] == other.dirpyrequalizer.mult[i];
         }
 
@@ -2040,6 +2097,119 @@ void ParamsEdited::combine (rtengine::procparams::ProcParams& toEdit, const rten
         toEdit.gradient.centerY   = mods.gradient.centerY;
     }
 
+    if (localwb.enabled) {
+        toEdit.localwb.enabled   = mods.localwb.enabled;
+    }
+
+
+    if (localwb.locY) {
+        toEdit.localwb.locY  = mods.localwb.locY;
+    }
+
+    if (localwb.locX) {
+        toEdit.localwb.locX  = mods.localwb.locX;
+    }
+
+    if (localwb.locYT) {
+        toEdit.localwb.locYT     = mods.localwb.locYT;
+    }
+
+    if (localwb.locXL) {
+        toEdit.localwb.locXL     = mods.localwb.locXL;
+    }
+
+    if (localwb.Smethod) {
+        toEdit.localwb.Smethod   = mods.localwb.Smethod;
+    }
+
+    if (localwb.centerX) {
+        toEdit.localwb.centerX   = mods.localwb.centerX;
+    }
+
+    if (localwb.centerY) {
+        toEdit.localwb.centerY   = mods.localwb.centerY;
+    }
+
+    if (localwb.circrad) {
+        toEdit.localwb.circrad   = mods.localwb.circrad;
+    }
+
+    if (localwb.thres) {
+        toEdit.localwb.thres   = mods.localwb.thres;
+    }
+
+    if (localwb.proxi) {
+        toEdit.localwb.proxi   = mods.localwb.proxi;
+    }
+
+
+    if (localwb.sensi) {
+        toEdit.localwb.sensi     = mods.localwb.sensi;
+    }
+
+    if (localwb.transit) {
+        toEdit.localwb.transit     = mods.localwb.transit;
+    }
+
+
+    if (localwb.nbspot) {
+        toEdit.localwb.nbspot   = mods.localwb.nbspot;
+    }
+
+    if (localwb.anbspot) {
+        toEdit.localwb.anbspot   = mods.localwb.anbspot;
+    }
+
+    if (localwb.retrab) {
+        toEdit.localwb.retrab   = mods.localwb.retrab;
+    }
+
+    if (localwb.hueref) {
+        toEdit.localwb.hueref   = mods.localwb.hueref;
+    }
+
+    if (localwb.chromaref) {
+        toEdit.localwb.chromaref   = mods.localwb.chromaref;
+    }
+
+    if (localwb.lumaref) {
+        toEdit.localwb.lumaref   = mods.localwb.lumaref;
+    }
+
+    if (localwb.qualityMethod) {
+        toEdit.localwb.qualityMethod   = mods.localwb.qualityMethod;
+    }
+
+    if (localwb.wbMethod) {
+        toEdit.localwb.wbMethod   = mods.localwb.wbMethod;
+    }
+
+    if (localwb.wbcamMethod) {
+        toEdit.localwb.wbcamMethod   = mods.localwb.wbcamMethod;
+    }
+
+
+    if (localwb.expwb) {
+        toEdit.localwb.expwb      = mods.localwb.expwb;
+    }
+
+    if (localwb.temp) {
+        toEdit.localwb.temp      = mods.localwb.temp;
+    }
+
+    if (localwb.green) {
+        toEdit.localwb.green      = mods.localwb.green;
+    }
+
+    if (localwb.equal) {
+        toEdit.localwb.equal      = mods.localwb.equal;
+    }
+
+    if (localwb.gamma) {
+        toEdit.localwb.gamma     = mods.localwb.gamma;
+    }
+
+
     if (pcvignette.enabled) {
         toEdit.pcvignette.enabled     = mods.pcvignette.enabled;
     }
@@ -2771,14 +2941,14 @@ void ParamsEdited::combine (rtengine::procparams::ProcParams& toEdit, const rten
         toEdit.wavelet.expnoise   = mods.wavelet.expnoise;
     }
 
-    for(int i = 0; i < 9; i++) {
-        if(wavelet.c[i]) {
+    for (int i = 0; i < 9; i++) {
+        if (wavelet.c[i]) {
             toEdit.wavelet.c[i] = dontforceSet && options.baBehav[ADDSET_WA] ? toEdit.wavelet.c[i] + mods.wavelet.c[i] : mods.wavelet.c[i];
         }
     }
 
-    for(int i = 0; i < 9; i++) {
-        if(wavelet.ch[i]) {
+    for (int i = 0; i < 9; i++) {
+        if (wavelet.ch[i]) {
             toEdit.wavelet.ch[i] = dontforceSet && options.baBehav[ADDSET_WA] ? toEdit.wavelet.ch[i] + mods.wavelet.ch[i] : mods.wavelet.ch[i];
         }
     }
@@ -2884,8 +3054,8 @@ void ParamsEdited::combine (rtengine::procparams::ProcParams& toEdit, const rten
         toEdit.dirpyrequalizer.cbdlMethod   = mods.dirpyrequalizer.cbdlMethod;
     }
 
-    for(int i = 0; i < 6; i++) {
-        if(dirpyrequalizer.mult[i]) {
+    for (int i = 0; i < 6; i++) {
+        if (dirpyrequalizer.mult[i]) {
             toEdit.dirpyrequalizer.mult[i]    = dontforceSet && options.baBehav[ADDSET_DIRPYREQ] ? toEdit.dirpyrequalizer.mult[i] + mods.dirpyrequalizer.mult[i] : mods.dirpyrequalizer.mult[i];
         }
     }

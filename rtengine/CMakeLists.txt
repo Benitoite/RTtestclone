@@ -72,6 +72,7 @@ set(RTENGINESOURCEFILES
     improcfun.cc
     init.cc
     iplab2rgb.cc
+	iplowb.cc
     ipresize.cc
     ipretinex.cc
     ipsharpen.cc

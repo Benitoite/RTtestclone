@@ -446,6 +446,148 @@ void Polyline::drawOuterGeometry(Cairo::RefPtr<Cairo::Context> &cr, ObjectMOBuff
     }
 }
 
+void Beziers::drawOuterGeometry (Cairo::RefPtr<Cairo::Context> &cr, ObjectMOBuffer *objectBuffer, EditCoordSystem &coordSystem)
+{
+    if ((flags & F_VISIBLE) && state != INSENSITIVE) {
+        RGBColor color;
+        /*
+                if (flags & F_AUTO_COLOR) {
+                    color = getOuterLineColor();
+                } else {
+                    color = outerLineColor;
+                }
+        */
+        //      cr->set_source_rgb (color.getR(), color.getG(), color.getB());
+        //   cr->set_line_width ( getOuterLineWidth() );
+        cr->set_line_width ( innerLineWidth );
+
+        rtengine::Coord begin_ = begin;
+        rtengine::Coord inter_ = inter;
+        rtengine::Coord end_ = end;
+
+        if (datum == IMAGE) {
+            coordSystem.imageCoordToScreen (begin.x, begin.y, begin_.x, begin_.y);
+            coordSystem.imageCoordToScreen (inter.x, inter.y, inter_.x, inter_.y);
+            coordSystem.imageCoordToScreen (end.x, end.y, end_.x, end_.y);
+        } else if (datum == CLICKED_POINT) {
+            begin_ += objectBuffer->getDataProvider()->posScreen;
+            inter_ += objectBuffer->getDataProvider()->posScreen;
+            end_ += objectBuffer->getDataProvider()->posScreen;
+        } else if (datum == CURSOR) {
+            begin_ += objectBuffer->getDataProvider()->posScreen + objectBuffer->getDataProvider()->deltaScreen;
+            inter_ += objectBuffer->getDataProvider()->posScreen + objectBuffer->getDataProvider()->deltaScreen;
+            end_ += objectBuffer->getDataProvider()->posScreen + objectBuffer->getDataProvider()->deltaScreen;
+        }
+
+        cr->save();
+        cr->move_to (begin_.x + 0.5, begin_.y + 0.5);
+        cr->curve_to (begin_.x + 0.5, begin_.y + 0.5, inter_.x + 0.5, inter_.y + 0.5, end_.x + 0.5, end_.y + 0.5);
+        cr->restore();
+        cr->stroke();
+    }
+}
+
+void Beziers::drawInnerGeometry (Cairo::RefPtr<Cairo::Context> &cr, ObjectMOBuffer *objectBuffer, EditCoordSystem &coordSystem)
+{
+    if ((flags & F_VISIBLE) && innerLineWidth > 0.) {
+        /*
+        if (state != INSENSITIVE) {
+            RGBColor color;
+
+            if (flags & F_AUTO_COLOR) {
+                color = getInnerLineColor();
+            } else {
+                color = innerLineColor;
+            }
+
+            cr->set_source_rgb (color.getR(), color.getG(), color.getB());
+        }
+        */
+        cr->set_line_width (innerLineWidth);
+
+        rtengine::Coord begin_ = begin;
+        rtengine::Coord inter_ = inter;
+        rtengine::Coord end_ = end;
+
+        if (datum == IMAGE) {
+            coordSystem.imageCoordToScreen (begin.x, begin.y, begin_.x, begin_.y);
+            coordSystem.imageCoordToScreen (inter.x, inter.y, inter_.x, inter_.y);
+            coordSystem.imageCoordToScreen (end.x, end.y, end_.x, end_.y);
+        } else if (datum == CLICKED_POINT) {
+            begin_ += objectBuffer->getDataProvider()->posScreen;
+            inter_ += objectBuffer->getDataProvider()->posScreen;
+            end_ += objectBuffer->getDataProvider()->posScreen;
+        } else if (datum == CURSOR) {
+            begin_ += objectBuffer->getDataProvider()->posScreen + objectBuffer->getDataProvider()->deltaScreen;
+            inter_ += objectBuffer->getDataProvider()->posScreen + objectBuffer->getDataProvider()->deltaScreen;
+            end_ += objectBuffer->getDataProvider()->posScreen + objectBuffer->getDataProvider()->deltaScreen;
+        }
+
+        cr->save();
+
+        cr->move_to (begin_.x + 0.5, begin_.y + 0.5);
+        cr->curve_to (begin_.x + 0.5, begin_.y + 0.5, inter_.x + 0.5, inter_.y + 0.5, end_.x + 0.5, end_.y + 0.5);
+        cr->restore();
+        cr->stroke();
+        /*
+                if (state == INSENSITIVE) {
+                    std::valarray<double> ds (1);
+                    ds[0] = 4;
+                    cr->set_source_rgba (1.0, 1.0, 1.0, 0.618);
+                    cr->stroke_preserve();
+                    cr->set_source_rgba (0.0, 0.0, 0.0, 0.618);
+                    cr->set_dash (ds, 0);
+                    cr->stroke();
+                    ds.resize (0);
+                    cr->set_dash (ds, 0);
+                } else {
+                    cr->stroke();
+                }
+                */
+    }
+}
+
+void Beziers::drawToMOChannel (Cairo::RefPtr<Cairo::Context> &cr, unsigned short id, ObjectMOBuffer *objectBuffer, EditCoordSystem &coordSystem)
+{
+    if (flags & F_HOVERABLE) {
+        cr->set_line_width ( getMouseOverLineWidth() );
+        rtengine::Coord begin_ = begin;
+        rtengine::Coord inter_ = inter;
+        rtengine::Coord end_ = end;
+
+        if (datum == IMAGE) {
+            coordSystem.imageCoordToCropCanvas (begin.x, begin.y, begin_.x, begin_.y);
+            coordSystem.imageCoordToCropCanvas (inter.x, inter.y, inter_.x, inter_.y);
+            coordSystem.imageCoordToCropCanvas (end.x, end.y, end_.x, end_.y);
+        } else if (datum == CLICKED_POINT) {
+            begin_ += objectBuffer->getDataProvider()->posScreen;
+            inter_ += objectBuffer->getDataProvider()->posScreen;
+            end_ += objectBuffer->getDataProvider()->posScreen;
+        } else if (datum == CURSOR) {
+            begin_ += objectBuffer->getDataProvider()->posScreen + objectBuffer->getDataProvider()->deltaScreen;
+            inter_ += objectBuffer->getDataProvider()->posScreen + objectBuffer->getDataProvider()->deltaScreen;
+            end_ += objectBuffer->getDataProvider()->posScreen + objectBuffer->getDataProvider()->deltaScreen;
+        }
+
+        // setting the color to the objet's ID
+        /*
+        if (objectBuffer->getObjectMode() == OM_255) {
+            cr->set_source_rgba (0., 0., 0., ((id + 1) & 0xFF) / 255.);
+        } else {
+            cr->set_source_rgba (0., 0., 0., (id + 1) / 65535.);
+        }
+        */
+        cr->save();
+
+        cr->move_to (begin_.x + 0.5, begin_.y + 0.5);
+        cr->curve_to (begin_.x + 0.5, begin_.y + 0.5, inter_.x + 0.5, inter_.y + 0.5, end_.x + 0.5, end_.y + 0.5);
+        cr->restore();
+
+        cr->stroke();
+    }
+}
+
+
 void Polyline::drawInnerGeometry(Cairo::RefPtr<Cairo::Context> &cr, ObjectMOBuffer *objectBuffer, EditCoordSystem &coordSystem)
 {
     if ((flags & F_VISIBLE) && points.size() > 1) {

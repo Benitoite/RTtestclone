@@ -413,6 +413,40 @@ public:
     bool amount;
 };
 
+class LocrgbParamsEdited
+{
+public:
+    bool enabled;
+    bool degree;
+    bool locY;
+    bool locX;
+    bool locYT;
+    bool locXL;
+    bool centerX;
+    bool centerY;
+    bool circrad;
+    bool thres;
+    bool proxi;
+    bool Smethod;
+    bool transit;
+    bool nbspot;
+    bool anbspot;
+    bool retrab;
+    bool hueref;
+    bool chromaref;
+    bool lumaref;
+    bool sensi;
+    bool qualityMethod;
+    bool wbMethod;
+    bool wbcamMethod;
+    bool expwb;
+    bool temp;
+    bool green;
+    bool equal;
+    bool gamma;
+};
+
+
 class LensProfParamsEdited
 {
 public:
@@ -797,6 +831,7 @@ public:
     LensProfParamsEdited          lensProf;
     PerspectiveParamsEdited       perspective;
     GradientParamsEdited          gradient;
+    LocrgbParamsEdited            localwb;
     PCVignetteParamsEdited        pcvignette;
     CACorrParamsEdited            cacorrection;
     VignettingParamsEdited        vignetting;

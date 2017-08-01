@@ -53,6 +53,7 @@
 #include "vignetting.h"
 #include "retinex.h"
 #include "gradient.h"
+#include "localwb.h"
 #include "pcvignette.h"
 #include "toolbar.h"
 #include "lensgeom.h"
@@ -101,6 +102,7 @@ protected:
     WhiteBalance* whitebalance;
     Vignetting* vignetting;
     Gradient* gradient;
+    Localwb* localwb;
     Retinex*  retinex;
     PCVignette* pcvignette;
     LensGeometry* lensgeom;
@@ -217,7 +219,7 @@ public:
     // toolpanellistener interface
     void panelChanged   (rtengine::ProcEvent event, const Glib::ustring& descr);
 
-    void imageTypeChanged(bool isRaw, bool isBayer, bool isXtrans);
+    void imageTypeChanged (bool isRaw, bool isBayer, bool isXtrans);
     // profilechangelistener interface
     void profileChange  (const rtengine::procparams::PartialProfile* nparams, rtengine::ProcEvent event, const Glib::ustring& descr, const ParamsEdited* paramsEdited = nullptr);
     void setDefaults    (rtengine::procparams::ProcParams* defparams);
@@ -297,7 +299,7 @@ public:
     void toolSelected (ToolMode tool);
     void editModeSwitchedOff ();
 
-    void setEditProvider(EditDataProvider *provider);
+    void setEditProvider (EditDataProvider *provider);
 };
 
 #endif

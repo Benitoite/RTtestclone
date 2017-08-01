@@ -89,9 +89,9 @@ protected:
 private:
     void deleteLoadedProfileData( )
     {
-        if(loadedProfileData) {
-            if(loadedProfileDataJpg) {
-                free(loadedProfileData);
+        if (loadedProfileData) {
+            if (loadedProfileDataJpg) {
+                free (loadedProfileData);
             } else {
                 delete[] loadedProfileData;
             }
@@ -102,9 +102,9 @@ private:
 public:
     static Glib::ustring errorMsg[6];
 
-    ImageIO () : pl (nullptr), embProfile(nullptr), profileData(nullptr), profileLength(0), loadedProfileData(nullptr), loadedProfileDataJpg(false),
-        loadedProfileLength(0), iptc(nullptr), exifRoot (nullptr), sampleFormat(IIOSF_UNKNOWN),
-        sampleArrangement(IIOSA_UNKNOWN) {}
+    ImageIO () : pl (nullptr), embProfile (nullptr), profileData (nullptr), profileLength (0), loadedProfileData (nullptr), loadedProfileDataJpg (false),
+        loadedProfileLength (0), iptc (nullptr), exifRoot (nullptr), sampleFormat (IIOSF_UNKNOWN),
+        sampleArrangement (IIOSA_UNKNOWN) {}
 
     virtual ~ImageIO ();
 
@@ -113,7 +113,7 @@ public:
         pl = l;
     }
 
-    void                 setSampleFormat(IIOSampleFormat sFormat)
+    void                 setSampleFormat (IIOSampleFormat sFormat)
     {
         sampleFormat = sFormat;
     }
@@ -121,7 +121,7 @@ public:
     {
         return sampleFormat;
     }
-    void                 setSampleArrangement(IIOSampleArrangement sArrangement)
+    void                 setSampleArrangement (IIOSampleArrangement sArrangement)
     {
         sampleArrangement = sArrangement;
     }
@@ -132,7 +132,12 @@ public:
 
     virtual void    getStdImage (ColorTemp ctemp, int tran, Imagefloat* image, PreviewProps pp, bool first, procparams::ToneCurveParams hrp)
     {
-        printf("getStdImage NULL!\n");
+        printf ("getStdImage NULL!\n");
+    }
+
+    virtual void    getStdImageloc (int begx, int begy, int yEn, int xEn, int cx, int cy, ColorTemp ctemp, int tran, Imagefloat* image, Imagefloat* bufimage, PreviewProps pp, bool first, procparams::ToneCurveParams hrp)
+    {
+        printf ("getStdImageloc NULL!\n");
     }
 
     virtual int     getBPS      () = 0;
@@ -158,7 +163,7 @@ public:
     static int getTIFFSampleFormat (Glib::ustring fname, IIOSampleFormat &sFormat, IIOSampleArrangement &sArrangement);
 
     int loadJPEGFromMemory (const char* buffer, int bufsize);
-    int loadPPMFromMemory(const char* buffer, int width, int height, bool swap, int bps);
+    int loadPPMFromMemory (const char* buffer, int width, int height, bool swap, int bps);
 
     int savePNG  (Glib::ustring fname, int compression = -1, volatile int bps = -1);
     int saveJPEG (Glib::ustring fname, int quality = 100, int subSamp = 3);

@@ -45,7 +45,7 @@ namespace rtengine
 extern const char sImage8[];
 extern const char sImage16[];
 extern const char sImagefloat[];
-int getCoarseBitMask( const procparams::CoarseTransformParams &coarse);
+int getCoarseBitMask ( const procparams::CoarseTransformParams &coarse);
 class ProgressListener;
 class Color;
 
@@ -59,7 +59,7 @@ class ImageDatas : virtual public ImageDimensions
 {
 public:
     template<class S, class D>
-    void convertTo(S src, D& dst) const
+    void convertTo (S src, D& dst) const
     {
         dst = src;
     }
@@ -72,7 +72,7 @@ public:
     // free the memory allocated for the image data without deleting the object.
     virtual void flushData ()
     {
-        allocate(0, 0);
+        allocate (0, 0);
     }
 
     virtual void hflip () {}
@@ -97,31 +97,36 @@ public:
     {
         return "unknown";
     }
+    virtual void getAutoWBMultipliersloc (int begx, int begy, int yEn, int xEn, int cx, int cy, int bf_h, int bf_w, double &rm, double &gm, double &bm)
+    {
+        rm = gm = bm = 1.0;
+    }
+
 
 };
 
 template<>
-inline void ImageDatas::convertTo(unsigned short src, unsigned char& dst) const
+inline void ImageDatas::convertTo (unsigned short src, unsigned char& dst) const
 {
-    dst = uint16ToUint8Rounded(src);
+    dst = uint16ToUint8Rounded (src);
 }
 template<>
-inline void ImageDatas::convertTo(unsigned char src, int& dst) const
-{
-    dst = src * 257;
-}
-template<>
-inline void ImageDatas::convertTo(unsigned char src, unsigned short& dst) const
+inline void ImageDatas::convertTo (unsigned char src, int& dst) const
 {
     dst = src * 257;
 }
 template<>
-inline void ImageDatas::convertTo(float src, unsigned char& dst) const
+inline void ImageDatas::convertTo (unsigned char src, unsigned short& dst) const
 {
-    dst = uint16ToUint8Rounded(src);
+    dst = src * 257;
 }
 template<>
-inline void ImageDatas::convertTo(unsigned char src, float& dst) const
+inline void ImageDatas::convertTo (float src, unsigned char& dst) const
+{
+    dst = uint16ToUint8Rounded (src);
+}
+template<>
+inline void ImageDatas::convertTo (unsigned char src, float& dst) const
 {
     dst = src * 257;
 }
@@ -142,14 +147,14 @@ public:
     T** ptrs;
 
 #if CHECK_BOUNDS
-    PlanarPtr() : width_(0), height_(0), ptrs (NULL) {}
+    PlanarPtr() : width_ (0), height_ (0), ptrs (NULL) {}
 #else
     PlanarPtr() : ptrs (nullptr) {}
 #endif
 
-    bool resize(int newSize)
+    bool resize (int newSize)
     {
-        if (ab.resize(newSize)) {
+        if (ab.resize (newSize)) {
             ptrs = ab.data;
             return true;
         } else {
@@ -159,7 +164,7 @@ public:
     }
     void swap (PlanarPtr<T> &other)
     {
-        ab.swap(other.ab);
+        ab.swap (other.ab);
         T** tmpsPtrs = other.ptrs;
         other.ptrs = ptrs;
         ptrs = tmpsPtrs;
@@ -219,10 +224,10 @@ public:
     T* data;
     PlanarPtr<T> v;  // v stands for "value", whatever it represent
 
-    PlanarWhateverData() : rowstride(0), data (nullptr) {}
-    PlanarWhateverData(int w, int h) : rowstride(0), data (nullptr)
+    PlanarWhateverData() : rowstride (0), data (nullptr) {}
+    PlanarWhateverData (int w, int h) : rowstride (0), data (nullptr)
     {
-        allocate(w, h);
+        allocate (w, h);
     }
 
     // Send back the row stride. WARNING: unit = byte, not element!
@@ -231,10 +236,10 @@ public:
         return rowstride;
     }
 
-    void swap(PlanarWhateverData<T> &other)
+    void swap (PlanarWhateverData<T> &other)
     {
-        abData.swap(other.abData);
-        v.swap(other.v);
+        abData.swap (other.abData);
+        v.swap (other.v);
         T* tmpData = other.data;
         other.data = data;
         data = tmpData;
@@ -269,12 +274,12 @@ public:
         v.height_ = height;
 #endif
 
-        if (sizeof(T) > 1) {
+        if (sizeof (T) > 1) {
             // 128 bits memory alignment for >8bits data
-            rowstride = ( width * sizeof(T) + 15 ) / 16 * 16;
+            rowstride = ( width * sizeof (T) + 15 ) / 16 * 16;
         } else {
             // No memory alignment for 8bits data
-            rowstride = width * sizeof(T);
+            rowstride = width * sizeof (T);
         }
 
         // find the padding length to ensure a 128 bits alignment for each row
@@ -285,14 +290,14 @@ public:
             rowstride = 0;
         }
 
-        if (size && abData.resize(size, 1)
-                && v.resize(height) ) {
+        if (size && abData.resize (size, 1)
+                && v.resize (height) ) {
             data   = abData.data;
         } else {
             // asking for a new size of 0 is safe and will free memory, if any!
-            abData.resize(0);
+            abData.resize (0);
             data = nullptr;
-            v.resize(0);
+            v.resize (0);
             width = height = -1;
 #if CHECK_BOUNDS
             v.width_ = v.height_ = -1;
@@ -301,27 +306,27 @@ public:
             return;
         }
 
-        char *start   = (char*)(data);
+        char *start   = (char*) (data);
 
         for (int i = 0; i < height; ++i) {
             int k = i * rowstride;
-            v(i) = (T*)(start   + k);
+            v (i) = (T*) (start   + k);
         }
     }
 
     /** Copy the data to another PlanarWhateverData */
-    void copyData(PlanarWhateverData<T> *dest)
+    void copyData (PlanarWhateverData<T> *dest)
     {
         assert (dest != NULL);
         // Make sure that the size is the same, reallocate if necessary
-        dest->allocate(width, height);
+        dest->allocate (width, height);
 
         if (dest->width == -1) {
             return;
         }
 
         for (int i = 0; i < height; i++) {
-            memcpy (dest->v(i), v(i), width * sizeof(T));
+            memcpy (dest->v (i), v (i), width * sizeof (T));
         }
     }
 
@@ -329,33 +334,33 @@ public:
     {
 
         if (deg == 90) {
-            PlanarWhateverData<T> rotatedImg(height, width);  // New image, rotated
+            PlanarWhateverData<T> rotatedImg (height, width); // New image, rotated
 
             for (int ny = 0; ny < rotatedImg.height; ny++) {
                 int ox = ny;
                 int oy = height - 1;
 
                 for (int nx = 0; nx < rotatedImg.width; nx++) {
-                    rotatedImg.v(ny, nx) = v(oy, ox);
+                    rotatedImg.v (ny, nx) = v (oy, ox);
                     --oy;
                 }
             }
 
-            swap(rotatedImg);
+            swap (rotatedImg);
         } else if (deg == 270) {
-            PlanarWhateverData<T> rotatedImg(height, width);  // New image, rotated
+            PlanarWhateverData<T> rotatedImg (height, width); // New image, rotated
 
             for (int nx = 0; nx < rotatedImg.width; nx++) {
                 int oy = nx;
                 int ox = width - 1;
 
                 for (int ny = 0; ny < rotatedImg.height; ny++) {
-                    rotatedImg.v(ny, nx) = v(oy, ox);
+                    rotatedImg.v (ny, nx) = v (oy, ox);
                     --ox;
                 }
             }
 
-            swap(rotatedImg);
+            swap (rotatedImg);
         } else if (deg == 180) {
             int height2 = height / 2 + (height & 1);
 
@@ -371,13 +376,14 @@ public:
                     int x = width - 1 - j;
                     int y = height - 1 - i;
 
-                    tmp = v(i, j);
-                    v(i, j) = v(y, x);
-                    v(y, x) = tmp;
+                    tmp = v (i, j);
+                    v (i, j) = v (y, x);
+                    v (y, x) = tmp;
                 }
             }
+
 #ifdef _OPENMP
-            static_cast<void>(bigImage); // to silence cppcheck warning
+            static_cast<void> (bigImage); // to silence cppcheck warning
 #endif
         }
     }
@@ -390,7 +396,7 @@ public:
             // special case where no resizing is necessary, just type conversion....
             for (int i = 0; i < height; i++) {
                 for (int j = 0; j < width; j++) {
-                    convertTo(v(i, j), imgPtr->v(i, j));
+                    convertTo (v (i, j), imgPtr->v (i, j));
                 }
             }
         } else if (interp == TI_Nearest) {
@@ -399,7 +405,7 @@ public:
 
                 for (int j = 0; j < nw; j++) {
                     int ci = j * width / nw;
-                    convertTo(v(ri, ci), imgPtr->v(i, j));
+                    convertTo (v (ri, ci), imgPtr->v (i, j));
                 }
             }
         } else if (interp == TI_Bilinear) {
@@ -410,7 +416,7 @@ public:
                     sy = height - 1;
                 }
 
-                float dy = float(i) * float(height) / float(nh) - float(sy);
+                float dy = float (i) * float (height) / float (nh) - float (sy);
                 int ny = sy + 1;
 
                 if (ny >= height) {
@@ -424,21 +430,21 @@ public:
                         sx = width;
                     }
 
-                    float dx = float(j) * float(width) / float(nw) - float(sx);
+                    float dx = float (j) * float (width) / float (nw) - float (sx);
                     int nx = sx + 1;
 
                     if (nx >= width) {
                         nx = sx;
                     }
 
-                    convertTo(v(sy, sx) * (1.f - dx) * (1.f - dy) + v(sy, nx)*dx * (1.f - dy) + v(ny, sx) * (1.f - dx)*dy + v(ny, nx)*dx * dy, imgPtr->v(i, j));
+                    convertTo (v (sy, sx) * (1.f - dx) * (1.f - dy) + v (sy, nx)*dx * (1.f - dy) + v (ny, sx) * (1.f - dx)*dy + v (ny, nx)*dx * dy, imgPtr->v (i, j));
                 }
             }
         } else {
             // This case should never occur!
             for (int i = 0; i < nh; i++) {
                 for (int j = 0; j < nw; j++) {
-                    v(i, j) = 0;
+                    v (i, j) = 0;
                 }
             }
         }
@@ -459,12 +465,13 @@ public:
                 float temp;
                 int x = width - 1 - j;
 
-                temp = v(i, j);
-                v(i, j) = v(i, x);
-                v(i, x) = temp;
+                temp = v (i, j);
+                v (i, j) = v (i, x);
+                v (i, x) = temp;
             }
+
 #ifdef _OPENMP
-        static_cast<void>(bigImage); // to silence cppcheck warning
+        static_cast<void> (bigImage); // to silence cppcheck warning
 #endif
     }
 
@@ -484,21 +491,22 @@ public:
                 T temp;
                 int y = height - 1 - i;
 
-                temp = v(i, j);
-                v(i, j) = v(y, j);
-                v(y, j) = temp;
+                temp = v (i, j);
+                v (i, j) = v (y, j);
+                v (y, j) = temp;
             }
+
 #ifdef _OPENMP
-        static_cast<void>(bigImage); // to silence cppcheck warning
+        static_cast<void> (bigImage); // to silence cppcheck warning
 #endif
     }
 
-    void calcHist(unsigned int *hist16)
+    void calcHist (unsigned int *hist16)
     {
         for (int row = 0; row < height; row++)
             for (int col = 0; col < width; col++) {
                 unsigned short idx;
-                convertTo(v(row, col), idx);
+                convertTo (v (row, col), idx);
                 hist16[idx]++;
             }
     }
@@ -558,26 +566,26 @@ public:
         for (int iy = y - halfSquare; iy < y - halfSquare + squareSize; ++iy) {
             for (int ix = x - halfSquare; ix < x - halfSquare + squareSize; ++ix) {
                 if (ix >= 0 && iy >= 0 && ix < width && iy < height) {
-                    accumulator += float(this->v(iy, ix));
+                    accumulator += float (this->v (iy, ix));
                     ++n;
                 }
             }
         }
 
-        value = n ? T(accumulator / float(n)) : T(0);
+        value = n ? T (accumulator / float (n)) : T (0);
     }
 
     void readData   (FILE *f)
     {
         for (int i = 0; i < height; i++) {
-            fread (v(i), sizeof(T), width, f);
+            fread (v (i), sizeof (T), width, f);
         }
     }
 
     void writeData  (FILE *f)
     {
         for (int i = 0; i < height; i++) {
-            fwrite (v(i), sizeof(T), width, f);
+            fwrite (v (i), sizeof (T), width, f);
         }
     }
 
@@ -601,10 +609,10 @@ public:
     PlanarPtr<T> g;
     PlanarPtr<T> b;
 
-    PlanarRGBData() : rowstride(0), planestride(0), data (nullptr) {}
-    PlanarRGBData(int w, int h) : rowstride(0), planestride(0), data (nullptr)
+    PlanarRGBData() : rowstride (0), planestride (0), data (nullptr) {}
+    PlanarRGBData (int w, int h) : rowstride (0), planestride (0), data (nullptr)
     {
-        allocate(w, h);
+        allocate (w, h);
     }
 
     // Send back the row stride. WARNING: unit = byte, not element!
@@ -618,12 +626,12 @@ public:
         return planestride;
     }
 
-    void swap(PlanarRGBData<T> &other)
+    void swap (PlanarRGBData<T> &other)
     {
-        abData.swap(other.abData);
-        r.swap(other.r);
-        g.swap(other.g);
-        b.swap(other.b);
+        abData.swap (other.abData);
+        r.swap (other.r);
+        g.swap (other.g);
+        b.swap (other.b);
         T* tmpData = other.data;
         other.data = data;
         data = tmpData;
@@ -666,13 +674,13 @@ public:
         b.height_ = height;
 #endif
 
-        if (sizeof(T) > 1) {
+        if (sizeof (T) > 1) {
             // 128 bits memory alignment for >8bits data
-            rowstride = ( width * sizeof(T) + 15 ) / 16 * 16;
+            rowstride = ( width * sizeof (T) + 15 ) / 16 * 16;
             planestride = rowstride * height;
         } else {
             // No memory alignment for 8bits data
-            rowstride = width * sizeof(T);
+            rowstride = width * sizeof (T);
             planestride = rowstride * height;
         }
 
@@ -684,18 +692,18 @@ public:
             rowstride = 0;
         }
 
-        if (size && abData.resize(size, 1)
-                && r.resize(height)
-                && g.resize(height)
-                && b.resize(height) ) {
+        if (size && abData.resize (size, 1)
+                && r.resize (height)
+                && g.resize (height)
+                && b.resize (height) ) {
             data   = abData.data;
         } else {
             // asking for a new size of 0 is safe and will free memory, if any!
-            abData.resize(0);
+            abData.resize (0);
             data = nullptr;
-            r.resize(0);
-            g.resize(0);
-            b.resize(0);
+            r.resize (0);
+            g.resize (0);
+            b.resize (0);
             width = height = -1;
 #if CHECK_BOUNDS
             r.width_ = r.height_ = -1;
@@ -705,34 +713,34 @@ public:
             return;
         }
 
-        char *redstart   = (char*)(data);
-        char *greenstart = (char*)(data) +   planestride;
-        char *bluestart  = (char*)(data) + 2 * planestride;
+        char *redstart   = (char*) (data);
+        char *greenstart = (char*) (data) +   planestride;
+        char *bluestart  = (char*) (data) + 2 * planestride;
 
         for (int i = 0; i < height; ++i) {
             int k = i * rowstride;
-            r(i) = (T*)(redstart   + k);
-            g(i) = (T*)(greenstart + k);
-            b(i) = (T*)(bluestart  + k);
+            r (i) = (T*) (redstart   + k);
+            g (i) = (T*) (greenstart + k);
+            b (i) = (T*) (bluestart  + k);
         }
     }
 
     /** Copy the data to another PlanarRGBData */
-    void copyData(PlanarRGBData<T> *dest)
+    void copyData (PlanarRGBData<T> *dest)
     {
         assert (dest != nullptr);
         // Make sure that the size is the same, reallocate if necessary
-        dest->allocate(width, height);
+        dest->allocate (width, height);
 
         if (dest->width == -1) {
-            printf("ERROR: PlanarRGBData::copyData >>> allocation failed!\n");
+            printf ("ERROR: PlanarRGBData::copyData >>> allocation failed!\n");
             return;
         }
 
         for (int i = 0; i < height; i++) {
-            memcpy (dest->r(i), r(i), width * sizeof(T));
-            memcpy (dest->g(i), g(i), width * sizeof(T));
-            memcpy (dest->b(i), b(i), width * sizeof(T));
+            memcpy (dest->r (i), r (i), width * sizeof (T));
+            memcpy (dest->g (i), g (i), width * sizeof (T));
+            memcpy (dest->b (i), b (i), width * sizeof (T));
         }
     }
 
@@ -740,37 +748,37 @@ public:
     {
 
         if (deg == 90) {
-            PlanarRGBData<T> rotatedImg(height, width);  // New image, rotated
+            PlanarRGBData<T> rotatedImg (height, width); // New image, rotated
 
             for (int ny = 0; ny < rotatedImg.height; ny++) {
                 int ox = ny;
                 int oy = height - 1;
 
                 for (int nx = 0; nx < rotatedImg.width; nx++) {
-                    rotatedImg.r(ny, nx) = r(oy, ox);
-                    rotatedImg.g(ny, nx) = g(oy, ox);
-                    rotatedImg.b(ny, nx) = b(oy, ox);
+                    rotatedImg.r (ny, nx) = r (oy, ox);
+                    rotatedImg.g (ny, nx) = g (oy, ox);
+                    rotatedImg.b (ny, nx) = b (oy, ox);
                     --oy;
                 }
             }
 
-            swap(rotatedImg);
+            swap (rotatedImg);
         } else if (deg == 270) {
-            PlanarRGBData<T> rotatedImg(height, width);  // New image, rotated
+            PlanarRGBData<T> rotatedImg (height, width); // New image, rotated
 
             for (int nx = 0; nx < rotatedImg.width; nx++) {
                 int oy = nx;
                 int ox = width - 1;
 
                 for (int ny = 0; ny < rotatedImg.height; ny++) {
-                    rotatedImg.r(ny, nx) = r(oy, ox);
-                    rotatedImg.g(ny, nx) = g(oy, ox);
-                    rotatedImg.b(ny, nx) = b(oy, ox);
+                    rotatedImg.r (ny, nx) = r (oy, ox);
+                    rotatedImg.g (ny, nx) = g (oy, ox);
+                    rotatedImg.b (ny, nx) = b (oy, ox);
                     --ox;
                 }
             }
 
-            swap(rotatedImg);
+            swap (rotatedImg);
         } else if (deg == 180) {
             int height2 = height / 2 + (height & 1);
 
@@ -786,21 +794,22 @@ public:
                     int x = width - 1 - j;
                     int y = height - 1 - i;
 
-                    tmp = r(i, j);
-                    r(i, j) = r(y, x);
-                    r(y, x) = tmp;
+                    tmp = r (i, j);
+                    r (i, j) = r (y, x);
+                    r (y, x) = tmp;
 
-                    tmp = g(i, j);
-                    g(i, j) = g(y, x);
-                    g(y, x) = tmp;
+                    tmp = g (i, j);
+                    g (i, j) = g (y, x);
+                    g (y, x) = tmp;
 
-                    tmp = b(i, j);
-                    b(i, j) = b(y, x);
-                    b(y, x) = tmp;
+                    tmp = b (i, j);
+                    b (i, j) = b (y, x);
+                    b (y, x) = tmp;
                 }
             }
+
 #ifdef _OPENMP
-            static_cast<void>(bigImage); // to silence cppcheck warning
+            static_cast<void> (bigImage); // to silence cppcheck warning
 #endif
         }
     }
@@ -813,9 +822,9 @@ public:
             // special case where no resizing is necessary, just type conversion....
             for (int i = 0; i < height; i++) {
                 for (int j = 0; j < width; j++) {
-                    convertTo(r(i, j), imgPtr->r(i, j));
-                    convertTo(g(i, j), imgPtr->g(i, j));
-                    convertTo(b(i, j), imgPtr->b(i, j));
+                    convertTo (r (i, j), imgPtr->r (i, j));
+                    convertTo (g (i, j), imgPtr->g (i, j));
+                    convertTo (b (i, j), imgPtr->b (i, j));
                 }
             }
         } else if (interp == TI_Nearest) {
@@ -824,40 +833,40 @@ public:
 
                 for (int j = 0; j < nw; j++) {
                     int ci = j * width / nw;
-                    convertTo(r(ri, ci), imgPtr->r(i, j));
-                    convertTo(g(ri, ci), imgPtr->g(i, j));
-                    convertTo(b(ri, ci), imgPtr->b(i, j));
+                    convertTo (r (ri, ci), imgPtr->r (i, j));
+                    convertTo (g (ri, ci), imgPtr->g (i, j));
+                    convertTo (b (ri, ci), imgPtr->b (i, j));
                 }
             }
         } else if (interp == TI_Bilinear) {
-            float heightByNh = float(height) / float(nh);
-            float widthByNw = float(width) / float(nw);
+            float heightByNh = float (height) / float (nh);
+            float widthByNw = float (width) / float (nw);
             float syf = 0.f;
 
             for (int i = 0; i < nh; i++, syf += heightByNh) {
                 int sy = syf;
-                float dy = syf - float(sy);
+                float dy = syf - float (sy);
                 int ny = sy < height - 1 ? sy + 1 : sy;
 
                 float sxf = 0.f;
 
                 for (int j = 0; j < nw; j++, sxf += widthByNw) {
                     int sx = sxf;
-                    float dx = sxf - float(sx);
+                    float dx = sxf - float (sx);
                     int nx = sx < width - 1 ? sx + 1 : sx;
 
-                    convertTo(r(sy, sx) * (1.f - dx) * (1.f - dy) + r(sy, nx)*dx * (1.f - dy) + r(ny, sx) * (1.f - dx)*dy + r(ny, nx)*dx * dy, imgPtr->r(i, j));
-                    convertTo(g(sy, sx) * (1.f - dx) * (1.f - dy) + g(sy, nx)*dx * (1.f - dy) + g(ny, sx) * (1.f - dx)*dy + g(ny, nx)*dx * dy, imgPtr->g(i, j));
-                    convertTo(b(sy, sx) * (1.f - dx) * (1.f - dy) + b(sy, nx)*dx * (1.f - dy) + b(ny, sx) * (1.f - dx)*dy + b(ny, nx)*dx * dy, imgPtr->b(i, j));
+                    convertTo (r (sy, sx) * (1.f - dx) * (1.f - dy) + r (sy, nx)*dx * (1.f - dy) + r (ny, sx) * (1.f - dx)*dy + r (ny, nx)*dx * dy, imgPtr->r (i, j));
+                    convertTo (g (sy, sx) * (1.f - dx) * (1.f - dy) + g (sy, nx)*dx * (1.f - dy) + g (ny, sx) * (1.f - dx)*dy + g (ny, nx)*dx * dy, imgPtr->g (i, j));
+                    convertTo (b (sy, sx) * (1.f - dx) * (1.f - dy) + b (sy, nx)*dx * (1.f - dy) + b (ny, sx) * (1.f - dx)*dy + b (ny, nx)*dx * dy, imgPtr->b (i, j));
                 }
             }
         } else {
             // This case should never occur!
             for (int i = 0; i < nh; i++) {
                 for (int j = 0; j < nw; j++) {
-                    r(i, j) = 0;
-                    g(i, j) = 0;
-                    b(i, j) = 0;
+                    r (i, j) = 0;
+                    g (i, j) = 0;
+                    b (i, j) = 0;
                 }
             }
         }
@@ -878,20 +887,21 @@ public:
                 float temp;
                 int x = width - 1 - j;
 
-                temp = r(i, j);
-                r(i, j) = r(i, x);
-                r(i, x) = temp;
+                temp = r (i, j);
+                r (i, j) = r (i, x);
+                r (i, x) = temp;
 
-                temp = g(i, j);
-                g(i, j) = g(i, x);
-                g(i, x) = temp;
+                temp = g (i, j);
+                g (i, j) = g (i, x);
+                g (i, x) = temp;
 
-                temp = b(i, j);
-                b(i, j) = b(i, x);
-                b(i, x) = temp;
+                temp = b (i, j);
+                b (i, j) = b (i, x);
+                b (i, x) = temp;
             }
+
 #ifdef _OPENMP
-        static_cast<void>(bigImage); // to silence cppcheck warning
+        static_cast<void> (bigImage); // to silence cppcheck warning
 #endif
     }
 
@@ -911,31 +921,32 @@ public:
                 T tempR, tempG, tempB;
                 int y = height - 1 - i;
 
-                tempR = r(i, j);
-                r(i, j) = r(y, j);
-                r(y, j) = tempR;
+                tempR = r (i, j);
+                r (i, j) = r (y, j);
+                r (y, j) = tempR;
 
-                tempG = g(i, j);
-                g(i, j) = g(y, j);
-                g(y, j) = tempG;
+                tempG = g (i, j);
+                g (i, j) = g (y, j);
+                g (y, j) = tempG;
 
-                tempB = b(i, j);
-                b(i, j) = b(y, j);
-                b(y, j) = tempB;
+                tempB = b (i, j);
+                b (i, j) = b (y, j);
+                b (y, j) = tempB;
             }
+
 #ifdef _OPENMP
-        static_cast<void>(bigImage); // to silence cppcheck warning
+        static_cast<void> (bigImage); // to silence cppcheck warning
 #endif
     }
 
-    void calcGrayscaleHist(unsigned int *hist16)
+    void calcGrayscaleHist (unsigned int *hist16)
     {
         for (int row = 0; row < height; row++)
             for (int col = 0; col < width; col++) {
                 unsigned short rIdx, gIdx, bIdx;
-                convertTo(r(row, col), rIdx);
-                convertTo(g(row, col), gIdx);
-                convertTo(b(row, col), bIdx);
+                convertTo (r (row, col), rIdx);
+                convertTo (g (row, col), gIdx);
+                convertTo (b (row, col), bIdx);
                 hist16[rIdx]++;
                 hist16[gIdx] += 2; // Bayer 2x green correction
                 hist16[bIdx]++;
@@ -946,18 +957,18 @@ public:
     {
         histcompr = 3;
 
-        histogram(65536 >> histcompr);
+        histogram (65536 >> histcompr);
         histogram.clear();
 
         for (int i = 0; i < height; i++)
             for (int j = 0; j < width; j++) {
                 float r_, g_, b_;
-                convertTo<T, float>(r(i, j), r_);
-                convertTo<T, float>(g(i, j), g_);
-                convertTo<T, float>(b(i, j), b_);
-                histogram[(int)Color::igamma_srgb (r_) >> histcompr]++;
-                histogram[(int)Color::igamma_srgb (g_) >> histcompr]++;
-                histogram[(int)Color::igamma_srgb (b_) >> histcompr]++;
+                convertTo<T, float> (r (i, j), r_);
+                convertTo<T, float> (g (i, j), g_);
+                convertTo<T, float> (b (i, j), b_);
+                histogram[ (int)Color::igamma_srgb (r_) >> histcompr]++;
+                histogram[ (int)Color::igamma_srgb (g_) >> histcompr]++;
+                histogram[ (int)Color::igamma_srgb (b_) >> histcompr]++;
             }
     }
 
@@ -967,12 +978,12 @@ public:
         avg_r = avg_g = avg_b = 0.;
         n = 0;
 
-        for (unsigned int i = 0; i < (unsigned int)(height); i++)
-            for (unsigned int j = 0; j < (unsigned int)(width); j++) {
+        for (unsigned int i = 0; i < (unsigned int) (height); i++)
+            for (unsigned int j = 0; j < (unsigned int) (width); j++) {
                 float r_, g_, b_;
-                convertTo<T, float>(r(i, j), r_);
-                convertTo<T, float>(g(i, j), g_);
-                convertTo<T, float>(b(i, j), b_);
+                convertTo<T, float> (r (i, j), r_);
+                convertTo<T, float> (g (i, j), g_);
+                convertTo<T, float> (b (i, j), b_);
                 int rtemp = Color::igamma_srgb (r_);
                 int gtemp = Color::igamma_srgb (g_);
                 int btemp = Color::igamma_srgb (b_);
@@ -986,9 +997,9 @@ public:
                     continue;
                 }
 
-                avg_r += double(r_);
-                avg_g += double(g_);
-                avg_b += double(b_);
+                avg_r += double (r_);
+                avg_g += double (g_);
+                avg_b += double (b_);
                 n++;
             }
     }
@@ -1002,26 +1013,26 @@ public:
         int n = 0;
         //int p = 6;
 
-        for (unsigned int i = 0; i < (unsigned int)(height); i++)
-            for (unsigned int j = 0; j < (unsigned int)(width); j++) {
+        for (unsigned int i = 0; i < (unsigned int) (height); i++)
+            for (unsigned int j = 0; j < (unsigned int) (width); j++) {
                 float r_, g_, b_;
-                convertTo<T, float>(r(i, j), r_);
-                convertTo<T, float>(g(i, j), g_);
-                convertTo<T, float>(b(i, j), b_);
+                convertTo<T, float> (r (i, j), r_);
+                convertTo<T, float> (g (i, j), g_);
+                convertTo<T, float> (b (i, j), b_);
 
                 if (r_ > 64000.f || g_ > 64000.f || b_ > 64000.f) {
                     continue;
                 }
 
-                avg_r += double(r_);
-                avg_g += double(g_);
-                avg_b += double(b_);
+                avg_r += double (r_);
+                avg_g += double (g_);
+                avg_b += double (b_);
                 n++;
             }
 
-        rm = avg_r / double(n);
-        gm = avg_g / double(n);
-        bm = avg_b / double(n);
+        rm = avg_r / double (n);
+        gm = avg_g / double (n);
+        bm = avg_b / double (n);
     }
 
     void transformPixel (int x, int y, int tran, int& tx, int& ty)
@@ -1081,8 +1092,8 @@ public:
 
             if (x >= 0 && y >= 0 && x < width && y < height) {
                 float v;
-                convertTo<T, float>(this->r(y, x), v);
-                reds += double(v);
+                convertTo<T, float> (this->r (y, x), v);
+                reds += double (v);
                 rn++;
             }
 
@@ -1090,8 +1101,8 @@ public:
 
             if (x >= 0 && y >= 0 && x < width && y < height) {
                 float v;
-                convertTo<T, float>(this->g(y, x), v);
-                greens += double(v);
+                convertTo<T, float> (this->g (y, x), v);
+                greens += double (v);
                 gn++;
             }
 
@@ -1099,8 +1110,8 @@ public:
 
             if (x >= 0 && y >= 0 && x < width && y < height) {
                 float v;
-                convertTo<T, float>(this->b(y, x), v);
-                blues += double(v);
+                convertTo<T, float> (this->b (y, x), v);
+                blues += double (v);
                 bn++;
             }
         }
@@ -1120,46 +1131,46 @@ public:
         for (int iy = y - halfSquare; iy < y - halfSquare + squareSize; ++iy) {
             for (int ix = x - halfSquare; ix < x - halfSquare + squareSize; ++ix) {
                 if (ix >= 0 && iy >= 0 && ix < width && iy < height) {
-                    accumulatorR += float(this->r(iy, ix));
-                    accumulatorG += float(this->g(iy, ix));
-                    accumulatorB += float(this->b(iy, ix));
+                    accumulatorR += float (this->r (iy, ix));
+                    accumulatorG += float (this->g (iy, ix));
+                    accumulatorB += float (this->b (iy, ix));
                     ++n;
                 }
             }
         }
 
-        valueR = n ? T(accumulatorR / float(n)) : T(0);
-        valueG = n ? T(accumulatorG / float(n)) : T(0);
-        valueB = n ? T(accumulatorB / float(n)) : T(0);
+        valueR = n ? T (accumulatorR / float (n)) : T (0);
+        valueG = n ? T (accumulatorG / float (n)) : T (0);
+        valueB = n ? T (accumulatorB / float (n)) : T (0);
     }
 
     void readData   (FILE *f)
     {
         for (int i = 0; i < height; i++) {
-            fread (r(i), sizeof(T), width, f);
+            fread (r (i), sizeof (T), width, f);
         }
 
         for (int i = 0; i < height; i++) {
-            fread (g(i), sizeof(T), width, f);
+            fread (g (i), sizeof (T), width, f);
         }
 
         for (int i = 0; i < height; i++) {
-            fread (b(i), sizeof(T), width, f);
+            fread (b (i), sizeof (T), width, f);
         }
     }
 
     void writeData  (FILE *f)
     {
         for (int i = 0; i < height; i++) {
-            fwrite (r(i), sizeof(T), width, f);
+            fwrite (r (i), sizeof (T), width, f);
         }
 
         for (int i = 0; i < height; i++) {
-            fwrite (g(i), sizeof(T), width, f);
+            fwrite (g (i), sizeof (T), width, f);
         }
 
         for (int i = 0; i < height; i++) {
-            fwrite (b(i), sizeof(T), width, f);
+            fwrite (b (i), sizeof (T), width, f);
         }
     }
 
@@ -1181,11 +1192,11 @@ public:
 #endif
 
 #if CHECK_BOUNDS
-    ChunkyPtr() : ptr (NULL), width(-1), width_(0), height_(0) {}
+    ChunkyPtr() : ptr (NULL), width (-1), width_ (0), height_ (0) {}
 #else
-    ChunkyPtr() : ptr (nullptr), width(-1) {}
+    ChunkyPtr() : ptr (nullptr), width (-1) {}
 #endif
-    void init(T* base, int w = -1)
+    void init (T* base, int w = -1)
     {
         ptr = base;
         width = w;
@@ -1250,9 +1261,9 @@ public:
     ChunkyPtr<T> b;
 
     ChunkyRGBData() : data (nullptr) {}
-    ChunkyRGBData(int w, int h) : data (nullptr)
+    ChunkyRGBData (int w, int h) : data (nullptr)
     {
-        allocate(w, h);
+        allocate (w, h);
     }
 
     /** Returns the pixel data, in r/g/b order from top left to bottom right continuously.
@@ -1262,12 +1273,12 @@ public:
         return data;
     }
 
-    void swap(ChunkyRGBData<T> &other)
+    void swap (ChunkyRGBData<T> &other)
     {
-        abData.swap(other.abData);
-        r.swap(other.r);
-        g.swap(other.g);
-        b.swap(other.b);
+        abData.swap (other.abData);
+        r.swap (other.r);
+        g.swap (other.g);
+        b.swap (other.b);
         T* tmpData = other.data;
         other.data = data;
         data = tmpData;
@@ -1309,18 +1320,18 @@ public:
         b.height_ = height;
 #endif
 
-        abData.resize(width * height * 3u);
+        abData.resize (width * height * 3u);
 
         if (!abData.isEmpty()) {
             data = abData.data;
-            r.init(data,   width);
-            g.init(data + 1, width);
-            b.init(data + 2, width);
+            r.init (data,   width);
+            g.init (data + 1, width);
+            b.init (data + 2, width);
         } else {
             data = nullptr;
-            r.init(nullptr);
-            g.init(nullptr);
-            b.init(nullptr);
+            r.init (nullptr);
+            g.init (nullptr);
+            b.init (nullptr);
             width = height = -1;
 #if CHECK_BOUNDS
             r.width_ = r.height_ = -1;
@@ -1331,55 +1342,55 @@ public:
     }
 
     /** Copy the data to another ChunkyRGBData */
-    void copyData(ChunkyRGBData<T> *dest)
+    void copyData (ChunkyRGBData<T> *dest)
     {
         assert (dest != nullptr);
         // Make sure that the size is the same, reallocate if necessary
-        dest->allocate(width, height);
+        dest->allocate (width, height);
 
         if (dest->width == -1) {
-            printf("ERROR: ChunkyRGBData::copyData >>> allocation failed!\n");
+            printf ("ERROR: ChunkyRGBData::copyData >>> allocation failed!\n");
             return;
         }
 
-        memcpy (dest->data, data, 3 * width * height * sizeof(T));
+        memcpy (dest->data, data, 3 * width * height * sizeof (T));
     }
 
     void rotate (int deg)
     {
 
         if (deg == 90) {
-            ChunkyRGBData<T> rotatedImg(height, width);  // New image, rotated
+            ChunkyRGBData<T> rotatedImg (height, width); // New image, rotated
 
             for (int ny = 0; ny < rotatedImg.height; ny++) {
                 int ox = ny;
                 int oy = height - 1;
 
                 for (int nx = 0; nx < rotatedImg.width; nx++) {
-                    rotatedImg.r(ny, nx) = r(oy, ox);
-                    rotatedImg.g(ny, nx) = g(oy, ox);
-                    rotatedImg.b(ny, nx) = b(oy, ox);
+                    rotatedImg.r (ny, nx) = r (oy, ox);
+                    rotatedImg.g (ny, nx) = g (oy, ox);
+                    rotatedImg.b (ny, nx) = b (oy, ox);
                     --oy;
                 }
             }
 
-            swap(rotatedImg);
+            swap (rotatedImg);
         } else if (deg == 270) {
-            ChunkyRGBData<T> rotatedImg(height, width);  // New image, rotated
+            ChunkyRGBData<T> rotatedImg (height, width); // New image, rotated
 
             for (int nx = 0; nx < rotatedImg.width; nx++) {
                 int oy = nx;
                 int ox = width - 1;
 
                 for (int ny = 0; ny < rotatedImg.height; ny++) {
-                    rotatedImg.r(ny, nx) = r(oy, ox);
-                    rotatedImg.g(ny, nx) = g(oy, ox);
-                    rotatedImg.b(ny, nx) = b(oy, ox);
+                    rotatedImg.r (ny, nx) = r (oy, ox);
+                    rotatedImg.g (ny, nx) = g (oy, ox);
+                    rotatedImg.b (ny, nx) = b (oy, ox);
                     --ox;
                 }
             }
 
-            swap(rotatedImg);
+            swap (rotatedImg);
         } else if (deg == 180) {
             int height2 = height / 2 + (height & 1);
 
@@ -1390,17 +1401,17 @@ public:
                     int x = width - 1 - j;
                     int y = height - 1 - i;
 
-                    tmp = r(i, j);
-                    r(i, j) = r(y, x);
-                    r(y, x) = tmp;
+                    tmp = r (i, j);
+                    r (i, j) = r (y, x);
+                    r (y, x) = tmp;
 
-                    tmp = g(i, j);
-                    g(i, j) = g(y, x);
-                    g(y, x) = tmp;
+                    tmp = g (i, j);
+                    g (i, j) = g (y, x);
+                    g (y, x) = tmp;
 
-                    tmp = b(i, j);
-                    b(i, j) = b(y, x);
-                    b(y, x) = tmp;
+                    tmp = b (i, j);
+                    b (i, j) = b (y, x);
+                    b (y, x) = tmp;
                 }
             }
         }
@@ -1414,9 +1425,9 @@ public:
             // special case where no resizing is necessary, just type conversion....
             for (int i = 0; i < height; i++) {
                 for (int j = 0; j < width; j++) {
-                    convertTo(r(i, j), imgPtr->r(i, j));
-                    convertTo(g(i, j), imgPtr->g(i, j));
-                    convertTo(b(i, j), imgPtr->b(i, j));
+                    convertTo (r (i, j), imgPtr->r (i, j));
+                    convertTo (g (i, j), imgPtr->g (i, j));
+                    convertTo (b (i, j), imgPtr->b (i, j));
                 }
             }
         } else if (interp == TI_Nearest) {
@@ -1425,9 +1436,9 @@ public:
 
                 for (int j = 0; j < nw; j++) {
                     int ci = j * width / nw;
-                    convertTo(r(ri, ci), imgPtr->r(i, j));
-                    convertTo(g(ri, ci), imgPtr->g(i, j));
-                    convertTo(b(ri, ci), imgPtr->b(i, j));
+                    convertTo (r (ri, ci), imgPtr->r (i, j));
+                    convertTo (g (ri, ci), imgPtr->g (i, j));
+                    convertTo (b (ri, ci), imgPtr->b (i, j));
                 }
             }
         } else if (interp == TI_Bilinear) {
@@ -1438,7 +1449,7 @@ public:
                     sy = height - 1;
                 }
 
-                float dy = float(i) * float(height) / float(nh) - float(sy);
+                float dy = float (i) * float (height) / float (nh) - float (sy);
                 int ny = sy + 1;
 
                 if (ny >= height) {
@@ -1452,28 +1463,28 @@ public:
                         sx = width;
                     }
 
-                    float dx = float(j) * float(width) / float(nw) - float(sx);
+                    float dx = float (j) * float (width) / float (nw) - float (sx);
                     int nx = sx + 1;
 
                     if (nx >= width) {
                         nx = sx;
                     }
 
-                    T valR = r(sy, sx) * (1.f - dx) * (1.f - dy) + r(sy, nx) * dx * (1.f - dy) + r(ny, sx) * (1.f - dx) * dy + r(ny, nx) * dx * dy;
-                    T valG = g(sy, sx) * (1.f - dx) * (1.f - dy) + g(sy, nx) * dx * (1.f - dy) + g(ny, sx) * (1.f - dx) * dy + g(ny, nx) * dx * dy;
-                    T valB = b(sy, sx) * (1.f - dx) * (1.f - dy) + b(sy, nx) * dx * (1.f - dy) + b(ny, sx) * (1.f - dx) * dy + b(ny, nx) * dx * dy;
-                    convertTo(valR, imgPtr->r(i, j));
-                    convertTo(valG, imgPtr->g(i, j));
-                    convertTo(valB, imgPtr->b(i, j));
+                    T valR = r (sy, sx) * (1.f - dx) * (1.f - dy) + r (sy, nx) * dx * (1.f - dy) + r (ny, sx) * (1.f - dx) * dy + r (ny, nx) * dx * dy;
+                    T valG = g (sy, sx) * (1.f - dx) * (1.f - dy) + g (sy, nx) * dx * (1.f - dy) + g (ny, sx) * (1.f - dx) * dy + g (ny, nx) * dx * dy;
+                    T valB = b (sy, sx) * (1.f - dx) * (1.f - dy) + b (sy, nx) * dx * (1.f - dy) + b (ny, sx) * (1.f - dx) * dy + b (ny, nx) * dx * dy;
+                    convertTo (valR, imgPtr->r (i, j));
+                    convertTo (valG, imgPtr->g (i, j));
+                    convertTo (valB, imgPtr->b (i, j));
                 }
             }
         } else {
             // This case should never occur!
             for (int i = 0; i < nh; i++) {
                 for (int j = 0; j < nw; j++) {
-                    r(i, j) = 0;
-                    g(i, j) = 0;
-                    b(i, j) = 0;
+                    r (i, j) = 0;
+                    g (i, j) = 0;
+                    b (i, j) = 0;
                 }
             }
         }
@@ -1518,27 +1529,27 @@ public:
     void vflip ()
     {
 
-        AlignedBuffer<T> lBuffer(3 * width);
+        AlignedBuffer<T> lBuffer (3 * width);
         T* lineBuffer = lBuffer.data;
-        size_t size = 3 * width * sizeof(T);
+        size_t size = 3 * width * sizeof (T);
 
         for (int i = 0; i < height / 2; i++) {
-            T *lineBegin1 = r(i);
-            T *lineBegin2 = r(height - 1 - i);
+            T *lineBegin1 = r (i);
+            T *lineBegin2 = r (height - 1 - i);
             memcpy (lineBuffer, lineBegin1, size);
             memcpy (lineBegin1, lineBegin2, size);
             memcpy (lineBegin2, lineBuffer, size);
         }
     }
 
-    void calcGrayscaleHist(unsigned int *hist16)
+    void calcGrayscaleHist (unsigned int *hist16)
     {
         for (int row = 0; row < height; row++)
             for (int col = 0; col < width; col++) {
                 unsigned short rIdx, gIdx, bIdx;
-                convertTo(r(row, col), rIdx);
-                convertTo(g(row, col), gIdx);
-                convertTo(b(row, col), bIdx);
+                convertTo (r (row, col), rIdx);
+                convertTo (g (row, col), gIdx);
+                convertTo (b (row, col), bIdx);
                 hist16[rIdx]++;
                 hist16[gIdx] += 2; // Bayer 2x green correction
                 hist16[bIdx]++;
@@ -1549,18 +1560,18 @@ public:
     {
         histcompr = 3;
 
-        histogram(65536 >> histcompr);
+        histogram (65536 >> histcompr);
         histogram.clear();
 
         for (int i = 0; i < height; i++)
             for (int j = 0; j < width; j++) {
                 float r_, g_, b_;
-                convertTo<T, float>(r(i, j), r_);
-                convertTo<T, float>(g(i, j), g_);
-                convertTo<T, float>(b(i, j), b_);
-                histogram[(int)Color::igamma_srgb (r_) >> histcompr]++;
-                histogram[(int)Color::igamma_srgb (g_) >> histcompr]++;
-                histogram[(int)Color::igamma_srgb (b_) >> histcompr]++;
+                convertTo<T, float> (r (i, j), r_);
+                convertTo<T, float> (g (i, j), g_);
+                convertTo<T, float> (b (i, j), b_);
+                histogram[ (int)Color::igamma_srgb (r_) >> histcompr]++;
+                histogram[ (int)Color::igamma_srgb (g_) >> histcompr]++;
+                histogram[ (int)Color::igamma_srgb (b_) >> histcompr]++;
             }
     }
 
@@ -1570,12 +1581,12 @@ public:
         avg_r = avg_g = avg_b = 0.;
         n = 0;
 
-        for (unsigned int i = 0; i < (unsigned int)(height); i++)
-            for (unsigned int j = 0; j < (unsigned int)(width); j++) {
+        for (unsigned int i = 0; i < (unsigned int) (height); i++)
+            for (unsigned int j = 0; j < (unsigned int) (width); j++) {
                 float r_, g_, b_;
-                convertTo<T, float>(r(i, j), r_);
-                convertTo<T, float>(g(i, j), g_);
-                convertTo<T, float>(b(i, j), b_);
+                convertTo<T, float> (r (i, j), r_);
+                convertTo<T, float> (g (i, j), g_);
+                convertTo<T, float> (b (i, j), b_);
                 int rtemp = Color::igamma_srgb (r_);
                 int gtemp = Color::igamma_srgb (g_);
                 int btemp = Color::igamma_srgb (b_);
@@ -1589,9 +1600,9 @@ public:
                     continue;
                 }
 
-                avg_r += double(r_);
-                avg_g += double(g_);
-                avg_b += double(b_);
+                avg_r += double (r_);
+                avg_g += double (g_);
+                avg_b += double (b_);
                 n++;
             }
     }
@@ -1605,26 +1616,26 @@ public:
         int n = 0;
         //int p = 6;
 
-        for (unsigned int i = 0; i < (unsigned int)(height); i++)
-            for (unsigned int j = 0; j < (unsigned int)(width); j++) {
+        for (unsigned int i = 0; i < (unsigned int) (height); i++)
+            for (unsigned int j = 0; j < (unsigned int) (width); j++) {
                 float r_, g_, b_;
-                convertTo<T, float>(r(i, j), r_);
-                convertTo<T, float>(g(i, j), g_);
-                convertTo<T, float>(b(i, j), b_);
+                convertTo<T, float> (r (i, j), r_);
+                convertTo<T, float> (g (i, j), g_);
+                convertTo<T, float> (b (i, j), b_);
 
                 if (r_ > 64000.f || g_ > 64000.f || b_ > 64000.f) {
                     continue;
                 }
 
-                avg_r += double(r_);
-                avg_g += double(g_);
-                avg_b += double(b_);
+                avg_r += double (r_);
+                avg_g += double (g_);
+                avg_b += double (b_);
                 n++;
             }
 
-        rm = avg_r / double(n);
-        gm = avg_g / double(n);
-        bm = avg_b / double(n);
+        rm = avg_r / double (n);
+        gm = avg_g / double (n);
+        bm = avg_b / double (n);
     }
 
     void transformPixel (int x, int y, int tran, int& tx, int& ty)
@@ -1684,8 +1695,8 @@ public:
 
             if (x >= 0 && y >= 0 && x < width && y < height) {
                 float v;
-                convertTo<T, float>(this->r(y, x), v);
-                reds += double(v);
+                convertTo<T, float> (this->r (y, x), v);
+                reds += double (v);
                 rn++;
             }
 
@@ -1693,8 +1704,8 @@ public:
 
             if (x >= 0 && y >= 0 && x < width && y < height) {
                 float v;
-                convertTo<T, float>(this->g(y, x), v);
-                greens += double(v);
+                convertTo<T, float> (this->g (y, x), v);
+                greens += double (v);
                 gn++;
             }
 
@@ -1702,8 +1713,8 @@ public:
 
             if (x >= 0 && y >= 0 && x < width && y < height) {
                 float v;
-                convertTo<T, float>(this->b(y, x), v);
-                blues += double(v);
+                convertTo<T, float> (this->b (y, x), v);
+                blues += double (v);
                 bn++;
             }
         }
@@ -1712,14 +1723,14 @@ public:
     void readData   (FILE *f)
     {
         for (int i = 0; i < height; i++) {
-            fread (r(i), sizeof(T), 3 * width, f);
+            fread (r (i), sizeof (T), 3 * width, f);
         }
     }
 
     void writeData  (FILE *f)
     {
         for (int i = 0; i < height; i++) {
-            fwrite (r(i), sizeof(T), 3 * width, f);
+            fwrite (r (i), sizeof (T), 3 * width, f);
         }
     }
 

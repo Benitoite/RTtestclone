@@ -672,6 +672,52 @@ void Crop::update (int todo)
             }
         }
 
+        Imagefloat *imageoriginal = nullptr;
+        Imagefloat *imagetransformed = nullptr;
+        Imagefloat *improv = nullptr;
+
+        if (params.localwb.enabled && params.localwb.expwb) {
+         //   parent->currWBloc = ColorTemp (params.localrgb.temp, params.localrgb.green, params.localrgb.equal, "Custom");
+            parent->currWBloc = ColorTemp (params.localwb.temp, params.localwb.green, 1., "Custom");
+
+            imageoriginal = new Imagefloat (trafw, trafh);
+            imagetransformed = new Imagefloat (trafw, trafh);
+            improv = new Imagefloat (trafw, trafh);
+            int W = origCrop->getWidth();
+            int H = origCrop->getHeight();
+            //  double ptemp, pgreen;
+            //  printf("W=%i H=%i trafw=%i trafh=%i\n",W, H, trafw, trafh);
+#ifdef _OPENMP
+            #pragma omp parallel for
+#endif
+
+            for (int ir = 0; ir < H; ir++)
+                for (int jr = 0; jr < W; jr++) {
+                    imagetransformed->r (ir, jr) = imageoriginal->r (ir, jr) = origCrop->r (ir, jr);
+                    imagetransformed->g (ir, jr) = imageoriginal->g (ir, jr) = origCrop->g (ir, jr);
+                    imagetransformed->b (ir, jr) = imageoriginal->b (ir, jr) = origCrop->b (ir, jr);
+                }
+
+            PreviewProps pp (trafx, trafy, trafw * skip, trafh * skip, skip);
+            parent->ipf.WB_Local (parent->imgsrc, 1, 1, trafx / skip, trafy / skip, cropx / skip, cropy / skip, skips (parent->fw, skip), skips (parent->fh, skip), parent->fw, parent->fh, improv, imagetransformed, parent->currWBloc, tr, imageoriginal, pp, params.toneCurve, params.icm, params.raw, parent->ptemp, parent->pgreen);
+#ifdef _OPENMP
+            #pragma omp parallel for
+#endif
+
+            for (int ir = 0; ir < H; ir++)
+                for (int jr = 0; jr < W; jr++) {
+                    origCrop->r (ir, jr) = imagetransformed->r (ir, jr);
+                    origCrop->g (ir, jr) = imagetransformed->g (ir, jr);
+                    origCrop->b (ir, jr) = imagetransformed->b (ir, jr);
+                }
+
+            delete imageoriginal;
+            delete imagetransformed;
+            delete improv;
+
+        }
+		
+		
         parent->imgsrc->convertColorSpace(origCrop, params.icm, parent->currWB);
 
         delete [] min_r;

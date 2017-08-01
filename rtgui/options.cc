@@ -447,6 +447,7 @@ void Options::setDefaults ()
     UseIconNoText = true;
     whiteBalanceSpotSize = 8;
     showFilmStripToolBar = false;
+    showdelimspot = false;
     menuGroupRank = true;
     menuGroupLabel = true;
     menuGroupFileOperations = true;
@@ -683,6 +684,14 @@ void Options::setDefaults ()
     rtSettings.ed_lipinfl = 0.8; //between 0.5 to 0.9
     rtSettings.ed_lipampl = 1.1; //between 1 and 2
 
+//locallab locrgb
+    rtSettings.nspot = 8;//between 1 and ??
+    rtSettings.locdelay = false;//true enabled delay 200 for selection spot
+    rtSettings.cropsleep = 50;//generate a pause of 50 µs for dcrop (100%)to avoid crash when moving window, between 0 to ??
+    rtSettings.reduchigh = 0.85;//transition for luminance in scope
+    rtSettings.reduclow = 0.85;//transition for luminance out scope
+
+// end locallab locrgb
 
     rtSettings.ciecamfloat = true;
     rtSettings.protectred = 60;
@@ -843,6 +852,10 @@ int Options::readFromFile (Glib::ustring fname)
                     rtSettings.bot_right          = keyFile.get_double ("General", "BotRight");
                 }
 
+                if (keyFile.has_key ("General", "Nspot")) {
+                    rtSettings.nspot          = keyFile.get_integer ("General", "Nspot");
+                }
+				
                 if (keyFile.has_key ("General", "EDdetec")) {
                     rtSettings.ed_detec          = keyFile.get_double ("General", "EDdetec");
                 }
@@ -863,6 +876,21 @@ int Options::readFromFile (Glib::ustring fname)
                     rtSettings.ed_lipampl          = keyFile.get_double ("General", "EDLipampl");
                 }
 
+                if (keyFile.has_key ("General", "Locdelay")) {
+                    rtSettings.locdelay          = keyFile.get_boolean ("General", "Locdelay");
+                }
+				
+                if (keyFile.has_key ("General", "Cropsleep")) {
+                    rtSettings.cropsleep          = keyFile.get_integer ("General", "Cropsleep");
+                }
+
+                if (keyFile.has_key ("General", "Reduchigh")) {
+                    rtSettings.reduchigh          = keyFile.get_double ("General", "Reduchigh");
+                }
+
+                if (keyFile.has_key ("General", "Reduclow")) {
+                    rtSettings.reduclow          = keyFile.get_double ("General", "Reduclow");
+                }
 
             }
 
@@ -1471,6 +1499,10 @@ int Options::readFromFile (Glib::ustring fname)
                     showFilmStripToolBar        = keyFile.get_boolean ("GUI", "ShowFilmStripToolBar");
                 }
 
+                if (keyFile.has_key ("GUI", "Showdelimspot")) {
+                    showdelimspot        = keyFile.get_boolean ("GUI", "Showdelimspot");
+                }
+				
                 if (keyFile.has_key ("GUI", "FileBrowserToolbarSingleRow")) {
                     FileBrowserToolbarSingleRow = keyFile.get_boolean ("GUI", "FileBrowserToolbarSingleRow");
                 }
@@ -1934,6 +1966,11 @@ int Options::saveToFile (Glib::ustring fname)
         keyFile.set_double ("General", "EDLipinfl", rtSettings.ed_lipinfl);
         keyFile.set_double ("General", "EDLipampl", rtSettings.ed_lipampl);
 
+        keyFile.set_integer ("General", "Nspot", rtSettings.nspot);
+        keyFile.set_boolean ("General", "Locdelay", rtSettings.locdelay);
+        keyFile.set_integer ("General", "Cropsleep", rtSettings.cropsleep);
+        keyFile.set_double ("General", "Reduchigh", rtSettings.reduchigh);
+        keyFile.set_double ("General", "Reduclow", rtSettings.reduclow);
 
         keyFile.set_integer ("External Editor", "EditorKind", editorToSendTo);
         keyFile.set_string  ("External Editor", "GimpDir", gimpDir);
@@ -2102,6 +2139,7 @@ int Options::saveToFile (Glib::ustring fname)
         keyFile.set_integer ("GUI", "NavigatorHSVUnit", (int)navHSVUnit);
         keyFile.set_boolean ("GUI", "ShowFilmStripToolBar", showFilmStripToolBar);
         keyFile.set_boolean ("GUI", "FileBrowserToolbarSingleRow", FileBrowserToolbarSingleRow);
+        keyFile.set_boolean ("GUI", "Showdelimspot", showdelimspot);
         keyFile.set_boolean ("GUI", "HideTPVScrollbar", hideTPVScrollbar);
         keyFile.set_boolean ("GUI", "UseIconNoText", UseIconNoText);
         keyFile.set_boolean ("GUI", "HistogramWorking", rtSettings.HistogramWorking);

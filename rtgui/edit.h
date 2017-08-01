@@ -399,6 +399,23 @@ public:
     void drawToMOChannel (Cairo::RefPtr<Cairo::Context> &cr, unsigned short id, ObjectMOBuffer *objectBuffer, EditCoordSystem &coordSystem);
 };
 
+class Beziers : public Geometry
+{
+public:
+    rtengine::Coord begin;
+    rtengine::Coord inter;
+    rtengine::Coord end;
+
+    Beziers ();
+    Beziers (rtengine::Coord& begin, rtengine::Coord& inter, rtengine::Coord& end);
+    Beziers (float beginX, float beginY, float interX, float interY, float endX, float endY);
+
+    void drawOuterGeometry (Cairo::RefPtr<Cairo::Context> &cr, ObjectMOBuffer *objectBuffer, EditCoordSystem &coordSystem);
+    void drawInnerGeometry (Cairo::RefPtr<Cairo::Context> &cr, ObjectMOBuffer *objectBuffer, EditCoordSystem &coordSystem);
+    void drawToMOChannel   (Cairo::RefPtr<Cairo::Context> &cr, unsigned short id, ObjectMOBuffer *objectBuffer, EditCoordSystem &coordSystem);
+};
+
+
 class OPIcon : public Geometry    // OP stands for "On Preview"
 {
 
@@ -808,6 +825,11 @@ inline Line::Line () :
         begin (10, 10), end (100, 100) {
 }
 
+inline Beziers::Beziers () :
+    begin (10, 10), inter (50, 50), end (100, 100)
+{
+}
+
 inline RGBAColor::RGBAColor () :
         RGBColor (0., 0., 0.), a (0.) {
 }
@@ -843,6 +865,18 @@ inline Circle::Circle (int centerX, int centerY, int radius, bool filled,
         center (centerX, centerY), radius (radius), filled (filled), radiusInImageSpace (
                 radiusInImageSpace) {
 }
+
+inline Beziers::Beziers (rtengine::Coord& begin, rtengine::Coord& inter, rtengine::Coord& end) :
+    begin (begin), inter (inter), end (end)
+{
+}
+
+inline Beziers::Beziers (float beginX, float beginY, float interX, float interY, float endX, float endY) :
+    begin (beginX, beginY), inter (interX, interY), end (endX, endY)
+{
+}
+
+
 
 inline Line::Line (rtengine::Coord& begin, rtengine::Coord& end) :
         begin (begin), end (end) {

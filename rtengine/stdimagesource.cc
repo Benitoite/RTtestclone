@@ -51,7 +51,7 @@ template<class T> T** allocArray (int W, int H)
 }
 
 #define HR_SCALE 2
-StdImageSource::StdImageSource () : ImageSource(), img(nullptr), plistener(nullptr), full(false), max{}, rgbSourceModified(false)
+StdImageSource::StdImageSource () : ImageSource(), img (nullptr), plistener (nullptr), full (false), max {}, rgbSourceModified (false)
 {
 
     embProfile = nullptr;
@@ -74,19 +74,19 @@ void StdImageSource::getSampleFormat (const Glib::ustring &fname, IIOSampleForma
     sFormat = IIOSF_UNKNOWN;
     sArrangement = IIOSA_UNKNOWN;
 
-    if (hasJpegExtension(fname)) {
+    if (hasJpegExtension (fname)) {
         // For now, png and jpeg files are converted to unsigned short by the loader itself,
         // but there should be functions that read the sample format first, like the TIFF case below
         sFormat = IIOSF_UNSIGNED_CHAR;
         sArrangement = IIOSA_CHUNKY;
         return;
-    } else if (hasPngExtension(fname)) {
+    } else if (hasPngExtension (fname)) {
         int result = ImageIO::getPNGSampleFormat (fname, sFormat, sArrangement);
 
         if (result == IMIO_SUCCESS) {
             return;
         }
-    } else if (hasTiffExtension(fname)) {
+    } else if (hasTiffExtension (fname)) {
         int result = ImageIO::getTIFFSampleFormat (fname, sFormat, sArrangement);
 
         if (result == IMIO_SUCCESS) {
@@ -111,34 +111,34 @@ int StdImageSource::load (const Glib::ustring &fname, int imageNum, bool batch)
 
     IIOSampleFormat sFormat;
     IIOSampleArrangement sArrangement;
-    getSampleFormat(fname, sFormat, sArrangement);
+    getSampleFormat (fname, sFormat, sArrangement);
 
     // Then create the appropriate object
 
     switch (sFormat) {
-    case (IIOSF_UNSIGNED_CHAR): {
-        img = new Image8;
-        break;
+        case (IIOSF_UNSIGNED_CHAR): {
+            img = new Image8;
+            break;
+        }
+
+        case (IIOSF_UNSIGNED_SHORT): {
+            img = new Image16;
+            break;
+        }
+
+        case (IIOSF_LOGLUV24):
+        case (IIOSF_LOGLUV32):
+        case (IIOSF_FLOAT): {
+            img = new Imagefloat;
+            break;
+        }
+
+        default:
+            return IMIO_FILETYPENOTSUPPORTED;
     }
 
-    case (IIOSF_UNSIGNED_SHORT): {
-        img = new Image16;
-        break;
-    }
-
-    case (IIOSF_LOGLUV24):
-    case (IIOSF_LOGLUV32):
-    case (IIOSF_FLOAT): {
-        img = new Imagefloat;
-        break;
-    }
-
-    default:
-        return IMIO_FILETYPENOTSUPPORTED;
-    }
-
-    img->setSampleFormat(sFormat);
-    img->setSampleArrangement(sArrangement);
+    img->setSampleFormat (sFormat);
+    img->setSampleArrangement (sArrangement);
 
     if (plistener) {
         plistener->setProgressStr ("PROGRESSBAR_LOADING");
@@ -172,7 +172,7 @@ int StdImageSource::load (const Glib::ustring &fname, int imageNum, bool batch)
         }
 
         if (deg) {
-            img->rotate(deg);
+            img->rotate (deg);
         }
     }
 
@@ -187,12 +187,33 @@ int StdImageSource::load (const Glib::ustring &fname, int imageNum, bool batch)
     return 0;
 }
 
+void StdImageSource::getImage_local    (int begx, int begy, int yEn, int xEn, int cx, int cy, const ColorTemp &ctemp, int tran, Imagefloat* image, Imagefloat* bufimage, const PreviewProps &pp, const ToneCurveParams &hrp, const ColorManagementParams &cmp, const RAWParams &raw)
+{
+    // the code will use OpenMP as of now.
+    //TO DO change getStdImage to getStdImage_local
+    printf ("Ici TIFF JPG\n");
+    //does not work ...why ??
+    img->getStdImageloc (begx, begy, yEn, xEn, cx,  cy, ctemp, tran, image, bufimage, pp, true, hrp);
+
+
+    // Flip if needed
+    if (tran & TR_HFLIP) {
+        bufimage->hflip();
+    }
+
+    if (tran & TR_VFLIP) {
+        bufimage->vflip();
+    }
+
+}
+
+
 void StdImageSource::getImage (const ColorTemp &ctemp, int tran, Imagefloat* image, const PreviewProps &pp, const ToneCurveParams &hrp, const ColorManagementParams &cmp, const RAWParams &raw)
 {
 
     // the code will use OpenMP as of now.
 
-    img->getStdImage(ctemp, tran, image, pp, true, hrp);
+    img->getStdImage (ctemp, tran, image, pp, true, hrp);
 
     // Hombre: we could have rotated the image here too, with just few line of code, but:
     // 1. it would require other modifications in the engine, so "do not touch that little plonker!"
@@ -208,7 +229,7 @@ void StdImageSource::getImage (const ColorTemp &ctemp, int tran, Imagefloat* ima
     }
 }
 
-void StdImageSource::convertColorSpace(Imagefloat* image, const ColorManagementParams &cmp, const ColorTemp &wb)
+void StdImageSource::convertColorSpace (Imagefloat* image, const ColorManagementParams &cmp, const ColorTemp &wb)
 {
     colorSpaceConversion (image, cmp, embProfile, img->getSampleFormat());
 }
@@ -247,8 +268,8 @@ void StdImageSource::colorSpaceConversion (Imagefloat* im, const ColorManagement
     }
 
     if (!skipTransform && in) {
-        if(in == embedded && cmsGetColorSpace(in) != cmsSigRgbData) { // if embedded profile is not an RGB profile, use sRGB
-            printf("embedded profile is not an RGB profile, using sRGB as input profile\n");
+        if (in == embedded && cmsGetColorSpace (in) != cmsSigRgbData) { // if embedded profile is not an RGB profile, use sRGB
+            printf ("embedded profile is not an RGB profile, using sRGB as input profile\n");
             in = ICCStore::getInstance()->getsRGBProfile ();
         }
 
@@ -257,18 +278,18 @@ void StdImageSource::colorSpaceConversion (Imagefloat* im, const ColorManagement
                                    cmsFLAGS_NOOPTIMIZE | cmsFLAGS_NOCACHE);
         lcmsMutex->unlock ();
 
-        if(hTransform) {
+        if (hTransform) {
             // Convert to the [0.0 ; 1.0] range
             im->normalizeFloatTo1();
 
-            im->ExecCMSTransform(hTransform);
+            im->ExecCMSTransform (hTransform);
 
             // Converting back to the [0.0 ; 65535.0] range
             im->normalizeFloatTo65535();
 
-            cmsDeleteTransform(hTransform);
+            cmsDeleteTransform (hTransform);
         } else {
-            printf("Could not convert from %s to %s\n", in == embedded ? "embedded profile" : cmp.input.data(), cmp.working.data());
+            printf ("Could not convert from %s to %s\n", in == embedded ? "embedded profile" : cmp.input.data(), cmp.working.data());
         }
     }
 }
@@ -294,15 +315,39 @@ void StdImageSource::getSize (const PreviewProps &pp, int& w, int& h)
 void StdImageSource::getAutoExpHistogram (LUTu & histogram, int& histcompr)
 {
     if (img->getType() == sImage8) {
-        Image8 *img_ = static_cast<Image8*>(img);
-        img_->computeAutoHistogram(histogram, histcompr);
+        Image8 *img_ = static_cast<Image8*> (img);
+        img_->computeAutoHistogram (histogram, histcompr);
     } else if (img->getType() == sImage16) {
-        Image16 *img_ = static_cast<Image16*>(img);
-        img_->computeAutoHistogram(histogram, histcompr);
+        Image16 *img_ = static_cast<Image16*> (img);
+        img_->computeAutoHistogram (histogram, histcompr);
     } else if (img->getType() == sImagefloat) {
-        Imagefloat *img_ = static_cast<Imagefloat*>(img);
-        img_->computeAutoHistogram(histogram, histcompr);
+        Imagefloat *img_ = static_cast<Imagefloat*> (img);
+        img_->computeAutoHistogram (histogram, histcompr);
     }
+}
+
+void StdImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, array2D<float> &blueloc, int bfw, int bfh, double &avg_rm, double &avg_gm, double &avg_bm, const LocrgbParams &localr, int begx, int begy, int yEn, int xEn, int cx, int cy)
+{
+
+}
+
+void  StdImageSource::getrgbloc (bool gamma, bool cat02, int begx, int begy, int yEn, int xEn, int cx, int cy, int bf_h, int bf_w)
+{}
+
+void StdImageSource::getAutoWBMultipliersloc (int begx, int begy, int yEn, int xEn, int cx, int cy, int bf_h, int bf_w, double &rm, double &gm, double &bm, const LocrgbParams &localr)
+{
+    if (redAWBMul != -1.) {
+        rm = redAWBMul;
+        gm = greenAWBMul;
+        bm = blueAWBMul;
+        return;
+    }
+
+    img->getAutoWBMultipliersloc (begx, begy, yEn, xEn, cx, cy, bf_h, bf_w, rm, gm, bm);
+
+    redAWBMul   = rm;
+    greenAWBMul = gm;
+    blueAWBMul  = bm;
 }
 
 void StdImageSource::getAutoWBMultipliers (double &rm, double &gm, double &bm)
@@ -314,7 +359,7 @@ void StdImageSource::getAutoWBMultipliers (double &rm, double &gm, double &bm)
         return;
     }
 
-    img->getAutoWBMultipliers(rm, gm, bm);
+    img->getAutoWBMultipliers (rm, gm, bm);
 
     redAWBMul   = rm;
     greenAWBMul = gm;
@@ -325,11 +370,11 @@ ColorTemp StdImageSource::getSpotWB (std::vector<Coord2D> &red, std::vector<Coor
 {
     int rn, gn, bn;
     double reds, greens, blues;
-    img->getSpotWBData(reds, greens, blues, rn, gn, bn, red, green, blue, tran);
+    img->getSpotWBData (reds, greens, blues, rn, gn, bn, red, green, blue, tran);
     double img_r, img_g, img_b;
     wb.getMultipliers (img_r, img_g, img_b);
 
-    if( settings->verbose ) {
+    if ( settings->verbose ) {
         printf ("AVG: %g %g %g\n", reds / rn, greens / gn, blues / bn);
     }
 

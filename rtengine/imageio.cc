@@ -50,14 +50,14 @@ namespace
 {
 
 // Opens a file for binary writing and request exclusive lock (cases were you need "wb" mode plus locking)
-FILE* g_fopen_withBinaryAndLock(const Glib::ustring& fname)
+FILE* g_fopen_withBinaryAndLock (const Glib::ustring& fname)
 {
 
 #ifdef WIN32
 
     // Use native function to disallow sharing, i.e. lock the file for exclusive access.
     // This is important to e.g. prevent Windows Explorer from crashing RT due to concurrently scanning an image file.
-    std::unique_ptr<wchar_t, GFreeFunc> wfname (reinterpret_cast<wchar_t*>(g_utf8_to_utf16 (fname.c_str (), -1, NULL, NULL, NULL)), g_free);
+    std::unique_ptr<wchar_t, GFreeFunc> wfname (reinterpret_cast<wchar_t*> (g_utf8_to_utf16 (fname.c_str (), -1, NULL, NULL, NULL)), g_free);
 
     HANDLE hFile = CreateFileW ( wfname.get (), GENERIC_READ | GENERIC_WRITE, 0 /* no sharing allowed */, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
     FILE* f = nullptr;
@@ -100,8 +100,8 @@ void ImageIO::setMetadata (const rtexif::TagDirectory* eroot)
         rtexif::TagDirectory* td = ((rtexif::TagDirectory*)eroot)->clone (nullptr);
 
         // make IPTC and XMP pass through
-        td->keepTag(0x83bb);  // IPTC
-        td->keepTag(0x02bc);  // XMP
+        td->keepTag (0x83bb); // IPTC
+        td->keepTag (0x02bc); // XMP
 
         exifRoot = td;
     }
@@ -137,23 +137,23 @@ void ImageIO::setMetadata (const rtexif::TagDirectory* eroot, const rtengine::pr
     iptc = iptc_data_new ();
 
     for (rtengine::procparams::IPTCPairs::const_iterator i = iptcc.begin(); i != iptcc.end(); ++i) {
-        if (i->first == "Keywords" && !(i->second.empty())) {
+        if (i->first == "Keywords" && ! (i->second.empty())) {
             for (unsigned int j = 0; j < i->second.size(); j++) {
                 IptcDataSet * ds = iptc_dataset_new ();
                 iptc_dataset_set_tag (ds, IPTC_RECORD_APP_2, IPTC_TAG_KEYWORDS);
-                std::string loc = to_utf8(i->second.at(j));
-                iptc_dataset_set_data (ds, (unsigned char*)loc.c_str(), min(static_cast<size_t>(64), loc.size()), IPTC_DONT_VALIDATE);
+                std::string loc = to_utf8 (i->second.at (j));
+                iptc_dataset_set_data (ds, (unsigned char*)loc.c_str(), min (static_cast<size_t> (64), loc.size()), IPTC_DONT_VALIDATE);
                 iptc_data_add_dataset (iptc, ds);
                 iptc_dataset_unref (ds);
             }
 
             continue;
-        } else if (i->first == "SupplementalCategories" && !(i->second.empty())) {
+        } else if (i->first == "SupplementalCategories" && ! (i->second.empty())) {
             for (unsigned int j = 0; j < i->second.size(); j++) {
                 IptcDataSet * ds = iptc_dataset_new ();
                 iptc_dataset_set_tag (ds, IPTC_RECORD_APP_2, IPTC_TAG_SUPPL_CATEGORY);
-                std::string loc = to_utf8(i->second.at(j));
-                iptc_dataset_set_data (ds, (unsigned char*)loc.c_str(), min(static_cast<size_t>(32), loc.size()), IPTC_DONT_VALIDATE);
+                std::string loc = to_utf8 (i->second.at (j));
+                iptc_dataset_set_data (ds, (unsigned char*)loc.c_str(), min (static_cast<size_t> (32), loc.size()), IPTC_DONT_VALIDATE);
                 iptc_data_add_dataset (iptc, ds);
                 iptc_dataset_unref (ds);
             }
@@ -162,11 +162,11 @@ void ImageIO::setMetadata (const rtexif::TagDirectory* eroot, const rtengine::pr
         }
 
         for (int j = 0; j < 16; j++)
-            if (i->first == strTags[j].field && !(i->second.empty())) {
+            if (i->first == strTags[j].field && ! (i->second.empty())) {
                 IptcDataSet * ds = iptc_dataset_new ();
                 iptc_dataset_set_tag (ds, IPTC_RECORD_APP_2, strTags[j].tag);
-                std::string loc = to_utf8(i->second.at(0));
-                iptc_dataset_set_data (ds, (unsigned char*)loc.c_str(), min(strTags[j].size, loc.size()), IPTC_DONT_VALIDATE);
+                std::string loc = to_utf8 (i->second.at (0));
+                iptc_dataset_set_data (ds, (unsigned char*)loc.c_str(), min (strTags[j].size, loc.size()), IPTC_DONT_VALIDATE);
                 iptc_data_add_dataset (iptc, ds);
                 iptc_dataset_unref (ds);
             }
@@ -194,7 +194,7 @@ ImageIO::~ImageIO ()
 {
 
     if (embProfile) {
-        cmsCloseProfile(embProfile);
+        cmsCloseProfile (embProfile);
     }
 
     deleteLoadedProfileData();
@@ -202,9 +202,9 @@ ImageIO::~ImageIO ()
     delete [] profileData;
 }
 
-void png_read_data(png_struct_def  *png_ptr, unsigned char *data, size_t length);
-void png_write_data(png_struct_def *png_ptr, unsigned char *data, size_t length);
-void png_flush(png_struct_def *png_ptr);
+void png_read_data (png_struct_def  *png_ptr, unsigned char *data, size_t length);
+void png_write_data (png_struct_def *png_ptr, unsigned char *data, size_t length);
+void png_flush (png_struct_def *png_ptr);
 
 int ImageIO::getPNGSampleFormat (Glib::ustring fname, IIOSampleFormat &sFormat, IIOSampleArrangement &sArrangement)
 {
@@ -218,7 +218,7 @@ int ImageIO::getPNGSampleFormat (Glib::ustring fname, IIOSampleFormat &sFormat, 
     unsigned char header[8];
 
     if (fread (header, 1, 8, file) != 8 || png_sig_cmp (header, 0, 8)) {
-        fclose(file);
+        fclose (file);
         return IMIO_HEADERERROR;
     }
 
@@ -239,7 +239,7 @@ int ImageIO::getPNGSampleFormat (Glib::ustring fname, IIOSampleFormat &sFormat, 
         return IMIO_HEADERERROR;
     }
 
-    if (setjmp (png_jmpbuf(png))) {
+    if (setjmp (png_jmpbuf (png))) {
         png_destroy_read_struct (&png, &info, &end_info);
         fclose (file);
         return IMIO_READERROR;
@@ -249,12 +249,12 @@ int ImageIO::getPNGSampleFormat (Glib::ustring fname, IIOSampleFormat &sFormat, 
     png_set_read_fn (png, file, png_read_data);
     png_set_sig_bytes (png, 8);
 
-    png_read_info(png, info);
+    png_read_info (png, info);
 
     //retrieving image information
     png_uint_32 width, height;
     int bit_depth, color_type, interlace_type, compression_type, filter_method;
-    png_get_IHDR(png, info, &width, &height, &bit_depth, &color_type, &interlace_type, &compression_type, &filter_method);
+    png_get_IHDR (png, info, &width, &height, &bit_depth, &color_type, &interlace_type, &compression_type, &filter_method);
 
     png_destroy_read_struct (&png, &info, &end_info);
     fclose (file);
@@ -296,7 +296,7 @@ int ImageIO::loadPNG  (Glib::ustring fname)
     unsigned char header[8];
 
     if (fread (header, 1, 8, file) != 8 || png_sig_cmp (header, 0, 8)) {
-        fclose(file);
+        fclose (file);
         return IMIO_HEADERERROR;
     }
 
@@ -317,7 +317,7 @@ int ImageIO::loadPNG  (Glib::ustring fname)
         return IMIO_HEADERERROR;
     }
 
-    if (setjmp (png_jmpbuf(png))) {
+    if (setjmp (png_jmpbuf (png))) {
         png_destroy_read_struct (&png, &info, &end_info);
         fclose (file);
         return IMIO_READERROR;
@@ -327,49 +327,49 @@ int ImageIO::loadPNG  (Glib::ustring fname)
     png_set_read_fn (png, file, png_read_data);
     png_set_sig_bytes (png, 8);
 
-    png_read_info(png, info);
+    png_read_info (png, info);
 
     embProfile = nullptr;
 
     //retrieving image information
     png_uint_32 width, height;
     int bit_depth, color_type, interlace_type, compression_type, filter_method;
-    png_get_IHDR(png, info, &width, &height, &bit_depth, &color_type, &interlace_type, &compression_type, &filter_method);
+    png_get_IHDR (png, info, &width, &height, &bit_depth, &color_type, &interlace_type, &compression_type, &filter_method);
 
     if (color_type == PNG_COLOR_TYPE_PALETTE || interlace_type != PNG_INTERLACE_NONE )  {
         // we don't support interlaced png or png with palette
         png_destroy_read_struct (&png, &info, &end_info);
         fclose (file);
-        printf("%s uses an unsupported feature: <palette-indexed colors|interlacing>. Skipping.\n", fname.data());
+        printf ("%s uses an unsupported feature: <palette-indexed colors|interlacing>. Skipping.\n", fname.data());
         return IMIO_VARIANTNOTSUPPORTED;
     }
 
     if (color_type == PNG_COLOR_TYPE_GRAY || color_type == PNG_COLOR_TYPE_GRAY_ALPHA) {
-        png_set_gray_to_rgb(png);
+        png_set_gray_to_rgb (png);
     }
 
-    if (png_get_valid(png, info, PNG_INFO_tRNS)) {
-        png_set_tRNS_to_alpha(png);
+    if (png_get_valid (png, info, PNG_INFO_tRNS)) {
+        png_set_tRNS_to_alpha (png);
     }
 
     if (color_type & PNG_COLOR_MASK_ALPHA) {
-        png_set_strip_alpha(png);
+        png_set_strip_alpha (png);
     }
 
     //setting gamma
     double gamma;
 
-    if (png_get_gAMA(png, info, &gamma)) {
-        png_set_gamma(png, 1.0 / gamma, gamma);    // use gamma from metadata
+    if (png_get_gAMA (png, info, &gamma)) {
+        png_set_gamma (png, 1.0 / gamma, gamma);   // use gamma from metadata
     } else {
-        png_set_gamma(png, 2.2, 1.0 / 2.2);    // no gamma in metadata, suppose gamma 2.2
+        png_set_gamma (png, 2.2, 1.0 / 2.2);   // no gamma in metadata, suppose gamma 2.2
     }
 
 //  if (bps==8 && bit_depth==16) png_set_strip_16(png);
 
     //updating png info struct
-    png_read_update_info(png, info);
-    png_get_IHDR(png, info, &width, &height, &bit_depth, &color_type, &interlace_type, &compression_type, &filter_method);
+    png_read_update_info (png, info);
+    png_get_IHDR (png, info, &width, &height, &bit_depth, &color_type, &interlace_type, &compression_type, &filter_method);
 
     allocate (width, height);
 
@@ -377,7 +377,7 @@ int ImageIO::loadPNG  (Glib::ustring fname)
     unsigned char *row = new unsigned char [rowlen];
 
     // set a new jump point to avoid memory leak
-    if (setjmp (png_jmpbuf(png))) {
+    if (setjmp (png_jmpbuf (png))) {
         png_destroy_read_struct (&png, &info, &end_info);
         fclose (file);
         delete [] row;
@@ -398,8 +398,8 @@ int ImageIO::loadPNG  (Glib::ustring fname)
 
         setScanline (i, row, bit_depth);
 
-        if (pl && !(i % 100)) {
-            pl->setProgress ((double)(i + 1) / height);
+        if (pl && ! (i % 100)) {
+            pl->setProgress ((double) (i + 1) / height);
         }
     }
 
@@ -407,7 +407,7 @@ int ImageIO::loadPNG  (Glib::ustring fname)
     png_destroy_read_struct (&png, &info, &end_info);
 
     delete [] row;
-    fclose(file);
+    fclose (file);
 
     if (pl) {
         pl->setProgressStr ("PROGRESSBAR_READY");
@@ -432,9 +432,9 @@ void my_error_exit (j_common_ptr cinfo)
 
     /* Return control to the setjmp point */
 #if defined( WIN32 ) && defined( __x86_64__ )
-    __builtin_longjmp(myerr->setjmp_buffer, 1);
+    __builtin_longjmp (myerr->setjmp_buffer, 1);
 #else
-    longjmp(myerr->setjmp_buffer, 1);
+    longjmp (myerr->setjmp_buffer, 1);
 #endif
 }
 
@@ -442,7 +442,7 @@ void my_error_exit (j_common_ptr cinfo)
 int ImageIO::loadJPEGFromMemory (const char* buffer, int bufsize)
 {
     jpeg_decompress_struct cinfo;
-    jpeg_create_decompress(&cinfo);
+    jpeg_create_decompress (&cinfo);
     jpeg_memory_src (&cinfo, (const JOCTET*)buffer, bufsize);
 
     /* We use our private extension JPEG error handler.
@@ -451,21 +451,21 @@ int ImageIO::loadJPEGFromMemory (const char* buffer, int bufsize)
     */
     my_error_mgr jerr;
     /* We set up the normal JPEG error routines, then override error_exit. */
-    cinfo.err = jpeg_std_error(&jerr.pub);
+    cinfo.err = jpeg_std_error (&jerr.pub);
     jerr.pub.error_exit = my_error_exit;
 
     /* Establish the setjmp return context for my_error_exit to use. */
 #if defined( WIN32 ) && defined( __x86_64__ )
 
-    if (__builtin_setjmp(jerr.setjmp_buffer)) {
+    if (__builtin_setjmp (jerr.setjmp_buffer)) {
 #else
 
-    if (setjmp(jerr.setjmp_buffer)) {
+    if (setjmp (jerr.setjmp_buffer)) {
 #endif
         /* If we get here, the JPEG code has signaled an error.
            We need to clean up the JPEG object and return.
         */
-        jpeg_destroy_decompress(&cinfo);
+        jpeg_destroy_decompress (&cinfo);
         return IMIO_READERROR;
     }
 
@@ -478,7 +478,7 @@ int ImageIO::loadJPEGFromMemory (const char* buffer, int bufsize)
 
     setup_read_icc_profile (&cinfo);
 
-    jpeg_read_header(&cinfo, TRUE);
+    jpeg_read_header (&cinfo, TRUE);
 
     deleteLoadedProfileData();
     loadedProfileDataJpg = true;
@@ -490,7 +490,7 @@ int ImageIO::loadJPEGFromMemory (const char* buffer, int bufsize)
         embProfile = nullptr;
     }
 
-    jpeg_start_decompress(&cinfo);
+    jpeg_start_decompress (&cinfo);
 
     unsigned int width = cinfo.output_width;
     unsigned int height = cinfo.output_height;
@@ -500,24 +500,24 @@ int ImageIO::loadJPEGFromMemory (const char* buffer, int bufsize)
     unsigned char *row = new unsigned char[width * 3];
 
     while (cinfo.output_scanline < height) {
-        if (jpeg_read_scanlines(&cinfo, &row, 1) < 1) {
-            jpeg_finish_decompress(&cinfo);
-            jpeg_destroy_decompress(&cinfo);
+        if (jpeg_read_scanlines (&cinfo, &row, 1) < 1) {
+            jpeg_finish_decompress (&cinfo);
+            jpeg_destroy_decompress (&cinfo);
             delete [] row;
             return IMIO_READERROR;
         }
 
         setScanline (cinfo.output_scanline - 1, row, 8);
 
-        if (pl && !(cinfo.output_scanline % 100)) {
-            pl->setProgress ((double)(cinfo.output_scanline) / cinfo.output_height);
+        if (pl && ! (cinfo.output_scanline % 100)) {
+            pl->setProgress ((double) (cinfo.output_scanline) / cinfo.output_height);
         }
     }
 
     delete [] row;
 
-    jpeg_finish_decompress(&cinfo);
-    jpeg_destroy_decompress(&cinfo);
+    jpeg_finish_decompress (&cinfo);
+    jpeg_destroy_decompress (&cinfo);
 
     if (pl) {
         pl->setProgressStr ("PROGRESSBAR_READY");
@@ -529,7 +529,7 @@ int ImageIO::loadJPEGFromMemory (const char* buffer, int bufsize)
 
 int ImageIO::loadJPEG (Glib::ustring fname)
 {
-    FILE *file = g_fopen(fname.c_str (), "rb");
+    FILE *file = g_fopen (fname.c_str (), "rb");
 
     if (!file) {
         return IMIO_CANNOTREADFILE;
@@ -537,12 +537,12 @@ int ImageIO::loadJPEG (Glib::ustring fname)
 
     jpeg_decompress_struct cinfo;
     jpeg_error_mgr jerr;
-    cinfo.err = my_jpeg_std_error(&jerr);
-    jpeg_create_decompress(&cinfo);
+    cinfo.err = my_jpeg_std_error (&jerr);
+    jpeg_create_decompress (&cinfo);
 
     my_jpeg_stdio_src (&cinfo, file);
 
-    if ( setjmp((reinterpret_cast<rt_jpeg_error_mgr*>(cinfo.src))->error_jmp_buf) == 0 ) {
+    if ( setjmp ((reinterpret_cast<rt_jpeg_error_mgr*> (cinfo.src))->error_jmp_buf) == 0 ) {
         if (pl) {
             pl->setProgressStr ("PROGRESSBAR_LOADJPEG");
             pl->setProgress (0.0);
@@ -551,11 +551,11 @@ int ImageIO::loadJPEG (Glib::ustring fname)
         setup_read_icc_profile (&cinfo);
 
         //jpeg_stdio_src(&cinfo,file);
-        jpeg_read_header(&cinfo, TRUE);
+        jpeg_read_header (&cinfo, TRUE);
 
         //if JPEG is CMYK, then abort reading
         if (cinfo.jpeg_color_space == JCS_CMYK || cinfo.jpeg_color_space == JCS_YCCK) {
-            jpeg_destroy_decompress(&cinfo);
+            jpeg_destroy_decompress (&cinfo);
             return IMIO_READERROR;
         }
 
@@ -571,7 +571,7 @@ int ImageIO::loadJPEG (Glib::ustring fname)
             embProfile = nullptr;
         }
 
-        jpeg_start_decompress(&cinfo);
+        jpeg_start_decompress (&cinfo);
 
         unsigned int width = cinfo.output_width;
         unsigned int height = cinfo.output_height;
@@ -581,25 +581,25 @@ int ImageIO::loadJPEG (Glib::ustring fname)
         unsigned char *row = new unsigned char[width * 3];
 
         while (cinfo.output_scanline < height) {
-            if (jpeg_read_scanlines(&cinfo, &row, 1) < 1) {
-                jpeg_finish_decompress(&cinfo);
-                jpeg_destroy_decompress(&cinfo);
+            if (jpeg_read_scanlines (&cinfo, &row, 1) < 1) {
+                jpeg_finish_decompress (&cinfo);
+                jpeg_destroy_decompress (&cinfo);
                 delete [] row;
                 return IMIO_READERROR;
             }
 
             setScanline (cinfo.output_scanline - 1, row, 8);
 
-            if (pl && !(cinfo.output_scanline % 100)) {
-                pl->setProgress ((double)(cinfo.output_scanline) / cinfo.output_height);
+            if (pl && ! (cinfo.output_scanline % 100)) {
+                pl->setProgress ((double) (cinfo.output_scanline) / cinfo.output_height);
             }
         }
 
         delete [] row;
 
-        jpeg_finish_decompress(&cinfo);
-        jpeg_destroy_decompress(&cinfo);
-        fclose(file);
+        jpeg_finish_decompress (&cinfo);
+        jpeg_destroy_decompress (&cinfo);
+        fclose (file);
 
         if (pl) {
             pl->setProgressStr ("PROGRESSBAR_READY");
@@ -608,7 +608,7 @@ int ImageIO::loadJPEG (Glib::ustring fname)
 
         return IMIO_SUCCESS;
     } else {
-        jpeg_destroy_decompress(&cinfo);
+        jpeg_destroy_decompress (&cinfo);
         return IMIO_READERROR;
     }
 }
@@ -620,7 +620,7 @@ int ImageIO::getTIFFSampleFormat (Glib::ustring fname, IIOSampleFormat &sFormat,
     TIFF* in = TIFFOpenW (wfilename, "r");
     g_free (wfilename);
 #else
-    TIFF* in = TIFFOpen(fname.c_str(), "r");
+    TIFF* in = TIFFOpen (fname.c_str(), "r");
 #endif
 
     if (in == nullptr) {
@@ -628,17 +628,17 @@ int ImageIO::getTIFFSampleFormat (Glib::ustring fname, IIOSampleFormat &sFormat,
     }
 
     uint16 bitspersample = 0, samplesperpixel = 0, sampleformat = 0;
-    int hasTag = TIFFGetField(in, TIFFTAG_BITSPERSAMPLE, &bitspersample);
-    hasTag &= TIFFGetField(in, TIFFTAG_SAMPLESPERPIXEL, &samplesperpixel);
+    int hasTag = TIFFGetField (in, TIFFTAG_BITSPERSAMPLE, &bitspersample);
+    hasTag &= TIFFGetField (in, TIFFTAG_SAMPLESPERPIXEL, &samplesperpixel);
 
     if (!hasTag) {
         // These are needed
-        TIFFClose(in);
+        TIFFClose (in);
         sFormat = IIOSF_UNKNOWN;
         return IMIO_VARIANTNOTSUPPORTED;
     }
 
-    if (!TIFFGetField(in, TIFFTAG_SAMPLEFORMAT, &sampleformat))
+    if (!TIFFGetField (in, TIFFTAG_SAMPLEFORMAT, &sampleformat))
         /*
          * WARNING: This is a dirty hack!
          * We assume that files which doesn't contain the TIFFTAG_SAMPLEFORMAT tag
@@ -650,32 +650,32 @@ int ImageIO::getTIFFSampleFormat (Glib::ustring fname, IIOSampleFormat &sFormat,
     }
 
     uint16 config;
-    TIFFGetField(in, TIFFTAG_PLANARCONFIG, &config);
+    TIFFGetField (in, TIFFTAG_PLANARCONFIG, &config);
 
     if (config == PLANARCONFIG_CONTIG) {
         sArrangement = IIOSA_CHUNKY;
     } else {
         sFormat = IIOSF_UNKNOWN;
         sArrangement = IIOSA_UNKNOWN;
-        TIFFClose(in);
+        TIFFClose (in);
         return IMIO_VARIANTNOTSUPPORTED;
     }
 
     uint16 photometric;
 
-    if (!TIFFGetField(in, TIFFTAG_PHOTOMETRIC, &photometric)) {
-        TIFFClose(in);
+    if (!TIFFGetField (in, TIFFTAG_PHOTOMETRIC, &photometric)) {
+        TIFFClose (in);
         return IMIO_VARIANTNOTSUPPORTED;
     }
 
     uint16 compression;
 
     if (photometric == PHOTOMETRIC_LOGLUV)
-        if (!TIFFGetField(in, TIFFTAG_COMPRESSION, &compression)) {
+        if (!TIFFGetField (in, TIFFTAG_COMPRESSION, &compression)) {
             compression = COMPRESSION_NONE;
         }
 
-    TIFFClose(in);
+    TIFFClose (in);
 
     if (photometric == PHOTOMETRIC_RGB || photometric == PHOTOMETRIC_MINISBLACK) {
         if ((samplesperpixel == 1 || samplesperpixel == 3 || samplesperpixel == 4) && sampleformat == SAMPLEFORMAT_UINT) {
@@ -718,9 +718,9 @@ int ImageIO::loadTIFF (Glib::ustring fname)
 {
 
     static MyMutex thumbMutex;
-    MyMutex::MyLock lock(thumbMutex);
+    MyMutex::MyLock lock (thumbMutex);
 
-    if(!options.serializeTiffRead) {
+    if (!options.serializeTiffRead) {
         lock.release();
     }
 
@@ -729,7 +729,7 @@ int ImageIO::loadTIFF (Glib::ustring fname)
     TIFF* in = TIFFOpenW (wfilename, "r");
     g_free (wfilename);
 #else
-    TIFF* in = TIFFOpen(fname.c_str(), "r");
+    TIFF* in = TIFFOpen (fname.c_str(), "r");
 #endif
 
     if (in == nullptr) {
@@ -742,29 +742,29 @@ int ImageIO::loadTIFF (Glib::ustring fname)
     }
 
     int width, height;
-    TIFFGetField(in, TIFFTAG_IMAGEWIDTH, &width);
-    TIFFGetField(in, TIFFTAG_IMAGELENGTH, &height);
+    TIFFGetField (in, TIFFTAG_IMAGEWIDTH, &width);
+    TIFFGetField (in, TIFFTAG_IMAGELENGTH, &height);
 
     uint16 bitspersample, samplesperpixel;
-    int hasTag = TIFFGetField(in, TIFFTAG_BITSPERSAMPLE, &bitspersample);
-    hasTag &= TIFFGetField(in, TIFFTAG_SAMPLESPERPIXEL, &samplesperpixel);
+    int hasTag = TIFFGetField (in, TIFFTAG_BITSPERSAMPLE, &bitspersample);
+    hasTag &= TIFFGetField (in, TIFFTAG_SAMPLESPERPIXEL, &samplesperpixel);
 
     if (!hasTag) {
         // These are needed
-        TIFFClose(in);
+        TIFFClose (in);
         return IMIO_VARIANTNOTSUPPORTED;
     }
 
     uint16 config;
-    TIFFGetField(in, TIFFTAG_PLANARCONFIG, &config);
+    TIFFGetField (in, TIFFTAG_PLANARCONFIG, &config);
 
     if (config != PLANARCONFIG_CONTIG) {
-        TIFFClose(in);
+        TIFFClose (in);
         return IMIO_VARIANTNOTSUPPORTED;
     }
 
     if (sampleFormat & (IIOSF_LOGLUV24 | IIOSF_LOGLUV32)) {
-        TIFFSetField(in, TIFFTAG_SGILOGDATAFMT, SGILOGDATAFMT_FLOAT);
+        TIFFSetField (in, TIFFTAG_SGILOGDATAFMT, SGILOGDATAFMT_FLOAT);
     }
 
     /*
@@ -773,43 +773,49 @@ int ImageIO::loadTIFF (Glib::ustring fname)
      * effective minimum and maximum values
      */
     if (options.rtSettings.verbose) {
-        printf("Informations of \"%s\":\n", fname.c_str());
+        printf ("Informations of \"%s\":\n", fname.c_str());
         uint16 tiffDefaultScale, tiffBaselineExposure, tiffLinearResponseLimit;
-        if (TIFFGetField(in, TIFFTAG_DEFAULTSCALE, &tiffDefaultScale)) {
-            printf("   DefaultScale: %d\n", tiffDefaultScale);
+
+        if (TIFFGetField (in, TIFFTAG_DEFAULTSCALE, &tiffDefaultScale)) {
+            printf ("   DefaultScale: %d\n", tiffDefaultScale);
+        } else {
+            printf ("   No DefaultScale value!\n");
         }
-        else
-            printf("   No DefaultScale value!\n");
-        if (TIFFGetField(in, TIFFTAG_BASELINEEXPOSURE, &tiffBaselineExposure)) {
-            printf("   BaselineExposure: %d\n", tiffBaselineExposure);
+
+        if (TIFFGetField (in, TIFFTAG_BASELINEEXPOSURE, &tiffBaselineExposure)) {
+            printf ("   BaselineExposure: %d\n", tiffBaselineExposure);
+        } else {
+            printf ("   No BaselineExposure value!\n");
         }
-        else
-            printf("   No BaselineExposure value!\n");
-        if (TIFFGetField(in, TIFFTAG_LINEARRESPONSELIMIT, &tiffLinearResponseLimit)) {
-            printf("   LinearResponseLimit: %d\n", tiffLinearResponseLimit);
+
+        if (TIFFGetField (in, TIFFTAG_LINEARRESPONSELIMIT, &tiffLinearResponseLimit)) {
+            printf ("   LinearResponseLimit: %d\n", tiffLinearResponseLimit);
+        } else {
+            printf ("   No LinearResponseLimit value!\n");
         }
-        else
-            printf("   No LinearResponseLimit value!\n");
 
         uint16 tiffMinValue, tiffMaxValue;
-        if (TIFFGetField(in, TIFFTAG_SMINSAMPLEVALUE, &tiffMinValue)) {
-            printf("   MinValue: %d\n", tiffMinValue);
+
+        if (TIFFGetField (in, TIFFTAG_SMINSAMPLEVALUE, &tiffMinValue)) {
+            printf ("   MinValue: %d\n", tiffMinValue);
+        } else {
+            printf ("   No minimum value!\n");
         }
-        else
-            printf("   No minimum value!\n");
-        if (TIFFGetField(in, TIFFTAG_SMAXSAMPLEVALUE, &tiffMaxValue)) {
-            printf("   MaxValue: %d\n\n", tiffMaxValue);
+
+        if (TIFFGetField (in, TIFFTAG_SMAXSAMPLEVALUE, &tiffMaxValue)) {
+            printf ("   MaxValue: %d\n\n", tiffMaxValue);
+        } else {
+            printf ("   No maximum value!\n\n");
         }
-        else
-            printf("   No maximum value!\n\n");
-        printf("   Those values are not taken into account, the image data are normalized to a [0;1] range\n\n");
+
+        printf ("   Those values are not taken into account, the image data are normalized to a [0;1] range\n\n");
     }
 
     char* profdata;
     deleteLoadedProfileData();
     loadedProfileDataJpg = false;
 
-    if (TIFFGetField(in, TIFFTAG_ICCPROFILE, &loadedProfileLength, &profdata)) {
+    if (TIFFGetField (in, TIFFTAG_ICCPROFILE, &loadedProfileLength, &profdata)) {
         embProfile = cmsOpenProfileFromMem (profdata, loadedProfileLength);
         loadedProfileData = new char [loadedProfileLength];
         memcpy (loadedProfileData, profdata, loadedProfileLength);
@@ -820,11 +826,11 @@ int ImageIO::loadTIFF (Glib::ustring fname)
     allocate (width, height);
 
     float minValue[3] = {0.f, 0.f, 0.f}, maxValue[3] = {0.f, 0.f, 0.f};
-    unsigned char* linebuffer = new unsigned char[TIFFScanlineSize(in) * (samplesperpixel == 1 ? 3 : 1)];
+    unsigned char* linebuffer = new unsigned char[TIFFScanlineSize (in) * (samplesperpixel == 1 ? 3 : 1)];
 
     for (int row = 0; row < height; row++) {
-        if (TIFFReadScanline(in, linebuffer, row, 0) < 0) {
-            TIFFClose(in);
+        if (TIFFReadScanline (in, linebuffer, row, 0) < 0) {
+            TIFFClose (in);
             delete [] linebuffer;
             return IMIO_READERROR;
         }
@@ -833,15 +839,15 @@ int ImageIO::loadTIFF (Glib::ustring fname)
             for (int i = 0; i < width; i++) {
                 memcpy (linebuffer + i * 3 * bitspersample / 8, linebuffer + i * samplesperpixel * bitspersample / 8, 3 * bitspersample / 8);
             }
-        }
-        else if (samplesperpixel == 1) {
+        } else if (samplesperpixel == 1) {
             const size_t bytes = bitspersample / 8;
+
             for (int i = width - 1; i >= 0; --i) {
                 const unsigned char* const src = linebuffer + i * bytes;
                 unsigned char* const dest = linebuffer + i * 3 * bytes;
-                memcpy(dest + 2 * bytes, src, bytes);
-                memcpy(dest + 1 * bytes, src, bytes);
-                memcpy(dest + 0 * bytes, src, bytes);
+                memcpy (dest + 2 * bytes, src, bytes);
+                memcpy (dest + 1 * bytes, src, bytes);
+                memcpy (dest + 0 * bytes, src, bytes);
             }
         }
 
@@ -851,8 +857,8 @@ int ImageIO::loadTIFF (Glib::ustring fname)
             setScanline (row, linebuffer, bitspersample, nullptr, nullptr);
         }
 
-        if (pl && !(row % 100)) {
-            pl->setProgress ((double)(row + 1) / height);
+        if (pl && ! (row % 100)) {
+            pl->setProgress ((double) (row + 1) / height);
         }
     }
 
@@ -860,19 +866,19 @@ int ImageIO::loadTIFF (Glib::ustring fname)
 #ifdef _DEBUG
 
         if (options.rtSettings.verbose)
-            printf("Normalizing \"%s\" image \"%s\" whose mini/maxi values are:\n   Red:   minimum value=%0.5f / maximum value=%0.5f\n   Green: minimum value=%0.5f / maximum value=%0.5f\n   Blue:  minimum value=%0.5f / maximum value=%0.5f\n",
-                   getType(), fname.c_str(),
-                   minValue[0], maxValue[0], minValue[1],
-                   maxValue[1], minValue[2], maxValue[2]
-                  );
+            printf ("Normalizing \"%s\" image \"%s\" whose mini/maxi values are:\n   Red:   minimum value=%0.5f / maximum value=%0.5f\n   Green: minimum value=%0.5f / maximum value=%0.5f\n   Blue:  minimum value=%0.5f / maximum value=%0.5f\n",
+                    getType(), fname.c_str(),
+                    minValue[0], maxValue[0], minValue[1],
+                    maxValue[1], minValue[2], maxValue[2]
+                   );
 
 #endif
-        float minVal = rtengine::min(minValue[0], minValue[1], minValue[2]);
-        float maxVal = rtengine::max(maxValue[0], maxValue[1], maxValue[2]);
-        normalizeFloat(minVal, maxVal);
+        float minVal = rtengine::min (minValue[0], minValue[1], minValue[2]);
+        float maxVal = rtengine::max (maxValue[0], maxValue[1], maxValue[2]);
+        normalizeFloat (minVal, maxVal);
     }
 
-    TIFFClose(in);
+    TIFFClose (in);
     delete [] linebuffer;
 
     if (pl) {
@@ -883,22 +889,22 @@ int ImageIO::loadTIFF (Glib::ustring fname)
     return IMIO_SUCCESS;
 }
 
-int ImageIO::loadPPMFromMemory(const char* buffer, int width, int height, bool swap, int bps)
+int ImageIO::loadPPMFromMemory (const char* buffer, int width, int height, bool swap, int bps)
 {
     allocate (width, height);
 
-    int line_length(width * 3 * (bps / 8));
+    int line_length (width * 3 * (bps / 8));
 
     if ( swap && bps > 8 ) {
         char swapped[line_length];
 
         for ( int row = 0; row < height; ++row ) {
-            ::rtengine::swab(((char*)buffer) + (row * line_length), swapped, line_length);
-            setScanline(row, (unsigned char*)&swapped[0], bps);
+            ::rtengine::swab (((char*)buffer) + (row * line_length), swapped, line_length);
+            setScanline (row, (unsigned char*)&swapped[0], bps);
         }
     } else {
         for ( int row = 0; row < height; ++row ) {
-            setScanline(row, ((unsigned char*)buffer) + (row * line_length), bps);
+            setScanline (row, ((unsigned char*)buffer) + (row * line_length), bps);
         }
     }
 
@@ -929,7 +935,7 @@ int ImageIO::savePNG  (Glib::ustring fname, int compression, volatile int bps)
         return IMIO_HEADERERROR;
     }
 
-    png_infop info = png_create_info_struct(png);
+    png_infop info = png_create_info_struct (png);
 
     if (!info) {
         png_destroy_write_struct (&png, nullptr);
@@ -937,15 +943,15 @@ int ImageIO::savePNG  (Glib::ustring fname, int compression, volatile int bps)
         return IMIO_HEADERERROR;
     }
 
-    if (setjmp(png_jmpbuf(png))) {
+    if (setjmp (png_jmpbuf (png))) {
         png_destroy_write_struct (&png, &info);
-        fclose(file);
+        fclose (file);
         return IMIO_CANNOTWRITEFILE;
     }
 
     png_set_write_fn (png, file, png_write_data, png_flush);
 
-    png_set_compression_level(png, compression);
+    png_set_compression_level (png, compression);
 
     int width = getWidth ();
     int height = getHeight ();
@@ -954,14 +960,14 @@ int ImageIO::savePNG  (Glib::ustring fname, int compression, volatile int bps)
         bps = getBPS ();
     }
 
-    png_set_IHDR(png, info, width, height, bps, PNG_COLOR_TYPE_RGB,
-                 PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_DEFAULT, PNG_FILTER_TYPE_BASE);
+    png_set_IHDR (png, info, width, height, bps, PNG_COLOR_TYPE_RGB,
+                  PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_DEFAULT, PNG_FILTER_TYPE_BASE);
 
 
     int rowlen = width * 3 * bps / 8;
     unsigned char *row = new unsigned char [rowlen];
 
-    png_write_info(png, info);
+    png_write_info (png, info);
 
     for (int i = 0; i < height; i++) {
         getScanline (i, row, bps);
@@ -980,13 +986,13 @@ int ImageIO::savePNG  (Glib::ustring fname, int compression, volatile int bps)
 
         png_write_row (png, (png_byte*)row);
 
-        if (pl && !(i % 100)) {
-            pl->setProgress ((double)(i + 1) / height);
+        if (pl && ! (i % 100)) {
+            pl->setProgress ((double) (i + 1) / height);
         }
     }
 
-    png_write_end(png, info);
-    png_destroy_write_struct(&png, &info);
+    png_write_end (png, info);
+    png_destroy_write_struct (&png, &info);
 
     delete [] row;
     fclose (file);
@@ -1021,22 +1027,22 @@ int ImageIO::saveJPEG (Glib::ustring fname, int quality, int subSamp)
     */
     my_error_mgr jerr;
     /* We set up the normal JPEG error routines, then override error_exit. */
-    cinfo.err = jpeg_std_error(&jerr.pub);
+    cinfo.err = jpeg_std_error (&jerr.pub);
     jerr.pub.error_exit = my_error_exit;
 
     /* Establish the setjmp return context for my_error_exit to use. */
 #if defined( WIN32 ) && defined( __x86_64__ )
 
-    if (__builtin_setjmp(jerr.setjmp_buffer)) {
+    if (__builtin_setjmp (jerr.setjmp_buffer)) {
 #else
 
-    if (setjmp(jerr.setjmp_buffer)) {
+    if (setjmp (jerr.setjmp_buffer)) {
 #endif
         /* If we get here, the JPEG code has signaled an error.
            We need to clean up the JPEG object, close the file, remove the already saved part of the file and return.
         */
-        jpeg_destroy_compress(&cinfo);
-        fclose(file);
+        jpeg_destroy_compress (&cinfo);
+        fclose (file);
         g_remove (fname.c_str());
         return IMIO_CANNOTWRITEFILE;
     }
@@ -1088,7 +1094,7 @@ int ImageIO::saveJPEG (Glib::ustring fname, int quality, int subSamp)
         cinfo.comp_info[0].h_samp_factor = cinfo.comp_info[0].v_samp_factor = 1;
     }
 
-    jpeg_start_compress(&cinfo, TRUE);
+    jpeg_start_compress (&cinfo, TRUE);
 
     // buffer for exif and iptc markers
     unsigned char* buffer = new unsigned char[165535]; //FIXME: no buffer size check so it can be overflowed in createJPEGMarker() for large tags, and then software will crash
@@ -1099,7 +1105,7 @@ int ImageIO::saveJPEG (Glib::ustring fname, int quality, int subSamp)
         int size = rtexif::ExifManager::createJPEGMarker (exifRoot, exifChange, cinfo.image_width, cinfo.image_height, buffer);
 
         if (size > 0 && size < 65530) {
-            jpeg_write_marker(&cinfo, JPEG_APP0 + 1, buffer, size);
+            jpeg_write_marker (&cinfo, JPEG_APP0 + 1, buffer, size);
         }
     }
 
@@ -1127,7 +1133,7 @@ int ImageIO::saveJPEG (Glib::ustring fname, int quality, int subSamp)
         }
 
         if (!error) {
-            jpeg_write_marker(&cinfo, JPEG_APP0 + 13, buffer, bytes);
+            jpeg_write_marker (&cinfo, JPEG_APP0 + 13, buffer, bytes);
         }
     }
 
@@ -1145,17 +1151,17 @@ int ImageIO::saveJPEG (Glib::ustring fname, int quality, int subSamp)
     /* To avoid memory leaks we establish a new setjmp return context for my_error_exit to use. */
 #if defined( WIN32 ) && defined( __x86_64__ )
 
-    if (__builtin_setjmp(jerr.setjmp_buffer)) {
+    if (__builtin_setjmp (jerr.setjmp_buffer)) {
 #else
 
-    if (setjmp(jerr.setjmp_buffer)) {
+    if (setjmp (jerr.setjmp_buffer)) {
 #endif
         /* If we get here, the JPEG code has signaled an error.
            We need to clean up the JPEG object, close the file, remove the already saved part of the file and return.
         */
         delete [] row;
-        jpeg_destroy_compress(&cinfo);
-        fclose(file);
+        jpeg_destroy_compress (&cinfo);
+        fclose (file);
         g_remove (fname.c_str());
         return IMIO_CANNOTWRITEFILE;
     }
@@ -1172,8 +1178,8 @@ int ImageIO::saveJPEG (Glib::ustring fname, int quality, int subSamp)
             return IMIO_CANNOTWRITEFILE;
         }
 
-        if (pl && !(cinfo.next_scanline % 100)) {
-            pl->setProgress ((double)(cinfo.next_scanline) / cinfo.image_height);
+        if (pl && ! (cinfo.next_scanline % 100)) {
+            pl->setProgress ((double) (cinfo.next_scanline) / cinfo.image_height);
         }
     }
 
@@ -1243,7 +1249,7 @@ int ImageIO::saveTIFF (Glib::ustring fname, int bps, bool uncompressed)
 
         // The maximum lenght is strangely not the same than for the JPEG file...
         // Which maximum length is the good one ?
-        if (size > 0 && size <= static_cast<int>(bufferSize)) {
+        if (size > 0 && size <= static_cast<int> (bufferSize)) {
             fwrite (buffer, size, 1, file);
         }
 
@@ -1265,16 +1271,16 @@ int ImageIO::saveTIFF (Glib::ustring fname, int bps, bool uncompressed)
 
             fwrite (linebuffer, lineWidth, 1, file);
 
-            if (pl && !(i % 100)) {
-                pl->setProgress ((double)(i + 1) / height);
+            if (pl && ! (i % 100)) {
+                pl->setProgress ((double) (i + 1) / height);
             }
         }
 
-        if(buffer) {
+        if (buffer) {
             delete [] buffer;
         }
 
-        if (ferror(file)) {
+        if (ferror (file)) {
             writeOk = false;
         }
 
@@ -1284,11 +1290,11 @@ int ImageIO::saveTIFF (Glib::ustring fname, int bps, bool uncompressed)
         const char *mode = !exifRoot ? "w" : (exifRoot->getOrder() == rtexif::INTEL ? "wl" : "wb");
 #ifdef WIN32
         FILE *file = g_fopen_withBinaryAndLock (fname);
-        int fileno = _fileno(file);
-        int osfileno = _get_osfhandle(fileno);
+        int fileno = _fileno (file);
+        int osfileno = _get_osfhandle (fileno);
         TIFF* out = TIFFFdOpen (osfileno, fname.c_str(), mode);
 #else
-        TIFF* out = TIFFOpen(fname.c_str(), mode);
+        TIFF* out = TIFFOpen (fname.c_str(), mode);
         int fileno = TIFFFileno (out);
 #endif
 
@@ -1378,12 +1384,12 @@ int ImageIO::saveTIFF (Glib::ustring fname, int bps, bool uncompressed)
                 return IMIO_CANNOTWRITEFILE;
             }
 
-            if (pl && !(row % 100)) {
-                pl->setProgress ((double)(row + 1) / height);
+            if (pl && ! (row % 100)) {
+                pl->setProgress ((double) (row + 1) / height);
             }
         }
 
-        if (TIFFFlush(out) != 1) {
+        if (TIFFFlush (out) != 1) {
             writeOk = false;
         }
 
@@ -1400,7 +1406,7 @@ int ImageIO::saveTIFF (Glib::ustring fname, int bps, bool uncompressed)
         pl->setProgress (1.0);
     }
 
-    if(writeOk) {
+    if (writeOk) {
         return IMIO_SUCCESS;
     } else {
         g_remove (fname.c_str());
@@ -1410,49 +1416,49 @@ int ImageIO::saveTIFF (Glib::ustring fname, int bps, bool uncompressed)
 
 // PNG read and write routines:
 
-void png_read_data(png_structp png_ptr, png_bytep data, png_size_t length)
+void png_read_data (png_structp png_ptr, png_bytep data, png_size_t length)
 {
     png_size_t check;
 
     /* fread() returns 0 on error, so it is OK to store this in a png_size_t
      * instead of an int, which is what fread() actually returns.
      */
-    check = (png_size_t)fread(data, (png_size_t)1, length, (FILE *)png_get_io_ptr(png_ptr));
+    check = (png_size_t)fread (data, (png_size_t)1, length, (FILE *)png_get_io_ptr (png_ptr));
 
     if (check != length) {
-        png_error(png_ptr, "Read Error");
+        png_error (png_ptr, "Read Error");
     }
 }
 
-void png_write_data(png_structp png_ptr, png_bytep data, png_size_t length)
+void png_write_data (png_structp png_ptr, png_bytep data, png_size_t length)
 {
     png_uint_32 check;
 
-    check = fwrite(data, 1, length, (FILE *)png_get_io_ptr(png_ptr));
+    check = fwrite (data, 1, length, (FILE *)png_get_io_ptr (png_ptr));
 
     if (check != length) {
-        png_error(png_ptr, "Write Error");
+        png_error (png_ptr, "Write Error");
     }
 }
 
-void png_flush(png_structp png_ptr)
+void png_flush (png_structp png_ptr)
 {
     FILE *io_ptr;
-    io_ptr = (FILE *)(png_get_io_ptr(png_ptr));
+    io_ptr = (FILE *) (png_get_io_ptr (png_ptr));
 
     if (io_ptr != nullptr) {
-        fflush(io_ptr);
+        fflush (io_ptr);
     }
 }
 
 int ImageIO::load (Glib::ustring fname)
 {
 
-    if (hasPngExtension(fname)) {
+    if (hasPngExtension (fname)) {
         return loadPNG (fname);
-    } else if (hasJpegExtension(fname)) {
+    } else if (hasJpegExtension (fname)) {
         return loadJPEG (fname);
-    } else if (hasTiffExtension(fname)) {
+    } else if (hasTiffExtension (fname)) {
         return loadTIFF (fname);
     } else {
         return IMIO_FILETYPENOTSUPPORTED;
@@ -1461,11 +1467,11 @@ int ImageIO::load (Glib::ustring fname)
 
 int ImageIO::save (Glib::ustring fname)
 {
-    if (hasPngExtension(fname)) {
+    if (hasPngExtension (fname)) {
         return savePNG (fname);
-    } else if (hasJpegExtension(fname)) {
+    } else if (hasJpegExtension (fname)) {
         return saveJPEG (fname);
-    } else if (hasTiffExtension(fname)) {
+    } else if (hasTiffExtension (fname)) {
         return saveTIFF (fname);
     } else {
         return IMIO_FILETYPENOTSUPPORTED;

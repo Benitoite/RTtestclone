@@ -81,6 +81,7 @@ set(NONCLISOURCEFILES
     lensgeom.cc
     lensprofile.cc
     lockablecolorpicker.cc
+	localwb.cc
     lwbutton.cc
     lwbuttonset.cc
     main.cc

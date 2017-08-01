@@ -46,6 +46,7 @@ public:
     Imagefloat*          tofloat();
 
     virtual void         getStdImage (ColorTemp ctemp, int tran, Imagefloat* image, PreviewProps pp, bool first, procparams::ToneCurveParams hrp);
+    virtual void         getStdImageloc (int begx, int begy, int yEn, int xEn, int cx, int cy, ColorTemp ctemp, int tran, Imagefloat* image, Imagefloat* bufimage, PreviewProps pp, bool first, procparams::ToneCurveParams hrp);
 
     virtual const char*  getType     () const
     {
@@ -53,7 +54,7 @@ public:
     }
     virtual int          getBPS      ()
     {
-        return 8 * sizeof(unsigned short);
+        return 8 * sizeof (unsigned short);
     }
     virtual void         getScanline (int row, unsigned char* buffer, int bps);
     virtual void         setScanline (int row, unsigned char* buffer, int bps, float *minValue = nullptr, float *maxValue = nullptr);
@@ -69,7 +70,7 @@ public:
     }
     virtual int          getBitsPerPixel ()
     {
-        return 8 * sizeof(unsigned short);
+        return 8 * sizeof (unsigned short);
     }
     virtual int          saveToFile (Glib::ustring fname)
     {
@@ -96,7 +97,7 @@ public:
         delete this;
     }
 
-    void                 ExecCMSTransform(cmsHTRANSFORM hTransform, const LabImage &labImage, int cx, int cy);
+    void                 ExecCMSTransform (cmsHTRANSFORM hTransform, const LabImage &labImage, int cx, int cy);
 };
 
 }

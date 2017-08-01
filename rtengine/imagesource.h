@@ -62,8 +62,8 @@ protected:
     double dirpyrdenoiseExpComp;
 
 public:
-    ImageSource () : references (1), redAWBMul(-1.), greenAWBMul(-1.), blueAWBMul(-1.),
-        embProfile(nullptr), idata(nullptr), dirpyrdenoiseExpComp(INFINITY) {}
+    ImageSource () : references (1), redAWBMul (-1.), greenAWBMul (-1.), blueAWBMul (-1.),
+        embProfile (nullptr), idata (nullptr), dirpyrdenoiseExpComp (INFINITY) {}
 
     virtual ~ImageSource            () {}
     virtual int         load        (const Glib::ustring &fname, int imageNum = 0, bool batch = false) = 0;
@@ -76,24 +76,28 @@ public:
     virtual void        flushRGB           () {};
     virtual void        HLRecovery_Global  (ToneCurveParams hrp) {};
     virtual void        HLRecovery_inpaint (float** red, float** green, float** blue) {};
-    virtual void        MSR(LabImage* lab, LUTf & mapcurve, bool &mapcontlutili, int width, int height, int skip, RetinexParams deh, const RetinextransmissionCurve & dehatransmissionCurve, const RetinexgaintransmissionCurve & dehagaintransmissionCurve, float &minCD, float &maxCD, float &mini, float &maxi, float &Tmean, float &Tsigma, float &Tmin, float &Tmax) {};
+    virtual void        MSR (LabImage* lab, LUTf & mapcurve, bool &mapcontlutili, int width, int height, int skip, RetinexParams deh, const RetinextransmissionCurve & dehatransmissionCurve, const RetinexgaintransmissionCurve & dehagaintransmissionCurve, float &minCD, float &maxCD, float &mini, float &maxi, float &Tmean, float &Tsigma, float &Tmin, float &Tmax) {};
 
     virtual bool        IsrgbSourceModified() const = 0; // tracks whether cached rgb output of demosaic has been modified
 
-    virtual void setCurrentFrame(unsigned int frameNum) = 0;
+    virtual void setCurrentFrame (unsigned int frameNum) = 0;
     virtual int getFrameCount() = 0;
 
 
     // use right after demosaicing image, add coarse transformation and put the result in the provided Imagefloat*
     virtual void        getImage    (const ColorTemp &ctemp, int tran, Imagefloat* image, const PreviewProps &pp, const ToneCurveParams &hlp, const ColorManagementParams &cmp, const RAWParams &raw) = 0;
+    virtual void        getImage_local    (int begx, int begy, int yEn, int xEn, int cx, int cy, const ColorTemp &ctemp, int tran, Imagefloat* image, Imagefloat* bufimage, const PreviewProps &pp, const ToneCurveParams &hlp, const ColorManagementParams &cmp, const RAWParams &raw) = 0;
     virtual eSensorType getSensorType () const = 0;
     // true is ready to provide the AutoWB, i.e. when the image has been demosaiced for RawImageSource
     virtual bool        isWBProviderReady () = 0;
 
     virtual void        convertColorSpace    (Imagefloat* image, const ColorManagementParams &cmp, const ColorTemp &wb) = 0; // DIRTY HACK: this method is derived in rawimagesource and strimagesource, but (...,RAWParams raw) will be used ONLY for raw images
     virtual void        getAutoWBMultipliers (double &rm, double &gm, double &bm) = 0;
+    virtual void        getAutoWBMultipliersloc (int begx, int begy, int yEn, int xEn, int cx, int cy, int bf_h, int bf_w, double &rm, double &gm, double &bm, const LocrgbParams &localr) = 0;
     virtual ColorTemp   getWB       () const = 0;
     virtual ColorTemp   getSpotWB   (std::vector<Coord2D> &red, std::vector<Coord2D> &green, std::vector<Coord2D> &blue, int tran, double equal) = 0;
+    virtual void        WBauto (array2D<float> &redloc, array2D<float> &greenloc, array2D<float> &blueloc, int bfw, int bfh, double &avg_rm, double &avg_gm, double &avg_bm, const LocrgbParams &localr, int begx, int begy, int yEn, int xEn, int cx, int cy) = 0;
+    virtual void        getrgbloc (bool gamma, bool cat02, int begx, int begy, int yEn, int xEn, int cx, int cy, int bf_h, int bf_w) = 0;
 
     virtual double      getDefGain  () const
     {
@@ -110,7 +114,7 @@ public:
     virtual ImageData*     getImageData () = 0;
     virtual ImageMatrices* getImageMatrices () = 0;
     virtual bool        isRAW() const = 0;
-    virtual DCPProfile* getDCP(const ColorManagementParams &cmp, ColorTemp &wb, DCPProfile::ApplyState &as)
+    virtual DCPProfile* getDCP (const ColorManagementParams &cmp, ColorTemp &wb, DCPProfile::ApplyState &as)
     {
         return nullptr;
     };
@@ -158,7 +162,7 @@ public:
     {
         return this;
     }
-    virtual void getRawValues(int x, int y, int rotate, int &R, int &G, int &B) = 0;
+    virtual void getRawValues (int x, int y, int rotate, int &R, int &G, int &B) = 0;
 };
 }
 #endif

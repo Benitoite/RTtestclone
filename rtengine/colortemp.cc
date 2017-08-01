@@ -70,7 +70,7 @@ static const double cie_colour_match_jd[97][3] = {//350nm to 830nm   5 nm J.Desm
     {0.000001251141, 0.00000045181, 0.000000}
 };
 
-ColorTemp::ColorTemp (double t, double g, double e, const Glib::ustring &m) : temp(t), green(g), equal(e), method(m)
+ColorTemp::ColorTemp (double t, double g, double e, const Glib::ustring &m) : temp (t), green (g), equal (e), method (m)
 {
 
     clip (temp, green, equal);
@@ -107,14 +107,14 @@ void ColorTemp::clip (double &temp, double &green, double &equal)
         green = MAXGREEN;
     }
 
-    if(equal < MINEQUAL) {
+    if (equal < MINEQUAL) {
         equal = MINEQUAL;
-    } else if(equal > MAXEQUAL) {
+    } else if (equal > MAXEQUAL) {
         equal = MAXEQUAL;
     }
 }
 
-ColorTemp::ColorTemp (double mulr, double mulg, double mulb, double e) : equal(e), method("Custom")
+ColorTemp::ColorTemp (double mulr, double mulg, double mulb, double e) : equal (e), method ("Custom")
 {
     mul2temp (mulr, mulg, mulb, equal, temp, green);
 }
@@ -122,7 +122,7 @@ ColorTemp::ColorTemp (double mulr, double mulg, double mulb, double e) : equal(e
 void ColorTemp::mul2temp (const double rmul, const double gmul, const double bmul, const double equal, double& temp, double& green) const
 {
 
-    double maxtemp = double(MAXTEMP), mintemp = double(MINTEMP);
+    double maxtemp = double (MAXTEMP), mintemp = double (MINTEMP);
     double tmpr, tmpg, tmpb;
     temp = (maxtemp + mintemp) / 2;
 
@@ -141,7 +141,6 @@ void ColorTemp::mul2temp (const double rmul, const double gmul, const double bmu
     green = (tmpg / tmpr) / (gmul / rmul);
     clip (temp, green);
 }
-
 
 // spectral data for Daylight direct Sun: I have choose 5300K because Nikon=5200K, Olympus=5300K, Panasonic=5500K, Leica=5400K, Minolta=5100K
 const double ColorTemp::Daylight5300_spect[97] = {
@@ -358,7 +357,15 @@ const double ColorTemp::Flash6500_spect[97] = {
 // actually 20 color that must be good enough for CRI
 
 // I think 40  color for palette (Skin, Sky, gray)
-
+/*
+const double ColorTemp::ColorchechredA1_spect[97] = {
+    0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+    0.048, 0.051, 0.055, 0.06, 0.065, 0.068, 0.068, 0.067, 0.064, 0.062, 0.059, 0.057, 0.055, 0.054, 0.053, 0.053, 0.052, 0.052, 0.052, 0.053, 0.054, 0.055, 0.057, 0.059, 0.061, 0.062, 0.065,
+    0.067, 0.07, 0.072, 0.074, 0.075, 0.076, 0.078, 0.079, 0.082, 0.087, 0.092, 0.1, 0.107, 0.115, 0.122, 0.129, 0.134, 0.138, 0.142, 0.146, 0.15, 0.154, 0.158, 0.163, 0.167,  0.173, 0.18, 0.188,
+    0.196, 0.204, 0.213, 0.222, 0.231, 0.242, 0.251, 0.261, 0.271, 0.282, 0.294, 0.305, 0.318, 0.334, 0.354, 0.372, 0.392, 0.409, 0.42, 0.436, 0.45, 0.462, 0.465, 0.448, 0.432, 0.421,
+    0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+};
+*/
 //spectral data Colorchecker24 : Red C3
 const double  ColorTemp::ColorchechredC3_spect[97] = {
     0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
@@ -444,6 +451,21 @@ const double ColorTemp::ColorchechGraC4_67_spect[97] = {
     0.369, 0.3689, 0.368, 0.3673, 0.3678, 0.3684, 0.37, 0.3711, 0.3712, 0.3714, 0.3714, 0.3714, 0.371, 0.3707, 0.37, 0.3694, 0.3697, 0.3703, 0.3697, 0.3692, 0.3688, 0.3685, 0.3675, 0.3669, 0.3657, 0.3647, 0.3635, 0.3625, 0.361,
     0.3596, 0.3585, 0.3579, 0.357, 0.3560, 0.3555, 0.3548, 0.3535, 0.3526, 0.3513, 0.3500, 0.349, 0.3475, 0.3467, 0.3460, 0.3452, 0.3444, 0.3431, 0.3421, 0.3411, 0.3403, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
 };
+const double ColorTemp::Fictif_61greyspect[97] = {
+    0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+    0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1,
+    0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1,
+    0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+};
+const double ColorTemp::JDC468_K15_87greyspect[97] = {
+    0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+    0.1984, 0.2223, 0.2448, 0.2934, 0.3415, 0.4425, 0.5707, 0.6609, 0.7619, 0.7956, 0.8275, 0.8280, 0.8292, 0.8223, 0.8156, 0.8112, 0.8076, 0.8040, 0.7982, 0.7970, 0.7954, 0.8013, 0.8083, 0.8141, 0.8184, 0.8167,
+    0.8137, 0.8080, 0.8026, 0.8013, 0.7988, 0.7963, 0.7942, 0.7855, 0.7765, 0.7680, 0.7603, 0.7640, 0.7681, 0.7750, 0.7827, 0.7876, 0.7923, 0.7935, 0.7945, 0.7955, 0.7964, 0.7975, 0.7982, 0.8000, 0.8017, 0.8051,
+    0.8090, 0.8145, 0.8191, 0.8234, 0.8269, 0.8300, 0.8327, 0.8342, 0.8359, 0.8375, 0.8390, 0.8405, 0.8421, 0.8436, 0.8452, 0.8480, 0.8504, 0.8564, 0.8611,
+    0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+
+};
+//K15 275   275 0.1984  0.2448  0.3415  0.5707  0.7619  0.8275  0.8292  0.8156  0.8076  0.7982  0.7954  0.8083  0.8184  0.8137  0.8026  0.7988  0.7942  0.7765  0.7603  0.7681  0.7827  0.7923  0.7945  0.7964  0.7982  0.8017  0.8090  0.8191  0.8269  0.8327  0.8359  0.8390  0.8421  0.8452  0.8504  0.8611
 
 //spectral data Colorchecker24 : Skin B1
 //use also for palette WB
@@ -476,7 +498,7 @@ const double ColorTemp::ColorchechDCBluN881_m7_m14_spect[97] = {
 //spectral data ColorcheckerSG : Skin F7
 //use also for palette WB
 const double ColorTemp::ColorchechSGSkiF763_14_26_spect[97] = {
-    0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0508, 0.64, 0.0776, 0.903, 0.1099, 0.1128, 0.1256, 0.128, 0.1307, 0.133, 0.1357, 0.139, 0.1425, 0.148, 0.1523, 0.159, 0.1669, 0.177, 0.1871, 0.20, 0.2118, 0.2235, 0.2355, 0.2445, 0.2537, 0.259, 0.2655, 0.268,
+    0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0508, 0.064, 0.0776, 0.903, 0.1099, 0.1128, 0.1256, 0.128, 0.1307, 0.133, 0.1357, 0.139, 0.1425, 0.148, 0.1523, 0.159, 0.1669, 0.177, 0.1871, 0.20, 0.2118, 0.2235, 0.2355, 0.2445, 0.2537, 0.259, 0.2655, 0.268,
     0.2700, 0.2708, 0.2716, 0.2743, 0.2770, 0.2803, 0.2827, 0.283, 0.2832, 0.283, 0.2828, 0.295, 0.3079, 0.344, 0.3803, 0.4105, 0.4409, 0.455, 0.4694, 0.477, 0.4851, 0.4896, 0.4962, 0.501, 0.5066, 0.511, 0.5160, 0.521,
     0.5256, 0.529, 0.5318, 0.535, 0.5383, 0.541, 0.5451, 0.549, 0.5524, 0.556, 0.5597, 0.562, 0.5650, 0.568, 0.5709, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
 };
@@ -529,15 +551,148 @@ const double ColorTemp::JDC468_GraK14_44_spect[97] = {
     0.1408, 0.14330, 0.1475, 0.15170, 0.1583, 0.16500, 0.172, 0.17940, 0.1836, 0.18780, 0.188, 0.18820, 0.186, 0.18430, 0.1801, 0.17620, 0.1741, 0.17210, 0.179, 0.18420, 0.1991, 0.21430,
     0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
 };
+const double ColorTemp::JDC468_BluM5_spect[97] = {
+    0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+    0.1510, 0.1802, 0.2069, 0.2550,  0.3047, 0.4055, 0.5069, 0.590, 0.6747, 0.701,   0.7351, 0.7345, 0.7338, 0.7195, 0.7063, 0.693,  0.6732, 0.6490, 0.6261, 0.5993, 0.5723, 0.5560,
+    0.5401, 0.526, 0.5106, 0.4805,  0.4504, 0.42, 0.3907, 0.385, 0.3799, 0.3750,    0.3695, 0.3340,  0.3005, 0.2692, 0.2382, 0.2387, 0.2389, 0.2501, 0.2610, 0.2635, 0.2662, 0.2601,  0.2541,
+    0.2450, 0.2426, 0.2430, 0.2434, 0.2490, 0.2523, 0.2612, 0.2692, 0.2694, 0.2996, 0.3145, 0.3329, 0.3413, 0.3498, 0.3467, 0.3442, 0.3355, 0.3266, 0.3131, 0.2996, 0.2911, 0.2831, 0.2950, 0.3070, 0.3430, 0.3799,
+    0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+};
+
+//m5    317 //0.1510    0.2069  0.3047  0.5069  0.6747  0.7351  0.7338  0.7063  0.6732  0.6261  0.5723  0.5401
+//  0.5106  0.4504  0.3907  0.3799  0.3695  0.3005  0.2382  0.2389  0.2610  0.2662  0.2541
+//  0.2426  0.2434  0.2523  0.2692  0.2996  0.3329  0.3498  0.3442  0.3266  0.2996  0.2831  0.3070  0.3799
+
+const double ColorTemp::JDC468_RedG21va_spect[97] = {
+    0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+    0.1207, 0.141, 0.1585, 0.1810, 0.2073, 0.2529,  0.2959,  0.3210, 0.3476, 0.3350, 0.3232, 0.2845,  0.2564, 0.2140,   0.1823, 0.1523, 0.1266, 0.1001, 0.0792, 0.061,  0.0439, 0.0349,  0.0295, 0.0260,  0.0222,
+    0.0180, 0.0135, 0.0111,  0.0087, 0.0090,  0.0094, 0.0101,  0.0109, 0.0093,  0.0086, 0.0090,  0.0091, 0.0061,  0.0321, 0.0086,  0.1368, 0.2312,  0.3256, 0.4112,  0.4958, 0.5444,  0.5884, 0.6002,  0.6264,  0.6323, 0.6473,
+    0.6546, 0.6659, 0.6775,  0.6881, 0.6982,  0.7081, 0.7150,  0.7201, 0.7217,  0.7232, 0.7222,  0.7215,  0.7187, 0.7157, 0.7144,  0.7131, 0.7196,  0.7269, 0.7303, 0.7599,
+    0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+};
+//g21 177   0.1207  0.1585  0.2073  0.2959  0.3476  0.3232  0.2564  0.1823  0.1266  0.0792  0.0439  0.0295  0.0222  0.0135  0.0087  0.0094  0.0109  0.0086  0.0091  0.0321
+//  0.1368  0.3256  0.4958  0.5884  0.6264  0.6473  0.6659  0.6881  0.7081  0.7201  0.7232  0.7215  0.7157  0.7131  0.7269  0.7599
+const double ColorTemp::JDC468_RedI9_spect[97] = {
+    0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+    0.0258, 0.023,  0.0220, 0.0205,  0.0189, 0.0183,  0.0174, 0.0168,  0.0162, 0.0152,  0.0148, 0.0145,  0.0139, 0.0136,  0.0133, 0.0130,  0.0127, 0.0130,  0.0133, 0.0151,  0.0168, 0.0218,  0.0268, 0.0317,  0.0367, 0.0330,
+    0.0313, 0.0270,  0.0227, 0.0240,  0.0255, 0.0280,  0.0302, 0.0280,  0.0225, 0.0215,  0.0209, 0.0424,  0.0639, 0.1401,  0.2131, 0.3250,  0.4369, 0.5210,  0.6265, 0.6795,  0.7336, 0.7551,  0.7784, 0.7890,  0.7994, 0.8070,
+    0.8146, 0.8210,  0.8277, 0.8321,  0.8362, 0.8398,  0.8439, 0.8470,  0.8504, 0.8530,  0.8572,  0.8612, 0.8653, 0.8689,  0.8715, 0.8730,  0.8747, 0.8766,  0.8788,
+    0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+};
+
+//I9 RED 217    0.0258  0.0220  0.0189  0.0174  0.0162  0.0148  0.0139  0.0133  0.0127  0.0133  0.0168  0.0268  0.0367  0.0313  0.0227  0.0255  0.0302  0.0225  0.0209  0.0639  0.2131  0.4369  0.6265  0.7336  0.7784  0.7994  0.8146  0.8277  0.8362  0.8439  0.8504  0.8572  0.8653  0.8715  0.8747  0.8788
+
+const double ColorTemp::JDC468_YelN10_spect[97] = {
+    0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+    0.0531, 0.0520,  0.0504, 0.0510,  0.0518, 0.0608,  0.0628, 0.0669,  0.0699, 0.0705,  0.0716, 0.0720,  0.0735, 0.0755,  0.0775, 0.0800,  0.0825, 0.0896,  0.0969, 0.1260, 0.1563, 0.2312,  0.3096, 0.4132,  0.5177, 0.5905,  0.6637,
+    0.7251, 0.7350,  0.7458, 0.7480,  0.7507, 0.7460,  0.7414, 0.7356,  0.7301, 0.7320,  0.7347, 0.7390,  0.7438, 0.7472,  0.7500, 0.7508,  0.7515, 0.7528,  0.7538, 0.7550,  0.7563, 0.7581,  0.7607, 0.7642,  0.7686, 0.7710,
+    0.7791, 0.7840,  0.7872, 0.7902,  0.7935, 0.7955,  0.7979, 0.7995,  0.8021, 0.8035,  0.8058, 0.8072,  0.8090, 0.8110,  0.8143, 0.8198,  0.8259,
+    0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+};
+
+
+//n10   348 0.0531  0.0504  0.0518  0.0628  0.0699  0.0716  0.0735  0.0775  0.0825  0.0969  0.1563  0.3096  0.5177  0.6637  0.7251  0.7458  0.7507  0.7414  0.7301  0.7347  0.7438  0.7500  0.7515  0.7538  0.7563  0.7607  0.7686  0.7791  0.7872  0.7935  0.7979  0.8021  0.8058  0.8090  0.8143  0.8259
+const double ColorTemp::JDC468_GreN7_spect[97] = {
+    0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+    0.0112, 0.0102,  0.0094, 0.096,  0.0099, 0.0100,  0.0100, 0.0100,  0.0100, 0.099,  0.0099, 0.099,  0.0099, 0.099,  0.0099, 0.0100,  0.0100, 0.0103,  0.0107, 0.0129,  0.0151, 0.0312,  0.0462, 0.1015,  0.1571, 0.2270,  0.2977,
+    0.3558, 0.3441,  0.3321, 0.3020,  0.2710, 0.2312,  0.1954, 0.1602,  0.1251, 0.1003,  0.0794, 0.0672,  0.0563, 0.0513,  0.0452,  0.0418, 0.0378, 0.0356,  0.0337, 0.0336,  0.0335, 0.0345,  0.0358, 0.0383,  0.0405, 0.0445,  0.0497,
+    0.0612, 0.0647,  0.0670, 0.0660,  0.0644, 0.0620,  0.0574, 0.0525,  0.0483, 00460,  0.0436, 0.0484,  0.0532, 0.0690,  0.0870,
+    0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+};
+
+//n7    345 0.0112  0.0094  0.0099  0.0100  0.0100  0.0099  0.0099  0.0099  0.0100  0.0107  0.0151  0.0462  0.1571  0.2977  0.3558  0.3321  0.2710  0.1954  0.1251  0.0794  0.0563  0.0452  0.0378  0.0337  0.0335  0.0358  0.0405  0.0497  0.0612  0.0670  0.0644  0.0574  0.0483  0.0436  0.0532  0.0870
+
+const double ColorTemp::JDC468_GreA10_spect[97] = {
+    0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+    0.0958, 0.1010,  0.1090, 0.1172,  0.1352, 0.1954,  0.1957, 0.2178,  0.2402, 0.2477,  0.2553, 0.2594,  0.2622, 0.2667,  0.2707, 0.2760,  0.2805, 0.2913,  0.3023, 0.3376,  0.3715, 0.4345,  0.5030, 0.5702,  0.6376, 0.6724,  0.7072,
+    0.7216, 0.7160,  0.7110, 0.6990,  0.6865, 0.6667,  0.6446, 0.6174,  0.5921, 0.5727,  0.5511, 0.5386,  0.5238, 0.5134,  0.5070, 0.4980,  0.4918, 0.4867,  0.4830, 0.4834,  0.4838, 0.4889,  0.4906, 0.4976,  0.5046, 0.5162,  0.5279,
+    0.5519, 0.5589,  0.5649, 0.5645,  0.5639, 0.5576,  0.5552, 0.5480,  0.5407, 0.5377,  0.5326, 0.5387,  0.5498, 0.5732,  0.5966,
+    0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+};
+
+//a10  Green 10  0.0958  0.1090  0.1352  0.1957  0.2402  0.2553  0.2622  0.2707  0.2805  0.3023  0.3715  0.5030  0.6376  0.7072  0.7216  0.7110  0.6865  0.6446  0.5921  0.5511  0.5238  0.5070  0.4918  0.4830  0.4838  0.4906  0.5046  0.5279  0.5519  0.5649  0.5639  0.5552  0.5407  0.5326  0.5498  0.5966
+const double ColorTemp::JDC468_GreK7_spect[97] = {
+    0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+    0.0114, 0.0111,  0.0109, 0.0107,  0.0105, 0.0106,  0.0108, 0.0107,  0.0106, 0.0105,  0.0104, 0.0103,  0.0103, 0.0106,  0.0109, 0.0112,  0.0118, 0.0135,  0.0153, 0.0244,  0.0334, 0.0666,  0.0984, 0.1534,  0.2082, 0.2412,  0.2835,
+    0.2959, 0.2843,  0.2735, 0.2516,  0.2305, 0.2012,  0.1728, 0.1435,  0.1156, 0.0964,  0.0772, 0.0671,  0.0570, 0.0518,  0.0468, 0.0436,  0.0397, 0.0380,  0.0354, 0.0354,  0.0355, 0.0367,  0.0380, 0.0402,  0.0426, 0.0481,  0.0523,
+    0.0643, 0.0678,  0.0704, 0.0693,  0.0676, 0.0639,  0.0609, 0.0567,  0.0514, 0.0487,  0.0468, 0.0518,  0.0567, 0.0730,  0.0902,
+    0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+};
+
+//k7  Green  267 0.0114  0.0109  0.0105  0.0108  0.0106  0.0104  0.0103  0.0109  0.0118  0.0153  0.0334  0.0984  0.2082  0.2835  0.2959  0.2735  0.2305  0.1728  0.1156  0.0772  0.0570  0.0468  0.0397  0.0354  0.0355  0.0380  0.0426  0.0523  0.0643  0.0704  0.0676  0.0609  0.0514  0.0468  0.0567  0.0902
+
+const double ColorTemp::JDC468_PurE24_spect[97] = {
+    0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+    0.0677, 0.901,  0.1043, 0.1298,  0.1534, 0.1913,  0.2297, 0.2553,  0.2756, 0.2789,  0.2620, 0.2380,  0.2135, 0.1837,  0.1536, 0.1312,  0.1068, 0.0867,  0.0663, 0.0517,  0.0368, 0.0309,  0.0247, 0.0214,  0.0186, 0.0151,  0.0116,
+    0.0077, 0.0079,  0.0079, 0.0083,  0.0086, 0.0077,  0.0071, 0.0071,  0.0072, 0.0107,  0.0147, 0.0298,  0.0440, 0.0661,  0.0880, 0.1010,  0.1152, 0.1193,  0.1236, 0.1260,  0.1287, 0.1326,  0.1366, 0.1428,  0.1489, 0.1596,  0.1697,
+    0.1936, 0.1996,  0.2057, 0.2036,  0.2015, 0.1954, 0.1890, 0.1798,  0.1706, 0.1651,  0.1603, 0.1692,  0.1788, 0.2075,  0.2363,
+    0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+};
+//E24  Pur 128 0.0677  0.1043  0.1534  0.2297  0.2756  0.2620  0.2135  0.1536  0.1068  0.0663  0.0368  0.0247  0.0186  0.0116  0.0077  0.0079  0.0086  0.0071  0.0072  0.0147  0.0440  0.0880  0.1152  0.1236  0.1287  0.1366  0.1489  0.1697  0.1936  0.2057  0.2015  0.1890  0.1706  0.1603  0.1788  0.2363
+
 
 //spectral data 468 color : Blue H10 - Gamut > WidegamutRGB
 const double ColorTemp::JDC468_BluH10_spect[97] = {
     0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-    0.01590, 0.028, 0.03970, 0.0697, 0.09970, 0.1526, 0.20550, 0.253, 0.30110, 0.3412, 0.38180, 0.423, 0.46610, 0.4683, 0.51030, 0.4999, 0.49950, 0.4785, 0.45810, 0.429, 0.39950, 0.374, 0.35010, 0.3135, 0.29630,
+    0.01590, 0.028, 0.03970, 0.0697, 0.09970, 0.1526, 0.20550, 0.253, 0.30110, 0.3412, 0.38180, 0.423, 0.46610, 0.4683, 0.51030, 0.5005, 0.49950, 0.4785, 0.45810, 0.429, 0.39950, 0.374, 0.35010, 0.3135, 0.29630,
     0.2587, 0.22070, 0.182, 0.14450, 0.1125, 0.09060, 0.072, 0.04810, 0.033, 0.01740, 0.0113, 0.00520, 0.004, 0.00290, 0.0028, 0.00270, 0.0027, 0.00270, 0.0027, 0.00280, 0.0027, 0.00270, 0.0028, 0.00280,
-    0.0029, 0.00300, 0.0029, 0.00290, 0.0029, 0.0029, 0.00290, 0.0029, 0.00290, 0.0029, 0.00290, 0.0029, 0.00290, 0.0029, 0.00290, 0.0029, 0.0031, 0.00320, 0.0035, 0.00380, 0.047, 0.00560,
+    0.0029, 0.00300, 0.0029, 0.00290, 0.0029, 0.0029, 0.00290, 0.0029, 0.00290, 0.0029, 0.00290, 0.0029, 0.00290, 0.0029, 0.00290, 0.0029, 0.0031, 0.00320, 0.0035, 0.00380, 0.0047, 0.00560,
     0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
 };
+//0.0159, 0.028,    0.0397, 0.0697, 0.0997, 0.1526, 0.2055, 0.253, 0.3011,  0.3412, 0.3818, 0.423,  0.4661, 0.5103  0.4995  0.4581  0.3995  0.3501  0.2963
+//0.2207    0.1445  0.0906  0.0481  0.0174  0.0052  0.0029  0.0027  0.0027  0.0028  0.0027  0.0028  0.0030  0.0029  0.0029  0.0029  0.0029  0.0029  0.0029
+//0.0029    0.0032  0.0038  0.0056
+
+const double ColorTemp::JDC468_BluD6_spect[97] = {
+    0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+    0.1127, 0.143, 0.1773, 0.223,   0.2813, 0.3987, 0.4782, 0.5665, 0.6470, 0.6870, 0.7270, 0.7403, 0.7593, 0.7592, 0.7591, 0.7480, 0.7402, 0.7234, 0.7054, 0.6876, 0.6617, 0.6512, 0.6302, 0.6124, 0.5962, 0.5660,
+    0.5352, 0.5009, 0.4655, 0.4356, 0.4191, 0.3923, 0.3619, 0.3145, 0.2653, 0.2245, 0.1744, 0.1499, 0.1255, 0.1124, 0.1014, 0.0972, 0.0855, 0.0786, 0.0715, 0.0659, 0.0626, 0.0625, 0.0624, 0.0645, 0.0670, 0.0714,
+    0.0769, 0.0865, 0.0964, 0.1086, 0.1200, 0.123,  0.1327, 0.1309, 0.1281, 0.1214, 0.1146, 0.1023, 0.0950, 0.0901, 0.0839, 0.0918, 0.1009, 0.1260, 0.1597,
+    0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+
+
+};
+//d6 blue   84  0.1127  0.1773  0.2813  0.4782  0.6470  0.7270  0.7593  0.7591  0.7402  0.7054  0.6617  0.6302  0.5962  0.5352  0.4655  0.4191  0.3619  0.2653  0.1744  0.1255  0.1014  0.0855  0.0715  0.0626  0.0624  0.0670  0.0769  0.0964  0.1200  0.1327  0.1281  0.1146  0.0950  0.0839  0.1009  0.1597
+const double ColorTemp::JDC468_BluF4_spect[97] = {
+    0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+    0.0180, 0.0270, 0.0324, 0.0453, 0.0611, 0.0845, 0.1066, 0.1234, 0.1446, 0.1567, 0.1718, 0.1867, 0.1954, 0.2024, 0.2083, 0.2090, 0.2096, 0.2060, 0.2036, 0.1990, 0.1947, 0.1920, 0.1901, 0.1856, 0.1794, 0.1667, 0.1516, 0.1321,
+    0.1167, 0.1032, 0.0876, 0.0730, 0.0584, 0.0445, 0.0296, 0.0212, 0.0125, 0.0099, 0.0069, 0.0060, 0.0053, 0.0050, 0.0049, 0.0047, 0.0046, 0.0045, 0.0044, 0.0043, 0.0043, 0.0043, 0.0043, 0.0046, 0.0049, 0.0050, 0.0052, 0.0057,
+    0.0063, 0.0066, 0.0069, 0.0067, 0.0066, 0.0063, 0.0059, 0.0056, 0.0053, 0.0054, 0.0055, 0.0062, 0.0069, 0.0099, 0.0122,
+    0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+
+};
+
+// f4 blue  134 0.0180  0.0324  0.0611  0.1066  0.1446  0.1718  0.1954  0.2083  0.2096  0.2036  0.1947  0.1901  0.1794  0.1516  0.1167  0.0876  0.0584  0.0296  0.0125  0.0069  0.0053  0.0049  0.0046  0.0044  0.0043  0.0043  0.0049  0.0052  0.0063  0.0069  0.0066  0.0059  0.0053  0.0055  0.0069  0.0122
+const double ColorTemp::JDC468_GreI8_spect[97] = {
+    0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+    0.0230, 0.0232, 0.0234, 0.0254, 0.0263, 0.0298, 0.0329, 0.0367, 0.0377, 0.0388, 0.0399, 0.0410, 0.0421, 0.0440, 0.0460, 0.0481, 0.0496, 0.0523, 0.0559, 0.0645, 0.0727, 0.0878, 0.1020, 0.1156, 0.1288, 0.1334, 0.1394, 0.1398,
+    0.1402, 0.1407, 0.1413, 0.1409, 0.1396, 0.1334, 0.1276, 0.1200, 0.1129, 0.1095, 0.1064, 0.1053, 0.1043, 0.1031, 0.1021, 0.1001, 0.0980, 0.0970, 0.0952, 0.0963, 0.0967, 0.0990, 0.1009, 0.1042, 0.1078, 0.1130, 0.1188, 0.1251,
+    0.1307, 0.1335, 0.1374, 0.1376, 0.1378, 0.1362, 0.1345, 0.1312, 0.1278, 0.1257, 0.1240, 0.1290, 0.1345, 0.1476, 0.1615,
+    0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+
+};
+
+// i8 green215  215 0.0230  0.0234  0.0263  0.0329  0.0377  0.0399  0.0421  0.0460  0.0496  0.0559  0.0727  0.1020  0.1288  0.1394  0.1402  0.1413  0.1396  0.1276  0.1129  0.1064  0.1043  0.1021  0.0980  0.0952  0.0967  0.1009  0.1078  0.1188  0.1307  0.1374  0.1378  0.1345  0.1278  0.1240  0.1345  0.1615
+
+const double ColorTemp::JDC468_OraO18_spect[97] = {
+    0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+    0.0826, 0.0830, 0.0832, 0.0861, 0.0892, 0.0993, 0.1108, 0.1180, 0.1248, 0.1253, 0.1263, 0.1261, 0.1259, 0.1267, 0.1289, 0.1304, 0.1319, 0.1370, 0.1419, 0.1631, 0.1851, 0.2311, 0.2743, 0.3131, 0.3536, 0.3551, 0.3585, 0.3488, 0.3322,
+    0.3470, 0.3575, 0.3680, 0.3498, 0.3316, 0.3224, 0.3129, 0.3578, 0.4013, 0.4734, 0.5454, 0.5978, 0.6502, 0.6745, 0.6982, 0.7080, 0.7182, 0.7273, 0.7269, 0.7308, 0.7342, 0.7393, 0.7436, 0.7498, 0.7550, 0.7597, 0.7640, 0.7680, 0.7713,
+    0.7766, 0.7786, 0.7816, 0.7841, 0.7863, 0.7889, 0.7902, 0.7931, 0.7957, 0.7997, 0.8068,
+    0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+
+};
+// o18 ora 382  382 0.0826  0.0832  0.0892  0.1108  0.1248  0.1263  0.1259  0.1289  0.1319  0.1419  0.1851  0.2743  0.3536  0.3585  0.3322  0.3470  0.3680  0.3316  0.3129  0.4013  0.5454  0.6502  0.6982  0.7182  0.7269  0.7342  0.7436  0.7550  0.7640  0.7713  0.7766  0.7816  0.7863  0.7902  0.7957  0.8068
+const double ColorTemp::JDC468_OraD17_spect[97] = {
+    0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+    0.0462, 0.0442,  0.0422, 0.0401,  0.0383, 0.0390,  0.0396, 0.0396,  0.0395, 0.0388,  0.0380, 0.0378,  0.0376, 0.0381,  0.0384, 0.0391,  0.0399, 0.0421,  0.0451, 0.0561,  0.0676,  0.0934, 0.1189, 0.1432,  0.1671, 0.1650,  0.1632, 0.1512,  0.1402, 0.1456,
+    0.1521, 0.1613,  0.1696, 0.1552,  0.1409,  0.1342, 0.1283, 0.1689,  0.2084, 0.2845,  0.3575, 0.4183,  0.4797, 0.5090,  0.5389, 0.5498,  0.5617, 0.5667,  0.5728, 0.5788,  0.5822, 0.5889,  0.5938, 0.6011,  0.6081, 0.6145,  0.6212, 0.6267,  0.6304, 0.6331,
+    0.6352, 0.6361,  0.6373, 0.6372,  0.6370, 0.6376,  0.6384, 0.6413,  0.6483, 0.6523,  0.6668,
+    0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+
+};
+
+// d17 ora 95   95  0.0462  0.0422  0.0383  0.0396  0.0395  0.0380  0.0376  0.0384  0.0399  0.0451  0.0676  0.1189  0.1671  0.1632  0.1402  0.1521  0.1696  0.1409  0.1283  0.2084  0.3575  0.4797  0.5389  0.5617  0.5728  0.5822  0.5938  0.6081  0.6212  0.6304  0.6352  0.6373  0.6370  0.6384  0.6483  0.6668
 
 //spectral data ColorLab : Skin 35 15 17
 const double ColorTemp::ColabSkin35_15_17_spect[97] = {
@@ -848,7 +1003,7 @@ const double ColorTemp::ColabSky42_0_m24_spect[97] = {
 
 /* LERP(a,b,c) = linear interpolation macro, is 'a' when c == 0.0 and 'b' when c == 1.0 */
 #define LERP(a,b,c)     (((b) - (a)) * (c) + (a))
-int ColorTemp::XYZtoCorColorTemp(double x0, double y0, double z0, double &temp) const
+int ColorTemp::XYZtoCorColorTemp (double x0, double y0, double z0, double &temp) const
 {
 
     typedef struct UVT {
@@ -922,18 +1077,18 @@ int ColorTemp::XYZtoCorColorTemp(double x0, double y0, double z0, double &temp) 
     }
 
     if (i == 31) {
-        return(-1);    /* bad XYZ input, color temp would be less than minimum of 1666.7 degrees, or too far towards blue */
+        return (-1);   /* bad XYZ input, color temp would be less than minimum of 1666.7 degrees, or too far towards blue */
     }
 
-    di = di / sqrt(1.0 + uvt[i    ].t * uvt[i    ].t);
-    dm = dm / sqrt(1.0 + uvt[i - 1].t * uvt[i - 1].t);
+    di = di / sqrt (1.0 + uvt[i    ].t * uvt[i    ].t);
+    dm = dm / sqrt (1.0 + uvt[i - 1].t * uvt[i - 1].t);
     p = dm / (dm - di);     /* p = interpolation parameter, 0.0 : i-1, 1.0 : i */
-    p = 1.0 / (LERP(rt[i - 1], rt[i], p));
+    p = 1.0 / (LERP (rt[i - 1], rt[i], p));
     temp = p;
     return 0;      /* success */
 }
 
-void ColorTemp::cieCAT02(double Xw, double Yw, double Zw, double &CAM02BB00, double &CAM02BB01, double &CAM02BB02, double &CAM02BB10, double &CAM02BB11, double &CAM02BB12, double &CAM02BB20, double &CAM02BB21, double &CAM02BB22, double adap )
+void ColorTemp::cieCAT02 (double Xw, double Yw, double Zw, double &CAM02BB00, double &CAM02BB01, double &CAM02BB02, double &CAM02BB10, double &CAM02BB11, double &CAM02BB12, double &CAM02BB20, double &CAM02BB21, double &CAM02BB22, double adap )
 {
 
 // CIECAT02  - J.Desmis January 2012 review September 2012
@@ -985,20 +1140,20 @@ void ColorTemp::cieCAT02(double Xw, double Yw, double Zw, double &CAM02BB00, dou
     inv_white_orig[2][2] = 1. / cam_orig[2]; // 1/BeS
 
     //intermediates computation
-    for(int i = 0; i < 3; i++)
-        for(int j = 0; j < 3 ; j++) {
+    for (int i = 0; i < 3; i++)
+        for (int j = 0; j < 3 ; j++) {
             intermed[i][j] = inv_white_orig[i][i] * CAT02[i][j];
         }
 
-    for(int i = 0; i < 3; i++)
-        for(int j = 0; j < 3 ; j++) {
+    for (int i = 0; i < 3; i++)
+        for (int j = 0; j < 3 ; j++) {
             intermed_2[i][j] = cam_dest[i] * intermed[i][j];
         }
 
     //and CAM02
-    for(int i = 0; i < 3; i++)
-        for(int j = 0; j < 3; j++)
-            for(int k = 0; k < 3; k++) {
+    for (int i = 0; i < 3; i++)
+        for (int j = 0; j < 3; j++)
+            for (int k = 0; k < 3; k++) {
                 CAM02[i][j] += INVCAT02[i][k] * intermed_2[k][j];
             }
 
@@ -1031,67 +1186,67 @@ void ColorTemp::temp2mulxyz (double tem, double gree, const std::string &method,
     double x, y, z;
 
     if     (method == "Daylight"            ) {
-        spectrum_to_xyz_preset(Daylight5300_spect,     x, y, z);
-    } else if(method == "Cloudy"              ) {
-        spectrum_to_xyz_preset(Cloudy6200_spect,       x, y, z);
-    } else if(method == "Shade"               ) {
-        spectrum_to_xyz_preset(Shade7600_spect,        x, y, z);
-    } else if(method == "Tungsten"            ) {
-        spectrum_to_xyz_preset(A2856_spect,            x, y, z);
-    } else if(method == "Fluo F1"             ) {
-        spectrum_to_xyz_preset(FluoF1_spect,           x, y, z);
-    } else if(method == "Fluo F2"             ) {
-        spectrum_to_xyz_preset(FluoF2_spect,           x, y, z);
-    } else if(method == "Fluo F3"             ) {
-        spectrum_to_xyz_preset(FluoF3_spect,           x, y, z);
-    } else if(method == "Fluo F4"             ) {
-        spectrum_to_xyz_preset(FluoF4_spect,           x, y, z);
-    } else if(method == "Fluo F5"             ) {
-        spectrum_to_xyz_preset(FluoF5_spect,           x, y, z);
-    } else if(method == "Fluo F6"             ) {
-        spectrum_to_xyz_preset(FluoF6_spect,           x, y, z);
-    } else if(method == "Fluo F7"             ) {
-        spectrum_to_xyz_preset(FluoF7_spect,           x, y, z);
-    } else if(method == "Fluo F8"             ) {
-        spectrum_to_xyz_preset(FluoF8_spect,           x, y, z);
-    } else if(method == "Fluo F9"             ) {
-        spectrum_to_xyz_preset(FluoF9_spect,           x, y, z);
-    } else if(method == "Fluo F10"            ) {
-        spectrum_to_xyz_preset(FluoF10_spect,          x, y, z);
-    } else if(method == "Fluo F11"            ) {
-        spectrum_to_xyz_preset(FluoF11_spect,          x, y, z);
-    } else if(method == "Fluo F12"            ) {
-        spectrum_to_xyz_preset(FluoF12_spect,          x, y, z);
-    } else if(method == "HMI Lamp"            ) {
-        spectrum_to_xyz_preset(HMI_spect,              x, y, z);
-    } else if(method == "GTI Lamp"            ) {
-        spectrum_to_xyz_preset(GTI_spect,              x, y, z);
-    } else if(method == "JudgeIII Lamp"       ) {
-        spectrum_to_xyz_preset(JudgeIII_spect,         x, y, z);
-    } else if(method == "Solux Lamp 3500K"    ) {
-        spectrum_to_xyz_preset(Solux3500_spect,        x, y, z);
-    } else if(method == "Solux Lamp 4100K"    ) {
-        spectrum_to_xyz_preset(Solux4100_spect,        x, y, z);
-    } else if(method == "Solux Lamp 4700K"    ) {
-        spectrum_to_xyz_preset(Solux4700_spect,        x, y, z);
-    } else if(method == "NG Solux Lamp 4700K" ) {
-        spectrum_to_xyz_preset(NG_Solux4700_spect,     x, y, z);
-    } else if(method == "LED LSI Lumelex 2040") {
-        spectrum_to_xyz_preset(NG_LEDLSI2040_spect,    x, y, z);
-    } else if(method == "LED CRS SP12 WWMR16" ) {
-        spectrum_to_xyz_preset(NG_CRSSP12WWMR16_spect, x, y, z);
-    } else if(method == "Flash 5500K"         ) {
-        spectrum_to_xyz_preset(Flash5500_spect,        x, y, z);
-    } else if(method == "Flash 6000K"         ) {
-        spectrum_to_xyz_preset(Flash6000_spect,        x, y, z);
-    } else if(method == "Flash 6500K"         ) {
-        spectrum_to_xyz_preset(Flash6500_spect,        x, y, z);
+        spectrum_to_xyz_preset (Daylight5300_spect,     x, y, z);
+    } else if (method == "Cloudy"              ) {
+        spectrum_to_xyz_preset (Cloudy6200_spect,       x, y, z);
+    } else if (method == "Shade"               ) {
+        spectrum_to_xyz_preset (Shade7600_spect,        x, y, z);
+    } else if (method == "Tungsten"            ) {
+        spectrum_to_xyz_preset (A2856_spect,            x, y, z);
+    } else if (method == "Fluo F1"             ) {
+        spectrum_to_xyz_preset (FluoF1_spect,           x, y, z);
+    } else if (method == "Fluo F2"             ) {
+        spectrum_to_xyz_preset (FluoF2_spect,           x, y, z);
+    } else if (method == "Fluo F3"             ) {
+        spectrum_to_xyz_preset (FluoF3_spect,           x, y, z);
+    } else if (method == "Fluo F4"             ) {
+        spectrum_to_xyz_preset (FluoF4_spect,           x, y, z);
+    } else if (method == "Fluo F5"             ) {
+        spectrum_to_xyz_preset (FluoF5_spect,           x, y, z);
+    } else if (method == "Fluo F6"             ) {
+        spectrum_to_xyz_preset (FluoF6_spect,           x, y, z);
+    } else if (method == "Fluo F7"             ) {
+        spectrum_to_xyz_preset (FluoF7_spect,           x, y, z);
+    } else if (method == "Fluo F8"             ) {
+        spectrum_to_xyz_preset (FluoF8_spect,           x, y, z);
+    } else if (method == "Fluo F9"             ) {
+        spectrum_to_xyz_preset (FluoF9_spect,           x, y, z);
+    } else if (method == "Fluo F10"            ) {
+        spectrum_to_xyz_preset (FluoF10_spect,          x, y, z);
+    } else if (method == "Fluo F11"            ) {
+        spectrum_to_xyz_preset (FluoF11_spect,          x, y, z);
+    } else if (method == "Fluo F12"            ) {
+        spectrum_to_xyz_preset (FluoF12_spect,          x, y, z);
+    } else if (method == "HMI Lamp"            ) {
+        spectrum_to_xyz_preset (HMI_spect,              x, y, z);
+    } else if (method == "GTI Lamp"            ) {
+        spectrum_to_xyz_preset (GTI_spect,              x, y, z);
+    } else if (method == "JudgeIII Lamp"       ) {
+        spectrum_to_xyz_preset (JudgeIII_spect,         x, y, z);
+    } else if (method == "Solux Lamp 3500K"    ) {
+        spectrum_to_xyz_preset (Solux3500_spect,        x, y, z);
+    } else if (method == "Solux Lamp 4100K"    ) {
+        spectrum_to_xyz_preset (Solux4100_spect,        x, y, z);
+    } else if (method == "Solux Lamp 4700K"    ) {
+        spectrum_to_xyz_preset (Solux4700_spect,        x, y, z);
+    } else if (method == "NG Solux Lamp 4700K" ) {
+        spectrum_to_xyz_preset (NG_Solux4700_spect,     x, y, z);
+    } else if (method == "LED LSI Lumelex 2040") {
+        spectrum_to_xyz_preset (NG_LEDLSI2040_spect,    x, y, z);
+    } else if (method == "LED CRS SP12 WWMR16" ) {
+        spectrum_to_xyz_preset (NG_CRSSP12WWMR16_spect, x, y, z);
+    } else if (method == "Flash 5500K"         ) {
+        spectrum_to_xyz_preset (Flash5500_spect,        x, y, z);
+    } else if (method == "Flash 6000K"         ) {
+        spectrum_to_xyz_preset (Flash6000_spect,        x, y, z);
+    } else if (method == "Flash 6500K"         ) {
+        spectrum_to_xyz_preset (Flash6500_spect,        x, y, z);
     } else {
         // otherwise we use the Temp+Green generic solution
         if (tem <= INITIALBLACKBODY) {
             // if temperature is between 2000K and 4000K we use blackbody, because there will be no Daylight reference below 4000K...
             // of course, the previous version of RT used the "magical" but wrong formula of U.Fuchs (Ufraw).
-            spectrum_to_xyz_blackbody(tem, x, y, z);
+            spectrum_to_xyz_blackbody (tem, x, y, z);
         } else {
             // from 4000K up to 25000K: using the D illuminant (daylight) which is standard
             double m1, m2;
@@ -1100,7 +1255,7 @@ void ColorTemp::temp2mulxyz (double tem, double gree, const std::string &method,
                 x_D = -4.6070e9 / (tem * tem * tem) + 2.9678e6 / (tem * tem) + 0.09911e3 / tem + 0.244063;
             } else if (tem <= 25000) {
                 x_D = -2.0064e9 / (tem * tem * tem) + 1.9018e6 / (tem * tem) + 0.24748e3 / tem + 0.237040;
-            } else /*if (tem > 25000)*/ {
+            } else { /*if (tem > 25000)*/
                 x_D = -2.0064e9 / (tem * tem * tem) + 1.9018e6 / (tem * tem) + 0.24748e3 / tem + 0.237040 - ((tem - 25000) / 25000) * 0.025;    //Jacques empirical adjustemnt for very high temp (underwater !)
             }
 
@@ -1110,7 +1265,7 @@ void ColorTemp::temp2mulxyz (double tem, double gree, const std::string &method,
             interm = (0.0241 + 0.2562 * x_D - 0.734 * y_D);
             m1 = (-1.3515 - 1.7703 * x_D + 5.9114 * y_D) / interm;
             m2 = (0.03 - 31.4424 * x_D + 30.0717 * y_D) / interm;
-            spectrum_to_xyz_daylight(m1, m2, x, y, z);
+            spectrum_to_xyz_daylight (m1, m2, x, y, z);
             xD = x;
             yD = y;
         }
@@ -1156,67 +1311,67 @@ void ColorTemp::temp2mul (double temp, double green, double equal, double& rmul,
 
     // We first test for specially handled methods
     if     (method == "Daylight"            ) {
-        spectrum_to_xyz_preset(Daylight5300_spect,     x, y, z);
-    } else if(method == "Cloudy"              ) {
-        spectrum_to_xyz_preset(Cloudy6200_spect,       x, y, z);
-    } else if(method == "Shade"               ) {
-        spectrum_to_xyz_preset(Shade7600_spect,        x, y, z);
-    } else if(method == "Tungsten"            ) {
-        spectrum_to_xyz_preset(A2856_spect,            x, y, z);
-    } else if(method == "Fluo F1"             ) {
-        spectrum_to_xyz_preset(FluoF1_spect,           x, y, z);
-    } else if(method == "Fluo F2"             ) {
-        spectrum_to_xyz_preset(FluoF2_spect,           x, y, z);
-    } else if(method == "Fluo F3"             ) {
-        spectrum_to_xyz_preset(FluoF3_spect,           x, y, z);
-    } else if(method == "Fluo F4"             ) {
-        spectrum_to_xyz_preset(FluoF4_spect,           x, y, z);
-    } else if(method == "Fluo F5"             ) {
-        spectrum_to_xyz_preset(FluoF5_spect,           x, y, z);
-    } else if(method == "Fluo F6"             ) {
-        spectrum_to_xyz_preset(FluoF6_spect,           x, y, z);
-    } else if(method == "Fluo F7"             ) {
-        spectrum_to_xyz_preset(FluoF7_spect,           x, y, z);
-    } else if(method == "Fluo F8"             ) {
-        spectrum_to_xyz_preset(FluoF8_spect,           x, y, z);
-    } else if(method == "Fluo F9"             ) {
-        spectrum_to_xyz_preset(FluoF9_spect,           x, y, z);
-    } else if(method == "Fluo F10"            ) {
-        spectrum_to_xyz_preset(FluoF10_spect,          x, y, z);
-    } else if(method == "Fluo F11"            ) {
-        spectrum_to_xyz_preset(FluoF11_spect,          x, y, z);
-    } else if(method == "Fluo F12"            ) {
-        spectrum_to_xyz_preset(FluoF12_spect,          x, y, z);
-    } else if(method == "HMI Lamp"            ) {
-        spectrum_to_xyz_preset(HMI_spect,              x, y, z);
-    } else if(method == "GTI Lamp"            ) {
-        spectrum_to_xyz_preset(GTI_spect,              x, y, z);
-    } else if(method == "JudgeIII Lamp"       ) {
-        spectrum_to_xyz_preset(JudgeIII_spect,         x, y, z);
-    } else if(method == "Solux Lamp 3500K"    ) {
-        spectrum_to_xyz_preset(Solux3500_spect,        x, y, z);
-    } else if(method == "Solux Lamp 4100K"    ) {
-        spectrum_to_xyz_preset(Solux4100_spect,        x, y, z);
-    } else if(method == "Solux Lamp 4700K"    ) {
-        spectrum_to_xyz_preset(Solux4700_spect,        x, y, z);
-    } else if(method == "NG Solux Lamp 4700K" ) {
-        spectrum_to_xyz_preset(NG_Solux4700_spect,     x, y, z);
-    } else if(method == "LED LSI Lumelex 2040") {
-        spectrum_to_xyz_preset(NG_LEDLSI2040_spect,    x, y, z);
-    } else if(method == "LED CRS SP12 WWMR16" ) {
-        spectrum_to_xyz_preset(NG_CRSSP12WWMR16_spect, x, y, z);
-    } else if(method == "Flash 5500K"         ) {
-        spectrum_to_xyz_preset(Flash5500_spect,        x, y, z);
-    } else if(method == "Flash 6000K"         ) {
-        spectrum_to_xyz_preset(Flash6000_spect,        x, y, z);
-    } else if(method == "Flash 6500K"         ) {
-        spectrum_to_xyz_preset(Flash6500_spect,        x, y, z);
+        spectrum_to_xyz_preset (Daylight5300_spect,     x, y, z);
+    } else if (method == "Cloudy"              ) {
+        spectrum_to_xyz_preset (Cloudy6200_spect,       x, y, z);
+    } else if (method == "Shade"               ) {
+        spectrum_to_xyz_preset (Shade7600_spect,        x, y, z);
+    } else if (method == "Tungsten"            ) {
+        spectrum_to_xyz_preset (A2856_spect,            x, y, z);
+    } else if (method == "Fluo F1"             ) {
+        spectrum_to_xyz_preset (FluoF1_spect,           x, y, z);
+    } else if (method == "Fluo F2"             ) {
+        spectrum_to_xyz_preset (FluoF2_spect,           x, y, z);
+    } else if (method == "Fluo F3"             ) {
+        spectrum_to_xyz_preset (FluoF3_spect,           x, y, z);
+    } else if (method == "Fluo F4"             ) {
+        spectrum_to_xyz_preset (FluoF4_spect,           x, y, z);
+    } else if (method == "Fluo F5"             ) {
+        spectrum_to_xyz_preset (FluoF5_spect,           x, y, z);
+    } else if (method == "Fluo F6"             ) {
+        spectrum_to_xyz_preset (FluoF6_spect,           x, y, z);
+    } else if (method == "Fluo F7"             ) {
+        spectrum_to_xyz_preset (FluoF7_spect,           x, y, z);
+    } else if (method == "Fluo F8"             ) {
+        spectrum_to_xyz_preset (FluoF8_spect,           x, y, z);
+    } else if (method == "Fluo F9"             ) {
+        spectrum_to_xyz_preset (FluoF9_spect,           x, y, z);
+    } else if (method == "Fluo F10"            ) {
+        spectrum_to_xyz_preset (FluoF10_spect,          x, y, z);
+    } else if (method == "Fluo F11"            ) {
+        spectrum_to_xyz_preset (FluoF11_spect,          x, y, z);
+    } else if (method == "Fluo F12"            ) {
+        spectrum_to_xyz_preset (FluoF12_spect,          x, y, z);
+    } else if (method == "HMI Lamp"            ) {
+        spectrum_to_xyz_preset (HMI_spect,              x, y, z);
+    } else if (method == "GTI Lamp"            ) {
+        spectrum_to_xyz_preset (GTI_spect,              x, y, z);
+    } else if (method == "JudgeIII Lamp"       ) {
+        spectrum_to_xyz_preset (JudgeIII_spect,         x, y, z);
+    } else if (method == "Solux Lamp 3500K"    ) {
+        spectrum_to_xyz_preset (Solux3500_spect,        x, y, z);
+    } else if (method == "Solux Lamp 4100K"    ) {
+        spectrum_to_xyz_preset (Solux4100_spect,        x, y, z);
+    } else if (method == "Solux Lamp 4700K"    ) {
+        spectrum_to_xyz_preset (Solux4700_spect,        x, y, z);
+    } else if (method == "NG Solux Lamp 4700K" ) {
+        spectrum_to_xyz_preset (NG_Solux4700_spect,     x, y, z);
+    } else if (method == "LED LSI Lumelex 2040") {
+        spectrum_to_xyz_preset (NG_LEDLSI2040_spect,    x, y, z);
+    } else if (method == "LED CRS SP12 WWMR16" ) {
+        spectrum_to_xyz_preset (NG_CRSSP12WWMR16_spect, x, y, z);
+    } else if (method == "Flash 5500K"         ) {
+        spectrum_to_xyz_preset (Flash5500_spect,        x, y, z);
+    } else if (method == "Flash 6000K"         ) {
+        spectrum_to_xyz_preset (Flash6000_spect,        x, y, z);
+    } else if (method == "Flash 6500K"         ) {
+        spectrum_to_xyz_preset (Flash6500_spect,        x, y, z);
     } else {
         // otherwise we use the Temp+Green generic solution
         if (temp <= INITIALBLACKBODY) {
             // if temperature is between 2000K and 4000K we use blackbody, because there will be no Daylight reference below 4000K...
             // of course, the previous version of RT used the "magical" but wrong formula of U.Fuchs (Ufraw).
-            spectrum_to_xyz_blackbody(temp, x, y, z);
+            spectrum_to_xyz_blackbody (temp, x, y, z);
         } else {
             // from 4000K up to 25000K: using the D illuminant (daylight) which is standard
 
@@ -1224,7 +1379,7 @@ void ColorTemp::temp2mul (double temp, double green, double equal, double& rmul,
                 x_D = -4.6070e9 / (temp * temp * temp) + 2.9678e6 / (temp * temp) + 0.09911e3 / temp + 0.244063;
             } else if (temp <= 25000) {
                 x_D = -2.0064e9 / (temp * temp * temp) + 1.9018e6 / (temp * temp) + 0.24748e3 / temp + 0.237040;
-            } else /*if (temp > 25000)*/ { // above 25000 it's unknown..then I have modified to adjust for underwater
+            } else { /*if (temp > 25000)*/  // above 25000 it's unknown..then I have modified to adjust for underwater
                 x_D = -2.0064e9 / (temp * temp * temp) + 1.9018e6 / (temp * temp) + 0.24748e3 / temp + 0.237040 - ((temp - 25000) / 25000) * 0.025;    //Jacques empirical adjustemnt for very high temp (underwater !)
             }
 
@@ -1234,7 +1389,7 @@ void ColorTemp::temp2mul (double temp, double green, double equal, double& rmul,
             interm = (0.0241 + 0.2562 * x_D - 0.734 * y_D);
             m1 = (-1.3515 - 1.7703 * x_D + 5.9114 * y_D) / interm;
             m2 = (0.03 - 31.4424 * x_D + 30.0717 * y_D) / interm;
-            spectrum_to_xyz_daylight(m1, m2, x, y, z);
+            spectrum_to_xyz_daylight (m1, m2, x, y, z);
             xD = x;
             yD = y;
         }
@@ -1244,7 +1399,7 @@ void ColorTemp::temp2mul (double temp, double green, double equal, double& rmul,
     yD = y;
     float adj = 1.f;
 
-    if(equal < 0.9999 || equal > 1.0001 ) {
+    if (equal < 0.9999 || equal > 1.0001 ) {
         adj = (100.f + ( 1000.f - (1000.f * (float)equal) ) / 20.f) / 100.f;
     }
 
@@ -1257,8 +1412,8 @@ void ColorTemp::temp2mul (double temp, double green, double equal, double& rmul,
         // double u=4*xD/(-2*xD+12*yD+3);
         // double v=6*yD/(-2*xD+12*yD+3);
         // printf("xD=%f yD=%f u=%f v=%f\n",xD,yD,u,v);
-        if(settings->CRI_color != 0) {
-            printf("xD=%f yD=%f === Xwb=%f Ywb=%f Zwb=%f\n", xD, yD, Xwb, Ywb, Zwb);
+        if (settings->CRI_color != 0) {
+            printf ("xD=%f yD=%f === Xwb=%f Ywb=%f Zwb=%f\n", xD, yD, Xwb, Ywb, Zwb);
         }
     }
 
@@ -1295,7 +1450,7 @@ void ColorTemp::temp2mul (double temp, double green, double equal, double& rmul,
     //first calcul with illuminant (choice)
     // and calcul with : blackbody at equivalent temp of lamp
 
-    if(settings->CRI_color != 0) //activate if CRi_color !=0
+    if (settings->CRI_color != 0) //activate if CRi_color !=0
         // CRI_color-1 = dispaly Lab values of color CRI_color -1
     {
         int illum;
@@ -1310,7 +1465,7 @@ void ColorTemp::temp2mul (double temp, double green, double equal, double& rmul,
             JDC468_GraK14_44_spect, JDC468_BluH10_spect
         };
 
-        int N_c = sizeof(spec_color) / sizeof(spec_color[0]); //number of color
+        int N_c = sizeof (spec_color) / sizeof (spec_color[0]); //number of color
 
         bool CRI_type = false;
         double tempw;
@@ -1416,17 +1571,17 @@ void ColorTemp::temp2mul (double temp, double green, double equal, double& rmul,
             float CRI_RT = 0.0, CRI[50];
             float CRI_RTs = 0.0, CRIs[8];
 
-            for(int i = 0; i < N_c; i++) {
-                spectrum_to_color_xyz_preset(spec_color[i], spect_illum[illum + 3], XchkLamp[i], YchkLamp[i], ZchkLamp[i]);
+            for (int i = 0; i < N_c; i++) {
+                spectrum_to_color_xyz_preset (spec_color[i], spect_illum[illum + 3], XchkLamp[i], YchkLamp[i], ZchkLamp[i]);
             }
 
             //calculate XYZ for each color : for Blackbody and Daylight at tempw
-            if(tempw <= INITIALBLACKBODY) {
-                for(int i = 0; i < N_c; i++) {
-                    spectrum_to_color_xyz_blackbody(spec_color[i], tempw, Xchk[i], Ychk[i], Zchk[i]);
+            if (tempw <= INITIALBLACKBODY) {
+                for (int i = 0; i < N_c; i++) {
+                    spectrum_to_color_xyz_blackbody (spec_color[i], tempw, Xchk[i], Ychk[i], Zchk[i]);
                 }
 
-                spectrum_to_xyz_blackbody(tempw, x, y, z);//for white point
+                spectrum_to_xyz_blackbody (tempw, x, y, z); //for white point
             } else { // after 6600K (arbitrary) I use daylight...because ...but there is no lamp...
                 double m11, m22, x_DD, y_DD, interm2;
 
@@ -1443,17 +1598,17 @@ void ColorTemp::temp2mul (double temp, double green, double equal, double& rmul,
                 m11 = (-1.3515 - 1.7703 * x_DD + 5.9114 * y_DD) / interm2;
                 m22 = (0.03 - 31.4424 * x_DD + 30.0717 * y_DD) / interm2;
 
-                for(int i = 0; i < N_c; i++) {
-                    spectrum_to_color_xyz_daylight(spec_color[i], m11, m22, Xchk[i], Ychk[i], Zchk[i]);
+                for (int i = 0; i < N_c; i++) {
+                    spectrum_to_color_xyz_daylight (spec_color[i], m11, m22, Xchk[i], Ychk[i], Zchk[i]);
                 }
 
-                spectrum_to_xyz_daylight(m11, m22, x, y, z);
+                spectrum_to_xyz_daylight (m11, m22, x, y, z);
             }
 
             if (settings->verbose) {
                 double correl_temp;
-                XYZtoCorColorTemp(Xwb, Ywb, Zwb, correl_temp);
-                printf("Correlated temperature (lamp)=%i\n", (int) correl_temp); //use only for lamp...otherwise It give an information!!
+                XYZtoCorColorTemp (Xwb, Ywb, Zwb, correl_temp);
+                printf ("Correlated temperature (lamp)=%i\n", (int) correl_temp); //use only for lamp...otherwise It give an information!!
             }
 
             double Xwb_bb = x / y; //white balance for blackbody
@@ -1462,10 +1617,10 @@ void ColorTemp::temp2mul (double temp, double green, double equal, double& rmul,
 
             //calculate Matrix CAM02 : better than Von Kries and Bradford==> for Lamp
             double  adap = 1.0;
-            cieCAT02(Xwb, Ywb, Zwb, CAM02BB00, CAM02BB01, CAM02BB02, CAM02BB10, CAM02BB11, CAM02BB12, CAM02BB20, CAM02BB21, CAM02BB22, adap);
+            cieCAT02 (Xwb, Ywb, Zwb, CAM02BB00, CAM02BB01, CAM02BB02, CAM02BB10, CAM02BB11, CAM02BB12, CAM02BB20, CAM02BB21, CAM02BB22, adap);
 
             //here new value of X,Y,Z for lamp with chromatic CAM02 adaptation
-            for(int i = 0; i < N_c; i++) {
+            for (int i = 0; i < N_c; i++) {
                 Xcam02Lamp[i] = CAM02BB00 * XchkLamp[i] + CAM02BB01 * YchkLamp[i] + CAM02BB02 * ZchkLamp[i] ;
                 Ycam02Lamp[i] = CAM02BB10 * XchkLamp[i] + CAM02BB11 * YchkLamp[i] + CAM02BB12 * ZchkLamp[i] ;
                 Zcam02Lamp[i] = CAM02BB20 * XchkLamp[i] + CAM02BB21 * YchkLamp[i] + CAM02BB22 * ZchkLamp[i] ;
@@ -1473,11 +1628,11 @@ void ColorTemp::temp2mul (double temp, double green, double equal, double& rmul,
 
             //now calculate CAM02 for Blackbody (or Daylight) at tempx
 
-            cieCAT02(Xwb_bb, Ywb_bb, Zwb_bb, CAM02BB00, CAM02BB01, CAM02BB02, CAM02BB10, CAM02BB11, CAM02BB12, CAM02BB20, CAM02BB21, CAM02BB22, adap);
+            cieCAT02 (Xwb_bb, Ywb_bb, Zwb_bb, CAM02BB00, CAM02BB01, CAM02BB02, CAM02BB10, CAM02BB11, CAM02BB12, CAM02BB20, CAM02BB21, CAM02BB22, adap);
 
             //here new value of X,Y,Z for blackbody with chromatic CAM02 adaptation
 
-            for(int i = 0; i < N_c; i++) {
+            for (int i = 0; i < N_c; i++) {
                 Xcam02[i] = CAM02BB00 * Xchk[i] + CAM02BB01 * Ychk[i] + CAM02BB02 * Zchk[i] ;
                 Ycam02[i] = CAM02BB10 * Xchk[i] + CAM02BB11 * Ychk[i] + CAM02BB12 * Zchk[i] ;
                 Zcam02[i] = CAM02BB20 * Xchk[i] + CAM02BB21 * Ychk[i] + CAM02BB22 * Zchk[i] ;
@@ -1488,59 +1643,60 @@ void ColorTemp::temp2mul (double temp, double green, double equal, double& rmul,
             //now conversion to Lab
             // Lamp
 
-            for(int i = 0; i < N_c; i++) {
+            for (int i = 0; i < N_c; i++) {
                 xr[i] = Xcam02Lamp[i] / whiteD50[0];
                 yr[i] = Ycam02Lamp[i] / whiteD50[1];
                 zr[i] = Zcam02Lamp[i] / whiteD50[2];
 
                 // xr, yr , zr > epsilon
-                if(xr[i] > epsilon) {
-                    fx[i] = std::cbrt(xr[i]);
+                if (xr[i] > epsilon) {
+                    fx[i] = std::cbrt (xr[i]);
                 } else {
                     fx[i] = (903.3 * xr[i] + 16.0) / 116.0;
                 }
 
-                if(yr[i] > epsilon) {
-                    fy[i] = std::cbrt(yr[i]);
+                if (yr[i] > epsilon) {
+                    fy[i] = std::cbrt (yr[i]);
                 } else {
                     fy[i] = (903.3 * yr[i] + 16.0) / 116.0;
                 }
 
-                if(zr[i] > epsilon) {
-                    fz[i] = std::cbrt(zr[i]);
+                if (zr[i] > epsilon) {
+                    fz[i] = std::cbrt (zr[i]);
                 } else {
                     fz[i] = (903.3 * zr[i] + 16.0) / 116.0;
                 }
             }
 
             double Llamp[50], alamp[50], blamp[50];
-            for(int i = 0; i < N_c; i++) {
+
+            for (int i = 0; i < N_c; i++) {
                 Llamp[i] = 116.0 * fy[i] - 16.0;
                 alamp[i] = 500.0 * (fx[i] - fy[i]);
                 blamp[i] = 200.0 * (fy[i] - fz[i]);
             }
 
             //blackbody at tempx
-            for(int i = 0; i < N_c; i++) {
+            for (int i = 0; i < N_c; i++) {
                 xr[i] = Xcam02[i] / whiteD50[0];
                 yr[i] = Ycam02[i] / whiteD50[1];
                 zr[i] = Zcam02[i] / whiteD50[2];
 
                 //
-                if(xr[i] > epsilon) {
-                    fx[i] = std::cbrt(xr[i]);
+                if (xr[i] > epsilon) {
+                    fx[i] = std::cbrt (xr[i]);
                 } else {
                     fx[i] = (903.3 * xr[i] + 16.0) / 116.0;
                 }
 
-                if(yr[i] > epsilon) {
-                    fy[i] = std::cbrt(yr[i]);
+                if (yr[i] > epsilon) {
+                    fy[i] = std::cbrt (yr[i]);
                 } else {
                     fy[i] = (903.3 * yr[i] + 16.0) / 116.0;
                 }
 
-                if(zr[i] > epsilon) {
-                    fz[i] = std::cbrt(zr[i]);
+                if (zr[i] > epsilon) {
+                    fz[i] = std::cbrt (zr[i]);
                 } else {
                     fz[i] = (903.3 * zr[i] + 16.0) / 116.0;
                 }
@@ -1548,77 +1704,222 @@ void ColorTemp::temp2mul (double temp, double green, double equal, double& rmul,
 
             double Lbb[50], abb[50], bbb[50];
 
-            for(int i = 0; i < N_c; i++) {
+            for (int i = 0; i < N_c; i++) {
                 Lbb[i] = 116.*fy[i] - 16.;
-                abb[i] = 500.*(fx[i] - fy[i]);
-                bbb[i] = 200.*(fy[i] - fz[i]);
+                abb[i] = 500.* (fx[i] - fy[i]);
+                bbb[i] = 200.* (fy[i] - fz[i]);
             }
 
             //display value to verify calculs
-            if(settings->CRI_color != 0) {
-                printf("Color Number %i\n", numero_color);
-                printf("L_refer=%2.2f a=%2.2f b=%2.2f\n", Lbb[numero_color], abb[numero_color], bbb[numero_color]);
-                printf("L_lamp=%2.2f al=%2.2f bl=%2.2f\n", Llamp[numero_color], alamp[numero_color], blamp[numero_color]);
+            if (settings->CRI_color != 0) {
+                printf ("Color Number %i\n", numero_color);
+                printf ("L_refer=%2.2f a=%2.2f b=%2.2f\n", Lbb[numero_color], abb[numero_color], bbb[numero_color]);
+                printf ("L_lamp=%2.2f al=%2.2f bl=%2.2f\n", Llamp[numero_color], alamp[numero_color], blamp[numero_color]);
             }
 
             //then calculate DeltaE CIE 1976
-            for(int i = 0; i < 8; i++) {
-                DeltaEs[i] = sqrt((Lbb[i] - Llamp[i]) * (Lbb[i] - Llamp[i]) + (abb[i] - alamp[i]) * (abb[i] - alamp[i]) + (bbb[i] - blamp[i]) * (bbb[i] - blamp[i]));
+            for (int i = 0; i < 8; i++) {
+                DeltaEs[i] = sqrt ((Lbb[i] - Llamp[i]) * (Lbb[i] - Llamp[i]) + (abb[i] - alamp[i]) * (abb[i] - alamp[i]) + (bbb[i] - blamp[i]) * (bbb[i] - blamp[i]));
             }
 
-            for(int i = 0; i < 8; i++) {
+            for (int i = 0; i < 8; i++) {
                 CRIs[i] = 100 - 3.0 * DeltaEs[i];    //3.0 coef to adapt ==> same results than CRI "official"
             }
 
-            for(int i = 0; i < 8; i++) {
+            for (int i = 0; i < 8; i++) {
                 CRI_RTs += CRIs[i];
             }
 
             CRI_RTs /= 8;
 
-            for(int i = 0; i < 8; i++) {
+            for (int i = 0; i < 8; i++) {
                 quadCRIs += (CRIs[i] - CRI_RTs) * (CRIs[i] - CRI_RTs);
             }
 
             quadCRIs /= 8;
 
-            for(int i = 0; i < N_c; i++) {
-                DeltaE[i] = sqrt((Lbb[i] - Llamp[i]) * (Lbb[i] - Llamp[i]) + (abb[i] - alamp[i]) * (abb[i] - alamp[i]) + (bbb[i] - blamp[i]) * (bbb[i] - blamp[i]));
+            for (int i = 0; i < N_c; i++) {
+                DeltaE[i] = sqrt ((Lbb[i] - Llamp[i]) * (Lbb[i] - Llamp[i]) + (abb[i] - alamp[i]) * (abb[i] - alamp[i]) + (bbb[i] - blamp[i]) * (bbb[i] - blamp[i]));
             }
 
-            for(int i = 0; i < N_c; i++) {
+            for (int i = 0; i < N_c; i++) {
                 CRI[i] = 100 - 3.0 * DeltaE[i];    //3.0 coef to adapt ==> same results than CRI "official"
             }
 
-            for(int i = 0; i < N_c; i++) {
+            for (int i = 0; i < N_c; i++) {
                 CRI_RT += CRI[i];
             }
 
             CRI_RT /= N_c;
 
-            for(int i = 0; i < N_c; i++) {
+            for (int i = 0; i < N_c; i++) {
                 quadCRI += (CRI[i] - CRI_RT) * (CRI[i] - CRI_RT);
             }
 
             quadCRI /= N_c;
 
-            if(settings->CRI_color != 0) {
-                printf("CRI_standard=%i CRI:1->8=%i %i %i %i %i %i %i %i  Sigma=%2.1f\n", (int) CRI_RTs, (int) CRIs[0], (int) CRIs[1], (int) CRIs[2], (int) CRIs[3], (int) CRIs[4], (int) CRIs[5], (int) CRIs[6], (int) CRIs[7], sqrt(quadCRIs));
-                printf("CRI_RT_exten=%i CRI:9->20=%i %i %i %i %i %i %i %i %i %i %i %i Sigma=%2.1f\n", (int) CRI_RT, (int) CRI[8], (int) CRI[9], (int) CRI[10], (int) CRI[11], (int) CRI[12], (int) CRI[13], (int) CRI[14], (int) CRI[15], (int) CRI[16], (int) CRI[17], (int) CRI[18], (int) CRI[19], sqrt(quadCRI));
+            if (settings->CRI_color != 0) {
+                printf ("CRI_standard=%i CRI:1->8=%i %i %i %i %i %i %i %i  Sigma=%2.1f\n", (int) CRI_RTs, (int) CRIs[0], (int) CRIs[1], (int) CRIs[2], (int) CRIs[3], (int) CRIs[4], (int) CRIs[5], (int) CRIs[6], (int) CRIs[7], sqrt (quadCRIs));
+                printf ("CRI_RT_exten=%i CRI:9->20=%i %i %i %i %i %i %i %i %i %i %i %i Sigma=%2.1f\n", (int) CRI_RT, (int) CRI[8], (int) CRI[9], (int) CRI[10], (int) CRI[11], (int) CRI[12], (int) CRI[13], (int) CRI[14], (int) CRI[15], (int) CRI[16], (int) CRI[17], (int) CRI[18], (int) CRI[19], sqrt (quadCRI));
             }
         }
     }
 }
 
+void ColorTemp::tempxy (double &temp, float **Tx, float **Ty, float **TYY)
+{
+    const double* spec_colorforxcyc[] = {//color references
+        JDC468_BluH10_spect, JDC468_BluF4_spect, JDC468_BluD6_spect, ColorchechCyaF3_spect, JDC468_BluM5_spect, // 0 4
+        JDC468_GreK7_spect, ColabSky42_0_m24_spect, ColabSky60_0_m31_spect, ColorchechBluC150_m5_m22_spect, // 5 8
+        ColorchechDCBluN881_m7_m14_spect, ColorchechGreB3_spect, ColorchechPurD2_spect,  //9 11
+        ColorchechSGBlaN3_6_spect, ColorchechGraC4_67_spect, JDC468_K15_87greyspect,
+        JDC468_GraK14_44_spect, Fictif_61greyspect, ColorchechGreD1_spect,
+        ColorchechWhiA496_spect, JDC468_GreA10_spect, JDC468_GreI8_spect,
+        ColabSkin91_4_14_spect, JDC468_PurE24_spect, //22
+        ColorchechSGSkiK285_11_17_spect, ColorchechGreE2_spect, ColorchechMagE3_spect, //25
+        ColorchechSkiB166_18_18_spect, ColabSkin70_7_32_spect, ColorchechSGSkiF763_14_26_spect,
+        ColorchechSkiA138_13_14_spect, ColabSkin57_22_18_spect, JDC468_YelN10_spect,
+        ColabSkin35_15_17_spect, ColorchechYelD3_spect, JDC468_OraO18_spect,
+        JDC468_RedG21va_spect, ColorchechOraA2_spect, JDC468_OraD17_spect,
+        ColorchechredC3_spect, JDC468_RedI9_spect
+
+    };
+
+    typedef struct WbTxyz {
+        double Tem;
+        double XX;
+        double ZZ;
+    } WbTxyz;
+
+    WbTxyz Txyz[49] = {//temperature Xwb Zwb White point
+        {2001., 1.273842, 0.145295},
+        {2201., 1.217338, 0.190697},
+        {2401., 1.171996, 0.239195},
+        {2501., 1.152883, 0.264539},
+        {2605., 1.134846, 0.291032},
+        {2803., 1.105381, 0.342193},
+        {3003., 1.080982, 0.394258},
+        {3203., 1.060906, 0.446161},
+        {3400., 1.044547, 0.496719},
+        {3699., 1.024834, 0.571722},
+        {3902., 1.014244, 0.621136},
+        {4102., 0.993908, 0.63152},
+        {4202., 0.989283, 0.653999},
+        {4302., 0.985067, 0.676288},
+        {4402., 0.981228, 0.698349},
+        {4502., 0.977736, 0.720159},
+        {4602., 0.974562, 0.741698},
+        {4702., 0.971681, 0.762949},
+        {4802., 0.969069, 0.783899},
+        {4902., 0.966702, 0.804537},
+        {5002., 0.964561, 0.824854},
+        {5102., 0.962627, 0.844842},
+        {5202., 0.960883, 0.864497},
+        {5302., 0.959313, 0.883815},
+        {5402., 0.957903, 0.902793},
+        {5502., 0.956639, 0.921431},
+        {5602., 0.955509, 0.939728},
+        {5702., 0.954502, 0.957685},
+        {5802., 0.953608, 0.975303},
+        {5902., 0.952818, 0.992584},
+        {6002., 0.952122, 1.009532},
+        {6102., 0.951514, 1.026149},
+        {6202., 0.950985, 1.042439},
+        {6302., 0.950530, 1.058406},
+        {6402., 0.950143, 1.074055},
+        {6502., 0.949817, 1.089390},
+        {6702., 0.949330, 1.119138},
+        {6902., 0.949033, 1.147691},
+        {7301., 0.948896, 1.201432},
+        {7601., 0.949099, 1.239061},
+        {7901., 0.949498, 1.274460},
+        {8301., 0.950253, 1.318464},
+        {8601., 0.950941, 1.349261},
+        {9001., 0.951969, 1.387639},
+        {9401., 0.953081, 1.423213},
+        {9901., 0.954537, 1.464134},
+        {10501., 0.956321, 1.508623},
+        {11001., 0.957747, 1.541281},
+        {12001., 0.960440, 1.601019}
+
+    };
+
+    int N_c = sizeof (spec_colorforxcyc) / sizeof (spec_colorforxcyc[0]); //number of color
+    int N_t = sizeof (Txyz) / sizeof (Txyz[0]); //number of temperature White point
+    typedef struct XYZref {
+        double Xref;
+        double Yref;
+        double Zref;
+    } XYZref;
+    XYZref Refxyz[N_c];
+    double tempw = 5000.;
+
+    for (int tt = 0; tt < N_t; tt++) {
+        tempw = Txyz[tt].Tem;
+
+        if (tempw <= INITIALBLACKBODY) {
+
+            for (int i = 0; i < N_c; i++) {
+                spectrum_to_color_xyz_blackbody (spec_colorforxcyc[i], tempw, Refxyz[i].Xref, Refxyz[i].Yref, Refxyz[i].Zref);
+
+            }
+
+        } else {
+            double m11, m22, x_DD, y_DD, interm2;
+
+            if (tempw <= 7000) {
+                x_DD = -4.6070e9 / (tempw * tempw * tempw) + 2.9678e6 / (tempw * tempw) + 0.09911e3 / tempw + 0.244063;
+            } else {
+                x_DD = -2.0064e9 / (tempw * tempw * tempw) + 1.9018e6 / (tempw * tempw) + 0.24748e3 / tempw + 0.237040;
+            }
+
+            y_DD = -3.0 * x_DD * x_DD + 2.87 * x_DD - 0.275;
+            //calculate D -daylight in function of s0, s1, s2 and temp ==> x_D y_D
+            //S(lamda)=So(lambda)+m1*s1(lambda)+m2*s2(lambda)
+            interm2 = (0.0241 + 0.2562 * x_DD - 0.734 * y_DD);
+            m11 = (-1.3515 - 1.7703 * x_DD + 5.9114 * y_DD) / interm2;
+            m22 = (0.03 - 31.4424 * x_DD + 30.0717 * y_DD) / interm2;
+
+            for (int i = 0; i < N_c; i++) {
+                spectrum_to_color_xyz_daylight (spec_colorforxcyc[i], m11, m22, Refxyz[i].Xref, Refxyz[i].Yref, Refxyz[i].Zref);
+
+            }
+
+        }
+
+        for (int i = 0; i < N_c; i++) {
+            double som = (Refxyz[i].Xref + Refxyz[i].Yref +  Refxyz[i].Zref);
+
+            if (tt == 5) {
+                //     printf ("temp=%f Nc=%i x=%f y=%f Y=%f\n", tempw, i, Refxyz[i].Xref/som , Refxyz[i].Yref/som ,  Refxyz[i].Zref/som );
+            }
+
+            if (tt == 20) {
+                //   printf ("temp=%f Nc=%i x=%f y=%f Y=%f\n", tempw, i, Refxyz[i].Xref / som , Refxyz[i].Yref / som ,  Refxyz[i].Zref / som );
+            }
+
+            if (tt == 35) {
+                //    printf ("temp=%f Nc=%i x=%f y=%f Y=%f\n", tempw, i, Refxyz[i].Xref/som , Refxyz[i].Yref/som ,  Refxyz[i].Zref/som );
+            }
+
+            Tx[i][tt] =  (float) Refxyz[i].Xref / som;
+            Ty[i][tt] =  (float) Refxyz[i].Yref / som;
+            TYY[i][tt] = (float) Refxyz[i].Zref / som;
+        }
+
+    }
+}
+
+
 /*
     Calculate Planck's radiation
 */
 //calculate spectral data for blackbody at temp!
-double ColorTemp::blackbody_spect(double wavelength, double temperature)
+double ColorTemp::blackbody_spect (double wavelength, double temperature)
 {
     double wlm = wavelength * 1e-9;   /* Wavelength in meters */
-    return (3.7417715247e-16 / pow(wlm, 5)) /              //3.7417..= c1 = 2*Pi*h*c2  where h=Planck constant, c=velocity of light
-           (xexp(1.438786e-2 / (wlm * temperature)) - 1.0); //1.4387..= c2 = h*c/k  where k=Boltzmann constant
+    return (3.7417715247e-16 / pow (wlm, 5)) /             //3.7417..= c1 = 2*Pi*h*c2  where h=Planck constant, c=velocity of light
+           (xexp (1.438786e-2 / (wlm * temperature)) - 1.0); //1.4387..= c2 = h*c/k  where k=Boltzmann constant
 }
 
 /*
@@ -1638,13 +1939,13 @@ E.g. for 380nm: x2=0.001368  y2=0.000039  z2=0.006451  round in J.Walker to 0.00
 I have increase precision used by J.Walker  and pass to 350nm to 830nm
 */
 
-void ColorTemp::spectrum_to_xyz_daylight(double _m1, double _m2, double &x, double &y, double &z)
+void ColorTemp::spectrum_to_xyz_daylight (double _m1, double _m2, double &x, double &y, double &z)
 {
     int i;
     double lambda, X = 0, Y = 0, Z = 0, XYZ;
 
     for (i = 0, lambda = 350.; lambda < 830.1; i++, lambda += 5.) {
-        double Me = daylight_spect(lambda, _m1, _m2);
+        double Me = daylight_spect (lambda, _m1, _m2);
         X += Me * cie_colour_match_jd[i][0];
         Y += Me * cie_colour_match_jd[i][1];
         Z += Me * cie_colour_match_jd[i][2];
@@ -1656,13 +1957,13 @@ void ColorTemp::spectrum_to_xyz_daylight(double _m1, double _m2, double &x, doub
     z = Z / XYZ;
 }
 
-void ColorTemp::spectrum_to_xyz_blackbody(double _temp, double &x, double &y, double &z)
+void ColorTemp::spectrum_to_xyz_blackbody (double _temp, double &x, double &y, double &z)
 {
     int i;
     double lambda, X = 0, Y = 0, Z = 0, XYZ;
 
     for (i = 0, lambda = 350.; lambda < 830.1; i++, lambda += 5.) {
-        double Me = blackbody_spect(lambda, _temp);
+        double Me = blackbody_spect (lambda, _temp);
         X += Me * cie_colour_match_jd[i][0];
         Y += Me * cie_colour_match_jd[i][1];
         Z += Me * cie_colour_match_jd[i][2];
@@ -1674,7 +1975,7 @@ void ColorTemp::spectrum_to_xyz_blackbody(double _temp, double &x, double &y, do
     z = Z / XYZ;
 }
 
-void ColorTemp::spectrum_to_xyz_preset(const double* spec_intens, double &x, double &y, double &z)
+void ColorTemp::spectrum_to_xyz_preset (const double* spec_intens, double &x, double &y, double &z)
 {
     int i;
     double lambda, X = 0, Y = 0, Z = 0, XYZ;
@@ -1696,7 +1997,7 @@ void ColorTemp::spectrum_to_xyz_preset(const double* spec_intens, double &x, dou
     I have increased the precision used by J.Walker and pass from 350nm to 830nm
     */
     for (i = 0, lambda = 350.; lambda < 830.1; i++, lambda += 5.) {
-        double Me = get_spectral_color(lambda, spec_intens);
+        double Me = get_spectral_color (lambda, spec_intens);
         X += Me * cie_colour_match_jd[i][0];
         Y += Me * cie_colour_match_jd[i][1];
         Z += Me * cie_colour_match_jd[i][2];
@@ -1709,7 +2010,7 @@ void ColorTemp::spectrum_to_xyz_preset(const double* spec_intens, double &x, dou
 }
 
 //calculate XYZ from spectrum data (color) and illuminant : J.Desmis December 2011
-void ColorTemp::spectrum_to_color_xyz_preset(const double* spec_color, const double* spec_intens, double &xx, double &yy, double &zz)
+void ColorTemp::spectrum_to_color_xyz_preset (const double* spec_color, const double* spec_intens, double &xx, double &yy, double &zz)
 {
     int i;
     double lambda, X = 0, Y = 0, Z = 0, Yo = 0;
@@ -1719,8 +2020,8 @@ void ColorTemp::spectrum_to_color_xyz_preset(const double* spec_color, const dou
         double Me;
         double Mc;
 
-        Me = get_spectral_color(lambda, spec_color);
-        Mc = get_spectral_color(lambda, spec_intens);
+        Me = get_spectral_color (lambda, spec_color);
+        Mc = get_spectral_color (lambda, spec_intens);
         X += Mc * cie_colour_match_jd[i][0] * Me;
         Y += Mc * cie_colour_match_jd[i][1] * Me;
         Z += Mc * cie_colour_match_jd[i][2] * Me;
@@ -1730,7 +2031,7 @@ void ColorTemp::spectrum_to_color_xyz_preset(const double* spec_color, const dou
 
         double Ms;
 
-        Ms = get_spectral_color(lambda, spec_intens);
+        Ms = get_spectral_color (lambda, spec_intens);
         Yo += cie_colour_match_jd[i][1] * Ms;
     }
 
@@ -1740,7 +2041,7 @@ void ColorTemp::spectrum_to_color_xyz_preset(const double* spec_color, const dou
 }
 
 //calculate XYZ from spectrum data (color) and illuminant : J.Desmis december 2011
-void ColorTemp::spectrum_to_color_xyz_daylight(const double* spec_color, double _m1, double _m2, double &xx, double &yy, double &zz)
+void ColorTemp::spectrum_to_color_xyz_daylight (const double* spec_color, double _m1, double _m2, double &xx, double &yy, double &zz)
 {
     int i;
     double lambda, X = 0, Y = 0, Z = 0, Yo = 0;
@@ -1750,8 +2051,8 @@ void ColorTemp::spectrum_to_color_xyz_daylight(const double* spec_color, double 
         double Me;
         double Mc;
 
-        Me = get_spectral_color(lambda, spec_color);
-        Mc = daylight_spect(lambda, _m1, _m2);
+        Me = get_spectral_color (lambda, spec_color);
+        Mc = daylight_spect (lambda, _m1, _m2);
         X += Mc * cie_colour_match_jd[i][0] * Me;
         Y += Mc * cie_colour_match_jd[i][1] * Me;
         Z += Mc * cie_colour_match_jd[i][2] * Me;
@@ -1761,7 +2062,7 @@ void ColorTemp::spectrum_to_color_xyz_daylight(const double* spec_color, double 
 
         double Ms;
 
-        Ms = daylight_spect(lambda, _m1, _m2);
+        Ms = daylight_spect (lambda, _m1, _m2);
         Yo += cie_colour_match_jd[i][1] * Ms;
     }
 
@@ -1771,7 +2072,7 @@ void ColorTemp::spectrum_to_color_xyz_daylight(const double* spec_color, double 
 }
 
 //calculate XYZ from spectrum data (color) and illuminant : J.Desmis december 2011
-void ColorTemp::spectrum_to_color_xyz_blackbody(const double* spec_color, double _temp, double &xx, double &yy, double &zz)
+void ColorTemp::spectrum_to_color_xyz_blackbody (const double* spec_color, double _temp, double &xx, double &yy, double &zz)
 {
     int i;
     double lambda, X = 0, Y = 0, Z = 0, Yo = 0;
@@ -1781,8 +2082,8 @@ void ColorTemp::spectrum_to_color_xyz_blackbody(const double* spec_color, double
         double Me;
         double Mc;
 
-        Me = get_spectral_color(lambda, spec_color);
-        Mc = blackbody_spect(lambda, _temp);
+        Me = get_spectral_color (lambda, spec_color);
+        Mc = blackbody_spect (lambda, _temp);
         X += Mc * cie_colour_match_jd[i][0] * Me;
         Y += Mc * cie_colour_match_jd[i][1] * Me;
         Z += Mc * cie_colour_match_jd[i][2] * Me;
@@ -1792,7 +2093,7 @@ void ColorTemp::spectrum_to_color_xyz_blackbody(const double* spec_color, double
 
         double Ms;
 
-        Ms = blackbody_spect(lambda, _temp);
+        Ms = blackbody_spect (lambda, _temp);
         Yo += cie_colour_match_jd[i][1] * Ms;
     }
 
@@ -1801,7 +2102,7 @@ void ColorTemp::spectrum_to_color_xyz_blackbody(const double* spec_color, double
     zz = Z / Yo;
 }
 
-double ColorTemp::daylight_spect(double wavelength, double m1, double m2)
+double ColorTemp::daylight_spect (double wavelength, double m1, double m2)
 {
     //Values for Daylight illuminant: s0 s1 s2
     //s0

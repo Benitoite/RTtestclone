@@ -501,7 +501,35 @@ int refreshmap[rtengine::NUMOFEVENTS] = {
     DEMOSAIC,         // EvPixelShiftSmooth
     DEMOSAIC,         // EvPixelShiftLmmse
     DEMOSAIC,         // EvPixelShiftEqualBright
-    DEMOSAIC          // EvPixelShiftEqualBrightChannel
+    DEMOSAIC,          // EvPixelShiftEqualBrightChannel
+    DEMOSAIC, //EvLocrgbenaexpose
+    DEMOSAIC, //EvlocalwbEnabled
+    DEMOSAIC, //EvlocalwblocY
+    DEMOSAIC, //EvlocalwblocX
+    DEMOSAIC, //EvlocalwbCenter
+    DEMOSAIC, //EvlocalwbDegree
+    DEMOSAIC, //Evlocalwbtransit
+    DEMOSAIC, //EvlocalwblocYT
+    DEMOSAIC, //EvlocalwblocXL
+    DEMOSAIC, //EvlocalwbSmet
+    DEMOSAIC, //Evlocalwbsensi
+    DEMOSAIC, //Evlocalwbnbspot
+    DEMOSAIC, //Evlocalwbanbspot
+    DEMOSAIC, //Evlocalwbhueref
+    DEMOSAIC, //Evlocalwbchromaref
+    DEMOSAIC, //Evlocalwblumaref
+    DEMOSAIC, //Evlocalwbthres
+    DEMOSAIC, //Evlocalwbproxi
+    DEMOSAIC, //Evlocalwbcircrad
+    DEMOSAIC, //EvlocalwbqualityMethod
+    DEMOSAIC, //Evlocalwbretrab
+    DEMOSAIC, //EvLocrgbenawb
+    DEMOSAIC, //Evlocalwbtemp
+    DEMOSAIC, //Evlocalwbgreen
+    DEMOSAIC, //Evlocalwbequal
+    DEMOSAIC, //EvlocalwbwbMethod
+    DEMOSAIC, //Evlocalwbgamma
+    DEMOSAIC //EvlocalwbwbcamMethod
 
 };
 

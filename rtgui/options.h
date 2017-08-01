@@ -244,6 +244,7 @@ public:
     int curvebboxpos; // 0=above, 1=right, 2=below, 3=left
 
     bool showFilmStripToolBar;
+    bool showdelimspot;
 
     // Performance options
     Glib::ustring clutsDir;

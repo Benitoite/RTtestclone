@@ -273,6 +273,15 @@ public:
     void idirpyr          (LabImage* data_coarse, LabImage* data_fine, int level, LUTf &rangefn_L, LUTf & nrwt_l, LUTf & nrwt_ab,
                            int pitch, int scale, const int luma, const int chroma/*, LUTf & Lcurve, LUTf & abcurve*/ );
 
+						   
+    void calcrgb_ref (LabImage * original, LabImage * transformed, int sk, int sx, int sy, int cx, int cy, int oW, int oH,  int fw, int fh, double & hueref, double & chromaref, double & lumaref);
+
+    static void strcurv_data (std::string retistr, int *s_datc, int &siz);
+
+    //locargb
+    void WB_Local (ImageSource* imgsrc, int call, int sp, int sx, int sy, int cx, int cy, int oW, int oH,  int fw, int fh, Imagefloat* imageoriginal, Imagefloat* imagetransformed, const ColorTemp &ctemp, int tran, Imagefloat* orig_prev, const PreviewProps &pp, const ToneCurveParams &hrp, const ColorManagementParams &cmp, const RAWParams &raw, double &ptemp, double &pgreen);
+    void Whitebalance_Local (int call, int sp, Imagefloat* bufimage, const struct local_params & lp, Imagefloat* imageoriginal, Imagefloat* imagetransformed, int cx, int cy);
+						   
     void Tile_calc (int tilesize, int overlap, int kall, int imwidth, int imheight, int &numtiles_W, int &numtiles_H, int &tilewidth, int &tileheight, int &tileWskip, int &tileHskip);
     void ip_wavelet(LabImage * lab, LabImage * dst, int kall, const procparams::WaveletParams & waparams, const WavCurve & wavCLVCcurve, const WavOpacityCurveRG & waOpacityCurveRG, const WavOpacityCurveBY & waOpacityCurveBY,  const WavOpacityCurveW & waOpacityCurveW, const WavOpacityCurveWL & waOpacityCurveWL, LUTf &wavclCurve, bool wavcontlutili, int skip);
 
