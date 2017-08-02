@@ -930,7 +930,7 @@ void RAWParams::BayerSensor::setPixelShiftDefaults()
 
 void LocrgbParams::setDefaults()
 {
-    enabled = true;
+    enabled = false;
     degree = 0;
     locY = 250;
     locX = 250;
@@ -952,7 +952,7 @@ void LocrgbParams::setDefaults()
     retrab = 500;
     transit = 60;
     expwb = false;
-    wbMethod = "none";
+    wbMethod = "man";
     wbcamMethod = "none";
     temp = 4750.;
     green = 1.;

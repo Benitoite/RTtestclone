@@ -5714,7 +5714,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
     bool greyn = false;
     bool robust = false;
     bool itc = false;
-	printf("Dans WBauto\n");
+
     if (localr.wbMethod == "autorobust") {
         RobustWB (redloc, greenloc, blueloc, bfw, bfh, avg_rm, avg_gm, avg_bm);
     }
@@ -6454,7 +6454,8 @@ void RawImageSource::getAutoWBMultipliersloc (int begx, int begy, int yEn, int x
 {
     //    BENCHFUN
     constexpr double clipHigh = 64000.0;
-	printf("automulloc\n");
+
+//  printf("automulloc\n");
     if (ri->get_colors() == 1) {
         rm = gm = bm = 1;
         return;
@@ -6671,8 +6672,8 @@ void RawImageSource::getAutoWBMultipliersloc (int begx, int begy, int yEn, int x
     }
 
     if (localr.wbMethod == "aut"  || localr.wbMethod == "autosdw" || localr.wbMethod == "autedgsdw" || localr.wbMethod == "autitc"  || localr.wbMethod == "autedgrob" || localr.wbMethod == "autedg" || localr.wbMethod == "autorobust" ) {
-        printf("appel a WBauto\n");
-		WBauto (redloc, greenloc, blueloc, bfw, bfh, avg_rm, avg_gm, avg_bm, localr, begx, begy, yEn,  xEn,  cx,  cy);
+        //   printf("appel a WBauto\n");
+        WBauto (redloc, greenloc, blueloc, bfw, bfh, avg_rm, avg_gm, avg_bm, localr, begx, begy, yEn,  xEn,  cx,  cy);
     }
 
     redloc (0, 0);

@@ -289,7 +289,6 @@ void ImProcFunctions::calcrgb_ref (LabImage * original, LabImage * transformed, 
 void ImProcFunctions::WB_Local (ImageSource* imgsrc, int call, int sp, int sx, int sy, int cx, int cy, int oW, int oH,  int fw, int fh, Imagefloat* improv, Imagefloat* imagetransformed, const ColorTemp &ctemploc, int tran, Imagefloat* imageoriginal, const PreviewProps &pp, const ToneCurveParams &hrp, const ColorManagementParams &cmp, const RAWParams &raw, double &ptemp, double &pgreen)
 {
     if (params->localwb.enabled) {
-		printf("WB_loc\n");
         // BENCHFUN
 #ifdef _DEBUG
         MyTime t1e, t2e;
@@ -339,9 +338,8 @@ void ImProcFunctions::WB_Local (ImageSource* imgsrc, int call, int sp, int sx, i
                     bufimage->b (ir, jr) = 0.f;
                 }
 
-            if (lp.expwb && params->localwb.wbMethod != "none") {
-					printf("WB_loc expwb\n");
-	
+            if (lp.expwb) {// && params->localwb.wbMethod != "man") {
+
                 /*                float hueplus = hueref + dhue;
                                 float huemoins = hueref - dhue;
 

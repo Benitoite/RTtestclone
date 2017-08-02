@@ -683,6 +683,9 @@ bool Localwb::temptintComputed_ ()
     disableListener ();
     enableListener ();
     updateLabel ();
+    wbMethod->set_active (0);//enabled custom after auto
+    wbMethodChanged ();
+
     return false;
 
 }
@@ -739,6 +742,8 @@ void Localwb::updateLabel ()
             );
             metLabels->set_text (meta);
         }
+
+        nextmeth = 0;
     }
 }
 
@@ -969,14 +974,9 @@ void Localwb::read (const ProcParams* pp, const ParamsEdited* pedited)
 
     disableListener ();
 
-   
+
     enablewbConn.block (true);
-	/*
-    expwb->setEnabled (pp->localwb.expwb);
-    qualityMethodConn.block (true);
-    wbMethodConn.block (true);
-    wbcamMethodConn.block (true);
-    */
+
     if (pedited) {
         set_inconsistent                  (multiImage && !pedited->localwb.enabled);
         degree->setEditedState (pedited->localwb.degree ? Edited : UnEdited);
@@ -1081,12 +1081,9 @@ void Localwb::read (const ProcParams* pp, const ParamsEdited* pedited)
     }
 
     qualityMethodChanged ();
+    qualityMethodConn.block (false);
 
-    wbMethodConn.block (false);
-    wbcamMethodConn.block (false);
 
-//   if (pp->localwb.wbMethod == "none") {
-//       wbMethod->set_active (0);
     if (pp->localwb.wbMethod == "man") {
         wbMethod->set_active (0);
     } else if (pp->localwb.wbMethod == "aut") {
@@ -1108,6 +1105,8 @@ void Localwb::read (const ProcParams* pp, const ParamsEdited* pedited)
 
     }
 
+    wbMethodConn.block (false);
+
     wbMethodChanged ();
 
     if (pp->localwb.wbcamMethod == "none") {
@@ -1119,6 +1118,8 @@ void Localwb::read (const ProcParams* pp, const ParamsEdited* pedited)
     } else if (pp->localwb.wbcamMethod == "gamcat") {
         wbcamMethod->set_active (3);
     }
+
+    wbcamMethodConn.block (false);
 
     wbcamMethodChanged ();
 
@@ -1143,9 +1144,6 @@ void Localwb::read (const ProcParams* pp, const ParamsEdited* pedited)
 
     }
 
-    qualityMethodConn.block (false);
-    wbMethodConn.block (false);
-    wbcamMethodConn.block (false);
 
 
 
@@ -1248,7 +1246,7 @@ void Localwb::write (ProcParams* pp, ParamsEdited* pedited)
 
     }
 
-  //  printf ("Quali=%i \n", qualityMethod->get_active_row_number());
+    //  printf ("Quali=%i \n", qualityMethod->get_active_row_number());
 
     if (qualityMethod->get_active_row_number() == 0) {
         pp->localwb.qualityMethod = "std";
@@ -1258,7 +1256,7 @@ void Localwb::write (ProcParams* pp, ParamsEdited* pedited)
         pp->localwb.qualityMethod = "enhden";
     }
 
-  //  printf ("WBmeth=%i \n", wbMethod->get_active_row_number());
+    //  printf ("WBmeth=%i \n", wbMethod->get_active_row_number());
 
     if (wbMethod->get_active_row_number() == 0) {
         pp->localwb.wbMethod = "man";
@@ -1404,7 +1402,7 @@ bool Localwb::localwbComputed_ ()
 
 void Localwb::WBChanged (double temperature, double greenVal, int wbauto)
 {
-
+    printf ("wbauto=%i\n", wbauto);
     next_temp = temperature;
     next_green = greenVal;
     next_wbauto = wbauto;
@@ -1609,14 +1607,9 @@ void Localwb::adjusterChanged (Adjuster* a, double newval)
         } else if (a == chromaref) {
             listener->panelChanged (Evlocalwbchromaref, "");//anbspot->getTextValue());
         } else if (a == temp) {
-            printf ("TEMP\n");
             listener->panelChanged (Evlocalwbtemp, temp->getTextValue());
-            wbMethod->set_active (1);
-            wbMethodChanged ();
         } else if (a == green) {
             listener->panelChanged (Evlocalwbgreen, green->getTextValue());
-            wbMethod->set_active (1);
-            wbMethodChanged ();
 
         } else if (a == equal) {
             listener->panelChanged (Evlocalwbequal, equal->getTextValue());

@@ -1663,7 +1663,7 @@ TP_LOCAL_WIDTH;Right
 TP_LOCAL_WIDTH_L;Left
 TP_LOCALLAB_STYPE;Shape method
 TP_LOCALLAB_STYPE_TOOLTIP;You can choose between:\nSymmetrical - left handle linked to right, top handle linked to bottom.\nIndependent - all handles are independent.
-TP_LOCALRGB_LABEL;White Balance
+TP_LOCALRGB_LABEL;White Balance auto and local
 TP_LOCALRGB_WB;White balance
 TP_LOCALRGB_CAM;Color appearance (auto)
 TP_LOCALRGB_TTLABEL;WB all Temp=%1 Tint=%2 Equ=%3
