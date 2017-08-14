@@ -312,6 +312,10 @@ public:
     bool datacie;
     bool tonecie;
 //  bool sharpcie;
+    bool tempout;
+    bool greenout;
+    bool ybout;
+
 };
 
 class DirPyrDenoiseParamsEdited

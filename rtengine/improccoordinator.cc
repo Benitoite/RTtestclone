@@ -638,8 +638,8 @@ void ImProcCoordinator::updatePreviewImage (int todo, Crop* cropCall)
         ipf.chromiLuminanceCurve (nullptr, pW, nprevl, nprevl, chroma_acurve, chroma_bcurve, satcurve, lhskcurve, clcurve, lumacurve, utili, autili, butili, ccutili, cclutili, clcutili, histCCurve, histLCurve);
         ipf.vibrance (nprevl);
 
-        if ((params.colorappearance.enabled && !params.colorappearance.tonecie) ||  (!params.colorappearance.enabled)) {
-            ipf.EPDToneMap (nprevl, 5, 1);
+        if((params.colorappearance.enabled && !params.colorappearance.tonecie) ||  (!params.colorappearance.enabled)) {
+            ipf.EPDToneMap(nprevl, 5, scale);
         }
 
         // for all treatments Defringe, Sharpening, Contrast detail , Microcontrast they are activated if "CIECAM" function are disabled
@@ -1194,7 +1194,7 @@ void ImProcCoordinator::updatePreviewImage (int todo, Crop* cropCall)
             CAMBrightCurveJ.dirty = true;
             CAMBrightCurveQ.dirty = true;
 
-            ipf.ciecam_02float (ncie, float (adap), begh, endh, pW, 2, nprevl, &params, customColCurve1, customColCurve2, customColCurve3, histLCAM, histCCAM, CAMBrightCurveJ, CAMBrightCurveQ, CAMMean, 5, 1, execsharp, d, scale, 1);
+            ipf.ciecam_02float (ncie, float(adap), begh, endh, pW, 2, nprevl, &params, customColCurve1, customColCurve2, customColCurve3, histLCAM, histCCAM, CAMBrightCurveJ, CAMBrightCurveQ, CAMMean, 5, scale, execsharp, d, 1);
 
             if (params.colorappearance.autodegree && acListener && params.colorappearance.enabled) {
                 acListener->autoCamChanged (100.* (double)d);

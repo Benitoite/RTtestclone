@@ -1559,13 +1559,10 @@ bool EditorPanel::handleShortcutKey (GdkEventKey* event)
                     iareapanel->imageArea->previewModePanel->toggleFocusMask();
                     return true;
 
-                case GDK_KEY_f:
-                    iareapanel->imageArea->zoomPanel->zoomFitClicked();
-                    return true;
+            case GDK_KEY_less:
+                iareapanel->imageArea->indClippedPanel->toggleClipped (false);
+                return true;
 
-                case GDK_KEY_less:
-                    iareapanel->imageArea->indClippedPanel->toggleClipped (true);
-                    return true;
 
                 case GDK_KEY_greater:
                     iareapanel->imageArea->indClippedPanel->toggleClipped (false);
@@ -1918,10 +1915,10 @@ bool EditorPanel::saveImmediately(const Glib::ustring &filename, const SaveForma
 {
     rtengine::procparams::ProcParams pparams;
     ipc->getParams (&pparams);
-    std::unique_ptr<rtengine::ProcessingJob> job(rtengine::ProcessingJob::create (ipc->getInitialImage(), pparams));
+    rtengine::ProcessingJob *job = rtengine::ProcessingJob::create(ipc->getInitialImage(), pparams);
 
     // save immediately
-    rtengine::IImage16 *img = rtengine::processImage(job.get(), err, nullptr, options.tunnelMetaData, false);
+    rtengine::IImage16 *img = rtengine::processImage(job, err, nullptr, options.tunnelMetaData, false);
 
     int err = 0;
     if (sf.format == "tif") {
