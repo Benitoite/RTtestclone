@@ -1166,7 +1166,7 @@ public:
 
     WaveletParams ();
     void setDefaults();
-    void getCurves (WavCurve &cCurve, WavretiCurve &cTCurve, WavretigainCurve &cTgainCurve, WavmergCurve &cmergCurve, Wavmerg2Curve &cmerg2Curve, WavstyCurve &cstyCurve, Wavsty2Curve &csty2Curve, WavOpacityCurveRG &opacityCurveLUTRG , WavOpacityCurveBY &opacityCurveLUTBY, WavOpacityCurveW &opacityCurveLUTW, WavOpacityCurveWL &opacityCurveLUTWL) const;
+    void getCurves (WavCurve &cCurve, WavretiCurve &cTCurve, WavretigainCurve &cTgainCurve, WavmergCurve &cmergCurve, Wavmerg2Curve &cmerg2Curve, WavstyCurve &cstyCurve, Wavsty2Curve &csty2Curve, WavOpacityCurveRG &opacityCurveLUTRG, WavOpacityCurveBY &opacityCurveLUTBY, WavOpacityCurveW &opacityCurveLUTW, WavOpacityCurveWL &opacityCurveLUTWL) const;
     static void getDefaultCCWCurve (std::vector<double> &curve);
     static void getDefaultCCWCurveT (std::vector<double> &curve);
     static void getDefaultCCWgainCurveT (std::vector<double> &curve);
