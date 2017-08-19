@@ -36,6 +36,7 @@ CURVEEDITOR_TOOLTIPPASTE;Paste curve from clipboard.
 CURVEEDITOR_TOOLTIPSAVE;Save current curve.
 CURVEEDITOR_TYPE;Type:
 DIRBROWSER_FOLDERS;Folders
+DONT_SHOW_AGAIN;Don't show this message again.
 DYNPROFILEEDITOR_DELETE;Delete
 DYNPROFILEEDITOR_EDIT;Edit
 DYNPROFILEEDITOR_EDIT_RULE;Edit Dynamic Profile Rule
@@ -236,6 +237,7 @@ GENERAL_PORTRAIT;Portrait
 GENERAL_SAVE;Save
 GENERAL_UNCHANGED;(Unchanged)
 GENERAL_WARNING;Warning
+GIMP_PLUGIN_INFO;Welcome to the RawTherapee GIMP plugin!\nOnce you are done editing, simply close the main RawTherapee window and the image will be automatically imported in GIMP.
 HISTOGRAM_TOOLTIP_B;Show/Hide blue histogram.
 HISTOGRAM_TOOLTIP_BAR;Show/Hide RGB indicator bar.\nRight-click on image preview to freeze/unfreeze.
 HISTOGRAM_TOOLTIP_CHRO;Show/Hide chromaticity histogram.
@@ -686,100 +688,88 @@ HISTORY_MSG_436;Retinex - M - Radius
 HISTORY_MSG_437;Retinex - M - Method
 HISTORY_MSG_438;Retinex - M - Equalizer
 HISTORY_MSG_439;Retinex - Process
-HISTORY_MSG_440;Retinex - Gain transmission
-HISTORY_MSG_441;Retinex - Scale
-HISTORY_MSG_442;W - Unsharp method
-HISTORY_MSG_443;W - Merge luma
-HISTORY_MSG_444;W - Merge chroma
-HISTORY_MSG_445;W - Reti - gain
-HISTORY_MSG_446;W - Reti - brightness
-HISTORY_MSG_447;W - Reti - strength
-HISTORY_MSG_448;W - Reti - radius
-HISTORY_MSG_449;W - Reti - contrast
-HISTORY_MSG_450;W - Reti - threshold
-HISTORY_MSG_451;W - Retinex method
-HISTORY_MSG_452;W - Reti - transmission
-HISTORY_MSG_453;W - Reti - chroma
-HISTORY_MSG_454;W - Reti - process
-HISTORY_MSG_455;W - merge - enabled
-HISTORY_MSG_456;W - merge - file
-HISTORY_MSG_457;W - merge - type
-HISTORY_MSG_458;W - merge - preview
-HISTORY_MSG_459;W - merge - H shift
-HISTORY_MSG_460;W - merge - V shift
-HISTORY_MSG_461;W - merge - blend L
-HISTORY_MSG_462;W - merge - blend C
-HISTORY_MSG_463;W - merge - reset
-HISTORY_MSG_464;W - es - sharp method
-HISTORY_MSG_465;W - Reti - enabled
-HISTORY_MSG_466;W - merge - method
-HISTORY_MSG_467;W - Reti - radius
-HISTORY_MSG_468;W - Reti - highlight
-HISTORY_MSG_469;W - Reti - H tonal width
-HISTORY_MSG_470;W - Reti - shadows
-HISTORY_MSG_471;W - Reti - S tonal width
-HISTORY_MSG_472;W - Reti - Scale
-HISTORY_MSG_473;W - Residual - Toning color bal
-HISTORY_MSG_474;W - es - Edge detection
-HISTORY_MSG_475;W - merge - gradient luma
-HISTORY_MSG_476;W - merge - merge curve
-HISTORY_MSG_477;W - Reti - gain curve
-HISTORY_MSG_478;CbDL - method
-HISTORY_MSG_479;W - merge - save size
-HISTORY_MSG_480;W - merge - luminance style
-HISTORY_MSG_481;W - merge - chroma
-HISTORY_MSG_482;W - merge - residual style
-HISTORY_MSG_483;W - merge - style targ/prot
-HISTORY_MSG_484;W - merge - shape detection curve hdr
-HISTORY_MSG_485;W - merge - style detection color
-HISTORY_MSG_486;W - merge - dirV
-HISTORY_MSG_487;W - merge - dirH
-HISTORY_MSG_488;W - merge - dirD
-HISTORY_MSG_489;W - merge - SH curve
-HISTORY_MSG_490;W - merge - luma curve++
-HISTORY_MSG_491;W - merge - luminance hdr
-HISTORY_MSG_492;W - merge - residual hdr
-HISTORY_MSG_493;W - merge - position
-HISTORY_MSG_494;W - merge - shape method
-HISTORY_MSG_495;W - merge - Neural index
-HISTORY_MSG_496;W - merge - shape detection curve sty
-HISTORY_MSG_497;Output Black Point Compensation
-HISTORY_MSG_498;WB - Temp bias
-HISTORY_MSG_499;Raw Sub-Image
-HISTORY_MSG_500;EvPixelShiftMotion
-HISTORY_MSG_501;EvPixelShiftMotionCorrection
-HISTORY_MSG_502;EvPixelShiftStddevFactorGreen
-HISTORY_MSG_503;PS ISO adaption
-HISTORY_MSG_504;EvPixelShiftNreadIso
-HISTORY_MSG_505;EvPixelShiftPrnu
-HISTORY_MSG_506;PS Show motion
-HISTORY_MSG_507;PS Show mask only
-HISTORY_MSG_508;EvPixelShiftAutomatic
-HISTORY_MSG_509;EvPixelShiftNonGreenHorizontal
-HISTORY_MSG_510;EvPixelShiftNonGreenVertical
-HISTORY_MSG_511;PS Check red/blue
-HISTORY_MSG_512;EvPixelShiftStddevFactorRed
-HISTORY_MSG_513;EvPixelShiftStddevFactorBlue
-HISTORY_MSG_514;EvPixelShiftGreenAmaze
-HISTORY_MSG_515;EvPixelShiftNonGreenAmaze
-HISTORY_MSG_516;PS Check green
-HISTORY_MSG_517;EvPixelShiftRedBlueWeight
-HISTORY_MSG_518;PS Blur motion mask
-HISTORY_MSG_519;PS Blur radius
-HISTORY_MSG_520;EvPixelShiftSum
-HISTORY_MSG_521;EvPixelShiftExp0
-HISTORY_MSG_522;PS Fill holes
-HISTORY_MSG_523;PS Median
-HISTORY_MSG_524;EvPixelShiftMedian3
-HISTORY_MSG_525;PS Motion correction
-HISTORY_MSG_526;PS Smooth transitions
-HISTORY_MSG_527;PS Use lmmse
-HISTORY_MSG_528;PS Equalize
-HISTORY_MSG_529;PS Equalize channel
-HISTORY_MSG_530;Retinex - Chroma
-HISTORY_MSG_531;CAM02 - Temp out
-HISTORY_MSG_532;CAM02 - Green out
-HISTORY_MSG_533;CAM02 - Yb out
+HISTORY_MSG_440;CbDL - Method
+HISTORY_MSG_441;Retinex - Gain transmission
+HISTORY_MSG_442;Retinex - Scale
+HISTORY_MSG_443;Output black point compensation
+HISTORY_MSG_444;WB - Temp bias
+HISTORY_MSG_445;Raw sub-image
+HISTORY_MSG_449;PS - ISO adaption
+HISTORY_MSG_452;PS - Show motion
+HISTORY_MSG_453;PS - Show mask only
+HISTORY_MSG_457;PS - Check red/blue
+HISTORY_MSG_462;PS - Check green
+HISTORY_MSG_464;PS - Blur motion mask
+HISTORY_MSG_465;PS - Blur radius
+HISTORY_MSG_468;PS - Fill holes
+HISTORY_MSG_469;PS - Median
+HISTORY_MSG_471;PS - Motion correction
+HISTORY_MSG_472;PS - Smooth transitions
+HISTORY_MSG_473;PS - Use LMMSE
+HISTORY_MSG_474;PS - Equalize
+HISTORY_MSG_475;PS - Equalize channel
+HISTORY_MSG_476;CAM02 - Temp out
+HISTORY_MSG_477;CAM02 - Green out
+HISTORY_MSG_478;CAM02 - Yb out
+HISTORY_MSG_479;CAM02 - CAT02 adaptation out
+HISTORY_MSG_480;CAM02 - Automatic CAT02 out
+HISTORY_MSG_481;CAM02 - Temp scene
+HISTORY_MSG_482;CAM02 - Green scene
+HISTORY_MSG_483;CAM02 - Yb scene
+HISTORY_MSG_484;CAM02 - Auto Yb scene
+HISTORY_MSG_485;W - Unsharp method
+HISTORY_MSG_486;W - Merge luma
+HISTORY_MSG_487;W - Merge chroma
+HISTORY_MSG_488;W - Reti - gain
+HISTORY_MSG_489;W - Reti - brightness
+HISTORY_MSG_490;W - Reti - strength
+HISTORY_MSG_491;W - Reti - radius
+HISTORY_MSG_492;W - Reti - contrast
+HISTORY_MSG_493;W - Reti - threshold
+HISTORY_MSG_494;W - Retinex method
+HISTORY_MSG_495;W - Reti - transmission
+HISTORY_MSG_496;W - Reti - chroma
+HISTORY_MSG_497;W - Reti - process
+HISTORY_MSG_498;W - merge - enabled
+HISTORY_MSG_499;W - merge - file
+HISTORY_MSG_500;W - merge - type
+HISTORY_MSG_501;W - merge - preview
+HISTORY_MSG_502;W - merge - H shift
+HISTORY_MSG_503;W - merge - V shift
+HISTORY_MSG_504;W - merge - blend L
+HISTORY_MSG_505;W - merge - blend C
+HISTORY_MSG_506;W - merge - reset
+HISTORY_MSG_507;W - es - sharp method
+HISTORY_MSG_508;W - Reti - enabled
+HISTORY_MSG_509;W - merge - method
+HISTORY_MSG_510;W - Reti - radius
+HISTORY_MSG_511;W - Reti - highlight
+HISTORY_MSG_512;W - Reti - H tonal width
+HISTORY_MSG_513;W - Reti - shadows
+HISTORY_MSG_514;W - Reti - S tonal width
+HISTORY_MSG_515;W - Reti - Scale
+HISTORY_MSG_516;W - merge - gradient luma
+HISTORY_MSG_517;W - merge - merge curve
+HISTORY_MSG_518;W - Reti - gain curve
+HISTORY_MSG_519;CbDL - method
+HISTORY_MSG_520;W - merge - save size
+HISTORY_MSG_521;W - merge - luminance style
+HISTORY_MSG_522;W - merge - chroma
+HISTORY_MSG_523;W - merge - residual style
+HISTORY_MSG_524;W - merge - style targ/prot
+HISTORY_MSG_525;W - merge - shape detection curve hdr
+HISTORY_MSG_526;W - merge - style detection color
+HISTORY_MSG_527;W - merge - dirV
+HISTORY_MSG_528;W - merge - dirH
+HISTORY_MSG_529;W - merge - dirD
+HISTORY_MSG_530;W - merge - SH curve
+HISTORY_MSG_531;W - merge - luma curve++
+HISTORY_MSG_532;W - merge - luminance hdr
+HISTORY_MSG_533;W - merge - residual hdr
+HISTORY_MSG_534;W - merge - position
+HISTORY_MSG_535;W - merge - shape method
+HISTORY_MSG_536;W - merge - Neural index
+HISTORY_MSG_537;W - merge - shape detection curve sty
 HISTORY_NEWSNAPSHOT;Add
 HISTORY_NEWSNAPSHOT_TOOLTIP;Shortcut: <b>Alt-s</b>
 HISTORY_SNAPSHOT;Snapshot
@@ -1029,8 +1019,8 @@ PREFERENCES_CUSTPROFBUILDKEYFORMAT_NAME;Name
 PREFERENCES_CUSTPROFBUILDKEYFORMAT_TID;TagID
 PREFERENCES_CUSTPROFBUILDPATH;Executable path
 PREFERENCES_CUTOVERLAYBRUSH;Crop mask color/transparency
-PREFERENCES_D50_OLD;5000K
 PREFERENCES_D50;Settings in main menu
+PREFERENCES_D50_OLD;5000K
 PREFERENCES_D55;5500K
 PREFERENCES_D60;6000K
 PREFERENCES_D65;6500K
@@ -1042,8 +1032,6 @@ PREFERENCES_DATEFORMAT;Date format
 PREFERENCES_DATEFORMATHINT;You can use the following formatting strings:\n<b>%y</b>	- year\n<b>%m</b>	- month\n<b>%d</b>	- day\n\nFor example, the ISO 8601 standard dictates the date format as follows:\n<b>%y-%m-%d</b>
 PREFERENCES_DAUB_LABEL;Use Daubechies D6 wavelets instead of D4
 PREFERENCES_DAUB_TOOLTIP;The Noise Reduction and Wavelet Levels tools use a Debauchies mother wavelet. If you choose D6 instead of D4 you increase the number of orthogonal Daubechies coefficients and probably increase quality of small-scale levels. There is no memory or processing time difference between the two.
-PREFERENCES_DEFAULTLANG;Default Language
-PREFERENCES_DEFAULTTHEME;Default Theme
 PREFERENCES_DIRDARKFRAMES;Dark-frames directory
 PREFERENCES_DIRHOME;Home directory
 PREFERENCES_DIRLAST;Last visited directory
@@ -1075,8 +1063,8 @@ PREFERENCES_GREY;Output device's Yb luminance (%)
 PREFERENCES_GREY05;Yb=05 CIE L#30
 PREFERENCES_GREY10;Yb=10 CIE L#40
 PREFERENCES_GREY15;Yb=15 CIE L#45
-PREFERENCES_GREY18_OLD;Yb=18 CIE L#50
 PREFERENCES_GREY18;Settings in main menu
+PREFERENCES_GREY18_OLD;Yb=18 CIE L#50
 PREFERENCES_GREY23;Yb=23 CIE L#55
 PREFERENCES_GREY30;Yb=30 CIE L#60
 PREFERENCES_GREY40;Yb=40 CIE L#70
@@ -1098,6 +1086,7 @@ PREFERENCES_INTENT_PERCEPTUAL;Perceptual
 PREFERENCES_INTENT_RELATIVE;Relative Colorimetric
 PREFERENCES_INTENT_SATURATION;Saturation
 PREFERENCES_INTERNALTHUMBIFUNTOUCHED;Show embedded JPEG thumbnail if raw is unedited
+PREFERENCES_LANG;Language
 PREFERENCES_LANGAUTODETECT;Use system language
 PREFERENCES_LEVAUTDN;Denoising level
 PREFERENCES_LEVDN;Cell size
@@ -1189,6 +1178,7 @@ PREFERENCES_TAB_GENERAL;General
 PREFERENCES_TAB_IMPROC;Image Processing
 PREFERENCES_TAB_PERFORMANCE;Performance & Quality
 PREFERENCES_TAB_SOUND;Sounds
+PREFERENCES_THEME;Theme
 PREFERENCES_TIMAX;High
 PREFERENCES_TINB;Number of tiles
 PREFERENCES_TISTD;Standard
@@ -1346,11 +1336,11 @@ TP_COARSETRAF_TOOLTIP_HFLIP;Flip horizontally.
 TP_COARSETRAF_TOOLTIP_ROTLEFT;Rotate left.\n\nShortcuts:\n<b>[</b> - Multiple Editor Tabs Mode,\n<b>Alt-[</b> - Single Editor Tab Mode.
 TP_COARSETRAF_TOOLTIP_ROTRIGHT;Rotate right.\n\nShortcuts:\n<b>]</b> - Multiple Editor Tabs Mode,\n<b>Alt-]</b> - Single Editor Tab Mode.
 TP_COARSETRAF_TOOLTIP_VFLIP;Flip vertically.
-TP_COLORAPP_ADAPTSCENE;Scene luminosity
-TP_COLORAPP_ADAPTSCENE_TOOLTIP;Absolute luminance of the scene environement (cd/m²).\n1) Calculated from the Exif data:\nShutter speed - ISO speed - F number - camera exposure correction.\n2) Calculated from the raw white point and RT's Exposure Compensation slider.
-TP_COLORAPP_ADAPTVIEWING;Viewing luminosity (cd/m²)
-TP_COLORAPP_ADAPTVIEWING_TOOLTIP;Absolute luminance of the viewing environnement\n(usually 16cd/m²).
-TP_COLORAPP_ADAP_AUTO_TOOLTIP;If the checkbox is checked (recommended) RawTherapee calculates an optimum value from Exif data.\nTo set the value manually, uncheck the checkbox first.
+TP_COLORAPP_ADAPTSCENE;Scene absolute luminance
+TP_COLORAPP_ADAPTSCENE_TOOLTIP;Absolute luminance of the scene environment (cd/m²).\n1) Calculated from the Exif data:\nShutter speed - ISO speed - F number - camera exposure correction.\n2) Calculated from the raw white point and RT's Exposure Compensation slider.
+TP_COLORAPP_ADAPTVIEWING;Viewing absolute luminance (cd/m²)
+TP_COLORAPP_ADAPTVIEWING_TOOLTIP;Absolute luminance of the viewing environment\n(usually 16cd/m²).
+TP_COLORAPP_ADAP_AUTO_TOOLTIP;If the checkbox is checked (recommended) RawTherapee calculates an optimum value from the Exif data.\nTo set the value manually, uncheck the checkbox first.
 TP_COLORAPP_ALGO;Algorithm
 TP_COLORAPP_ALGO_ALL;All
 TP_COLORAPP_ALGO_JC;Lightness + Chroma (JC)
@@ -1370,8 +1360,8 @@ TP_COLORAPP_CHROMA_TOOLTIP;Chroma in CIECAM02 differs from L*a*b* and RGB chroma
 TP_COLORAPP_CIECAT_DEGREE;CAT02 adaptation
 TP_COLORAPP_CONTRAST;Contrast (J)
 TP_COLORAPP_CONTRAST_Q;Contrast (Q)
-TP_COLORAPP_CONTRAST_Q_TOOLTIP;Contrast in CIECAM02 for the Q slider; it differs from L*a*b* and RGB contrast.
-TP_COLORAPP_CONTRAST_TOOLTIP;Contrast in CIECAM02 for the J slider; it differs from L*a*b* and RGB contrast.
+TP_COLORAPP_CONTRAST_Q_TOOLTIP;Differs from L*a*b* and RGB contrast.
+TP_COLORAPP_CONTRAST_TOOLTIP;Differs from L*a*b* and RGB contrast.
 TP_COLORAPP_CURVEEDITOR1;Tone curve 1
 TP_COLORAPP_CURVEEDITOR1_TOOLTIP;Shows the histogram of L* (L*a*b*) before CIECAM02.\nIf the "Show CIECAM02 output histograms in curves" checkbox is enabled, shows the histogram of J or Q after CIECAM02.\n\nJ and Q are not shown in the main histogram panel.\n\nFor final output refer to the main histogram panel.
 TP_COLORAPP_CURVEEDITOR2;Tone curve 2
@@ -1382,6 +1372,7 @@ TP_COLORAPP_DATACIE;CIECAM02 output histograms in curves
 TP_COLORAPP_DATACIE_TOOLTIP;When enabled, histograms in CIECAM02 curves show approximate values/ranges for J or Q, and C, s or M after the CIECAM02 adjustments.\nThis selection does not impact the main histogram panel.\n\nWhen disabled, histograms in CIECAM02 curves show L*a*b* values before CIECAM02 adjustments.
 TP_COLORAPP_DEGREE_AUTO_TOOLTIP;If the check-box is checked (recommended), RawTherapee calculates an optimum value, which is then used by CAT02, and also for the entire CIECAM02.\nTo set the value manually, uncheck the check-box first (values above 65 are recommended).
 TP_COLORAPP_DEGREE_TOOLTIP;Amount of CIE Chromatic Adaptation Transform 2002.
+TP_COLORAPP_FREE;Free temp+green + CAT02 + [output]
 TP_COLORAPP_GAMUT;Gamut control (L*a*b*)
 TP_COLORAPP_GAMUT_TOOLTIP;Allow gamut control in L*a*b* mode.
 TP_COLORAPP_HUE;Hue (h)
@@ -1393,9 +1384,11 @@ TP_COLORAPP_LABEL_VIEWING;Viewing Conditions
 TP_COLORAPP_LIGHT;Lightness (J)
 TP_COLORAPP_LIGHT_TOOLTIP;Lightness in CIECAM02 differs from L*a*b* and RGB lightness.
 TP_COLORAPP_MODEL;WP Model
-TP_COLORAPP_MODEL_TOOLTIP;White-Point Model.\n\n<b>WB [RT] + [output]</b>: RT's white balance is used for the scene, CIECAM02 is set to D50, and the output device's white balance is set in Viewing Conditions.\n\n<b>WB [RT+CAT02] + [output]</b>: RT's white balance settings are used by CAT02 and the output device's white balance is set in Viewing Conditions.
+TP_COLORAPP_MODEL_TOOLTIP;White-Point Model.\n\n<b>WB [RT] + [output]</b>: RT's white balance is used for the scene, CIECAM02 is set to D50, and the output device's white balance is set in Viewing Conditions.\n\n<b>WB [RT+CAT02] + [output]</b>: RT's white balance settings are used by CAT02 and the output device's white balance is set in Viewing Conditions.\n\n<b>Free temp+green + CAT02 + [output]:</b> temp and green are selected bu user, output device's white balance is set in Viewing Conditions.
+TP_COLORAPP_NEUTRAL;Reset
+TP_COLORAPP_NEUTRAL_TIP;Reset all sliders checkbox and curves to their default values
 TP_COLORAPP_RSTPRO;Red & skin-tones protection
-TP_COLORAPP_RSTPRO_TOOLTIP;Red and skin-tones protection affects both sliders and curves.
+TP_COLORAPP_RSTPRO_TOOLTIP;Red &amp; skin-tones protection affects both sliders and curves.
 TP_COLORAPP_SHARPCIE;--unused--
 TP_COLORAPP_SHARPCIE_TOOLTIP;--unused--
 TP_COLORAPP_SURROUND;Surround
@@ -1414,11 +1407,14 @@ TP_COLORAPP_TCMODE_LABEL2;Curve mode 2
 TP_COLORAPP_TCMODE_LABEL3;Curve chroma mode
 TP_COLORAPP_TCMODE_LIGHTNESS;Lightness
 TP_COLORAPP_TCMODE_SATUR;Saturation
+TP_COLORAPP_TEMP_TOOLTIP;To select an illuminant always Tint=1.\nA temp=2856\nD50 temp=5003\nD55 temp=5503\nD65 temp=6504\nD75 temp=7504
 TP_COLORAPP_TONECIE;Tone mapping using CIECAM02
 TP_COLORAPP_TONECIE_TOOLTIP;If this option is disabled, tone mapping is done in L*a*b* space.\nIf this option is enabled, tone mapping is done using CIECAM02.\nThe Tone Mapping tool must be enabled for this setting to take effect.
 TP_COLORAPP_WBCAM;WB [RT+CAT02] + [output]
 TP_COLORAPP_WBRT;WB [RT] + [output]
-TP_COLORAPP_YB;Yb (mean luminance)
+TP_COLORAPP_YB;Yb% (mean luminance)
+TP_COLORAPP_YBSCENE;Yb% (mean luminance)
+TP_COLORAPP_YBSCENE_TOOLTIP;if auto enable, Yb is calculated from the mean value of actual image luminance 
 TP_COLORTONING_AB;o C/L
 TP_COLORTONING_AUTOSAT;Automatic
 TP_COLORTONING_BALANCE;Balance
@@ -2328,5 +2324,3 @@ ZOOMPANEL_ZOOMFITCROPSCREEN;Fit crop to screen\nShortcut: <b>Alt</b>-<b>f</b>
 ZOOMPANEL_ZOOMFITSCREEN;Fit whole image to screen\nShortcut: <b>f</b>
 ZOOMPANEL_ZOOMIN;Zoom In\nShortcut: <b>+</b>
 ZOOMPANEL_ZOOMOUT;Zoom Out\nShortcut: <b>-</b>
-GIMP_PLUGIN_INFO;Welcome to the RawTherapee GIMP plugin!\nOnce you are done editing, simply close the main RawTherapee window and the image will be automatically imported in GIMP.
-DONT_SHOW_AGAIN;Don't show this message again.

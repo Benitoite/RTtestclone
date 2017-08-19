@@ -319,7 +319,7 @@ private:
                         for (int hcr = 0; hcr < numtiles_H; hcr++) {
                             int beg_tileW = wcr * tileWskip + tileWskip / 2.f - crW / 2.f;
                             int beg_tileH = hcr * tileHskip + tileHskip / 2.f - crH / 2.f;
-                            PreviewProps ppP (beg_tileW , beg_tileH, crW, crH, skipP);
+                            PreviewProps ppP (beg_tileW, beg_tileH, crW, crH, skipP);
                             imgsrc->getImage (currWB, tr, origCropPart, ppP, params.toneCurve, params.icm, params.raw );
                             //baseImg->getStdImage(currWB, tr, origCropPart, ppP, true, params.toneCurve);
 
@@ -539,7 +539,7 @@ private:
 
                     for (int wcr = 0; wcr <= 2; wcr++) {
                         for (int hcr = 0; hcr <= 2; hcr++) {
-                            PreviewProps ppP (coordW[wcr] , coordH[hcr], crW, crH, 1);
+                            PreviewProps ppP (coordW[wcr], coordH[hcr], crW, crH, 1);
                             imgsrc->getImage (currWB, tr, origCropPart, ppP, params.toneCurve, params.icm, params.raw);
                             //baseImg->getStdImage(currWB, tr, origCropPart, ppP, true, params.toneCurve);
 
@@ -738,7 +738,7 @@ private:
     {
         procparams::ProcParams& params = job->pparams;
         //ImProcFunctions ipf (&params, true);
-        ImProcFunctions &ipf = *(ipf_p.get());
+        ImProcFunctions &ipf = * (ipf_p.get());
 
         // perform luma/chroma denoise
 //  CieImage *cieView;
@@ -803,7 +803,7 @@ private:
     {
         procparams::ProcParams& params = job->pparams;
         //ImProcFunctions ipf (&params, true);
-        ImProcFunctions &ipf = *(ipf_p.get());
+        ImProcFunctions &ipf = * (ipf_p.get());
 
         imgsrc->convertColorSpace (baseImg, params.icm, currWB);
 
@@ -828,7 +828,7 @@ private:
     {
         procparams::ProcParams& params = job->pparams;
         //ImProcFunctions ipf (&params, true);
-        ImProcFunctions &ipf = *(ipf_p.get());
+        ImProcFunctions &ipf = * (ipf_p.get());
 
         if (params.dirpyrequalizer.cbdlMethod == "bef" && params.dirpyrequalizer.enabled && !params.colorappearance.enabled) {
             const int W = baseImg->getWidth();
@@ -933,7 +933,7 @@ private:
 
         LUTu histToneCurve;
 
-        ipf.rgbProc (baseImg, labView, nullptr, curve1, curve2, curve, shmap, params.toneCurve.saturation, rCurve, gCurve, bCurve, satLimit , satLimitOpacity, ctColorCurve, ctOpacityCurve, opautili, clToningcurve, cl2Toningcurve, customToneCurve1, customToneCurve2, customToneCurvebw1, customToneCurvebw2, rrm, ggm, bbm, autor, autog, autob, expcomp, hlcompr, hlcomprthresh, dcpProf, as, histToneCurve);
+        ipf.rgbProc (baseImg, labView, nullptr, curve1, curve2, curve, shmap, params.toneCurve.saturation, rCurve, gCurve, bCurve, satLimit, satLimitOpacity, ctColorCurve, ctOpacityCurve, opautili, clToningcurve, cl2Toningcurve, customToneCurve1, customToneCurve2, customToneCurvebw1, customToneCurvebw2, rrm, ggm, bbm, autor, autog, autob, expcomp, hlcompr, hlcomprthresh, dcpProf, as, histToneCurve);
 
         if (settings->verbose) {
             printf ("Output image / Auto B&W coefs:   R=%.2f   G=%.2f   B=%.2f\n", autor, autog, autob);
@@ -1082,6 +1082,7 @@ private:
         bool wavcontlutili = false;
 
         CurveFactory::curveWavContL (wavcontlutili, params.wavelet.wavclCurve, wavclCurve,/* hist16C, dummy,*/ 1);
+//<<<<<<< HEAD
 
 //   if(params.wavelet.enabled) {
         //      ipf.ip_wavelet(labView, labView, 2, WaveParams, wavCLVCurve, waOpacityCurveRG, waOpacityCurveBY, waOpacityCurveW,  waOpacityCurveWL, wavclCurve, wavcontlutili, 1);
@@ -1485,7 +1486,13 @@ private:
                 unshar    = NULL;
 
             }
+/*
+=======
 
+        if (params.wavelet.enabled) {
+            ipf.ip_wavelet (labView, labView, 2, WaveParams, wavCLVCurve, waOpacityCurveRG, waOpacityCurveBY, waOpacityCurveW,  waOpacityCurveWL, wavclCurve, wavcontlutili, 1);
+>>>>>>> dev
+*/
         }
 
 
@@ -1547,19 +1554,19 @@ private:
 
             if (params.sharpening.enabled) {
                 if (settings->ciecamfloat) {
-                    float d;
-                    ipf.ciecam_02float (cieView, float(adap), begh, endh, 1, 2, labView, &params, customColCurve1, customColCurve2, customColCurve3, dummy, dummy, CAMBrightCurveJ, CAMBrightCurveQ, CAMMean, 5, 1, true, d, 1);
+                    float d, dj, yb;
+                    ipf.ciecam_02float (cieView, float (adap), begh, endh, 1, 2, labView, &params, customColCurve1, customColCurve2, customColCurve3, dummy, dummy, CAMBrightCurveJ, CAMBrightCurveQ, CAMMean, 5, 1, true, d, dj, yb, 1);
                 } else {
-                    double dd;
-                    ipf.ciecam_02 (cieView, adap, begh, endh, 1, 2, labView, &params, customColCurve1, customColCurve2, customColCurve3, dummy, dummy, CAMBrightCurveJ, CAMBrightCurveQ, CAMMean, 5, 1, true, dd, 1);
+                    double dd, dj, yb;
+                    ipf.ciecam_02 (cieView, adap, begh, endh, 1, 2, labView, &params, customColCurve1, customColCurve2, customColCurve3, dummy, dummy, CAMBrightCurveJ, CAMBrightCurveQ, CAMMean, 5, 1, true, dd, dj, yb, 1);
                 }
             } else {
                 if (settings->ciecamfloat) {
-                    float d;
-                    ipf.ciecam_02float (cieView, float(adap), begh, endh, 1, 2, labView, &params, customColCurve1, customColCurve2, customColCurve3, dummy, dummy, CAMBrightCurveJ, CAMBrightCurveQ, CAMMean, 5, 1, true, d, 1);
+                    float d, dj, yb;
+                    ipf.ciecam_02float (cieView, float (adap), begh, endh, 1, 2, labView, &params, customColCurve1, customColCurve2, customColCurve3, dummy, dummy, CAMBrightCurveJ, CAMBrightCurveQ, CAMMean, 5, 1, true, d, dj, yb, 1);
                 } else {
-                    double dd;
-                    ipf.ciecam_02 (cieView, adap, begh, endh, 1, 2, labView, &params, customColCurve1, customColCurve2, customColCurve3, dummy, dummy, CAMBrightCurveJ, CAMBrightCurveQ, CAMMean, 5, 1, true, dd, 1);
+                    double dd, dj, yb;
+                    ipf.ciecam_02 (cieView, adap, begh, endh, 1, 2, labView, &params, customColCurve1, customColCurve2, customColCurve3, dummy, dummy, CAMBrightCurveJ, CAMBrightCurveQ, CAMMean, 5, 1, true, dd, dj, yb, 1);
                 }
             }
         }
@@ -1773,7 +1780,7 @@ private:
     {
         procparams::ProcParams& params = job->pparams;
         //ImProcFunctions ipf (&params, true);
-        ImProcFunctions &ipf = *(ipf_p.get());
+        ImProcFunctions &ipf = * (ipf_p.get());
 
         int imw, imh;
         double scale_factor = ipf.resizeScale (&params, fw, fh, imw, imh);
@@ -1809,7 +1816,7 @@ private:
             tmplab = std::move (resized);
         }
 
-        adjust_procparams(scale_factor);
+        adjust_procparams (scale_factor);
 
         fw = imw;
         fh = imh;
@@ -1844,21 +1851,27 @@ private:
         params.dirpyrDenoise.luma *= scale_factor;
         //params.dirpyrDenoise.Ldetail += (100 - params.dirpyrDenoise.Ldetail) * scale_factor;
         auto &lcurve = params.dirpyrDenoise.lcurve;
+
         for (size_t i = 2; i < lcurve.size(); i += 4) {
-            lcurve[i] *= min(scale_factor * 2, 1.0);
+            lcurve[i] *= min (scale_factor * 2, 1.0);
         }
-        noiseLCurve.Set(lcurve);
+
+        noiseLCurve.Set (lcurve);
         const char *medmethods[] = { "soft", "33", "55soft", "55", "77", "99" };
+
         if (params.dirpyrDenoise.median) {
             auto &key = params.dirpyrDenoise.methodmed == "RGB" ? params.dirpyrDenoise.rgbmethod : params.dirpyrDenoise.medmethod;
-            for (int i = 1; i < int(sizeof(medmethods)/sizeof(const char *)); ++i) {
+
+            for (int i = 1; i < int (sizeof (medmethods) / sizeof (const char *)); ++i) {
                 if (key == medmethods[i]) {
-                    int j = i - int(1.0 / scale_factor);
+                    int j = i - int (1.0 / scale_factor);
+
                     if (j < 0) {
                         params.dirpyrDenoise.median = false;
                     } else {
                         key = medmethods[j];
                     }
+
                     break;
                 }
             }
@@ -1873,6 +1886,7 @@ private:
             adjust_radius (defaultparams.dirpyrequalizer.mult[i], dirpyreq_scale,
                            params.dirpyrequalizer.mult[i]);
         }
+
         params.dirpyrequalizer.threshold *= scale_factor;
 
         adjust_radius (defaultparams.defringe.radius, scale_factor,
@@ -1881,11 +1895,12 @@ private:
 
         if (params.raw.xtranssensor.method ==
                 procparams::RAWParams::XTransSensor::methodstring[
-                    procparams::RAWParams::XTransSensor::threePass]) {
+             procparams::RAWParams::XTransSensor::threePass]) {
             params.raw.xtranssensor.method =
                 procparams::RAWParams::XTransSensor::methodstring[
-                    procparams::RAWParams::XTransSensor::onePass];
+            procparams::RAWParams::XTransSensor::onePass];
         }
+
         if (params.raw.bayersensor.method == procparams::RAWParams::BayerSensor::methodstring[procparams::RAWParams::BayerSensor::pixelshift]) {
             params.raw.bayersensor.method = procparams::RAWParams::BayerSensor::methodstring[params.raw.bayersensor.pixelShiftLmmse ? procparams::RAWParams::BayerSensor::lmmse : procparams::RAWParams::BayerSensor::amaze];
         }
@@ -2001,8 +2016,9 @@ void batchProcessingThread (ProcessingJob* job, BatchProcessingListener* bpl, bo
 void startBatchProcessing (ProcessingJob* job, BatchProcessingListener* bpl, bool tunnelMetaData)
 {
 
-    if (bpl)
-        Glib::Thread::create(sigc::bind(sigc::ptr_fun(batchProcessingThread), job, bpl, tunnelMetaData), 0, true, true, Glib::THREAD_PRIORITY_LOW);
+    if (bpl) {
+        Glib::Thread::create (sigc::bind (sigc::ptr_fun (batchProcessingThread), job, bpl, tunnelMetaData), 0, true, true, Glib::THREAD_PRIORITY_LOW);
+    }
 
 }
 

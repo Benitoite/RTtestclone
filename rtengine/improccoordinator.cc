@@ -561,7 +561,7 @@ void ImProcCoordinator::updatePreviewImage (int todo, Crop* cropCall)
             DCPProfile *dcpProf = imgsrc->getDCP (params.icm, currWB, as);
 
             ipf.rgbProc (oprevi, oprevl, nullptr, hltonecurve, shtonecurve, tonecurve, shmap, params.toneCurve.saturation,
-                         rCurve, gCurve, bCurve, colourToningSatLimit , colourToningSatLimitOpacity, ctColorCurve, ctOpacityCurve, opautili, clToningcurve, cl2Toningcurve, customToneCurve1, customToneCurve2, beforeToneCurveBW, afterToneCurveBW, rrm, ggm, bbm, bwAutoR, bwAutoG, bwAutoB, params.toneCurve.expcomp, params.toneCurve.hlcompr, params.toneCurve.hlcomprthresh, dcpProf, as, histToneCurve);
+                         rCurve, gCurve, bCurve, colourToningSatLimit, colourToningSatLimitOpacity, ctColorCurve, ctOpacityCurve, opautili, clToningcurve, cl2Toningcurve, customToneCurve1, customToneCurve2, beforeToneCurveBW, afterToneCurveBW, rrm, ggm, bbm, bwAutoR, bwAutoG, bwAutoB, params.toneCurve.expcomp, params.toneCurve.hlcompr, params.toneCurve.hlcomprthresh, dcpProf, as, histToneCurve);
 
             if (params.blackwhite.enabled && params.blackwhite.autoc && abwListener) {
                 if (settings->verbose) {
@@ -573,7 +573,7 @@ void ImProcCoordinator::updatePreviewImage (int todo, Crop* cropCall)
 
             if (params.colorToning.autosat && actListener) {
                 if (settings->verbose) {
-                    printf ("ImProcCoordinator / Auto CT:  indi=%d   satH=%d  satPR=%d\n", indi, (int)colourToningSatLimit , (int) colourToningSatLimitOpacity);
+                    printf ("ImProcCoordinator / Auto CT:  indi=%d   satH=%d  satPR=%d\n", indi, (int)colourToningSatLimit, (int) colourToningSatLimitOpacity);
                 }
 
                 actListener->autoColorTonChanged (indi, (int) colourToningSatLimit, (int)colourToningSatLimitOpacity); //change sliders autosat
@@ -638,8 +638,8 @@ void ImProcCoordinator::updatePreviewImage (int todo, Crop* cropCall)
         ipf.chromiLuminanceCurve (nullptr, pW, nprevl, nprevl, chroma_acurve, chroma_bcurve, satcurve, lhskcurve, clcurve, lumacurve, utili, autili, butili, ccutili, cclutili, clcutili, histCCurve, histLCurve);
         ipf.vibrance (nprevl);
 
-        if((params.colorappearance.enabled && !params.colorappearance.tonecie) ||  (!params.colorappearance.enabled)) {
-            ipf.EPDToneMap(nprevl, 5, scale);
+        if ((params.colorappearance.enabled && !params.colorappearance.tonecie) ||  (!params.colorappearance.enabled)) {
+            ipf.EPDToneMap (nprevl, 5, scale);
         }
 
         // for all treatments Defringe, Sharpening, Contrast detail , Microcontrast they are activated if "CIECAM" function are disabled
@@ -862,7 +862,14 @@ void ImProcCoordinator::updatePreviewImage (int todo, Crop* cropCall)
                 }
 
                 delete mergelabpart;
-
+				/*
+=======
+        if ((params.wavelet.enabled)) {
+            WaveletParams WaveParams = params.wavelet;
+            //      WaveParams.getCurves(wavCLVCurve, waOpacityCurveRG, waOpacityCurveBY);
+            WaveParams.getCurves (wavCLVCurve, waOpacityCurveRG, waOpacityCurveBY, waOpacityCurveW, waOpacityCurveWL);
+>>>>>>> dev
+*/
             }
         }
 
@@ -1116,7 +1123,12 @@ void ImProcCoordinator::updatePreviewImage (int todo, Crop* cropCall)
                 } else {
                     mL0 = mL = mC0 = mC = 0.f;
                 }
-
+				/*
+=======
+            //  ipf.ip_wavelet(nprevl, nprevl, kall, WaveParams, wavCLVCurve, waOpacityCurveRG, waOpacityCurveBY, scale);
+            ipf.ip_wavelet (nprevl, nprevl, kall, WaveParams, wavCLVCurve, waOpacityCurveRG, waOpacityCurveBY, waOpacityCurveW, waOpacityCurveWL, wavclCurve, wavcontlutili, scale);
+>>>>>>> dev
+*/
 #ifdef _OPENMP
                 #pragma omp parallel for
 #endif
@@ -1174,7 +1186,7 @@ void ImProcCoordinator::updatePreviewImage (int todo, Crop* cropCall)
 
             int begh = 0;
             int endh = pH;
-            float d;
+            float d, dj, yb;
             bool execsharp = false;
 
             if (!ncie) {
@@ -1194,14 +1206,18 @@ void ImProcCoordinator::updatePreviewImage (int todo, Crop* cropCall)
             CAMBrightCurveJ.dirty = true;
             CAMBrightCurveQ.dirty = true;
 
-            ipf.ciecam_02float (ncie, float(adap), begh, endh, pW, 2, nprevl, &params, customColCurve1, customColCurve2, customColCurve3, histLCAM, histCCAM, CAMBrightCurveJ, CAMBrightCurveQ, CAMMean, 5, scale, execsharp, d, 1);
+            ipf.ciecam_02float (ncie, float (adap), begh, endh, pW, 2, nprevl, &params, customColCurve1, customColCurve2, customColCurve3, histLCAM, histCCAM, CAMBrightCurveJ, CAMBrightCurveQ, CAMMean, 5, scale, execsharp, d, dj, yb, 1);
 
-            if (params.colorappearance.autodegree && acListener && params.colorappearance.enabled) {
-                acListener->autoCamChanged (100.* (double)d);
+            if ((params.colorappearance.autodegree || params.colorappearance.autodegreeout) && acListener && params.colorappearance.enabled) {
+                acListener->autoCamChanged (100.* (double)d, 100.* (double)dj);
             }
 
             if (params.colorappearance.autoadapscen && acListener && params.colorappearance.enabled) {
-                acListener->adapCamChanged (adap);   //real value of adapt scene luminosity
+                acListener->adapCamChanged (adap);   //real value of adapt scene
+            }
+
+            if (params.colorappearance.autoybscen && acListener && params.colorappearance.enabled) {
+                acListener->ybCamChanged ((int) yb);   //real value Yb scene
             }
 
             readyphase++;

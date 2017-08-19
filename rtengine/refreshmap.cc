@@ -468,6 +468,49 @@ int refreshmap[rtengine::NUMOFEVENTS] = {
     DEMOSAIC,         // EvviewMethod
     RETINEX,          // EvRetinexgaintransmission
     RETINEX,         //EvLskal
+    RETINEX,          // EvChrrt
+    OUTPUTPROFILE,       //EvOBPCompens
+    ALLNORAW,          // EvWBtempBias
+    DARKFRAME,        // EvRawImageNum
+    DEMOSAIC,         // EvPixelShiftMotion
+    DEMOSAIC,         // EvPixelShiftMotionCorrection
+    DEMOSAIC,         // EvPixelShiftStddevFactorGreen
+    DEMOSAIC,         // EvPixelShiftEperIso
+    DEMOSAIC,         // EvPixelShiftNreadIso
+    DEMOSAIC,         // EvPixelShiftPrnu
+    DEMOSAIC,         // EvPixelshiftShowMotion
+    DEMOSAIC,         // EvPixelshiftShowMotionMaskOnly
+    DEMOSAIC,         // EvPixelShiftAutomatic
+    DEMOSAIC,         // EvPixelShiftNonGreenHorizontal
+    DEMOSAIC,         // EvPixelShiftNonGreenVertical
+    DEMOSAIC,         // EvPixelShiftNonGreenCross
+    DEMOSAIC,         // EvPixelShiftStddevFactorRed
+    DEMOSAIC,         // EvPixelShiftStddevFactorBlue
+    DEMOSAIC,         // EvPixelShiftNonGreenCross2
+    DEMOSAIC,         // EvPixelShiftNonGreenAmaze
+    DEMOSAIC,         // EvPixelShiftGreen
+    DEMOSAIC,         // EvPixelShiftRedBlueWeight
+    DEMOSAIC,         // EvPixelShiftBlur
+    DEMOSAIC,         // EvPixelShiftSigma
+    DEMOSAIC,         // EvPixelShiftSum
+    DEMOSAIC,         // EvPixelShiftExp0
+    DEMOSAIC,         // EvPixelShiftHoleFill
+    DEMOSAIC,         // EvPixelShiftMedian
+    DEMOSAIC,         // EvPixelShiftMedian3
+    DEMOSAIC,         // EvPixelShiftMotionMethod
+    DEMOSAIC,         // EvPixelShiftSmooth
+    DEMOSAIC,         // EvPixelShiftLmmse
+    DEMOSAIC,         // EvPixelShiftEqualBright
+    DEMOSAIC,          // EvPixelShiftEqualBrightChannel
+    LUMINANCECURVE,   // EvCATtempout
+    LUMINANCECURVE,   // EvCATgreenout
+    LUMINANCECURVE,   // EvCATybout
+    LUMINANCECURVE,   // EvCATDegreeout
+    LUMINANCECURVE,   // EvCATAutoDegreeout
+    LUMINANCECURVE,   // EvCATtempsc
+    LUMINANCECURVE,   // EvCATgreensc
+    LUMINANCECURVE,   // EvCATybscen
+    LUMINANCECURVE,   // EvCATAutoyb	
     DIRPYREQUALIZER,  // EvWavusharpmet
     DIRPYREQUALIZER,  // EvWavmergeL
     DIRPYREQUALIZER,  // EvWavmergeC
@@ -522,45 +565,6 @@ int refreshmap[rtengine::NUMOFEVENTS] = {
     DIRPYREQUALIZER,    //EvWavmergMethod2
     DIRPYREQUALIZER,     //EvWavshapMethod
     DIRPYREQUALIZER,     //EvWavshapind
-    DIRPYREQUALIZER,     //EvWavsty2Curve
-    OUTPUTPROFILE,       //EvOBPCompens
-    ALLNORAW,          // EvWBtempBias
-    DARKFRAME,        // EvRawImageNum
-    DEMOSAIC,         // EvPixelShiftMotion
-    DEMOSAIC,         // EvPixelShiftMotionCorrection
-    DEMOSAIC,         // EvPixelShiftStddevFactorGreen
-    DEMOSAIC,         // EvPixelShiftEperIso
-    DEMOSAIC,         // EvPixelShiftNreadIso
-    DEMOSAIC,         // EvPixelShiftPrnu
-    DEMOSAIC,         // EvPixelshiftShowMotion
-    DEMOSAIC,         // EvPixelshiftShowMotionMaskOnly
-    DEMOSAIC,         // EvPixelShiftAutomatic
-    DEMOSAIC,         // EvPixelShiftNonGreenHorizontal
-    DEMOSAIC,         // EvPixelShiftNonGreenVertical
-    DEMOSAIC,         // EvPixelShiftNonGreenCross
-    DEMOSAIC,         // EvPixelShiftStddevFactorRed
-    DEMOSAIC,         // EvPixelShiftStddevFactorBlue
-    DEMOSAIC,         // EvPixelShiftNonGreenCross2
-    DEMOSAIC,         // EvPixelShiftNonGreenAmaze
-    DEMOSAIC,         // EvPixelShiftGreen
-    DEMOSAIC,         // EvPixelShiftRedBlueWeight
-    DEMOSAIC,         // EvPixelShiftBlur
-    DEMOSAIC,         // EvPixelShiftSigma
-    DEMOSAIC,         // EvPixelShiftSum
-    DEMOSAIC,         // EvPixelShiftExp0
-    DEMOSAIC,         // EvPixelShiftHoleFill
-    DEMOSAIC,         // EvPixelShiftMedian
-    DEMOSAIC,         // EvPixelShiftMedian3
-    DEMOSAIC,         // EvPixelShiftMotionMethod
-    DEMOSAIC,         // EvPixelShiftSmooth
-    DEMOSAIC,         // EvPixelShiftLmmse
-    DEMOSAIC,         // EvPixelShiftEqualBright
-    DEMOSAIC,          // EvPixelShiftEqualBrightChannel
-    RETINEX,          // EvChrrt
-    LUMINANCECURVE,   // EvCATtempout
-    LUMINANCECURVE,   // EvCATgreenout
-    LUMINANCECURVE   // EvCATybout
-
-
+    DIRPYREQUALIZER     //EvWavsty2Curve
 };
 
