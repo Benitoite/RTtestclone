@@ -2500,9 +2500,9 @@ void RawImageSource::retinexPrepareBuffers (ColorManagementParams cmp, const Ret
             double x;
 
             if (gamm2 < 1.) {
-                x = Color::igammareti (val, gamm, start, ts, mul , add);
+                x = Color::igammareti (val, gamm, start, ts, mul, add);
             } else {
-                x = Color::gammareti (val, gamm, start, ts, mul , add);
+                x = Color::gammareti (val, gamm, start, ts, mul, add);
             }
 
             lutTonereti[i] = CLIP (x * 65535.); // CLIP avoid in some case extra values
@@ -2769,9 +2769,9 @@ void RawImageSource::retinex (ColorManagementParams cmp, const RetinexParams &de
             double x;
 
             if (gamm2 < 1.) {
-                x = Color::gammareti (val, gamm, start, ts, mul , add);
+                x = Color::gammareti (val, gamm, start, ts, mul, add);
             } else {
-                x = Color::igammareti (val, gamm, start, ts, mul , add);
+                x = Color::igammareti (val, gamm, start, ts, mul, add);
             }
 
             lutToneireti[i] = CLIP (x * 65535.);
@@ -2840,8 +2840,7 @@ void RawImageSource::retinex (ColorManagementParams cmp, const RetinexParams &de
                         int pos = LBuffer[i][j];
                         hist16RETThr[pos]++; //histogram in Curve
                     }
-                }
-            else
+                } else
                 for (int j = 0; j < W - 2 * border; j++) {
                     LBuffer[i][j] = temp[i][j];
                 }
@@ -4039,8 +4038,8 @@ void RawImageSource::processFalseColorCorrectionThread  (Imagefloat* im, array2D
         convert_row_to_YIQ (im->r (i + 1), im->g (i + 1), im->b (i + 1), rbconv_Y[nx], rbconv_I[nx], rbconv_Q[nx], W);
 
 #ifdef __SSE2__
-        pre1[0] = _mm_setr_ps (rbconv_I[px][0], rbconv_Q[px][0], 0, 0) , pre1[1] = _mm_setr_ps (rbconv_I[cx][0], rbconv_Q[cx][0], 0, 0), pre1[2] = _mm_setr_ps (rbconv_I[nx][0], rbconv_Q[nx][0], 0, 0);
-        pre2[0] = _mm_setr_ps (rbconv_I[px][1], rbconv_Q[px][1], 0, 0) , pre2[1] = _mm_setr_ps (rbconv_I[cx][1], rbconv_Q[cx][1], 0, 0), pre2[2] = _mm_setr_ps (rbconv_I[nx][1], rbconv_Q[nx][1], 0, 0);
+        pre1[0] = _mm_setr_ps (rbconv_I[px][0], rbconv_Q[px][0], 0, 0), pre1[1] = _mm_setr_ps (rbconv_I[cx][0], rbconv_Q[cx][0], 0, 0), pre1[2] = _mm_setr_ps (rbconv_I[nx][0], rbconv_Q[nx][0], 0, 0);
+        pre2[0] = _mm_setr_ps (rbconv_I[px][1], rbconv_Q[px][1], 0, 0), pre2[1] = _mm_setr_ps (rbconv_I[cx][1], rbconv_Q[cx][1], 0, 0), pre2[2] = _mm_setr_ps (rbconv_I[nx][1], rbconv_Q[nx][1], 0, 0);
 
         // fill first element in rbout_I and rbout_Q
         rbout_I[cx][0] = rbconv_I[cx][0];
@@ -4177,7 +4176,7 @@ void RawImageSource::processFalseColorCorrection  (Imagefloat* im, const int ste
     multi_array2D<float, 5> buffer (W, 3);
 
     for (int t = 0; t < steps; t++) {
-        processFalseColorCorrectionThread (im, buffer[0], buffer[1], buffer[2], buffer[3], buffer[4], 1 , im->getHeight() - 1);
+        processFalseColorCorrectionThread (im, buffer[0], buffer[1], buffer[2], buffer[3], buffer[4], 1, im->getHeight() - 1);
     }
 
 #endif
@@ -5128,12 +5127,10 @@ void RawImageSource::getRAWHistogram (LUTu & histRedRaw, LUTu & histGreenRaw, LU
     if (ri->getSensorType() == ST_BAYER)    // since there are twice as many greens, correct for it
         for (int i = 0; i < 256; i++) {
             histGreenRaw[i] >>= 1;
-        }
-    else if (ri->getSensorType() == ST_FUJI_XTRANS) // since Xtrans has 2.5 as many greens, correct for it
+        } else if (ri->getSensorType() == ST_FUJI_XTRANS) // since Xtrans has 2.5 as many greens, correct for it
         for (int i = 0; i < 256; i++) {
             histGreenRaw[i] = (histGreenRaw[i] * 2) / 5;
-        }
-    else if (ri->get_colors() == 1) { // monochrome sensor => set all histograms equal
+        } else if (ri->get_colors() == 1) { // monochrome sensor => set all histograms equal
         histGreenRaw += histRedRaw;
         histBlueRaw += histRedRaw;
     }
@@ -6432,7 +6429,7 @@ void  RawImageSource::getrgbloc (bool gamma, bool cat02, int begx, int begy, int
         for (int i = 0; i < bfh; i++)
             for (int j = 0; j < bfw; j++) {
                 float X = 0.f, Y = 0.f, Z = 0.f;
-                Color::rgbxyz (redloc[i][j], greenloc[i][j], blueloc[i][j] , X, Y, Z, wp);
+                Color::rgbxyz (redloc[i][j], greenloc[i][j], blueloc[i][j], X, Y, Z, wp);
                 double temp;
                 double Xr = X / 65535.;
                 double Yr = Y / 65535.;
@@ -6686,7 +6683,7 @@ void RawImageSource::getAutoWBMultipliersloc (int begx, int begy, int yEn, int x
 
     //    return ColorTemp (pow(avg_r/rn, 1.0/6.0)*img_r, pow(avg_g/gn, 1.0/6.0)*img_g, pow(avg_b/bn, 1.0/6.0)*img_b);
 
-    double reds = 0. , greens = 0., blues = 0.;
+    double reds = 0., greens = 0., blues = 0.;
 
     if (localr.wbMethod == "aut"  || localr.wbMethod == "autosdw"  || localr.wbMethod == "autedgsdw" || localr.wbMethod == "autedgrob" || localr.wbMethod == "autedg" || localr.wbMethod == "autorobust") {
         reds   = avg_rm * refwb_red;

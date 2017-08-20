@@ -254,9 +254,37 @@ RTWindow *create_rt_window()
         Gtk::Settings::get_for_screen(screen)->property_gtk_theme_name() = "Adwaita";
         Gtk::Settings::get_for_screen(screen)->property_gtk_application_prefer_dark_theme() = true;
 
+#if defined(__APPLE__)
+        // This will force screen resolution regarding font, but I don't think it's compliant with Gtk guidelines...
+        // Do not confuse with screen scaling, where everything is scaled up !
+        screen->set_resolution (96.);
+#endif
+
         Glib::RefPtr<Glib::Regex> regex = Glib::Regex::create(THEMEREGEXSTR, Glib::RegexCompileFlags::REGEX_CASELESS);
-        Glib::ustring filename = Glib::build_filename(argv0, "themes", options.theme + ".css");
-        if (!regex->match(options.theme + ".css") || !Glib::file_test(filename, Glib::FILE_TEST_EXISTS)) {
+        Glib::ustring filename;
+        Glib::MatchInfo mInfo;
+        bool match = regex->match(options.theme + ".css", mInfo);
+        if (match) {
+            // save old theme (name + version)
+            Glib::ustring initialTheme(options.theme);
+
+            // update version
+            auto pos = options.theme.find("-GTK3-");
+            Glib::ustring themeRootName(options.theme.substr(0, pos));
+            if (GTK_MINOR_VERSION < 20) {
+                options.theme = themeRootName + "-GTK3-_19";
+            } else {
+                options.theme = themeRootName + "-GTK3-20_";
+            }
+            // check if this version exist
+            if (!Glib::file_test(Glib::build_filename(argv0, "themes", options.theme + ".css"), Glib::FILE_TEST_EXISTS)) {
+                // set back old theme version if the actual one doesn't exist yet
+                options.theme = initialTheme;
+            }
+        }
+        filename = Glib::build_filename(argv0, "themes", options.theme + ".css");
+
+        if (!match || !Glib::file_test(filename, Glib::FILE_TEST_EXISTS)) {
             options.theme = "RawTherapee-GTK";
             // We're not testing GTK_MAJOR_VERSION == 3 here, since this branch requires Gtk3 only
             if (GTK_MINOR_VERSION < 20) {
@@ -409,6 +437,19 @@ private:
 private:
     RTWindow *rtWindow;
 };
+
+void show_gimp_plugin_info_dialog(Gtk::Window *parent)
+{
+    if (options.gimpPluginShowInfoDialog) {
+        Gtk::MessageDialog info(*parent, M("GIMP_PLUGIN_INFO"), false, Gtk::MESSAGE_INFO, Gtk::BUTTONS_OK, true);
+        Gtk::Box *box = info.get_message_area();
+        Gtk::CheckButton dontshowagain(M("DONT_SHOW_AGAIN"));
+        dontshowagain.show();
+        box->pack_start(dontshowagain);
+        info.run();
+        options.gimpPluginShowInfoDialog = !dontshowagain.get_active();
+    }
+}
 
 } // namespace
 
@@ -596,6 +637,9 @@ int main(int argc, char **argv)
             Gtk::Main m(&argc, &argv);
             gdk_threads_enter();
             const std::unique_ptr<RTWindow> rtWindow(create_rt_window());
+            if (gimpPlugin) {
+                show_gimp_plugin_info_dialog(rtWindow.get());
+            }
             m.run(*rtWindow);
             gdk_threads_leave();
 
