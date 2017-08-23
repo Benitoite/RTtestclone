@@ -255,13 +255,13 @@ ToolPanelCoordinator::ToolPanelCoordinator () : ipc (nullptr), hasChanged (false
 
     TOITypes type = options.UseIconNoText ? TOI_ICON : TOI_TEXT;
 
-    toiE = Gtk::manage (new TextOrIcon ("exposure.png" , M ("MAIN_TAB_EXPOSURE") , M ("MAIN_TAB_EXPOSURE_TOOLTIP") , type));
-    toiD = Gtk::manage (new TextOrIcon ("detail.png"   , M ("MAIN_TAB_DETAIL")   , M ("MAIN_TAB_DETAIL_TOOLTIP")   , type));
-    toiC = Gtk::manage (new TextOrIcon ("colour.png"   , M ("MAIN_TAB_COLOR")    , M ("MAIN_TAB_COLOR_TOOLTIP")    , type));
-    toiW = Gtk::manage (new TextOrIcon ("wavelet.png"  , M ("MAIN_TAB_WAVELET")  , M ("MAIN_TAB_WAVELET_TOOLTIP") , type));
+    toiE = Gtk::manage (new TextOrIcon ("exposure.png", M ("MAIN_TAB_EXPOSURE"), M ("MAIN_TAB_EXPOSURE_TOOLTIP"), type));
+    toiD = Gtk::manage (new TextOrIcon ("detail.png", M ("MAIN_TAB_DETAIL"), M ("MAIN_TAB_DETAIL_TOOLTIP"), type));
+    toiC = Gtk::manage (new TextOrIcon ("colour.png", M ("MAIN_TAB_COLOR"), M ("MAIN_TAB_COLOR_TOOLTIP"), type));
+    toiW = Gtk::manage (new TextOrIcon ("wavelet.png", M ("MAIN_TAB_WAVELET"), M ("MAIN_TAB_WAVELET_TOOLTIP"), type));
     toiT = Gtk::manage (new TextOrIcon ("transform.png", M ("MAIN_TAB_TRANSFORM"), M ("MAIN_TAB_TRANSFORM_TOOLTIP"), type));
-    toiR = Gtk::manage (new TextOrIcon ("raw.png"      , M ("MAIN_TAB_RAW")      , M ("MAIN_TAB_RAW_TOOLTIP")      , type));
-    toiM = Gtk::manage (new TextOrIcon ("meta.png"     , M ("MAIN_TAB_METADATA") , M ("MAIN_TAB_METADATA_TOOLTIP") , type));
+    toiR = Gtk::manage (new TextOrIcon ("raw.png", M ("MAIN_TAB_RAW"), M ("MAIN_TAB_RAW_TOOLTIP"), type));
+    toiM = Gtk::manage (new TextOrIcon ("meta.png", M ("MAIN_TAB_METADATA"), M ("MAIN_TAB_METADATA_TOOLTIP"), type));
 
     toolPanelNotebook->append_page (*exposurePanelSW,  *toiE);
     toolPanelNotebook->append_page (*detailsPanelSW,   *toiD);
@@ -610,14 +610,23 @@ void ToolPanelCoordinator::writeOptions ()
 {
 
     crop->writeOptions ();
-    options.tpOpen.clear ();
+
+    if (options.autoSaveTpOpen) {
+        writeToolExpandedStatus (options.tpOpen);
+    }
+}
+
+
+void ToolPanelCoordinator::writeToolExpandedStatus (std::vector<int> &tpOpen)
+{
+    tpOpen.clear ();
 
     for (size_t i = 0; i < expList.size(); i++) {
-        options.tpOpen.push_back (expList.at (i)->get_expanded ());
+        tpOpen.push_back (expList.at (i)->get_expanded ());
     }
 
-    wavelet->writeOptions (options.tpOpen);
-    retinex->writeOptions (options.tpOpen);
+    wavelet->writeOptions (tpOpen);
+    retinex->writeOptions (tpOpen);
 }
 
 

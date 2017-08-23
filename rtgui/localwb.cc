@@ -764,7 +764,7 @@ void Localwb::writeOptions (std::vector<int> &tpOpen)
 
 void Localwb::updateToolState (std::vector<int> &tpOpen)
 {
-    if (tpOpen.size() == 2) {
+    if (tpOpen.size() >= 2) {
         expsettings->set_expanded (tpOpen.at (0));
         expwb->set_expanded (tpOpen.at (1));
 
