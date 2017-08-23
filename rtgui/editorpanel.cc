@@ -72,61 +72,70 @@ int setprogressStrUI ( void *p )
 }
 
 
-bool find_default_monitor_profile(GdkWindow *rootwin, Glib::ustring &defprof, Glib::ustring &defprofname)
+bool find_default_monitor_profile (GdkWindow *rootwin, Glib::ustring &defprof, Glib::ustring &defprofname)
 {
 #ifdef WIN32
-    HDC hDC = GetDC(nullptr);
+    HDC hDC = GetDC (nullptr);
 
     if (hDC != nullptr) {
-        if (SetICMMode(hDC, ICM_ON)) {
+        if (SetICMMode (hDC, ICM_ON)) {
             char profileName[MAX_PATH + 1];
             DWORD profileLength = MAX_PATH;
 
-            if (GetICMProfileA(hDC, &profileLength, profileName)) {
-                defprof = Glib::ustring(profileName);
-                defprofname = Glib::path_get_basename(defprof);
-                size_t pos = defprofname.rfind(".");
+            if (GetICMProfileA (hDC, &profileLength, profileName)) {
+                defprof = Glib::ustring (profileName);
+                defprofname = Glib::path_get_basename (defprof);
+                size_t pos = defprofname.rfind (".");
 
                 if (pos != Glib::ustring::npos) {
-                    defprofname = defprofname.substr(0, pos);
+                    defprofname = defprofname.substr (0, pos);
                 }
-                defprof = Glib::ustring("file:") + defprof;
+
+                defprof = Glib::ustring ("file:") + defprof;
                 return true;
             }
 
             // might fail if e.g. the monitor has no profile
         }
 
-        ReleaseDC(NULL, hDC);
+        ReleaseDC (NULL, hDC);
     }
+
 #elif !defined(__APPLE__)
     // taken from geeqie (image.c) and adapted
     // Originally licensed as GPL v2+, with the following copyright:
     // * Copyright (C) 2006 John Ellis
     // * Copyright (C) 2008 - 2016 The Geeqie Team
-    // 
+    //
     guchar *prof = nullptr;
     gint proflen;
     GdkAtom type = GDK_NONE;
     gint format = 0;
-    if (gdk_property_get(rootwin, gdk_atom_intern("_ICC_PROFILE", FALSE), GDK_NONE, 0, 64 * 1024 * 1024, FALSE, &type, &format, &proflen, &prof) && proflen > 0) {
-        cmsHPROFILE p = cmsOpenProfileFromMem(prof, proflen);
+
+    if (gdk_property_get (rootwin, gdk_atom_intern ("_ICC_PROFILE", FALSE), GDK_NONE, 0, 64 * 1024 * 1024, FALSE, &type, &format, &proflen, &prof) && proflen > 0) {
+        cmsHPROFILE p = cmsOpenProfileFromMem (prof, proflen);
+
         if (p) {
             defprofname = "from GDK";
-            defprof = Glib::build_filename(Options::rtdir, "GDK_ICC_PROFILE.icc");
-            if (cmsSaveProfileToFile(p, defprof.c_str())) {
-                cmsCloseProfile(p);
+            defprof = Glib::build_filename (Options::rtdir, "GDK_ICC_PROFILE.icc");
+
+            if (cmsSaveProfileToFile (p, defprof.c_str())) {
+                cmsCloseProfile (p);
+
                 if (prof) {
-                    g_free(prof);
+                    g_free (prof);
                 }
-                defprof = Glib::ustring("file:") + defprof;
+
+                defprof = Glib::ustring ("file:") + defprof;
                 return true;
             }
         }
     }
+
     if (prof) {
-        g_free(prof);
+        g_free (prof);
     }
+
 #endif
     return false;
 }
@@ -158,17 +167,20 @@ private:
 
         profileBox.append (M ("PREFERENCES_PROFILE_NONE"));
         Glib::ustring defprofname;
-        if (find_default_monitor_profile(profileBox.get_root_window()->gobj(), defprof, defprofname)) {
+
+        if (find_default_monitor_profile (profileBox.get_root_window()->gobj(), defprof, defprofname)) {
             profileBox.append (M ("MONITOR_PROFILE_SYSTEM") + " (" + defprofname + ")");
+
             if (options.rtSettings.autoMonitorProfile) {
-                rtengine::ICCStore::getInstance()->setDefaultMonitorProfileName(defprof);
-                profileBox.set_active(1);
+                rtengine::ICCStore::getInstance()->setDefaultMonitorProfileName (defprof);
+                profileBox.set_active (1);
             } else {
-                profileBox.set_active(0);
+                profileBox.set_active (0);
             }
         } else {
             profileBox.set_active (0);
         }
+
         const std::vector<Glib::ustring> profiles = rtengine::ICCStore::getInstance()->getProfiles (rtengine::ICCStore::ProfileType::MONITOR);
 
         for (const auto profile : profiles) {
@@ -246,8 +258,10 @@ private:
         Glib::ustring profile;
 
 #if !defined(__APPLE__) // monitor profile not supported on apple
+
         if (!defprof.empty() && profileBox.get_active_row_number () == 1) {
             profile = defprof;
+
             if (profile.empty ()) {
                 profile = options.rtSettings.monitorProfile;
             }
@@ -258,6 +272,7 @@ private:
         } else if (profileBox.get_active_row_number () > 0) {
             profile = profileBox.get_active_text ();
         }
+
 #else
         profile = "RT_sRGB";
 #endif
@@ -424,10 +439,11 @@ public:
         ConnectionBlocker profileBlocker (profileConn);
 
         if (!defprof.empty() && options.rtSettings.autoMonitorProfile) {
-            profileBox.set_active(1);
+            profileBox.set_active (1);
         } else {
             setActiveTextOrIndex (profileBox, options.rtSettings.monitorProfile, 0);
         }
+
 #endif
 
         switch (options.rtSettings.monitorIntent) {
@@ -448,19 +464,19 @@ public:
         updateParameters ();
     }
 
-    void defaultMonitorProfileChanged(const Glib::ustring &profile_name, bool auto_monitor_profile)
+    void defaultMonitorProfileChanged (const Glib::ustring &profile_name, bool auto_monitor_profile)
     {
         ConnectionBlocker profileBlocker (profileConn);
-        
+
         if (auto_monitor_profile && !defprof.empty()) {
-            rtengine::ICCStore::getInstance()->setDefaultMonitorProfileName(defprof);
+            rtengine::ICCStore::getInstance()->setDefaultMonitorProfileName (defprof);
 #ifndef __APPLE__
-            profileBox.set_active(1);
+            profileBox.set_active (1);
 #endif
         } else {
-            rtengine::ICCStore::getInstance()->setDefaultMonitorProfileName(profile_name);
+            rtengine::ICCStore::getInstance()->setDefaultMonitorProfileName (profile_name);
 #ifndef __APPLE__
-            setActiveTextOrIndex(profileBox, profile_name, 0);
+            setActiveTextOrIndex (profileBox, profile_name, 0);
 #endif
         }
     }
@@ -468,7 +484,7 @@ public:
 };
 
 EditorPanel::EditorPanel (FilePanel* filePanel)
-    : catalogPane(nullptr), realized(false), tbBeforeLock(nullptr), iHistoryShow(nullptr), iHistoryHide(nullptr), iTopPanel_1_Show(nullptr), iTopPanel_1_Hide(nullptr), iRightPanel_1_Show(nullptr), iRightPanel_1_Hide(nullptr), iBeforeLockON(nullptr), iBeforeLockOFF(nullptr), previewHandler(nullptr), beforePreviewHandler(nullptr), beforeIarea(nullptr), beforeBox(nullptr), afterBox(nullptr), beforeLabel(nullptr), afterLabel(nullptr), beforeHeaderBox(nullptr), afterHeaderBox(nullptr), parent(nullptr), parentWindow(nullptr), openThm(nullptr), isrc(nullptr), ipc(nullptr), beforeIpc(nullptr), err(0), isProcessing(false)
+    : catalogPane (nullptr), realized (false), tbBeforeLock (nullptr), iHistoryShow (nullptr), iHistoryHide (nullptr), iTopPanel_1_Show (nullptr), iTopPanel_1_Hide (nullptr), iRightPanel_1_Show (nullptr), iRightPanel_1_Hide (nullptr), iBeforeLockON (nullptr), iBeforeLockOFF (nullptr), previewHandler (nullptr), beforePreviewHandler (nullptr), beforeIarea (nullptr), beforeBox (nullptr), afterBox (nullptr), beforeLabel (nullptr), afterLabel (nullptr), beforeHeaderBox (nullptr), afterHeaderBox (nullptr), parent (nullptr), parentWindow (nullptr), openThm (nullptr), isrc (nullptr), ipc (nullptr), beforeIpc (nullptr), err (0), isProcessing (false)
 {
 
     epih = new EditorPanelIdleHelper;
@@ -695,6 +711,7 @@ EditorPanel::EditorPanel (FilePanel* filePanel)
     iops->attach_next_to (*vsep2, Gtk::POS_LEFT, 1, 1);
     iops->attach_next_to (*progressLabel, Gtk::POS_LEFT, 1, 1);
     iops->attach_next_to (*vsep1, Gtk::POS_LEFT, 1, 1);
+
     if (!gimpPlugin) {
         iops->attach_next_to (*sendtogimp, Gtk::POS_LEFT, 1, 1);
     }
@@ -931,6 +948,14 @@ void EditorPanel::writeOptions()
 
     if (tpc) {
         tpc->writeOptions();
+    }
+}
+
+
+void EditorPanel::writeToolExpandedStatus (std::vector<int> &tpOpen)
+{
+    if (tpc) {
+        tpc->writeToolExpandedStatus (tpOpen);
     }
 }
 
@@ -1559,13 +1584,16 @@ bool EditorPanel::handleShortcutKey (GdkEventKey* event)
                     iareapanel->imageArea->previewModePanel->toggleFocusMask();
                     return true;
 
-            case GDK_KEY_less:
-                iareapanel->imageArea->indClippedPanel->toggleClipped (false);
-                return true;
+                case GDK_KEY_f:
+                    iareapanel->imageArea->zoomPanel->zoomFitClicked();
+                    return true;
 
+                case GDK_KEY_less:
+                    iareapanel->imageArea->indClippedPanel->toggleClipped (false);
+                    return true;
 
                 case GDK_KEY_greater:
-                    iareapanel->imageArea->indClippedPanel->toggleClipped (false);
+                    iareapanel->imageArea->indClippedPanel->toggleClipped (true);
                     return true;
 
                 case GDK_KEY_F5:
@@ -1596,24 +1624,26 @@ bool EditorPanel::handleShortcutKey (GdkEventKey* event)
                     setProgressStr (M ("PROGRESSBAR_PROCESSING_PROFILESAVED"));
                     return true;
 
-            case GDK_KEY_s:
-                if (!gimpPlugin) {
-                    saveAsPressed();
-                }
-                return true;
-
-            case GDK_KEY_b:
-                if (!gimpPlugin && !simpleEditor) {
-                    queueImgPressed();
-                }
+                case GDK_KEY_s:
+                    if (!gimpPlugin) {
+                        saveAsPressed();
+                    }
 
                     return true;
 
-            case GDK_KEY_e:
-                if (!gimpPlugin) {
-                    sendToGimpPressed();
-                }
-                return true;
+                case GDK_KEY_b:
+                    if (!gimpPlugin && !simpleEditor) {
+                        queueImgPressed();
+                    }
+
+                    return true;
+
+                case GDK_KEY_e:
+                    if (!gimpPlugin) {
+                        sendToGimpPressed();
+                    }
+
+                    return true;
 
                 case GDK_KEY_z:
                     history->undo ();
@@ -1713,8 +1743,9 @@ bool EditorPanel::idle_saveImage (ProgressConnector<rtengine::IImage16*> *pc, Gl
         else if (sf.format == "jpg")
             ld->startFunc (sigc::bind (sigc::mem_fun (img, &rtengine::IImage16::saveAsJPEG), fname, sf.jpegQuality, sf.jpegSubSamp),
                            sigc::bind (sigc::mem_fun (*this, &EditorPanel::idle_imageSaved), ld, img, fname, sf));
-        else
+        else {
             delete ld;
+        }
     } else {
         Glib::ustring msg_ = Glib::ustring ("<b>") + fname + ": Error during image processing\n</b>";
         Gtk::MessageDialog msgd (*parent, msg_, true, Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK, true);
@@ -1911,25 +1942,27 @@ void EditorPanel::sendToGimpPressed ()
 }
 
 
-bool EditorPanel::saveImmediately(const Glib::ustring &filename, const SaveFormat &sf)
+bool EditorPanel::saveImmediately (const Glib::ustring &filename, const SaveFormat &sf)
 {
     rtengine::procparams::ProcParams pparams;
     ipc->getParams (&pparams);
-    rtengine::ProcessingJob *job = rtengine::ProcessingJob::create(ipc->getInitialImage(), pparams);
+    rtengine::ProcessingJob *job = rtengine::ProcessingJob::create (ipc->getInitialImage(), pparams);
 
     // save immediately
-    rtengine::IImage16 *img = rtengine::processImage(job, err, nullptr, options.tunnelMetaData, false);
+    rtengine::IImage16 *img = rtengine::processImage (job, err, nullptr, options.tunnelMetaData, false);
 
     int err = 0;
+
     if (sf.format == "tif") {
-        err = img->saveAsTIFF(filename, sf.tiffBits, sf.tiffUncompressed);
+        err = img->saveAsTIFF (filename, sf.tiffBits, sf.tiffUncompressed);
     } else if (sf.format == "png") {
-        err = img->saveAsPNG(filename, sf.pngCompression, sf.pngBits);
+        err = img->saveAsPNG (filename, sf.pngCompression, sf.pngBits);
     } else if (sf.format == "jpg") {
-        err = img->saveAsJPEG(filename, sf.jpegQuality, sf.jpegSubSamp);
+        err = img->saveAsJPEG (filename, sf.jpegQuality, sf.jpegSubSamp);
     } else {
         err = 1;
     }
+
     img->free();
     return !err;
 }
@@ -2083,7 +2116,7 @@ void EditorPanel::beforeAfterToggled ()
     if (beforeAfter->get_active ()) {
 
         int errorCode = 0;
-        rtengine::InitialImage *beforeImg = rtengine::InitialImage::load ( isrc->getImageSource ()->getFileName(),  openThm->getType() == FT_Raw , &errorCode, nullptr);
+        rtengine::InitialImage *beforeImg = rtengine::InitialImage::load ( isrc->getImageSource ()->getFileName(),  openThm->getType() == FT_Raw, &errorCode, nullptr);
 
         if ( !beforeImg || errorCode ) {
             return;
@@ -2152,7 +2185,7 @@ void EditorPanel::tbBeforeLock_toggled ()
 }
 
 void EditorPanel::histogramChanged (LUTu & histRed, LUTu & histGreen, LUTu & histBlue, LUTu & histLuma, LUTu & histToneCurve, LUTu & histLCurve, LUTu & histCCurve, /*LUTu & histCLurve, LUTu & histLLCurve,*/ LUTu & histLCAM, LUTu & histCCAM,
-                                    LUTu & histRedRaw, LUTu & histGreenRaw, LUTu & histBlueRaw , LUTu & histChroma, LUTu & histLRETI)
+                                    LUTu & histRedRaw, LUTu & histGreenRaw, LUTu & histBlueRaw, LUTu & histChroma, LUTu & histLRETI)
 {
 
     if (histogramPanel) {
@@ -2288,8 +2321,8 @@ void EditorPanel::updateHistogramPosition (int oldPosition, int newPosition)
 }
 
 
-void EditorPanel::defaultMonitorProfileChanged(const Glib::ustring &profile_name, bool auto_monitor_profile)
+void EditorPanel::defaultMonitorProfileChanged (const Glib::ustring &profile_name, bool auto_monitor_profile)
 {
-    colorMgmtToolBar->defaultMonitorProfileChanged(profile_name, auto_monitor_profile);
+    colorMgmtToolBar->defaultMonitorProfileChanged (profile_name, auto_monitor_profile);
 }
 
