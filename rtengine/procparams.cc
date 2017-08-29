@@ -987,7 +987,7 @@ void LocrgbParams::setDefaults()
     transit = 60;
     expwb = false;
     wbMethod = "man";
-    wbcamMethod = "none";
+    wbcamMethod = "gam";
     temp = 4750.;
     green = 1.;
     equal = 1.;

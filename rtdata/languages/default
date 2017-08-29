@@ -1687,7 +1687,7 @@ TP_LOCALLAB_STYPE;Shape method
 TP_LOCALLAB_STYPE_TOOLTIP;You can choose between:\nSymmetrical - left handle linked to right, top handle linked to bottom.\nIndependent - all handles are independent.
 TP_LOCALRGB_LABEL;White Balance auto and local
 TP_LOCALRGB_WB;White balance
-TP_LOCALRGB_CAM;Color appearance (auto)
+TP_LOCALRGB_CAM;Gamma
 TP_LOCALRGB_TTLABEL;WB all Temp=%1 Tint=%2 Equ=%3
 TP_LOCALRGB_METLABEL;Last auto Method=%1
 TP_LOCALRGB_TTLABEL_TOOLTIP;Display full image White Balance settings
@@ -1702,7 +1702,7 @@ TP_LOCALRGBWB_AUTOLD;4-Auto Grey Old
 TP_LOCALRGBWB_AUTOROBUST;5-Auto Robust Color
 TP_LOCALRGBWB_AUTOSDW;6-Auto Standard Deviation
 TP_LOCALWBCAM_NONE;none
-TP_LOCALWBCAM_TOOLTIP;Only on auto mode, except "Auto grey Old"\n.Introduce Color appearance to improve WB (equal energy)
+TP_LOCALWBCAM_TOOLTIP;Only on auto mode, except "Auto grey Old"\n.Introduce gamma to improve WB (equal grey luminance)
 TP_LOCALWBCAM_GAM;gamma sRGB
 TP_LOCALWBCAM_CAT02;Cat02
 TP_LOCALWBCAM_GACAT;Cat02 and gamma

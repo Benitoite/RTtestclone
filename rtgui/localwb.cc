@@ -324,9 +324,9 @@ Localwb::Localwb () :
 
     wbcamMethod->append (M ("TP_LOCALWBCAM_NONE"));
     wbcamMethod->append (M ("TP_LOCALWBCAM_GAM"));
-    wbcamMethod->append (M ("TP_LOCALWBCAM_CAT02"));
-    wbcamMethod->append (M ("TP_LOCALWBCAM_GACAT"));
-    wbcamMethod->set_active (0);
+//    wbcamMethod->append (M ("TP_LOCALWBCAM_CAT02"));
+//    wbcamMethod->append (M ("TP_LOCALWBCAM_GACAT"));
+    wbcamMethod->set_active (1);
     wbcamMethodConn = wbcamMethod->signal_changed().connect ( sigc::mem_fun (*this, &Localwb::wbcamMethodChanged) );
     wbcamMethod->set_tooltip_markup (M ("TP_LOCALWBCAM_TOOLTIP"));
 
@@ -1113,10 +1113,12 @@ void Localwb::read (const ProcParams* pp, const ParamsEdited* pedited)
         wbcamMethod->set_active (0);
     } else if (pp->localwb.wbcamMethod == "gam") {
         wbcamMethod->set_active (1);
+		/*
     } else if (pp->localwb.wbcamMethod == "cat") {
         wbcamMethod->set_active (2);
     } else if (pp->localwb.wbcamMethod == "gamcat") {
         wbcamMethod->set_active (3);
+		*/
     }
 
     wbcamMethodConn.block (false);
@@ -1282,10 +1284,11 @@ void Localwb::write (ProcParams* pp, ParamsEdited* pedited)
         pp->localwb.wbcamMethod = "none";
     } else if (wbcamMethod->get_active_row_number() == 1) {
         pp->localwb.wbcamMethod = "gam";
-    } else if (wbcamMethod->get_active_row_number() == 2) {
+/*    } else if (wbcamMethod->get_active_row_number() == 2) {
         pp->localwb.wbcamMethod = "cat";
     } else if (wbcamMethod->get_active_row_number() == 3) {
         pp->localwb.wbcamMethod = "gamcat";
+*/		
     }
 
     if (Smethod->get_active_row_number() == 0) {
