@@ -5919,7 +5919,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
         float **Tx = nullptr;
         float **Ty = nullptr;
         float **TYY = nullptr;
-        int Nc = 40;
+        int Nc = 42;
         Tx = new float*[Nc];
 
         for (int i = 0; i < Nc; i++) {
@@ -5972,20 +5972,20 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
             rmm[tt] = rm / gm;
             gmm[tt] = gm / gm;
             bmm[tt] = bm / gm;
-            //  printf ("WWW tt=%i rm=%f gm=%f bm=%f\n", tt, rmm[tt], gmm[tt], bmm[tt]);
+            //   printf ("WWW tt=%i rm=%f gm=%f bm=%f\n", tt, rmm[tt], gmm[tt], bmm[tt]);
             //printf("gain=%f\n", gain);
         }
 
-        //call tempxy to calaculate for 40 color references Temp and x y for xyY
+        //call tempxy to calaculate for 41 color references Temp and x y for xyY
 
         ColorTemp::tempxy (temp, Tx, Ty, TYY);//calculate chroma xy (xyY) for Z known colors on under 90 illuminants
 
         float epsx = 0.001f, epsy = 0.001f;//delta value to have result!
         array2D<int> hh;
 
-        hh (40, N_t);
+        hh (42, N_t);
 
-        for (int i = 0; i < 40; i++) {
+        for (int i = 0; i < 42; i++) {
             for (int j = 0; j < N_t; j++) {
                 hh[i][j] = 0;
 
@@ -6048,8 +6048,9 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
         int inter[122] = {}; //interest for photographie 1 = small (limit gamut) 2 = normal 3 = major (skin, sky, neutral)
         float histuse[122] = {};
         int nh = 0;
-        float xxx[122] = {};//for max 40 color references calculated ==> max in images "like histogram"
+        float xxx[122] = {};//for max 42 color references calculated ==> max in images "like histogram"
         float yyy[122] = {};
+        int nc = 0, nc2 = 0; //near reference color
 
         for (int p = 0; p < 122; p++) {
             histxy[p] = 0.f;
@@ -6069,7 +6070,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 1;
                         xxx[nh] = 0.11f;
                         yyy[nh] = 0.18f;
-
+                        nc = 0;
                         //blue hard
                     } else if (yc[y][x] < 0.3f) {
                         nh = 1;
@@ -6078,6 +6079,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 1;
                         xxx[nh] = 0.11f;
                         yyy[nh] = 0.25f;
+                        nc = 1;
 
                         //blue
                     } else if (yc[y][x] < 0.4f) {
@@ -6087,6 +6089,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 1;
                         xxx[nh] = 0.09f;
                         yyy[nh] = 0.35f;
+                        nc = 1;
 
                     } else if (yc[y][x] < 0.5f) {
                         //blue green
@@ -6096,6 +6099,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 1;
                         xxx[nh] = 0.08f;
                         yyy[nh] = 0.45f;
+                        nc = 1;
 
                     } else if (yc[y][x] < 0.6f) {
                         nh = 4;
@@ -6104,6 +6108,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 1;
                         xxx[nh] = 0.06f;
                         yyy[nh] = 0.55f;
+                        nc = 1;
 
                     } else {
                         //green
@@ -6113,6 +6118,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 1;
                         xxx[nh] = 0.05f;
                         yyy[nh] = 0.75f;
+                        nc = 1;
 
 
                     }
@@ -6124,6 +6130,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 1;
                         xxx[nh] = 0.18f;
                         yyy[nh] = 0.1f;
+                        nc = 2;
 
                     } else if (yc[y][x] < 0.3f) {
                         nh = 7;
@@ -6132,6 +6139,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 2;
                         xxx[nh] = 0.18f;
                         yyy[nh] = 0.27f;
+                        nc = 2;
 
                     } else if (yc[y][x] < 0.4f) {
                         nh = 8;
@@ -6140,6 +6148,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 2;
                         xxx[nh] = 0.18f;
                         yyy[nh] = 0.35f;
+                        nc = 2;
 
                     } else if (yc[y][x] < 0.5f) {
                         nh = 9;
@@ -6148,6 +6157,8 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 2;
                         xxx[nh] = 0.18f;
                         yyy[nh] = 0.45f;
+                        nc = 2;
+                        nc2 = 3;
 
                     } else if (yc[y][x] < 0.6f) {
                         nh = 10;
@@ -6156,6 +6167,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 2;
                         xxx[nh] = 0.18f;
                         yyy[nh] = 0.55f;
+                        nc = 3;
 
                     } else {
                         nh = 11;
@@ -6165,6 +6177,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         xxx[nh] = 0.18f;
                         yyy[nh] = 0.7f;
 
+                        nc = 3;
 
                     }
 
@@ -6176,6 +6189,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 1;
                         xxx[nh] = 0.26f;
                         yyy[nh] = 0.12f;
+                        nc = 4;
 
                     } else if (yc[y][x] < 0.25f) {
                         nh = 13;
@@ -6184,6 +6198,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 2;
                         xxx[nh] = 0.26f;
                         yyy[nh] = 0.225f;
+                        nc = 1;
 
                     } else if (yc[y][x] < 0.29f) {
                         nh = 14;
@@ -7092,25 +7107,22 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
         for (int j = 0; j < 122; j++) {
 
             histuse[j] = 100 * histxy[j] * (1.f / area[j]) * inter[j];
-            //  histuse[j] =(1.f / area[j]) * inter[j];
-            //printf("hist=%5.f ", histuse[j]);
-            printf ("h=%i ", (int) histuse[j]);
+            //    printf ("h=%i ", (int) histuse[j]);
 
         }
 
         printf ("\n");
-        //     float max[20] = {};
-        int memj[40] = {};
+        int memj[42] = {};
 
-        //find the 20 max values for histuse.
-        float max[40] = {-100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.,
-                         -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f
+        //find the 40 max values for histuse probably less
+        float max[42] = {-100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.,
+                         -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f
                         };
 
-        for (int k = 0; k < 40; k++) {
+        for (int k = 0; k < 42; k++) {
             int ind = 0;
 
-            for (int j = 0; j < 105; j++) {
+            for (int j = 0; j < 122; j++) {
                 if (histuse[j] > max[k]) {
                     max[k] = histuse[j];
                     memj[k] = j;
@@ -7121,21 +7133,47 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
             histuse[ind] = 0.f;
         }
 
-        for (int k = 0; k < 40; k++) {
-            printf ("k=%i", memj[k]);
+        int siz = 0;
+
+        for (int k = 0; k < 42; k++) {
+            if (memj[k] != 0) {
+                siz++;
+                printf ("k=%i", memj[k]);
+
+            }
         }
 
+        float *xxcal = nullptr;
+        float *yycal = nullptr;
+
+        xxcal = new float [siz];
+        yycal = new float [siz];
+        int pos = 0;
+
+        for (int k = 0; k < 42; k++) {
+            if (memj[k] != 0) {
+                xxcal[pos] = xxx[memj[k]];
+                yycal[pos] = yyy[memj[k]];
+                pos++;
+            }
+        }
+
+
+        delete[] xxcal;
+        delete[] yycal;
 
 
         //end family
 
-        for (int tt = 0; tt < N_t; tt++) {
+        //   for (int tt = 0; tt < N_t; tt++) {
+        for (int tt = 30; tt < 50; tt++) {
+
             //find multiplier to have enough good values to compute
             float avgL = 0.;
             float max = 0.f;
             int nn = 0;
             float multi = 1.f;
-            printf ("rmm=%f bmm=%f\n", rmm[tt], bmm[tt]);
+            //   printf ("rmm=%f bmm=%f\n", rmm[tt], bmm[tt]);
 
             for (int y = 0; y < bfh ; y += 10) {
                 for (int x = 0; x < bfw ; x += 10) {
@@ -7168,86 +7206,86 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
             sigm = sqrt (vari / mm);
 
             multi = 60000.f / (avgL + 2.f * sigm);//mean + 2 sigma #95% population
-            printf ("multi=%f\n", multi);
-
-            for (int y = 0; y < bfh ; y += 10) {
-                for (int x = 0; x < bfw ; x += 10) {
-                    int yy = y / 10;
-                    int xx = x / 10 ;
-                    reditc[yy][xx] = rmm[tt] * multi * redloc[y][x];
-                    greenitc[yy][xx] = multi * greenloc[y][x];
-                    blueitc[yy][xx] = bmm[tt] * multi * blueloc[y][x];
-
-
-                    if (reditc[yy][xx] > 64000.f) {
-                        reditc[yy][xx] = 64000.f;
-                    }
-
-                    if (greenitc[yy][xx] > 64000.f) {
-                        greenitc[yy][xx] = 64000.f;
-                    }
-
-                    if (blueitc[yy][xx] > 64000.f) {
-                        blueitc[yy][xx] = 64000.f;
-                    }
-
-                    if (reditc[yy][xx] < 100.f) {
-                        reditc[yy][xx] = 100.f;
-                    }
-
-                    if (greenitc[yy][xx] < 100.f) {
-                        greenitc[yy][xx] = 100.f;
-                    }
-
-                    if (blueitc[yy][xx] < 100.f) {
-                        blueitc[yy][xx] = 100.f;
-                    }
+            //     printf ("multi=%f\n", multi);
+            /*
+                        for (int y = 0; y < bfh ; y += 10) {
+                            for (int x = 0; x < bfw ; x += 10) {
+                                int yy = y / 10;
+                                int xx = x / 10 ;
+                                reditc[yy][xx] = rmm[tt] * multi * redloc[y][x];
+                                greenitc[yy][xx] = multi * greenloc[y][x];
+                                blueitc[yy][xx] = bmm[tt] * multi * blueloc[y][x];
 
 
-                    Xitc[yy][xx] = 0.f;
-                    Yitc[yy][xx] = 0.f;
-                    Zitc[yy][xx] = 0.f;
+                                if (reditc[yy][xx] > 64000.f) {
+                                    reditc[yy][xx] = 64000.f;
+                                }
 
-                    float xc = 0.f, yc = 0.f, Yc = 0.f;
-                    float RR =  reditc[yy][xx];
-                    float GG =  greenitc[yy][xx];
-                    float BB =  blueitc[yy][xx];
+                                if (greenitc[yy][xx] > 64000.f) {
+                                    greenitc[yy][xx] = 64000.f;
+                                }
 
-                    Color::rgbxyY (RR, GG, BB, xc, yc, Yc, wp);
-                    Xitc[yy][xx] = xc;
-                    Yitc[yy][xx] = yc;
-                    Zitc[yy][xx] = Yc;
+                                if (blueitc[yy][xx] > 64000.f) {
+                                    blueitc[yy][xx] = 64000.f;
+                                }
+
+                                if (reditc[yy][xx] < 100.f) {
+                                    reditc[yy][xx] = 100.f;
+                                }
+
+                                if (greenitc[yy][xx] < 100.f) {
+                                    greenitc[yy][xx] = 100.f;
+                                }
+
+                                if (blueitc[yy][xx] < 100.f) {
+                                    blueitc[yy][xx] = 100.f;
+                                }
 
 
-                    for (int nc = 0; nc < 40; nc ++) {
-                        if ((Xitc[yy][xx] > (Tx[nc][tt] - epsx) && Xitc[yy][xx] < (Tx[nc][tt] + epsx)) && (Yitc[yy][xx] > (Ty[nc][tt] - epsy) && Yitc[yy][xx] < (Ty[nc][tt] + epsy))) {
-                            hh[nc][tt] = 1;
+                                Xitc[yy][xx] = 0.f;
+                                Yitc[yy][xx] = 0.f;
+                                Zitc[yy][xx] = 0.f;
+
+                                float xc = 0.f, yc = 0.f, Yc = 0.f;
+                                float RR =  reditc[yy][xx];
+                                float GG =  greenitc[yy][xx];
+                                float BB =  blueitc[yy][xx];
+
+                                Color::rgbxyY (RR, GG, BB, xc, yc, Yc, wp);
+                                Xitc[yy][xx] = xc;
+                                Yitc[yy][xx] = yc;
+                                Zitc[yy][xx] = Yc;
+
+
+                                for (int nc = 0; nc < 40; nc ++) {
+                                    if ((Xitc[yy][xx] > (Tx[nc][tt] - epsx) && Xitc[yy][xx] < (Tx[nc][tt] + epsx)) && (Yitc[yy][xx] > (Ty[nc][tt] - epsy) && Yitc[yy][xx] < (Ty[nc][tt] + epsy))) {
+                                        hh[nc][tt] = 1;
+                                    }
+                                }
+
+                            }
                         }
-                    }
-
-                }
-            }
-
+            */
             //  printf("R=%f G=%f B=%f Xc=%f Yc=%f Y=%f MaxRGB=%f\n", avgR /256, avgG/256, avgB/256, avgX, avgY, avgZ, max/256);
 
         }
 
         int somm[N_t];
+        /*
+                for (int j = 0; j < N_t; j++) {
+                    somm[j] = 0;
+                }
 
-        for (int j = 0; j < N_t; j++) {
-            somm[j] = 0;
-        }
+                for (int nn = 0; nn < 40; nn++) {
+                    for (int j = 0; j < N_t; j++) {
+                        somm[j] += hh[nn][j];
+                    }
+                }
 
-        for (int nn = 0; nn < 40; nn++) {
-            for (int j = 0; j < N_t; j++) {
-                somm[j] += hh[nn][j];
-            }
-        }
-
-        for (int j = 0; j < N_t; j++) {
-            printf ("j=%i somm=%i ", j, somm[j] );
-        }
-
+                for (int j = 0; j < N_t; j++) {
+                    printf ("j=%i somm=%i ", j, somm[j] );
+                }
+        */
         hh (0, 0);
 
         for (int i = 0; i < Nc; i++) {

@@ -47,7 +47,7 @@ private:
     std::string method;
     static void clip (double &temp, double &green);
     static void clip (double &temp, double &green, double &equal);
-    int XYZtoCorColorTemp (double x0, double y0 , double z0, double &temp) const;
+    int XYZtoCorColorTemp (double x0, double y0, double z0, double &temp) const;
     void temp2mul (double temp, double green, double equal, double& rmul, double& gmul, double& bmul) const;
 
 public:
@@ -177,6 +177,9 @@ public:
     static const double JDC468_RedG21va_spect[97]; //468 G21 modifié
     static const double JDC468_RedI9_spect[97]; //468 I9
     static const double JDC468_GreI8_spect[97]; //468 I8
+    static const double JDC468_GreQ7_spect[97]; //468 Q7
+    static const double ColorGreenM25_spect[97];
+
     static const double JDC468_OraO18_spect[97]; //468 O18
     static const double JDC468_OraD17_spect[97]; //468 D17
     static const double Fictif_61greyspect[97];//468 K15
