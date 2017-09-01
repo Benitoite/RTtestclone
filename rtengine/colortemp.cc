@@ -407,6 +407,41 @@ const double ColorTemp::ColorGreenM25_spect[97] = {
     0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
 };
 
+const double ColorTemp::ColorYellowkeltano_spect[97] = {
+    0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+    0.0, 0.0658, 0.0045,  0.0,  0.0, 0.0131,  0.0098,  0.0084, 0.0123, 0.0104, 0.0131, 0.0112, 0.0121, 0.0121, 0.0139,
+    0.0128, 0.0148, 0.0199, 0.0296, 0.0389, 0.0476, 0.0689, 0.0945, 0.1132, 0.1326, 0.1490,  0.1674, 0.1741, 0.1775, 0.1868,
+    0.1914, 0.1928, 0.1961, 0.1972, 0.1992, 0.2045, 0.2064, 0.2053, 0.2048, 0.2072, 0.2086, 0.2081, 0.2069, 0.2056,  0.2073,
+    0.2096, 0.2114, 0.2067, 0.2089, 0.2100, 0.2061, 0.2019, 0.1983, 0.1971, 0.1961, 0.2016, 0.1956, 0.1946, 0.1922, 0.1983, 0.1991,
+    0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+};
+
+const double ColorTemp::ColorGreenalsi_spect[97] = {
+    0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+    0.1732,  0.0292,  0.0315,  0.0533,  0.0469,  0.0359,  0.0404,  0.0356,  0.0345,  0.0374,  0.0348,  0.0336,  0.0332,  0.0333,  0.0342,
+    0.0330,  0.0350,  0.0343,  0.0354,  0.0371,  0.0399,  0.0426,  0.0497,  0.0541,  0.0616,  0.0701,  0.0750,  0.0764,  0.0783,  0.0794,
+    0.0784,  0.0732,  0.0708,  0.0652,  0.0612,  0.0595,  0.0570,  0.0531,  0.0507,  0.0501,  0.0488,  0.0458,  0.0437,  0.0420,  0.0436,
+    0.0424,  0.0417,  0.0389,  0.0380,  0.0378,  0.0371,  0.0350,  0.0333,  0.0350,  0.0394,  0.0379,  0.0446,  0.0491,  0.0575,  0.0734,  0.0953,
+    0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+};
+
+const double ColorTemp::ColorRedpetunia_spect[97] = {
+    0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+    0.1890, 0.1097,  0.0855,  0.0899,  0.0987,  0.0881,  0.0807,  0.0804,  0.0787,  0.0691,  0.0643,  0.0549,  0.0465,  0.0404,  0.0385,
+    0.0302,  0.0244,  0.0195,  0.0165,  0.0159,  0.0123,  0.0129,  0.0108,  0.0111,  0.0114,  0.0126,  0.0126,  0.0134,  0.0162,  0.0170,
+    0.0213,  0.0248,  0.0279,  0.0351,  0.0412,  0.0566,  0.0752,  0.0909, 0.1069, 0.1270, 0.1526, 0.1707, 0.1858, 0.1999, 0.2112,
+    0.2293, 0.2422, 0.2471, 0.2611, 0.2718, 0.2710, 0.2778, 0.2807, 0.2825, 0.2856, 0.2909, 0.2901, 0.2974, 0.3042, 0.3044, 0.3075,
+    0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+};
+
+const double ColorTemp::ColorRedkurttu_spect[97] = {
+    0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+    0.0979, 0.1536,  0.0745, 0.1145,  0.0937,  0.0996,  0.0972,  0.0924,  0.0875,  0.0878,  0.0826,  0.0766,  0.0658,  0.0599,  0.0545,
+    0.0509,  0.0443,  0.0381,  0.0356,  0.0327,  0.0318,  0.0304,  0.0295,  0.0288,  0.0285,  0.0271,  0.0281,  0.0282,  0.0278,  0.0280,
+    0.0296,  0.0309,  0.0324,  0.0342,  0.0343,  0.0376,  0.0419,  0.0464,  0.0520,  0.0634,  0.0747,  0.0905, 0.1093, 0.1167, 0.1264,
+    0.1439, 0.1650, 0.1928, 0.2183, 0.2380, 0.2537, 0.2754, 0.2893, 0.3009, 0.3115, 0.3213, 0.3173, 0.3222, 0.3237, 0.3192, 0.3210,
+    0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+};
 
 //spectral data Colorchecker24 : Green B3
 const double ColorTemp::ColorchechGreB3_spect[97] = {
@@ -1790,17 +1825,17 @@ void ColorTemp::tempxy (double &temp, float **Tx, float **Ty, float **TYY)
 {
     const double* spec_colorforxcyc[] = {//color references
         JDC468_BluH10_spect, JDC468_BluF4_spect, JDC468_BluD6_spect, ColorchechCyaF3_spect, JDC468_BluM5_spect, // 0 4
-        ColorGreenM25_spect, JDC468_GreK7_spect, ColabSky42_0_m24_spect, ColabSky60_0_m31_spect,  ColorchechBluC150_m5_m22_spect,
+        ColorGreenM25_spect,  JDC468_GreK7_spect, ColabSky42_0_m24_spect, ColabSky60_0_m31_spect,  ColorchechBluC150_m5_m22_spect,
         JDC468_GreQ7_spect, ColorchechDCBluN881_m7_m14_spect, ColorchechGreB3_spect, ColorchechPurD2_spect,  //9 11
         ColorchechSGBlaN3_6_spect, ColorchechGraC4_67_spect, JDC468_K15_87greyspect,
-        JDC468_GraK14_44_spect, Fictif_61greyspect, ColorchechGreD1_spect,
+        JDC468_GraK14_44_spect, ColorGreenalsi_spect, Fictif_61greyspect, ColorchechGreD1_spect,
         ColorchechWhiA496_spect, JDC468_GreA10_spect, JDC468_GreI8_spect,
         ColabSkin91_4_14_spect, JDC468_PurE24_spect, //22
         ColorchechSGSkiK285_11_17_spect, ColorchechGreE2_spect, ColorchechMagE3_spect, //25
         ColorchechSkiB166_18_18_spect, ColabSkin70_7_32_spect, ColorchechSGSkiF763_14_26_spect,
         ColorchechSkiA138_13_14_spect, ColabSkin57_22_18_spect, JDC468_YelN10_spect,
-        ColabSkin35_15_17_spect, ColorchechYelD3_spect, JDC468_OraO18_spect,
-        JDC468_RedG21va_spect, ColorchechOraA2_spect, JDC468_OraD17_spect,
+        ColabSkin35_15_17_spect, ColorRedkurttu_spect, ColorYellowkeltano_spect,  ColorchechYelD3_spect, JDC468_OraO18_spect,
+        JDC468_RedG21va_spect, ColorchechOraA2_spect, JDC468_OraD17_spect, ColorRedpetunia_spect,
         ColorchechredC3_spect, JDC468_RedI9_spect
 
     };

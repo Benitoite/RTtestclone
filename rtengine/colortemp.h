@@ -179,7 +179,10 @@ public:
     static const double JDC468_GreI8_spect[97]; //468 I8
     static const double JDC468_GreQ7_spect[97]; //468 Q7
     static const double ColorGreenM25_spect[97];
-
+    static const double ColorYellowkeltano_spect[97];
+    static const double ColorGreenalsi_spect[97];
+    static const double ColorRedpetunia_spect[97];
+    static const double ColorRedkurttu_spect[97];
     static const double JDC468_OraO18_spect[97]; //468 O18
     static const double JDC468_OraD17_spect[97]; //468 D17
     static const double Fictif_61greyspect[97];//468 K15
