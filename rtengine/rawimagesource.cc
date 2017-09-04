@@ -5981,16 +5981,6 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
         ColorTemp::tempxy (temp, Tx, Ty, TYY);//calculate chroma xy (xyY) for Z known colors on under 90 illuminants
 
         float epsx = 0.001f, epsy = 0.001f;//delta value to have result!
-        array2D<int> hh;
-
-        hh (Nc, N_t);
-
-        for (int i = 0; i < Nc; i++) {
-            for (int j = 0; j < N_t; j++) {
-                hh[i][j] = 0;
-
-            }
-        }
 
         //calculate for this image the mean values for each family of color, near histogram x y (number)
         //xy vary from x 0..0.77  y 0..0.82
@@ -6043,19 +6033,23 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
 
                 }
         */
-        int histxy[167] = {};//number of values for each pair xy
-        float area[167] = {};//multiplier for compensation differences area ==> big areas are rare near limit prophotos or more
-        int inter[167] = {}; //interest for photographie 1 = small (limit gamut) 2 = normal 3 = major (skin, sky, neutral)
-        float histuse[167] = {};
+        int siza = 167;
+        int histxy[siza] = {};//number of values for each pair xy
+        float area[siza] = {};//multiplier for compensation differences area ==> big areas are rare near limit prophotos or more
+        int inter[siza] = {}; //interest for photographie 1 = small (limit gamut) 2 = normal 3 = major (skin, sky, neutral)
+        float histuse[siza] = {};
         int nh = 0;
-        float xxx[167] = {};//for max 43 color references calculated ==> max in images "like histogram"
-        float yyy[167] = {};
-        int nc = 0, nc2 = 0; //near reference color
+        float xxx[siza] = {};//for max 45 color references calculated ==> max in images "like histogram"
+        float yyy[siza] = {};
+        float YYY[siza] = {};//not used directly, but necessary to keep good range
+        int nc = 0, nc2 = 0; //near reference color perhaps not need
+        float histY[siza] = {};//#mean Y of xyY : not used directly, but necessary to keep good range
 
-        for (int p = 0; p < 167; p++) {
+        for (int p = 0; p < siza; p++) {
             histxy[p] = 0.f;
             area[p] = 20.f;
             inter[p] = 1;
+            histY[p] = 1.f;
         }
 
         for (int y = 0; y < bfhitc ; y++) {
@@ -6070,6 +6064,8 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 1;
                         xxx[nh] = 0.11f;
                         yyy[nh] = 0.18f;
+                        YYY[nh] += Yc[y][x];
+
                         nc = 0;
                         //blue hard
                     } else if (yc[y][x] < 0.3f) {
@@ -6079,6 +6075,8 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 1;
                         xxx[nh] = 0.11f;
                         yyy[nh] = 0.25f;
+                        YYY[nh] += Yc[y][x];
+
                         nc = 1;
 
                         //blue
@@ -6090,6 +6088,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         xxx[nh] = 0.09f;
                         yyy[nh] = 0.35f;
                         nc = 1;
+                        YYY[nh] += Yc[y][x];
 
                     } else if (yc[y][x] < 0.5f) {
                         //blue green
@@ -6099,6 +6098,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 1;
                         xxx[nh] = 0.08f;
                         yyy[nh] = 0.45f;
+                        YYY[nh] += Yc[y][x];
                         nc = 1;
 
                     } else if (yc[y][x] < 0.6f) {
@@ -6108,9 +6108,10 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 1;
                         xxx[nh] = 0.06f;
                         yyy[nh] = 0.55f;
+                        YYY[nh] += Yc[y][x];
                         nc = 1;
 
-                    } else {
+                    } else if (yc[y][x] < 0.82f) {
                         //green
                         nh = 5;
                         histxy[nh]++;
@@ -6130,6 +6131,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 1;
                         xxx[nh] = 0.18f;
                         yyy[nh] = 0.1f;
+                        YYY[nh] += Yc[y][x];
                         nc = 2;
 
                     } else if (yc[y][x] < 0.3f) {
@@ -6139,6 +6141,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 2;
                         xxx[nh] = 0.18f;
                         yyy[nh] = 0.27f;
+                        YYY[nh] += Yc[y][x];
                         nc = 2;
 
                     } else if (yc[y][x] < 0.4f) {
@@ -6148,6 +6151,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 2;
                         xxx[nh] = 0.18f;
                         yyy[nh] = 0.35f;
+                        YYY[nh] += Yc[y][x];
                         nc = 2;
 
                     } else if (yc[y][x] < 0.5f) {
@@ -6167,15 +6171,17 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 2;
                         xxx[nh] = 0.18f;
                         yyy[nh] = 0.55f;
+                        YYY[nh] += Yc[y][x];
                         nc = 3;
 
-                    } else {
+                    } else if (yc[y][x] < 0.75f) {
                         nh = 11;
                         histxy[nh]++;
                         area[nh] = 400.f;
                         inter[nh] = 1;
                         xxx[nh] = 0.18f;
                         yyy[nh] = 0.7f;
+                        YYY[nh] += Yc[y][x];
 
                         nc = 3;
 
@@ -6190,6 +6196,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         xxx[nh] = 0.26f;
                         yyy[nh] = 0.12f;
                         nc = 4;
+                        YYY[nh] += Yc[y][x];
 
                     } else if (yc[y][x] < 0.25f) {
                         nh = 13;
@@ -6199,6 +6206,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         xxx[nh] = 0.26f;
                         yyy[nh] = 0.225f;
                         nc = 1;
+                        YYY[nh] += Yc[y][x];
 
                     } else if (yc[y][x] < 0.29f) {
                         nh = 14;
@@ -6215,6 +6223,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 3;
                         xxx[nh] = 0.26f;
                         yyy[nh] = 0.31f;
+                        YYY[nh] += Yc[y][x];
 
                     } else if (yc[y][x] < 0.37f) {
                         nh = 16;
@@ -6231,6 +6240,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 2;
                         xxx[nh] = 0.26f;
                         yyy[nh] = 0.385f;
+                        YYY[nh] += Yc[y][x];
 
                     } else if (yc[y][x] < 0.45f) {
                         nh = 18;
@@ -6239,6 +6249,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 2;
                         xxx[nh] = 0.26f;
                         yyy[nh] = 0.425f;
+                        YYY[nh] += Yc[y][x];
 
 
                     } else if (yc[y][x] < 0.5f) {
@@ -6247,6 +6258,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         area[nh] = 25.f;
                         xxx[nh] = 0.26f;
                         yyy[nh] = 0.475f;
+                        YYY[nh] += Yc[y][x];
 
                     } else if (yc[y][x] < 0.6f) {
                         nh = 20;
@@ -6255,14 +6267,16 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 2;
                         xxx[nh] = 0.26f;
                         yyy[nh] = 0.55f;
+                        YYY[nh] += Yc[y][x];
 
-                    } else {
+                    } else if (yc[y][x] < 0.75f) {
                         nh = 21;
                         histxy[nh]++;
                         area[nh] = 60.f;
                         inter[nh] = 2;
                         xxx[nh] = 0.26f;
                         yyy[nh] = 0.67f;
+                        YYY[nh] += Yc[y][x];
 
                     }
                 } else if (xc[y][x] < 0.31f) {//near neutral others
@@ -6273,6 +6287,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 1;
                         xxx[nh] = 0.295f;
                         yyy[nh] = 0.15f;
+                        YYY[nh] += Yc[y][x];
 
                     } else if (yc[y][x] < 0.24f) {
                         nh = 23;
@@ -6281,6 +6296,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 2;
                         xxx[nh] = 0.295f;
                         yyy[nh] = 0.22f;
+                        YYY[nh] += Yc[y][x];
 
 
                     } else if (yc[y][x] < 0.29f) {
@@ -6290,6 +6306,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 2;
                         xxx[nh] = 0.295f;
                         yyy[nh] = 0.265f;
+                        YYY[nh] += Yc[y][x];
 
 
                     } else if (yc[y][x] < 0.32f) {
@@ -6299,6 +6316,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 2;
                         xxx[nh] = 0.295f;
                         yyy[nh] = 0.305f;
+                        YYY[nh] += Yc[y][x];
 
                     } else if (yc[y][x] < 0.36f) {
                         nh = 26;
@@ -6307,6 +6325,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 2;
                         xxx[nh] = 0.295f;
                         yyy[nh] = 0.34f;
+                        YYY[nh] += Yc[y][x];
 
                     } else if (yc[y][x] < 0.4f) {
                         nh = 27;
@@ -6315,6 +6334,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 2;
                         xxx[nh] = 0.295f;
                         yyy[nh] = 0.38f;
+                        YYY[nh] += Yc[y][x];
 
 
                     } else if (yc[y][x] < 0.5f) {
@@ -6324,14 +6344,16 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 2;
                         xxx[nh] = 0.295f;
                         yyy[nh] = 0.45f;
+                        YYY[nh] += Yc[y][x];
 
-                    } else {
+                    } else if (yc[y][x] < 0.7f) {
                         nh = 29;
                         histxy[nh]++;
                         area[nh] = 45.f;
                         inter[nh] = 1;
                         xxx[nh] = 0.295f;
                         yyy[nh] = 0.63f;
+                        YYY[nh] += Yc[y][x];
 
                     }
                 } else if (xc[y][x] < 0.325f) {//neutral  34
@@ -6342,6 +6364,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 1;
                         xxx[nh] = 0.31f;
                         yyy[nh] = 0.15f;
+                        YYY[nh] += Yc[y][x];
 
                     } else if (yc[y][x] < 0.24f) {
                         nh = 31;
@@ -6358,6 +6381,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 2;
                         xxx[nh] = 0.31f;
                         yyy[nh] = 0.265f;
+                        YYY[nh] += Yc[y][x];
 
                     } else if (yc[y][x] < 0.32f) {
                         nh = 33;
@@ -6366,6 +6390,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 2;
                         xxx[nh] = 0.31f;
                         yyy[nh] = 0.305f;
+                        YYY[nh] += Yc[y][x];
 
                     } else if (yc[y][x] < 0.34f) {
                         nh = 34;
@@ -6374,6 +6399,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 3;
                         xxx[nh] = 0.31f;
                         yyy[nh] = 0.33f;
+                        YYY[nh] += Yc[y][x];
 
                     } else if (yc[y][x] < 0.37f) {
                         nh = 35;
@@ -6382,6 +6408,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 3;
                         xxx[nh] = 0.31f;
                         yyy[nh] = 0.355f;
+                        YYY[nh] += Yc[y][x];
 
                     } else if (yc[y][x] < 0.4f) {
                         nh = 36;
@@ -6390,6 +6417,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 3;
                         xxx[nh] = 0.31f;
                         yyy[nh] = 0.385f;
+                        YYY[nh] += Yc[y][x];
 
                     } else if (yc[y][x] < 0.45f) {
                         nh = 37;
@@ -6398,6 +6426,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 2;
                         xxx[nh] = 0.3f;
                         yyy[nh] = 0.425f;
+                        YYY[nh] += Yc[y][x];
 
                     } else if (yc[y][x] < 0.5f) {
                         nh = 38;
@@ -6406,6 +6435,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 2;
                         xxx[nh] = 0.31f;
                         yyy[nh] = 0.475f;
+                        YYY[nh] += Yc[y][x];
 
                     } else if (yc[y][x] < 0.55f) {
                         nh = 39;
@@ -6414,14 +6444,16 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 2;
                         xxx[nh] = 0.31f;
                         yyy[nh] = 0.525f;
+                        YYY[nh] += Yc[y][x];
 
-                    } else {
+                    } else if (yc[y][x] < 0.7f) {
                         nh = 40;
                         histxy[nh]++;
                         area[nh] = 20.f;
                         inter[nh] = 1;
                         xxx[nh] = 0.31f;
                         yyy[nh] = 0.6f;
+                        YYY[nh] += Yc[y][x];
 
                     }
 
@@ -6433,6 +6465,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 1;
                         xxx[nh] = 0.33f;
                         yyy[nh] = 0.15f;
+                        YYY[nh] += Yc[y][x];
 
                     } else if (yc[y][x] < 0.24f) {
                         nh = 42;
@@ -6441,6 +6474,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 2;
                         xxx[nh] = 0.33f;
                         yyy[nh] = 0.22f;
+                        YYY[nh] += Yc[y][x];
 
                     } else if (yc[y][x] < 0.29f) {
                         nh = 43;
@@ -6457,6 +6491,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 2;
                         xxx[nh] = 0.33f;
                         yyy[nh] = 0.305f;
+                        YYY[nh] += Yc[y][x];
 
                     } else if (yc[y][x] < 0.33f) {
                         nh = 45;
@@ -6465,6 +6500,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 3;
                         xxx[nh] = 0.33f;
                         yyy[nh] = 0.325f;
+                        YYY[nh] += Yc[y][x];
                     } else if (yc[y][x] < 0.34f) {
                         nh = 46;
                         histxy[nh]++;
@@ -6472,6 +6508,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 3;
                         xxx[nh] = 0.33f;
                         yyy[nh] = 0.335f;
+                        YYY[nh] += Yc[y][x];
                     } else if (yc[y][x] < 0.35f) {
                         nh = 47;
                         histxy[nh]++;
@@ -6479,6 +6516,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 3;
                         xxx[nh] = 0.33f;
                         yyy[nh] = 0.345f;
+                        YYY[nh] += Yc[y][x];
                     } else if (yc[y][x] < 0.36f) {
                         nh = 48;
                         histxy[nh]++;
@@ -6486,6 +6524,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 3;
                         xxx[nh] = 0.33f;
                         yyy[nh] = 0.355f;
+                        YYY[nh] += Yc[y][x];
 
                     } else if (yc[y][x] < 0.37f) {
                         nh = 47;
@@ -6494,6 +6533,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 3;
                         xxx[nh] = 0.33f;
                         yyy[nh] = 0.365f;
+                        YYY[nh] += Yc[y][x];
                     } else if (yc[y][x] < 0.38f) {
                         nh = 48;
                         histxy[nh]++;
@@ -6501,6 +6541,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 3;
                         xxx[nh] = 0.33f;
                         yyy[nh] = 0.375f;
+                        YYY[nh] += Yc[y][x];
 
                     } else if (yc[y][x] < 0.4f) {
                         nh = 49;
@@ -6509,6 +6550,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 3;
                         xxx[nh] = 0.3f;
                         yyy[nh] = 0.39f;
+                        YYY[nh] += Yc[y][x];
 
                     } else if (yc[y][x] < 0.45f) {
                         nh = 50;
@@ -6517,6 +6559,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 2;
                         xxx[nh] = 0.3f;
                         yyy[nh] = 0.425f;
+                        YYY[nh] += Yc[y][x];
 
                     } else if (yc[y][x] < 0.5f) {
                         nh = 51;
@@ -6525,6 +6568,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 2;
                         xxx[nh] = 0.3f;
                         yyy[nh] = 0.475f;
+                        YYY[nh] += Yc[y][x];
 
                     } else if (yc[y][x] < 0.55f) {
                         nh = 52;
@@ -6533,14 +6577,16 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 2;
                         xxx[nh] = 0.3f;
                         yyy[nh] = 0.525f;
+                        YYY[nh] += Yc[y][x];
 
-                    } else {
+                    } else if (yc[y][x] < 0.7f) {
                         nh = 53;
                         histxy[nh]++;
                         area[nh] = 10.f;
                         inter[nh] = 1;
                         xxx[nh] = 0.3f;
                         yyy[nh] = 0.6f;
+                        YYY[nh] += Yc[y][x];
 
                     }
 
@@ -6552,6 +6598,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 1;
                         xxx[nh] = 0.34f;
                         yyy[nh] = 0.15f;
+                        YYY[nh] += Yc[y][x];
 
                     } else if (yc[y][x] < 0.24f) {
                         nh = 55;
@@ -6560,6 +6607,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 2;
                         xxx[nh] = 0.34f;
                         yyy[nh] = 0.22f;
+                        YYY[nh] += Yc[y][x];
 
                     } else if (yc[y][x] < 0.29f) {
                         nh = 56;
@@ -6568,6 +6616,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 2;
                         xxx[nh] = 0.34f;
                         yyy[nh] = 0.265f;
+                        YYY[nh] += Yc[y][x];
 
                     } else if (yc[y][x] < 0.32f) {
                         nh = 57;
@@ -6576,6 +6625,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 2;
                         xxx[nh] = 0.34f;
                         yyy[nh] = 0.305f;
+                        YYY[nh] += Yc[y][x];
 
                     } else if (yc[y][x] < 0.33f) {//34
                         nh = 58;
@@ -6584,6 +6634,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 3;
                         xxx[nh] = 0.34f;
                         yyy[nh] = 0.325f;
+                        YYY[nh] += Yc[y][x];
                     } else if (yc[y][x] < 0.34f) {
                         nh = 59;
                         histxy[nh]++;
@@ -6591,6 +6642,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 3;
                         xxx[nh] = 0.34f;
                         yyy[nh] = 0.335f;
+                        YYY[nh] += Yc[y][x];
 
                     } else if (yc[y][x] < 0.35f) {//34
                         nh = 60;
@@ -6598,6 +6650,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         area[nh] = 1.f;
                         inter[nh] = 3;
                         xxx[nh] = 0.34f;
+                        YYY[nh] += Yc[y][x];
                         yyy[nh] = 0.345f;
                     } else if (yc[y][x] < 0.36f) {//34
                         nh = 61;
@@ -6606,6 +6659,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 3;
                         xxx[nh] = 0.34f;
                         yyy[nh] = 0.355f;
+                        YYY[nh] += Yc[y][x];
 
                     } else if (yc[y][x] < 0.37f) {
                         nh = 62;
@@ -6614,6 +6668,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 3;
                         xxx[nh] = 0.34f;
                         yyy[nh] = 0.365f;
+                        YYY[nh] += Yc[y][x];
                     } else if (yc[y][x] < 0.38f) {
                         nh = 63;
                         histxy[nh]++;
@@ -6621,6 +6676,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 3;
                         xxx[nh] = 0.34f;
                         yyy[nh] = 0.375f;
+                        YYY[nh] += Yc[y][x];
                     } else if (yc[y][x] < 0.39f) {
                         nh = 64;
                         histxy[nh]++;
@@ -6628,6 +6684,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 3;
                         xxx[nh] = 0.34f;
                         yyy[nh] = 0.385f;
+                        YYY[nh] += Yc[y][x];
 
                     } else if (yc[y][x] < 0.4f) {
                         nh = 65;
@@ -6636,6 +6693,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 3;
                         xxx[nh] = 0.34f;
                         yyy[nh] = 0.395f;
+                        YYY[nh] += Yc[y][x];
                     } else if (yc[y][x] < 0.42f) {
                         nh = 66;
                         histxy[nh]++;
@@ -6643,6 +6701,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 3;
                         xxx[nh] = 0.34f;
                         yyy[nh] = 0.41f;
+                        YYY[nh] += Yc[y][x];
 
                     } else if (yc[y][x] < 0.45f) {
                         nh = 67;
@@ -6651,6 +6710,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 2;
                         xxx[nh] = 0.34f;
                         yyy[nh] = 0.435f;
+                        YYY[nh] += Yc[y][x];
                     } else if (yc[y][x] < 0.48f) {
                         nh = 68;
                         histxy[nh]++;
@@ -6658,6 +6718,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 2;
                         xxx[nh] = 0.34f;
                         yyy[nh] = 0.465f;
+                        YYY[nh] += Yc[y][x];
 
                     } else if (yc[y][x] < 0.5f) {
                         nh = 69;
@@ -6666,6 +6727,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 2;
                         xxx[nh] = 0.34f;
                         yyy[nh] = 0.49f;
+                        YYY[nh] += Yc[y][x];
 
                     } else if (yc[y][x] < 0.55f) {
                         nh = 70;
@@ -6674,14 +6736,16 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 2;
                         xxx[nh] = 0.34f;
                         yyy[nh] = 0.525f;
+                        YYY[nh] += Yc[y][x];
 
-                    } else {
+                    } else if (yc[y][x] < 0.65f) {
                         nh = 71;
                         histxy[nh]++;
                         area[nh] = 2.f;
                         inter[nh] = 1;
                         xxx[nh] = 0.34f;
                         yyy[nh] = 0.6f;
+                        YYY[nh] += Yc[y][x];
 
                     }
 
@@ -6693,6 +6757,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 1;
                         xxx[nh] = 0.35f;
                         yyy[nh] = 0.15f;
+                        YYY[nh] += Yc[y][x];
 
                     } else if (yc[y][x] < 0.24f) {
                         nh = 73;
@@ -6701,6 +6766,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 2;
                         xxx[nh] = 0.35f;
                         yyy[nh] = 0.22f;
+                        YYY[nh] += Yc[y][x];
 
                     } else if (yc[y][x] < 0.29f) {
                         nh = 74;
@@ -6709,6 +6775,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 2;
                         xxx[nh] = 0.35f;
                         yyy[nh] = 0.265f;
+                        YYY[nh] += Yc[y][x];
 
                     } else if (yc[y][x] < 0.32f) {
                         nh = 75;
@@ -6717,6 +6784,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 2;
                         xxx[nh] = 0.35f;
                         yyy[nh] = 0.305f;
+                        YYY[nh] += Yc[y][x];
 
                     } else if (yc[y][x] < 0.33f) {//34
                         nh = 76;
@@ -6725,6 +6793,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 3;
                         xxx[nh] = 0.35f;
                         yyy[nh] = 0.325f;
+                        YYY[nh] += Yc[y][x];
                     } else if (yc[y][x] < 0.34f) {
                         nh = 77;
                         histxy[nh]++;
@@ -6732,6 +6801,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 3;
                         xxx[nh] = 0.35f;
                         yyy[nh] = 0.335f;
+                        YYY[nh] += Yc[y][x];
 
                     } else if (yc[y][x] < 0.35f) {//34
                         nh = 78;
@@ -6740,6 +6810,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 3;
                         xxx[nh] = 0.35f;
                         yyy[nh] = 0.345f;
+                        YYY[nh] += Yc[y][x];
                     } else if (yc[y][x] < 0.36f) {//34
                         nh = 79;
                         histxy[nh]++;
@@ -6747,6 +6818,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 3;
                         xxx[nh] = 0.35f;
                         yyy[nh] = 0.355f;
+                        YYY[nh] += Yc[y][x];
 
                     } else if (yc[y][x] < 0.37f) {
                         nh = 80;
@@ -6755,6 +6827,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 3;
                         xxx[nh] = 0.35f;
                         yyy[nh] = 0.365f;
+                        YYY[nh] += Yc[y][x];
                     } else if (yc[y][x] < 0.38f) {
                         nh = 81;
                         histxy[nh]++;
@@ -6762,6 +6835,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 3;
                         xxx[nh] = 0.35f;
                         yyy[nh] = 0.375f;
+                        YYY[nh] += Yc[y][x];
                     } else if (yc[y][x] < 0.39f) {
                         nh = 82;
                         histxy[nh]++;
@@ -6769,6 +6843,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 3;
                         xxx[nh] = 0.35f;
                         yyy[nh] = 0.385f;
+                        YYY[nh] += Yc[y][x];
 
                     } else if (yc[y][x] < 0.4f) {
                         nh = 83;
@@ -6777,6 +6852,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 3;
                         xxx[nh] = 0.35f;
                         yyy[nh] = 0.395f;
+                        YYY[nh] += Yc[y][x];
                     } else if (yc[y][x] < 0.42f) {
                         nh = 84;
                         histxy[nh]++;
@@ -6784,6 +6860,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 3;
                         xxx[nh] = 0.35f;
                         yyy[nh] = 0.41f;
+                        YYY[nh] += Yc[y][x];
 
                     } else if (yc[y][x] < 0.45f) {
                         nh = 85;
@@ -6792,6 +6869,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 2;
                         xxx[nh] = 0.34f;
                         yyy[nh] = 0.435f;
+                        YYY[nh] += Yc[y][x];
                     } else if (yc[y][x] < 0.48f) {
                         nh = 68;
                         histxy[nh]++;
@@ -6799,6 +6877,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 2;
                         xxx[nh] = 0.35f;
                         yyy[nh] = 0.465f;
+                        YYY[nh] += Yc[y][x];
 
                     } else if (yc[y][x] < 0.5f) {
                         nh = 86;
@@ -6807,6 +6886,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 2;
                         xxx[nh] = 0.35f;
                         yyy[nh] = 0.49f;
+                        YYY[nh] += Yc[y][x];
 
                     } else if (yc[y][x] < 0.55f) {
                         nh = 87;
@@ -6815,14 +6895,16 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 2;
                         xxx[nh] = 0.35f;
                         yyy[nh] = 0.525f;
+                        YYY[nh] += Yc[y][x];
 
-                    } else {
+                    } else if (yc[y][x] < 0.65f) {
                         nh = 88;
                         histxy[nh]++;
                         area[nh] = 2.f;
                         inter[nh] = 1;
                         xxx[nh] = 0.35f;
                         yyy[nh] = 0.6f;
+                        YYY[nh] += Yc[y][x];
 
                     }
 
@@ -6834,6 +6916,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 1;
                         xxx[nh] = 0.355f;
                         yyy[nh] = 0.16f;
+                        YYY[nh] += Yc[y][x];
 
 
                     } else if (yc[y][x] < 0.24f) {
@@ -6843,6 +6926,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 2;
                         xxx[nh] = 0.355f;
                         yyy[nh] = 0.22f;
+                        YYY[nh] += Yc[y][x];
 
                     } else if (yc[y][x] < 0.29f) {
                         nh = 91;
@@ -6851,6 +6935,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 2;
                         xxx[nh] = 0.355f;
                         yyy[nh] = 0.265f;
+                        YYY[nh] += Yc[y][x];
 
                     } else if (yc[y][x] < 0.32f) {
                         nh = 92;
@@ -6859,6 +6944,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 3;
                         xxx[nh] = 0.355f;
                         yyy[nh] = 0.30f;
+                        YYY[nh] += Yc[y][x];
                     } else if (yc[y][x] < 0.33f) {
                         nh = 93;
                         histxy[nh]++;
@@ -6866,6 +6952,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 3;
                         xxx[nh] = 0.355f;
                         yyy[nh] = 0.325f;
+                        YYY[nh] += Yc[y][x];
 
                     } else if (yc[y][x] < 0.34f) {
                         nh = 94;
@@ -6874,6 +6961,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 3;
                         xxx[nh] = 0.355f;
                         yyy[nh] = 0.335f;
+                        YYY[nh] += Yc[y][x];
                     } else if (yc[y][x] < 0.36f) {
                         nh = 95;
                         histxy[nh]++;
@@ -6881,6 +6969,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 3;
                         xxx[nh] = 0.355f;
                         yyy[nh] = 0.35f;
+                        YYY[nh] += Yc[y][x];
 
                     } else if (yc[y][x] < 0.37f) {
                         nh = 96;
@@ -6889,6 +6978,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 3;
                         xxx[nh] = 0.355f;
                         yyy[nh] = 0.365f;
+                        YYY[nh] += Yc[y][x];
                     } else if (yc[y][x] < 0.38f) {
                         nh = 97;
                         histxy[nh]++;
@@ -6896,6 +6986,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 3;
                         xxx[nh] = 0.355f;
                         yyy[nh] = 0.375f;
+                        YYY[nh] += Yc[y][x];
                     } else if (yc[y][x] < 0.39f) {
                         nh = 98;
                         histxy[nh]++;
@@ -6903,6 +6994,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 3;
                         xxx[nh] = 0.355f;
                         yyy[nh] = 0.385f;
+                        YYY[nh] += Yc[y][x];
 
                     } else if (yc[y][x] < 0.4f) {
                         nh = 99;
@@ -6911,6 +7003,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 3;
                         xxx[nh] = 0.355f;
                         yyy[nh] = 0.395f;
+                        YYY[nh] += Yc[y][x];
                     } else if (yc[y][x] < 0.42f) {
                         nh = 100;
                         histxy[nh]++;
@@ -6918,6 +7011,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 3;
                         xxx[nh] = 0.355f;
                         yyy[nh] = 0.41f;
+                        YYY[nh] += Yc[y][x];
 
                     } else if (yc[y][x] < 0.45f) {
                         nh = 101;
@@ -6926,6 +7020,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 2;
                         xxx[nh] = 0.355f;
                         yyy[nh] = 0.435f;
+                        YYY[nh] += Yc[y][x];
 
                     } else if (yc[y][x] < 0.5f) {
                         nh = 102;
@@ -6934,6 +7029,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 2;
                         xxx[nh] = 0.355f;
                         yyy[nh] = 0.475f;
+                        YYY[nh] += Yc[y][x];
 
                     } else if (yc[y][x] < 0.55f) {
                         nh = 103;
@@ -6942,15 +7038,17 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 2;
                         xxx[nh] = 0.355f;
                         yyy[nh] = 0.525f;
+                        YYY[nh] += Yc[y][x];
 
 
-                    } else {
+                    } else if (yc[y][x] < 0.63f) {
                         nh = 104;
                         histxy[nh]++;
                         area[nh] = 10.f;
                         inter[nh] = 1;
                         xxx[nh] = 0.355f;
                         yyy[nh] = 0.55f;
+                        YYY[nh] += Yc[y][x];
 
                     }
 
@@ -6962,6 +7060,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 1;
                         xxx[nh] = 0.38f;
                         yyy[nh] = 0.18f;
+                        YYY[nh] += Yc[y][x];
 
                     } else if (yc[y][x] < 0.24f) {
                         nh = 106;
@@ -6970,6 +7069,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 2;
                         xxx[nh] = 0.38f;
                         yyy[nh] = 0.22f;
+                        YYY[nh] += Yc[y][x];
 
                     } else if (yc[y][x] < 0.29f) {
                         nh = 107;
@@ -6978,6 +7078,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 2;
                         xxx[nh] = 0.38f;
                         yyy[nh] = 0.265f;
+                        YYY[nh] += Yc[y][x];
 
                     } else if (yc[y][x] < 0.32f) {
                         nh = 108;
@@ -6986,6 +7087,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 3;
                         xxx[nh] = 0.38f;
                         yyy[nh] = 0.305f;
+                        YYY[nh] += Yc[y][x];
 
                     } else if (yc[y][x] < 0.34f) {
                         nh = 109;
@@ -6994,6 +7096,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 3;
                         xxx[nh] = 0.38f;
                         yyy[nh] = 0.33f;
+                        YYY[nh] += Yc[y][x];
 
                     } else if (yc[y][x] < 0.37f) {
                         nh = 110;
@@ -7002,6 +7105,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 3;
                         xxx[nh] = 0.38f;
                         yyy[nh] = 0.355f;
+                        YYY[nh] += Yc[y][x];
 
                     } else if (yc[y][x] < 0.4f) {
                         nh = 111;
@@ -7009,6 +7113,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         area[nh] = 12.f;
                         inter[nh] = 3;
                         xxx[nh] = 0.38f;
+                        YYY[nh] += Yc[y][x];
                         yyy[nh] = 0.385f;
 
                     } else if (yc[y][x] < 0.45f) {
@@ -7018,6 +7123,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 2;
                         xxx[nh] = 0.38f;
                         yyy[nh] = 0.425f;
+                        YYY[nh] += Yc[y][x];
 
                     } else if (yc[y][x] < 0.5f) {
                         nh = 113;
@@ -7026,6 +7132,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 2;
                         xxx[nh] = 0.38f;
                         yyy[nh] = 0.475f;
+                        YYY[nh] += Yc[y][x];
 
                     } else if (yc[y][x] < 0.55f) {
                         nh = 114;
@@ -7034,15 +7141,17 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 2;
                         xxx[nh] = 0.38f;
                         yyy[nh] = 0.525f;
+                        YYY[nh] += Yc[y][x];
 
 
-                    } else {
+                    } else if (yc[y][x] < 0.6f) {
                         nh = 115;
                         histxy[nh]++;
                         area[nh] = 16.f;
                         inter[nh] = 1;
                         xxx[nh] = 0.38f;
                         yyy[nh] = 0.56f;
+                        YYY[nh] += Yc[y][x];
 
                     }
 
@@ -7054,6 +7163,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 1;
                         xxx[nh] = 0.42f;
                         yyy[nh] = 0.18f;
+                        YYY[nh] += Yc[y][x];
 
                     } else if (yc[y][x] < 0.24f) {
                         nh = 117;
@@ -7062,6 +7172,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 2;
                         xxx[nh] = 0.42f;
                         yyy[nh] = 0.22f;
+                        YYY[nh] += Yc[y][x];
 
                     } else if (yc[y][x] < 0.29f) {
                         nh = 118;
@@ -7070,6 +7181,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 2;
                         xxx[nh] = 0.42f;
                         yyy[nh] = 0.265f;
+                        YYY[nh] += Yc[y][x];
 
                     } else if (yc[y][x] < 0.32f) {
                         nh = 119;
@@ -7078,6 +7190,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 3;
                         xxx[nh] = 0.42f;
                         yyy[nh] = 0.305f;
+                        YYY[nh] += Yc[y][x];
 
                     } else if (yc[y][x] < 0.34f) {
                         nh = 120;
@@ -7086,6 +7199,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 3;
                         xxx[nh] = 0.42f;
                         yyy[nh] = 0.33f;
+                        YYY[nh] += Yc[y][x];
 
                     } else if (yc[y][x] < 0.37f) {
                         nh = 121;
@@ -7094,6 +7208,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 3;
                         xxx[nh] = 0.42f;
                         yyy[nh] = 0.355f;
+                        YYY[nh] += Yc[y][x];
 
                     } else if (yc[y][x] < 0.4f) {
                         nh = 122;
@@ -7102,6 +7217,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 3;
                         xxx[nh] = 0.42f;
                         yyy[nh] = 0.385f;
+                        YYY[nh] += Yc[y][x];
 
                     } else if (yc[y][x] < 0.45f) {
                         nh = 123;
@@ -7110,6 +7226,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 2;
                         xxx[nh] = 0.38f;
                         yyy[nh] = 0.425f;
+                        YYY[nh] += Yc[y][x];
 
                     } else if (yc[y][x] < 0.5f) {
                         nh = 124;
@@ -7118,6 +7235,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 2;
                         xxx[nh] = 0.42f;
                         yyy[nh] = 0.475f;
+                        YYY[nh] += Yc[y][x];
 
                     } else if (yc[y][x] < 0.55f) {
                         nh = 125;
@@ -7126,15 +7244,17 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 2;
                         xxx[nh] = 0.42f;
                         yyy[nh] = 0.525f;
+                        YYY[nh] += Yc[y][x];
 
 
-                    } else {
+                    } else if (yc[y][x] < 0.58f) {
                         nh = 126;
                         histxy[nh]++;
                         area[nh] = 16.f;
                         inter[nh] = 1;
                         xxx[nh] = 0.42f;
                         yyy[nh] = 0.56f;
+                        YYY[nh] += Yc[y][x];
 
                     }
 
@@ -7146,6 +7266,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 1;
                         xxx[nh] = 0.475f;
                         yyy[nh] = 0.19f;
+                        YYY[nh] += Yc[y][x];
 
                     } else if (yc[y][x] < 0.24f) {
                         nh = 128;
@@ -7154,6 +7275,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 2;
                         xxx[nh] = 0.475f;
                         yyy[nh] = 0.22f;
+                        YYY[nh] += Yc[y][x];
 
                     } else if (yc[y][x] < 0.29f) {
                         nh = 129;
@@ -7162,6 +7284,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 2;
                         xxx[nh] = 0.475f;
                         yyy[nh] = 0.265f;
+                        YYY[nh] += Yc[y][x];
 
                     } else if (yc[y][x] < 0.32f) {
                         nh = 130;
@@ -7170,6 +7293,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 3;
                         xxx[nh] = 0.475f;
                         yyy[nh] = 0.305f;
+                        YYY[nh] += Yc[y][x];
 
                     } else if (yc[y][x] < 0.34f) {
                         nh = 131;
@@ -7186,6 +7310,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 3;
                         xxx[nh] = 0.475f;
                         yyy[nh] = 0.355f;
+                        YYY[nh] += Yc[y][x];
 
                     } else if (yc[y][x] < 0.4f) {
                         nh = 133;
@@ -7194,6 +7319,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 3;
                         xxx[nh] = 0.475f;
                         yyy[nh] = 0.385f;
+                        YYY[nh] += Yc[y][x];
 
                     } else if (yc[y][x] < 0.45f) {
                         nh = 134;
@@ -7202,6 +7328,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 2;
                         xxx[nh] = 0.475f;
                         yyy[nh] = 0.425f;
+                        YYY[nh] += Yc[y][x];
 
                     } else if (yc[y][x] < 0.5f) {
                         nh = 135;
@@ -7209,15 +7336,17 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         area[nh] = 25.f;
                         inter[nh] = 2;
                         xxx[nh] = 0.475f;
-                        yyy[nh] = 0.475f;
+                        yyy[nh] = 0.46f;
+                        YYY[nh] += Yc[y][x];
 
-                    } else {
+                    } else if (yc[y][x] < 0.55f) {
                         nh = 136;
                         histxy[nh]++;
                         area[nh] = 20.f;
                         inter[nh] = 1;
                         xxx[nh] = 0.475f;
                         yyy[nh] = 0.52f;
+                        YYY[nh] += Yc[y][x];
 
                     }
                 } else if (xc[y][x] < 0.545f) {
@@ -7228,6 +7357,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 1;
                         xxx[nh] = 0.525f;
                         yyy[nh] = 0.19f;
+                        YYY[nh] += Yc[y][x];
 
                     } else if (yc[y][x] < 0.24f) {
                         nh = 138;
@@ -7236,6 +7366,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 1;
                         xxx[nh] = 0.525f;
                         yyy[nh] = 0.22f;
+                        YYY[nh] += Yc[y][x];
 
                     } else if (yc[y][x] < 0.29f) {
                         nh = 139;
@@ -7244,6 +7375,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 2;
                         xxx[nh] = 0.525f;
                         yyy[nh] = 0.265f;
+                        YYY[nh] += Yc[y][x];
 
                     } else if (yc[y][x] < 0.32f) {
                         nh = 140;
@@ -7252,6 +7384,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 2;
                         xxx[nh] = 0.525f;
                         yyy[nh] = 0.305f;
+                        YYY[nh] += Yc[y][x];
 
                     } else if (yc[y][x] < 0.34f) {
                         nh = 141;
@@ -7260,6 +7393,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 2;
                         xxx[nh] = 0.525f;
                         yyy[nh] = 0.33f;
+                        YYY[nh] += Yc[y][x];
 
                     } else if (yc[y][x] < 0.37f) {
                         nh = 142;
@@ -7268,6 +7402,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 2;
                         xxx[nh] = 0.525f;
                         yyy[nh] = 0.355f;
+                        YYY[nh] += Yc[y][x];
 
                     } else if (yc[y][x] < 0.4f) {
                         nh = 143;
@@ -7276,6 +7411,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 2;
                         xxx[nh] = 0.525f;
                         yyy[nh] = 0.385f;
+                        YYY[nh] += Yc[y][x];
 
                     } else if (yc[y][x] < 0.45f) {
                         nh = 144;
@@ -7284,6 +7420,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 2;
                         xxx[nh] = 0.525f;
                         yyy[nh] = 0.425f;
+                        YYY[nh] += Yc[y][x];
 
                     } else if (yc[y][x] < 0.5f) {
                         nh = 145;
@@ -7292,6 +7429,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 1;
                         xxx[nh] = 0.525f;
                         yyy[nh] = 0.46f;
+                        YYY[nh] += Yc[y][x];
 
 
 
@@ -7305,6 +7443,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 1;
                         xxx[nh] = 0.575f;
                         yyy[nh] = 0.19f;
+                        YYY[nh] += Yc[y][x];
 
                     } else if (yc[y][x] < 0.25f) {
                         nh = 147;
@@ -7313,6 +7452,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 1;
                         xxx[nh] = 0.575f;
                         yyy[nh] = 0.225f;
+                        YYY[nh] += Yc[y][x];
 
                     } else if (yc[y][x] < 0.3f) {
                         nh = 148;
@@ -7321,6 +7461,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 2;
                         xxx[nh] = 0.575f;
                         yyy[nh] = 0.275f;
+                        YYY[nh] += Yc[y][x];
 
                     } else if (yc[y][x] < 0.35f) {
                         nh = 149;
@@ -7329,6 +7470,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 2;
                         xxx[nh] = 0.575f;
                         yyy[nh] = 0.325f;
+                        YYY[nh] += Yc[y][x];
 
                     } else if (yc[y][x] < 0.4f) {
                         nh = 160;
@@ -7337,15 +7479,17 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 2;
                         xxx[nh] = 0.575f;
                         yyy[nh] = 0.375f;
+                        YYY[nh] += Yc[y][x];
 
 
-                    } else {
+                    } else if (yc[y][x] < 0.45f) {
                         nh = 161;
                         histxy[nh]++;
                         area[nh] = 15.f;
                         inter[nh] = 1;
-                        xxx[nh] = 0.575f;
-                        yyy[nh] = 0.41f;
+                        xxx[nh] = 0.56f;
+                        yyy[nh] = 0.405f;
+                        YYY[nh] += Yc[y][x];
 
                     }
 
@@ -7357,6 +7501,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 1;
                         xxx[nh] = 0.625f;
                         yyy[nh] = 0.22f;
+                        YYY[nh] += Yc[y][x];
 
 
                     } else if (yc[y][x] < 0.3f) {
@@ -7366,6 +7511,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 2;
                         xxx[nh] = 0.625f;
                         yyy[nh] = 0.275f;
+                        YYY[nh] += Yc[y][x];
 
                     } else if (yc[y][x] < 0.35f) {
                         nh = 164;
@@ -7374,25 +7520,28 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
                         inter[nh] = 2;
                         xxx[nh] = 0.625f;
                         yyy[nh] = 0.34f;
+                        YYY[nh] += Yc[y][x];
 
 
-                    } else {
+                    } else if (yc[y][x] < 0.45f) {
                         nh = 165;
                         histxy[nh]++;
                         area[nh] = 15.f;
                         inter[nh] = 1;
                         xxx[nh] = 0.625f;
                         yyy[nh] = 0.37f;
+                        YYY[nh] += Yc[y][x];
 
                     }
 
-                } else  {
+                } else if (xc[y][x] < 0.75f) {
                     nh = 166;
                     histxy[nh]++;
                     area[nh] = 25.f;
                     inter[nh] = 1;
-                    xxx[nh] = 0.66f;
-                    yyy[nh] = 0.26f;
+                    xxx[nh] = 0.635f;
+                    yyy[nh] = 0.32f;
+                    YYY[nh] += Yc[y][x];
 
 
                 }
@@ -7400,17 +7549,18 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
             }
         }
 
-        for (int j = 0; j < 167; j++) {
+        for (int j = 0; j < siza; j++) {
 
             histuse[j] = 100 * histxy[j] * (1.f / area[j]) * inter[j];
-            //    printf ("h=%i ", (int) histuse[j]);
+            histY[j] = YYY[j] / histxy[j];
+            //   printf ("h=%i ", (int) histuse[j]);
 
         }
 
-        printf ("\n");
+        //    printf ("\n");
         int memj[Nc] = {};
 
-        //find the 40 max values for histuse probably less
+        //find the 45 max values for histuse probably less
         float max[Nc] = {-100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.,
                          -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f
                         };
@@ -7418,7 +7568,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
         for (int k = 0; k < Nc; k++) {
             int ind = 0;
 
-            for (int j = 0; j < 167; j++) {
+            for (int j = 0; j < siza; j++) {
                 if (histuse[j] > max[k]) {
                     max[k] = histuse[j];
                     memj[k] = j;
@@ -7434,155 +7584,347 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
         for (int k = 0; k < Nc; k++) {
             if (memj[k] != 0) {
                 siz++;
-                printf ("k=%i", memj[k]);
+                //     printf ("k=%i", memj[k]);
 
             }
         }
 
         float *xxcal = nullptr;
         float *yycal = nullptr;
+        float *YYcal = nullptr;
 
         xxcal = new float [siz];
         yycal = new float [siz];
+        YYcal = new float [siz];
         int pos = 0;
 
         for (int k = 0; k < Nc; k++) {
             if (memj[k] != 0) {
                 xxcal[pos] = xxx[memj[k]];
                 yycal[pos] = yyy[memj[k]];
+                YYcal[pos] = histY[memj[k]];
                 pos++;
             }
         }
 
+//printf("pos=%i\n", pos);
+//calculate RGB values for these colors
 
-        delete[] xxcal;
-        delete[] yycal;
+        float R[pos], G[pos], B[pos];
 
-
-        //end family
-
-        //   for (int tt = 0; tt < N_t; tt++) {
-        for (int tt = 30; tt < 50; tt++) {
-
-            //find multiplier to have enough good values to compute
-            float avgL = 0.;
-            float max = 0.f;
-            int nn = 0;
-            float multi = 1.f;
-            //   printf ("rmm=%f bmm=%f\n", rmm[tt], bmm[tt]);
-
-            for (int y = 0; y < bfh ; y += 10) {
-                for (int x = 0; x < bfw ; x += 10) {
-                    int yy = y / 10 ;
-                    int xx = x / 10 ;
-                    reditc[yy][xx] =  rmm[tt] * redloc[y][x]; //multiplier red for WB
-                    greenitc[yy][xx] = greenloc[y][x];
-                    blueitc[yy][xx] =  bmm[tt] * blueloc[y][x]; //multiplier blue for WB
-                    float LL = (0.299f * reditc[yy][xx] + 0.587f * greenitc[yy][xx] + 0.114f * blueitc[yy][xx]);
-                    avgL += LL;
-                    nn++;
-                }
-            }
-
-            avgL /= nn;
-            float sigm = 0.f;
-            float vari = 0.f;
-            int mm = 0;
-
-            for (int y = 0; y < bfh ; y += 10) {
-                for (int x = 0; x < bfw ; x += 10) {
-                    int yy = y / 10 ;
-                    int xx = x / 10 ;
-                    float LL = (0.299f * reditc[yy][xx] + 0.587f * greenitc[yy][xx] + 0.114f * blueitc[yy][xx]);
-                    vari += SQR (LL - avgL);
-                    mm++;
-                }
-            }
-
-            sigm = sqrt (vari / mm);
-
-            multi = 60000.f / (avgL + 2.f * sigm);//mean + 2 sigma #95% population
-            //     printf ("multi=%f\n", multi);
-            /*
-                        for (int y = 0; y < bfh ; y += 10) {
-                            for (int x = 0; x < bfw ; x += 10) {
-                                int yy = y / 10;
-                                int xx = x / 10 ;
-                                reditc[yy][xx] = rmm[tt] * multi * redloc[y][x];
-                                greenitc[yy][xx] = multi * greenloc[y][x];
-                                blueitc[yy][xx] = bmm[tt] * multi * blueloc[y][x];
-
-
-                                if (reditc[yy][xx] > 64000.f) {
-                                    reditc[yy][xx] = 64000.f;
-                                }
-
-                                if (greenitc[yy][xx] > 64000.f) {
-                                    greenitc[yy][xx] = 64000.f;
-                                }
-
-                                if (blueitc[yy][xx] > 64000.f) {
-                                    blueitc[yy][xx] = 64000.f;
-                                }
-
-                                if (reditc[yy][xx] < 100.f) {
-                                    reditc[yy][xx] = 100.f;
-                                }
-
-                                if (greenitc[yy][xx] < 100.f) {
-                                    greenitc[yy][xx] = 100.f;
-                                }
-
-                                if (blueitc[yy][xx] < 100.f) {
-                                    blueitc[yy][xx] = 100.f;
-                                }
-
-
-                                Xitc[yy][xx] = 0.f;
-                                Yitc[yy][xx] = 0.f;
-                                Zitc[yy][xx] = 0.f;
-
-                                float xc = 0.f, yc = 0.f, Yc = 0.f;
-                                float RR =  reditc[yy][xx];
-                                float GG =  greenitc[yy][xx];
-                                float BB =  blueitc[yy][xx];
-
-                                Color::rgbxyY (RR, GG, BB, xc, yc, Yc, wp);
-                                Xitc[yy][xx] = xc;
-                                Yitc[yy][xx] = yc;
-                                Zitc[yy][xx] = Yc;
-
-
-                                for (int nc = 0; nc < 40; nc ++) {
-                                    if ((Xitc[yy][xx] > (Tx[nc][tt] - epsx) && Xitc[yy][xx] < (Tx[nc][tt] + epsx)) && (Yitc[yy][xx] > (Ty[nc][tt] - epsy) && Yitc[yy][xx] < (Ty[nc][tt] + epsy))) {
-                                        hh[nc][tt] = 1;
-                                    }
-                                }
-
-                            }
-                        }
-            */
-            //  printf("R=%f G=%f B=%f Xc=%f Yc=%f Y=%f MaxRGB=%f\n", avgR /256, avgG/256, avgB/256, avgX, avgY, avgZ, max/256);
+        for (int p = 0; p < pos; p++) {
+            //  printf("xx=%f yy=%f YY=%f\n", xxcal[p],yycal[p], YYcal[p]);
+            float X, Y, Z;
+            X = 65535.f * (xxcal[p] * YYcal[p]) / yycal[p];
+            Z = 65535.f * ((1.f - xxcal[p] - yycal[p]) * YYcal[p]) / yycal[p];
+            Y = 65535.f * YYcal[p];
+            Color::xyz2rgb (X, Y, Z, R[p], G[p], B[p], wip);
+            //  printf("R=%f G=%f B=%f\n", R[p],G[p], B[p]);
 
         }
 
-        int somm[N_t];
-        /*
-                for (int j = 0; j < N_t; j++) {
-                    somm[j] = 0;
+        array2D<float> rk;
+        array2D<float> gk;
+        array2D<float> bk;
+        rk (pos, N_t);
+        gk (pos, N_t);
+        bk (pos, N_t);
+
+        array2D<float> xk;
+        array2D<float> yk;
+        array2D<float> Yk;
+        xk (pos, N_t);
+        yk (pos, N_t);
+        Yk (pos, N_t);
+
+        for (int i = 0; i < pos; i++) {
+            for (int j = 0; j < N_t; j++) {
+                rk[i][j] = 0.f;
+                gk[i][j] = 0.f;
+                bk[i][j] = 0.f;
+                xk[i][j] = 0.f;
+                yk[i][j] = 0.f;
+                Yk[i][j] = 0.f;
+            }
+        }
+
+//printf("\n");
+
+//calculate r g b with T coefi
+        for (int tt = 0; tt < N_t; tt++) {
+            //  printf("rmm=%f bmm=%f\n", rmm[tt],bmm[tt]);
+        }
+
+        for (int tt = 0; tt < N_t; tt++) {
+            for (int p = 0; p < pos; p++) {
+                rk[p][tt] = rmm[tt] * R[p];
+                gk[p][tt] =  G[p];
+                bk[p][tt] = bmm[tt] * B[p];
+                //  printf("R=%f ", R[p]);
+                //  printf("rk=%f gk=%f bk=%f\n", rk[p][tt], gk[p][tt], bk[p][tt]);
+
+            }
+        }
+
+//       printf ("\n");
+
+//recalculate x y Y for each Temp and each color selected
+        for (int tt = 0; tt < N_t; tt++) {
+            for (int p = 0; p < pos; p++) {
+                float x_c = 0.f, y_c = 0.f, Y_c = 0.f;
+                float RR = rk[p][tt];
+                float GG = gk[p][tt];
+                float BB = bk[p][tt];
+
+                Color::rgbxyY (RR, GG, BB, x_c, y_c, Y_c, wp);
+                xk[p][tt] = x_c;
+                yk[p][tt] = y_c;
+                Yk[p][tt] = Y_c;
+                //printf("xk=%f yk=%f\n", xk[p][tt], yk[p][tt]);
+
+            }
+
+        }
+
+        //now we are comparaing by correlation xk, yk to Tx[nc][tt] and Ty
+        // covariance xk  + Tx and yk + Ty / sigma xk + Tx * sigma yk + ty
+        //number elements = Number of reference color + number of color found
+        //
+        int number = pos + Nc;
+        //    int number =  Nc;
+        float avgx[N_t] = {}, avgy[N_t] = {};
+        float covar[N_t] = {};
+        float sigx[N_t] = {};
+        float sigy[N_t] = {};
+        float correl[N_t] = {};
+        float avgx42 = 0.f;
+        float avgy42 = 0.f;
+        float sigx42 = 0.f;
+        float sigy42 = 0.f;
+
+        for (int tt = 0; tt < N_t; tt++) {
+            avgx[tt] = 0.f;
+            avgy[tt] = 0.f;
+            covar[tt] = 0.f;
+            sigx[tt] = 0.f;
+            sigy[tt] = 0.f;
+            correl[tt] = 0.f;
+        }
+
+        int typ = 2;//4 type of covariance
+		//I must change something - probably adapted references color to real color...todo
+        if (typ == 1) {
+            //mean 2 for ref
+            for (int tt = 0; tt < N_t; tt++) {
+                for (int i = 0; i < pos; i++) {//Nc  ==> pos
+                    avgy[tt] += Tx[i][tt];
+                    avgy[tt] += Ty[i][tt];
                 }
 
-                for (int nn = 0; nn < 40; nn++) {
-                    for (int j = 0; j < N_t; j++) {
-                        somm[j] += hh[nn][j];
-                    }
+                avgy[tt] /= 2 * pos;//to change
+            }
+
+            for (int tt = 0; tt < N_t; tt++) {
+                for (int i = 0; i < pos; i++) {
+                    avgx[tt] += xk[i][tt];
+                    avgx[tt] += yk[i][tt];
                 }
 
-                for (int j = 0; j < N_t; j++) {
-                    printf ("j=%i somm=%i ", j, somm[j] );
+                avgx[tt] /= 2 * pos;
+
+            }
+
+            for (int tt = 0; tt < N_t; tt++) {
+                for (int i = 0; i < pos; i++) {
+                    covar[tt] += ((Tx[i][tt] - avgy[tt]) * (xk[i][tt] - avgx[tt]));
+                    covar[tt] += ((Ty[i][tt] - avgy[tt]) * (yk[i][tt] - avgx[tt]));
+                    sigy[tt] += SQR (Tx[i][tt] - avgy[tt]);
+                    sigy[tt] += SQR (Ty[i][tt] - avgy[tt]);
+                    sigx[tt] += SQR (xk[i][tt] - avgx[tt]);
+                    sigy[tt] += SQR (yk[i][tt] - avgx[tt]);
+
                 }
-        */
-        hh (0, 0);
+
+                covar[tt] /= 2 * pos;
+                sigy[tt] /= 2 * pos;
+                sigx[tt] /= 2 * pos;
+                sigx[tt] = sqrt (sigx[tt]);
+                sigy[tt] = sqrt (sigy[tt]);
+
+                correl[tt] = covar[tt] / (sigx[tt] * sigy[tt]);
+
+                printf ("tt=%i  corr=%f\n", tt, correl[tt]);
+
+            }
+        } else if (typ == 2) {
+            //          for (int tt = 0; tt < N_t; tt++) {
+            for (int i = 0; i < Nc; i++) {//Nc  ==> pos
+                avgy42 += Tx[i][42];
+                avgy42 += Ty[i][42];
+            }
+
+            avgy42 /= 2 * Nc;//to change
+//           }
+
+            for (int tt = 23; tt < N_t; tt++) {
+                for (int i = 0; i < pos; i++) {
+                    avgx[tt] += xk[i][tt];
+                    avgx[tt] += yk[i][tt];
+                }
+
+                avgx[tt] /= 2 * pos;
+
+            }
+
+            for (int tt = 23; tt < N_t; tt++) {
+                for (int i = 0; i < pos; i++) {
+                    covar[tt] += ((Tx[i][42] - avgy42) * (xk[i][tt] - avgx[tt]));
+                    covar[tt] += ((Ty[i][42] - avgy42) * (yk[i][tt] - avgx[tt]));
+                    sigy[tt] += SQR (Tx[i][42] - avgy42);
+                    sigy[tt] += SQR (Ty[i][42] - avgy42);
+                    sigx[tt] += SQR (xk[i][tt] - avgx[tt]);
+                    sigy[tt] += SQR (yk[i][tt] - avgx[tt]);
+
+                }
+
+                covar[tt] /= 2 * pos;
+                sigy[tt] /= 2 * pos;
+                sigx[tt] /= 2 * pos;
+                sigx[tt] = sqrt (sigx[tt]);
+                sigy[tt] = sqrt (sigy[tt]);
+
+                correl[tt] = covar[tt] / (sigx[tt] * sigy[tt]);
+
+                printf ("tt=%i pos=%i corr=%f\n", tt, pos, correl[tt]);
+
+            }
+
+        } else if (typ == 3) {
+
+            //calculate mean for x anf for y
+            for (int tt = 0; tt < N_t; tt++) {
+                for (int i = 0; i < Nc; i++) {
+                    avgx[tt] += Tx[i][tt];
+                    avgy[tt] += Ty[i][tt];
+                }
+            }
+
+            for (int tt = 0; tt < N_t; tt++) {
+                for (int i = 0; i < pos; i++) {
+                    avgx[tt] += xk[i][tt];
+                    avgy[tt] += yk[i][tt];
+                }
+
+                avgx[tt] /= number;
+                avgy[tt] /= number;
+            }
+
+            //calculate covariance and stdv x stdv y
+            for (int tt = 0; tt < N_t; tt++) {
+                for (int i = 0; i < Nc; i++) {
+                    covar[tt] += ((Tx[i][tt] - avgx[tt]) * (Ty[i][tt] - avgy[tt]));
+
+                    sigx[tt] += SQR (Tx[i][tt] - avgx[tt]);
+                    sigy[tt] += SQR (Ty[i][tt] - avgy[tt]);
+
+
+                }
+            }
+
+            for (int tt = 0; tt < N_t; tt++) {
+                for (int i = 0; i < pos; i++) {
+                    covar[tt] += ((xk[i][tt] - avgx[tt]) * (yk[i][tt] - avgy[tt]));
+                    sigx[tt] += SQR (xk[i][tt] - avgx[tt]);
+                    sigy[tt] += SQR (yk[i][tt] - avgy[tt]);
+
+                }
+            }
+
+            for (int tt = 0; tt < N_t; tt++) {
+
+                covar[tt] /= number;
+                sigx[tt] /= number;
+                sigy[tt] /= number;
+                sigx[tt] = sqrt (sigx[tt]);
+                sigy[tt] = sqrt (sigy[tt]);
+
+                correl[tt] = covar[tt] / (sigx[tt] * sigy[tt]);
+
+                printf ("tt=%i  corr=%f\n", tt, correl[tt]);
+            }
+        } else if (typ == 4) {//tt=42 #5000K
+            //calculate mean for x anf for y
+            //      for (int tt = 0; tt < N_t; tt++) {
+            for (int i = 0; i < Nc; i++) {
+                //tt = 42;
+                avgx42 += Tx[i][42];
+                avgy42 += Ty[i][42];
+            }
+
+            //     }
+
+            for (int tt = 0; tt < N_t; tt++) {
+                for (int i = 0; i < pos; i++) {
+                    avgx[tt] += xk[i][tt];
+                    avgy[tt] += yk[i][tt];
+                }
+
+                avgx[tt] += avgx42;
+                avgy[tt] += avgy42;
+
+                avgx[tt] /= number;
+                avgy[tt] /= number;
+            }
+
+            //calculate covariance and stdv x stdv y
+            for (int tt = 0; tt < N_t; tt++) {
+                for (int i = 0; i < Nc; i++) {
+                    covar[tt] += ((Tx[i][42] - avgx[tt]) * (Ty[i][42] - avgy[tt]));
+
+                    sigx[tt] += SQR (Tx[i][42] - avgx[tt]);
+                    sigy[tt] += SQR (Ty[i][42] - avgy[tt]);
+
+
+                }
+            }
+
+            for (int tt = 0; tt < N_t; tt++) {
+                for (int i = 0; i < pos; i++) {
+                    covar[tt] += ((xk[i][tt] - avgx[tt]) * (yk[i][tt] - avgy[tt]));
+                    sigx[tt] += SQR (xk[i][tt] - avgx[tt]);
+                    sigy[tt] += SQR (yk[i][tt] - avgy[tt]);
+
+                }
+            }
+
+            for (int tt = 0; tt < N_t; tt++) {
+
+                covar[tt] /= number;
+                sigx[tt] /= number;
+                sigy[tt] /= number;
+                sigx[tt] = sqrt (sigx[tt]);
+                sigy[tt] = sqrt (sigy[tt]);
+
+                correl[tt] = covar[tt] / (sigx[tt] * sigy[tt]);
+
+                printf ("tt=%i  corr=%f\n", tt, correl[tt]);
+            }
+
+        }
+
+        delete[] xxcal;
+        delete[] yycal;
+        delete[] YYcal;
+
+        rk (0, 0);
+        gk (0, 0);
+        bk (0, 0);
+        xk (0, 0);
+        yk (0, 0);
+        Yk (0, 0);
+
+
+        //end family
 
         for (int i = 0; i < Nc; i++) {
             delete [] Tx[i];

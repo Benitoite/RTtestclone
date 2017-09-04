@@ -1835,7 +1835,7 @@ void ColorTemp::tempxy (double &temp, float **Tx, float **Ty, float **TYY)
         ColorchechSkiB166_18_18_spect, ColabSkin70_7_32_spect, ColorchechSGSkiF763_14_26_spect,
         ColorchechSkiA138_13_14_spect, ColabSkin57_22_18_spect, JDC468_YelN10_spect,
         ColabSkin35_15_17_spect, ColorRedkurttu_spect, ColorYellowkeltano_spect,  ColorchechYelD3_spect, JDC468_OraO18_spect,
-        JDC468_RedG21va_spect, ColorchechOraA2_spect, JDC468_OraD17_spect, ColorRedpetunia_spect,
+        JDC468_RedG21va_spect, ColorRedpetunia_spect, ColorchechOraA2_spect, JDC468_OraD17_spect, 
         ColorchechredC3_spect, JDC468_RedI9_spect
 
     };
@@ -1989,16 +1989,16 @@ void ColorTemp::tempxy (double &temp, float **Tx, float **Ty, float **TYY)
         for (int i = 0; i < N_c; i++) {
             double som = (Refxyz[i].Xref + Refxyz[i].Yref +  Refxyz[i].Zref);
 
-            if (tt == 5) {
+            if (tt == 55) {
                 //     printf ("temp=%f Nc=%i x=%f y=%f Y=%f\n", tempw, i, Refxyz[i].Xref/som , Refxyz[i].Yref/som ,  Refxyz[i].Zref/som );
             }
 
-            if (tt == 20) {
+            if (tt == 65) {
                 //   printf ("temp=%f Nc=%i x=%f y=%f Y=%f\n", tempw, i, Refxyz[i].Xref / som , Refxyz[i].Yref / som ,  Refxyz[i].Zref / som );
             }
 
-            if (tt == 41) {
-                printf ("temp=%f Nc=%i x=%f y=%f Y=%f\n", tempw, i, Refxyz[i].Xref / som, Refxyz[i].Yref / som,  Refxyz[i].Zref / som );
+            if (tt == 90) {
+           //     printf ("temp=%f Nc=%i x=%f y=%f Y=%f\n", tempw, i, Refxyz[i].Xref / som, Refxyz[i].Yref / som,  Refxyz[i].Zref / som );
             }
 
             Tx[i][tt] =  (float) Refxyz[i].Xref / som;
