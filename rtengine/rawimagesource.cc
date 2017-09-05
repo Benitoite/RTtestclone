@@ -5636,36 +5636,25 @@ static void SobelWB (array2D<float> &redsobel, array2D<float> &greensobel, array
     }
 }
 
-void xyz_to_cat02floatraw ( float &r, float &g, float &b, float x, float y, float z)
+
+void RawImageSource::ItcWB (array2D<float> &redloc, array2D<float> &greenloc, array2D<float> &blueloc, int bfw, int bfh, double &avg_rm, double &avg_gm, double &avg_bm)
 {
 
-    {
-        r = ( 0.7328f * x) + (0.4296f * y) - (0.1624f * z);
-        g = (-0.7036f * x) + (1.6975f * y) + (0.0061f * z);
-        b = ( 0.0030f * x) + (0.0136f * y) + (0.9834f * z);
-    }
-}
+    ColorManagementParams cmp;
+    TMatrix wprof = ICCStore::getInstance()->workingSpaceMatrix ("sRGB");
+    TMatrix wiprof = ICCStore::getInstance()->workingSpaceInverseMatrix ("sRGB");
+    //inverse matrix user select
+    double wip[3][3] = {
+        {wiprof[0][0], wiprof[0][1], wiprof[0][2]},
+        {wiprof[1][0], wiprof[1][1], wiprof[1][2]},
+        {wiprof[2][0], wiprof[2][1], wiprof[2][2]}
+    };
 
-void cat02_to_xyzfloatraw ( float &x, float &y, float &z, float r, float g, float b)
-{
-    x = ( 1.096124f * r) - (0.278869f * g) + (0.182745f * b);
-    y = ( 0.454369f * r) + (0.473533f * g) + (0.072098f * b);
-    z = (-0.009628f * r) - (0.005698f * g) + (1.015326f * b);
-}
-
-
-
-void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, array2D<float> &blueloc, int bfw, int bfh, double &avg_rm, double &avg_gm, double &avg_bm, const LocrgbParams &localr, int begx, int begy, int yEn, int xEn, int cx, int cy)
-{
-    //auto white balance
-//   printf ("AUtoWB OK\n");
-    array2D<float> redsobel;
-    array2D<float> greensobel;
-    array2D<float> bluesobel;
-
-    redsobel (bfw, bfh);
-    greensobel (bfw, bfh);
-    bluesobel (bfw, bfh);
+    double wp[3][3] = {
+        {wprof[0][0], wprof[0][1], wprof[0][2]},
+        {wprof[1][0], wprof[1][1], wprof[1][2]},
+        {wprof[2][0], wprof[2][1], wprof[2][2]}
+    };
 
     array2D<float> reditc;
     array2D<float> greenitc;
@@ -5697,6 +5686,2385 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
     yc (bfwitc, bfhitc);
     Yc (bfwitc, bfhitc);
 
+    double avprov = 1.f;
+
+    typedef struct WbTxyz {
+        double Tem;
+        double XX;
+        double ZZ;
+    } WbTxyz;
+
+    WbTxyz Txyz[91] = {//temperature Xwb Zwb 90 values
+        {2001., 1.273842, 0.145295},
+        {2101., 1.244008, 0.167533},
+        {2201., 1.217338, 0.190697},
+        {2301., 1.193444, 0.214632},
+        {2401., 1.171996, 0.239195},
+        {2501., 1.152883, 0.264539},
+        {2605., 1.134846, 0.291032},
+        {2705., 1.119049, 0.316446},
+        {2803., 1.105381, 0.342193},
+        {2856., 1.098258, 0.355599},
+        {2910., 1.091550, 0.369645},
+        {3003., 1.080982, 0.394258},
+        {3103., 1.070277, 0.419815},
+        {3203., 1.060906, 0.446161},
+        {3303., 1.052034, 0.471422},
+        {3400., 1.044547, 0.496719},
+        {3500., 1.037145, 0.521523},
+        {3600., 1.030574, 0.546590},
+        {3699., 1.024834, 0.571722},
+        {3801., 1.019072, 0.596102},
+        {3902., 1.014244, 0.621136},
+        {4002., 0.996153, 0.609518},
+        {4052., 0.993720, 0.620805},
+        {4102., 0.993908, 0.63152},
+        {4152., 0.989179, 0.643262},
+        {4202., 0.989283, 0.653999},
+        {4252., 0.985039, 0.665536},
+        {4302., 0.985067, 0.676288},
+        {4352., 0.981271, 0.687599},
+        {4402., 0.981228, 0.698349},
+        {4452., 0.977843, 0.709425},
+        {4502., 0.977736, 0.720159},
+        {4552., 0.974728, 0.730993},
+        {4602., 0.974562, 0.741698},
+        {4652., 0.971899, 0.752284},
+        {4702., 0.971681, 0.762949},
+        {4752., 0.969335, 0.773285},
+        {4802., 0.969069, 0.783899},
+        {4852., 0.967011, 0.793982},
+        {4902., 0.966702, 0.804537},
+        {4952., 0.964908, 0.814366},
+        {5002., 0.964561, 0.824854},
+        {5052., 0.963008, 0.834429},
+        {5102., 0.962627, 0.844842},
+        {5152., 0.961294, 0.854166},
+        {5202., 0.960883, 0.864497},
+        {5252., 0.959749, 0.873572},
+        {5302., 0.959313, 0.883815},
+        {5352., 0.958361, 0.892644},
+        {5402., 0.957903, 0.902793},
+        {5452., 0.957116, 0.911379},
+        {5502., 0.956639, 0.921431},
+        {5552., 0.956002, 0.929779},
+        {5602., 0.955509, 0.939728},
+        {5652., 0.955008, 0.947842},
+        {5702., 0.954502, 0.957685},
+        {5752., 0.954124, 0.965569},
+        {5802., 0.953608, 0.975303},
+        {5852., 0.953342, 0.982963},
+        {5902., 0.952818, 0.992584},
+        {5952., 0.952652, 1.000025},
+        {6002., 0.952122, 1.009532},
+        {6052., 0.952047, 1.016759},
+        {6102., 0.951514, 1.026149},
+        {6152., 0.951520, 1.033168},
+        {6202., 0.950985, 1.042439},
+        {6252., 0.951064, 1.049256},
+        {6302., 0.950530, 1.058406},
+        {6352., 0.950674, 1.065027},
+        {6402., 0.950143, 1.074055},
+        {6452., 0.950345, 1.080484},
+        {6502., 0.949817, 1.089390},
+        {6602., 0.949952, 1.103094},
+        {6702., 0.949330, 1.119138},
+        {6802., 0.949596, 1.132190},
+        {6902., 0.949033, 1.147691},
+        {7002., 0.949402, 1.160129},
+        {7152., 0.949348, 1.180429},
+        {7301., 0.948896, 1.201432},
+        {7451., 0.949434, 1.219076},
+        {7601., 0.949099, 1.239061},
+        {7751., 0.949729, 1.255559},
+        {7901., 0.949498, 1.274460},
+        {8301., 0.950253, 1.318464},
+        {8601., 0.950941, 1.349261},
+        {9001., 0.951969, 1.387639},
+        {9401., 0.953081, 1.423213},
+        {9901., 0.954537, 1.464134},
+        {10501., 0.956321, 1.508623},
+        {11001., 0.957747, 1.541281},
+        {12001., 0.960440, 1.601019}
+
+    };
+    int N_t = sizeof (Txyz) / sizeof (Txyz[0]); //number of temperature White point
+
+    double temp = 5000.;
+    int nbt = N_t;
+    float **Tx = nullptr;
+    float **Ty = nullptr;
+    float **TYY = nullptr;
+    int Nc = 46;
+    Tx = new float*[Nc];
+
+    for (int i = 0; i < Nc; i++) {
+        Tx[i] = new float[nbt];
+    }
+
+    Ty = new float*[Nc];
+
+    for (int i = 0; i < Nc; i++) {
+        Ty[i] = new float[nbt];
+    }
+
+    TYY = new float*[Nc];
+
+    for (int i = 0; i < Nc; i++) {
+        TYY[i] = new float[nbt];
+    }
+
+    float *rmm = nullptr;
+    rmm = new float [N_t];
+
+    float *gmm = nullptr;
+    gmm = new float [N_t];
+
+    float *bmm = nullptr;
+    bmm = new float [N_t];
+
+    //calculate R G B multiplier in function illuminant and temperature
+    for (int tt = 0; tt < N_t; tt++) {
+        double r, g, b;
+        float rm, gm, bm;
+        ColorTemp WBiter = ColorTemp (Txyz[tt].Tem, 1.f, 1.f, "Custom");
+        const RAWParams raw ;
+        WBiter.getMultipliers (r, g, b);
+        rm = imatrices.cam_rgb[0][0] * r + imatrices.cam_rgb[0][1] * g + imatrices.cam_rgb[0][2] * b;
+        gm = imatrices.cam_rgb[1][0] * r + imatrices.cam_rgb[1][1] * g + imatrices.cam_rgb[1][2] * b;
+        bm = imatrices.cam_rgb[2][0] * r + imatrices.cam_rgb[2][1] * g + imatrices.cam_rgb[2][2] * b;
+
+        const float new_pre_mul[4] = { ri->get_pre_mul (0) / rm, ri->get_pre_mul (1) / gm, ri->get_pre_mul (2) / bm, ri->get_pre_mul (3) / gm };
+        float new_scale_mul[4];
+
+        bool isMono = (ri->getSensorType() == ST_FUJI_XTRANS && raw.xtranssensor.method == RAWParams::XTransSensor::methodstring[RAWParams::XTransSensor::mono])
+                      || (ri->getSensorType() == ST_BAYER && raw.bayersensor.method == RAWParams::BayerSensor::methodstring[RAWParams::BayerSensor::mono]);
+        float gain = calculate_scale_mul (new_scale_mul, new_pre_mul, c_white, cblacksom, isMono, ri->get_colors());
+        rm = new_scale_mul[0] / scale_mul[0] * gain;
+        gm = new_scale_mul[1] / scale_mul[1] * gain;
+        bm = new_scale_mul[2] / scale_mul[2] * gain;
+        float som = rm + gm + bm;
+        //  printf ("ZZZ rm=%f gm=%f bm=%f\n", rm / gm, gm / gm, bm / gm);
+        rmm[tt] = rm / gm;
+        gmm[tt] = gm / gm;
+        bmm[tt] = bm / gm;
+        //   printf ("WWW tt=%i rm=%f gm=%f bm=%f\n", tt, rmm[tt], gmm[tt], bmm[tt]);
+        //printf("gain=%f\n", gain);
+    }
+
+    //call tempxy to calaculate for 41 color references Temp and x y for xyY
+
+    ColorTemp::tempxy (temp, Tx, Ty, TYY);//calculate chroma xy (xyY) for Z known colors on under 90 illuminants
+
+    float epsx = 0.001f, epsy = 0.001f;//delta value to have result!
+
+    //calculate for this image the mean values for each family of color, near histogram x y (number)
+    //xy vary from x 0..0.77  y 0..0.82
+    //neutral values are near x=0.34 0.33 0.315 0.37 y =0.35 0.36 0.34
+    //skin are about x 0.45  0.49 y 0.4 0.47
+    //blue sky x=0.25 y=0.28  and x=0.29 y=0.32
+    // step about 0.02   x 0.32 0.34  y= 0.34 0.36 skin    --  sky x 0.24 0.30 y 0.28 0.32
+    //big step about 0.2
+
+    //calculate x y Y
+    for (int y = 0; y < bfh ; y += 10) {
+        for (int x = 0; x < bfw ; x += 10) {
+            int yy = y / 10;
+            int xx = x / 10 ;
+            float x_c = 0.f, y_c = 0.f, Y_c = 0.f;
+            float RR =  redloc[y][x];
+            float GG =  greenloc[y][x];
+            float BB =  blueloc[y][x];
+
+            Color::rgbxyY (RR, GG, BB, x_c, y_c, Y_c, wp);
+            xc[yy][xx] = x_c;
+            yc[yy][xx] = y_c;
+            Yc[yy][xx] = Y_c;
+            //  printf("xc=%f yc=%f ", x_c, y_c);
+
+        }
+
+    }
+
+    /*
+            //calculate X Y Z from xyY
+            X = 65535.f * (xc[yy][xx]* Yc[yy][xx] /yc[yy][xx]);
+            Y = 65535.f * Yc[yy][xx];
+            Z = 65535.f * (1 - xc[yy][xx] - yc[yy][xx])* yc[yy][xx];
+            for (int y = 0; y < bfh ; y += 10) {
+                for (int x = 0; x < bfw ; x += 10) {
+                    int yy = y / 10;
+                    int xx = x / 10 ;
+                    float x_c = 0.f, y_c = 0.f, Y_c = 0.f;
+                    float RR =  redloc[yy][xx];
+                    float GG =  greenloc[yy][xx];
+                    float BB =  blueloc[yy][xx];
+
+                    Color::rgbxyY (RR, GG, BB, x_c, y_c, Y_c, wp);
+                    xc[yy][xx] = x_c;
+                    yc[yy][xx] = y_c;
+                    Yc[yy][xx] = Y_c;
+
+                }
+
+            }
+    */
+    int siza = 167;
+    int histxy[siza] = {};//number of values for each pair xy
+    float area[siza] = {};//multiplier for compensation differences area ==> big areas are rare near limit prophotos or more
+    int inter[siza] = {}; //interest for photographie 1 = small (limit gamut) 2 = normal 3 = major (skin, sky, neutral)
+    float histuse[siza] = {};
+    int nh = 0;
+    float xxx[siza] = {};//for max 45 color references calculated ==> max in images "like histogram"
+    float yyy[siza] = {};
+    float YYY[siza] = {};//not used directly, but necessary to keep good range
+    int nc = 0, nc2 = 0; //near reference color perhaps not need
+    float histY[siza] = {};//#mean Y of xyY : not used directly, but necessary to keep good range
+
+    for (int p = 0; p < siza; p++) {
+        histxy[p] = 0.f;
+        area[p] = 20.f;
+        inter[p] = 1;
+        histY[p] = 1.f;
+    }
+
+    for (int y = 0; y < bfhitc ; y++) {
+        for (int x = 0; x < bfwitc ; x++) {
+
+            if (xc[y][x] < 0.12f) { // near Prophoto
+
+                if (yc[y][x] < 0.2f) {
+                    nh = 0;
+                    histxy[nh]++;
+                    area[nh] = 50.f;
+                    inter[nh] = 1;
+                    xxx[nh] = 0.11f;
+                    yyy[nh] = 0.18f;
+                    YYY[nh] += Yc[y][x];
+
+                    nc = 0;
+                    //blue hard
+                } else if (yc[y][x] < 0.3f) {
+                    nh = 1;
+                    histxy[nh]++;
+                    area[nh] = 60.f;
+                    inter[nh] = 1;
+                    xxx[nh] = 0.11f;
+                    yyy[nh] = 0.25f;
+                    YYY[nh] += Yc[y][x];
+
+                    nc = 1;
+
+                    //blue
+                } else if (yc[y][x] < 0.4f) {
+                    nh = 2;
+                    histxy[nh]++;
+                    area[nh] = 80.f;
+                    inter[nh] = 1;
+                    xxx[nh] = 0.09f;
+                    yyy[nh] = 0.35f;
+                    nc = 1;
+                    YYY[nh] += Yc[y][x];
+
+                } else if (yc[y][x] < 0.5f) {
+                    //blue green
+                    nh = 3;
+                    histxy[nh]++;
+                    area[nh] = 100.f;
+                    inter[nh] = 1;
+                    xxx[nh] = 0.08f;
+                    yyy[nh] = 0.45f;
+                    YYY[nh] += Yc[y][x];
+                    nc = 1;
+
+                } else if (yc[y][x] < 0.6f) {
+                    nh = 4;
+                    histxy[nh]++;
+                    area[nh] = 120.f;
+                    inter[nh] = 1;
+                    xxx[nh] = 0.06f;
+                    yyy[nh] = 0.55f;
+                    YYY[nh] += Yc[y][x];
+                    nc = 1;
+
+                } else if (yc[y][x] < 0.82f) {
+                    //green
+                    nh = 5;
+                    histxy[nh]++;
+                    area[nh] = 240.f;
+                    inter[nh] = 1;
+                    xxx[nh] = 0.05f;
+                    yyy[nh] = 0.75f;
+                    nc = 1;
+
+
+                }
+            } else if (xc[y][x] < 0.24f) {
+                if (yc[y][x] < 0.2f) {
+                    nh = 6;
+                    histxy[nh]++;
+                    area[nh] = 230.f;
+                    inter[nh] = 1;
+                    xxx[nh] = 0.18f;
+                    yyy[nh] = 0.1f;
+                    YYY[nh] += Yc[y][x];
+                    nc = 2;
+
+                } else if (yc[y][x] < 0.3f) {
+                    nh = 7;
+                    histxy[nh]++;
+                    area[nh] = 240.f;
+                    inter[nh] = 2;
+                    xxx[nh] = 0.18f;
+                    yyy[nh] = 0.27f;
+                    YYY[nh] += Yc[y][x];
+                    nc = 2;
+
+                } else if (yc[y][x] < 0.4f) {
+                    nh = 8;
+                    histxy[nh]++;
+                    area[nh] = 240.f;
+                    inter[nh] = 2;
+                    xxx[nh] = 0.18f;
+                    yyy[nh] = 0.35f;
+                    YYY[nh] += Yc[y][x];
+                    nc = 2;
+
+                } else if (yc[y][x] < 0.5f) {
+                    nh = 9;
+                    histxy[nh]++;
+                    area[nh] = 240.f;
+                    inter[nh] = 2;
+                    xxx[nh] = 0.18f;
+                    yyy[nh] = 0.45f;
+                    nc = 2;
+                    nc2 = 3;
+
+                } else if (yc[y][x] < 0.6f) {
+                    nh = 10;
+                    histxy[nh]++;
+                    area[nh] = 240.f;
+                    inter[nh] = 2;
+                    xxx[nh] = 0.18f;
+                    yyy[nh] = 0.55f;
+                    YYY[nh] += Yc[y][x];
+                    nc = 3;
+
+                } else if (yc[y][x] < 0.75f) {
+                    nh = 11;
+                    histxy[nh]++;
+                    area[nh] = 400.f;
+                    inter[nh] = 1;
+                    xxx[nh] = 0.18f;
+                    yyy[nh] = 0.7f;
+                    YYY[nh] += Yc[y][x];
+
+                    nc = 3;
+
+                }
+
+            } else if (xc[y][x] < 0.28f) {//blue sky and other
+                if (yc[y][x] < 0.2f) {
+                    nh = 12;
+                    histxy[nh]++;
+                    area[nh] = 80.f;
+                    inter[nh] = 1;
+                    xxx[nh] = 0.26f;
+                    yyy[nh] = 0.12f;
+                    nc = 4;
+                    YYY[nh] += Yc[y][x];
+
+                } else if (yc[y][x] < 0.25f) {
+                    nh = 13;
+                    histxy[nh]++;
+                    area[nh] = 20.f;
+                    inter[nh] = 2;
+                    xxx[nh] = 0.26f;
+                    yyy[nh] = 0.225f;
+                    nc = 1;
+                    YYY[nh] += Yc[y][x];
+
+                } else if (yc[y][x] < 0.29f) {
+                    nh = 14;
+                    histxy[nh]++;
+                    area[nh] = 20.f;
+                    inter[nh] = 3;
+                    xxx[nh] = 0.26f;
+                    yyy[nh] = 0.27f;
+
+                } else if (yc[y][x] < 0.33f) {
+                    nh = 15;
+                    histxy[nh]++;
+                    area[nh] = 20.f;
+                    inter[nh] = 3;
+                    xxx[nh] = 0.26f;
+                    yyy[nh] = 0.31f;
+                    YYY[nh] += Yc[y][x];
+
+                } else if (yc[y][x] < 0.37f) {
+                    nh = 16;
+                    histxy[nh]++;
+                    area[nh] = 20.f;
+                    inter[nh] = 2;
+                    xxx[nh] = 0.26f;
+                    yyy[nh] = 0.35f;
+
+                } else if (yc[y][x] < 0.4f) {
+                    nh = 17;
+                    histxy[nh]++;
+                    area[nh] = 15.f;
+                    inter[nh] = 2;
+                    xxx[nh] = 0.26f;
+                    yyy[nh] = 0.385f;
+                    YYY[nh] += Yc[y][x];
+
+                } else if (yc[y][x] < 0.45f) {
+                    nh = 18;
+                    histxy[nh]++;
+                    area[nh] = 25.f;
+                    inter[nh] = 2;
+                    xxx[nh] = 0.26f;
+                    yyy[nh] = 0.425f;
+                    YYY[nh] += Yc[y][x];
+
+
+                } else if (yc[y][x] < 0.5f) {
+                    nh = 19;
+                    histxy[nh]++;
+                    area[nh] = 25.f;
+                    xxx[nh] = 0.26f;
+                    yyy[nh] = 0.475f;
+                    YYY[nh] += Yc[y][x];
+
+                } else if (yc[y][x] < 0.6f) {
+                    nh = 20;
+                    histxy[nh]++;
+                    area[nh] = 50.f;
+                    inter[nh] = 2;
+                    xxx[nh] = 0.26f;
+                    yyy[nh] = 0.55f;
+                    YYY[nh] += Yc[y][x];
+
+                } else if (yc[y][x] < 0.75f) {
+                    nh = 21;
+                    histxy[nh]++;
+                    area[nh] = 60.f;
+                    inter[nh] = 2;
+                    xxx[nh] = 0.26f;
+                    yyy[nh] = 0.67f;
+                    YYY[nh] += Yc[y][x];
+
+                }
+            } else if (xc[y][x] < 0.31f) {//near neutral others
+                if (yc[y][x] < 0.2f) {
+                    nh = 22;
+                    histxy[nh]++;
+                    area[nh] = 50.f;
+                    inter[nh] = 1;
+                    xxx[nh] = 0.295f;
+                    yyy[nh] = 0.15f;
+                    YYY[nh] += Yc[y][x];
+
+                } else if (yc[y][x] < 0.24f) {
+                    nh = 23;
+                    histxy[nh]++;
+                    area[nh] = 12.f;
+                    inter[nh] = 2;
+                    xxx[nh] = 0.295f;
+                    yyy[nh] = 0.22f;
+                    YYY[nh] += Yc[y][x];
+
+
+                } else if (yc[y][x] < 0.29f) {
+                    nh = 24;
+                    histxy[nh]++;
+                    area[nh] = 15.f;
+                    inter[nh] = 2;
+                    xxx[nh] = 0.295f;
+                    yyy[nh] = 0.265f;
+                    YYY[nh] += Yc[y][x];
+
+
+                } else if (yc[y][x] < 0.32f) {
+                    nh = 25;
+                    histxy[nh]++;
+                    area[nh] = 9.f;
+                    inter[nh] = 2;
+                    xxx[nh] = 0.295f;
+                    yyy[nh] = 0.305f;
+                    YYY[nh] += Yc[y][x];
+
+                } else if (yc[y][x] < 0.36f) {
+                    nh = 26;
+                    histxy[nh]++;
+                    area[nh] = 12.f;
+                    inter[nh] = 2;
+                    xxx[nh] = 0.295f;
+                    yyy[nh] = 0.34f;
+                    YYY[nh] += Yc[y][x];
+
+                } else if (yc[y][x] < 0.4f) {
+                    nh = 27;
+                    histxy[nh]++;
+                    area[nh] = 12.f;
+                    inter[nh] = 2;
+                    xxx[nh] = 0.295f;
+                    yyy[nh] = 0.38f;
+                    YYY[nh] += Yc[y][x];
+
+
+                } else if (yc[y][x] < 0.5f) {
+                    nh = 28;
+                    histxy[nh]++;
+                    area[nh] = 30.f;
+                    inter[nh] = 2;
+                    xxx[nh] = 0.295f;
+                    yyy[nh] = 0.45f;
+                    YYY[nh] += Yc[y][x];
+
+                } else if (yc[y][x] < 0.7f) {
+                    nh = 29;
+                    histxy[nh]++;
+                    area[nh] = 45.f;
+                    inter[nh] = 1;
+                    xxx[nh] = 0.295f;
+                    yyy[nh] = 0.63f;
+                    YYY[nh] += Yc[y][x];
+
+                }
+            } else if (xc[y][x] < 0.325f) {//neutral  34
+                if (yc[y][x] < 0.2f) {
+                    nh = 30;
+                    histxy[nh]++;
+                    area[nh] = 25.f;
+                    inter[nh] = 1;
+                    xxx[nh] = 0.31f;
+                    yyy[nh] = 0.15f;
+                    YYY[nh] += Yc[y][x];
+
+                } else if (yc[y][x] < 0.24f) {
+                    nh = 31;
+                    histxy[nh]++;
+                    area[nh] = 6.f;
+                    inter[nh] = 2;
+                    xxx[nh] = 0.31f;
+                    yyy[nh] = 0.22f;
+
+                } else if (yc[y][x] < 0.29f) {
+                    nh = 32;
+                    histxy[nh]++;
+                    area[nh] = 7.5f;
+                    inter[nh] = 2;
+                    xxx[nh] = 0.31f;
+                    yyy[nh] = 0.265f;
+                    YYY[nh] += Yc[y][x];
+
+                } else if (yc[y][x] < 0.32f) {
+                    nh = 33;
+                    histxy[nh]++;
+                    area[nh] = 4.5f;
+                    inter[nh] = 2;
+                    xxx[nh] = 0.31f;
+                    yyy[nh] = 0.305f;
+                    YYY[nh] += Yc[y][x];
+
+                } else if (yc[y][x] < 0.34f) {
+                    nh = 34;
+                    histxy[nh]++;
+                    area[nh] = 3.f;
+                    inter[nh] = 3;
+                    xxx[nh] = 0.31f;
+                    yyy[nh] = 0.33f;
+                    YYY[nh] += Yc[y][x];
+
+                } else if (yc[y][x] < 0.37f) {
+                    nh = 35;
+                    histxy[nh]++;
+                    area[nh] = 4.5f;
+                    inter[nh] = 3;
+                    xxx[nh] = 0.31f;
+                    yyy[nh] = 0.355f;
+                    YYY[nh] += Yc[y][x];
+
+                } else if (yc[y][x] < 0.4f) {
+                    nh = 36;
+                    histxy[nh]++;
+                    area[nh] = 4.5f;
+                    inter[nh] = 3;
+                    xxx[nh] = 0.31f;
+                    yyy[nh] = 0.385f;
+                    YYY[nh] += Yc[y][x];
+
+                } else if (yc[y][x] < 0.45f) {
+                    nh = 37;
+                    histxy[nh]++;
+                    area[nh] = 7.5f;
+                    inter[nh] = 2;
+                    xxx[nh] = 0.3f;
+                    yyy[nh] = 0.425f;
+                    YYY[nh] += Yc[y][x];
+
+                } else if (yc[y][x] < 0.5f) {
+                    nh = 38;
+                    histxy[nh]++;
+                    area[nh] = 7.5f;
+                    inter[nh] = 2;
+                    xxx[nh] = 0.31f;
+                    yyy[nh] = 0.475f;
+                    YYY[nh] += Yc[y][x];
+
+                } else if (yc[y][x] < 0.55f) {
+                    nh = 39;
+                    histxy[nh]++;
+                    area[nh] = 7.5f;
+                    inter[nh] = 2;
+                    xxx[nh] = 0.31f;
+                    yyy[nh] = 0.525f;
+                    YYY[nh] += Yc[y][x];
+
+                } else if (yc[y][x] < 0.7f) {
+                    nh = 40;
+                    histxy[nh]++;
+                    area[nh] = 20.f;
+                    inter[nh] = 1;
+                    xxx[nh] = 0.31f;
+                    yyy[nh] = 0.6f;
+                    YYY[nh] += Yc[y][x];
+
+                }
+
+            } else if (xc[y][x] < 0.335f) {//neutral
+                if (yc[y][x] < 0.2f) {
+                    nh = 41;
+                    histxy[nh]++;
+                    area[nh] = 15.f;
+                    inter[nh] = 1;
+                    xxx[nh] = 0.33f;
+                    yyy[nh] = 0.15f;
+                    YYY[nh] += Yc[y][x];
+
+                } else if (yc[y][x] < 0.24f) {
+                    nh = 42;
+                    histxy[nh]++;
+                    area[nh] = 4.f;
+                    inter[nh] = 2;
+                    xxx[nh] = 0.33f;
+                    yyy[nh] = 0.22f;
+                    YYY[nh] += Yc[y][x];
+
+                } else if (yc[y][x] < 0.29f) {
+                    nh = 43;
+                    histxy[nh]++;
+                    area[nh] = 5.f;
+                    inter[nh] = 2;
+                    xxx[nh] = 0.33f;
+                    yyy[nh] = 0.265f;
+
+                } else if (yc[y][x] < 0.32f) {
+                    nh = 44;
+                    histxy[nh]++;
+                    area[nh] = 3.f;
+                    inter[nh] = 2;
+                    xxx[nh] = 0.33f;
+                    yyy[nh] = 0.305f;
+                    YYY[nh] += Yc[y][x];
+
+                } else if (yc[y][x] < 0.33f) {
+                    nh = 45;
+                    histxy[nh]++;
+                    area[nh] = 1.f;
+                    inter[nh] = 3;
+                    xxx[nh] = 0.33f;
+                    yyy[nh] = 0.325f;
+                    YYY[nh] += Yc[y][x];
+                } else if (yc[y][x] < 0.34f) {
+                    nh = 46;
+                    histxy[nh]++;
+                    area[nh] = 1.f;
+                    inter[nh] = 3;
+                    xxx[nh] = 0.33f;
+                    yyy[nh] = 0.335f;
+                    YYY[nh] += Yc[y][x];
+                } else if (yc[y][x] < 0.35f) {
+                    nh = 47;
+                    histxy[nh]++;
+                    area[nh] = 1.f;
+                    inter[nh] = 3;
+                    xxx[nh] = 0.33f;
+                    yyy[nh] = 0.345f;
+                    YYY[nh] += Yc[y][x];
+                } else if (yc[y][x] < 0.36f) {
+                    nh = 48;
+                    histxy[nh]++;
+                    area[nh] = 1.f;
+                    inter[nh] = 3;
+                    xxx[nh] = 0.33f;
+                    yyy[nh] = 0.355f;
+                    YYY[nh] += Yc[y][x];
+
+                } else if (yc[y][x] < 0.37f) {
+                    nh = 47;
+                    histxy[nh]++;
+                    area[nh] = 1.f;
+                    inter[nh] = 3;
+                    xxx[nh] = 0.33f;
+                    yyy[nh] = 0.365f;
+                    YYY[nh] += Yc[y][x];
+                } else if (yc[y][x] < 0.38f) {
+                    nh = 48;
+                    histxy[nh]++;
+                    area[nh] = 1.f;
+                    inter[nh] = 3;
+                    xxx[nh] = 0.33f;
+                    yyy[nh] = 0.375f;
+                    YYY[nh] += Yc[y][x];
+
+                } else if (yc[y][x] < 0.4f) {
+                    nh = 49;
+                    histxy[nh]++;
+                    area[nh] = 2.f;
+                    inter[nh] = 3;
+                    xxx[nh] = 0.3f;
+                    yyy[nh] = 0.39f;
+                    YYY[nh] += Yc[y][x];
+
+                } else if (yc[y][x] < 0.45f) {
+                    nh = 50;
+                    histxy[nh]++;
+                    area[nh] = 5.f;
+                    inter[nh] = 2;
+                    xxx[nh] = 0.3f;
+                    yyy[nh] = 0.425f;
+                    YYY[nh] += Yc[y][x];
+
+                } else if (yc[y][x] < 0.5f) {
+                    nh = 51;
+                    histxy[nh]++;
+                    area[nh] = 5.f;
+                    inter[nh] = 2;
+                    xxx[nh] = 0.3f;
+                    yyy[nh] = 0.475f;
+                    YYY[nh] += Yc[y][x];
+
+                } else if (yc[y][x] < 0.55f) {
+                    nh = 52;
+                    histxy[nh]++;
+                    area[nh] = 5.f;
+                    inter[nh] = 2;
+                    xxx[nh] = 0.3f;
+                    yyy[nh] = 0.525f;
+                    YYY[nh] += Yc[y][x];
+
+                } else if (yc[y][x] < 0.7f) {
+                    nh = 53;
+                    histxy[nh]++;
+                    area[nh] = 10.f;
+                    inter[nh] = 1;
+                    xxx[nh] = 0.3f;
+                    yyy[nh] = 0.6f;
+                    YYY[nh] += Yc[y][x];
+
+                }
+
+            } else if (xc[y][x] < 0.345f) {//neutral  37
+                if (yc[y][x] < 0.2f) {
+                    nh = 54;
+                    histxy[nh]++;
+                    area[nh] = 20.f;
+                    inter[nh] = 1;
+                    xxx[nh] = 0.34f;
+                    yyy[nh] = 0.15f;
+                    YYY[nh] += Yc[y][x];
+
+                } else if (yc[y][x] < 0.24f) {
+                    nh = 55;
+                    histxy[nh]++;
+                    area[nh] = 4.f;
+                    inter[nh] = 2;
+                    xxx[nh] = 0.34f;
+                    yyy[nh] = 0.22f;
+                    YYY[nh] += Yc[y][x];
+
+                } else if (yc[y][x] < 0.29f) {
+                    nh = 56;
+                    histxy[nh]++;
+                    area[nh] = 5.f;
+                    inter[nh] = 2;
+                    xxx[nh] = 0.34f;
+                    yyy[nh] = 0.265f;
+                    YYY[nh] += Yc[y][x];
+
+                } else if (yc[y][x] < 0.32f) {
+                    nh = 57;
+                    histxy[nh]++;
+                    area[nh] = 3.f;
+                    inter[nh] = 2;
+                    xxx[nh] = 0.34f;
+                    yyy[nh] = 0.305f;
+                    YYY[nh] += Yc[y][x];
+
+                } else if (yc[y][x] < 0.33f) {//34
+                    nh = 58;
+                    histxy[nh]++;
+                    area[nh] = 1.f;
+                    inter[nh] = 3;
+                    xxx[nh] = 0.34f;
+                    yyy[nh] = 0.325f;
+                    YYY[nh] += Yc[y][x];
+                } else if (yc[y][x] < 0.34f) {
+                    nh = 59;
+                    histxy[nh]++;
+                    area[nh] = 1.f;
+                    inter[nh] = 3;
+                    xxx[nh] = 0.34f;
+                    yyy[nh] = 0.335f;
+                    YYY[nh] += Yc[y][x];
+
+                } else if (yc[y][x] < 0.35f) {//34
+                    nh = 60;
+                    histxy[nh]++;
+                    area[nh] = 1.f;
+                    inter[nh] = 3;
+                    xxx[nh] = 0.34f;
+                    YYY[nh] += Yc[y][x];
+                    yyy[nh] = 0.345f;
+                } else if (yc[y][x] < 0.36f) {//34
+                    nh = 61;
+                    histxy[nh]++;
+                    area[nh] = 1.f;
+                    inter[nh] = 3;
+                    xxx[nh] = 0.34f;
+                    yyy[nh] = 0.355f;
+                    YYY[nh] += Yc[y][x];
+
+                } else if (yc[y][x] < 0.37f) {
+                    nh = 62;
+                    histxy[nh]++;
+                    area[nh] = 1.f;
+                    inter[nh] = 3;
+                    xxx[nh] = 0.34f;
+                    yyy[nh] = 0.365f;
+                    YYY[nh] += Yc[y][x];
+                } else if (yc[y][x] < 0.38f) {
+                    nh = 63;
+                    histxy[nh]++;
+                    area[nh] = 1.f;
+                    inter[nh] = 3;
+                    xxx[nh] = 0.34f;
+                    yyy[nh] = 0.375f;
+                    YYY[nh] += Yc[y][x];
+                } else if (yc[y][x] < 0.39f) {
+                    nh = 64;
+                    histxy[nh]++;
+                    area[nh] = 1.f;
+                    inter[nh] = 3;
+                    xxx[nh] = 0.34f;
+                    yyy[nh] = 0.385f;
+                    YYY[nh] += Yc[y][x];
+
+                } else if (yc[y][x] < 0.4f) {
+                    nh = 65;
+                    histxy[nh]++;
+                    area[nh] = 1.f;
+                    inter[nh] = 3;
+                    xxx[nh] = 0.34f;
+                    yyy[nh] = 0.395f;
+                    YYY[nh] += Yc[y][x];
+                } else if (yc[y][x] < 0.42f) {
+                    nh = 66;
+                    histxy[nh]++;
+                    area[nh] = 2.f;
+                    inter[nh] = 3;
+                    xxx[nh] = 0.34f;
+                    yyy[nh] = 0.41f;
+                    YYY[nh] += Yc[y][x];
+
+                } else if (yc[y][x] < 0.45f) {
+                    nh = 67;
+                    histxy[nh]++;
+                    area[nh] = 3.f;
+                    inter[nh] = 2;
+                    xxx[nh] = 0.34f;
+                    yyy[nh] = 0.435f;
+                    YYY[nh] += Yc[y][x];
+                } else if (yc[y][x] < 0.48f) {
+                    nh = 68;
+                    histxy[nh]++;
+                    area[nh] = 3.f;
+                    inter[nh] = 2;
+                    xxx[nh] = 0.34f;
+                    yyy[nh] = 0.465f;
+                    YYY[nh] += Yc[y][x];
+
+                } else if (yc[y][x] < 0.5f) {
+                    nh = 69;
+                    histxy[nh]++;
+                    area[nh] = 2.f;
+                    inter[nh] = 2;
+                    xxx[nh] = 0.34f;
+                    yyy[nh] = 0.49f;
+                    YYY[nh] += Yc[y][x];
+
+                } else if (yc[y][x] < 0.55f) {
+                    nh = 70;
+                    histxy[nh]++;
+                    area[nh] = 5.f;
+                    inter[nh] = 2;
+                    xxx[nh] = 0.34f;
+                    yyy[nh] = 0.525f;
+                    YYY[nh] += Yc[y][x];
+
+                } else if (yc[y][x] < 0.65f) {
+                    nh = 71;
+                    histxy[nh]++;
+                    area[nh] = 2.f;
+                    inter[nh] = 1;
+                    xxx[nh] = 0.34f;
+                    yyy[nh] = 0.6f;
+                    YYY[nh] += Yc[y][x];
+
+                }
+
+            } else if (xc[y][x] < 0.355f) {//neutral  37
+                if (yc[y][x] < 0.2f) {
+                    nh = 72;
+                    histxy[nh]++;
+                    area[nh] = 20.f;
+                    inter[nh] = 1;
+                    xxx[nh] = 0.35f;
+                    yyy[nh] = 0.15f;
+                    YYY[nh] += Yc[y][x];
+
+                } else if (yc[y][x] < 0.24f) {
+                    nh = 73;
+                    histxy[nh]++;
+                    area[nh] = 4.f;
+                    inter[nh] = 2;
+                    xxx[nh] = 0.35f;
+                    yyy[nh] = 0.22f;
+                    YYY[nh] += Yc[y][x];
+
+                } else if (yc[y][x] < 0.29f) {
+                    nh = 74;
+                    histxy[nh]++;
+                    area[nh] = 5.f;
+                    inter[nh] = 2;
+                    xxx[nh] = 0.35f;
+                    yyy[nh] = 0.265f;
+                    YYY[nh] += Yc[y][x];
+
+                } else if (yc[y][x] < 0.32f) {
+                    nh = 75;
+                    histxy[nh]++;
+                    area[nh] = 3.f;
+                    inter[nh] = 2;
+                    xxx[nh] = 0.35f;
+                    yyy[nh] = 0.305f;
+                    YYY[nh] += Yc[y][x];
+
+                } else if (yc[y][x] < 0.33f) {//34
+                    nh = 76;
+                    histxy[nh]++;
+                    area[nh] = 1.f;
+                    inter[nh] = 3;
+                    xxx[nh] = 0.35f;
+                    yyy[nh] = 0.325f;
+                    YYY[nh] += Yc[y][x];
+                } else if (yc[y][x] < 0.34f) {
+                    nh = 77;
+                    histxy[nh]++;
+                    area[nh] = 1.f;
+                    inter[nh] = 3;
+                    xxx[nh] = 0.35f;
+                    yyy[nh] = 0.335f;
+                    YYY[nh] += Yc[y][x];
+
+                } else if (yc[y][x] < 0.35f) {//34
+                    nh = 78;
+                    histxy[nh]++;
+                    area[nh] = 1.f;
+                    inter[nh] = 3;
+                    xxx[nh] = 0.35f;
+                    yyy[nh] = 0.345f;
+                    YYY[nh] += Yc[y][x];
+                } else if (yc[y][x] < 0.36f) {//34
+                    nh = 79;
+                    histxy[nh]++;
+                    area[nh] = 1.f;
+                    inter[nh] = 3;
+                    xxx[nh] = 0.35f;
+                    yyy[nh] = 0.355f;
+                    YYY[nh] += Yc[y][x];
+
+                } else if (yc[y][x] < 0.37f) {
+                    nh = 80;
+                    histxy[nh]++;
+                    area[nh] = 1.f;
+                    inter[nh] = 3;
+                    xxx[nh] = 0.35f;
+                    yyy[nh] = 0.365f;
+                    YYY[nh] += Yc[y][x];
+                } else if (yc[y][x] < 0.38f) {
+                    nh = 81;
+                    histxy[nh]++;
+                    area[nh] = 1.f;
+                    inter[nh] = 3;
+                    xxx[nh] = 0.35f;
+                    yyy[nh] = 0.375f;
+                    YYY[nh] += Yc[y][x];
+                } else if (yc[y][x] < 0.39f) {
+                    nh = 82;
+                    histxy[nh]++;
+                    area[nh] = 1.f;
+                    inter[nh] = 3;
+                    xxx[nh] = 0.35f;
+                    yyy[nh] = 0.385f;
+                    YYY[nh] += Yc[y][x];
+
+                } else if (yc[y][x] < 0.4f) {
+                    nh = 83;
+                    histxy[nh]++;
+                    area[nh] = 1.f;
+                    inter[nh] = 3;
+                    xxx[nh] = 0.35f;
+                    yyy[nh] = 0.395f;
+                    YYY[nh] += Yc[y][x];
+                } else if (yc[y][x] < 0.42f) {
+                    nh = 84;
+                    histxy[nh]++;
+                    area[nh] = 2.f;
+                    inter[nh] = 3;
+                    xxx[nh] = 0.35f;
+                    yyy[nh] = 0.41f;
+                    YYY[nh] += Yc[y][x];
+
+                } else if (yc[y][x] < 0.45f) {
+                    nh = 85;
+                    histxy[nh]++;
+                    area[nh] = 3.f;
+                    inter[nh] = 2;
+                    xxx[nh] = 0.34f;
+                    yyy[nh] = 0.435f;
+                    YYY[nh] += Yc[y][x];
+                } else if (yc[y][x] < 0.48f) {
+                    nh = 68;
+                    histxy[nh]++;
+                    area[nh] = 3.f;
+                    inter[nh] = 2;
+                    xxx[nh] = 0.35f;
+                    yyy[nh] = 0.465f;
+                    YYY[nh] += Yc[y][x];
+
+                } else if (yc[y][x] < 0.5f) {
+                    nh = 86;
+                    histxy[nh]++;
+                    area[nh] = 2.f;
+                    inter[nh] = 2;
+                    xxx[nh] = 0.35f;
+                    yyy[nh] = 0.49f;
+                    YYY[nh] += Yc[y][x];
+
+                } else if (yc[y][x] < 0.55f) {
+                    nh = 87;
+                    histxy[nh]++;
+                    area[nh] = 5.f;
+                    inter[nh] = 2;
+                    xxx[nh] = 0.35f;
+                    yyy[nh] = 0.525f;
+                    YYY[nh] += Yc[y][x];
+
+                } else if (yc[y][x] < 0.65f) {
+                    nh = 88;
+                    histxy[nh]++;
+                    area[nh] = 2.f;
+                    inter[nh] = 1;
+                    xxx[nh] = 0.35f;
+                    yyy[nh] = 0.6f;
+                    YYY[nh] += Yc[y][x];
+
+                }
+
+            } else if (xc[y][x] < 0.365f) {  //0.4
+                if (yc[y][x] < 0.2f) {
+                    nh = 89;
+                    histxy[nh]++;
+                    area[nh] = 20.f;
+                    inter[nh] = 1;
+                    xxx[nh] = 0.355f;
+                    yyy[nh] = 0.16f;
+                    YYY[nh] += Yc[y][x];
+
+
+                } else if (yc[y][x] < 0.24f) {
+                    nh = 90;
+                    histxy[nh]++;
+                    area[nh] = 4.f;
+                    inter[nh] = 2;
+                    xxx[nh] = 0.355f;
+                    yyy[nh] = 0.22f;
+                    YYY[nh] += Yc[y][x];
+
+                } else if (yc[y][x] < 0.29f) {
+                    nh = 91;
+                    histxy[nh]++;
+                    area[nh] = 5.f;
+                    inter[nh] = 2;
+                    xxx[nh] = 0.355f;
+                    yyy[nh] = 0.265f;
+                    YYY[nh] += Yc[y][x];
+
+                } else if (yc[y][x] < 0.32f) {
+                    nh = 92;
+                    histxy[nh]++;
+                    area[nh] = 3.f;
+                    inter[nh] = 3;
+                    xxx[nh] = 0.355f;
+                    yyy[nh] = 0.30f;
+                    YYY[nh] += Yc[y][x];
+                } else if (yc[y][x] < 0.33f) {
+                    nh = 93;
+                    histxy[nh]++;
+                    area[nh] = 1.f;
+                    inter[nh] = 3;
+                    xxx[nh] = 0.355f;
+                    yyy[nh] = 0.325f;
+                    YYY[nh] += Yc[y][x];
+
+                } else if (yc[y][x] < 0.34f) {
+                    nh = 94;
+                    histxy[nh]++;
+                    area[nh] = 1.f;
+                    inter[nh] = 3;
+                    xxx[nh] = 0.355f;
+                    yyy[nh] = 0.335f;
+                    YYY[nh] += Yc[y][x];
+                } else if (yc[y][x] < 0.36f) {
+                    nh = 95;
+                    histxy[nh]++;
+                    area[nh] = 2.f;
+                    inter[nh] = 3;
+                    xxx[nh] = 0.355f;
+                    yyy[nh] = 0.35f;
+                    YYY[nh] += Yc[y][x];
+
+                } else if (yc[y][x] < 0.37f) {
+                    nh = 96;
+                    histxy[nh]++;
+                    area[nh] = 1.f;
+                    inter[nh] = 3;
+                    xxx[nh] = 0.355f;
+                    yyy[nh] = 0.365f;
+                    YYY[nh] += Yc[y][x];
+                } else if (yc[y][x] < 0.38f) {
+                    nh = 97;
+                    histxy[nh]++;
+                    area[nh] = 1.f;
+                    inter[nh] = 3;
+                    xxx[nh] = 0.355f;
+                    yyy[nh] = 0.375f;
+                    YYY[nh] += Yc[y][x];
+                } else if (yc[y][x] < 0.39f) {
+                    nh = 98;
+                    histxy[nh]++;
+                    area[nh] = 1.f;
+                    inter[nh] = 3;
+                    xxx[nh] = 0.355f;
+                    yyy[nh] = 0.385f;
+                    YYY[nh] += Yc[y][x];
+
+                } else if (yc[y][x] < 0.4f) {
+                    nh = 99;
+                    histxy[nh]++;
+                    area[nh] = 1.f;
+                    inter[nh] = 3;
+                    xxx[nh] = 0.355f;
+                    yyy[nh] = 0.395f;
+                    YYY[nh] += Yc[y][x];
+                } else if (yc[y][x] < 0.42f) {
+                    nh = 100;
+                    histxy[nh]++;
+                    area[nh] = 2.f;
+                    inter[nh] = 3;
+                    xxx[nh] = 0.355f;
+                    yyy[nh] = 0.41f;
+                    YYY[nh] += Yc[y][x];
+
+                } else if (yc[y][x] < 0.45f) {
+                    nh = 101;
+                    histxy[nh]++;
+                    area[nh] = 3.f;
+                    inter[nh] = 2;
+                    xxx[nh] = 0.355f;
+                    yyy[nh] = 0.435f;
+                    YYY[nh] += Yc[y][x];
+
+                } else if (yc[y][x] < 0.5f) {
+                    nh = 102;
+                    histxy[nh]++;
+                    area[nh] = 5.f;
+                    inter[nh] = 2;
+                    xxx[nh] = 0.355f;
+                    yyy[nh] = 0.475f;
+                    YYY[nh] += Yc[y][x];
+
+                } else if (yc[y][x] < 0.55f) {
+                    nh = 103;
+                    histxy[nh]++;
+                    area[nh] = 5.f;
+                    inter[nh] = 2;
+                    xxx[nh] = 0.355f;
+                    yyy[nh] = 0.525f;
+                    YYY[nh] += Yc[y][x];
+
+
+                } else if (yc[y][x] < 0.63f) {
+                    nh = 104;
+                    histxy[nh]++;
+                    area[nh] = 10.f;
+                    inter[nh] = 1;
+                    xxx[nh] = 0.355f;
+                    yyy[nh] = 0.55f;
+                    YYY[nh] += Yc[y][x];
+
+                }
+
+            } else if (xc[y][x] < 0.405f) {//45
+                if (yc[y][x] < 0.2f) {
+                    nh = 105;
+                    histxy[nh]++;
+                    area[nh] = 40.f;
+                    inter[nh] = 1;
+                    xxx[nh] = 0.38f;
+                    yyy[nh] = 0.18f;
+                    YYY[nh] += Yc[y][x];
+
+                } else if (yc[y][x] < 0.24f) {
+                    nh = 106;
+                    histxy[nh]++;
+                    area[nh] = 16.f;
+                    inter[nh] = 2;
+                    xxx[nh] = 0.38f;
+                    yyy[nh] = 0.22f;
+                    YYY[nh] += Yc[y][x];
+
+                } else if (yc[y][x] < 0.29f) {
+                    nh = 107;
+                    histxy[nh]++;
+                    area[nh] = 20.f;
+                    inter[nh] = 2;
+                    xxx[nh] = 0.38f;
+                    yyy[nh] = 0.265f;
+                    YYY[nh] += Yc[y][x];
+
+                } else if (yc[y][x] < 0.32f) {
+                    nh = 108;
+                    histxy[nh]++;
+                    area[nh] = 12.f;
+                    inter[nh] = 3;
+                    xxx[nh] = 0.38f;
+                    yyy[nh] = 0.305f;
+                    YYY[nh] += Yc[y][x];
+
+                } else if (yc[y][x] < 0.34f) {
+                    nh = 109;
+                    histxy[nh]++;
+                    area[nh] = 8.f;
+                    inter[nh] = 3;
+                    xxx[nh] = 0.38f;
+                    yyy[nh] = 0.33f;
+                    YYY[nh] += Yc[y][x];
+
+                } else if (yc[y][x] < 0.37f) {
+                    nh = 110;
+                    histxy[nh]++;
+                    area[nh] = 12.f;
+                    inter[nh] = 3;
+                    xxx[nh] = 0.38f;
+                    yyy[nh] = 0.355f;
+                    YYY[nh] += Yc[y][x];
+
+                } else if (yc[y][x] < 0.4f) {
+                    nh = 111;
+                    histxy[nh]++;
+                    area[nh] = 12.f;
+                    inter[nh] = 3;
+                    xxx[nh] = 0.38f;
+                    YYY[nh] += Yc[y][x];
+                    yyy[nh] = 0.385f;
+
+                } else if (yc[y][x] < 0.45f) {
+                    nh = 112;
+                    histxy[nh]++;
+                    area[nh] = 20.f;
+                    inter[nh] = 2;
+                    xxx[nh] = 0.38f;
+                    yyy[nh] = 0.425f;
+                    YYY[nh] += Yc[y][x];
+
+                } else if (yc[y][x] < 0.5f) {
+                    nh = 113;
+                    histxy[nh]++;
+                    area[nh] = 20.f;
+                    inter[nh] = 2;
+                    xxx[nh] = 0.38f;
+                    yyy[nh] = 0.475f;
+                    YYY[nh] += Yc[y][x];
+
+                } else if (yc[y][x] < 0.55f) {
+                    nh = 114;
+                    histxy[nh]++;
+                    area[nh] = 20.f;
+                    inter[nh] = 2;
+                    xxx[nh] = 0.38f;
+                    yyy[nh] = 0.525f;
+                    YYY[nh] += Yc[y][x];
+
+
+                } else if (yc[y][x] < 0.6f) {
+                    nh = 115;
+                    histxy[nh]++;
+                    area[nh] = 16.f;
+                    inter[nh] = 1;
+                    xxx[nh] = 0.38f;
+                    yyy[nh] = 0.56f;
+                    YYY[nh] += Yc[y][x];
+
+                }
+
+            } else if (xc[y][x] < 0.445f) {//45
+                if (yc[y][x] < 0.2f) {
+                    nh = 116;
+                    histxy[nh]++;
+                    area[nh] = 40.f;
+                    inter[nh] = 1;
+                    xxx[nh] = 0.42f;
+                    yyy[nh] = 0.18f;
+                    YYY[nh] += Yc[y][x];
+
+                } else if (yc[y][x] < 0.24f) {
+                    nh = 117;
+                    histxy[nh]++;
+                    area[nh] = 16.f;
+                    inter[nh] = 2;
+                    xxx[nh] = 0.42f;
+                    yyy[nh] = 0.22f;
+                    YYY[nh] += Yc[y][x];
+
+                } else if (yc[y][x] < 0.29f) {
+                    nh = 118;
+                    histxy[nh]++;
+                    area[nh] = 20.f;
+                    inter[nh] = 2;
+                    xxx[nh] = 0.42f;
+                    yyy[nh] = 0.265f;
+                    YYY[nh] += Yc[y][x];
+
+                } else if (yc[y][x] < 0.32f) {
+                    nh = 119;
+                    histxy[nh]++;
+                    area[nh] = 12.f;
+                    inter[nh] = 3;
+                    xxx[nh] = 0.42f;
+                    yyy[nh] = 0.305f;
+                    YYY[nh] += Yc[y][x];
+
+                } else if (yc[y][x] < 0.34f) {
+                    nh = 120;
+                    histxy[nh]++;
+                    area[nh] = 8.f;
+                    inter[nh] = 3;
+                    xxx[nh] = 0.42f;
+                    yyy[nh] = 0.33f;
+                    YYY[nh] += Yc[y][x];
+
+                } else if (yc[y][x] < 0.37f) {
+                    nh = 121;
+                    histxy[nh]++;
+                    area[nh] = 12.f;
+                    inter[nh] = 3;
+                    xxx[nh] = 0.42f;
+                    yyy[nh] = 0.355f;
+                    YYY[nh] += Yc[y][x];
+
+                } else if (yc[y][x] < 0.4f) {
+                    nh = 122;
+                    histxy[nh]++;
+                    area[nh] = 12.f;
+                    inter[nh] = 3;
+                    xxx[nh] = 0.42f;
+                    yyy[nh] = 0.385f;
+                    YYY[nh] += Yc[y][x];
+
+                } else if (yc[y][x] < 0.45f) {
+                    nh = 123;
+                    histxy[nh]++;
+                    area[nh] = 20.f;
+                    inter[nh] = 2;
+                    xxx[nh] = 0.38f;
+                    yyy[nh] = 0.425f;
+                    YYY[nh] += Yc[y][x];
+
+                } else if (yc[y][x] < 0.5f) {
+                    nh = 124;
+                    histxy[nh]++;
+                    area[nh] = 20.f;
+                    inter[nh] = 2;
+                    xxx[nh] = 0.42f;
+                    yyy[nh] = 0.475f;
+                    YYY[nh] += Yc[y][x];
+
+                } else if (yc[y][x] < 0.55f) {
+                    nh = 125;
+                    histxy[nh]++;
+                    area[nh] = 20.f;
+                    inter[nh] = 2;
+                    xxx[nh] = 0.42f;
+                    yyy[nh] = 0.525f;
+                    YYY[nh] += Yc[y][x];
+
+
+                } else if (yc[y][x] < 0.58f) {
+                    nh = 126;
+                    histxy[nh]++;
+                    area[nh] = 16.f;
+                    inter[nh] = 1;
+                    xxx[nh] = 0.42f;
+                    yyy[nh] = 0.56f;
+                    YYY[nh] += Yc[y][x];
+
+                }
+
+            } else if (xc[y][x] < 0.495f) {
+                if (yc[y][x] < 0.2f) {
+                    nh = 127;
+                    histxy[nh]++;
+                    area[nh] = 40.f;
+                    inter[nh] = 1;
+                    xxx[nh] = 0.475f;
+                    yyy[nh] = 0.19f;
+                    YYY[nh] += Yc[y][x];
+
+                } else if (yc[y][x] < 0.24f) {
+                    nh = 128;
+                    histxy[nh]++;
+                    area[nh] = 20.f;
+                    inter[nh] = 2;
+                    xxx[nh] = 0.475f;
+                    yyy[nh] = 0.22f;
+                    YYY[nh] += Yc[y][x];
+
+                } else if (yc[y][x] < 0.29f) {
+                    nh = 129;
+                    histxy[nh]++;
+                    area[nh] = 25.f;
+                    inter[nh] = 2;
+                    xxx[nh] = 0.475f;
+                    yyy[nh] = 0.265f;
+                    YYY[nh] += Yc[y][x];
+
+                } else if (yc[y][x] < 0.32f) {
+                    nh = 130;
+                    histxy[nh]++;
+                    area[nh] = 15.f;
+                    inter[nh] = 3;
+                    xxx[nh] = 0.475f;
+                    yyy[nh] = 0.305f;
+                    YYY[nh] += Yc[y][x];
+
+                } else if (yc[y][x] < 0.34f) {
+                    nh = 131;
+                    histxy[nh]++;
+                    area[nh] = 10.f;
+                    inter[nh] = 3;
+                    xxx[nh] = 0.475f;
+                    yyy[nh] = 0.33f;
+
+                } else if (yc[y][x] < 0.37f) {
+                    nh = 132;
+                    histxy[nh]++;
+                    area[nh] = 15.f;
+                    inter[nh] = 3;
+                    xxx[nh] = 0.475f;
+                    yyy[nh] = 0.355f;
+                    YYY[nh] += Yc[y][x];
+
+                } else if (yc[y][x] < 0.4f) {
+                    nh = 133;
+                    histxy[nh]++;
+                    area[nh] = 15.f;
+                    inter[nh] = 3;
+                    xxx[nh] = 0.475f;
+                    yyy[nh] = 0.385f;
+                    YYY[nh] += Yc[y][x];
+
+                } else if (yc[y][x] < 0.45f) {
+                    nh = 134;
+                    histxy[nh]++;
+                    area[nh] = 25.f;
+                    inter[nh] = 2;
+                    xxx[nh] = 0.475f;
+                    yyy[nh] = 0.425f;
+                    YYY[nh] += Yc[y][x];
+
+                } else if (yc[y][x] < 0.5f) {
+                    nh = 135;
+                    histxy[nh]++;
+                    area[nh] = 25.f;
+                    inter[nh] = 2;
+                    xxx[nh] = 0.475f;
+                    yyy[nh] = 0.46f;
+                    YYY[nh] += Yc[y][x];
+
+                } else if (yc[y][x] < 0.55f) {
+                    nh = 136;
+                    histxy[nh]++;
+                    area[nh] = 20.f;
+                    inter[nh] = 1;
+                    xxx[nh] = 0.475f;
+                    yyy[nh] = 0.52f;
+                    YYY[nh] += Yc[y][x];
+
+                }
+            } else if (xc[y][x] < 0.545f) {
+                if (yc[y][x] < 0.2f) {
+                    nh = 137;
+                    histxy[nh]++;
+                    area[nh] = 25.f;
+                    inter[nh] = 1;
+                    xxx[nh] = 0.525f;
+                    yyy[nh] = 0.19f;
+                    YYY[nh] += Yc[y][x];
+
+                } else if (yc[y][x] < 0.24f) {
+                    nh = 138;
+                    histxy[nh]++;
+                    area[nh] = 20.f;
+                    inter[nh] = 1;
+                    xxx[nh] = 0.525f;
+                    yyy[nh] = 0.22f;
+                    YYY[nh] += Yc[y][x];
+
+                } else if (yc[y][x] < 0.29f) {
+                    nh = 139;
+                    histxy[nh]++;
+                    area[nh] = 25.f;
+                    inter[nh] = 2;
+                    xxx[nh] = 0.525f;
+                    yyy[nh] = 0.265f;
+                    YYY[nh] += Yc[y][x];
+
+                } else if (yc[y][x] < 0.32f) {
+                    nh = 140;
+                    histxy[nh]++;
+                    area[nh] = 15.f;
+                    inter[nh] = 2;
+                    xxx[nh] = 0.525f;
+                    yyy[nh] = 0.305f;
+                    YYY[nh] += Yc[y][x];
+
+                } else if (yc[y][x] < 0.34f) {
+                    nh = 141;
+                    histxy[nh]++;
+                    area[nh] = 10.f;
+                    inter[nh] = 2;
+                    xxx[nh] = 0.525f;
+                    yyy[nh] = 0.33f;
+                    YYY[nh] += Yc[y][x];
+
+                } else if (yc[y][x] < 0.37f) {
+                    nh = 142;
+                    histxy[nh]++;
+                    area[nh] = 15.f;
+                    inter[nh] = 2;
+                    xxx[nh] = 0.525f;
+                    yyy[nh] = 0.355f;
+                    YYY[nh] += Yc[y][x];
+
+                } else if (yc[y][x] < 0.4f) {
+                    nh = 143;
+                    histxy[nh]++;
+                    area[nh] = 15.f;
+                    inter[nh] = 2;
+                    xxx[nh] = 0.525f;
+                    yyy[nh] = 0.385f;
+                    YYY[nh] += Yc[y][x];
+
+                } else if (yc[y][x] < 0.45f) {
+                    nh = 144;
+                    histxy[nh]++;
+                    area[nh] = 25.f;
+                    inter[nh] = 2;
+                    xxx[nh] = 0.525f;
+                    yyy[nh] = 0.425f;
+                    YYY[nh] += Yc[y][x];
+
+                } else if (yc[y][x] < 0.5f) {
+                    nh = 145;
+                    histxy[nh]++;
+                    area[nh] = 25.f;
+                    inter[nh] = 1;
+                    xxx[nh] = 0.525f;
+                    yyy[nh] = 0.46f;
+                    YYY[nh] += Yc[y][x];
+
+
+
+                }
+
+            } else if (xc[y][x] < 0.595f) {
+                if (yc[y][x] < 0.2f) {
+                    nh = 146;
+                    histxy[nh]++;
+                    area[nh] = 15.f;
+                    inter[nh] = 1;
+                    xxx[nh] = 0.575f;
+                    yyy[nh] = 0.19f;
+                    YYY[nh] += Yc[y][x];
+
+                } else if (yc[y][x] < 0.25f) {
+                    nh = 147;
+                    histxy[nh]++;
+                    area[nh] = 25.f;
+                    inter[nh] = 1;
+                    xxx[nh] = 0.575f;
+                    yyy[nh] = 0.225f;
+                    YYY[nh] += Yc[y][x];
+
+                } else if (yc[y][x] < 0.3f) {
+                    nh = 148;
+                    histxy[nh]++;
+                    area[nh] = 25.f;
+                    inter[nh] = 2;
+                    xxx[nh] = 0.575f;
+                    yyy[nh] = 0.275f;
+                    YYY[nh] += Yc[y][x];
+
+                } else if (yc[y][x] < 0.35f) {
+                    nh = 149;
+                    histxy[nh]++;
+                    area[nh] = 25.f;
+                    inter[nh] = 2;
+                    xxx[nh] = 0.575f;
+                    yyy[nh] = 0.325f;
+                    YYY[nh] += Yc[y][x];
+
+                } else if (yc[y][x] < 0.4f) {
+                    nh = 160;
+                    histxy[nh]++;
+                    area[nh] = 25.f;
+                    inter[nh] = 2;
+                    xxx[nh] = 0.575f;
+                    yyy[nh] = 0.375f;
+                    YYY[nh] += Yc[y][x];
+
+
+                } else if (yc[y][x] < 0.45f) {
+                    nh = 161;
+                    histxy[nh]++;
+                    area[nh] = 15.f;
+                    inter[nh] = 1;
+                    xxx[nh] = 0.56f;
+                    yyy[nh] = 0.405f;
+                    YYY[nh] += Yc[y][x];
+
+                }
+
+            } else if (xc[y][x] < 0.65f) {
+                if (yc[y][x] < 0.25f) {
+                    nh = 162;
+                    histxy[nh]++;
+                    area[nh] = 15.f;
+                    inter[nh] = 1;
+                    xxx[nh] = 0.625f;
+                    yyy[nh] = 0.22f;
+                    YYY[nh] += Yc[y][x];
+
+
+                } else if (yc[y][x] < 0.3f) {
+                    nh = 163;
+                    histxy[nh]++;
+                    area[nh] = 25.f;
+                    inter[nh] = 2;
+                    xxx[nh] = 0.625f;
+                    yyy[nh] = 0.275f;
+                    YYY[nh] += Yc[y][x];
+
+                } else if (yc[y][x] < 0.35f) {
+                    nh = 164;
+                    histxy[nh]++;
+                    area[nh] = 25.f;
+                    inter[nh] = 2;
+                    xxx[nh] = 0.625f;
+                    yyy[nh] = 0.34f;
+                    YYY[nh] += Yc[y][x];
+
+
+                } else if (yc[y][x] < 0.45f) {
+                    nh = 165;
+                    histxy[nh]++;
+                    area[nh] = 15.f;
+                    inter[nh] = 1;
+                    xxx[nh] = 0.625f;
+                    yyy[nh] = 0.37f;
+                    YYY[nh] += Yc[y][x];
+
+                }
+
+            } else if (xc[y][x] < 0.75f) {
+                nh = 166;
+                histxy[nh]++;
+                area[nh] = 25.f;
+                inter[nh] = 1;
+                xxx[nh] = 0.635f;
+                yyy[nh] = 0.32f;
+                YYY[nh] += Yc[y][x];
+
+
+            }
+
+        }
+    }
+
+    for (int j = 0; j < siza; j++) {
+
+        histuse[j] = 100 * histxy[j] * (1.f / area[j]) * inter[j];
+        histY[j] = YYY[j] / histxy[j];
+        //   printf ("h=%i ", (int) histuse[j]);
+
+    }
+
+    //    printf ("\n");
+    int memj[Nc] = {};
+
+    //find the 45 max values for histuse probably less
+    float max[Nc] = {-100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.,
+                     -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f
+                    };
+
+    for (int k = 0; k < Nc; k++) {
+        int ind = 0;
+
+        for (int j = 0; j < siza; j++) {
+            if (histuse[j] > max[k]) {
+                max[k] = histuse[j];
+                memj[k] = j;
+                ind = j;
+            }
+        }
+
+        histuse[ind] = 0.f;
+    }
+
+    int siz = 0;
+
+    for (int k = 0; k < Nc; k++) {
+        if (memj[k] != 0) {
+            siz++;
+            //     printf ("k=%i", memj[k]);
+
+        }
+    }
+
+    float *xxcal = nullptr;
+    float *yycal = nullptr;
+    float *YYcal = nullptr;
+
+    xxcal = new float [siz];
+    yycal = new float [siz];
+    YYcal = new float [siz];
+    int pos = 0;
+
+    for (int k = 0; k < Nc; k++) {
+        if (memj[k] != 0) {
+            xxcal[pos] = xxx[memj[k]];
+            yycal[pos] = yyy[memj[k]];
+            YYcal[pos] = histY[memj[k]];
+            pos++;
+        }
+    }
+
+//printf("pos=%i\n", pos);
+//calculate RGB values for these colors
+
+    float R[pos], G[pos], B[pos];
+
+    for (int p = 0; p < pos; p++) {
+        //  printf("xx=%f yy=%f YY=%f\n", xxcal[p],yycal[p], YYcal[p]);
+        float X, Y, Z;
+        X = 65535.f * (xxcal[p] * YYcal[p]) / yycal[p];
+        Z = 65535.f * ((1.f - xxcal[p] - yycal[p]) * YYcal[p]) / yycal[p];
+        Y = 65535.f * YYcal[p];
+        Color::xyz2rgb (X, Y, Z, R[p], G[p], B[p], wip);
+        //  printf("R=%f G=%f B=%f\n", R[p],G[p], B[p]);
+
+    }
+
+    array2D<float> rk;
+    array2D<float> gk;
+    array2D<float> bk;
+    rk (pos, N_t);
+    gk (pos, N_t);
+    bk (pos, N_t);
+
+    array2D<float> xk;
+    array2D<float> yk;
+    array2D<float> Yk;
+    xk (pos, N_t);
+    yk (pos, N_t);
+    Yk (pos, N_t);
+
+    for (int i = 0; i < pos; i++) {
+        for (int j = 0; j < N_t; j++) {
+            rk[i][j] = 0.f;
+            gk[i][j] = 0.f;
+            bk[i][j] = 0.f;
+            xk[i][j] = 0.f;
+            yk[i][j] = 0.f;
+            Yk[i][j] = 0.f;
+        }
+    }
+
+//printf("\n");
+
+//calculate r g b with T coefi
+    for (int tt = 0; tt < N_t; tt++) {
+        //  printf("rmm=%f bmm=%f\n", rmm[tt],bmm[tt]);
+    }
+
+    for (int tt = 0; tt < N_t; tt++) {
+        for (int p = 0; p < pos; p++) {
+            rk[p][tt] = rmm[tt] * R[p];
+            gk[p][tt] =  G[p];
+            bk[p][tt] = bmm[tt] * B[p];
+            //  printf("R=%f ", R[p]);
+            //  printf("rk=%f gk=%f bk=%f\n", rk[p][tt], gk[p][tt], bk[p][tt]);
+
+        }
+    }
+
+//       printf ("\n");
+
+//recalculate x y Y for each Temp and each color selected
+    for (int tt = 0; tt < N_t; tt++) {
+        for (int p = 0; p < pos; p++) {
+            float x_c = 0.f, y_c = 0.f, Y_c = 0.f;
+            float RR = rk[p][tt];
+            float GG = gk[p][tt];
+            float BB = bk[p][tt];
+
+            Color::rgbxyY (RR, GG, BB, x_c, y_c, Y_c, wp);
+            xk[p][tt] = x_c;
+            yk[p][tt] = y_c;
+            Yk[p][tt] = Y_c;
+            //printf("xk=%f yk=%f\n", xk[p][tt], yk[p][tt]);
+
+        }
+
+    }
+
+    //now we are comparaing by correlation xk, yk to Tx[nc][tt] and Ty
+    // covariance xk  + Tx and yk + Ty / sigma xk + Tx * sigma yk + ty
+    //number elements = Number of reference color + number of color found
+    //
+    int number = pos + Nc;
+    //    int number =  Nc;
+    float avgx[N_t] = {}, avgy[N_t] = {};
+    float covar[N_t] = {};
+    float sigx[N_t] = {};
+    float sigy[N_t] = {};
+    float correl[N_t] = {};
+    float avgx42 = 0.f;
+    float avgy42 = 0.f;
+    float sigx42 = 0.f;
+    float sigy42 = 0.f;
+
+    for (int tt = 0; tt < N_t; tt++) {
+        avgx[tt] = 0.f;
+        avgy[tt] = 0.f;
+        covar[tt] = 0.f;
+        sigx[tt] = 0.f;
+        sigy[tt] = 0.f;
+        correl[tt] = 0.f;
+    }
+
+    int typ = 2;//4 type of covariance
+
+    //I must change something - probably adapted references color to real color...todo
+    if (typ == 1) {
+        //mean 2 for ref
+        for (int tt = 0; tt < N_t; tt++) {
+            for (int i = 0; i < pos; i++) {//Nc  ==> pos
+                avgy[tt] += Tx[i][tt];
+                avgy[tt] += Ty[i][tt];
+            }
+
+            avgy[tt] /= 2 * pos;//to change
+        }
+
+        for (int tt = 0; tt < N_t; tt++) {
+            for (int i = 0; i < pos; i++) {
+                avgx[tt] += xk[i][tt];
+                avgx[tt] += yk[i][tt];
+            }
+
+            avgx[tt] /= 2 * pos;
+
+        }
+
+        for (int tt = 0; tt < N_t; tt++) {
+            for (int i = 0; i < pos; i++) {
+                covar[tt] += ((Tx[i][tt] - avgy[tt]) * (xk[i][tt] - avgx[tt]));
+                covar[tt] += ((Ty[i][tt] - avgy[tt]) * (yk[i][tt] - avgx[tt]));
+                sigy[tt] += SQR (Tx[i][tt] - avgy[tt]);
+                sigy[tt] += SQR (Ty[i][tt] - avgy[tt]);
+                sigx[tt] += SQR (xk[i][tt] - avgx[tt]);
+                sigy[tt] += SQR (yk[i][tt] - avgx[tt]);
+
+            }
+
+            covar[tt] /= 2 * pos;
+            sigy[tt] /= 2 * pos;
+            sigx[tt] /= 2 * pos;
+            sigx[tt] = sqrt (sigx[tt]);
+            sigy[tt] = sqrt (sigy[tt]);
+
+            correl[tt] = covar[tt] / (sigx[tt] * sigy[tt]);
+
+            printf ("tt=%i  corr=%f\n", tt, correl[tt]);
+
+        }
+    } else if (typ == 2) {
+        //          for (int tt = 0; tt < N_t; tt++) {
+        for (int i = 0; i < Nc; i++) {//Nc  ==> pos
+            avgy42 += Tx[i][42];
+            avgy42 += Ty[i][42];
+        }
+
+        avgy42 /= 2 * Nc;//to change
+//           }
+
+        for (int tt = 23; tt < N_t; tt++) {
+            for (int i = 0; i < pos; i++) {
+                avgx[tt] += xk[i][tt];
+                avgx[tt] += yk[i][tt];
+            }
+
+            avgx[tt] /= 2 * pos;
+
+        }
+
+        for (int tt = 23; tt < N_t; tt++) {
+            for (int i = 0; i < pos; i++) {
+                covar[tt] += ((Tx[i][42] - avgy42) * (xk[i][tt] - avgx[tt]));
+                covar[tt] += ((Ty[i][42] - avgy42) * (yk[i][tt] - avgx[tt]));
+                sigy[tt] += SQR (Tx[i][42] - avgy42);
+                sigy[tt] += SQR (Ty[i][42] - avgy42);
+                sigx[tt] += SQR (xk[i][tt] - avgx[tt]);
+                sigy[tt] += SQR (yk[i][tt] - avgx[tt]);
+
+            }
+
+            covar[tt] /= 2 * pos;
+            sigy[tt] /= 2 * pos;
+            sigx[tt] /= 2 * pos;
+            sigx[tt] = sqrt (sigx[tt]);
+            sigy[tt] = sqrt (sigy[tt]);
+
+            correl[tt] = covar[tt] / (sigx[tt] * sigy[tt]);
+
+            printf ("tt=%i pos=%i corr=%f\n", tt, pos, correl[tt]);
+
+        }
+
+    } else if (typ == 3) {
+
+        //calculate mean for x anf for y
+        for (int tt = 0; tt < N_t; tt++) {
+            for (int i = 0; i < Nc; i++) {
+                avgx[tt] += Tx[i][tt];
+                avgy[tt] += Ty[i][tt];
+            }
+        }
+
+        for (int tt = 0; tt < N_t; tt++) {
+            for (int i = 0; i < pos; i++) {
+                avgx[tt] += xk[i][tt];
+                avgy[tt] += yk[i][tt];
+            }
+
+            avgx[tt] /= number;
+            avgy[tt] /= number;
+        }
+
+        //calculate covariance and stdv x stdv y
+        for (int tt = 0; tt < N_t; tt++) {
+            for (int i = 0; i < Nc; i++) {
+                covar[tt] += ((Tx[i][tt] - avgx[tt]) * (Ty[i][tt] - avgy[tt]));
+
+                sigx[tt] += SQR (Tx[i][tt] - avgx[tt]);
+                sigy[tt] += SQR (Ty[i][tt] - avgy[tt]);
+
+
+            }
+        }
+
+        for (int tt = 0; tt < N_t; tt++) {
+            for (int i = 0; i < pos; i++) {
+                covar[tt] += ((xk[i][tt] - avgx[tt]) * (yk[i][tt] - avgy[tt]));
+                sigx[tt] += SQR (xk[i][tt] - avgx[tt]);
+                sigy[tt] += SQR (yk[i][tt] - avgy[tt]);
+
+            }
+        }
+
+        for (int tt = 0; tt < N_t; tt++) {
+
+            covar[tt] /= number;
+            sigx[tt] /= number;
+            sigy[tt] /= number;
+            sigx[tt] = sqrt (sigx[tt]);
+            sigy[tt] = sqrt (sigy[tt]);
+
+            correl[tt] = covar[tt] / (sigx[tt] * sigy[tt]);
+
+            printf ("tt=%i  corr=%f\n", tt, correl[tt]);
+        }
+    } else if (typ == 4) {//tt=42 #5000K
+        //calculate mean for x anf for y
+        //      for (int tt = 0; tt < N_t; tt++) {
+        for (int i = 0; i < Nc; i++) {
+            //tt = 42;
+            avgx42 += Tx[i][42];
+            avgy42 += Ty[i][42];
+        }
+
+        //     }
+
+        for (int tt = 0; tt < N_t; tt++) {
+            for (int i = 0; i < pos; i++) {
+                avgx[tt] += xk[i][tt];
+                avgy[tt] += yk[i][tt];
+            }
+
+            avgx[tt] += avgx42;
+            avgy[tt] += avgy42;
+
+            avgx[tt] /= number;
+            avgy[tt] /= number;
+        }
+
+        //calculate covariance and stdv x stdv y
+        for (int tt = 0; tt < N_t; tt++) {
+            for (int i = 0; i < Nc; i++) {
+                covar[tt] += ((Tx[i][42] - avgx[tt]) * (Ty[i][42] - avgy[tt]));
+
+                sigx[tt] += SQR (Tx[i][42] - avgx[tt]);
+                sigy[tt] += SQR (Ty[i][42] - avgy[tt]);
+
+
+            }
+        }
+
+        for (int tt = 0; tt < N_t; tt++) {
+            for (int i = 0; i < pos; i++) {
+                covar[tt] += ((xk[i][tt] - avgx[tt]) * (yk[i][tt] - avgy[tt]));
+                sigx[tt] += SQR (xk[i][tt] - avgx[tt]);
+                sigy[tt] += SQR (yk[i][tt] - avgy[tt]);
+
+            }
+        }
+
+        for (int tt = 0; tt < N_t; tt++) {
+
+            covar[tt] /= number;
+            sigx[tt] /= number;
+            sigy[tt] /= number;
+            sigx[tt] = sqrt (sigx[tt]);
+            sigy[tt] = sqrt (sigy[tt]);
+
+            correl[tt] = covar[tt] / (sigx[tt] * sigy[tt]);
+
+            printf ("tt=%i  corr=%f\n", tt, correl[tt]);
+        }
+
+    }
+
+    delete[] xxcal;
+    delete[] yycal;
+    delete[] YYcal;
+
+    rk (0, 0);
+    gk (0, 0);
+    bk (0, 0);
+    xk (0, 0);
+    yk (0, 0);
+    Yk (0, 0);
+    reditc (0, 0);
+    greenitc (0, 0);
+    blueitc (0, 0);
+
+    Xitc (0, 0);
+    Yitc (0, 0);
+    Zitc (0, 0);
+    tempitc (0, 0);
+    xc (0, 0);
+    yc (0, 0);
+    Yc (0, 0);
+
+
+    //end family
+
+    for (int i = 0; i < Nc; i++) {
+        delete [] Tx[i];
+        delete [] Ty[i];
+        delete [] TYY[i];
+
+    }
+
+    delete [] Tx;
+    delete [] Ty;
+    delete [] TYY;
+
+
+    delete [] rmm;
+    delete [] gmm;
+    delete [] bmm;
+
+    /*        double covarrel[44];
+
+            for (int i = 0; i < 44; i++) {
+                covarrel[i] = 0.;
+            }
+
+
+            for (int Tx = 0; Tx < 44; Tx++) {
+                double avgX = 0.f, avgY = 0.f, avgZ = 0.f;
+                double avgR = 0.f, avgG = 0.f, avgB = 0.f;
+                int nb = 0;
+
+    //        double rmul = sRGBd65_xyz[0][0] *  Txyz[Tx].XX + sRGBd65_xyz[0][1] * 1. + sRGBd65_xyz[0][2] * Txyz[Tx].ZZ;
+    //        double gmul = sRGBd65_xyz[1][0] *  Txyz[Tx].XX + sRGBd65_xyz[1][1] * 1. + sRGBd65_xyz[1][2] * Txyz[Tx].ZZ;
+    //        double bmul = sRGBd65_xyz[2][0] *  Txyz[Tx].XX + sRGBd65_xyz[2][1] * 1. + sRGBd65_xyz[2][2] * Txyz[Tx].ZZ;
+                //sort data xyz in histogram ==> Convert to xyY thrn compare to cie_colour_match_jdc
+                for (int y = 0; y < bfh ; y += 1) {
+                    for (int x = 0; x < bfw ; x += 1) {
+                        int yy = y ;
+                        int xx = x ;
+                        reditc[yy][xx] = redloc[y][x];
+                        greenitc[yy][xx] = greenloc[y][x];
+                        blueitc[yy][xx] = blueloc[y][x];
+
+                        if (reditc[yy][xx] > 65400.f) {
+                            reditc[yy][xx] = 65400.f;
+                        }
+
+                        if (greenitc[yy][xx] > 65400.f) {
+                            greenitc[yy][xx] = 65400.f;
+                        }
+
+                        if (blueitc[yy][xx] > 65400.f) {
+                            blueitc[yy][xx] = 65400.f;
+                        }
+
+                        if (reditc[yy][xx] < 200.f) {
+                            reditc[yy][xx] = 200.f;
+                        }
+
+                        if (greenitc[yy][xx] < 200.f) {
+                            greenitc[yy][xx] = 200.f;
+                        }
+
+                        if (blueitc[yy][xx] < 200.f) {
+                            blueitc[yy][xx] = 200.f;
+                        }
+
+                        avgR += reditc[yy][xx];
+                        avgG += greenitc[yy][xx];
+                        avgB += blueitc[yy][xx];
+
+                        Xitc[yy][xx] = 0.f;
+                        Yitc[yy][xx] = 0.f;
+                        Zitc[yy][xx] = 0.f;
+                        float xxx = 0.f, yyy = 0.f, zzz = 0.f;
+                        float RR =  reditc[yy][xx];
+                        float GG =  greenitc[yy][xx];
+                        float BB =  blueitc[yy][xx];
+
+                        Color::rgbxyz (RR, GG, BB, xxx, yyy, zzz, wp);
+                        Xitc[yy][xx] = xxx;
+                        Yitc[yy][xx] = yyy;
+                        Zitc[yy][xx] = zzz;
+
+                        //   Xitc[yy][xx] /= 655.35f;
+                        //   Yitc[yy][xx] /= 655.35f;
+                        //   Zitc[yy][xx] /= 655.35f;
+
+                        Xitc[yy][xx] *= Txyz[Tx].XX;
+                        Zitc[yy][xx] *= Txyz[Tx].ZZ;
+                        //  x = X / (X+Y+Z);
+                        //  y = Y / (X+Y+Z);
+
+                        avgX += Xitc[yy][xx];
+                        avgY += Yitc[yy][xx];
+                        avgZ += Zitc[yy][xx];
+
+                        nb++;
+
+                    }
+                }
+
+                avgX /= nb;
+                avgY /= nb;
+                avgZ /= nb;
+                avgR /= nb;
+                avgG /= nb;
+                avgB /= nb;
+                */
+    //  printf("avgX=%f avgY=%f avgZ=%f avR=%f avG=%f avB=%f nb=%i bf=%i\n", avgX, avgY, avgZ, avgR, avgG, avgB, nb, (bfh)*(bfw));
+    /*
+            avgX /= avgY;
+            avgZ /= avgY;
+            avprov = avgY;
+            avgY = 1.f;
+    */
+    /*
+                float avgtemp = 0.f;
+                int nbitc = 0;
+                float maxtemp = -10000.f;
+                float mintemp = 100000.f;
+
+                for (int y = 0; y < bfhitc ; y++) {
+                    for (int x = 0; x < bfwitc ; x++) {
+                        double temp;
+                        ColorTemp::XYZtoCorColorTemp ((double)Xitc[y][x] / 65535., (double)Yitc[y][x] / 65535., (double) Zitc[y][x] / 65535., temp);
+                        tempitc[y][x] = (float) temp;
+
+                        if (temp > maxtemp) {
+                            maxtemp = (float) temp ;
+                        }
+
+                        if (temp < mintemp) {
+                            mintemp = (float) temp ;
+                        }
+
+                        //printf("temp=%f ", tempitc[y][x]);
+                        avgtemp += tempitc[y][x];
+                        nbitc++;
+                    }
+                }
+
+                avgtemp /= nbitc;
+                int nbstd = 0;
+                float stditc = 0.f;
+                double stdX = 0.f;
+                double stdY = 0.f;
+                double stdZ = 0.f;
+                double stdxyz = 0.f;
+
+                for (int y = 0; y < bfhitc ; y++) {
+                    for (int x = 0; x < bfwitc ; x++) {
+                        stditc += SQR (avgtemp - tempitc[y][x]);
+                        double dX = avgX -  (double)Xitc[y][x];
+                        double dY = avgY -  (double)Yitc[y][x];
+                        double dZ = avgZ -  (double)Zitc[y][x];
+
+                        stdX += SQR (dX);
+                        stdY += SQR (dY);
+                        stdZ += SQR (dZ);
+                        stdxyz += (dX *  dY * dZ) ;//prepare covariance
+
+                        nbstd++;
+                    }
+                }
+
+                stdX /= nbstd;
+                stdY /= nbstd;
+                stdZ /= nbstd;
+                stdX = sqrt (stdX);
+                stdY = sqrt (stdY);
+                stdZ = sqrt (stdZ);
+
+                stdxyz /= nbstd;
+
+                double mult = stdX * stdZ * stdY;
+                double cova = stdxyz / mult; //correlation
+                covarrel[Tx] = cova;
+                printf ("temp=%f tempref=%f covarel=%f nbstd=%i  stdxyz=%f sX=%f sY=%f sZ=%f mul=%f\n", avgtemp,  Txyz[Tx].Tem, cova, nbstd, stdxyz, stdX, stdY, stdZ, mult );
+
+            }
+            */
+    /*
+            float maxcovarrel = -10.f;
+            int TTx = 0;
+
+            for (int Tx = 0; Tx < 44; Tx++) {
+                if (covarrel[Tx] > maxcovarrel) {
+                    maxcovarrel = covarrel[Tx];
+                    TTx = Tx;
+
+                }
+
+                //     printf ("cov=%f\n", covarrel[Tx]);
+
+            }
+    */
+    //     printf ("cov=%f\n", maxcovarrel);
+
+//       printf ("Temp=%f maxc=%f\n",  Txyz[TTx].Tem, maxcovarrel);
+    //we must now tries to minimize
+    //  avgX /= avgY;
+    //  avgZ /= avgY;
+    //  avprov = avgY;
+    //  avgY = 1.f;
+    //    avprov = 1.f;
+    //  stdX /= avgY;
+    //  stdY /= avgY;
+    //  stdZ /= avgY;
+
+    //     stditc /= nbstd;
+
+    //     printf ("avgte=%f std=%f  max=%f min=%f avgX=%f avgY=%f avgZ=%f stdX=%f stdY=%f stdZ=%f corel=%f\n", avgtemp / nbitc, sqrt (stditc), maxtemp, mintemp, avgX / avgY, avgY / avgY, avgZ / avgY, sqrt (stdX) / avgY, sqrt (stdY) / avgY, sqrt (stdZ) / avgY , covarrel);
+
+
+    //     double rmul = sRGBd65_xyz[0][0] * (avgX / avgY) + sRGBd65_xyz[0][1] * 1. + sRGBd65_xyz[0][2] * (avgZ / avgY);
+    //     double gmul = sRGBd65_xyz[1][0] * (avgX / avgY) + sRGBd65_xyz[1][1] * 1. + sRGBd65_xyz[1][2] * (avgZ / avgY);
+    //    double bmul = sRGBd65_xyz[2][0] * (avgX / avgY) + sRGBd65_xyz[2][1] * 1. + sRGBd65_xyz[2][2] * (avgX / avgY);
+
+}
+
+
+
+
+void xyz_to_cat02floatraw ( float &r, float &g, float &b, float x, float y, float z)
+{
+
+    {
+        r = ( 0.7328f * x) + (0.4296f * y) - (0.1624f * z);
+        g = (-0.7036f * x) + (1.6975f * y) + (0.0061f * z);
+        b = ( 0.0030f * x) + (0.0136f * y) + (0.9834f * z);
+    }
+}
+
+void cat02_to_xyzfloatraw ( float &x, float &y, float &z, float r, float g, float b)
+{
+    x = ( 1.096124f * r) - (0.278869f * g) + (0.182745f * b);
+    y = ( 0.454369f * r) + (0.473533f * g) + (0.072098f * b);
+    z = (-0.009628f * r) - (0.005698f * g) + (1.015326f * b);
+}
+
+
+
+void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, array2D<float> &blueloc, int bfw, int bfh, double &avg_rm, double &avg_gm, double &avg_bm, const LocrgbParams &localr, int begx, int begy, int yEn, int xEn, int cx, int cy)
+{
+    //auto white balance
+//   printf ("AUtoWB OK\n");
+    array2D<float> redsobel;
+    array2D<float> greensobel;
+    array2D<float> bluesobel;
+
+    redsobel (bfw, bfh);
+    greensobel (bfw, bfh);
+    bluesobel (bfw, bfh);
     ColorManagementParams cmp;
     TMatrix wprof = ICCStore::getInstance()->workingSpaceMatrix ("sRGB");
     TMatrix wiprof = ICCStore::getInstance()->workingSpaceInverseMatrix ("sRGB");
@@ -5739,6 +8107,8 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
 
     if (localr.wbMethod == "autitc") {
         itc = true;
+        ItcWB (redloc, greenloc, blueloc, bfw, bfh, avg_rm, avg_gm, avg_bm);
+
     }
 
     if (localr.wbMethod == "autedgsdw") {
@@ -5808,2341 +8178,6 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
     float varir = localr.equal;
     float varib = 1.f - (varir - 1.f);
 
-    if (itc) {
-
-        double avprov = 1.f;
-
-        typedef struct WbTxyz {
-            double Tem;
-            double XX;
-            double ZZ;
-        } WbTxyz;
-
-        WbTxyz Txyz[91] = {//temperature Xwb Zwb 90 values
-            {2001., 1.273842, 0.145295},
-            {2101., 1.244008, 0.167533},
-            {2201., 1.217338, 0.190697},
-            {2301., 1.193444, 0.214632},
-            {2401., 1.171996, 0.239195},
-            {2501., 1.152883, 0.264539},
-            {2605., 1.134846, 0.291032},
-            {2705., 1.119049, 0.316446},
-            {2803., 1.105381, 0.342193},
-            {2856., 1.098258, 0.355599},
-            {2910., 1.091550, 0.369645},
-            {3003., 1.080982, 0.394258},
-            {3103., 1.070277, 0.419815},
-            {3203., 1.060906, 0.446161},
-            {3303., 1.052034, 0.471422},
-            {3400., 1.044547, 0.496719},
-            {3500., 1.037145, 0.521523},
-            {3600., 1.030574, 0.546590},
-            {3699., 1.024834, 0.571722},
-            {3801., 1.019072, 0.596102},
-            {3902., 1.014244, 0.621136},
-            {4002., 0.996153, 0.609518},
-            {4052., 0.993720, 0.620805},
-            {4102., 0.993908, 0.63152},
-            {4152., 0.989179, 0.643262},
-            {4202., 0.989283, 0.653999},
-            {4252., 0.985039, 0.665536},
-            {4302., 0.985067, 0.676288},
-            {4352., 0.981271, 0.687599},
-            {4402., 0.981228, 0.698349},
-            {4452., 0.977843, 0.709425},
-            {4502., 0.977736, 0.720159},
-            {4552., 0.974728, 0.730993},
-            {4602., 0.974562, 0.741698},
-            {4652., 0.971899, 0.752284},
-            {4702., 0.971681, 0.762949},
-            {4752., 0.969335, 0.773285},
-            {4802., 0.969069, 0.783899},
-            {4852., 0.967011, 0.793982},
-            {4902., 0.966702, 0.804537},
-            {4952., 0.964908, 0.814366},
-            {5002., 0.964561, 0.824854},
-            {5052., 0.963008, 0.834429},
-            {5102., 0.962627, 0.844842},
-            {5152., 0.961294, 0.854166},
-            {5202., 0.960883, 0.864497},
-            {5252., 0.959749, 0.873572},
-            {5302., 0.959313, 0.883815},
-            {5352., 0.958361, 0.892644},
-            {5402., 0.957903, 0.902793},
-            {5452., 0.957116, 0.911379},
-            {5502., 0.956639, 0.921431},
-            {5552., 0.956002, 0.929779},
-            {5602., 0.955509, 0.939728},
-            {5652., 0.955008, 0.947842},
-            {5702., 0.954502, 0.957685},
-            {5752., 0.954124, 0.965569},
-            {5802., 0.953608, 0.975303},
-            {5852., 0.953342, 0.982963},
-            {5902., 0.952818, 0.992584},
-            {5952., 0.952652, 1.000025},
-            {6002., 0.952122, 1.009532},
-            {6052., 0.952047, 1.016759},
-            {6102., 0.951514, 1.026149},
-            {6152., 0.951520, 1.033168},
-            {6202., 0.950985, 1.042439},
-            {6252., 0.951064, 1.049256},
-            {6302., 0.950530, 1.058406},
-            {6352., 0.950674, 1.065027},
-            {6402., 0.950143, 1.074055},
-            {6452., 0.950345, 1.080484},
-            {6502., 0.949817, 1.089390},
-            {6602., 0.949952, 1.103094},
-            {6702., 0.949330, 1.119138},
-            {6802., 0.949596, 1.132190},
-            {6902., 0.949033, 1.147691},
-            {7002., 0.949402, 1.160129},
-            {7152., 0.949348, 1.180429},
-            {7301., 0.948896, 1.201432},
-            {7451., 0.949434, 1.219076},
-            {7601., 0.949099, 1.239061},
-            {7751., 0.949729, 1.255559},
-            {7901., 0.949498, 1.274460},
-            {8301., 0.950253, 1.318464},
-            {8601., 0.950941, 1.349261},
-            {9001., 0.951969, 1.387639},
-            {9401., 0.953081, 1.423213},
-            {9901., 0.954537, 1.464134},
-            {10501., 0.956321, 1.508623},
-            {11001., 0.957747, 1.541281},
-            {12001., 0.960440, 1.601019}
-
-        };
-        int N_t = sizeof (Txyz) / sizeof (Txyz[0]); //number of temperature White point
-
-        double temp = 5000.;
-        int nbt = N_t;
-        float **Tx = nullptr;
-        float **Ty = nullptr;
-        float **TYY = nullptr;
-        int Nc = 46;
-        Tx = new float*[Nc];
-
-        for (int i = 0; i < Nc; i++) {
-            Tx[i] = new float[nbt];
-        }
-
-        Ty = new float*[Nc];
-
-        for (int i = 0; i < Nc; i++) {
-            Ty[i] = new float[nbt];
-        }
-
-        TYY = new float*[Nc];
-
-        for (int i = 0; i < Nc; i++) {
-            TYY[i] = new float[nbt];
-        }
-
-        float *rmm = nullptr;
-        rmm = new float [N_t];
-
-        float *gmm = nullptr;
-        gmm = new float [N_t];
-
-        float *bmm = nullptr;
-        bmm = new float [N_t];
-
-        //calculate R G B multiplier in function illuminant and temperature
-        for (int tt = 0; tt < N_t; tt++) {
-            double r, g, b;
-            float rm, gm, bm;
-            ColorTemp WBiter = ColorTemp (Txyz[tt].Tem, 1.f, 1.f, "Custom");
-            const RAWParams raw ;
-            WBiter.getMultipliers (r, g, b);
-            rm = imatrices.cam_rgb[0][0] * r + imatrices.cam_rgb[0][1] * g + imatrices.cam_rgb[0][2] * b;
-            gm = imatrices.cam_rgb[1][0] * r + imatrices.cam_rgb[1][1] * g + imatrices.cam_rgb[1][2] * b;
-            bm = imatrices.cam_rgb[2][0] * r + imatrices.cam_rgb[2][1] * g + imatrices.cam_rgb[2][2] * b;
-
-            const float new_pre_mul[4] = { ri->get_pre_mul (0) / rm, ri->get_pre_mul (1) / gm, ri->get_pre_mul (2) / bm, ri->get_pre_mul (3) / gm };
-            float new_scale_mul[4];
-
-            bool isMono = (ri->getSensorType() == ST_FUJI_XTRANS && raw.xtranssensor.method == RAWParams::XTransSensor::methodstring[RAWParams::XTransSensor::mono])
-                          || (ri->getSensorType() == ST_BAYER && raw.bayersensor.method == RAWParams::BayerSensor::methodstring[RAWParams::BayerSensor::mono]);
-            float gain = calculate_scale_mul (new_scale_mul, new_pre_mul, c_white, cblacksom, isMono, ri->get_colors());
-            rm = new_scale_mul[0] / scale_mul[0] * gain;
-            gm = new_scale_mul[1] / scale_mul[1] * gain;
-            bm = new_scale_mul[2] / scale_mul[2] * gain;
-            float som = rm + gm + bm;
-            //  printf ("ZZZ rm=%f gm=%f bm=%f\n", rm / gm, gm / gm, bm / gm);
-            rmm[tt] = rm / gm;
-            gmm[tt] = gm / gm;
-            bmm[tt] = bm / gm;
-            //   printf ("WWW tt=%i rm=%f gm=%f bm=%f\n", tt, rmm[tt], gmm[tt], bmm[tt]);
-            //printf("gain=%f\n", gain);
-        }
-
-        //call tempxy to calaculate for 41 color references Temp and x y for xyY
-
-        ColorTemp::tempxy (temp, Tx, Ty, TYY);//calculate chroma xy (xyY) for Z known colors on under 90 illuminants
-
-        float epsx = 0.001f, epsy = 0.001f;//delta value to have result!
-
-        //calculate for this image the mean values for each family of color, near histogram x y (number)
-        //xy vary from x 0..0.77  y 0..0.82
-        //neutral values are near x=0.34 0.33 0.315 0.37 y =0.35 0.36 0.34
-        //skin are about x 0.45  0.49 y 0.4 0.47
-        //blue sky x=0.25 y=0.28  and x=0.29 y=0.32
-        // step about 0.02   x 0.32 0.34  y= 0.34 0.36 skin    --  sky x 0.24 0.30 y 0.28 0.32
-        //big step about 0.2
-
-        //calculate x y Y
-        for (int y = 0; y < bfh ; y += 10) {
-            for (int x = 0; x < bfw ; x += 10) {
-                int yy = y / 10;
-                int xx = x / 10 ;
-                float x_c = 0.f, y_c = 0.f, Y_c = 0.f;
-                float RR =  redloc[y][x];
-                float GG =  greenloc[y][x];
-                float BB =  blueloc[y][x];
-
-                Color::rgbxyY (RR, GG, BB, x_c, y_c, Y_c, wp);
-                xc[yy][xx] = x_c;
-                yc[yy][xx] = y_c;
-                Yc[yy][xx] = Y_c;
-                //  printf("xc=%f yc=%f ", x_c, y_c);
-
-            }
-
-        }
-
-        /*
-                //calculate X Y Z from xyY
-                X = 65535.f * (xc[yy][xx]* Yc[yy][xx] /yc[yy][xx]);
-                Y = 65535.f * Yc[yy][xx];
-                Z = 65535.f * (1 - xc[yy][xx] - yc[yy][xx])* yc[yy][xx];
-                for (int y = 0; y < bfh ; y += 10) {
-                    for (int x = 0; x < bfw ; x += 10) {
-                        int yy = y / 10;
-                        int xx = x / 10 ;
-                        float x_c = 0.f, y_c = 0.f, Y_c = 0.f;
-                        float RR =  redloc[yy][xx];
-                        float GG =  greenloc[yy][xx];
-                        float BB =  blueloc[yy][xx];
-
-                        Color::rgbxyY (RR, GG, BB, x_c, y_c, Y_c, wp);
-                        xc[yy][xx] = x_c;
-                        yc[yy][xx] = y_c;
-                        Yc[yy][xx] = Y_c;
-
-                    }
-
-                }
-        */
-        int siza = 167;
-        int histxy[siza] = {};//number of values for each pair xy
-        float area[siza] = {};//multiplier for compensation differences area ==> big areas are rare near limit prophotos or more
-        int inter[siza] = {}; //interest for photographie 1 = small (limit gamut) 2 = normal 3 = major (skin, sky, neutral)
-        float histuse[siza] = {};
-        int nh = 0;
-        float xxx[siza] = {};//for max 45 color references calculated ==> max in images "like histogram"
-        float yyy[siza] = {};
-        float YYY[siza] = {};//not used directly, but necessary to keep good range
-        int nc = 0, nc2 = 0; //near reference color perhaps not need
-        float histY[siza] = {};//#mean Y of xyY : not used directly, but necessary to keep good range
-
-        for (int p = 0; p < siza; p++) {
-            histxy[p] = 0.f;
-            area[p] = 20.f;
-            inter[p] = 1;
-            histY[p] = 1.f;
-        }
-
-        for (int y = 0; y < bfhitc ; y++) {
-            for (int x = 0; x < bfwitc ; x++) {
-
-                if (xc[y][x] < 0.12f) { // near Prophoto
-
-                    if (yc[y][x] < 0.2f) {
-                        nh = 0;
-                        histxy[nh]++;
-                        area[nh] = 50.f;
-                        inter[nh] = 1;
-                        xxx[nh] = 0.11f;
-                        yyy[nh] = 0.18f;
-                        YYY[nh] += Yc[y][x];
-
-                        nc = 0;
-                        //blue hard
-                    } else if (yc[y][x] < 0.3f) {
-                        nh = 1;
-                        histxy[nh]++;
-                        area[nh] = 60.f;
-                        inter[nh] = 1;
-                        xxx[nh] = 0.11f;
-                        yyy[nh] = 0.25f;
-                        YYY[nh] += Yc[y][x];
-
-                        nc = 1;
-
-                        //blue
-                    } else if (yc[y][x] < 0.4f) {
-                        nh = 2;
-                        histxy[nh]++;
-                        area[nh] = 80.f;
-                        inter[nh] = 1;
-                        xxx[nh] = 0.09f;
-                        yyy[nh] = 0.35f;
-                        nc = 1;
-                        YYY[nh] += Yc[y][x];
-
-                    } else if (yc[y][x] < 0.5f) {
-                        //blue green
-                        nh = 3;
-                        histxy[nh]++;
-                        area[nh] = 100.f;
-                        inter[nh] = 1;
-                        xxx[nh] = 0.08f;
-                        yyy[nh] = 0.45f;
-                        YYY[nh] += Yc[y][x];
-                        nc = 1;
-
-                    } else if (yc[y][x] < 0.6f) {
-                        nh = 4;
-                        histxy[nh]++;
-                        area[nh] = 120.f;
-                        inter[nh] = 1;
-                        xxx[nh] = 0.06f;
-                        yyy[nh] = 0.55f;
-                        YYY[nh] += Yc[y][x];
-                        nc = 1;
-
-                    } else if (yc[y][x] < 0.82f) {
-                        //green
-                        nh = 5;
-                        histxy[nh]++;
-                        area[nh] = 240.f;
-                        inter[nh] = 1;
-                        xxx[nh] = 0.05f;
-                        yyy[nh] = 0.75f;
-                        nc = 1;
-
-
-                    }
-                } else if (xc[y][x] < 0.24f) {
-                    if (yc[y][x] < 0.2f) {
-                        nh = 6;
-                        histxy[nh]++;
-                        area[nh] = 230.f;
-                        inter[nh] = 1;
-                        xxx[nh] = 0.18f;
-                        yyy[nh] = 0.1f;
-                        YYY[nh] += Yc[y][x];
-                        nc = 2;
-
-                    } else if (yc[y][x] < 0.3f) {
-                        nh = 7;
-                        histxy[nh]++;
-                        area[nh] = 240.f;
-                        inter[nh] = 2;
-                        xxx[nh] = 0.18f;
-                        yyy[nh] = 0.27f;
-                        YYY[nh] += Yc[y][x];
-                        nc = 2;
-
-                    } else if (yc[y][x] < 0.4f) {
-                        nh = 8;
-                        histxy[nh]++;
-                        area[nh] = 240.f;
-                        inter[nh] = 2;
-                        xxx[nh] = 0.18f;
-                        yyy[nh] = 0.35f;
-                        YYY[nh] += Yc[y][x];
-                        nc = 2;
-
-                    } else if (yc[y][x] < 0.5f) {
-                        nh = 9;
-                        histxy[nh]++;
-                        area[nh] = 240.f;
-                        inter[nh] = 2;
-                        xxx[nh] = 0.18f;
-                        yyy[nh] = 0.45f;
-                        nc = 2;
-                        nc2 = 3;
-
-                    } else if (yc[y][x] < 0.6f) {
-                        nh = 10;
-                        histxy[nh]++;
-                        area[nh] = 240.f;
-                        inter[nh] = 2;
-                        xxx[nh] = 0.18f;
-                        yyy[nh] = 0.55f;
-                        YYY[nh] += Yc[y][x];
-                        nc = 3;
-
-                    } else if (yc[y][x] < 0.75f) {
-                        nh = 11;
-                        histxy[nh]++;
-                        area[nh] = 400.f;
-                        inter[nh] = 1;
-                        xxx[nh] = 0.18f;
-                        yyy[nh] = 0.7f;
-                        YYY[nh] += Yc[y][x];
-
-                        nc = 3;
-
-                    }
-
-                } else if (xc[y][x] < 0.28f) {//blue sky and other
-                    if (yc[y][x] < 0.2f) {
-                        nh = 12;
-                        histxy[nh]++;
-                        area[nh] = 80.f;
-                        inter[nh] = 1;
-                        xxx[nh] = 0.26f;
-                        yyy[nh] = 0.12f;
-                        nc = 4;
-                        YYY[nh] += Yc[y][x];
-
-                    } else if (yc[y][x] < 0.25f) {
-                        nh = 13;
-                        histxy[nh]++;
-                        area[nh] = 20.f;
-                        inter[nh] = 2;
-                        xxx[nh] = 0.26f;
-                        yyy[nh] = 0.225f;
-                        nc = 1;
-                        YYY[nh] += Yc[y][x];
-
-                    } else if (yc[y][x] < 0.29f) {
-                        nh = 14;
-                        histxy[nh]++;
-                        area[nh] = 20.f;
-                        inter[nh] = 3;
-                        xxx[nh] = 0.26f;
-                        yyy[nh] = 0.27f;
-
-                    } else if (yc[y][x] < 0.33f) {
-                        nh = 15;
-                        histxy[nh]++;
-                        area[nh] = 20.f;
-                        inter[nh] = 3;
-                        xxx[nh] = 0.26f;
-                        yyy[nh] = 0.31f;
-                        YYY[nh] += Yc[y][x];
-
-                    } else if (yc[y][x] < 0.37f) {
-                        nh = 16;
-                        histxy[nh]++;
-                        area[nh] = 20.f;
-                        inter[nh] = 2;
-                        xxx[nh] = 0.26f;
-                        yyy[nh] = 0.35f;
-
-                    } else if (yc[y][x] < 0.4f) {
-                        nh = 17;
-                        histxy[nh]++;
-                        area[nh] = 15.f;
-                        inter[nh] = 2;
-                        xxx[nh] = 0.26f;
-                        yyy[nh] = 0.385f;
-                        YYY[nh] += Yc[y][x];
-
-                    } else if (yc[y][x] < 0.45f) {
-                        nh = 18;
-                        histxy[nh]++;
-                        area[nh] = 25.f;
-                        inter[nh] = 2;
-                        xxx[nh] = 0.26f;
-                        yyy[nh] = 0.425f;
-                        YYY[nh] += Yc[y][x];
-
-
-                    } else if (yc[y][x] < 0.5f) {
-                        nh = 19;
-                        histxy[nh]++;
-                        area[nh] = 25.f;
-                        xxx[nh] = 0.26f;
-                        yyy[nh] = 0.475f;
-                        YYY[nh] += Yc[y][x];
-
-                    } else if (yc[y][x] < 0.6f) {
-                        nh = 20;
-                        histxy[nh]++;
-                        area[nh] = 50.f;
-                        inter[nh] = 2;
-                        xxx[nh] = 0.26f;
-                        yyy[nh] = 0.55f;
-                        YYY[nh] += Yc[y][x];
-
-                    } else if (yc[y][x] < 0.75f) {
-                        nh = 21;
-                        histxy[nh]++;
-                        area[nh] = 60.f;
-                        inter[nh] = 2;
-                        xxx[nh] = 0.26f;
-                        yyy[nh] = 0.67f;
-                        YYY[nh] += Yc[y][x];
-
-                    }
-                } else if (xc[y][x] < 0.31f) {//near neutral others
-                    if (yc[y][x] < 0.2f) {
-                        nh = 22;
-                        histxy[nh]++;
-                        area[nh] = 50.f;
-                        inter[nh] = 1;
-                        xxx[nh] = 0.295f;
-                        yyy[nh] = 0.15f;
-                        YYY[nh] += Yc[y][x];
-
-                    } else if (yc[y][x] < 0.24f) {
-                        nh = 23;
-                        histxy[nh]++;
-                        area[nh] = 12.f;
-                        inter[nh] = 2;
-                        xxx[nh] = 0.295f;
-                        yyy[nh] = 0.22f;
-                        YYY[nh] += Yc[y][x];
-
-
-                    } else if (yc[y][x] < 0.29f) {
-                        nh = 24;
-                        histxy[nh]++;
-                        area[nh] = 15.f;
-                        inter[nh] = 2;
-                        xxx[nh] = 0.295f;
-                        yyy[nh] = 0.265f;
-                        YYY[nh] += Yc[y][x];
-
-
-                    } else if (yc[y][x] < 0.32f) {
-                        nh = 25;
-                        histxy[nh]++;
-                        area[nh] = 9.f;
-                        inter[nh] = 2;
-                        xxx[nh] = 0.295f;
-                        yyy[nh] = 0.305f;
-                        YYY[nh] += Yc[y][x];
-
-                    } else if (yc[y][x] < 0.36f) {
-                        nh = 26;
-                        histxy[nh]++;
-                        area[nh] = 12.f;
-                        inter[nh] = 2;
-                        xxx[nh] = 0.295f;
-                        yyy[nh] = 0.34f;
-                        YYY[nh] += Yc[y][x];
-
-                    } else if (yc[y][x] < 0.4f) {
-                        nh = 27;
-                        histxy[nh]++;
-                        area[nh] = 12.f;
-                        inter[nh] = 2;
-                        xxx[nh] = 0.295f;
-                        yyy[nh] = 0.38f;
-                        YYY[nh] += Yc[y][x];
-
-
-                    } else if (yc[y][x] < 0.5f) {
-                        nh = 28;
-                        histxy[nh]++;
-                        area[nh] = 30.f;
-                        inter[nh] = 2;
-                        xxx[nh] = 0.295f;
-                        yyy[nh] = 0.45f;
-                        YYY[nh] += Yc[y][x];
-
-                    } else if (yc[y][x] < 0.7f) {
-                        nh = 29;
-                        histxy[nh]++;
-                        area[nh] = 45.f;
-                        inter[nh] = 1;
-                        xxx[nh] = 0.295f;
-                        yyy[nh] = 0.63f;
-                        YYY[nh] += Yc[y][x];
-
-                    }
-                } else if (xc[y][x] < 0.325f) {//neutral  34
-                    if (yc[y][x] < 0.2f) {
-                        nh = 30;
-                        histxy[nh]++;
-                        area[nh] = 25.f;
-                        inter[nh] = 1;
-                        xxx[nh] = 0.31f;
-                        yyy[nh] = 0.15f;
-                        YYY[nh] += Yc[y][x];
-
-                    } else if (yc[y][x] < 0.24f) {
-                        nh = 31;
-                        histxy[nh]++;
-                        area[nh] = 6.f;
-                        inter[nh] = 2;
-                        xxx[nh] = 0.31f;
-                        yyy[nh] = 0.22f;
-
-                    } else if (yc[y][x] < 0.29f) {
-                        nh = 32;
-                        histxy[nh]++;
-                        area[nh] = 7.5f;
-                        inter[nh] = 2;
-                        xxx[nh] = 0.31f;
-                        yyy[nh] = 0.265f;
-                        YYY[nh] += Yc[y][x];
-
-                    } else if (yc[y][x] < 0.32f) {
-                        nh = 33;
-                        histxy[nh]++;
-                        area[nh] = 4.5f;
-                        inter[nh] = 2;
-                        xxx[nh] = 0.31f;
-                        yyy[nh] = 0.305f;
-                        YYY[nh] += Yc[y][x];
-
-                    } else if (yc[y][x] < 0.34f) {
-                        nh = 34;
-                        histxy[nh]++;
-                        area[nh] = 3.f;
-                        inter[nh] = 3;
-                        xxx[nh] = 0.31f;
-                        yyy[nh] = 0.33f;
-                        YYY[nh] += Yc[y][x];
-
-                    } else if (yc[y][x] < 0.37f) {
-                        nh = 35;
-                        histxy[nh]++;
-                        area[nh] = 4.5f;
-                        inter[nh] = 3;
-                        xxx[nh] = 0.31f;
-                        yyy[nh] = 0.355f;
-                        YYY[nh] += Yc[y][x];
-
-                    } else if (yc[y][x] < 0.4f) {
-                        nh = 36;
-                        histxy[nh]++;
-                        area[nh] = 4.5f;
-                        inter[nh] = 3;
-                        xxx[nh] = 0.31f;
-                        yyy[nh] = 0.385f;
-                        YYY[nh] += Yc[y][x];
-
-                    } else if (yc[y][x] < 0.45f) {
-                        nh = 37;
-                        histxy[nh]++;
-                        area[nh] = 7.5f;
-                        inter[nh] = 2;
-                        xxx[nh] = 0.3f;
-                        yyy[nh] = 0.425f;
-                        YYY[nh] += Yc[y][x];
-
-                    } else if (yc[y][x] < 0.5f) {
-                        nh = 38;
-                        histxy[nh]++;
-                        area[nh] = 7.5f;
-                        inter[nh] = 2;
-                        xxx[nh] = 0.31f;
-                        yyy[nh] = 0.475f;
-                        YYY[nh] += Yc[y][x];
-
-                    } else if (yc[y][x] < 0.55f) {
-                        nh = 39;
-                        histxy[nh]++;
-                        area[nh] = 7.5f;
-                        inter[nh] = 2;
-                        xxx[nh] = 0.31f;
-                        yyy[nh] = 0.525f;
-                        YYY[nh] += Yc[y][x];
-
-                    } else if (yc[y][x] < 0.7f) {
-                        nh = 40;
-                        histxy[nh]++;
-                        area[nh] = 20.f;
-                        inter[nh] = 1;
-                        xxx[nh] = 0.31f;
-                        yyy[nh] = 0.6f;
-                        YYY[nh] += Yc[y][x];
-
-                    }
-
-                } else if (xc[y][x] < 0.335f) {//neutral
-                    if (yc[y][x] < 0.2f) {
-                        nh = 41;
-                        histxy[nh]++;
-                        area[nh] = 15.f;
-                        inter[nh] = 1;
-                        xxx[nh] = 0.33f;
-                        yyy[nh] = 0.15f;
-                        YYY[nh] += Yc[y][x];
-
-                    } else if (yc[y][x] < 0.24f) {
-                        nh = 42;
-                        histxy[nh]++;
-                        area[nh] = 4.f;
-                        inter[nh] = 2;
-                        xxx[nh] = 0.33f;
-                        yyy[nh] = 0.22f;
-                        YYY[nh] += Yc[y][x];
-
-                    } else if (yc[y][x] < 0.29f) {
-                        nh = 43;
-                        histxy[nh]++;
-                        area[nh] = 5.f;
-                        inter[nh] = 2;
-                        xxx[nh] = 0.33f;
-                        yyy[nh] = 0.265f;
-
-                    } else if (yc[y][x] < 0.32f) {
-                        nh = 44;
-                        histxy[nh]++;
-                        area[nh] = 3.f;
-                        inter[nh] = 2;
-                        xxx[nh] = 0.33f;
-                        yyy[nh] = 0.305f;
-                        YYY[nh] += Yc[y][x];
-
-                    } else if (yc[y][x] < 0.33f) {
-                        nh = 45;
-                        histxy[nh]++;
-                        area[nh] = 1.f;
-                        inter[nh] = 3;
-                        xxx[nh] = 0.33f;
-                        yyy[nh] = 0.325f;
-                        YYY[nh] += Yc[y][x];
-                    } else if (yc[y][x] < 0.34f) {
-                        nh = 46;
-                        histxy[nh]++;
-                        area[nh] = 1.f;
-                        inter[nh] = 3;
-                        xxx[nh] = 0.33f;
-                        yyy[nh] = 0.335f;
-                        YYY[nh] += Yc[y][x];
-                    } else if (yc[y][x] < 0.35f) {
-                        nh = 47;
-                        histxy[nh]++;
-                        area[nh] = 1.f;
-                        inter[nh] = 3;
-                        xxx[nh] = 0.33f;
-                        yyy[nh] = 0.345f;
-                        YYY[nh] += Yc[y][x];
-                    } else if (yc[y][x] < 0.36f) {
-                        nh = 48;
-                        histxy[nh]++;
-                        area[nh] = 1.f;
-                        inter[nh] = 3;
-                        xxx[nh] = 0.33f;
-                        yyy[nh] = 0.355f;
-                        YYY[nh] += Yc[y][x];
-
-                    } else if (yc[y][x] < 0.37f) {
-                        nh = 47;
-                        histxy[nh]++;
-                        area[nh] = 1.f;
-                        inter[nh] = 3;
-                        xxx[nh] = 0.33f;
-                        yyy[nh] = 0.365f;
-                        YYY[nh] += Yc[y][x];
-                    } else if (yc[y][x] < 0.38f) {
-                        nh = 48;
-                        histxy[nh]++;
-                        area[nh] = 1.f;
-                        inter[nh] = 3;
-                        xxx[nh] = 0.33f;
-                        yyy[nh] = 0.375f;
-                        YYY[nh] += Yc[y][x];
-
-                    } else if (yc[y][x] < 0.4f) {
-                        nh = 49;
-                        histxy[nh]++;
-                        area[nh] = 2.f;
-                        inter[nh] = 3;
-                        xxx[nh] = 0.3f;
-                        yyy[nh] = 0.39f;
-                        YYY[nh] += Yc[y][x];
-
-                    } else if (yc[y][x] < 0.45f) {
-                        nh = 50;
-                        histxy[nh]++;
-                        area[nh] = 5.f;
-                        inter[nh] = 2;
-                        xxx[nh] = 0.3f;
-                        yyy[nh] = 0.425f;
-                        YYY[nh] += Yc[y][x];
-
-                    } else if (yc[y][x] < 0.5f) {
-                        nh = 51;
-                        histxy[nh]++;
-                        area[nh] = 5.f;
-                        inter[nh] = 2;
-                        xxx[nh] = 0.3f;
-                        yyy[nh] = 0.475f;
-                        YYY[nh] += Yc[y][x];
-
-                    } else if (yc[y][x] < 0.55f) {
-                        nh = 52;
-                        histxy[nh]++;
-                        area[nh] = 5.f;
-                        inter[nh] = 2;
-                        xxx[nh] = 0.3f;
-                        yyy[nh] = 0.525f;
-                        YYY[nh] += Yc[y][x];
-
-                    } else if (yc[y][x] < 0.7f) {
-                        nh = 53;
-                        histxy[nh]++;
-                        area[nh] = 10.f;
-                        inter[nh] = 1;
-                        xxx[nh] = 0.3f;
-                        yyy[nh] = 0.6f;
-                        YYY[nh] += Yc[y][x];
-
-                    }
-
-                } else if (xc[y][x] < 0.345f) {//neutral  37
-                    if (yc[y][x] < 0.2f) {
-                        nh = 54;
-                        histxy[nh]++;
-                        area[nh] = 20.f;
-                        inter[nh] = 1;
-                        xxx[nh] = 0.34f;
-                        yyy[nh] = 0.15f;
-                        YYY[nh] += Yc[y][x];
-
-                    } else if (yc[y][x] < 0.24f) {
-                        nh = 55;
-                        histxy[nh]++;
-                        area[nh] = 4.f;
-                        inter[nh] = 2;
-                        xxx[nh] = 0.34f;
-                        yyy[nh] = 0.22f;
-                        YYY[nh] += Yc[y][x];
-
-                    } else if (yc[y][x] < 0.29f) {
-                        nh = 56;
-                        histxy[nh]++;
-                        area[nh] = 5.f;
-                        inter[nh] = 2;
-                        xxx[nh] = 0.34f;
-                        yyy[nh] = 0.265f;
-                        YYY[nh] += Yc[y][x];
-
-                    } else if (yc[y][x] < 0.32f) {
-                        nh = 57;
-                        histxy[nh]++;
-                        area[nh] = 3.f;
-                        inter[nh] = 2;
-                        xxx[nh] = 0.34f;
-                        yyy[nh] = 0.305f;
-                        YYY[nh] += Yc[y][x];
-
-                    } else if (yc[y][x] < 0.33f) {//34
-                        nh = 58;
-                        histxy[nh]++;
-                        area[nh] = 1.f;
-                        inter[nh] = 3;
-                        xxx[nh] = 0.34f;
-                        yyy[nh] = 0.325f;
-                        YYY[nh] += Yc[y][x];
-                    } else if (yc[y][x] < 0.34f) {
-                        nh = 59;
-                        histxy[nh]++;
-                        area[nh] = 1.f;
-                        inter[nh] = 3;
-                        xxx[nh] = 0.34f;
-                        yyy[nh] = 0.335f;
-                        YYY[nh] += Yc[y][x];
-
-                    } else if (yc[y][x] < 0.35f) {//34
-                        nh = 60;
-                        histxy[nh]++;
-                        area[nh] = 1.f;
-                        inter[nh] = 3;
-                        xxx[nh] = 0.34f;
-                        YYY[nh] += Yc[y][x];
-                        yyy[nh] = 0.345f;
-                    } else if (yc[y][x] < 0.36f) {//34
-                        nh = 61;
-                        histxy[nh]++;
-                        area[nh] = 1.f;
-                        inter[nh] = 3;
-                        xxx[nh] = 0.34f;
-                        yyy[nh] = 0.355f;
-                        YYY[nh] += Yc[y][x];
-
-                    } else if (yc[y][x] < 0.37f) {
-                        nh = 62;
-                        histxy[nh]++;
-                        area[nh] = 1.f;
-                        inter[nh] = 3;
-                        xxx[nh] = 0.34f;
-                        yyy[nh] = 0.365f;
-                        YYY[nh] += Yc[y][x];
-                    } else if (yc[y][x] < 0.38f) {
-                        nh = 63;
-                        histxy[nh]++;
-                        area[nh] = 1.f;
-                        inter[nh] = 3;
-                        xxx[nh] = 0.34f;
-                        yyy[nh] = 0.375f;
-                        YYY[nh] += Yc[y][x];
-                    } else if (yc[y][x] < 0.39f) {
-                        nh = 64;
-                        histxy[nh]++;
-                        area[nh] = 1.f;
-                        inter[nh] = 3;
-                        xxx[nh] = 0.34f;
-                        yyy[nh] = 0.385f;
-                        YYY[nh] += Yc[y][x];
-
-                    } else if (yc[y][x] < 0.4f) {
-                        nh = 65;
-                        histxy[nh]++;
-                        area[nh] = 1.f;
-                        inter[nh] = 3;
-                        xxx[nh] = 0.34f;
-                        yyy[nh] = 0.395f;
-                        YYY[nh] += Yc[y][x];
-                    } else if (yc[y][x] < 0.42f) {
-                        nh = 66;
-                        histxy[nh]++;
-                        area[nh] = 2.f;
-                        inter[nh] = 3;
-                        xxx[nh] = 0.34f;
-                        yyy[nh] = 0.41f;
-                        YYY[nh] += Yc[y][x];
-
-                    } else if (yc[y][x] < 0.45f) {
-                        nh = 67;
-                        histxy[nh]++;
-                        area[nh] = 3.f;
-                        inter[nh] = 2;
-                        xxx[nh] = 0.34f;
-                        yyy[nh] = 0.435f;
-                        YYY[nh] += Yc[y][x];
-                    } else if (yc[y][x] < 0.48f) {
-                        nh = 68;
-                        histxy[nh]++;
-                        area[nh] = 3.f;
-                        inter[nh] = 2;
-                        xxx[nh] = 0.34f;
-                        yyy[nh] = 0.465f;
-                        YYY[nh] += Yc[y][x];
-
-                    } else if (yc[y][x] < 0.5f) {
-                        nh = 69;
-                        histxy[nh]++;
-                        area[nh] = 2.f;
-                        inter[nh] = 2;
-                        xxx[nh] = 0.34f;
-                        yyy[nh] = 0.49f;
-                        YYY[nh] += Yc[y][x];
-
-                    } else if (yc[y][x] < 0.55f) {
-                        nh = 70;
-                        histxy[nh]++;
-                        area[nh] = 5.f;
-                        inter[nh] = 2;
-                        xxx[nh] = 0.34f;
-                        yyy[nh] = 0.525f;
-                        YYY[nh] += Yc[y][x];
-
-                    } else if (yc[y][x] < 0.65f) {
-                        nh = 71;
-                        histxy[nh]++;
-                        area[nh] = 2.f;
-                        inter[nh] = 1;
-                        xxx[nh] = 0.34f;
-                        yyy[nh] = 0.6f;
-                        YYY[nh] += Yc[y][x];
-
-                    }
-
-                } else if (xc[y][x] < 0.355f) {//neutral  37
-                    if (yc[y][x] < 0.2f) {
-                        nh = 72;
-                        histxy[nh]++;
-                        area[nh] = 20.f;
-                        inter[nh] = 1;
-                        xxx[nh] = 0.35f;
-                        yyy[nh] = 0.15f;
-                        YYY[nh] += Yc[y][x];
-
-                    } else if (yc[y][x] < 0.24f) {
-                        nh = 73;
-                        histxy[nh]++;
-                        area[nh] = 4.f;
-                        inter[nh] = 2;
-                        xxx[nh] = 0.35f;
-                        yyy[nh] = 0.22f;
-                        YYY[nh] += Yc[y][x];
-
-                    } else if (yc[y][x] < 0.29f) {
-                        nh = 74;
-                        histxy[nh]++;
-                        area[nh] = 5.f;
-                        inter[nh] = 2;
-                        xxx[nh] = 0.35f;
-                        yyy[nh] = 0.265f;
-                        YYY[nh] += Yc[y][x];
-
-                    } else if (yc[y][x] < 0.32f) {
-                        nh = 75;
-                        histxy[nh]++;
-                        area[nh] = 3.f;
-                        inter[nh] = 2;
-                        xxx[nh] = 0.35f;
-                        yyy[nh] = 0.305f;
-                        YYY[nh] += Yc[y][x];
-
-                    } else if (yc[y][x] < 0.33f) {//34
-                        nh = 76;
-                        histxy[nh]++;
-                        area[nh] = 1.f;
-                        inter[nh] = 3;
-                        xxx[nh] = 0.35f;
-                        yyy[nh] = 0.325f;
-                        YYY[nh] += Yc[y][x];
-                    } else if (yc[y][x] < 0.34f) {
-                        nh = 77;
-                        histxy[nh]++;
-                        area[nh] = 1.f;
-                        inter[nh] = 3;
-                        xxx[nh] = 0.35f;
-                        yyy[nh] = 0.335f;
-                        YYY[nh] += Yc[y][x];
-
-                    } else if (yc[y][x] < 0.35f) {//34
-                        nh = 78;
-                        histxy[nh]++;
-                        area[nh] = 1.f;
-                        inter[nh] = 3;
-                        xxx[nh] = 0.35f;
-                        yyy[nh] = 0.345f;
-                        YYY[nh] += Yc[y][x];
-                    } else if (yc[y][x] < 0.36f) {//34
-                        nh = 79;
-                        histxy[nh]++;
-                        area[nh] = 1.f;
-                        inter[nh] = 3;
-                        xxx[nh] = 0.35f;
-                        yyy[nh] = 0.355f;
-                        YYY[nh] += Yc[y][x];
-
-                    } else if (yc[y][x] < 0.37f) {
-                        nh = 80;
-                        histxy[nh]++;
-                        area[nh] = 1.f;
-                        inter[nh] = 3;
-                        xxx[nh] = 0.35f;
-                        yyy[nh] = 0.365f;
-                        YYY[nh] += Yc[y][x];
-                    } else if (yc[y][x] < 0.38f) {
-                        nh = 81;
-                        histxy[nh]++;
-                        area[nh] = 1.f;
-                        inter[nh] = 3;
-                        xxx[nh] = 0.35f;
-                        yyy[nh] = 0.375f;
-                        YYY[nh] += Yc[y][x];
-                    } else if (yc[y][x] < 0.39f) {
-                        nh = 82;
-                        histxy[nh]++;
-                        area[nh] = 1.f;
-                        inter[nh] = 3;
-                        xxx[nh] = 0.35f;
-                        yyy[nh] = 0.385f;
-                        YYY[nh] += Yc[y][x];
-
-                    } else if (yc[y][x] < 0.4f) {
-                        nh = 83;
-                        histxy[nh]++;
-                        area[nh] = 1.f;
-                        inter[nh] = 3;
-                        xxx[nh] = 0.35f;
-                        yyy[nh] = 0.395f;
-                        YYY[nh] += Yc[y][x];
-                    } else if (yc[y][x] < 0.42f) {
-                        nh = 84;
-                        histxy[nh]++;
-                        area[nh] = 2.f;
-                        inter[nh] = 3;
-                        xxx[nh] = 0.35f;
-                        yyy[nh] = 0.41f;
-                        YYY[nh] += Yc[y][x];
-
-                    } else if (yc[y][x] < 0.45f) {
-                        nh = 85;
-                        histxy[nh]++;
-                        area[nh] = 3.f;
-                        inter[nh] = 2;
-                        xxx[nh] = 0.34f;
-                        yyy[nh] = 0.435f;
-                        YYY[nh] += Yc[y][x];
-                    } else if (yc[y][x] < 0.48f) {
-                        nh = 68;
-                        histxy[nh]++;
-                        area[nh] = 3.f;
-                        inter[nh] = 2;
-                        xxx[nh] = 0.35f;
-                        yyy[nh] = 0.465f;
-                        YYY[nh] += Yc[y][x];
-
-                    } else if (yc[y][x] < 0.5f) {
-                        nh = 86;
-                        histxy[nh]++;
-                        area[nh] = 2.f;
-                        inter[nh] = 2;
-                        xxx[nh] = 0.35f;
-                        yyy[nh] = 0.49f;
-                        YYY[nh] += Yc[y][x];
-
-                    } else if (yc[y][x] < 0.55f) {
-                        nh = 87;
-                        histxy[nh]++;
-                        area[nh] = 5.f;
-                        inter[nh] = 2;
-                        xxx[nh] = 0.35f;
-                        yyy[nh] = 0.525f;
-                        YYY[nh] += Yc[y][x];
-
-                    } else if (yc[y][x] < 0.65f) {
-                        nh = 88;
-                        histxy[nh]++;
-                        area[nh] = 2.f;
-                        inter[nh] = 1;
-                        xxx[nh] = 0.35f;
-                        yyy[nh] = 0.6f;
-                        YYY[nh] += Yc[y][x];
-
-                    }
-
-                } else if (xc[y][x] < 0.365f) {  //0.4
-                    if (yc[y][x] < 0.2f) {
-                        nh = 89;
-                        histxy[nh]++;
-                        area[nh] = 20.f;
-                        inter[nh] = 1;
-                        xxx[nh] = 0.355f;
-                        yyy[nh] = 0.16f;
-                        YYY[nh] += Yc[y][x];
-
-
-                    } else if (yc[y][x] < 0.24f) {
-                        nh = 90;
-                        histxy[nh]++;
-                        area[nh] = 4.f;
-                        inter[nh] = 2;
-                        xxx[nh] = 0.355f;
-                        yyy[nh] = 0.22f;
-                        YYY[nh] += Yc[y][x];
-
-                    } else if (yc[y][x] < 0.29f) {
-                        nh = 91;
-                        histxy[nh]++;
-                        area[nh] = 5.f;
-                        inter[nh] = 2;
-                        xxx[nh] = 0.355f;
-                        yyy[nh] = 0.265f;
-                        YYY[nh] += Yc[y][x];
-
-                    } else if (yc[y][x] < 0.32f) {
-                        nh = 92;
-                        histxy[nh]++;
-                        area[nh] = 3.f;
-                        inter[nh] = 3;
-                        xxx[nh] = 0.355f;
-                        yyy[nh] = 0.30f;
-                        YYY[nh] += Yc[y][x];
-                    } else if (yc[y][x] < 0.33f) {
-                        nh = 93;
-                        histxy[nh]++;
-                        area[nh] = 1.f;
-                        inter[nh] = 3;
-                        xxx[nh] = 0.355f;
-                        yyy[nh] = 0.325f;
-                        YYY[nh] += Yc[y][x];
-
-                    } else if (yc[y][x] < 0.34f) {
-                        nh = 94;
-                        histxy[nh]++;
-                        area[nh] = 1.f;
-                        inter[nh] = 3;
-                        xxx[nh] = 0.355f;
-                        yyy[nh] = 0.335f;
-                        YYY[nh] += Yc[y][x];
-                    } else if (yc[y][x] < 0.36f) {
-                        nh = 95;
-                        histxy[nh]++;
-                        area[nh] = 2.f;
-                        inter[nh] = 3;
-                        xxx[nh] = 0.355f;
-                        yyy[nh] = 0.35f;
-                        YYY[nh] += Yc[y][x];
-
-                    } else if (yc[y][x] < 0.37f) {
-                        nh = 96;
-                        histxy[nh]++;
-                        area[nh] = 1.f;
-                        inter[nh] = 3;
-                        xxx[nh] = 0.355f;
-                        yyy[nh] = 0.365f;
-                        YYY[nh] += Yc[y][x];
-                    } else if (yc[y][x] < 0.38f) {
-                        nh = 97;
-                        histxy[nh]++;
-                        area[nh] = 1.f;
-                        inter[nh] = 3;
-                        xxx[nh] = 0.355f;
-                        yyy[nh] = 0.375f;
-                        YYY[nh] += Yc[y][x];
-                    } else if (yc[y][x] < 0.39f) {
-                        nh = 98;
-                        histxy[nh]++;
-                        area[nh] = 1.f;
-                        inter[nh] = 3;
-                        xxx[nh] = 0.355f;
-                        yyy[nh] = 0.385f;
-                        YYY[nh] += Yc[y][x];
-
-                    } else if (yc[y][x] < 0.4f) {
-                        nh = 99;
-                        histxy[nh]++;
-                        area[nh] = 1.f;
-                        inter[nh] = 3;
-                        xxx[nh] = 0.355f;
-                        yyy[nh] = 0.395f;
-                        YYY[nh] += Yc[y][x];
-                    } else if (yc[y][x] < 0.42f) {
-                        nh = 100;
-                        histxy[nh]++;
-                        area[nh] = 2.f;
-                        inter[nh] = 3;
-                        xxx[nh] = 0.355f;
-                        yyy[nh] = 0.41f;
-                        YYY[nh] += Yc[y][x];
-
-                    } else if (yc[y][x] < 0.45f) {
-                        nh = 101;
-                        histxy[nh]++;
-                        area[nh] = 3.f;
-                        inter[nh] = 2;
-                        xxx[nh] = 0.355f;
-                        yyy[nh] = 0.435f;
-                        YYY[nh] += Yc[y][x];
-
-                    } else if (yc[y][x] < 0.5f) {
-                        nh = 102;
-                        histxy[nh]++;
-                        area[nh] = 5.f;
-                        inter[nh] = 2;
-                        xxx[nh] = 0.355f;
-                        yyy[nh] = 0.475f;
-                        YYY[nh] += Yc[y][x];
-
-                    } else if (yc[y][x] < 0.55f) {
-                        nh = 103;
-                        histxy[nh]++;
-                        area[nh] = 5.f;
-                        inter[nh] = 2;
-                        xxx[nh] = 0.355f;
-                        yyy[nh] = 0.525f;
-                        YYY[nh] += Yc[y][x];
-
-
-                    } else if (yc[y][x] < 0.63f) {
-                        nh = 104;
-                        histxy[nh]++;
-                        area[nh] = 10.f;
-                        inter[nh] = 1;
-                        xxx[nh] = 0.355f;
-                        yyy[nh] = 0.55f;
-                        YYY[nh] += Yc[y][x];
-
-                    }
-
-                } else if (xc[y][x] < 0.405f) {//45
-                    if (yc[y][x] < 0.2f) {
-                        nh = 105;
-                        histxy[nh]++;
-                        area[nh] = 40.f;
-                        inter[nh] = 1;
-                        xxx[nh] = 0.38f;
-                        yyy[nh] = 0.18f;
-                        YYY[nh] += Yc[y][x];
-
-                    } else if (yc[y][x] < 0.24f) {
-                        nh = 106;
-                        histxy[nh]++;
-                        area[nh] = 16.f;
-                        inter[nh] = 2;
-                        xxx[nh] = 0.38f;
-                        yyy[nh] = 0.22f;
-                        YYY[nh] += Yc[y][x];
-
-                    } else if (yc[y][x] < 0.29f) {
-                        nh = 107;
-                        histxy[nh]++;
-                        area[nh] = 20.f;
-                        inter[nh] = 2;
-                        xxx[nh] = 0.38f;
-                        yyy[nh] = 0.265f;
-                        YYY[nh] += Yc[y][x];
-
-                    } else if (yc[y][x] < 0.32f) {
-                        nh = 108;
-                        histxy[nh]++;
-                        area[nh] = 12.f;
-                        inter[nh] = 3;
-                        xxx[nh] = 0.38f;
-                        yyy[nh] = 0.305f;
-                        YYY[nh] += Yc[y][x];
-
-                    } else if (yc[y][x] < 0.34f) {
-                        nh = 109;
-                        histxy[nh]++;
-                        area[nh] = 8.f;
-                        inter[nh] = 3;
-                        xxx[nh] = 0.38f;
-                        yyy[nh] = 0.33f;
-                        YYY[nh] += Yc[y][x];
-
-                    } else if (yc[y][x] < 0.37f) {
-                        nh = 110;
-                        histxy[nh]++;
-                        area[nh] = 12.f;
-                        inter[nh] = 3;
-                        xxx[nh] = 0.38f;
-                        yyy[nh] = 0.355f;
-                        YYY[nh] += Yc[y][x];
-
-                    } else if (yc[y][x] < 0.4f) {
-                        nh = 111;
-                        histxy[nh]++;
-                        area[nh] = 12.f;
-                        inter[nh] = 3;
-                        xxx[nh] = 0.38f;
-                        YYY[nh] += Yc[y][x];
-                        yyy[nh] = 0.385f;
-
-                    } else if (yc[y][x] < 0.45f) {
-                        nh = 112;
-                        histxy[nh]++;
-                        area[nh] = 20.f;
-                        inter[nh] = 2;
-                        xxx[nh] = 0.38f;
-                        yyy[nh] = 0.425f;
-                        YYY[nh] += Yc[y][x];
-
-                    } else if (yc[y][x] < 0.5f) {
-                        nh = 113;
-                        histxy[nh]++;
-                        area[nh] = 20.f;
-                        inter[nh] = 2;
-                        xxx[nh] = 0.38f;
-                        yyy[nh] = 0.475f;
-                        YYY[nh] += Yc[y][x];
-
-                    } else if (yc[y][x] < 0.55f) {
-                        nh = 114;
-                        histxy[nh]++;
-                        area[nh] = 20.f;
-                        inter[nh] = 2;
-                        xxx[nh] = 0.38f;
-                        yyy[nh] = 0.525f;
-                        YYY[nh] += Yc[y][x];
-
-
-                    } else if (yc[y][x] < 0.6f) {
-                        nh = 115;
-                        histxy[nh]++;
-                        area[nh] = 16.f;
-                        inter[nh] = 1;
-                        xxx[nh] = 0.38f;
-                        yyy[nh] = 0.56f;
-                        YYY[nh] += Yc[y][x];
-
-                    }
-
-                } else if (xc[y][x] < 0.445f) {//45
-                    if (yc[y][x] < 0.2f) {
-                        nh = 116;
-                        histxy[nh]++;
-                        area[nh] = 40.f;
-                        inter[nh] = 1;
-                        xxx[nh] = 0.42f;
-                        yyy[nh] = 0.18f;
-                        YYY[nh] += Yc[y][x];
-
-                    } else if (yc[y][x] < 0.24f) {
-                        nh = 117;
-                        histxy[nh]++;
-                        area[nh] = 16.f;
-                        inter[nh] = 2;
-                        xxx[nh] = 0.42f;
-                        yyy[nh] = 0.22f;
-                        YYY[nh] += Yc[y][x];
-
-                    } else if (yc[y][x] < 0.29f) {
-                        nh = 118;
-                        histxy[nh]++;
-                        area[nh] = 20.f;
-                        inter[nh] = 2;
-                        xxx[nh] = 0.42f;
-                        yyy[nh] = 0.265f;
-                        YYY[nh] += Yc[y][x];
-
-                    } else if (yc[y][x] < 0.32f) {
-                        nh = 119;
-                        histxy[nh]++;
-                        area[nh] = 12.f;
-                        inter[nh] = 3;
-                        xxx[nh] = 0.42f;
-                        yyy[nh] = 0.305f;
-                        YYY[nh] += Yc[y][x];
-
-                    } else if (yc[y][x] < 0.34f) {
-                        nh = 120;
-                        histxy[nh]++;
-                        area[nh] = 8.f;
-                        inter[nh] = 3;
-                        xxx[nh] = 0.42f;
-                        yyy[nh] = 0.33f;
-                        YYY[nh] += Yc[y][x];
-
-                    } else if (yc[y][x] < 0.37f) {
-                        nh = 121;
-                        histxy[nh]++;
-                        area[nh] = 12.f;
-                        inter[nh] = 3;
-                        xxx[nh] = 0.42f;
-                        yyy[nh] = 0.355f;
-                        YYY[nh] += Yc[y][x];
-
-                    } else if (yc[y][x] < 0.4f) {
-                        nh = 122;
-                        histxy[nh]++;
-                        area[nh] = 12.f;
-                        inter[nh] = 3;
-                        xxx[nh] = 0.42f;
-                        yyy[nh] = 0.385f;
-                        YYY[nh] += Yc[y][x];
-
-                    } else if (yc[y][x] < 0.45f) {
-                        nh = 123;
-                        histxy[nh]++;
-                        area[nh] = 20.f;
-                        inter[nh] = 2;
-                        xxx[nh] = 0.38f;
-                        yyy[nh] = 0.425f;
-                        YYY[nh] += Yc[y][x];
-
-                    } else if (yc[y][x] < 0.5f) {
-                        nh = 124;
-                        histxy[nh]++;
-                        area[nh] = 20.f;
-                        inter[nh] = 2;
-                        xxx[nh] = 0.42f;
-                        yyy[nh] = 0.475f;
-                        YYY[nh] += Yc[y][x];
-
-                    } else if (yc[y][x] < 0.55f) {
-                        nh = 125;
-                        histxy[nh]++;
-                        area[nh] = 20.f;
-                        inter[nh] = 2;
-                        xxx[nh] = 0.42f;
-                        yyy[nh] = 0.525f;
-                        YYY[nh] += Yc[y][x];
-
-
-                    } else if (yc[y][x] < 0.58f) {
-                        nh = 126;
-                        histxy[nh]++;
-                        area[nh] = 16.f;
-                        inter[nh] = 1;
-                        xxx[nh] = 0.42f;
-                        yyy[nh] = 0.56f;
-                        YYY[nh] += Yc[y][x];
-
-                    }
-
-                } else if (xc[y][x] < 0.495f) {
-                    if (yc[y][x] < 0.2f) {
-                        nh = 127;
-                        histxy[nh]++;
-                        area[nh] = 40.f;
-                        inter[nh] = 1;
-                        xxx[nh] = 0.475f;
-                        yyy[nh] = 0.19f;
-                        YYY[nh] += Yc[y][x];
-
-                    } else if (yc[y][x] < 0.24f) {
-                        nh = 128;
-                        histxy[nh]++;
-                        area[nh] = 20.f;
-                        inter[nh] = 2;
-                        xxx[nh] = 0.475f;
-                        yyy[nh] = 0.22f;
-                        YYY[nh] += Yc[y][x];
-
-                    } else if (yc[y][x] < 0.29f) {
-                        nh = 129;
-                        histxy[nh]++;
-                        area[nh] = 25.f;
-                        inter[nh] = 2;
-                        xxx[nh] = 0.475f;
-                        yyy[nh] = 0.265f;
-                        YYY[nh] += Yc[y][x];
-
-                    } else if (yc[y][x] < 0.32f) {
-                        nh = 130;
-                        histxy[nh]++;
-                        area[nh] = 15.f;
-                        inter[nh] = 3;
-                        xxx[nh] = 0.475f;
-                        yyy[nh] = 0.305f;
-                        YYY[nh] += Yc[y][x];
-
-                    } else if (yc[y][x] < 0.34f) {
-                        nh = 131;
-                        histxy[nh]++;
-                        area[nh] = 10.f;
-                        inter[nh] = 3;
-                        xxx[nh] = 0.475f;
-                        yyy[nh] = 0.33f;
-
-                    } else if (yc[y][x] < 0.37f) {
-                        nh = 132;
-                        histxy[nh]++;
-                        area[nh] = 15.f;
-                        inter[nh] = 3;
-                        xxx[nh] = 0.475f;
-                        yyy[nh] = 0.355f;
-                        YYY[nh] += Yc[y][x];
-
-                    } else if (yc[y][x] < 0.4f) {
-                        nh = 133;
-                        histxy[nh]++;
-                        area[nh] = 15.f;
-                        inter[nh] = 3;
-                        xxx[nh] = 0.475f;
-                        yyy[nh] = 0.385f;
-                        YYY[nh] += Yc[y][x];
-
-                    } else if (yc[y][x] < 0.45f) {
-                        nh = 134;
-                        histxy[nh]++;
-                        area[nh] = 25.f;
-                        inter[nh] = 2;
-                        xxx[nh] = 0.475f;
-                        yyy[nh] = 0.425f;
-                        YYY[nh] += Yc[y][x];
-
-                    } else if (yc[y][x] < 0.5f) {
-                        nh = 135;
-                        histxy[nh]++;
-                        area[nh] = 25.f;
-                        inter[nh] = 2;
-                        xxx[nh] = 0.475f;
-                        yyy[nh] = 0.46f;
-                        YYY[nh] += Yc[y][x];
-
-                    } else if (yc[y][x] < 0.55f) {
-                        nh = 136;
-                        histxy[nh]++;
-                        area[nh] = 20.f;
-                        inter[nh] = 1;
-                        xxx[nh] = 0.475f;
-                        yyy[nh] = 0.52f;
-                        YYY[nh] += Yc[y][x];
-
-                    }
-                } else if (xc[y][x] < 0.545f) {
-                    if (yc[y][x] < 0.2f) {
-                        nh = 137;
-                        histxy[nh]++;
-                        area[nh] = 25.f;
-                        inter[nh] = 1;
-                        xxx[nh] = 0.525f;
-                        yyy[nh] = 0.19f;
-                        YYY[nh] += Yc[y][x];
-
-                    } else if (yc[y][x] < 0.24f) {
-                        nh = 138;
-                        histxy[nh]++;
-                        area[nh] = 20.f;
-                        inter[nh] = 1;
-                        xxx[nh] = 0.525f;
-                        yyy[nh] = 0.22f;
-                        YYY[nh] += Yc[y][x];
-
-                    } else if (yc[y][x] < 0.29f) {
-                        nh = 139;
-                        histxy[nh]++;
-                        area[nh] = 25.f;
-                        inter[nh] = 2;
-                        xxx[nh] = 0.525f;
-                        yyy[nh] = 0.265f;
-                        YYY[nh] += Yc[y][x];
-
-                    } else if (yc[y][x] < 0.32f) {
-                        nh = 140;
-                        histxy[nh]++;
-                        area[nh] = 15.f;
-                        inter[nh] = 2;
-                        xxx[nh] = 0.525f;
-                        yyy[nh] = 0.305f;
-                        YYY[nh] += Yc[y][x];
-
-                    } else if (yc[y][x] < 0.34f) {
-                        nh = 141;
-                        histxy[nh]++;
-                        area[nh] = 10.f;
-                        inter[nh] = 2;
-                        xxx[nh] = 0.525f;
-                        yyy[nh] = 0.33f;
-                        YYY[nh] += Yc[y][x];
-
-                    } else if (yc[y][x] < 0.37f) {
-                        nh = 142;
-                        histxy[nh]++;
-                        area[nh] = 15.f;
-                        inter[nh] = 2;
-                        xxx[nh] = 0.525f;
-                        yyy[nh] = 0.355f;
-                        YYY[nh] += Yc[y][x];
-
-                    } else if (yc[y][x] < 0.4f) {
-                        nh = 143;
-                        histxy[nh]++;
-                        area[nh] = 15.f;
-                        inter[nh] = 2;
-                        xxx[nh] = 0.525f;
-                        yyy[nh] = 0.385f;
-                        YYY[nh] += Yc[y][x];
-
-                    } else if (yc[y][x] < 0.45f) {
-                        nh = 144;
-                        histxy[nh]++;
-                        area[nh] = 25.f;
-                        inter[nh] = 2;
-                        xxx[nh] = 0.525f;
-                        yyy[nh] = 0.425f;
-                        YYY[nh] += Yc[y][x];
-
-                    } else if (yc[y][x] < 0.5f) {
-                        nh = 145;
-                        histxy[nh]++;
-                        area[nh] = 25.f;
-                        inter[nh] = 1;
-                        xxx[nh] = 0.525f;
-                        yyy[nh] = 0.46f;
-                        YYY[nh] += Yc[y][x];
-
-
-
-                    }
-
-                } else if (xc[y][x] < 0.595f) {
-                    if (yc[y][x] < 0.2f) {
-                        nh = 146;
-                        histxy[nh]++;
-                        area[nh] = 15.f;
-                        inter[nh] = 1;
-                        xxx[nh] = 0.575f;
-                        yyy[nh] = 0.19f;
-                        YYY[nh] += Yc[y][x];
-
-                    } else if (yc[y][x] < 0.25f) {
-                        nh = 147;
-                        histxy[nh]++;
-                        area[nh] = 25.f;
-                        inter[nh] = 1;
-                        xxx[nh] = 0.575f;
-                        yyy[nh] = 0.225f;
-                        YYY[nh] += Yc[y][x];
-
-                    } else if (yc[y][x] < 0.3f) {
-                        nh = 148;
-                        histxy[nh]++;
-                        area[nh] = 25.f;
-                        inter[nh] = 2;
-                        xxx[nh] = 0.575f;
-                        yyy[nh] = 0.275f;
-                        YYY[nh] += Yc[y][x];
-
-                    } else if (yc[y][x] < 0.35f) {
-                        nh = 149;
-                        histxy[nh]++;
-                        area[nh] = 25.f;
-                        inter[nh] = 2;
-                        xxx[nh] = 0.575f;
-                        yyy[nh] = 0.325f;
-                        YYY[nh] += Yc[y][x];
-
-                    } else if (yc[y][x] < 0.4f) {
-                        nh = 160;
-                        histxy[nh]++;
-                        area[nh] = 25.f;
-                        inter[nh] = 2;
-                        xxx[nh] = 0.575f;
-                        yyy[nh] = 0.375f;
-                        YYY[nh] += Yc[y][x];
-
-
-                    } else if (yc[y][x] < 0.45f) {
-                        nh = 161;
-                        histxy[nh]++;
-                        area[nh] = 15.f;
-                        inter[nh] = 1;
-                        xxx[nh] = 0.56f;
-                        yyy[nh] = 0.405f;
-                        YYY[nh] += Yc[y][x];
-
-                    }
-
-                } else if (xc[y][x] < 0.65f) {
-                    if (yc[y][x] < 0.25f) {
-                        nh = 162;
-                        histxy[nh]++;
-                        area[nh] = 15.f;
-                        inter[nh] = 1;
-                        xxx[nh] = 0.625f;
-                        yyy[nh] = 0.22f;
-                        YYY[nh] += Yc[y][x];
-
-
-                    } else if (yc[y][x] < 0.3f) {
-                        nh = 163;
-                        histxy[nh]++;
-                        area[nh] = 25.f;
-                        inter[nh] = 2;
-                        xxx[nh] = 0.625f;
-                        yyy[nh] = 0.275f;
-                        YYY[nh] += Yc[y][x];
-
-                    } else if (yc[y][x] < 0.35f) {
-                        nh = 164;
-                        histxy[nh]++;
-                        area[nh] = 25.f;
-                        inter[nh] = 2;
-                        xxx[nh] = 0.625f;
-                        yyy[nh] = 0.34f;
-                        YYY[nh] += Yc[y][x];
-
-
-                    } else if (yc[y][x] < 0.45f) {
-                        nh = 165;
-                        histxy[nh]++;
-                        area[nh] = 15.f;
-                        inter[nh] = 1;
-                        xxx[nh] = 0.625f;
-                        yyy[nh] = 0.37f;
-                        YYY[nh] += Yc[y][x];
-
-                    }
-
-                } else if (xc[y][x] < 0.75f) {
-                    nh = 166;
-                    histxy[nh]++;
-                    area[nh] = 25.f;
-                    inter[nh] = 1;
-                    xxx[nh] = 0.635f;
-                    yyy[nh] = 0.32f;
-                    YYY[nh] += Yc[y][x];
-
-
-                }
-
-            }
-        }
-
-        for (int j = 0; j < siza; j++) {
-
-            histuse[j] = 100 * histxy[j] * (1.f / area[j]) * inter[j];
-            histY[j] = YYY[j] / histxy[j];
-            //   printf ("h=%i ", (int) histuse[j]);
-
-        }
-
-        //    printf ("\n");
-        int memj[Nc] = {};
-
-        //find the 45 max values for histuse probably less
-        float max[Nc] = {-100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.,
-                         -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f
-                        };
-
-        for (int k = 0; k < Nc; k++) {
-            int ind = 0;
-
-            for (int j = 0; j < siza; j++) {
-                if (histuse[j] > max[k]) {
-                    max[k] = histuse[j];
-                    memj[k] = j;
-                    ind = j;
-                }
-            }
-
-            histuse[ind] = 0.f;
-        }
-
-        int siz = 0;
-
-        for (int k = 0; k < Nc; k++) {
-            if (memj[k] != 0) {
-                siz++;
-                //     printf ("k=%i", memj[k]);
-
-            }
-        }
-
-        float *xxcal = nullptr;
-        float *yycal = nullptr;
-        float *YYcal = nullptr;
-
-        xxcal = new float [siz];
-        yycal = new float [siz];
-        YYcal = new float [siz];
-        int pos = 0;
-
-        for (int k = 0; k < Nc; k++) {
-            if (memj[k] != 0) {
-                xxcal[pos] = xxx[memj[k]];
-                yycal[pos] = yyy[memj[k]];
-                YYcal[pos] = histY[memj[k]];
-                pos++;
-            }
-        }
-
-//printf("pos=%i\n", pos);
-//calculate RGB values for these colors
-
-        float R[pos], G[pos], B[pos];
-
-        for (int p = 0; p < pos; p++) {
-            //  printf("xx=%f yy=%f YY=%f\n", xxcal[p],yycal[p], YYcal[p]);
-            float X, Y, Z;
-            X = 65535.f * (xxcal[p] * YYcal[p]) / yycal[p];
-            Z = 65535.f * ((1.f - xxcal[p] - yycal[p]) * YYcal[p]) / yycal[p];
-            Y = 65535.f * YYcal[p];
-            Color::xyz2rgb (X, Y, Z, R[p], G[p], B[p], wip);
-            //  printf("R=%f G=%f B=%f\n", R[p],G[p], B[p]);
-
-        }
-
-        array2D<float> rk;
-        array2D<float> gk;
-        array2D<float> bk;
-        rk (pos, N_t);
-        gk (pos, N_t);
-        bk (pos, N_t);
-
-        array2D<float> xk;
-        array2D<float> yk;
-        array2D<float> Yk;
-        xk (pos, N_t);
-        yk (pos, N_t);
-        Yk (pos, N_t);
-
-        for (int i = 0; i < pos; i++) {
-            for (int j = 0; j < N_t; j++) {
-                rk[i][j] = 0.f;
-                gk[i][j] = 0.f;
-                bk[i][j] = 0.f;
-                xk[i][j] = 0.f;
-                yk[i][j] = 0.f;
-                Yk[i][j] = 0.f;
-            }
-        }
-
-//printf("\n");
-
-//calculate r g b with T coefi
-        for (int tt = 0; tt < N_t; tt++) {
-            //  printf("rmm=%f bmm=%f\n", rmm[tt],bmm[tt]);
-        }
-
-        for (int tt = 0; tt < N_t; tt++) {
-            for (int p = 0; p < pos; p++) {
-                rk[p][tt] = rmm[tt] * R[p];
-                gk[p][tt] =  G[p];
-                bk[p][tt] = bmm[tt] * B[p];
-                //  printf("R=%f ", R[p]);
-                //  printf("rk=%f gk=%f bk=%f\n", rk[p][tt], gk[p][tt], bk[p][tt]);
-
-            }
-        }
-
-//       printf ("\n");
-
-//recalculate x y Y for each Temp and each color selected
-        for (int tt = 0; tt < N_t; tt++) {
-            for (int p = 0; p < pos; p++) {
-                float x_c = 0.f, y_c = 0.f, Y_c = 0.f;
-                float RR = rk[p][tt];
-                float GG = gk[p][tt];
-                float BB = bk[p][tt];
-
-                Color::rgbxyY (RR, GG, BB, x_c, y_c, Y_c, wp);
-                xk[p][tt] = x_c;
-                yk[p][tt] = y_c;
-                Yk[p][tt] = Y_c;
-                //printf("xk=%f yk=%f\n", xk[p][tt], yk[p][tt]);
-
-            }
-
-        }
-
-        //now we are comparaing by correlation xk, yk to Tx[nc][tt] and Ty
-        // covariance xk  + Tx and yk + Ty / sigma xk + Tx * sigma yk + ty
-        //number elements = Number of reference color + number of color found
-        //
-        int number = pos + Nc;
-        //    int number =  Nc;
-        float avgx[N_t] = {}, avgy[N_t] = {};
-        float covar[N_t] = {};
-        float sigx[N_t] = {};
-        float sigy[N_t] = {};
-        float correl[N_t] = {};
-        float avgx42 = 0.f;
-        float avgy42 = 0.f;
-        float sigx42 = 0.f;
-        float sigy42 = 0.f;
-
-        for (int tt = 0; tt < N_t; tt++) {
-            avgx[tt] = 0.f;
-            avgy[tt] = 0.f;
-            covar[tt] = 0.f;
-            sigx[tt] = 0.f;
-            sigy[tt] = 0.f;
-            correl[tt] = 0.f;
-        }
-
-        int typ = 2;//4 type of covariance
-		//I must change something - probably adapted references color to real color...todo
-        if (typ == 1) {
-            //mean 2 for ref
-            for (int tt = 0; tt < N_t; tt++) {
-                for (int i = 0; i < pos; i++) {//Nc  ==> pos
-                    avgy[tt] += Tx[i][tt];
-                    avgy[tt] += Ty[i][tt];
-                }
-
-                avgy[tt] /= 2 * pos;//to change
-            }
-
-            for (int tt = 0; tt < N_t; tt++) {
-                for (int i = 0; i < pos; i++) {
-                    avgx[tt] += xk[i][tt];
-                    avgx[tt] += yk[i][tt];
-                }
-
-                avgx[tt] /= 2 * pos;
-
-            }
-
-            for (int tt = 0; tt < N_t; tt++) {
-                for (int i = 0; i < pos; i++) {
-                    covar[tt] += ((Tx[i][tt] - avgy[tt]) * (xk[i][tt] - avgx[tt]));
-                    covar[tt] += ((Ty[i][tt] - avgy[tt]) * (yk[i][tt] - avgx[tt]));
-                    sigy[tt] += SQR (Tx[i][tt] - avgy[tt]);
-                    sigy[tt] += SQR (Ty[i][tt] - avgy[tt]);
-                    sigx[tt] += SQR (xk[i][tt] - avgx[tt]);
-                    sigy[tt] += SQR (yk[i][tt] - avgx[tt]);
-
-                }
-
-                covar[tt] /= 2 * pos;
-                sigy[tt] /= 2 * pos;
-                sigx[tt] /= 2 * pos;
-                sigx[tt] = sqrt (sigx[tt]);
-                sigy[tt] = sqrt (sigy[tt]);
-
-                correl[tt] = covar[tt] / (sigx[tt] * sigy[tt]);
-
-                printf ("tt=%i  corr=%f\n", tt, correl[tt]);
-
-            }
-        } else if (typ == 2) {
-            //          for (int tt = 0; tt < N_t; tt++) {
-            for (int i = 0; i < Nc; i++) {//Nc  ==> pos
-                avgy42 += Tx[i][42];
-                avgy42 += Ty[i][42];
-            }
-
-            avgy42 /= 2 * Nc;//to change
-//           }
-
-            for (int tt = 23; tt < N_t; tt++) {
-                for (int i = 0; i < pos; i++) {
-                    avgx[tt] += xk[i][tt];
-                    avgx[tt] += yk[i][tt];
-                }
-
-                avgx[tt] /= 2 * pos;
-
-            }
-
-            for (int tt = 23; tt < N_t; tt++) {
-                for (int i = 0; i < pos; i++) {
-                    covar[tt] += ((Tx[i][42] - avgy42) * (xk[i][tt] - avgx[tt]));
-                    covar[tt] += ((Ty[i][42] - avgy42) * (yk[i][tt] - avgx[tt]));
-                    sigy[tt] += SQR (Tx[i][42] - avgy42);
-                    sigy[tt] += SQR (Ty[i][42] - avgy42);
-                    sigx[tt] += SQR (xk[i][tt] - avgx[tt]);
-                    sigy[tt] += SQR (yk[i][tt] - avgx[tt]);
-
-                }
-
-                covar[tt] /= 2 * pos;
-                sigy[tt] /= 2 * pos;
-                sigx[tt] /= 2 * pos;
-                sigx[tt] = sqrt (sigx[tt]);
-                sigy[tt] = sqrt (sigy[tt]);
-
-                correl[tt] = covar[tt] / (sigx[tt] * sigy[tt]);
-
-                printf ("tt=%i pos=%i corr=%f\n", tt, pos, correl[tt]);
-
-            }
-
-        } else if (typ == 3) {
-
-            //calculate mean for x anf for y
-            for (int tt = 0; tt < N_t; tt++) {
-                for (int i = 0; i < Nc; i++) {
-                    avgx[tt] += Tx[i][tt];
-                    avgy[tt] += Ty[i][tt];
-                }
-            }
-
-            for (int tt = 0; tt < N_t; tt++) {
-                for (int i = 0; i < pos; i++) {
-                    avgx[tt] += xk[i][tt];
-                    avgy[tt] += yk[i][tt];
-                }
-
-                avgx[tt] /= number;
-                avgy[tt] /= number;
-            }
-
-            //calculate covariance and stdv x stdv y
-            for (int tt = 0; tt < N_t; tt++) {
-                for (int i = 0; i < Nc; i++) {
-                    covar[tt] += ((Tx[i][tt] - avgx[tt]) * (Ty[i][tt] - avgy[tt]));
-
-                    sigx[tt] += SQR (Tx[i][tt] - avgx[tt]);
-                    sigy[tt] += SQR (Ty[i][tt] - avgy[tt]);
-
-
-                }
-            }
-
-            for (int tt = 0; tt < N_t; tt++) {
-                for (int i = 0; i < pos; i++) {
-                    covar[tt] += ((xk[i][tt] - avgx[tt]) * (yk[i][tt] - avgy[tt]));
-                    sigx[tt] += SQR (xk[i][tt] - avgx[tt]);
-                    sigy[tt] += SQR (yk[i][tt] - avgy[tt]);
-
-                }
-            }
-
-            for (int tt = 0; tt < N_t; tt++) {
-
-                covar[tt] /= number;
-                sigx[tt] /= number;
-                sigy[tt] /= number;
-                sigx[tt] = sqrt (sigx[tt]);
-                sigy[tt] = sqrt (sigy[tt]);
-
-                correl[tt] = covar[tt] / (sigx[tt] * sigy[tt]);
-
-                printf ("tt=%i  corr=%f\n", tt, correl[tt]);
-            }
-        } else if (typ == 4) {//tt=42 #5000K
-            //calculate mean for x anf for y
-            //      for (int tt = 0; tt < N_t; tt++) {
-            for (int i = 0; i < Nc; i++) {
-                //tt = 42;
-                avgx42 += Tx[i][42];
-                avgy42 += Ty[i][42];
-            }
-
-            //     }
-
-            for (int tt = 0; tt < N_t; tt++) {
-                for (int i = 0; i < pos; i++) {
-                    avgx[tt] += xk[i][tt];
-                    avgy[tt] += yk[i][tt];
-                }
-
-                avgx[tt] += avgx42;
-                avgy[tt] += avgy42;
-
-                avgx[tt] /= number;
-                avgy[tt] /= number;
-            }
-
-            //calculate covariance and stdv x stdv y
-            for (int tt = 0; tt < N_t; tt++) {
-                for (int i = 0; i < Nc; i++) {
-                    covar[tt] += ((Tx[i][42] - avgx[tt]) * (Ty[i][42] - avgy[tt]));
-
-                    sigx[tt] += SQR (Tx[i][42] - avgx[tt]);
-                    sigy[tt] += SQR (Ty[i][42] - avgy[tt]);
-
-
-                }
-            }
-
-            for (int tt = 0; tt < N_t; tt++) {
-                for (int i = 0; i < pos; i++) {
-                    covar[tt] += ((xk[i][tt] - avgx[tt]) * (yk[i][tt] - avgy[tt]));
-                    sigx[tt] += SQR (xk[i][tt] - avgx[tt]);
-                    sigy[tt] += SQR (yk[i][tt] - avgy[tt]);
-
-                }
-            }
-
-            for (int tt = 0; tt < N_t; tt++) {
-
-                covar[tt] /= number;
-                sigx[tt] /= number;
-                sigy[tt] /= number;
-                sigx[tt] = sqrt (sigx[tt]);
-                sigy[tt] = sqrt (sigy[tt]);
-
-                correl[tt] = covar[tt] / (sigx[tt] * sigy[tt]);
-
-                printf ("tt=%i  corr=%f\n", tt, correl[tt]);
-            }
-
-        }
-
-        delete[] xxcal;
-        delete[] yycal;
-        delete[] YYcal;
-
-        rk (0, 0);
-        gk (0, 0);
-        bk (0, 0);
-        xk (0, 0);
-        yk (0, 0);
-        Yk (0, 0);
-
-
-        //end family
-
-        for (int i = 0; i < Nc; i++) {
-            delete [] Tx[i];
-            delete [] Ty[i];
-            delete [] TYY[i];
-
-        }
-
-        delete [] Tx;
-        delete [] Ty;
-        delete [] TYY;
-
-
-        delete [] rmm;
-        delete [] gmm;
-        delete [] bmm;
-
-        /*        double covarrel[44];
-
-                for (int i = 0; i < 44; i++) {
-                    covarrel[i] = 0.;
-                }
-
-
-                for (int Tx = 0; Tx < 44; Tx++) {
-                    double avgX = 0.f, avgY = 0.f, avgZ = 0.f;
-                    double avgR = 0.f, avgG = 0.f, avgB = 0.f;
-                    int nb = 0;
-
-        //        double rmul = sRGBd65_xyz[0][0] *  Txyz[Tx].XX + sRGBd65_xyz[0][1] * 1. + sRGBd65_xyz[0][2] * Txyz[Tx].ZZ;
-        //        double gmul = sRGBd65_xyz[1][0] *  Txyz[Tx].XX + sRGBd65_xyz[1][1] * 1. + sRGBd65_xyz[1][2] * Txyz[Tx].ZZ;
-        //        double bmul = sRGBd65_xyz[2][0] *  Txyz[Tx].XX + sRGBd65_xyz[2][1] * 1. + sRGBd65_xyz[2][2] * Txyz[Tx].ZZ;
-                    //sort data xyz in histogram ==> Convert to xyY thrn compare to cie_colour_match_jdc
-                    for (int y = 0; y < bfh ; y += 1) {
-                        for (int x = 0; x < bfw ; x += 1) {
-                            int yy = y ;
-                            int xx = x ;
-                            reditc[yy][xx] = redloc[y][x];
-                            greenitc[yy][xx] = greenloc[y][x];
-                            blueitc[yy][xx] = blueloc[y][x];
-
-                            if (reditc[yy][xx] > 65400.f) {
-                                reditc[yy][xx] = 65400.f;
-                            }
-
-                            if (greenitc[yy][xx] > 65400.f) {
-                                greenitc[yy][xx] = 65400.f;
-                            }
-
-                            if (blueitc[yy][xx] > 65400.f) {
-                                blueitc[yy][xx] = 65400.f;
-                            }
-
-                            if (reditc[yy][xx] < 200.f) {
-                                reditc[yy][xx] = 200.f;
-                            }
-
-                            if (greenitc[yy][xx] < 200.f) {
-                                greenitc[yy][xx] = 200.f;
-                            }
-
-                            if (blueitc[yy][xx] < 200.f) {
-                                blueitc[yy][xx] = 200.f;
-                            }
-
-                            avgR += reditc[yy][xx];
-                            avgG += greenitc[yy][xx];
-                            avgB += blueitc[yy][xx];
-
-                            Xitc[yy][xx] = 0.f;
-                            Yitc[yy][xx] = 0.f;
-                            Zitc[yy][xx] = 0.f;
-                            float xxx = 0.f, yyy = 0.f, zzz = 0.f;
-                            float RR =  reditc[yy][xx];
-                            float GG =  greenitc[yy][xx];
-                            float BB =  blueitc[yy][xx];
-
-                            Color::rgbxyz (RR, GG, BB, xxx, yyy, zzz, wp);
-                            Xitc[yy][xx] = xxx;
-                            Yitc[yy][xx] = yyy;
-                            Zitc[yy][xx] = zzz;
-
-                            //   Xitc[yy][xx] /= 655.35f;
-                            //   Yitc[yy][xx] /= 655.35f;
-                            //   Zitc[yy][xx] /= 655.35f;
-
-                            Xitc[yy][xx] *= Txyz[Tx].XX;
-                            Zitc[yy][xx] *= Txyz[Tx].ZZ;
-                            //  x = X / (X+Y+Z);
-                            //  y = Y / (X+Y+Z);
-
-                            avgX += Xitc[yy][xx];
-                            avgY += Yitc[yy][xx];
-                            avgZ += Zitc[yy][xx];
-
-                            nb++;
-
-                        }
-                    }
-
-                    avgX /= nb;
-                    avgY /= nb;
-                    avgZ /= nb;
-                    avgR /= nb;
-                    avgG /= nb;
-                    avgB /= nb;
-                    */
-        //  printf("avgX=%f avgY=%f avgZ=%f avR=%f avG=%f avB=%f nb=%i bf=%i\n", avgX, avgY, avgZ, avgR, avgG, avgB, nb, (bfh)*(bfw));
-        /*
-                avgX /= avgY;
-                avgZ /= avgY;
-                avprov = avgY;
-                avgY = 1.f;
-        */
-        /*
-                    float avgtemp = 0.f;
-                    int nbitc = 0;
-                    float maxtemp = -10000.f;
-                    float mintemp = 100000.f;
-
-                    for (int y = 0; y < bfhitc ; y++) {
-                        for (int x = 0; x < bfwitc ; x++) {
-                            double temp;
-                            ColorTemp::XYZtoCorColorTemp ((double)Xitc[y][x] / 65535., (double)Yitc[y][x] / 65535., (double) Zitc[y][x] / 65535., temp);
-                            tempitc[y][x] = (float) temp;
-
-                            if (temp > maxtemp) {
-                                maxtemp = (float) temp ;
-                            }
-
-                            if (temp < mintemp) {
-                                mintemp = (float) temp ;
-                            }
-
-                            //printf("temp=%f ", tempitc[y][x]);
-                            avgtemp += tempitc[y][x];
-                            nbitc++;
-                        }
-                    }
-
-                    avgtemp /= nbitc;
-                    int nbstd = 0;
-                    float stditc = 0.f;
-                    double stdX = 0.f;
-                    double stdY = 0.f;
-                    double stdZ = 0.f;
-                    double stdxyz = 0.f;
-
-                    for (int y = 0; y < bfhitc ; y++) {
-                        for (int x = 0; x < bfwitc ; x++) {
-                            stditc += SQR (avgtemp - tempitc[y][x]);
-                            double dX = avgX -  (double)Xitc[y][x];
-                            double dY = avgY -  (double)Yitc[y][x];
-                            double dZ = avgZ -  (double)Zitc[y][x];
-
-                            stdX += SQR (dX);
-                            stdY += SQR (dY);
-                            stdZ += SQR (dZ);
-                            stdxyz += (dX *  dY * dZ) ;//prepare covariance
-
-                            nbstd++;
-                        }
-                    }
-
-                    stdX /= nbstd;
-                    stdY /= nbstd;
-                    stdZ /= nbstd;
-                    stdX = sqrt (stdX);
-                    stdY = sqrt (stdY);
-                    stdZ = sqrt (stdZ);
-
-                    stdxyz /= nbstd;
-
-                    double mult = stdX * stdZ * stdY;
-                    double cova = stdxyz / mult; //correlation
-                    covarrel[Tx] = cova;
-                    printf ("temp=%f tempref=%f covarel=%f nbstd=%i  stdxyz=%f sX=%f sY=%f sZ=%f mul=%f\n", avgtemp,  Txyz[Tx].Tem, cova, nbstd, stdxyz, stdX, stdY, stdZ, mult );
-
-                }
-                */
-        /*
-                float maxcovarrel = -10.f;
-                int TTx = 0;
-
-                for (int Tx = 0; Tx < 44; Tx++) {
-                    if (covarrel[Tx] > maxcovarrel) {
-                        maxcovarrel = covarrel[Tx];
-                        TTx = Tx;
-
-                    }
-
-                    //     printf ("cov=%f\n", covarrel[Tx]);
-
-                }
-        */
-        //     printf ("cov=%f\n", maxcovarrel);
-
-//       printf ("Temp=%f maxc=%f\n",  Txyz[TTx].Tem, maxcovarrel);
-        //we must now tries to minimize
-        //  avgX /= avgY;
-        //  avgZ /= avgY;
-        //  avprov = avgY;
-        //  avgY = 1.f;
-        //    avprov = 1.f;
-        //  stdX /= avgY;
-        //  stdY /= avgY;
-        //  stdZ /= avgY;
-
-        //     stditc /= nbstd;
-
-        //     printf ("avgte=%f std=%f  max=%f min=%f avgX=%f avgY=%f avgZ=%f stdX=%f stdY=%f stdZ=%f corel=%f\n", avgtemp / nbitc, sqrt (stditc), maxtemp, mintemp, avgX / avgY, avgY / avgY, avgZ / avgY, sqrt (stdX) / avgY, sqrt (stdY) / avgY, sqrt (stdZ) / avgY , covarrel);
-
-
-        //     double rmul = sRGBd65_xyz[0][0] * (avgX / avgY) + sRGBd65_xyz[0][1] * 1. + sRGBd65_xyz[0][2] * (avgZ / avgY);
-        //     double gmul = sRGBd65_xyz[1][0] * (avgX / avgY) + sRGBd65_xyz[1][1] * 1. + sRGBd65_xyz[1][2] * (avgZ / avgY);
-        //    double bmul = sRGBd65_xyz[2][0] * (avgX / avgY) + sRGBd65_xyz[2][1] * 1. + sRGBd65_xyz[2][2] * (avgX / avgY);
-
-    }
 
 
 //CAT02 inverse
@@ -8174,19 +8209,6 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
     redsobel (0, 0);
     greensobel (0, 0);
     bluesobel (0, 0);
-
-    reditc (0, 0);
-    greenitc (0, 0);
-    blueitc (0, 0);
-
-    Xitc (0, 0);
-    Yitc (0, 0);
-    Zitc (0, 0);
-    tempitc (0, 0);
-    xc (0, 0);
-    yc (0, 0);
-    Yc (0, 0);
-
 }
 
 void  RawImageSource::getrgbloc (bool gamma, bool cat02, int begx, int begy, int yEn, int xEn, int cx, int cy, int bf_h, int bf_w)
@@ -8542,7 +8564,7 @@ void RawImageSource::getAutoWBMultipliersloc (int begx, int begy, int yEn, int x
 
     double reds = 0., greens = 0., blues = 0.;
 
-    if (localr.wbMethod == "aut"  || localr.wbMethod == "autosdw"  || localr.wbMethod == "autedgsdw" || localr.wbMethod == "autedgrob" || localr.wbMethod == "autedg" || localr.wbMethod == "autorobust") {
+    if (localr.wbMethod == "aut"  || localr.wbMethod == "autosdw"  || localr.wbMethod == "autedgsdw" || localr.wbMethod == "autedgrob" || localr.wbMethod == "autedg" || localr.wbMethod == "autorobust" || localr.wbMethod == "autitc" ) {
         reds   = avg_rm * refwb_red;
         greens = avg_gm * refwb_green;
         blues  = avg_bm * refwb_blue;
