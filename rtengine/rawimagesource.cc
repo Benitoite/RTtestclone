@@ -5795,7 +5795,7 @@ void RawImageSource::ItcWB (array2D<float> &redloc, array2D<float> &greenloc, ar
     float **Tx = nullptr;
     float **Ty = nullptr;
     float **TYY = nullptr;
-    int Nc = 46;
+    int Nc = 61;
     Tx = new float*[Nc];
 
     for (int i = 0; i < Nc; i++) {
@@ -7436,9 +7436,10 @@ void RawImageSource::ItcWB (array2D<float> &redloc, array2D<float> &greenloc, ar
     //    printf ("\n");
     int memj[Nc] = {};
 
-    //find the 45 max values for histuse probably less
-    float max[Nc] = {-100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.,
-                     -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f
+    //find the xx max values for histuse probably less
+    float max[Nc] = {-100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f,
+                     -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f,
+                     -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f, -100.f
                     };
 
     for (int k = 0; k < Nc; k++) {
@@ -7453,6 +7454,7 @@ void RawImageSource::ItcWB (array2D<float> &redloc, array2D<float> &greenloc, ar
         }
 
         histuse[ind] = 0.f;
+        max[ind] = -100.f;
     }
 
     int siz = 0;
@@ -7460,9 +7462,13 @@ void RawImageSource::ItcWB (array2D<float> &redloc, array2D<float> &greenloc, ar
     for (int k = 0; k < Nc; k++) {
         if (memj[k] != 0) {
             siz++;
-            //     printf ("k=%i", memj[k]);
+            printf ("k=%i", memj[k]);
 
         }
+    }
+
+    if (siz > Nc) {
+        siz = Nc;
     }
 
     float *xxcal = nullptr;
@@ -7471,16 +7477,55 @@ void RawImageSource::ItcWB (array2D<float> &redloc, array2D<float> &greenloc, ar
 
     xxcal = new float [siz];
     yycal = new float [siz];
-    YYcal = new float [siz];
+    YYcal = new float [ siz];
     int pos = 0;
 
     for (int k = 0; k < Nc; k++) {
-        if (memj[k] != 0) {
+        if (memj[k] != 0 && pos < siz) {
             xxcal[pos] = xxx[memj[k]];
             yycal[pos] = yyy[memj[k]];
             YYcal[pos] = histY[memj[k]];
             pos++;
         }
+    }
+
+
+    //find reference color near color calculated
+    float min[Nc] = {10000.f, 10000.f, 10000.f, 10000.f, 10000.f, 10000.f, 10000.f, 10000.f, 10000.f, 10000.f, 10000.f, 10000.f, 10000.f, 10000.f, 10000.f, 10000.f, 10000.f, 10000.f, 10000.f, 10000.f,
+                     10000.f, 10000.f, 10000.f, 10000.f, 10000.f, 10000.f, 10000.f, 10000.f, 10000.f, 10000.f, 10000.f, 10000.f, 10000.f, 10000.f, 10000.f, 10000.f, 10000.f, 10000.f, 10000.f, 10000.f,
+                     10000.f, 10000.f, 10000.f, 10000.f, 10000.f, 10000.f, 10000.f, 10000.f, 10000.f, 10000.f, 10000.f, 10000.f, 10000.f, 10000.f, 10000.f, 10000.f, 10000.f, 10000.f
+                    };
+
+    int memk[Nc] = {};
+    float chrocalc[Nc] = {};
+    float Txprov[Nc] = {};
+    float Typrov[Nc] = {};
+
+    for (int k = 0; k < Nc; k++) {
+        Txprov[k] = Tx[k][42];
+        Typrov[k] = Ty[k][42];
+    }
+
+    for (int p = 0; p < pos; p++) {//color calculated
+        for (int k = 0; k < Nc; k++) {//ref color
+
+            chrocalc[k] = SQR (Txprov[k] - xxcal[p]) + SQR (Typrov[k] - yycal[p]);
+
+            if (chrocalc[k] < min[p]) {
+                min[p] = chrocalc[k];
+                memk[p] = k;
+            }
+
+        }
+
+        Txprov[memk[p]] = 100.f;
+        Typrov[memk[p]] = 100.f;
+        min[memk[p]] = 10000.f;
+
+    }
+
+    for (int p = 0; p < pos; p++) {
+        printf ("co=%i ", memk[p]);
     }
 
 //printf("pos=%i\n", pos);
@@ -8035,7 +8080,7 @@ void RawImageSource::ItcWB (array2D<float> &redloc, array2D<float> &greenloc, ar
 
 
 
-void xyz_to_cat02floatraw ( float &r, float &g, float &b, float x, float y, float z)
+void xyz_to_cat02floatraw ( float & r, float & g, float & b, float x, float y, float z)
 {
 
     {
@@ -8045,7 +8090,7 @@ void xyz_to_cat02floatraw ( float &r, float &g, float &b, float x, float y, floa
     }
 }
 
-void cat02_to_xyzfloatraw ( float &x, float &y, float &z, float r, float g, float b)
+void cat02_to_xyzfloatraw ( float & x, float & y, float & z, float r, float g, float b)
 {
     x = ( 1.096124f * r) - (0.278869f * g) + (0.182745f * b);
     y = ( 0.454369f * r) + (0.473533f * g) + (0.072098f * b);
@@ -8054,7 +8099,7 @@ void cat02_to_xyzfloatraw ( float &x, float &y, float &z, float r, float g, floa
 
 
 
-void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, array2D<float> &blueloc, int bfw, int bfh, double &avg_rm, double &avg_gm, double &avg_bm, const LocrgbParams &localr, int begx, int begy, int yEn, int xEn, int cx, int cy)
+void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, array2D<float> &blueloc, int bfw, int bfh, double & avg_rm, double & avg_gm, double & avg_bm, const LocrgbParams & localr, int begx, int begy, int yEn, int xEn, int cx, int cy)
 {
     //auto white balance
 //   printf ("AUtoWB OK\n");
@@ -8326,7 +8371,7 @@ void  RawImageSource::getrgbloc (bool gamma, bool cat02, int begx, int begy, int
 
 }
 
-void RawImageSource::getAutoWBMultipliersloc (int begx, int begy, int yEn, int xEn, int cx, int cy, int bf_h, int bf_w, double &rm, double &gm, double &bm, const LocrgbParams &localr)
+void RawImageSource::getAutoWBMultipliersloc (int begx, int begy, int yEn, int xEn, int cx, int cy, int bf_h, int bf_w, double & rm, double & gm, double & bm, const LocrgbParams & localr)
 {
     //    BENCHFUN
     constexpr double clipHigh = 64000.0;
@@ -8584,7 +8629,7 @@ void RawImageSource::getAutoWBMultipliersloc (int begx, int begy, int yEn, int x
 
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-void RawImageSource::getAutoWBMultipliers (double &rm, double &gm, double &bm)
+void RawImageSource::getAutoWBMultipliers (double & rm, double & gm, double & bm)
 {
 //    BENCHFUN
     constexpr double clipHigh = 64000.0;

@@ -1030,6 +1030,17 @@ const double ColorTemp::ColabSky42_0_m24_spect[97] = {
     0.0979, 0.112,   0.1269, 0.134,   0.1430, 0.147,   0.1497, 0.151,   0.1529, 0.1545,  0.1561, 0.158,   0.1603, 0.1616,  0.1627, 0.1625,  0.1623, 0.1614,  0.1605, 0.159,   0.1575, 0.1567,  0.1557, 0.1563,  0.1569, 0.159,   0.1627,
     0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
 };
+//spectral data ColorLab : blue 77 -44 -50
+
+const double ColorTemp::Colorblue_spect[97] = {
+    0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+    0.0316, 0.0480, 0.0658, 0.0925, 0.1199, 0.1812, 0.2424, 0.2770, 0.3145, 0.3430, 0.3702, 0.4022, 0.4346, 0.4560, 0.4778, 0.4843, 0.4902, 0.4940, 0.4960, 0.4920, 0.4889, 0.4820,
+    0.4764, 0.4685, 0.4606, 0.4486, 0.4379, 0.4160, 0.3955, 0.3640, 0.3330, 0.2990, 0.2660, 0.2291, 0.1991, 0.1705, 0.1403, 0.1220, 0.1067, 0.0967, 0.0907, 0.0846, 0.0785, 0.0698,
+    0.0601, 0.0525, 0.0455, 0.0423, 0.0386, 0.0370, 0.0358, 0.0354, 0.0351, 0.0368, 0.0382, 0.0413, 0.0449, 0.0474, 0.0492, 0.0484, 0.0477, 0.0460, 0.0437, 0.0402, 0.0371, 0.0349,
+    0.0329, 0.0341, 0.0356, 0.0410, 0.0462,
+    0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+
+};
 
 /*
  *      Name:   XYZtoCorColorTemp.c
@@ -1824,20 +1835,22 @@ void ColorTemp::temp2mul (double temp, double green, double equal, double& rmul,
 void ColorTemp::tempxy (double &temp, float **Tx, float **Ty, float **TYY)
 {
     const double* spec_colorforxcyc[] = {//color references
-        JDC468_BluH10_spect, JDC468_BluF4_spect, JDC468_BluD6_spect, ColorchechCyaF3_spect, JDC468_BluM5_spect, // 0 4
-        ColorGreenM25_spect,  JDC468_GreK7_spect, ColabSky42_0_m24_spect, ColabSky60_0_m31_spect,  ColorchechBluC150_m5_m22_spect,
+        JDC468_BluH10_spect, JDC468_BluF4_spect, JDC468_BluD6_spect, ColorchechCyaF3_spect, Colorblue_spect, JDC468_BluM5_spect, // 0 4
+        ColorGreenM25_spect,   JDC468_GreK7_spect, ColabSky42_0_m24_spect, ColabSky60_0_m31_spect,  ColorchechBluC150_m5_m22_spect,
         JDC468_GreQ7_spect, ColorchechDCBluN881_m7_m14_spect, ColorchechGreB3_spect, ColorchechPurD2_spect,  //9 11
         ColorchechSGBlaN3_6_spect, ColorchechGraC4_67_spect, JDC468_K15_87greyspect,
         JDC468_GraK14_44_spect, ColorGreenalsi_spect, Fictif_61greyspect, ColorchechGreD1_spect,
         ColorchechWhiA496_spect, JDC468_GreA10_spect, JDC468_GreI8_spect,
         ColabSkin91_4_14_spect, JDC468_PurE24_spect, //22
-        ColorchechSGSkiK285_11_17_spect, ColorchechGreE2_spect, ColorchechMagE3_spect, //25
+        ColorchechSGSkiK285_11_17_spect,  ColorchechGreE2_spect, ColorchechMagE3_spect, //25
         ColorchechSkiB166_18_18_spect, ColabSkin70_7_32_spect, ColorchechSGSkiF763_14_26_spect,
         ColorchechSkiA138_13_14_spect, ColabSkin57_22_18_spect, JDC468_YelN10_spect,
-        ColabSkin35_15_17_spect, ColorRedkurttu_spect, ColorYellowkeltano_spect,  ColorchechYelD3_spect, JDC468_OraO18_spect,
-        JDC468_RedG21va_spect, ColorRedpetunia_spect, ColorchechOraA2_spect, JDC468_OraD17_spect, 
-        ColorchechredC3_spect, JDC468_RedI9_spect
-
+        ColabSkin35_15_17_spect, ColabSkin40_17_17_spect, ColorRedkurttu_spect, ColorYellowkeltano_spect,  ColorchechYelD3_spect, JDC468_OraO18_spect,
+        JDC468_GreN7_spect, JDC468_RedG21va_spect, ColorRedpetunia_spect, ColorchechOraA2_spect, JDC468_OraD17_spect,
+        ColorchechredC3_spect, JDC468_RedI9_spect,
+        ColabSkin87_8_8_spect, ColabSkin89_8_21_spect, ColabSkin75_8_4_spect, ColabSkin75_10_33_spect,
+        ColabSkin65_33_11_spect, ColabSkin65_7_24_spect, ColabSkin57_19_6_spect, ColabSkin57_4_19_spect, ColabSkin57_10_28_spect, ColabSkin40_17_6_spect,
+        ColabSkin26_18_18_spect, ColabSkin90_m1_20_spect
     };
 
     typedef struct WbTxyz {
@@ -1987,10 +2000,19 @@ void ColorTemp::tempxy (double &temp, float **Tx, float **Ty, float **TYY)
         }
 
         for (int i = 0; i < N_c; i++) {
-            double som = (Refxyz[i].Xref + Refxyz[i].Yref +  Refxyz[i].Zref);
+            float X = 65535.f * Refxyz[i].Xref;
+            float Y = 65535.f * Refxyz[i].Yref;
+            float Z = 65535.f * Refxyz[i].Zref;
+            float L, a, b;
+            Color::XYZ2Lab (X, Y, Z, L, a, b);
 
-            if (tt == 55) {
-                //     printf ("temp=%f Nc=%i x=%f y=%f Y=%f\n", tempw, i, Refxyz[i].Xref/som , Refxyz[i].Yref/som ,  Refxyz[i].Zref/som );
+            double som = (Refxyz[i].Xref + Refxyz[i].Yref +  Refxyz[i].Zref);
+            L /= 327.68f;
+            a /= 327.68f;
+            b /= 327.68f;
+
+            if (tt == 42) {
+                printf ("temp=%i Nc=%i x=%f y=%f Y=%f L=%2.1f a=%2.1f b=%2.1f\n", (int) tempw, i, Refxyz[i].Xref / som, Refxyz[i].Yref / som,  Refxyz[i].Zref / som, L, a, b );
             }
 
             if (tt == 65) {
@@ -1998,7 +2020,7 @@ void ColorTemp::tempxy (double &temp, float **Tx, float **Ty, float **TYY)
             }
 
             if (tt == 90) {
-           //     printf ("temp=%f Nc=%i x=%f y=%f Y=%f\n", tempw, i, Refxyz[i].Xref / som, Refxyz[i].Yref / som,  Refxyz[i].Zref / som );
+                //     printf ("temp=%f Nc=%i x=%f y=%f Y=%f\n", tempw, i, Refxyz[i].Xref / som, Refxyz[i].Yref / som,  Refxyz[i].Zref / som );
             }
 
             Tx[i][tt] =  (float) Refxyz[i].Xref / som;
