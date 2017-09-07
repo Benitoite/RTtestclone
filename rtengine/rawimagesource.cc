@@ -5848,7 +5848,7 @@ void RawImageSource::ItcWB (array2D<float> &redloc, array2D<float> &greenloc, ar
         rmm[tt] = rm / gm;
         gmm[tt] = gm / gm;
         bmm[tt] = bm / gm;
-        //   printf ("WWW tt=%i rm=%f gm=%f bm=%f\n", tt, rmm[tt], gmm[tt], bmm[tt]);
+        //  printf ("WWW tt=%i rm=%f gm=%f bm=%f\n", tt, rmm[tt], gmm[tt], bmm[tt]);
         //printf("gain=%f\n", gain);
     }
 
@@ -7178,6 +7178,7 @@ void RawImageSource::ItcWB (array2D<float> &redloc, array2D<float> &greenloc, ar
                     inter[nh] = 3;
                     xxx[nh] = 0.475f;
                     yyy[nh] = 0.33f;
+                    YYY[nh] += Yc[y][x];
 
                 } else if (yc[y][x] < 0.37f) {
                     nh = 132;
@@ -7540,7 +7541,7 @@ void RawImageSource::ItcWB (array2D<float> &redloc, array2D<float> &greenloc, ar
         Z = 65535.f * ((1.f - xxcal[p] - yycal[p]) * YYcal[p]) / yycal[p];
         Y = 65535.f * YYcal[p];
         Color::xyz2rgb (X, Y, Z, R[p], G[p], B[p], wip);
-        //  printf("R=%f G=%f B=%f\n", R[p],G[p], B[p]);
+        //printf("R=%f G=%f B=%f\n", R[p],G[p], B[p]);
 
     }
 
@@ -7601,7 +7602,7 @@ void RawImageSource::ItcWB (array2D<float> &redloc, array2D<float> &greenloc, ar
             xk[p][tt] = x_c;
             yk[p][tt] = y_c;
             Yk[p][tt] = Y_c;
-            //printf("xk=%f yk=%f\n", xk[p][tt], yk[p][tt]);
+            //    printf("xk=%f yk=%f\n", xk[p][tt], yk[p][tt]);
 
         }
 
@@ -7634,22 +7635,19 @@ void RawImageSource::ItcWB (array2D<float> &redloc, array2D<float> &greenloc, ar
 
     int typ = 2;//4 type of covariance
 
-    //I must change something - probably adapted references color to real color...todo
     if (typ == 1) {
         //mean 2 for ref
         for (int tt = 0; tt < N_t; tt++) {
             for (int i = 0; i < pos; i++) {//Nc  ==> pos
-                avgy[tt] += Tx[i][tt];
-                avgy[tt] += Ty[i][tt];
+                avgy[tt] += (Tx[i][tt] + Ty[i][tt]);
             }
 
-            avgy[tt] /= 2 * pos;//to change
+            avgy[tt] /= 2 * pos; //to change
         }
 
         for (int tt = 0; tt < N_t; tt++) {
             for (int i = 0; i < pos; i++) {
-                avgx[tt] += xk[i][tt];
-                avgx[tt] += yk[i][tt];
+                avgx[tt] += (xk[i][tt] + yk[i][tt]) ;
             }
 
             avgx[tt] /= 2 * pos;
@@ -7658,12 +7656,14 @@ void RawImageSource::ItcWB (array2D<float> &redloc, array2D<float> &greenloc, ar
 
         for (int tt = 0; tt < N_t; tt++) {
             for (int i = 0; i < pos; i++) {
-                covar[tt] += ((Tx[i][tt] - avgy[tt]) * (xk[i][tt] - avgx[tt]));
-                covar[tt] += ((Ty[i][tt] - avgy[tt]) * (yk[i][tt] - avgx[tt]));
+                covar[tt] += (((Tx[i][tt] - avgy[tt]) * (xk[i][tt] - avgx[tt])));
+                covar[tt] += (((Ty[i][tt] - avgy[tt]) * (yk[i][tt] - avgx[tt])));
+
                 sigy[tt] += SQR (Tx[i][tt] - avgy[tt]);
                 sigy[tt] += SQR (Ty[i][tt] - avgy[tt]);
+
                 sigx[tt] += SQR (xk[i][tt] - avgx[tt]);
-                sigy[tt] += SQR (yk[i][tt] - avgx[tt]);
+                sigx[tt] += SQR (yk[i][tt] - avgx[tt]);
 
             }
 
@@ -7679,33 +7679,34 @@ void RawImageSource::ItcWB (array2D<float> &redloc, array2D<float> &greenloc, ar
 
         }
     } else if (typ == 2) {
-        //          for (int tt = 0; tt < N_t; tt++) {
-        for (int i = 0; i < Nc; i++) {//Nc  ==> pos
-            avgy42 += Tx[i][42];
-            avgy42 += Ty[i][42];
+
+        for (int i = 0; i < pos; i++) {
+            avgy42 += (Tx[memk[i]][42] + Ty[memk[i]][42]);
+
         }
 
-        avgy42 /= 2 * Nc;//to change
+        avgy42 /= 2 * pos;
 //           }
 
-        for (int tt = 23; tt < N_t; tt++) {
+        for (int tt = 0; tt < N_t; tt++) {
             for (int i = 0; i < pos; i++) {
-                avgx[tt] += xk[i][tt];
-                avgx[tt] += yk[i][tt];
+                avgx[tt] += (xk[i][tt] + yk[i][tt]);
             }
 
             avgx[tt] /= 2 * pos;
-
+            printf ("av42=%f avx=%f \n", avgy42, avgx[tt]);
         }
 
-        for (int tt = 23; tt < N_t; tt++) {
+        for (int tt = 0; tt < N_t; tt++) {
             for (int i = 0; i < pos; i++) {
-                covar[tt] += ((Tx[i][42] - avgy42) * (xk[i][tt] - avgx[tt]));
-                covar[tt] += ((Ty[i][42] - avgy42) * (yk[i][tt] - avgx[tt]));
-                sigy[tt] += SQR (Tx[i][42] - avgy42);
-                sigy[tt] += SQR (Ty[i][42] - avgy42);
-                sigx[tt] += SQR (xk[i][tt] - avgx[tt]);
-                sigy[tt] += SQR (yk[i][tt] - avgx[tt]);
+                covar[tt] += ((Tx[memk[i]][42] - avgy42) * (xk[i][tt] - avgx[tt]));
+                covar[tt] += ((Ty[memk[i]][42] - avgy42) * (yk[i][tt] - avgx[tt]));
+
+                sigy[tt] += SQR (Tx[memk[i]][42] - avgy42);
+                sigy[tt] += SQR (Ty[memk[i]][42] - avgy42);
+
+                sigx[tt] += SQR (xk[i][tt] - avgx[tt]) ;
+                sigx[tt] += SQR (yk[i][tt] - avgx[tt]) ;
 
             }
 

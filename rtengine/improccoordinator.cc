@@ -484,12 +484,13 @@ void ImProcCoordinator::updatePreviewImage (int todo, Crop* cropCall)
                 autoWBloc.mul2temp (rm, gm, bm, 1.f, ptemp, pgreen);
                 currWBloc = autoWBloc;
 //            currWB = autoWBloc;
-//        params.wb.temperature = currWB.getTemp ();
-//        params.wb.green = currWB.getGreen ();
+                params.wb.temperature = currWB.getTemp ();
+                params.wb.green = currWB.getGreen ();
 
-                //     if (params.localwb.wbMethod != "man" && awbListener) {
-                //         awbListener->WBChanged (params.wb.temperature, params.wb.green);
-                //     }
+                if (params.wb.method == "Auto" && awbListener) {
+
+                    awbListener->WBChanged (params.wb.temperature, params.wb.green);
+                }
 
 
             }
