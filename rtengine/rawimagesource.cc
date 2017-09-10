@@ -5795,6 +5795,16 @@ void RawImageSource::ItcWB (array2D<float> &redloc, array2D<float> &greenloc, ar
     float **Tx = nullptr;
     float **Ty = nullptr;
     float **TYY = nullptr;
+    float **Ta = nullptr;
+    float **Tb = nullptr;
+    float **TL = nullptr;
+    float **TR = nullptr;
+    float **TG = nullptr;
+    float **TB = nullptr;
+    float **TX = nullptr;
+    float **TY = nullptr;
+    float **TZ = nullptr;
+
     int Nc = 61;
     Tx = new float*[Nc];
 
@@ -5812,6 +5822,60 @@ void RawImageSource::ItcWB (array2D<float> &redloc, array2D<float> &greenloc, ar
 
     for (int i = 0; i < Nc; i++) {
         TYY[i] = new float[nbt];
+    }
+
+    Ta = new float*[Nc];
+
+    for (int i = 0; i < Nc; i++) {
+        Ta[i] = new float[nbt];
+    }
+
+    Tb = new float*[Nc];
+
+    for (int i = 0; i < Nc; i++) {
+        Tb[i] = new float[nbt];
+    }
+
+    TL = new float*[Nc];
+
+    for (int i = 0; i < Nc; i++) {
+        TL[i] = new float[nbt];
+    }
+
+    TR = new float*[Nc];
+
+    for (int i = 0; i < Nc; i++) {
+        TR[i] = new float[nbt];
+    }
+
+    TG = new float*[Nc];
+
+    for (int i = 0; i < Nc; i++) {
+        TG[i] = new float[nbt];
+    }
+
+    TB = new float*[Nc];
+
+    for (int i = 0; i < Nc; i++) {
+        TB[i] = new float[nbt];
+    }
+
+    TX = new float*[Nc];
+
+    for (int i = 0; i < Nc; i++) {
+        TX[i] = new float[nbt];
+    }
+
+    TY = new float*[Nc];
+
+    for (int i = 0; i < Nc; i++) {
+        TY[i] = new float[nbt];
+    }
+
+    TZ = new float*[Nc];
+
+    for (int i = 0; i < Nc; i++) {
+        TZ[i] = new float[nbt];
     }
 
     float *rmm = nullptr;
@@ -5854,7 +5918,14 @@ void RawImageSource::ItcWB (array2D<float> &redloc, array2D<float> &greenloc, ar
 
     //call tempxy to calaculate for 41 color references Temp and x y for xyY
 
-    ColorTemp::tempxy (temp, Tx, Ty, TYY);//calculate chroma xy (xyY) for Z known colors on under 90 illuminants
+    ColorTemp::tempxy (temp, Tx, Ty, TYY, Ta, Tb, TL, TX, TY, TZ);//calculate chroma xy (xyY) for Z known colors on under 90 illuminants
+
+    for (int tt = 0; tt < N_t; tt++) {
+        for (int i = 0; i < Nc; i++) {
+            Color::xyz2rgb (TX[i][tt], TY[i][tt], TZ[i][tt], TR[i][tt], TG[i][tt], TB[i][tt], wip);
+
+        }
+    }
 
     float epsx = 0.001f, epsy = 0.001f;//delta value to have result!
 
@@ -5886,29 +5957,6 @@ void RawImageSource::ItcWB (array2D<float> &redloc, array2D<float> &greenloc, ar
 
     }
 
-    /*
-            //calculate X Y Z from xyY
-            X = 65535.f * (xc[yy][xx]* Yc[yy][xx] /yc[yy][xx]);
-            Y = 65535.f * Yc[yy][xx];
-            Z = 65535.f * (1 - xc[yy][xx] - yc[yy][xx])* yc[yy][xx];
-            for (int y = 0; y < bfh ; y += 10) {
-                for (int x = 0; x < bfw ; x += 10) {
-                    int yy = y / 10;
-                    int xx = x / 10 ;
-                    float x_c = 0.f, y_c = 0.f, Y_c = 0.f;
-                    float RR =  redloc[yy][xx];
-                    float GG =  greenloc[yy][xx];
-                    float BB =  blueloc[yy][xx];
-
-                    Color::rgbxyY (RR, GG, BB, x_c, y_c, Y_c, wp);
-                    xc[yy][xx] = x_c;
-                    yc[yy][xx] = y_c;
-                    Yc[yy][xx] = Y_c;
-
-                }
-
-            }
-    */
     int siza = 167;
     int histxy[siza] = {};//number of values for each pair xy
     float area[siza] = {};//multiplier for compensation differences area ==> big areas are rare near limit prophotos or more
@@ -7431,7 +7479,7 @@ void RawImageSource::ItcWB (array2D<float> &redloc, array2D<float> &greenloc, ar
 
     for (int j = 0; j < siza; j++) {
 
-        histuse[j] = 100 * histxy[j] * (1.f / area[j]) * inter[j];
+        histuse[j] = 100 * histxy[j];// * (1.f / area[j]) * inter[j];
         histY[j] = YYY[j] / histxy[j];
 
         if (histxy[j] != 0) {
@@ -7496,6 +7544,18 @@ void RawImageSource::ItcWB (array2D<float> &redloc, array2D<float> &greenloc, ar
             xxcal[pos] = xxx[memj[k]];
             yycal[pos] = yyy[memj[k]];
             YYcal[pos] = histY[memj[k]];
+            float X = 65535.f * (xxcal[pos] * YYcal[pos]) / yycal[pos];
+            float Z = 65535.f * ((1.f - xxcal[pos] - yycal[pos]) * YYcal[pos]) / yycal[pos];
+            float Y = 65535.f * YYcal[pos];
+            float L, a, b;
+            Color::XYZ2Lab (X, Y, Z, L, a, b);
+            L /= 32768.f;
+            a /= 32768.f;
+            b /= 32768.f;
+
+            xxcal[pos] = a;
+            yycal[pos] = b;
+            YYcal[pos] = L;
             pos++;
         }
     }
@@ -7529,8 +7589,8 @@ void RawImageSource::ItcWB (array2D<float> &redloc, array2D<float> &greenloc, ar
 
         }
 
-        Txprov[memk[p]] = 100.f;
-        Typrov[memk[p]] = 100.f;
+        Txprov[memk[p]] = 100000.f;
+        Typrov[memk[p]] = 100000.f;
         min[memk[p]] = 10000.f;
 
     }
@@ -7539,12 +7599,13 @@ void RawImageSource::ItcWB (array2D<float> &redloc, array2D<float> &greenloc, ar
         printf ("co=%i ", memk[p]);
     }
 
+    int pred = 0;
 //printf("pos=%i\n", pos);
 //calculate RGB values for these colors
 
     float R[pos], G[pos], B[pos];
 
-    for (int p = 0; p < pos; p++) {
+    for (int p = pred; p < pos; p++) {
         //  printf("xx=%f yy=%f YY=%f\n", xxcal[p],yycal[p], YYcal[p]);
         float X, Y, Z;
         X = 65535.f * (xxcal[p] * YYcal[p]) / yycal[p];
@@ -7588,7 +7649,7 @@ void RawImageSource::ItcWB (array2D<float> &redloc, array2D<float> &greenloc, ar
     }
 
     for (int tt = 0; tt < N_t; tt++) {
-        for (int p = 0; p < pos; p++) {
+        for (int p = pred; p < pos; p++) {
             rk[p][tt] = rmm[tt] * R[p];
             gk[p][tt] =  G[p];
             bk[p][tt] = bmm[tt] * B[p];
@@ -7602,7 +7663,7 @@ void RawImageSource::ItcWB (array2D<float> &redloc, array2D<float> &greenloc, ar
 
 //recalculate x y Y for each Temp and each color selected
     for (int tt = 0; tt < N_t; tt++) {
-        for (int p = 0; p < pos; p++) {
+        for (int p = pred; p < pos; p++) {
             float x_c = 0.f, y_c = 0.f, Y_c = 0.f;
             float RR = rk[p][tt];
             float GG = gk[p][tt];
@@ -7612,6 +7673,20 @@ void RawImageSource::ItcWB (array2D<float> &redloc, array2D<float> &greenloc, ar
             xk[p][tt] = x_c;
             yk[p][tt] = y_c;
             Yk[p][tt] = Y_c;
+            float X = 65535.f * (xk[p][tt] * Yk[p][tt]) / yk[p][tt];
+            float Z = 65535.f * ((1.f - xk[p][tt] - yk[p][tt]) * Yk[p][tt]) / yk[p][tt];
+            float Y = 65535.f * Yk[p][tt];
+            float L, a, b;
+            Color::XYZ2Lab (X, Y, Z, L, a, b);
+            L /= 32768.f;
+            a /= 32768.f;
+            b /= 32768.f;
+
+            xk[p][tt] = a;
+            yk[p][tt] = b;
+            Yk[p][tt] = L;
+
+
             //    printf("xk=%f yk=%f\n", xk[p][tt], yk[p][tt]);
 
         }
@@ -7643,60 +7718,183 @@ void RawImageSource::ItcWB (array2D<float> &redloc, array2D<float> &greenloc, ar
         correl[tt] = 0.f;
     }
 
-    int typ = 2;//4 type of covariance
+    int typ = 0;//4 type of covariance
+    float maxcorel = -10.f;
+    int tempcor = 0;
 
-    if (typ == 1) {
-        //mean 2 for ref
+    if (typ == 0) {//
         for (int tt = 0; tt < N_t; tt++) {
-            for (int i = 0; i < pos; i++) {//Nc  ==> pos
-                avgy[tt] += (Tx[i][tt] + Ty[i][tt]);
+            for (int i = pred; i < pos; i++) {
+                avgx[tt] = Tx[memk[i]][tt] + xxcal[i];
+                avgy[tt] = Ty[memk[i]][tt] + yycal[i];
+                //  avgx[tt] = Tx[i][tt] + xxcal[i];
+                //  avgy[tt] = Ty[i][tt] + yycal[i];
             }
 
-            avgy[tt] /= 2 * pos; //to change
+            avgx[tt] /= 2 * (pos - pred);
+            avgy[tt] /= 2 * (pos - pred);
         }
 
         for (int tt = 0; tt < N_t; tt++) {
-            for (int i = 0; i < pos; i++) {
-                avgx[tt] += (xk[i][tt] + yk[i][tt]) ;
+            for (int i = pred; i < pos; i++) {
+                covar[tt] += (Tx[memk[i]][tt] - avgx[tt]) * (Ty[memk[i]][tt] - avgy[tt]);
+                covar[tt] += (xxcal[i] - avgx[tt]) * (yycal[i] - avgy[tt]);
+                sigx[tt] += SQR ((Tx[memk[i]][tt] - avgx[tt]));
+                sigx[tt] += SQR ((xxcal[i] - avgx[tt]));
+                sigy[tt] += SQR ((Ty[memk[i]][tt] - avgy[tt]));
+                sigy[tt] += SQR ((yycal[i] - avgy[tt]));
             }
 
-            avgx[tt] /= 2 * pos;
-
-        }
-
-        for (int tt = 0; tt < N_t; tt++) {
-            for (int i = 0; i < pos; i++) {
-                covar[tt] += (((Tx[i][tt] - avgy[tt]) * (xk[i][tt] - avgx[tt])));
-                covar[tt] += (((Ty[i][tt] - avgy[tt]) * (yk[i][tt] - avgx[tt])));
-
-                sigy[tt] += SQR (Tx[i][tt] - avgy[tt]);
-                sigy[tt] += SQR (Ty[i][tt] - avgy[tt]);
-
-                sigx[tt] += SQR (xk[i][tt] - avgx[tt]);
-                sigx[tt] += SQR (yk[i][tt] - avgx[tt]);
-
-            }
-
-            covar[tt] /= 2 * pos;
-            sigy[tt] /= 2 * pos;
-            sigx[tt] /= 2 * pos;
+            covar[tt] /= 2 * (pos - pred);
+            sigy[tt] /= 2 * (pos - pred);
+            sigx[tt] /= 2 * (pos - pred);
             sigx[tt] = sqrt (sigx[tt]);
             sigy[tt] = sqrt (sigy[tt]);
 
             correl[tt] = covar[tt] / (sigx[tt] * sigy[tt]);
+            correl[tt] = fabs (correl[tt]);
 
-            printf ("tt=%i  corr=%f\n", tt, correl[tt]);
+            if (correl[tt] > maxcorel) {
+                maxcorel =  correl[tt];
+                tempcor = tt;
+            }
+
+
+            //    printf ("0 == tt=%i pos=%i corr=%f\n", tt, pos, correl[tt]);
+
 
         }
-    } else if (typ == 2) {
+
+        //    printf ("tempcor=%i temp=%f\n", tempcor, Txyz[tempcor].Tem);
+
+    }
+
+    for (int tt = 0; tt < N_t; tt++) {
+        avgx[tt] = 0.f;
+        avgy[tt] = 0.f;
+        covar[tt] = 0.f;
+        sigx[tt] = 0.f;
+        sigy[tt] = 0.f;
+        correl[tt] = 0.f;
+    }
+
+    maxcorel = -10.f;
+    tempcor = 0;
+
+    if (typ == 0) {//
+        pred = 0;
+
+        //pos = 14;
+        for (int tt = 0; tt < N_t; tt++) {
+            for (int i = pred; i < pos; i++) {
+                avgx[tt] = Tx[memk[i]][42] + xk[i][tt];
+                avgy[tt] = Ty[memk[i]][42] + yk[i][tt];
+                //avgx[tt] = Tx[i][42] + xk[i][tt];
+                //avgy[tt] = Ty[i][42] + yk[i][tt];
+            }
+
+            avgx[tt] /= 2 * (pos - pred);
+            avgy[tt] /= 2 * (pos - pred);
+        }
+
+        for (int tt = 0; tt < N_t; tt++) {
+            for (int i = pred; i < pos; i++) {
+                covar[tt] += (Tx[memk[i]][42] - avgx[tt]) * (Ty[memk[i]][42] - avgy[tt]);
+                covar[tt] += (xk[i][tt] - avgx[tt]) * (yk[i][tt] - avgy[tt]);
+                sigx[tt] += SQR ((Tx[memk[i]][42] - avgx[tt]));
+                sigx[tt] += SQR ((xk[i][tt] - avgx[tt]));
+                sigy[tt] += SQR ((Ty[memk[i]][42] - avgy[tt]));
+                sigy[tt] += SQR ((yk[i][tt] - avgy[tt]));
+            }
+
+            covar[tt] /=  2 * (pos - pred);
+            sigy[tt] /= 2 * (pos - pred);
+            sigx[tt] /= 2 * (pos - pred);
+            sigx[tt] = sqrt (sigx[tt]);
+            sigy[tt] = sqrt (sigy[tt]);
+
+            correl[tt] = covar[tt] / (sigx[tt] * sigy[tt]);
+            correl[tt] = fabs (correl[tt]);
+
+            if (correl[tt] > maxcorel) {
+                maxcorel =  correl[tt];
+                tempcor = tt;
+            }
+
+
+
+            //      printf ("1 == tt=%i pos=%i corr=%f\n", tt, pos, correl[tt]);
+
+
+        }
+
+        //    printf ("tempcor=%i temp=%f\n", tempcor, Txyz[tempcor].Tem);
+
+    }
+
+    for (int tt = 0; tt < N_t; tt++) {
+        avgx[tt] = 0.f;
+        avgy[tt] = 0.f;
+        covar[tt] = 0.f;
+        sigx[tt] = 0.f;
+        sigy[tt] = 0.f;
+        correl[tt] = 0.f;
+    }
+
+    if (typ == 9) {//
+        for (int tt = 0; tt < N_t; tt++) {
+            for (int i = pred; i < pos; i++) {
+                avgx[tt] = Tx[memk[i]][tt] + xk[i][tt];
+                avgy[tt] = Ty[memk[i]][tt] + yk[i][tt];
+            }
+
+            avgx[tt] /= 2 * (pos - pred);
+            avgy[tt] /= 2 * (pos - pred);
+        }
+
+        for (int tt = 0; tt < N_t; tt++) {
+            for (int i = pred; i < pos; i++) {
+                covar[tt] += (Tx[memk[i]][tt] - avgx[tt]) * (Ty[memk[i]][42] - avgy[tt]);
+                covar[tt] += (xk[i][tt] - avgx[tt]) * (yk[i][tt] - avgy[tt]);
+                sigx[tt] += SQR ((Tx[memk[i]][tt] - avgx[tt]));
+                sigx[tt] += SQR ((xk[i][tt] - avgx[tt]));
+                sigy[tt] += SQR ((Ty[memk[i]][tt] - avgy[tt]));
+                sigy[tt] += SQR ((yk[i][tt] - avgy[tt]));
+            }
+
+            covar[tt] /= 2 * (pos - pred);
+            sigy[tt] /= 2 * (pos - pred);
+            sigx[tt] /= 2 * (pos - pred);
+            sigx[tt] = sqrt (sigx[tt]);
+            sigy[tt] = sqrt (sigy[tt]);
+
+            correl[tt] = covar[tt] / (sigx[tt] * sigy[tt]);
+            correl[tt] = fabs (correl[tt]);
+
+            if (correl[tt] > maxcorel) {
+                maxcorel =  correl[tt];
+                tempcor = tt;
+            }
+
+
+
+            //       printf ("9 == tt=%i pos=%i corr=%f\n", tt, pos, correl[tt]);
+
+
+        }
+
+        //    printf ("9 tempcor=%i temp=%f\n", tempcor, Txyz[tempcor].Tem);
+
+    }
+
+
+    else if (typ == 2) {//covariance with Tx Ty 5000K and xk yk variing with temp and mulltiplier RGB and comparison  global chroma Tx + Ty and xk + yk
 
         for (int i = 0; i < pos; i++) {
             avgy42 += (Tx[memk[i]][42] + Ty[memk[i]][42]);
-
         }
 
         avgy42 /= 2 * pos;
-//           }
 
         for (int tt = 0; tt < N_t; tt++) {
             for (int i = 0; i < pos; i++) {
@@ -7704,7 +7902,7 @@ void RawImageSource::ItcWB (array2D<float> &redloc, array2D<float> &greenloc, ar
             }
 
             avgx[tt] /= 2 * pos;
-            printf ("av42=%f avx=%f \n", avgy42, avgx[tt]);
+            //   printf ("av42=%f avx=%f \n", avgy42, avgx[tt]);
         }
 
         for (int tt = 0; tt < N_t; tt++) {
@@ -7727,10 +7925,19 @@ void RawImageSource::ItcWB (array2D<float> &redloc, array2D<float> &greenloc, ar
             sigy[tt] = sqrt (sigy[tt]);
 
             correl[tt] = covar[tt] / (sigx[tt] * sigy[tt]);
+            correl[tt] = fabs (correl[tt]);
 
-            printf ("tt=%i pos=%i corr=%f\n", tt, pos, correl[tt]);
+            if (correl[tt] > maxcorel) {
+                maxcorel =  correl[tt];
+                tempcor = tt;
+            }
+
+
+            printf ("2 tt=%i pos=%i corr=%f\n", tt, pos, correl[tt]);
 
         }
+
+        printf ("tempcor=%i temp=%f\n", tempcor, Txyz[tempcor].Tem);
 
     } else if (typ == 3) {
 
@@ -7874,12 +8081,31 @@ void RawImageSource::ItcWB (array2D<float> &redloc, array2D<float> &greenloc, ar
         delete [] Tx[i];
         delete [] Ty[i];
         delete [] TYY[i];
+        delete [] Ta[i];
+        delete [] Tb[i];
+        delete [] TL[i];
+        delete [] TR[i];
+        delete [] TG[i];
+        delete [] TB[i];
+        delete [] TX[i];
+        delete [] TY[i];
+        delete [] TZ[i];
+
 
     }
 
     delete [] Tx;
     delete [] Ty;
     delete [] TYY;
+    delete [] Ta;
+    delete [] Tb;
+    delete [] TL;
+    delete [] TR;
+    delete [] TG;
+    delete [] TB;
+    delete [] TX;
+    delete [] TY;
+    delete [] TZ;
 
 
     delete [] rmm;
@@ -8090,7 +8316,7 @@ void RawImageSource::ItcWB (array2D<float> &redloc, array2D<float> &greenloc, ar
 
 
 
-
+/*
 void xyz_to_cat02floatraw ( float & r, float & g, float & b, float x, float y, float z)
 {
 
@@ -8107,7 +8333,7 @@ void cat02_to_xyzfloatraw ( float & x, float & y, float & z, float r, float g, f
     y = ( 0.454369f * r) + (0.473533f * g) + (0.072098f * b);
     z = (-0.009628f * r) - (0.005698f * g) + (1.015326f * b);
 }
-
+*/
 
 
 void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, array2D<float> &blueloc, int bfw, int bfh, double & avg_rm, double & avg_gm, double & avg_bm, const LocrgbParams & localr, int begx, int begy, int yEn, int xEn, int cx, int cy)
@@ -8249,7 +8475,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
     if (localr.wbcamMethod == "cat" || localr.wbcamMethod == "gamcat") {
         //printf("Inverse CAT02\n");
         float x, y, z;
-        cat02_to_xyzfloatraw ( x, y, z, avg_rm, avg_gm, avg_bm);
+        //   cat02_to_xyzfloatraw ( x, y, z, avg_rm, avg_gm, avg_bm);
         Color::xyz2rgbraw (x, y, z, avg_rm, avg_gm, avg_bm, wip);
     }
 
@@ -8375,7 +8601,7 @@ void  RawImageSource::getrgbloc (bool gamma, bool cat02, int begx, int begy, int
                 double Yr = Y / 65535.;
                 double Zr = Z / 65535.;
 
-                xyz_to_cat02floatraw ( redloc[i][j], greenloc[i][j], blueloc[i][j], X, Y, Z);
+                //          xyz_to_cat02floatraw ( redloc[i][j], greenloc[i][j], blueloc[i][j], X, Y, Z);
 
             }
     }

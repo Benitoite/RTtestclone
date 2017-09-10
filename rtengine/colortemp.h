@@ -21,6 +21,8 @@
 
 #include <glibmm.h>
 #include <cmath>
+#include "iccstore.h"
+#include "procparams.h"
 
 #define pow_F(a,b) (xexpf(b*xlogf(a)))
 
@@ -56,7 +58,9 @@ public:
     explicit ColorTemp (double e) : temp (-1.), green (-1.), equal (e), method ("Custom") {}
     ColorTemp (double t, double g, double e, const Glib::ustring &m);
     ColorTemp (double mulr, double mulg, double mulb, double e);
-    static void tempxy (double &temp, float **Tx, float **Ty, float **TYY);
+    static void tempxy (double &temp, float **Tx, float **Ty, float **TYY, float **Ta, float **Tb, float **TL, float **TX, float **TY, float **TZ);
+    static void xyz_to_cat02floatraw ( float & r, float & g, float & b, float x, float y, float z);
+    static void cat02_to_xyzfloatraw ( float & x, float & y, float & z, float r, float g, float b);
 
     void update (const double rmul, const double gmul, const double bmul, const double equal, const double tempBias = 0.0)
     {
