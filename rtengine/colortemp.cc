@@ -2073,9 +2073,9 @@ void ColorTemp::tempxy (double &temp, float **Tx, float **Ty, float **TYY, float
             Color::XYZ2Lab (X, Y, Z, L, a, b);
 
             double som = (Refxyzcat02[i].Xrefcat + Refxyzcat02[i].Yrefcat +  Refxyzcat02[i].Zrefcat);
-            L /= 32768.f;
-            a /= 32768.f;
-            b /= 32768.f;
+            L /= 327.68f;
+            a /= 327.68f;
+            b /= 327.68f;
             Ta[i][tt] = a;
             Tb[i][tt] = b;
             TL[i][tt] = L;
@@ -2098,7 +2098,7 @@ void ColorTemp::tempxy (double &temp, float **Tx, float **Ty, float **TYY, float
 
             Tx[i][tt] = (float) Refxyz[i].Xref / som;
             Ty[i][tt] = (float) Refxyz[i].Yref / som;
-            TYY[i][tt] =(float) Refxyz[i].Zref / som;
+            TYY[i][tt] = (float) Refxyz[i].Zref / som;
         }
 
     }

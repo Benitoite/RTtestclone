@@ -7544,18 +7544,19 @@ void RawImageSource::ItcWB (array2D<float> &redloc, array2D<float> &greenloc, ar
             xxcal[pos] = xxx[memj[k]];
             yycal[pos] = yyy[memj[k]];
             YYcal[pos] = histY[memj[k]];
-            float X = 65535.f * (xxcal[pos] * YYcal[pos]) / yycal[pos];
-            float Z = 65535.f * ((1.f - xxcal[pos] - yycal[pos]) * YYcal[pos]) / yycal[pos];
-            float Y = 65535.f * YYcal[pos];
-            float L, a, b;
-            Color::XYZ2Lab (X, Y, Z, L, a, b);
-            L /= 32768.f;
-            a /= 32768.f;
-            b /= 32768.f;
+            /*          float X = 65535.f * (xxcal[pos] * YYcal[pos]) / yycal[pos];
+                      float Z = 65535.f * ((1.f - xxcal[pos] - yycal[pos]) * YYcal[pos]) / yycal[pos];
+                      float Y = 65535.f * YYcal[pos];
+                      float L, a, b;
+                      Color::XYZ2Lab (X, Y, Z, L, a, b);
+                      L /= 32768.f;
+                      a /= 32768.f;
+                      b /= 32768.f;
 
-            xxcal[pos] = a;
-            yycal[pos] = b;
-            YYcal[pos] = L;
+                      xxcal[pos] = a;
+                      yycal[pos] = b;
+                      YYcal[pos] = L;
+            */
             pos++;
         }
     }
@@ -7573,7 +7574,7 @@ void RawImageSource::ItcWB (array2D<float> &redloc, array2D<float> &greenloc, ar
     float Typrov[Nc] = {};
 
     for (int k = 0; k < Nc; k++) {
-        Txprov[k] = Tx[k][42];
+        Txprov[k] = Tx[k][42];//D50
         Typrov[k] = Ty[k][42];
     }
 
@@ -7630,6 +7631,13 @@ void RawImageSource::ItcWB (array2D<float> &redloc, array2D<float> &greenloc, ar
     yk (pos, N_t);
     Yk (pos, N_t);
 
+    array2D<float> L_k;
+    array2D<float> a_k;
+    array2D<float> b_k;
+    L_k (pos, N_t);
+    a_k (pos, N_t);
+    b_k (pos, N_t);
+
     for (int i = 0; i < pos; i++) {
         for (int j = 0; j < N_t; j++) {
             rk[i][j] = 0.f;
@@ -7638,6 +7646,10 @@ void RawImageSource::ItcWB (array2D<float> &redloc, array2D<float> &greenloc, ar
             xk[i][j] = 0.f;
             yk[i][j] = 0.f;
             Yk[i][j] = 0.f;
+            L_k[i][j] = 0.f;
+            a_k[i][j] = 0.f;
+            b_k[i][j] = 0.f;
+
         }
     }
 
@@ -7678,13 +7690,13 @@ void RawImageSource::ItcWB (array2D<float> &redloc, array2D<float> &greenloc, ar
             float Y = 65535.f * Yk[p][tt];
             float L, a, b;
             Color::XYZ2Lab (X, Y, Z, L, a, b);
-            L /= 32768.f;
-            a /= 32768.f;
-            b /= 32768.f;
+            L /= 327.68f;
+            a /= 327.68f;
+            b /= 327.68f;
 
-            xk[p][tt] = a;
-            yk[p][tt] = b;
-            Yk[p][tt] = L;
+            L_k[p][tt] = L;
+            a_k[p][tt] = a;
+            b_k[p][tt] = b;
 
 
             //    printf("xk=%f yk=%f\n", xk[p][tt], yk[p][tt]);
@@ -7704,10 +7716,12 @@ void RawImageSource::ItcWB (array2D<float> &redloc, array2D<float> &greenloc, ar
     float sigx[N_t] = {};
     float sigy[N_t] = {};
     float correl[N_t] = {};
+    float deltac[N_t] = {};
     float avgx42 = 0.f;
     float avgy42 = 0.f;
     float sigx42 = 0.f;
     float sigy42 = 0.f;
+    float delta = 0.f;
 
     for (int tt = 0; tt < N_t; tt++) {
         avgx[tt] = 0.f;
@@ -7716,12 +7730,154 @@ void RawImageSource::ItcWB (array2D<float> &redloc, array2D<float> &greenloc, ar
         sigx[tt] = 0.f;
         sigy[tt] = 0.f;
         correl[tt] = 0.f;
+        deltac[tt] = 0.f;
     }
 
-    int typ = 0;//4 type of covariance
+    int typ = 14;//type of covariance or different algoritms
     float maxcorel = -10.f;
     int tempcor = 0;
 
+    float epsxx = 4000.f, epsyy = 4000.f;//delta value to have result!
+    array2D<int> hh;
+
+    hh (pos, N_t);
+
+    for (int tt = 0; tt < N_t; tt++) {
+        for (int i = pred; i < pos; i++) {
+            hh[i][tt] = 0;
+        }
+    }
+
+    if (typ == 14) {
+        //first algo from web
+        for (int tt = 0; tt < N_t; tt++) {
+            for (int i = pred; i < pos; i++) {
+                if ((rk[i][tt] > (TR[memk[i]][tt] - epsxx)) &&  (rk[i][tt] < (TR[memk[i]][tt] + epsxx)) && ((bk[i][tt] > (TB[memk[i]][tt] - epsyy)) &&  (bk[i][tt] < (TB[memk[i]][tt] + epsyy)))) {
+                    hh[i][tt] = 1;
+                }
+            }
+        }
+
+        int somme[N_t];
+
+        for (int j = 0; j < N_t; j++) {
+            somme[j] = 0;
+        }
+
+        for (int tt = 0; tt < N_t; tt++) {
+            for (int j = 0; j < pos; j++) {
+                somme[tt] += hh[j][tt];
+            }
+        }
+
+        for (int j = 0; j < N_t; j++) {
+            printf ("j=%i somm=%i \n", j, somme[j] );
+
+        }
+    }
+
+    hh (0, 0);
+
+    if (typ == 11) {
+        //second algo mine deltaC
+        for (int tt = 0; tt < N_t; tt++) {
+            for (int i = pred; i < pos; i++) {
+                deltac[tt] += SQR (Ta[i][tt] - a_k[i][tt]) +  SQR (Tb[i][tt] - b_k[i][tt])    ;
+
+            }
+
+            deltac[tt] /= (pos - pred);
+            printf ("tt=%i delta=%f\n", tt, deltac[tt]);
+        }
+    }
+
+    if (typ == 12) {
+        //3 algo correlation R (ref and calculated) f(B ref and calculated)
+        for (int tt = 0; tt < N_t; tt++) {
+            for (int i = pred; i < pos; i++) {
+                avgx[tt] = TR[memk[i]][tt] + rk[i][tt];
+                avgy[tt] = TB[memk[i]][tt] + bk[i][tt];
+            }
+
+            avgx[tt] /= 2 * (pos - pred);
+            avgy[tt] /= 2 * (pos - pred);
+        }
+
+        for (int tt = 0; tt < N_t; tt++) {
+            for (int i = pred; i < pos; i++) {
+                covar[tt] += (TR[memk[i]][tt] - avgx[tt]) * (TB[memk[i]][tt] - avgy[tt]);
+                covar[tt] += (rk[i][tt] - avgx[tt]) * (bk[i][tt] - avgy[tt]);
+                sigx[tt] += SQR ((TR[memk[i]][tt] - avgx[tt]));
+                sigx[tt] += SQR ((rk[i][tt] - avgx[tt]));
+                sigy[tt] += SQR ((TB[memk[i]][tt] - avgy[tt]));
+                sigy[tt] += SQR ((bk[i][tt] - avgy[tt]));
+            }
+
+            covar[tt] /= 2 * (pos - pred);
+            sigy[tt] /= 2 * (pos - pred);
+            sigx[tt] /= 2 * (pos - pred);
+            sigx[tt] = sqrt (sigx[tt]);
+            sigy[tt] = sqrt (sigy[tt]);
+
+            correl[tt] = covar[tt] / (sigx[tt] * sigy[tt]);
+            correl[tt] = fabs (correl[tt]);
+
+            if (correl[tt] > maxcorel) {
+                maxcorel =  correl[tt];
+                tempcor = tt;
+            }
+
+
+            printf ("12 == tt=%i pos=%i corr=%f\n", tt, pos, correl[tt]);
+
+
+        }
+    }
+
+    if (typ == 13) {//
+        //algo 4 ref (B + R) correllation with calculated rk + bk)
+        for (int tt = 0; tt < N_t; tt++) {
+            for (int i = pred; i < pos; i++) {
+                avgx[tt] = TR[memk[i]][tt] + TB[memk[i]][tt];
+                avgy[tt] =  rk[i][tt] + bk[i][tt];
+            }
+
+            avgx[tt] /= 2 * (pos - pred);
+            avgy[tt] /= 2 * (pos - pred);
+        }
+
+        for (int tt = 0; tt < N_t; tt++) {
+            for (int i = pred; i < pos; i++) {
+                covar[tt] += (TR[memk[i]][tt] - avgx[tt]) * (rk[i][tt] - avgy[tt]);
+                covar[tt] += (TB[memk[i]][tt] - avgx[tt]) * (bk[i][tt] - avgy[tt]);
+                sigx[tt] += SQR ((TR[memk[i]][tt] - avgx[tt]));
+                sigx[tt] += SQR ((TB[memk[i]][tt] - avgx[tt]));
+                sigy[tt] += SQR ((rk[i][tt] - avgy[tt]));
+                sigy[tt] += SQR ((bk[i][tt] - avgy[tt]));
+            }
+
+            covar[tt] /= 2 * (pos - pred);
+            sigy[tt] /= 2 * (pos - pred);
+            sigx[tt] /= 2 * (pos - pred);
+            sigx[tt] = sqrt (sigx[tt]);
+            sigy[tt] = sqrt (sigy[tt]);
+
+            correl[tt] = covar[tt] / (sigx[tt] * sigy[tt]);
+            correl[tt] = fabs (correl[tt]);
+
+            if (correl[tt] > maxcorel) {
+                maxcorel =  correl[tt];
+                tempcor = tt;
+            }
+
+
+            printf ("13 == tt=%i pos=%i corr=%f\n", tt, pos, correl[tt]);
+
+
+        }
+    }
+
+//same with x and y xyY not good
     if (typ == 0) {//
         for (int tt = 0; tt < N_t; tt++) {
             for (int i = pred; i < pos; i++) {
@@ -8062,6 +8218,9 @@ void RawImageSource::ItcWB (array2D<float> &redloc, array2D<float> &greenloc, ar
     xk (0, 0);
     yk (0, 0);
     Yk (0, 0);
+    L_k (0, 0);
+    a_k (0, 0);
+    b_k (0, 0);
     reditc (0, 0);
     greenitc (0, 0);
     blueitc (0, 0);
