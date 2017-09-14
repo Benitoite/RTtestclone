@@ -283,9 +283,9 @@ HISTORY_MSG_30;RLD - Radius
 HISTORY_MSG_31;RLD - Amount
 HISTORY_MSG_32;RLD - Damping
 HISTORY_MSG_33;RLD - Iterations
-HISTORY_MSG_34;LCP distortion correction
-HISTORY_MSG_35;LCP vignetting correction
-HISTORY_MSG_36;LCP CA correction
+HISTORY_MSG_34;Lens Correction - Distortion
+HISTORY_MSG_35;Lens Correction - Vignetting
+HISTORY_MSG_36;Lens Correction - CA
 HISTORY_MSG_37;Exposure - Auto levels
 HISTORY_MSG_38;White Balance - Method
 HISTORY_MSG_39;WB - Temperature
@@ -334,7 +334,7 @@ HISTORY_MSG_81;Resize
 HISTORY_MSG_82;Profile changed
 HISTORY_MSG_83;S/H - Sharp mask
 HISTORY_MSG_84;Perspective correction
-HISTORY_MSG_85;LCP
+HISTORY_MSG_85;Lens Correction - LCP file
 HISTORY_MSG_86;RGB Curves - Luminosity mode
 HISTORY_MSG_87;Impulse Noise Reduction
 HISTORY_MSG_88;Impulse NR threshold
@@ -717,59 +717,62 @@ HISTORY_MSG_481;CAM02 - Temp scene
 HISTORY_MSG_482;CAM02 - Green scene
 HISTORY_MSG_483;CAM02 - Yb scene
 HISTORY_MSG_484;CAM02 - Auto Yb scene
-HISTORY_MSG_485;W - Unsharp method
-HISTORY_MSG_486;W - Merge luma
-HISTORY_MSG_487;W - Merge chroma
-HISTORY_MSG_488;W - Reti - gain
-HISTORY_MSG_489;W - Reti - brightness
-HISTORY_MSG_490;W - Reti - strength
-HISTORY_MSG_491;W - Reti - radius
-HISTORY_MSG_492;W - Reti - contrast
-HISTORY_MSG_493;W - Reti - threshold
-HISTORY_MSG_494;W - Retinex method
-HISTORY_MSG_495;W - Reti - transmission
-HISTORY_MSG_496;W - Reti - chroma
-HISTORY_MSG_497;W - Reti - process
-HISTORY_MSG_498;W - merge - enabled
-HISTORY_MSG_499;W - merge - file
-HISTORY_MSG_500;W - merge - type
-HISTORY_MSG_501;W - merge - preview
-HISTORY_MSG_502;W - merge - H shift
-HISTORY_MSG_503;W - merge - V shift
-HISTORY_MSG_504;W - merge - blend L
-HISTORY_MSG_505;W - merge - blend C
-HISTORY_MSG_506;W - merge - reset
-HISTORY_MSG_507;W - es - sharp method
-HISTORY_MSG_508;W - Reti - enabled
-HISTORY_MSG_509;W - merge - method
-HISTORY_MSG_510;W - Reti - radius
-HISTORY_MSG_511;W - Reti - highlight
-HISTORY_MSG_512;W - Reti - H tonal width
-HISTORY_MSG_513;W - Reti - shadows
-HISTORY_MSG_514;W - Reti - S tonal width
-HISTORY_MSG_515;W - Reti - Scale
-HISTORY_MSG_516;W - merge - gradient luma
-HISTORY_MSG_517;W - merge - merge curve
-HISTORY_MSG_518;W - Reti - gain curve
-HISTORY_MSG_519;CbDL - method
-HISTORY_MSG_520;W - merge - save size
-HISTORY_MSG_521;W - merge - luminance style
-HISTORY_MSG_522;W - merge - chroma
-HISTORY_MSG_523;W - merge - residual style
-HISTORY_MSG_524;W - merge - style targ/prot
-HISTORY_MSG_525;W - merge - shape detection curve hdr
-HISTORY_MSG_526;W - merge - style detection color
-HISTORY_MSG_527;W - merge - dirV
-HISTORY_MSG_528;W - merge - dirH
-HISTORY_MSG_529;W - merge - dirD
-HISTORY_MSG_530;W - merge - SH curve
-HISTORY_MSG_531;W - merge - luma curve++
-HISTORY_MSG_532;W - merge - luminance hdr
-HISTORY_MSG_533;W - merge - residual hdr
-HISTORY_MSG_534;W - merge - position
-HISTORY_MSG_535;W - merge - shape method
-HISTORY_MSG_536;W - merge - Neural index
-HISTORY_MSG_537;W - merge - shape detection curve sty
+HISTORY_MSG_485;Lens Correction
+HISTORY_MSG_486;Lens Correction - Camera
+HISTORY_MSG_487;Lens Correction - Lens
+HISTORY_MSG_488;W - Unsharp method
+HISTORY_MSG_489;W - Merge luma
+HISTORY_MSG_490;W - Merge chroma
+HISTORY_MSG_491;W - Reti - gain
+HISTORY_MSG_492;W - Reti - brightness
+HISTORY_MSG_493;W - Reti - strength
+HISTORY_MSG_494;W - Reti - radius
+HISTORY_MSG_495;W - Reti - contrast
+HISTORY_MSG_496;W - Reti - threshold
+HISTORY_MSG_497;W - Retinex method
+HISTORY_MSG_498;W - Reti - transmission
+HISTORY_MSG_499;W - Reti - chroma
+HISTORY_MSG_500;W - Reti - process
+HISTORY_MSG_501;W - merge - enabled
+HISTORY_MSG_502;W - merge - file
+HISTORY_MSG_503;W - merge - type
+HISTORY_MSG_504;W - merge - preview
+HISTORY_MSG_505;W - merge - H shift
+HISTORY_MSG_506;W - merge - V shift
+HISTORY_MSG_507;W - merge - blend L
+HISTORY_MSG_508;W - merge - blend C
+HISTORY_MSG_509;W - merge - reset
+HISTORY_MSG_510;W - es - sharp method
+HISTORY_MSG_511;W - Reti - enabled
+HISTORY_MSG_512;W - merge - method
+HISTORY_MSG_513;W - Reti - radius
+HISTORY_MSG_514;W - Reti - highlight
+HISTORY_MSG_515;W - Reti - H tonal width
+HISTORY_MSG_516;W - Reti - shadows
+HISTORY_MSG_517;W - Reti - S tonal width
+HISTORY_MSG_518;W - Reti - Scale
+HISTORY_MSG_519;W - merge - gradient luma
+HISTORY_MSG_520;W - merge - merge curve
+HISTORY_MSG_521;W - Reti - gain curve
+HISTORY_MSG_522;CbDL - method
+HISTORY_MSG_523;W - merge - save size
+HISTORY_MSG_524;W - merge - luminance style
+HISTORY_MSG_525;W - merge - chroma
+HISTORY_MSG_526;W - merge - residual style
+HISTORY_MSG_527;W - merge - style targ/prot
+HISTORY_MSG_528;W - merge - shape detection curve hdr
+HISTORY_MSG_529;W - merge - style detection color
+HISTORY_MSG_530;W - merge - dirV
+HISTORY_MSG_531;W - merge - dirH
+HISTORY_MSG_532;W - merge - dirD
+HISTORY_MSG_533;W - merge - SH curve
+HISTORY_MSG_534;W - merge - luma curve++
+HISTORY_MSG_535;W - merge - luminance hdr
+HISTORY_MSG_536;W - merge - residual hdr
+HISTORY_MSG_537;W - merge - position
+HISTORY_MSG_538;W - merge - shape method
+HISTORY_MSG_539;W - merge - Neural index
+HISTORY_MSG_540;W - merge - shape detection curve sty
 HISTORY_NEWSNAPSHOT;Add
 HISTORY_NEWSNAPSHOT_TOOLTIP;Shortcut: <b>Alt-s</b>
 HISTORY_SNAPSHOT;Snapshot
@@ -943,7 +946,7 @@ PARTIALPASTE_IMPULSEDENOISE;Impulse noise reduction
 PARTIALPASTE_IPTCINFO;IPTC
 PARTIALPASTE_LABCURVE;L*a*b* adjustments
 PARTIALPASTE_LENSGROUP;Lens Related Settings
-PARTIALPASTE_LENSPROFILE;Lens correction profile
+PARTIALPASTE_LENSPROFILE;Profiled lens correction
 PARTIALPASTE_METAGROUP;Metadata
 PARTIALPASTE_PCVIGNETTE;Vignette filter
 PARTIALPASTE_PERSPECTIVE;Perspective
@@ -1710,7 +1713,7 @@ TP_LABCURVE_RSTPRO_TOOLTIP;Works on the Chromaticity slider and the CC curve.
 TP_LENSGEOM_AUTOCROP;Auto-Crop
 TP_LENSGEOM_FILL;Auto-fill
 TP_LENSGEOM_LABEL;Lens / Geometry
-TP_LENSPROFILE_LABEL;Lens Correction Profile
+TP_LENSPROFILE_LABEL;Profiled Lens Correction
 TP_LENSPROFILE_USECA;Chromatic aberration correction
 TP_LENSPROFILE_USEDIST;Distortion correction
 TP_LENSPROFILE_USEVIGN;Vignetting correction
@@ -2327,3 +2330,7 @@ ZOOMPANEL_ZOOMFITCROPSCREEN;Fit crop to screen\nShortcut: <b>Alt</b>-<b>f</b>
 ZOOMPANEL_ZOOMFITSCREEN;Fit whole image to screen\nShortcut: <b>f</b>
 ZOOMPANEL_ZOOMIN;Zoom In\nShortcut: <b>+</b>
 ZOOMPANEL_ZOOMOUT;Zoom Out\nShortcut: <b>-</b>
+LENSPROFILE_CORRECTION_AUTOMATCH;Auto-matched correction parameters
+LENSPROFILE_CORRECTION_MANUAL;Manual correction parameters
+LENSPROFILE_CORRECTION_LCPFILE;LCP File
+LENSPROFILE_LENS_WARNING;Warning: the crop factor used for lens profiling is larger than the crop factor of the camera, the results might be wrong.
