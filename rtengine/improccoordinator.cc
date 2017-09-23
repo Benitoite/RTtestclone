@@ -39,7 +39,7 @@ extern const Settings* settings;
 
 ImProcCoordinator::ImProcCoordinator ()
     : orig_prev (nullptr), oprevi (nullptr), oprevl (nullptr), nprevl (nullptr), previmg (nullptr), workimg (nullptr),
-      ncie (nullptr), imgsrc (nullptr), shmap (nullptr), lastAwbEqual (0.), lastAwbTempBias (0.0), ipf (&params, true), monitorIntent (RI_RELATIVE),
+      ncie (nullptr), imgsrc (nullptr), shmap (nullptr), lastAwbEqual (0.), lastAwbTempBias (0.0), lastAwbauto (""), ipf (&params, true), monitorIntent (RI_RELATIVE),
       softProof (false), gamutCheck (false), scale (10), highDetailPreprocessComputed (false), highDetailRawComputed (false),
       allocated (false), bwAutoR (-9000.f), bwAutoG (-9000.f), bwAutoB (-9000.f), CAMMean (NAN),
 
@@ -321,39 +321,51 @@ void ImProcCoordinator::updatePreviewImage (int todo, Crop* cropCall)
         }
 
         imgsrc->demosaic ( rp); //enabled demosaic
-        // if a demosaic happened we should also call getimage later, so we need to set the M_INIT flag
+        // if a demosaic happened we should also call g etimage later, so we need to set the M_INIT flag
+
+
         todo |= M_INIT;
+//    if (todo & (M_INIT | M_LINDENOISE)) {
 
-        if (params.localwb.wbMethod == "aut" || params.localwb.wbMethod == "autosdw" || params.localwb.wbMethod == "autitc" || params.localwb.wbMethod == "autedgsdw" || params.localwb.wbMethod == "autedgrob" || params.localwb.wbMethod == "autedg" || params.localwb.wbMethod == "autorobust" ) {
-            //calculate RGB demosaic and with or not gamma sRGB for local area
-            //         printf ("Auto 1\n");
-            struct local_params lpall;
-            calcLocalrgbParams (fw, fh, params.localwb, lpall);
-            int begy = lpall.yc - lpall.lyT;
-            int begx = lpall.xc - lpall.lxL;
-            int yEn = lpall.yc + lpall.ly;
-            int xEn = lpall.xc + lpall.lx;
-            int bf_h = lpall.ly + lpall.lyT;
-            int bf_w = lpall.lx + lpall.lxL;
+        //   if (params.wb.method == "Auto" || params.localwb.wbMethod == "aut" || params.localwb.wbMethod == "autosdw" || params.localwb.wbMethod == "autitc" || params.localwb.wbMethod == "autedgsdw" || params.localwb.wbMethod == "autedgrob" || params.localwb.wbMethod == "autedg" || params.localwb.wbMethod == "autorobust" ) {
+//       if (params.wb.method == "Auto" ) {
+        /*
+                    //calculate RGB demosaic and with or not gamma sRGB for local area
+                    //         printf ("Auto 1\n");
+                    struct local_params lpall;
+                    calcLocalrgbParams (fw, fh, params.localwb, lpall);
+                    int begy = lpall.yc - lpall.lyT;
+                    int begx = lpall.xc - lpall.lxL;
+                    int yEn = lpall.yc + lpall.ly;
+                    int xEn = lpall.xc + lpall.lx;
+                    int bf_h = lpall.ly + lpall.lyT;
+                    int bf_w = lpall.lx + lpall.lxL;
 
-            int cx = 0;
-            int cy = 0;
-            bool gamma = false;
-            bool cat02 = false;
+                    int cx = 0;
+                    int cy = 0;
+                    bool gamma = false;
+                    bool cat02 = false;
 
-            if (params.localwb.wbcamMethod == "gam"  || params.localwb.wbcamMethod == "gamcat") {
-                gamma = true;
-            }
+                    if (params.localwb.wbcamMethod == "gam"  || params.localwb.wbcamMethod == "gamcat") {
+                        gamma = true;
+                    }
 
-            if (params.localwb.wbcamMethod == "cat" ||  params.localwb.wbcamMethod == "gamcat") {
-                cat02 = true;
-            }
+                    if (params.localwb.wbcamMethod == "cat" ||  params.localwb.wbcamMethod == "gamcat") {
+                        cat02 = true;
+                    }
+        */
+        //imgsrc->getrgbloc (gamma, cat02, begx, begy, yEn, xEn, cx, cy, bf_h, bf_w);
+        //   imgsrc->getrgbloc (gamma, cat02, 0, 0, fh, fw, cx, cy, fh, fw);
+        printf ("OK getrgb\n");
+        bool gamma = false;
 
-            imgsrc->getrgbloc (gamma, cat02, begx, begy, yEn, xEn, cx, cy, bf_h, bf_w);
-            //   imgsrc->getrgbloc (gamma, cat02, 0, 0, fh, fw, cx, cy, fh, fw);
-
+        if (params.wb.wbcamMethod == "gam") {
+            gamma = true;
         }
 
+        imgsrc->getrgbloc (false, gamma, false, 0, 0, fh, fw, 0, 0, fh, fw);
+//        }
+//  }
 
         if (highDetailNeeded) {
             highDetailRawComputed = true;
@@ -400,6 +412,10 @@ void ImProcCoordinator::updatePreviewImage (int todo, Crop* cropCall)
         }
     }
 
+    bool autowb = false;
+    autowb =  (params.wb.method == "aut"  || params.wb.method == "autosdw" || params.wb.method == "autedgsdw" || params.wb.method == "autitc"  || params.wb.method == "autedgrob" || params.wb.method == "autedg" || params.wb.method == "autorobust" );
+
+//  Glib::ustring
     if (todo & (M_INIT | M_LINDENOISE)) {
         MyMutex::MyLock initLock (minit); // Also used in crop window
 
@@ -414,18 +430,23 @@ void ImProcCoordinator::updatePreviewImage (int todo, Crop* cropCall)
 
         if (params.wb.method == "Camera") {
             currWB = imgsrc->getWB ();
-        } else if (params.wb.method == "Auto") {
-            if (lastAwbEqual != params.wb.equal || lastAwbTempBias != params.wb.tempBias) {
+            //   } else if (params.wb.method == "Auto") {
+        } else if (autowb) {
+
+            if (lastAwbEqual != params.wb.equal || lastAwbTempBias != params.wb.tempBias  || lastAwbauto != params.wb.method) {
                 double rm, gm, bm;
-                imgsrc->getAutoWBMultipliers (rm, gm, bm);
+                // imgsrc->getAutoWBMultipliers (rm, gm, bm);
+                imgsrc->getAutoWBMultipliersloc (0, 0, fh, fw, 0, 0, fh, fw, rm, gm, bm, params.localwb, params.wb);
 
                 if (rm != -1.) {
                     autoWB.update (rm, gm, bm, params.wb.equal, params.wb.tempBias);
                     lastAwbEqual = params.wb.equal;
                     lastAwbTempBias = params.wb.tempBias;
+                    lastAwbauto = params.wb.method;
                 } else {
                     lastAwbEqual = -1.;
                     lastAwbTempBias = 0.0;
+                    lastAwbauto = "";
                     autoWB.useDefaults (params.wb.equal);
                 }
 
@@ -439,7 +460,9 @@ void ImProcCoordinator::updatePreviewImage (int todo, Crop* cropCall)
         params.wb.temperature = currWB.getTemp ();
         params.wb.green = currWB.getGreen ();
 
-        if (params.wb.method == "Auto" && awbListener) {
+        //    if (params.wb.method == "Auto" && awbListener) {
+        if (autowb && awbListener) {
+
             awbListener->WBChanged (params.wb.temperature, params.wb.green);
         }
 
@@ -459,136 +482,137 @@ void ImProcCoordinator::updatePreviewImage (int todo, Crop* cropCall)
         Imagefloat *imageoriginal = nullptr;
         Imagefloat *imagetransformed = nullptr;
         Imagefloat *improv = nullptr;
+        /*
+                if (params.localwb.enabled && params.localwb.expwb) {
+                    currWBloc = ColorTemp (params.localwb.temp, params.localwb.green, 1.f, "Custom");
+                    wbm = 0;
 
-        if (params.localwb.enabled && params.localwb.expwb) {
-            currWBloc = ColorTemp (params.localwb.temp, params.localwb.green, 1.f, "Custom");
-            wbm = 0;
+                    //  if ((params.localwb.wbMethod == "aut"  || params.localwb.wbMethod == "autosdw"  || params.localwb.wbMethod == "autitc" || params.localwb.wbMethod == "autedgsdw"   || params.localwb.wbMethod == "autedgrob" || params.localwb.wbMethod == "autedg" || params.localwb.wbMethod == "autold" || params.localwb.wbMethod == "autorobust" )) {
+                    if ((params.localwb.wbMethod != "man")) {
+                        struct local_params lpall;
+                        calcLocalrgbParams (fw, fh, params.localwb, lpall);
+                        int begy = lpall.yc - lpall.lyT;
+                        int begx = lpall.xc - lpall.lxL;
+                        int yEn = lpall.yc + lpall.ly;
+                        int xEn = lpall.xc + lpall.lx;
+                        int bf_h = lpall.ly + lpall.lyT;
+                        int bf_w = lpall.lx + lpall.lxL;
 
-            //  if ((params.localwb.wbMethod == "aut"  || params.localwb.wbMethod == "autosdw"  || params.localwb.wbMethod == "autitc" || params.localwb.wbMethod == "autedgsdw"   || params.localwb.wbMethod == "autedgrob" || params.localwb.wbMethod == "autedg" || params.localwb.wbMethod == "autold" || params.localwb.wbMethod == "autorobust" )) {
-            if ((params.localwb.wbMethod != "man")) {
-                struct local_params lpall;
-                calcLocalrgbParams (fw, fh, params.localwb, lpall);
-                int begy = lpall.yc - lpall.lyT;
-                int begx = lpall.xc - lpall.lxL;
-                int yEn = lpall.yc + lpall.ly;
-                int xEn = lpall.xc + lpall.lx;
-                int bf_h = lpall.ly + lpall.lyT;
-                int bf_w = lpall.lx + lpall.lxL;
+                        int cx = 0;
+                        int cy = 0;
+                        double rm, gm, bm;
+                        printf("bx=%i by=%i yE=%i xE=%i cx=%i cy=%i bfh=%i bfw=%i \n", begx, begy, yEn, xEn, cx, cy, bf_h, bf_w);
+                        imgsrc->getAutoWBMultipliersloc (begx, begy, yEn, xEn, cx, cy, bf_h, bf_w, rm, gm, bm, params.localwb);
+                        //   imgsrc->getAutoWBMultipliersloc (0, 0, fh, fw, cx, cy, fh, fw, rm, gm, bm, params.localwb);
+                        //     autoWBloc.mul2temp (rm, gm, bm, params.localrgb.equal, ptemp, pgreen);
+                        autoWBloc.mul2temp (rm, gm, bm, 1.f, ptemp, pgreen);
+                        currWBloc = autoWBloc;
+        //            currWB = autoWBloc;
+                        params.wb.temperature = currWB.getTemp ();
+                        params.wb.green = currWB.getGreen ();
 
-                int cx = 0;
-                int cy = 0;
-                double rm, gm, bm;
-                imgsrc->getAutoWBMultipliersloc (begx, begy, yEn, xEn, cx, cy, bf_h, bf_w, rm, gm, bm, params.localwb);
-                //   imgsrc->getAutoWBMultipliersloc (0, 0, fh, fw, cx, cy, fh, fw, rm, gm, bm, params.localwb);
-                //     autoWBloc.mul2temp (rm, gm, bm, params.localrgb.equal, ptemp, pgreen);
-                autoWBloc.mul2temp (rm, gm, bm, 1.f, ptemp, pgreen);
-                currWBloc = autoWBloc;
-//            currWB = autoWBloc;
-                params.wb.temperature = currWB.getTemp ();
-                params.wb.green = currWB.getGreen ();
+                        if (params.wb.method == "Auto" && awbListener) {
 
-                if (params.wb.method == "Auto" && awbListener) {
+                            awbListener->WBChanged (params.wb.temperature, params.wb.green);
+                        }
 
-                    awbListener->WBChanged (params.wb.temperature, params.wb.green);
+
+                    }
+
+                    //       if ((params.localwb.wbMethod == "man")) {
+
+                    imageoriginal = new Imagefloat (pW, pH);
+                    imagetransformed = new Imagefloat (pW, pH);
+                    improv = new Imagefloat (pW, pH);
+        #ifdef _OPENMP
+                    #pragma omp parallel for
+        #endif
+
+                    for (int ir = 0; ir < pH; ir++)
+                        for (int jr = 0; jr < pW; jr++) {
+                            imagetransformed->r (ir, jr) = imageoriginal->r (ir, jr) = orig_prev->r (ir, jr);
+                            imagetransformed->g (ir, jr) = imageoriginal->g (ir, jr) = orig_prev->g (ir, jr);
+                            imagetransformed->b (ir, jr) = imageoriginal->b (ir, jr) = orig_prev->b (ir, jr);
+                        }
+
+                    ipf.WB_Local (imgsrc, 3, 1, 0, 0, 0, 0, pW, pH, fw, fh, improv, imagetransformed, currWBloc, tr, imageoriginal, pp, params.toneCurve, params.icm, params.raw, ptemp, pgreen);
+        #ifdef _OPENMP
+                    #pragma omp parallel for
+        #endif
+
+                    for (int ir = 0; ir < pH; ir++)
+                        for (int jr = 0; jr < pW; jr++) {
+                            orig_prev->r (ir, jr) = imagetransformed->r (ir, jr);
+                            orig_prev->g (ir, jr) = imagetransformed->g (ir, jr);
+                            orig_prev->b (ir, jr) = imagetransformed->b (ir, jr);
+                        }
+
+                    delete imageoriginal;
+                    delete imagetransformed;
+                    delete improv;
+
+                    //     if ((params.localwb.wbMethod == "aut" || params.localwb.wbMethod == "autosdw" || params.localwb.wbMethod == "autitc" || params.localwb.wbMethod == "autedgsdw" || params.localwb.wbMethod == "autedgrob"  || params.localwb.wbMethod == "autedg" || params.localwb.wbMethod == "autold" || params.localwb.wbMethod == "autorobust" ) && alorgbListener) {
+
+                    if ((params.localwb.wbMethod != "man"  && alorgbListener)) {
+
+                        if (params.localwb.wbMethod == "man") {
+                            wbm = 1;
+                        }
+
+                        if (params.localwb.wbMethod == "aut") {
+                            wbm = 2;
+                        }
+
+                        if (params.localwb.wbMethod == "autedg") {
+                            wbm = 3;
+                        }
+
+                        if (params.localwb.wbMethod == "autold") {
+                            wbm = 4;
+                        }
+
+                        if (params.localwb.wbMethod == "autorobust") {
+                            wbm = 5;
+                        }
+
+                        if (params.localwb.wbMethod == "autosdw") {
+                            wbm = 6;
+                        }
+
+                        if (params.localwb.wbMethod == "autedgrob") {
+                            wbm = 7;
+                        }
+
+                        if (params.localwb.wbMethod == "autedgsdw") {
+                            wbm = 8;
+                        }
+
+                        if (params.localwb.wbMethod == "autitc") {
+                            wbm = 9;
+                        }
+
+                        alorgbListener ->WBChanged (ptemp, pgreen, 0);//change GUI and method to Custom
+                        //params.localwb.wbMethod = "man";
+                        //wbm = 0;
+
+                    }
+
+                    //   alorgbListener ->WBChanged (ptemp, pgreen, 0);//change GUI and method to Custom
+
+                    // params.localwb.wbMethod = "man";
+
+                    if (alorgbListener  && params.localwb.wbMethod != "man" ) { // display values Full image an last method auto
+                        alorgbListener->temptintChanged (params.wb.temperature, params.wb.green, params.wb.equal, wbm);
+                        //   alorgbListener->temptintChanged (params.wb.temperature, params.wb.green, 1., wbm);
+                    }
+
+                    params.localwb.wbMethod = "man";
+                    wbm = 0;
+
+
+
                 }
-
-
-            }
-
-            //       if ((params.localwb.wbMethod == "man")) {
-
-            imageoriginal = new Imagefloat (pW, pH);
-            imagetransformed = new Imagefloat (pW, pH);
-            improv = new Imagefloat (pW, pH);
-#ifdef _OPENMP
-            #pragma omp parallel for
-#endif
-
-            for (int ir = 0; ir < pH; ir++)
-                for (int jr = 0; jr < pW; jr++) {
-                    imagetransformed->r (ir, jr) = imageoriginal->r (ir, jr) = orig_prev->r (ir, jr);
-                    imagetransformed->g (ir, jr) = imageoriginal->g (ir, jr) = orig_prev->g (ir, jr);
-                    imagetransformed->b (ir, jr) = imageoriginal->b (ir, jr) = orig_prev->b (ir, jr);
-                }
-
-            ipf.WB_Local (imgsrc, 3, 1, 0, 0, 0, 0, pW, pH, fw, fh, improv, imagetransformed, currWBloc, tr, imageoriginal, pp, params.toneCurve, params.icm, params.raw, ptemp, pgreen);
-#ifdef _OPENMP
-            #pragma omp parallel for
-#endif
-
-            for (int ir = 0; ir < pH; ir++)
-                for (int jr = 0; jr < pW; jr++) {
-                    orig_prev->r (ir, jr) = imagetransformed->r (ir, jr);
-                    orig_prev->g (ir, jr) = imagetransformed->g (ir, jr);
-                    orig_prev->b (ir, jr) = imagetransformed->b (ir, jr);
-                }
-
-            delete imageoriginal;
-            delete imagetransformed;
-            delete improv;
-
-            //     if ((params.localwb.wbMethod == "aut" || params.localwb.wbMethod == "autosdw" || params.localwb.wbMethod == "autitc" || params.localwb.wbMethod == "autedgsdw" || params.localwb.wbMethod == "autedgrob"  || params.localwb.wbMethod == "autedg" || params.localwb.wbMethod == "autold" || params.localwb.wbMethod == "autorobust" ) && alorgbListener) {
-
-            if ((params.localwb.wbMethod != "man"  && alorgbListener)) {
-
-                if (params.localwb.wbMethod == "man") {
-                    wbm = 1;
-                }
-
-                if (params.localwb.wbMethod == "aut") {
-                    wbm = 2;
-                }
-
-                if (params.localwb.wbMethod == "autedg") {
-                    wbm = 3;
-                }
-
-                if (params.localwb.wbMethod == "autold") {
-                    wbm = 4;
-                }
-
-                if (params.localwb.wbMethod == "autorobust") {
-                    wbm = 5;
-                }
-
-                if (params.localwb.wbMethod == "autosdw") {
-                    wbm = 6;
-                }
-
-                if (params.localwb.wbMethod == "autedgrob") {
-                    wbm = 7;
-                }
-
-                if (params.localwb.wbMethod == "autedgsdw") {
-                    wbm = 8;
-                }
-
-                if (params.localwb.wbMethod == "autitc") {
-                    wbm = 9;
-                }
-
-                alorgbListener ->WBChanged (ptemp, pgreen, 0);//change GUI and method to Custom
-                //params.localwb.wbMethod = "man";
-                //wbm = 0;
-
-            }
-
-            //   alorgbListener ->WBChanged (ptemp, pgreen, 0);//change GUI and method to Custom
-
-            // params.localwb.wbMethod = "man";
-
-            if (alorgbListener  && params.localwb.wbMethod != "man" ) { // display values Full image an last method auto
-                alorgbListener->temptintChanged (params.wb.temperature, params.wb.green, params.wb.equal, wbm);
-                //   alorgbListener->temptintChanged (params.wb.temperature, params.wb.green, 1., wbm);
-            }
-
-            params.localwb.wbMethod = "man";
-            wbm = 0;
-
-
-
-        }
-
+        */
         //ColorTemp::CAT02 (orig_prev, &params) ;
         //   printf("orig_prevW=%d\n  scale=%d",orig_prev->width, scale);
         /* Issue 2785, disabled some 1:1 tools
@@ -654,7 +678,7 @@ void ImProcCoordinator::updatePreviewImage (int todo, Crop* cropCall)
         }
 
         if (needstransform)
-            ipf.transform (orig_prev, oprevi, 0, 0, 0, 0, pW, pH, fw, fh, 
+            ipf.transform (orig_prev, oprevi, 0, 0, 0, 0, pW, pH, fw, fh,
                            imgsrc->getMetaData(), imgsrc->getRotateDegree(), false);
         else {
             orig_prev->copyData (oprevi);

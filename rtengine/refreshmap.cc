@@ -64,9 +64,9 @@ int refreshmap[rtengine::NUMOFEVENTS] = {
     DARKFRAME,        // EvLCPUseVign,
     TRANSFORM,        // EvLCPUseCA,
     M_VOID,           // EvFixedExp
-    ALLNORAW,         // EvWBMethod,
-    ALLNORAW,         // EvWBTemp,
-    ALLNORAW,         // EvWBGreen,
+    DEMOSAIC,         // EvWBMethod,
+    DEMOSAIC,         // EvWBTemp,
+    DEMOSAIC,         // EvWBGreen,
     RGBCURVE,         // EvToneCurveMode1,
     RGBCURVE,         // EvToneCurve2,
     RGBCURVE,         // EvToneCurveMode2,
@@ -234,8 +234,8 @@ int refreshmap[rtengine::NUMOFEVENTS] = {
     LUMINANCECURVE,   // EvCATbadpix
     LUMINANCECURVE,   // EvCATAutoadap
     DEFRINGE,         // EvPFCurve
-    ALLNORAW,         // EvWBequal
-    ALLNORAW,         // EvWBequalbo
+    DEMOSAIC,         // EvWBequal
+    DEMOSAIC,         // EvWBequalbo
     TRANSFORM,        // EvGradientDegree
     TRANSFORM,        // EvGradientEnabled
     TRANSFORM,        // EvPCVignetteStrength
@@ -470,7 +470,7 @@ int refreshmap[rtengine::NUMOFEVENTS] = {
     RETINEX,          // EvRetinexgaintransmission
     RETINEX,          // EvLskal
     OUTPUTPROFILE,    // EvOBPCompens
-    ALLNORAW,          // EvWBtempBias
+    DEMOSAIC,          // EvWBtempBias
     DARKFRAME,        // EvRawImageNum
     DEMOSAIC,         // EvPixelShiftMotion
     DEMOSAIC,         // EvPixelShiftMotionCorrection
@@ -541,7 +541,8 @@ int refreshmap[rtengine::NUMOFEVENTS] = {
     DEMOSAIC, //Evlocalwbequal
     DEMOSAIC, //EvlocalwbwbMethod
     DEMOSAIC, //Evlocalwbgamma
-    DEMOSAIC //EvlocalwbwbcamMethod
+    DEMOSAIC, //EvlocalwbwbcamMethod
+	DEMOSAIC //EvWBcamMethod
 
 };
 

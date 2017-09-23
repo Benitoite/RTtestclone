@@ -2196,18 +2196,20 @@ void RawImageSource::preprocess  (const RAWParams &raw, const LensProfParams &le
     // Correct vignetting of lens profile
     if (!hasFlatField && lensProf.useVign) {
         std::unique_ptr<LensCorrection> pmap;
+
         if (lensProf.useLensfun()) {
-            pmap = LFDatabase::findModifier(lensProf, idata, W, H, coarse, -1);
+            pmap = LFDatabase::findModifier (lensProf, idata, W, H, coarse, -1);
         } else {
-            const std::shared_ptr<LCPProfile> pLCPProf = LCPStore::getInstance()->getProfile(lensProf.lcpFile);
+            const std::shared_ptr<LCPProfile> pLCPProf = LCPStore::getInstance()->getProfile (lensProf.lcpFile);
 
             if (pLCPProf) { // don't check focal length to allow distortion correction for lenses without chip, also pass dummy focal length 1 in case of 0
-                pmap.reset(new LCPMapper(pLCPProf, max(idata->getFocalLen(), 1.0), idata->getFocalLen35mm(), idata->getFocusDist(), idata->getFNumber(), true, false, W, H, coarse, -1));
+                pmap.reset (new LCPMapper (pLCPProf, max (idata->getFocalLen(), 1.0), idata->getFocalLen35mm(), idata->getFocusDist(), idata->getFNumber(), true, false, W, H, coarse, -1));
             }
         }
 
         if (pmap) {
             LensCorrection &map = *pmap;
+
             if (ri->getSensorType() == ST_BAYER || ri->getSensorType() == ST_FUJI_XTRANS || ri->get_colors() == 1) {
                 if (numFrames == 4) {
                     for (int i = 0; i < 4; ++i) {
@@ -2262,14 +2264,14 @@ void RawImageSource::preprocess  (const RAWParams &raw, const LensProfParams &le
     }
 
     // check if it is an olympus E camera or green equilibration is enabled. If yes, compute G channel pre-compensation factors
-    if ( ri->getSensorType() == ST_BAYER && (raw.bayersensor.greenthresh || (((idata->getMake().size() >= 7 && idata->getMake().substr(0, 7) == "OLYMPUS" && idata->getModel()[0] == 'E') || (idata->getMake().size() >= 9 && idata->getMake().substr(0, 9) == "Panasonic")) && raw.bayersensor.method != RAWParams::BayerSensor::methodstring[ RAWParams::BayerSensor::vng4])) ) {
+    if ( ri->getSensorType() == ST_BAYER && (raw.bayersensor.greenthresh || (((idata->getMake().size() >= 7 && idata->getMake().substr (0, 7) == "OLYMPUS" && idata->getModel()[0] == 'E') || (idata->getMake().size() >= 9 && idata->getMake().substr (0, 9) == "Panasonic")) && raw.bayersensor.method != RAWParams::BayerSensor::methodstring[ RAWParams::BayerSensor::vng4])) ) {
         // global correction
-        if(numFrames == 4) {
-            for(int i = 0; i < 4; ++i) {
-                green_equilibrate_global(*rawDataFrames[i]);
+        if (numFrames == 4) {
+            for (int i = 0; i < 4; ++i) {
+                green_equilibrate_global (*rawDataFrames[i]);
             }
         } else {
-            green_equilibrate_global(rawData);
+            green_equilibrate_global (rawData);
         }
     }
 
@@ -2279,12 +2281,12 @@ void RawImageSource::preprocess  (const RAWParams &raw, const LensProfParams &le
             plistener->setProgress (0.0);
         }
 
-        if(numFrames == 4) {
-            for(int i = 0; i < 4; ++i) {
-                green_equilibrate(0.01 * raw.bayersensor.greenthresh, *rawDataFrames[i]);
+        if (numFrames == 4) {
+            for (int i = 0; i < 4; ++i) {
+                green_equilibrate (0.01 * raw.bayersensor.greenthresh, *rawDataFrames[i]);
             }
         } else {
-            green_equilibrate(0.01 * raw.bayersensor.greenthresh, rawData);
+            green_equilibrate (0.01 * raw.bayersensor.greenthresh, rawData);
         }
     }
 
@@ -8478,7 +8480,7 @@ void cat02_to_xyzfloatraw ( float & x, float & y, float & z, float r, float g, f
 */
 
 
-void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, array2D<float> &blueloc, int bfw, int bfh, double & avg_rm, double & avg_gm, double & avg_bm, const LocrgbParams & localr, int begx, int begy, int yEn, int xEn, int cx, int cy)
+void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, array2D<float> &blueloc, int bfw, int bfh, double & avg_rm, double & avg_gm, double & avg_bm, const LocrgbParams & localr, const WBParams & wbpar, int begx, int begy, int yEn, int xEn, int cx, int cy)
 {
     //auto white balance
 //   printf ("AUtoWB OK\n");
@@ -8517,37 +8519,39 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
     bool robust = false;
     bool itc = false;
 
-    if (localr.wbMethod == "autorobust") {
+    if (wbpar.method == "autorobust") {
+        printf ("autorob\n");
         RobustWB (redloc, greenloc, blueloc, bfw, bfh, avg_rm, avg_gm, avg_bm);
     }
 
-    if (localr.wbMethod == "autedg") {
+    if (wbpar.method == "autedg") {
+        printf ("autoedge\n");
         edg = true;
     }
 
-    if (localr.wbMethod == "aut") {
+    if (wbpar.method == "aut") {
         greyn = true;
     }
 
-    if (localr.wbMethod == "autitc") {
+    if (wbpar.method == "autitc") {
         itc = true;
         ItcWB (redloc, greenloc, blueloc, bfw, bfh, avg_rm, avg_gm, avg_bm);
 
     }
 
-    if (localr.wbMethod == "autedgsdw") {
+    if (wbpar.method == "autedgsdw") {
         SobelWB (redsobel, greensobel, bluesobel, redloc, greenloc, blueloc, bfw, bfh);
         SdwWB (redsobel, greensobel, bluesobel, bfw, bfh, avg_rm, avg_gm, avg_bm,  begx, begy, yEn,  xEn,  cx,  cy);
 
     }
 
-    if (localr.wbMethod == "autedgrob") {
+    if (wbpar.method == "autedgrob") {
         SobelWB (redsobel, greensobel, bluesobel, redloc, greenloc, blueloc, bfw, bfh);
         RobustWB (redsobel, greensobel, bluesobel, bfw, bfh, avg_rm, avg_gm, avg_bm);
 
     }
 
-    if (localr.wbMethod == "autosdw") {
+    if (wbpar.method == "autosdw") {
         SdwWB (redloc, greenloc, blueloc, bfw, bfh, avg_rm, avg_gm, avg_bm,  begx, begy, yEn,  xEn,  cx,  cy);
 
         printf ("bfw=%i bfh=%i begx=%i begy=%i xEn=%i yEn=%i cx=%i\n", bfw, bfh, begx, begy, xEn, yEn, cx);
@@ -8613,14 +8617,15 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
         avg_bm = avg_b / bn;
     }
 
-    //inverse cat02
-    if (localr.wbcamMethod == "cat" || localr.wbcamMethod == "gamcat") {
-        //printf("Inverse CAT02\n");
-        float x, y, z;
-        //   cat02_to_xyzfloatraw ( x, y, z, avg_rm, avg_gm, avg_bm);
-        Color::xyz2rgbraw (x, y, z, avg_rm, avg_gm, avg_bm, wip);
-    }
-
+    /*
+        //inverse cat02
+        if (localr.wbcamMethod == "cat" || localr.wbcamMethod == "gamcat") {
+            //printf("Inverse CAT02\n");
+            float x, y, z;
+            //   cat02_to_xyzfloatraw ( x, y, z, avg_rm, avg_gm, avg_bm);
+            Color::xyz2rgbraw (x, y, z, avg_rm, avg_gm, avg_bm, wip);
+        }
+    */
     if (edg) {
         printf ("Local sobel avgr = % f avgg = % f avgb = % f \n", avg_rm, avg_gm, avg_bm);
     }
@@ -8635,10 +8640,17 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
     bluesobel (0, 0);
 }
 
-void  RawImageSource::getrgbloc (bool gamma, bool cat02, int begx, int begy, int yEn, int xEn, int cx, int cy, int bf_h, int bf_w)
+void  RawImageSource::getrgbloc (bool local, bool gamma, bool cat02, int begx, int begy, int yEn, int xEn, int cx, int cy, int bf_h, int bf_w)
 {
     //used by auto WB local to calculate red, green, blue in local region
-    int bfh = bf_h + 3, bfw = bf_w + 3;
+    // int bfh = bf_h + 3, bfw = bf_w + 3;
+    int bfh = H, bfw = W;
+
+    if (local) {
+        bfh = bf_h + 3;
+        bfw = bf_w + 3;
+    }
+
     //  printf ("bfh=%i bfw=%i H=%i W=%i \n", bf_h, bf_w, H, W);
     ColorManagementParams cmp;
     TMatrix wprof = ICCStore::getInstance()->workingSpaceMatrix (cmp.working);
@@ -8691,13 +8703,23 @@ void  RawImageSource::getrgbloc (bool gamma, bool cat02, int begx, int begy, int
             int lox = cx + j;
             int loy = cy + i;
 
-            if (lox >= begx && lox < xEn && loy >= begy && loy < yEn) {
-                redmm = redloc[loy - begy][lox - begx] = red[i][j];
-                greenmm = greenloc[loy - begy][lox - begx] = green[i][j];
-                bluemm = blueloc[loy - begy][lox - begx] = blue[i][j];
+            if (!local) {
+                redmm = redloc[i][j] = red[i][j];
+                greenmm = greenloc[i][j] = green[i][j];
+                bluemm = blueloc[i][j] = blue[i][j];
                 float LL = (0.299f * redmm + 0.587f * greenmm + 0.114f * bluemm);
                 avgL += LL;
                 nn++;
+            } else {
+
+                if (lox >= begx && lox < xEn && loy >= begy && loy < yEn) {
+                    redmm = redloc[loy - begy][lox - begx] = red[i][j];
+                    greenmm = greenloc[loy - begy][lox - begx] = green[i][j];
+                    bluemm = blueloc[loy - begy][lox - begx] = blue[i][j];
+                    float LL = (0.299f * redmm + 0.587f * greenmm + 0.114f * bluemm);
+                    avgL += LL;
+                    nn++;
+                }
             }
         }
 
@@ -8750,12 +8772,12 @@ void  RawImageSource::getrgbloc (bool gamma, bool cat02, int begx, int begy, int
 
 }
 
-void RawImageSource::getAutoWBMultipliersloc (int begx, int begy, int yEn, int xEn, int cx, int cy, int bf_h, int bf_w, double & rm, double & gm, double & bm, const LocrgbParams & localr)
+void RawImageSource::getAutoWBMultipliersloc (int begx, int begy, int yEn, int xEn, int cx, int cy, int bf_h, int bf_w, double & rm, double & gm, double & bm, const LocrgbParams & localr, const WBParams & wbpar)
 {
     //    BENCHFUN
     constexpr double clipHigh = 64000.0;
+    printf ("automulloc\n");
 
-//  printf("automulloc\n");
     if (ri->get_colors() == 1) {
         rm = gm = bm = 1;
         return;
@@ -8768,7 +8790,7 @@ void RawImageSource::getAutoWBMultipliersloc (int begx, int begy, int yEn, int x
     double avg_rm, avg_gm, avg_bm;
     int bfh = bf_h + 3, bfw = bf_w + 3;
 
-    if (localr.wbMethod == "autold") {
+    if (wbpar.method == "autold") {
 
         if (fuji) {
             for (int i = 32; i < H - 32; i++) {
@@ -8971,9 +8993,10 @@ void RawImageSource::getAutoWBMultipliersloc (int begx, int begy, int yEn, int x
         }
     }
 
-    if (localr.wbMethod == "aut"  || localr.wbMethod == "autosdw" || localr.wbMethod == "autedgsdw" || localr.wbMethod == "autitc"  || localr.wbMethod == "autedgrob" || localr.wbMethod == "autedg" || localr.wbMethod == "autorobust" ) {
+    //  if (localr.wbMethod == "aut"  || localr.wbMethod == "autosdw" || localr.wbMethod == "autedgsdw" || localr.wbMethod == "autitc"  || localr.wbMethod == "autedgrob" || localr.wbMethod == "autedg" || localr.wbMethod == "autorobust" ) {
+    if (wbpar.method == "aut"  || wbpar.method == "autosdw" || wbpar.method == "autedgsdw" || wbpar.method == "autitc"  || wbpar.method == "autedgrob" || wbpar.method == "autedg" || wbpar.method == "autorobust" ) {
         //   printf("appel a WBauto\n");
-        WBauto (redloc, greenloc, blueloc, bfw, bfh, avg_rm, avg_gm, avg_bm, localr, begx, begy, yEn,  xEn,  cx,  cy);
+        WBauto (redloc, greenloc, blueloc, bfw, bfh, avg_rm, avg_gm, avg_bm, localr, wbpar, begx, begy, yEn,  xEn,  cx,  cy);
     }
 
     redloc (0, 0);
@@ -8988,13 +9011,14 @@ void RawImageSource::getAutoWBMultipliersloc (int begx, int begy, int yEn, int x
 
     double reds = 0., greens = 0., blues = 0.;
 
-    if (localr.wbMethod == "aut"  || localr.wbMethod == "autosdw"  || localr.wbMethod == "autedgsdw" || localr.wbMethod == "autedgrob" || localr.wbMethod == "autedg" || localr.wbMethod == "autorobust" || localr.wbMethod == "autitc" ) {
+    if ( wbpar.method == "aut"  || wbpar.method == "autosdw"  || wbpar.method == "autedgsdw" || wbpar.method == "autedgrob" || wbpar.method == "autedg" || wbpar.method == "autorobust" || wbpar.method == "autitc" ) {
+        printf ("on y est\n");
         reds   = avg_rm * refwb_red;
         greens = avg_gm * refwb_green;
         blues  = avg_bm * refwb_blue;
     }
 
-    if (localr.wbMethod == "autold") {
+    if (wbpar.method == "autold") {
         reds   = avg_r / rn * refwb_red;
         greens = avg_g / gn * refwb_green;
         blues  = avg_b / bn * refwb_blue;
@@ -9012,26 +9036,28 @@ void RawImageSource::getAutoWBMultipliers (double & rm, double & gm, double & bm
 {
 //    BENCHFUN
     constexpr double clipHigh = 64000.0;
+    printf ("AUTO \n");
+    /*
+        if (ri->get_colors() == 1) {
+            rm = gm = bm = 1;
+            return;
+        }
+        */
+    /*
+        if (redAWBMul != -1.) {
+            rm = redAWBMul;
+            gm = greenAWBMul;
+            bm = blueAWBMul;
+            return;
+        }
 
-    if (ri->get_colors() == 1) {
-        rm = gm = bm = 1;
-        return;
-    }
-
-    if (redAWBMul != -1.) {
-        rm = redAWBMul;
-        gm = greenAWBMul;
-        bm = blueAWBMul;
-        return;
-    }
-
-    if (!isWBProviderReady()) {
-        rm = -1.0;
-        gm = -1.0;
-        bm = -1.0;
-        return;
-    }
-
+        if (!isWBProviderReady()) {
+            rm = -1.0;
+            gm = -1.0;
+            bm = -1.0;
+            return;
+        }
+    */
     double avg_r = 0;
     double avg_g = 0;
     double avg_b = 0;

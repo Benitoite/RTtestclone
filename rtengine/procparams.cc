@@ -52,7 +52,7 @@ const int br = (int) options.rtSettings.bot_right;
 const int tl = (int) options.rtSettings.top_left;
 const int bl = (int) options.rtSettings.bot_left;
 
-const char *LensProfParams::methodstring[static_cast<size_t>(LensProfParams::LcMode::LCP) + 1u] = {"none", "lfauto", "lfmanual", "lcp"};
+const char *LensProfParams::methodstring[static_cast<size_t> (LensProfParams::LcMode::LCP) + 1u] = {"none", "lfauto", "lfmanual", "lcp"};
 const char *RAWParams::BayerSensor::methodstring[RAWParams::BayerSensor::numMethods] = {"amaze", "igv", "lmmse", "eahd", "hphd", "vng4", "dcb", "ahd", "fast", "mono", "none", "pixelshift" };
 const char *RAWParams::XTransSensor::methodstring[RAWParams::XTransSensor::numMethods] = {"3-pass (best)", "1-pass (medium)", "fast", "mono", "none" };
 
@@ -67,12 +67,21 @@ bool ToneCurveParams::HLReconstructionNecessary (LUTu &histRedRaw, LUTu &histGre
 
     return histRedRaw[255] > 50 || histGreenRaw[255] > 50 || histBlueRaw[255] > 50 || histRedRaw[0] > 50 || histGreenRaw[0] > 50 || histBlueRaw[0] > 50;
 }
+//   autowb =  (params.wb.method == "aut"  || params.wb.method == "autosdw" || params.wb.method == "autedgsdw" || params.wb.method == "autitc"  || params.wb.method == "autedgrob" || params.wb.method == "autedg" || params.wb.method == "autorobust" );
 
 void WBParams::init()
+// Creation of the different methods and its associated temperature value
 {
-    // Creation of the different methods and its associated temperature value
     wbEntries.push_back (new WBEntry ("Camera",                 WBT_CAMERA,         M ("TP_WBALANCE_CAMERA"),         0, 1.f,    1.f,    0.f));
-    wbEntries.push_back (new WBEntry ("Auto",                   WBT_AUTO,           M ("TP_WBALANCE_AUTO"),           0, 1.f,    1.f,    0.f));
+    wbEntries.push_back (new WBEntry ("autold",                 WBT_AUTO,           M ("TP_WBALANCE_AUTOOLD"),        0, 1.f,    1.f,    0.f));
+    wbEntries.push_back (new WBEntry ("aut",                    WBT_AUTO,           M ("TP_WBALANCE_AUTODEM"),        0, 1.f,    1.f,    0.f));
+    wbEntries.push_back (new WBEntry ("autedg",                 WBT_AUTO,           M ("TP_WBALANCE_AUTOEDGE"),       0, 1.f,    1.f,    0.f));
+    wbEntries.push_back (new WBEntry ("autorobust",             WBT_AUTO,           M ("TP_WBALANCE_AUTOROB"),        0, 1.f,    1.f,    0.f));
+    wbEntries.push_back (new WBEntry ("autosdw",                WBT_AUTO,           M ("TP_WBALANCE_AUTOSDW"),        0, 1.f,    1.f,    0.f));
+    wbEntries.push_back (new WBEntry ("autedgsdw",              WBT_AUTO,           M ("TP_WBALANCE_AUTOEDGESW"),     0, 1.f,    1.f,    0.f));
+    wbEntries.push_back (new WBEntry ("autedgrob",              WBT_AUTO,           M ("TP_WBALANCE_AUTOEDGEROB"),    0, 1.f,    1.f,    0.f));
+    wbEntries.push_back (new WBEntry ("autitc",                 WBT_AUTO,           M ("TP_WBALANCE_AUTOITC"),        0, 1.f,    1.f,    0.f));
+
     wbEntries.push_back (new WBEntry ("Daylight",               WBT_DAYLIGHT,       M ("TP_WBALANCE_DAYLIGHT"),    5300, 1.f,    1.f,    0.f));
     wbEntries.push_back (new WBEntry ("Cloudy",                 WBT_CLOUDY,         M ("TP_WBALANCE_CLOUDY"),      6200, 1.f,    1.f,    0.f));
     wbEntries.push_back (new WBEntry ("Shade",                  WBT_SHADE,          M ("TP_WBALANCE_SHADE"),       7600, 1.f,    1.f,    0.f));
@@ -1187,6 +1196,7 @@ void ProcParams::setDefaults ()
     wb.green        = 1.0;
     wb.equal        = 1.0;
     wb.tempBias     = 0.0;
+	wb.wbcamMethod  = "gam";
     colorappearance.enabled       = false;
     colorappearance.degree        = 90;
     colorappearance.autodegree    = true;
@@ -2099,10 +2109,14 @@ int ProcParams::save (const Glib::ustring &fname, const Glib::ustring &fname2, b
         */
 
         // save wb
+        if (!pedited || pedited->wb.wbcamMethod) {
+            keyFile.set_string ("White Balance", "Cam", wb.wbcamMethod);
+        }
+
         if (!pedited || pedited->wb.method) {
             keyFile.set_string ("White Balance", "Setting", wb.method);
         }
-
+		
         if (!pedited || pedited->wb.temperature) {
             keyFile.set_integer ("White Balance", "Temperature", wb.temperature);
         }
@@ -2608,13 +2622,15 @@ int ProcParams::save (const Glib::ustring &fname, const Glib::ustring &fname2, b
         }
 
         if (!pedited || pedited->lensProf.lfCameraMake) {
-            keyFile.set_string("LensProfile", "LFCameraMake", lensProf.lfCameraMake);
+            keyFile.set_string ("LensProfile", "LFCameraMake", lensProf.lfCameraMake);
         }
+
         if (!pedited || pedited->lensProf.lfCameraModel) {
-            keyFile.set_string("LensProfile", "LFCameraModel", lensProf.lfCameraModel);
+            keyFile.set_string ("LensProfile", "LFCameraModel", lensProf.lfCameraModel);
         }
+
         if (!pedited || pedited->lensProf.lfLens) {
-            keyFile.set_string("LensProfile", "LFLens", lensProf.lfLens);
+            keyFile.set_string ("LensProfile", "LFLens", lensProf.lfLens);
         }
 
 // save perspective correction
@@ -5293,6 +5309,14 @@ int ProcParams::load (const Glib::ustring &fname, ParamsEdited* pedited)
                 }
             }
 
+            if (keyFile.has_key ("White Balance", "Cam")) {
+                wb.wbcamMethod = keyFile.get_string ("White Balance", "Cam");
+
+                if (pedited) {
+                    pedited->wb.wbcamMethod = true;
+                }
+            }
+			
             if (keyFile.has_key ("White Balance", "Temperature")) {
                 wb.temperature = keyFile.get_integer ("White Balance", "Temperature");
 
@@ -6208,7 +6232,7 @@ int ProcParams::load (const Glib::ustring &fname, ParamsEdited* pedited)
                     pedited->lensProf.lcpFile = true;
                 }
 
-                if(ppVersion < 327 && !lensProf.lcpFile.empty()) {
+                if (ppVersion < 327 && !lensProf.lcpFile.empty()) {
                     lensProf.lcMode = LensProfParams::LcMode::LCP;
                 }
             }
@@ -6237,22 +6261,25 @@ int ProcParams::load (const Glib::ustring &fname, ParamsEdited* pedited)
                 }
             }
 
-            if (keyFile.has_key("LensProfile", "LFCameraMake")) {
-                lensProf.lfCameraMake = keyFile.get_string("LensProfile", "LFCameraMake");
+            if (keyFile.has_key ("LensProfile", "LFCameraMake")) {
+                lensProf.lfCameraMake = keyFile.get_string ("LensProfile", "LFCameraMake");
+
                 if (pedited) {
                     pedited->lensProf.lfCameraMake = true;
                 }
             }
 
-            if (keyFile.has_key("LensProfile", "LFCameraModel")) {
-                lensProf.lfCameraModel = keyFile.get_string("LensProfile", "LFCameraModel");
+            if (keyFile.has_key ("LensProfile", "LFCameraModel")) {
+                lensProf.lfCameraModel = keyFile.get_string ("LensProfile", "LFCameraModel");
+
                 if (pedited) {
                     pedited->lensProf.lfCameraModel = true;
                 }
             }
 
-            if (keyFile.has_key("LensProfile", "LFLens")) {
-                lensProf.lfLens = keyFile.get_string("LensProfile", "LFLens");
+            if (keyFile.has_key ("LensProfile", "LFLens")) {
+                lensProf.lfLens = keyFile.get_string ("LensProfile", "LFLens");
+
                 if (pedited) {
                     pedited->lensProf.lfLens = true;
                 }
@@ -8756,6 +8783,7 @@ bool ProcParams::operator== (const ProcParams& other)
         && wb.green == other.wb.green
         && wb.temperature == other.wb.temperature
         && wb.equal == other.wb.equal
+        && wb.wbcamMethod == other.wb.wbcamMethod
         //&& colorShift.a == other.colorShift.a
         //&& colorShift.b == other.colorShift.b
         && colorappearance.enabled == other.colorappearance.enabled

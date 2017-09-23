@@ -72,6 +72,7 @@ protected:
 
     double lastAwbEqual;
     double lastAwbTempBias;
+    Glib::ustring lastAwbauto;
 
     ImProcFunctions ipf;
 

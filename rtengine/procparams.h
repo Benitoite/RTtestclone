@@ -559,6 +559,7 @@ public:
     double          green;
     double          equal;
     double          tempBias;
+    Glib::ustring   wbcamMethod;
 
     static void     init();
     static void     cleanup();

@@ -542,7 +542,7 @@ enum ProcEvent {
     EvlocalwbwbMethod = 512,
     Evlocalwbgamma = 513,
     EvlocalwbwbcamMethod = 514,
-
+	EvWBcamMethod = 515,
     NUMOFEVENTS
 
 };
