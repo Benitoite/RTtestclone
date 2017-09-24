@@ -114,7 +114,7 @@ PreviewImage::PreviewImage (const Glib::ustring &fname, const Glib::ustring &ext
             rawImage.preprocess(params.raw, params.lensProf, params.coarse);
             rawImage.demosaic(params.raw);
             Imagefloat image(fw, fh);
-            rawImage.getImage (wb, TR_NONE, &image, pp, params.toneCurve, params.icm, params.raw);
+            rawImage.getImage (wb, TR_NONE, &image, pp, params.toneCurve, params.icm, params.raw, params.wb);
             rtengine::Image8 output(fw, fh);
             rawImage.convertColorSpace(&image, params.icm, wb);
             #pragma omp parallel for schedule(dynamic, 10)

@@ -557,6 +557,7 @@ public:
     Glib::ustring   method;
     int             temperature;
     double          green;
+    double          cat02;
     double          equal;
     double          tempBias;
     Glib::ustring   wbcamMethod;

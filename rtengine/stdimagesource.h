@@ -43,7 +43,7 @@ public:
     ~StdImageSource ();
 
     int         load        (const Glib::ustring &fname, int imageNum = 0, bool batch = false);
-    void        getImage    (const ColorTemp &ctemp, int tran, Imagefloat* image, const PreviewProps &pp, const ToneCurveParams &hrp, const ColorManagementParams &cmp, const RAWParams &raw);
+    void        getImage    (const ColorTemp &ctemp, int tran, Imagefloat* image, const PreviewProps &pp, const ToneCurveParams &hrp, const ColorManagementParams &cmp, const RAWParams &raw, const WBParams &wbp);
     void        getImage_local    (int begx, int begy, int yEn, int xEn, int cx, int cy, const ColorTemp &ctemp, int tran, Imagefloat* image, Imagefloat* bufimage, const PreviewProps &pp, const ToneCurveParams &hrp, const ColorManagementParams &cmp, const RAWParams &raw);
     void        getrgbloc (bool local, bool gamma, bool  cat02, int begx, int begy, int yEn, int xEn, int cx, int cy, int bf_h, int bf_w);
     ColorTemp   getWB       () const

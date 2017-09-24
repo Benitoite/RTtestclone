@@ -80,7 +80,7 @@ void WBParams::init()
     wbEntries.push_back (new WBEntry ("autosdw",                WBT_AUTO,           M ("TP_WBALANCE_AUTOSDW"),        0, 1.f,    1.f,    0.f));
     wbEntries.push_back (new WBEntry ("autedgsdw",              WBT_AUTO,           M ("TP_WBALANCE_AUTOEDGESW"),     0, 1.f,    1.f,    0.f));
     wbEntries.push_back (new WBEntry ("autedgrob",              WBT_AUTO,           M ("TP_WBALANCE_AUTOEDGEROB"),    0, 1.f,    1.f,    0.f));
-    wbEntries.push_back (new WBEntry ("autitc",                 WBT_AUTO,           M ("TP_WBALANCE_AUTOITC"),        0, 1.f,    1.f,    0.f));
+ //   wbEntries.push_back (new WBEntry ("autitc",                 WBT_AUTO,           M ("TP_WBALANCE_AUTOITC"),        0, 1.f,    1.f,    0.f));
 
     wbEntries.push_back (new WBEntry ("Daylight",               WBT_DAYLIGHT,       M ("TP_WBALANCE_DAYLIGHT"),    5300, 1.f,    1.f,    0.f));
     wbEntries.push_back (new WBEntry ("Cloudy",                 WBT_CLOUDY,         M ("TP_WBALANCE_CLOUDY"),      6200, 1.f,    1.f,    0.f));
@@ -1196,6 +1196,7 @@ void ProcParams::setDefaults ()
     wb.green        = 1.0;
     wb.equal        = 1.0;
     wb.tempBias     = 0.0;
+	wb.cat02 		= 20.0;
 	wb.wbcamMethod  = "gam";
     colorappearance.enabled       = false;
     colorappearance.degree        = 90;
@@ -2129,6 +2130,10 @@ int ProcParams::save (const Glib::ustring &fname, const Glib::ustring &fname2, b
             keyFile.set_double ("White Balance", "Equal", wb.equal);
         }
 
+        if (!pedited || pedited->wb.cat02) {
+            keyFile.set_double ("White Balance", "Cat02", wb.cat02);
+        }
+		
         if (!pedited || pedited->wb.tempBias) {
             keyFile.set_double ("White Balance", "TemperatureBias", wb.tempBias);
         }
@@ -5341,6 +5346,13 @@ int ProcParams::load (const Glib::ustring &fname, ParamsEdited* pedited)
                 }
             }
 
+            if (keyFile.has_key ("White Balance", "Cat02")) {
+                wb.cat02 = keyFile.get_double ("White Balance", "Cat02");
+                if (pedited) {
+                    pedited->wb.cat02 = true;
+                }
+            }
+			
             if (keyFile.has_key ("White Balance", "TemperatureBias")) {
                 wb.tempBias = keyFile.get_double ("White Balance", "TemperatureBias");
 
@@ -8783,6 +8795,7 @@ bool ProcParams::operator== (const ProcParams& other)
         && wb.green == other.wb.green
         && wb.temperature == other.wb.temperature
         && wb.equal == other.wb.equal
+        && wb.cat02 == other.wb.cat02
         && wb.wbcamMethod == other.wb.wbcamMethod
         //&& colorShift.a == other.colorShift.a
         //&& colorShift.b == other.colorShift.b

@@ -364,9 +364,9 @@ void ImProcCoordinator::updatePreviewImage (int todo, Crop* cropCall)
         }
 
         imgsrc->getrgbloc (false, gamma, false, 0, 0, fh, fw, 0, 0, fh, fw);
+
 //        }
 //  }
-
         if (highDetailNeeded) {
             highDetailRawComputed = true;
         } else {
@@ -413,7 +413,7 @@ void ImProcCoordinator::updatePreviewImage (int todo, Crop* cropCall)
     }
 
     bool autowb = false;
-    autowb =  (params.wb.method == "aut"  || params.wb.method == "autosdw" || params.wb.method == "autedgsdw" || params.wb.method == "autitc"  || params.wb.method == "autedgrob" || params.wb.method == "autedg" || params.wb.method == "autorobust" );
+    autowb =  (params.wb.method == "autold" || params.wb.method == "aut"  || params.wb.method == "autosdw" || params.wb.method == "autedgsdw" || params.wb.method == "autitc"  || params.wb.method == "autedgrob" || params.wb.method == "autedg" || params.wb.method == "autorobust" );
 
 //  Glib::ustring
     if (todo & (M_INIT | M_LINDENOISE)) {
@@ -476,7 +476,7 @@ void ImProcCoordinator::updatePreviewImage (int todo, Crop* cropCall)
         // Tells to the ImProcFunctions' tools what is the preview scale, which may lead to some simplifications
         ipf.setScale (scale);
 
-        imgsrc->getImage (currWB, tr, orig_prev, pp, params.toneCurve, params.icm, params.raw);
+        imgsrc->getImage (currWB, tr, orig_prev, pp, params.toneCurve, params.icm, params.raw, params.wb);
         denoiseInfoStore.valid = false;
 
         Imagefloat *imageoriginal = nullptr;
@@ -1492,7 +1492,7 @@ void ImProcCoordinator::saveInputICCReference (const Glib::ustring& fname, bool 
         currWB = ColorTemp(); // = no white balance
     }
 
-    imgsrc->getImage (currWB, tr, im, pp, ppar.toneCurve, ppar.icm, ppar.raw);
+    imgsrc->getImage (currWB, tr, im, pp, ppar.toneCurve, ppar.icm, ppar.raw, ppar.wb);
     ImProcFunctions ipf (&ppar, true);
 
     if (ipf.needsTransform()) {

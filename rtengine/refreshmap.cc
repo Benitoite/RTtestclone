@@ -542,7 +542,8 @@ int refreshmap[rtengine::NUMOFEVENTS] = {
     DEMOSAIC, //EvlocalwbwbMethod
     DEMOSAIC, //Evlocalwbgamma
     DEMOSAIC, //EvlocalwbwbcamMethod
-	DEMOSAIC //EvWBcamMethod
+	DEMOSAIC, //EvWBcamMethod
+	DEMOSAIC //EvWBcat02
 
 };
 

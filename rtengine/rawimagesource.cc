@@ -953,12 +953,12 @@ void RawImageSource::getImage_local (int begx, int begy, int yEn, int xEn, int c
 
 
 
-void RawImageSource::getImage (const ColorTemp &ctemp, int tran, Imagefloat* image, const PreviewProps &pp, const ToneCurveParams &hrp, const ColorManagementParams &cmp, const RAWParams &raw )
+void RawImageSource::getImage (const ColorTemp &ctemp, int tran, Imagefloat* image, const PreviewProps &pp, const ToneCurveParams &hrp, const ColorManagementParams &cmp, const RAWParams &raw, const WBParams &wbp )
 {
     MyMutex::MyLock lock (getImageMutex);
 
     tran = defTransform (tran);
-
+    double wbcat02 = wbp.cat02;
     // compute channel multipliers
     double r, g, b;
     float rm, gm, bm;
@@ -1211,6 +1211,49 @@ void RawImageSource::getImage (const ColorTemp &ctemp, int tran, Imagefloat* ima
             image->g (image->getHeight() - 1, j) = (image->g (image->getHeight() - 2, j) + image->g (image->getHeight() - 1, j + 1) + image->g (image->getHeight() - 1, j - 1)) / 3;
             image->b (image->getHeight() - 1, j) = (image->b (image->getHeight() - 2, j) + image->b (image->getHeight() - 1, j + 1) + image->b (image->getHeight() - 1, j - 1)) / 3;
         }
+    }
+
+//Cat02 correction
+    /*
+        rmul = sRGBd65_xyz[0][0] * Xwb * adj + sRGBd65_xyz[0][1] * Ywb + sRGBd65_xyz[0][2] * Zwb / adj; // Jacques' empirical modification 5/2013
+        gmul = sRGBd65_xyz[1][0] * Xwb     + sRGBd65_xyz[1][1] * Ywb + sRGBd65_xyz[1][2] * Zwb;
+        bmul = sRGBd65_xyz[2][0] * Xwb * adj + sRGBd65_xyz[2][1] * Ywb + sRGBd65_xyz[2][2] * Zwb / adj;
+        //};
+        gmul /= green;
+        */
+
+
+
+    if (wbcat02 > 0.) {
+        float percat = (float) wbcat02 / 100.;
+//      printf("OK Cat02=%f\n", wbcat02);
+        double Xxyz, Zxyz;
+        double CAM02BB00, CAM02BB01, CAM02BB02, CAM02BB10, CAM02BB11, CAM02BB12, CAM02BB20, CAM02BB21, CAM02BB22; //for CIECAT02
+        double adap = 1.0;
+        float gree = ctemp.getGreen ();
+        ColorTemp::temp2mulxyz (ctemp.getTemp(), ctemp.getGreen (), "", Xxyz, Zxyz);
+        ColorTemp::cieCAT02 (Xxyz, 1., Zxyz, CAM02BB00, CAM02BB01, CAM02BB02, CAM02BB10, CAM02BB11, CAM02BB12, CAM02BB20, CAM02BB21, CAM02BB22, adap);
+
+        for (int y = 0; y < image->getHeight() ; y++) //{
+            for (int x = 0; x < image->getWidth(); x++) {
+                float X, Y, Z;
+                float Xcam02, Ycam02, Zcam02;
+                X  = xyz_sRGBd65[0][0] * image->r (y, x)   + xyz_sRGBd65[0][1] * image->g (y, x) / gree + xyz_sRGBd65[0][2] * image->b (y, x);
+                Y  = xyz_sRGBd65[1][0] * image->r (y, x)   + xyz_sRGBd65[1][1] * image->g (y, x) / gree + xyz_sRGBd65[1][2] * image->b (y, x);
+                Z  = xyz_sRGBd65[2][0] * image->r (y, x)   + xyz_sRGBd65[2][1] * image->g (y, x) / gree + xyz_sRGBd65[2][2] * image->b (y, x);
+                Xcam02 = CAM02BB00 * X + CAM02BB01 * Y + CAM02BB02 * Z ;
+                Ycam02 = CAM02BB10 * X + CAM02BB11 * Y + CAM02BB12 * Z ;
+                Zcam02 = CAM02BB20 * X + CAM02BB21 * Y + CAM02BB22 * Z ;
+                Xcam02 = percat * Xcam02 + (1.f - percat) * X;
+                Ycam02 = percat * Ycam02 + (1.f - percat) * Y;
+                Zcam02 = percat * Zcam02 + (1.f - percat) * Z;
+
+                image->r (y, x) = sRGBd65_xyz[0][0] *  Xcam02 + sRGBd65_xyz[0][1] * Ycam02 + sRGBd65_xyz[0][2] * Zcam02;
+                image->g (y, x) = gree * (sRGBd65_xyz[1][0] *  Xcam02 + sRGBd65_xyz[1][1] * Ycam02 + sRGBd65_xyz[1][2] * Zcam02);
+                image->b (y, x) = sRGBd65_xyz[2][0] *  Xcam02 + sRGBd65_xyz[2][1] * Ycam02 + sRGBd65_xyz[2][2] * Zcam02;
+
+            }
+
     }
 
     // Flip if needed
@@ -8788,7 +8831,8 @@ void RawImageSource::getAutoWBMultipliersloc (int begx, int begy, int yEn, int x
     double avg_b = 0;
     int rn = 0, gn = 0, bn = 0;
     double avg_rm, avg_gm, avg_bm;
-    int bfh = bf_h + 3, bfw = bf_w + 3;
+    //  int bfh = bf_h + 3, bfw = bf_w + 3;
+    int bfh = H, bfw = W;
 
     if (wbpar.method == "autold") {
 

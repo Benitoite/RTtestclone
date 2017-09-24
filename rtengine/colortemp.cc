@@ -1341,7 +1341,7 @@ void ColorTemp::temp2mulxyz (double tem, double gree, const std::string &method,
     double Z = (1.0 - xD - yD) / yD;
     Xxyz = X;
     Zxyz = Z;
-    //printf("Xxyz=%f Zxyz=%f\n",Xxyz,Zxyz);
+//    printf("Xxyz=%f Zxyz=%f\n",Xxyz,Zxyz);
 }
 
 void ColorTemp::temp2mul (double temp, double green, double equal, double& rmul, double& gmul, double& bmul) const

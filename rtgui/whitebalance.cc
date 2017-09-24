@@ -259,9 +259,20 @@ WhiteBalance::WhiteBalance () : FoldableToolPanel (this, "whitebalance", M ("TP_
     pack_start (*hbox, Gtk::PACK_SHRINK, 0);
     opt = 0;
 
+    Gtk::HBox* catbox = Gtk::manage (new Gtk::HBox ());
+    catbox->set_spacing (4);
+    catbox->show ();
+	
+    cat02 = Gtk::manage (new Adjuster (M ("TP_WBALANCE_CAT"), 0, 100, 1, 20));
+    cat02->set_tooltip_markup (M ("TP_WBALANCE_CAT_TOOLTIP"));
+    cat02->show ();
+    catbox->pack_start (*cat02);
+    pack_start (*catbox);
+
     Gtk::HBox* cambox = Gtk::manage (new Gtk::HBox ());
     cambox->set_spacing (4);
     cambox->show ();
+	
     Gtk::Label* labcam = Gtk::manage (new Gtk::Label (M ("TP_LOCALRGB_CAM") + ":"));
     labcam->show ();
     wbcamMethod = Gtk::manage (new MyComboBoxText ());
@@ -372,6 +383,7 @@ WhiteBalance::WhiteBalance () : FoldableToolPanel (this, "whitebalance", M ("TP_
     green->setAdjusterListener (this);
     equal->setAdjusterListener (this);
     tempBias->setAdjusterListener (this);
+    cat02->setAdjusterListener (this);
 
     spotbutton->signal_pressed().connect ( sigc::mem_fun (*this, &WhiteBalance::spotPressed) );
     methconn = method->signal_changed().connect ( sigc::mem_fun (*this, &WhiteBalance::optChanged) );
@@ -427,6 +439,8 @@ void WhiteBalance::adjusterChanged (Adjuster* a, double newval)
             listener->panelChanged (EvWBGreen, Glib::ustring::format (std::setw (4), std::fixed, std::setprecision (3), a->getValue()));
         } else if (a == equal) {
             listener->panelChanged (EvWBequal, Glib::ustring::format (std::setw (4), std::fixed, std::setprecision (3), a->getValue()));
+        } else if (a == cat02) {
+            listener->panelChanged (EvWBcat02, Glib::ustring::format (std::setw (4), std::fixed, std::setprecision (3), a->getValue()));
         } else if (a == tempBias) {
             listener->panelChanged (EvWBtempBias, Glib::ustring::format (std::setw (4), std::fixed, std::setprecision (2), a->getValue()));
         }
@@ -458,6 +472,7 @@ void WhiteBalance::optChanged ()
             temp->setEditedState (UnEdited);
             green->setEditedState (UnEdited);
             equal->setEditedState (UnEdited);
+            cat02->setEditedState (UnEdited);
             tempBias->setEditedState (UnEdited);
         } else {
             unsigned int methodId = findWBEntryId (row[methodColumns.colLabel], WBLT_GUI);
@@ -571,15 +586,16 @@ void WhiteBalance::read (const ProcParams* pp, const ParamsEdited* pedited)
 
     methconn.block (true);
     equal->setValue (pp->wb.equal);
+    cat02->setValue (pp->wb.cat02);
     tempBias->setValue (pp->wb.tempBias);
     tempBias->set_sensitive (true);
-
     if (pedited) {
         // By default, temperature and green are said "UnEdited", but it may change later
         temp->setEditedState (UnEdited);
         green->setEditedState (UnEdited);
         equal->setEditedState (pedited->wb.equal ? Edited : UnEdited);
         tempBias->setEditedState (pedited->wb.tempBias ? Edited : UnEdited);
+        cat02->setEditedState (pedited->wb.cat02 ? Edited : UnEdited);
 
         if (!pedited->wb.wbcamMethod) {
             wbcamMethod->set_active_text (M ("GENERAL_UNCHANGED"));
@@ -724,6 +740,7 @@ void WhiteBalance::write (ProcParams* pp, ParamsEdited* pedited)
         pedited->wb.temperature = temp->getEditedState ();
         pedited->wb.green = green->getEditedState ();
         pedited->wb.equal = equal->getEditedState ();
+        pedited->wb.cat02 = cat02->getEditedState ();
         pedited->wb.tempBias = tempBias->getEditedState ();
         pedited->wb.method = row[methodColumns.colLabel] != M ("GENERAL_UNCHANGED");
         pedited->wb.wbcamMethod    = wbcamMethod->get_active_text() != M ("GENERAL_UNCHANGED");
@@ -739,6 +756,7 @@ void WhiteBalance::write (ProcParams* pp, ParamsEdited* pedited)
     pp->wb.green = green->getValue ();
     pp->wb.equal = equal->getValue ();
     pp->wb.tempBias = tempBias->getValue ();
+    pp->wb.cat02 = cat02->getValue ();
 
     if (wbcamMethod->get_active_row_number() == 0) {
         pp->wb.wbcamMethod = "none";
@@ -770,6 +788,7 @@ void WhiteBalance::setDefaults (const ProcParams* defParams, const ParamsEdited*
 
     equal->setDefault (defParams->wb.equal);
     tempBias->setDefault (defParams->wb.tempBias);
+    cat02->setDefault (defParams->wb.cat02);
 
     if (wbp && defParams->wb.method == "Camera") {
         double ctemp;
@@ -792,11 +811,13 @@ void WhiteBalance::setDefaults (const ProcParams* defParams, const ParamsEdited*
         temp->setDefaultEditedState (pedited->wb.temperature ? Edited : UnEdited);
         green->setDefaultEditedState (pedited->wb.green ? Edited : UnEdited);
         equal->setDefaultEditedState (pedited->wb.equal ? Edited : UnEdited);
+        cat02->setDefaultEditedState (pedited->wb.cat02 ? Edited : UnEdited);
         tempBias->setDefaultEditedState (pedited->wb.tempBias ? Edited : UnEdited);
     } else {
         temp->setDefaultEditedState (Irrelevant);
         green->setDefaultEditedState (Irrelevant);
         equal->setDefaultEditedState (Irrelevant);
+        cat02->setDefaultEditedState (Irrelevant);
         tempBias->setDefaultEditedState (Irrelevant);
     }
 }
@@ -808,6 +829,7 @@ void WhiteBalance::setBatchMode (bool batchMode)
     temp->showEditedCB ();
     green->showEditedCB ();
     equal->showEditedCB ();
+    cat02->showEditedCB ();
     tempBias->showEditedCB ();
     Gtk::TreeModel::Row row = * (refTreeModel->append());
     row[methodColumns.colId] = WBParams::wbEntries.size();
@@ -855,6 +877,7 @@ void WhiteBalance::trimValues (rtengine::procparams::ProcParams* pp)
     temp->trimValue (pp->wb.temperature);
     green->trimValue (pp->wb.green);
     equal->trimValue (pp->wb.equal);
+    cat02->trimValue (pp->wb.cat02);
     tempBias->trimValue (pp->wb.tempBias);
 }
 

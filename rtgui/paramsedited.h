@@ -233,6 +233,7 @@ public:
     bool temperature;
     bool green;
     bool equal;
+	bool cat02;
     bool tempBias;
 	bool wbcamMethod;
 };
