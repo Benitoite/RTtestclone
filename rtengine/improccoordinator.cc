@@ -482,7 +482,13 @@ void ImProcCoordinator::updatePreviewImage (int todo, Crop* cropCall)
         Imagefloat *imageoriginal = nullptr;
         Imagefloat *imagetransformed = nullptr;
         Imagefloat *improv = nullptr;
-        /*
+		
+                //    if (alorgbListener ) { // display values Full image an last method auto
+               //         alorgbListener->temptintChanged (params.wb.temperature, params.wb.green, params.wb.equal, wbm);
+                        //   alorgbListener->temptintChanged (params.wb.temperature, params.wb.green, 1., wbm);
+               //     }
+		
+        
                 if (params.localwb.enabled && params.localwb.expwb) {
                     currWBloc = ColorTemp (params.localwb.temp, params.localwb.green, 1.f, "Custom");
                     wbm = 0;
@@ -502,7 +508,7 @@ void ImProcCoordinator::updatePreviewImage (int todo, Crop* cropCall)
                         int cy = 0;
                         double rm, gm, bm;
                         printf("bx=%i by=%i yE=%i xE=%i cx=%i cy=%i bfh=%i bfw=%i \n", begx, begy, yEn, xEn, cx, cy, bf_h, bf_w);
-                        imgsrc->getAutoWBMultipliersloc (begx, begy, yEn, xEn, cx, cy, bf_h, bf_w, rm, gm, bm, params.localwb);
+                        imgsrc->getAutoWBMultipliersloc (begx, begy, yEn, xEn, cx, cy, bf_h, bf_w, rm, gm, bm, params.localwb,params.wb, params.icm);
                         //   imgsrc->getAutoWBMultipliersloc (0, 0, fh, fw, cx, cy, fh, fw, rm, gm, bm, params.localwb);
                         //     autoWBloc.mul2temp (rm, gm, bm, params.localrgb.equal, ptemp, pgreen);
                         autoWBloc.mul2temp (rm, gm, bm, 1.f, ptemp, pgreen);
@@ -601,10 +607,11 @@ void ImProcCoordinator::updatePreviewImage (int todo, Crop* cropCall)
 
                     // params.localwb.wbMethod = "man";
 
-                    if (alorgbListener  && params.localwb.wbMethod != "man" ) { // display values Full image an last method auto
-                        alorgbListener->temptintChanged (params.wb.temperature, params.wb.green, params.wb.equal, wbm);
+                //    if (alorgbListener  && params.localwb.wbMethod != "man" ) { // display values Full image an last method auto
+               //     if (alorgbListener ) { // display values Full image an last method auto
+                //        alorgbListener->temptintChanged (params.wb.temperature, params.wb.green, params.wb.equal, wbm);
                         //   alorgbListener->temptintChanged (params.wb.temperature, params.wb.green, 1., wbm);
-                    }
+                //    }
 
                     params.localwb.wbMethod = "man";
                     wbm = 0;
@@ -612,7 +619,7 @@ void ImProcCoordinator::updatePreviewImage (int todo, Crop* cropCall)
 
 
                 }
-        */
+        
         //ColorTemp::CAT02 (orig_prev, &params) ;
         //   printf("orig_prevW=%d\n  scale=%d",orig_prev->width, scale);
         /* Issue 2785, disabled some 1:1 tools

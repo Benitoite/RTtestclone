@@ -263,7 +263,7 @@ Localwb::Localwb () :
 
     ToolParamBlock* const shapeBox = Gtk::manage (new ToolParamBlock());
 
-    shapeBox->pack_start (*nbspot);
+  //  shapeBox->pack_start (*nbspot);
     pack_start (*anbspot);
 
     hueref->setAdjusterListener (this);
@@ -282,10 +282,10 @@ Localwb::Localwb () :
     shapeBox->pack_start (*locYT);
     shapeBox->pack_start (*centerX);
     shapeBox->pack_start (*centerY);
-    shapeBox->pack_start (*circrad);
-    qualbox->pack_start (*labqual, Gtk::PACK_SHRINK, 4);
-    qualbox->pack_start (*qualityMethod);
-    shapeBox->pack_start (*qualbox);
+//    shapeBox->pack_start (*circrad);
+//    qualbox->pack_start (*labqual, Gtk::PACK_SHRINK, 4);
+//    qualbox->pack_start (*qualityMethod);
+//    shapeBox->pack_start (*qualbox);
     shapeBox->pack_start (*transit);
 
     artifFrame->set_label_align (0.025, 0.5);
@@ -298,7 +298,7 @@ Localwb::Localwb () :
     artifBox->pack_start (*retrab);
 
     artifFrame->add (*artifBox);
-    shapeBox->pack_start (*artifFrame);
+//    shapeBox->pack_start (*artifFrame);
 
     expsettings->add (*shapeBox);
     expsettings->setLevel (2);
@@ -309,7 +309,7 @@ Localwb::Localwb () :
 
     ToolParamBlock* const wbBox = Gtk::manage (new ToolParamBlock());
     wbMethod->append (M ("TP_LOCALRGBWB_MAN"));
-    wbMethod->append (M ("TP_LOCALRGBWB_AUT"));
+/*    wbMethod->append (M ("TP_LOCALRGBWB_AUT"));
     wbMethod->append (M ("TP_LOCALRGBWB_AUTEDG"));
     wbMethod->append (M ("TP_LOCALRGBWB_AUTOLD"));
     wbMethod->append (M ("TP_LOCALRGBWB_AUTOROBUST"));
@@ -317,7 +317,7 @@ Localwb::Localwb () :
     wbMethod->append (M ("TP_LOCALRGBWB_AUTEDGROB"));
     wbMethod->append (M ("TP_LOCALRGBWB_AUTEDGSDW"));
     wbMethod->append (M ("TP_LOCALRGBWB_AUTITC"));
-
+*/
 
     wbMethod->set_active (0);
     wbMethodConn = wbMethod->signal_changed().connect ( sigc::mem_fun (*this, &Localwb::wbMethodChanged) );
@@ -356,9 +356,9 @@ Localwb::Localwb () :
     green->show ();
     equal->show ();
 //  wbBox->pack_start (*spotbox);
-    wbBox->pack_start (*wbMethod);
-    wbBox->pack_start (*ttLabels);
-    wbBox->pack_start (*metLabels);
+//    wbBox->pack_start (*wbMethod);
+//    wbBox->pack_start (*ttLabels);
+//    wbBox->pack_start (*metLabels);
 
     wbBox->pack_start (*temp);
     wbBox->pack_start (*green);
@@ -366,7 +366,7 @@ Localwb::Localwb () :
     cambox->pack_start (*labcam, Gtk::PACK_SHRINK, 4);
     cambox->pack_start (*wbcamMethod);
 
-    wbBox->pack_start (*cambox);
+ //   wbBox->pack_start (*cambox);
 
     temp->setAdjusterListener (this);
     green->setAdjusterListener (this);
@@ -374,10 +374,13 @@ Localwb::Localwb () :
 
     gamma = Gtk::manage (new Gtk::CheckButton (M ("TP_LOCALRGBWB_GAMMA")));
     gammaconn = gamma->signal_toggled().connect ( sigc::mem_fun (*this, &Localwb::gamma_toggled) );
+    pack_start (*wbBox);
 
-    expwb->add (*wbBox);
-    expwb->setLevel (2);
-    pack_start (*expwb);
+//	expwb->add (*wbBox);
+//    expwb->setLevel (2);
+    expwb->setEnabled (true);
+	
+ //   pack_start (*expwb);
 
     // Instantiating the Editing geometry; positions will be initialized later
     Line *locYLine[2], *locXLine[2];
@@ -1052,7 +1055,8 @@ void Localwb::read (const ProcParams* pp, const ParamsEdited* pedited)
     lumaref->setValue (pp->localwb.lumaref);
     sensi->setValue (pp->localwb.sensi);
 
-    expwb->setEnabled (pp->localwb.expwb);
+ //   expwb->setEnabled (pp->localwb.expwb);
+    expwb->setEnabled (true);
 
     temp->setValue (pp->localwb.temp);
     green->setValue (pp->localwb.green);
@@ -1086,7 +1090,7 @@ void Localwb::read (const ProcParams* pp, const ParamsEdited* pedited)
 
     if (pp->localwb.wbMethod == "man") {
         wbMethod->set_active (0);
-    } else if (pp->localwb.wbMethod == "aut") {
+/*    } else if (pp->localwb.wbMethod == "aut") {
         wbMethod->set_active (1);
     } else if (pp->localwb.wbMethod == "autedg") {
         wbMethod->set_active (2);
@@ -1102,7 +1106,7 @@ void Localwb::read (const ProcParams* pp, const ParamsEdited* pedited)
         wbMethod->set_active (7);
     } else if (pp->localwb.wbMethod == "autitc") {
         wbMethod->set_active (8);
-
+*/
     }
 
     wbMethodConn.block (false);
@@ -1262,7 +1266,7 @@ void Localwb::write (ProcParams* pp, ParamsEdited* pedited)
 
     if (wbMethod->get_active_row_number() == 0) {
         pp->localwb.wbMethod = "man";
-    } else if (wbMethod->get_active_row_number() == 1) {
+ /*   } else if (wbMethod->get_active_row_number() == 1) {
         pp->localwb.wbMethod = "aut";
     } else if (wbMethod->get_active_row_number() == 2) {
         pp->localwb.wbMethod = "autedg";
@@ -1278,6 +1282,7 @@ void Localwb::write (ProcParams* pp, ParamsEdited* pedited)
         pp->localwb.wbMethod = "autedgsdw";
     } else if (wbMethod->get_active_row_number() == 8) {
         pp->localwb.wbMethod = "autitc";
+		*/
     }
 
     if (wbcamMethod->get_active_row_number() == 0) {

@@ -1693,7 +1693,7 @@ TP_LOCAL_WIDTH;Right
 TP_LOCAL_WIDTH_L;Left
 TP_LOCALLAB_STYPE;Shape method
 TP_LOCALLAB_STYPE_TOOLTIP;You can choose between:\nSymmetrical - left handle linked to right, top handle linked to bottom.\nIndependent - all handles are independent.
-TP_LOCALRGB_LABEL;White Balance auto and local
+TP_LOCALRGB_LABEL;White Balance Local
 TP_LOCALRGB_WB;White balance
 TP_LOCALRGB_CAM;Gamma
 TP_LOCALRGB_TTLABEL;WB all Temp=%1 Tint=%2 Equ=%3
@@ -2176,6 +2176,7 @@ TP_WBALANCE_AUTOEDGESW;Auto Edge + Standard deviation
 TP_WBALANCE_AUTOEDGEROB;Auto Edge + Robust
 TP_WBALANCE_AUTOITC;Auto iterate temperature correlation
 TP_WBALANCE_CAT;CAT02 adaptation
+TP_WBALANCE_CAT_TOOLTIP;(experimental)
 TP_WBALANCE_FLUO1;F1 - Daylight
 TP_WBALANCE_FLUO2;F2 - Cool White
 TP_WBALANCE_FLUO3;F3 - White
