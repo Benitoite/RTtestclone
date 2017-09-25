@@ -950,6 +950,48 @@ void RawImageSource::getImage_local (int begx, int begy, int yEn, int xEn, int c
 
 }
 
+static void inverse (double (*in)[3], double (*out)[3], int size)
+{
+    double work[3][6], num;
+    int i, j, k;
+
+    for (i = 0; i < 3; i++) {
+        for (j = 0; j < 6; j++) {
+            work[i][j] = j == i + 3;
+        }
+
+        for (j = 0; j < 3; j++)
+            for (k = 0; k < size; k++) {
+                work[i][j] += in[k][i] * in[k][j];
+            }
+    }
+
+    for (i = 0; i < 3; i++) {
+        num = work[i][i];
+
+        for (j = 0; j < 6; j++) {
+            work[i][j] /= num;
+        }
+
+        for (k = 0; k < 3; k++) {
+            if (k == i) {
+                continue;
+            }
+
+            num = work[k][i];
+
+            for (j = 0; j < 6; j++) {
+                work[k][j] -= work[i][j] * num;
+            }
+        }
+    }
+
+    for (i = 0; i < size; i++)
+        for (j = 0; j < 3; j++)
+            for (out[i][j] = k = 0; k < 3; k++) {
+                out[i][j] += work[j][k + 3] * in[i][k];
+            }
+}
 
 
 
@@ -1003,6 +1045,58 @@ void RawImageSource::getImage (const ColorTemp &ctemp, int tran, Imagefloat* ima
         rm *= camInitialGain;
         gm *= camInitialGain;
         bm *= camInitialGain;
+    }
+
+    if (wbcat02 > 0.) {
+        double in[3][3];
+        double out[3][3];
+
+        float percat = (float) wbcat02 / 100.;
+//      printf("OK Cat02=%f\n", wbcat02);
+        double Xxyz, Zxyz;
+        double iCAM02BB00, iCAM02BB01, iCAM02BB02, iCAM02BB10, iCAM02BB11, iCAM02BB12, iCAM02BB20, iCAM02BB21, iCAM02BB22; //for CIECAT02
+        double adap = percat;
+        float gree = ctemp.getGreen ();
+        ColorTemp::temp2mulxyz (ctemp.getTemp(), ctemp.getGreen (), "", Xxyz, Zxyz);
+        ColorTemp::icieCAT02 (Xxyz, 1., Zxyz, iCAM02BB00, iCAM02BB01, iCAM02BB02, iCAM02BB10, iCAM02BB11, iCAM02BB12, iCAM02BB20, iCAM02BB21, iCAM02BB22, adap);
+        in[0][0] = iCAM02BB00;
+        in[0][1] = iCAM02BB01;
+        in[0][2] = iCAM02BB02;
+        in[1][0] = iCAM02BB10;
+        in[1][1] = iCAM02BB11;
+        in[1][2] = iCAM02BB12;
+        in[2][0] = iCAM02BB20;
+        in[2][1] = iCAM02BB21;
+        in[2][2] = iCAM02BB22;
+        inverse (in, out, 3);
+
+        for (int y = 0; y < H ; y++) //{
+            for (int x = 0; x < W; x++) {
+                float X, Y, Z;
+                float Xcam02, Ycam02, Zcam02;
+                //    X  = xyz_sRGBd65[0][0] * image->r (y, x)   + xyz_sRGBd65[0][1] * image->g (y, x) / gree + xyz_sRGBd65[0][2] * image->b (y, x);
+                //    Y  = xyz_sRGBd65[1][0] * image->r (y, x)   + xyz_sRGBd65[1][1] * image->g (y, x) / gree + xyz_sRGBd65[1][2] * image->b (y, x);
+                //    Z  = xyz_sRGBd65[2][0] * image->r (y, x)   + xyz_sRGBd65[2][1] * image->g (y, x) / gree + xyz_sRGBd65[2][2] * image->b (y, x);
+                X  = xyz_sRGBd65[0][0] * red[y][x]   + xyz_sRGBd65[0][1] * green[y][x]  / gree + xyz_sRGBd65[0][2] *  blue[y][x] ;
+                Y  = xyz_sRGBd65[1][0] * red[y][x]    + xyz_sRGBd65[1][1] *  green[y][x]  / gree + xyz_sRGBd65[1][2] * blue[y][x];
+                Z  = xyz_sRGBd65[2][0] * red[y][x]    + xyz_sRGBd65[2][1] *  green[y][x]  / gree + xyz_sRGBd65[2][2] * blue[y][x];
+                //    Xcam02 = CAM02BB00 * X + CAM02BB01 * Y + CAM02BB02 * Z ;
+                //    Ycam02 = CAM02BB10 * X + CAM02BB11 * Y + CAM02BB12 * Z ;
+                //    Zcam02 = CAM02BB20 * X + CAM02BB21 * Y + CAM02BB22 * Z ;
+                Xcam02 = out[0][0] * X + out[0][1] * Y + out[0][2] * Z ;
+                Ycam02 = out[1][0] * X + out[1][1] * Y + out[1][2] * Z ;
+                Zcam02 = out[2][0] * X + out[2][1] * Y + out[2][2] * Z ;
+                /*
+                Xcam02 = percat * Xcam02 + (1.f - percat) * X;
+                Ycam02 = percat * Ycam02 + (1.f - percat) * Y;
+                Zcam02 = percat * Zcam02 + (1.f - percat) * Z;
+                */
+                red[y][x] = sRGBd65_xyz[0][0] *  Xcam02 + sRGBd65_xyz[0][1] * Ycam02 + sRGBd65_xyz[0][2] * Zcam02;
+                green[y][x] = gree * (sRGBd65_xyz[1][0] *  Xcam02 + sRGBd65_xyz[1][1] * Ycam02 + sRGBd65_xyz[1][2] * Zcam02);
+                blue[y][x] = sRGBd65_xyz[2][0] *  Xcam02 + sRGBd65_xyz[2][1] * Ycam02 + sRGBd65_xyz[2][2] * Zcam02;
+
+            }
+
     }
 
     defGain = 0.0;
@@ -1223,39 +1317,40 @@ void RawImageSource::getImage (const ColorTemp &ctemp, int tran, Imagefloat* ima
         */
 
 
+    /*
+    //not at good place ...see above
+        if (wbcat02 > 0.) {
+            float percat = (float) wbcat02 / 100.;
+    //      printf("OK Cat02=%f\n", wbcat02);
+            double Xxyz, Zxyz;
+            double CAM02BB00, CAM02BB01, CAM02BB02, CAM02BB10, CAM02BB11, CAM02BB12, CAM02BB20, CAM02BB21, CAM02BB22; //for CIECAT02
+            double adap = 1.0;
+            float gree = ctemp.getGreen ();
+            ColorTemp::temp2mulxyz (ctemp.getTemp(), ctemp.getGreen (), "", Xxyz, Zxyz);
+            ColorTemp::cieCAT02 (Xxyz, 1., Zxyz, CAM02BB00, CAM02BB01, CAM02BB02, CAM02BB10, CAM02BB11, CAM02BB12, CAM02BB20, CAM02BB21, CAM02BB22, adap);
 
-    if (wbcat02 > 0.) {
-        float percat = (float) wbcat02 / 100.;
-//      printf("OK Cat02=%f\n", wbcat02);
-        double Xxyz, Zxyz;
-        double CAM02BB00, CAM02BB01, CAM02BB02, CAM02BB10, CAM02BB11, CAM02BB12, CAM02BB20, CAM02BB21, CAM02BB22; //for CIECAT02
-        double adap = 1.0;
-        float gree = ctemp.getGreen ();
-        ColorTemp::temp2mulxyz (ctemp.getTemp(), ctemp.getGreen (), "", Xxyz, Zxyz);
-        ColorTemp::cieCAT02 (Xxyz, 1., Zxyz, CAM02BB00, CAM02BB01, CAM02BB02, CAM02BB10, CAM02BB11, CAM02BB12, CAM02BB20, CAM02BB21, CAM02BB22, adap);
+            for (int y = 0; y < image->getHeight() ; y++) //{
+                for (int x = 0; x < image->getWidth(); x++) {
+                    float X, Y, Z;
+                    float Xcam02, Ycam02, Zcam02;
+                    X  = xyz_sRGBd65[0][0] * image->r (y, x)   + xyz_sRGBd65[0][1] * image->g (y, x) / gree + xyz_sRGBd65[0][2] * image->b (y, x);
+                    Y  = xyz_sRGBd65[1][0] * image->r (y, x)   + xyz_sRGBd65[1][1] * image->g (y, x) / gree + xyz_sRGBd65[1][2] * image->b (y, x);
+                    Z  = xyz_sRGBd65[2][0] * image->r (y, x)   + xyz_sRGBd65[2][1] * image->g (y, x) / gree + xyz_sRGBd65[2][2] * image->b (y, x);
+                    Xcam02 = CAM02BB00 * X + CAM02BB01 * Y + CAM02BB02 * Z ;
+                    Ycam02 = CAM02BB10 * X + CAM02BB11 * Y + CAM02BB12 * Z ;
+                    Zcam02 = CAM02BB20 * X + CAM02BB21 * Y + CAM02BB22 * Z ;
+                    Xcam02 = percat * Xcam02 + (1.f - percat) * X;
+                    Ycam02 = percat * Ycam02 + (1.f - percat) * Y;
+                    Zcam02 = percat * Zcam02 + (1.f - percat) * Z;
 
-        for (int y = 0; y < image->getHeight() ; y++) //{
-            for (int x = 0; x < image->getWidth(); x++) {
-                float X, Y, Z;
-                float Xcam02, Ycam02, Zcam02;
-                X  = xyz_sRGBd65[0][0] * image->r (y, x)   + xyz_sRGBd65[0][1] * image->g (y, x) / gree + xyz_sRGBd65[0][2] * image->b (y, x);
-                Y  = xyz_sRGBd65[1][0] * image->r (y, x)   + xyz_sRGBd65[1][1] * image->g (y, x) / gree + xyz_sRGBd65[1][2] * image->b (y, x);
-                Z  = xyz_sRGBd65[2][0] * image->r (y, x)   + xyz_sRGBd65[2][1] * image->g (y, x) / gree + xyz_sRGBd65[2][2] * image->b (y, x);
-                Xcam02 = CAM02BB00 * X + CAM02BB01 * Y + CAM02BB02 * Z ;
-                Ycam02 = CAM02BB10 * X + CAM02BB11 * Y + CAM02BB12 * Z ;
-                Zcam02 = CAM02BB20 * X + CAM02BB21 * Y + CAM02BB22 * Z ;
-                Xcam02 = percat * Xcam02 + (1.f - percat) * X;
-                Ycam02 = percat * Ycam02 + (1.f - percat) * Y;
-                Zcam02 = percat * Zcam02 + (1.f - percat) * Z;
+                    image->r (y, x) = sRGBd65_xyz[0][0] *  Xcam02 + sRGBd65_xyz[0][1] * Ycam02 + sRGBd65_xyz[0][2] * Zcam02;
+                    image->g (y, x) = gree * (sRGBd65_xyz[1][0] *  Xcam02 + sRGBd65_xyz[1][1] * Ycam02 + sRGBd65_xyz[1][2] * Zcam02);
+                    image->b (y, x) = sRGBd65_xyz[2][0] *  Xcam02 + sRGBd65_xyz[2][1] * Ycam02 + sRGBd65_xyz[2][2] * Zcam02;
 
-                image->r (y, x) = sRGBd65_xyz[0][0] *  Xcam02 + sRGBd65_xyz[0][1] * Ycam02 + sRGBd65_xyz[0][2] * Zcam02;
-                image->g (y, x) = gree * (sRGBd65_xyz[1][0] *  Xcam02 + sRGBd65_xyz[1][1] * Ycam02 + sRGBd65_xyz[1][2] * Zcam02);
-                image->b (y, x) = sRGBd65_xyz[2][0] *  Xcam02 + sRGBd65_xyz[2][1] * Ycam02 + sRGBd65_xyz[2][2] * Zcam02;
+                }
 
-            }
-
-    }
-
+        }
+    */
     // Flip if needed
     if (tran & TR_HFLIP) {
         hflip (image);
@@ -5665,10 +5760,10 @@ static void SobelWB (array2D<float> &redsobel, array2D<float> &greensobel, array
 }
 
 
-void RawImageSource::ItcWB (array2D<float> &redloc, array2D<float> &greenloc, array2D<float> &blueloc, int bfw, int bfh, double &avg_rm, double &avg_gm, double &avg_bm)
+void RawImageSource::ItcWB (array2D<float> &redloc, array2D<float> &greenloc, array2D<float> &blueloc, int bfw, int bfh, double &avg_rm, double &avg_gm, double &avg_bm, const ColorManagementParams &cmp)
 {
 
-    ColorManagementParams cmp;
+    //  ColorManagementParams cmp;
     TMatrix wprof = ICCStore::getInstance()->workingSpaceMatrix ("sRGB");
     TMatrix wiprof = ICCStore::getInstance()->workingSpaceInverseMatrix ("sRGB");
     //inverse matrix user select
@@ -7761,7 +7856,7 @@ void RawImageSource::ItcWB (array2D<float> &redloc, array2D<float> &greenloc, ar
         deltac[tt] = 0.f;
     }
 
-    int typ = 14;//type of covariance or different algoritms
+    int typ = 11;//type of covariance or different algoritms
     float maxcorel = -10.f;
     int tempcor = 0;
 
@@ -8523,7 +8618,7 @@ void cat02_to_xyzfloatraw ( float & x, float & y, float & z, float r, float g, f
 */
 
 
-void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, array2D<float> &blueloc, int bfw, int bfh, double & avg_rm, double & avg_gm, double & avg_bm, const LocrgbParams & localr, const WBParams & wbpar, int begx, int begy, int yEn, int xEn, int cx, int cy)
+void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, array2D<float> &blueloc, int bfw, int bfh, double & avg_rm, double & avg_gm, double & avg_bm, const LocrgbParams & localr, const WBParams & wbpar, int begx, int begy, int yEn, int xEn, int cx, int cy, const ColorManagementParams &cmp)
 {
     //auto white balance
 //   printf ("AUtoWB OK\n");
@@ -8534,7 +8629,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
     redsobel (bfw, bfh);
     greensobel (bfw, bfh);
     bluesobel (bfw, bfh);
-    ColorManagementParams cmp;
+    //ColorManagementParams cmp;
     TMatrix wprof = ICCStore::getInstance()->workingSpaceMatrix ("sRGB");
     TMatrix wiprof = ICCStore::getInstance()->workingSpaceInverseMatrix ("sRGB");
     //inverse matrix user select
@@ -8578,7 +8673,7 @@ void RawImageSource::WBauto (array2D<float> &redloc, array2D<float> &greenloc, a
 
     if (wbpar.method == "autitc") {
         itc = true;
-        ItcWB (redloc, greenloc, blueloc, bfw, bfh, avg_rm, avg_gm, avg_bm);
+        ItcWB (redloc, greenloc, blueloc, bfw, bfh, avg_rm, avg_gm, avg_bm, cmp);
 
     }
 
@@ -8815,7 +8910,7 @@ void  RawImageSource::getrgbloc (bool local, bool gamma, bool cat02, int begx, i
 
 }
 
-void RawImageSource::getAutoWBMultipliersloc (int begx, int begy, int yEn, int xEn, int cx, int cy, int bf_h, int bf_w, double & rm, double & gm, double & bm, const LocrgbParams & localr, const WBParams & wbpar)
+void RawImageSource::getAutoWBMultipliersloc (int begx, int begy, int yEn, int xEn, int cx, int cy, int bf_h, int bf_w, double & rm, double & gm, double & bm, const LocrgbParams & localr, const WBParams & wbpar, const ColorManagementParams &cmp)
 {
     //    BENCHFUN
     constexpr double clipHigh = 64000.0;
@@ -9040,7 +9135,7 @@ void RawImageSource::getAutoWBMultipliersloc (int begx, int begy, int yEn, int x
     //  if (localr.wbMethod == "aut"  || localr.wbMethod == "autosdw" || localr.wbMethod == "autedgsdw" || localr.wbMethod == "autitc"  || localr.wbMethod == "autedgrob" || localr.wbMethod == "autedg" || localr.wbMethod == "autorobust" ) {
     if (wbpar.method == "aut"  || wbpar.method == "autosdw" || wbpar.method == "autedgsdw" || wbpar.method == "autitc"  || wbpar.method == "autedgrob" || wbpar.method == "autedg" || wbpar.method == "autorobust" ) {
         //   printf("appel a WBauto\n");
-        WBauto (redloc, greenloc, blueloc, bfw, bfh, avg_rm, avg_gm, avg_bm, localr, wbpar, begx, begy, yEn,  xEn,  cx,  cy);
+        WBauto (redloc, greenloc, blueloc, bfw, bfh, avg_rm, avg_gm, avg_bm, localr, wbpar, begx, begy, yEn,  xEn,  cx,  cy, cmp);
     }
 
     redloc (0, 0);

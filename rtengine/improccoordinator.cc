@@ -436,7 +436,7 @@ void ImProcCoordinator::updatePreviewImage (int todo, Crop* cropCall)
             if (lastAwbEqual != params.wb.equal || lastAwbTempBias != params.wb.tempBias  || lastAwbauto != params.wb.method) {
                 double rm, gm, bm;
                 // imgsrc->getAutoWBMultipliers (rm, gm, bm);
-                imgsrc->getAutoWBMultipliersloc (0, 0, fh, fw, 0, 0, fh, fw, rm, gm, bm, params.localwb, params.wb);
+                imgsrc->getAutoWBMultipliersloc (0, 0, fh, fw, 0, 0, fh, fw, rm, gm, bm, params.localwb, params.wb, params.icm);
 
                 if (rm != -1.) {
                     autoWB.update (rm, gm, bm, params.wb.equal, params.wb.tempBias);

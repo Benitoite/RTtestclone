@@ -1242,6 +1242,102 @@ void ColorTemp::cieCAT02 (double Xw, double Yw, double Zw, double &CAM02BB00, do
 
 }
 
+void ColorTemp::icieCAT02 (double Xw, double Yw, double Zw, double &iCAM02BB00, double &iCAM02BB01, double &iCAM02BB02, double &iCAM02BB10, double &iCAM02BB11, double &iCAM02BB12, double &iCAM02BB20, double &iCAM02BB21, double &iCAM02BB22, double adap )
+{
+
+// CIECAT02  - J.Desmis January 2012 review September 2017
+    const double whiteD50p[3] = {0.9646019585, 1.0, 0.8244507152}; //calculate with these tools
+
+    double cam_dest[3] = {0., 0., 0.};
+    double cam_orig[3] = {0., 0., 0.};
+    const double CAT02[3][3] = {{0.7328,   0.4296,  -0.1624},//CAT02 2002
+        { -0.7036,  1.6975,   0.0061},
+        {0.0030,   0.0136,   0.9834}
+    };
+    const double INVCAT02[3][3] = {{1.09612382083551,      -0.278869000218287,    0.182745179382773},  //Inverse CAT02
+        {0.454369041975359,      0.4735331543070412,   0.0720978037172291},
+        { -0.009627608738442936, -0.00569803121611342,  1.01532563995454}
+    };
+
+    double inv_white_orig[3][3] = {{0.,  0.,  0.},
+        {0.,  0.,  0.},
+        {0.,  0.,  0.}
+    };
+    double intermed[3][3] = {{0.,  0.,  0.},
+        {0.,  0.,  0.},
+        {0.,  0.,  0.}
+    };
+
+    double intermed_2[3][3] = {{0.,  0.,  0.},
+        {0.,  0.,  0.},
+        {0.,  0.,  0.}
+    };
+    double INVCAM02[3][3] = {{0.,  0.,  0.},
+        {0.,  0.,  0.},
+        {0.,  0.,  0.}
+    };
+    double D = adap;
+
+    //white destination Wd : RT use always D50
+    cam_dest[0] = INVCAT02[0][0] * whiteD50p[0] + INVCAT02[0][1] * whiteD50p[1] + INVCAT02[0][2] * whiteD50p[2]; //Cone reponse RoD
+    cam_dest[1] = INVCAT02[1][0] * whiteD50p[0] + INVCAT02[1][1] * whiteD50p[1] + INVCAT02[1][2] * whiteD50p[2]; //GaD
+    cam_dest[2] = INVCAT02[2][0] * whiteD50p[0] + INVCAT02[2][1] * whiteD50p[1] + INVCAT02[2][2] * whiteD50p[2]; //BeD
+
+    //origin white Ws : A, D65, custom, etc.
+    cam_orig[0] = INVCAT02[0][0] * Xw + INVCAT02[0][1] * Yw + INVCAT02[0][2] * Zw; //Cone reponse RoS
+    cam_orig[1] = INVCAT02[1][0] * Xw + INVCAT02[1][1] * Yw + INVCAT02[1][2] * Zw;
+    cam_orig[2] = INVCAT02[2][0] * Xw + INVCAT02[2][1] * Yw + INVCAT02[2][2] * Zw;
+//   cam_orig[0] = CAT02[0][0] * Xw + CAT02[0][1] * Yw + CAT02[0][2] * Zw; //Cone reponse RoS
+//   cam_orig[1] = CAT02[1][0] * Xw + CAT02[1][1] * Yw + CAT02[1][2] * Zw;
+    //  cam_orig[2] = CAT02[2][0] * Xw + CAT02[2][1] * Yw + CAT02[2][2] * Zw;
+
+    //inverse white
+    inv_white_orig[0][0] = 1. / cam_orig[0]; // 1/RoS
+    inv_white_orig[1][1] = 1. / cam_orig[1]; // 1/GaS
+    inv_white_orig[2][2] = 1. / cam_orig[2]; // 1/BeS
+
+    //intermediates computation
+    for (int i = 0; i < 3; i++)
+        for (int j = 0; j < 3 ; j++) {
+            // intermed[i][j] = inv_white_orig[i][i] * INVCAT02[i][j];
+            intermed[i][j] = inv_white_orig[i][i] * CAT02[i][j];
+        }
+
+    for (int i = 0; i < 3; i++)
+        for (int j = 0; j < 3 ; j++) {
+            intermed_2[i][j] = cam_dest[i] * intermed[i][j];
+        }
+
+    //and CAM02
+    for (int i = 0; i < 3; i++)
+        for (int j = 0; j < 3; j++)
+            for (int k = 0; k < 3; k++) {
+                INVCAM02[i][j] += INVCAT02[i][k] * intermed_2[k][j];
+            }
+
+    //adaptation jdc : slightly different from CIECAM02 : Rc=(Yw(D/Rw)+(1-D))*R , but it's work !   true at 0 and 1
+    INVCAM02[0][0] = (INVCAM02[0][0] - 1.0) * D + 1.0;
+    INVCAM02[2][2] = (INVCAM02[2][2] - 1.0) * D + 1.0;
+    INVCAM02[0][1] *= D;
+    INVCAM02[0][2] *= D;
+    INVCAM02[1][0] *= D;
+    INVCAM02[1][2] *= D;
+    INVCAM02[2][0] *= D;
+    INVCAM02[2][1] *= D;
+    //CAT02  matrix with D adaptation
+    iCAM02BB00 = INVCAM02[0][0];
+    iCAM02BB01 = INVCAM02[0][1];
+    iCAM02BB02 = INVCAM02[0][2];
+    iCAM02BB10 = INVCAM02[1][0];
+    iCAM02BB11 = INVCAM02[1][1];
+    iCAM02BB12 = INVCAM02[1][2];
+    iCAM02BB20 = INVCAM02[2][0];
+    iCAM02BB21 = INVCAM02[2][1];
+    iCAM02BB22 = INVCAM02[2][2];
+
+}
+
+
 void ColorTemp::temp2mulxyz (double tem, double gree, const std::string &method, double &Xxyz, double &Zxyz)
 {
     double xD, yD, x_D, y_D, interm;
