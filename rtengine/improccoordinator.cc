@@ -438,7 +438,6 @@ void ImProcCoordinator::updatePreviewImage (int todo, Crop* cropCall)
             currWB = imgsrc->getWB ();
             //   } else if (params.wb.method == "Auto") {
         } else if (autowb) {
-
             if (lastAwbEqual != params.wb.equal || lastAwbTempBias != params.wb.tempBias  || lastAwbauto != params.wb.method) {
                 double rm, gm, bm;
                 // imgsrc->getAutoWBMultipliers (rm, gm, bm);
@@ -1334,21 +1333,32 @@ bool ImProcCoordinator::getAutoWB (double& temp, double& green, double equal, do
 {
 
     if (imgsrc) {
-        if (lastAwbEqual != equal || lastAwbTempBias != tempBias) {
+//       bool autowb = false;
+//       autowb =  (params.wb.method == "autold" || params.wb.method == "aut"  || params.wb.method == "autosdw" || params.wb.method == "autedgsdw" || params.wb.method == "autitc"  || params.wb.method == "autedgrob" || params.wb.method == "autedg" || params.wb.method == "autorobust" );
+
+//       if (autowb) {
+        if (lastAwbEqual != equal || lastAwbTempBias != tempBias || lastAwbauto != params.wb.method) {
 // Issue 2500            MyMutex::MyLock lock(minit);  // Also used in crop window
             double rm, gm, bm;
-            imgsrc->getAutoWBMultipliers (rm, gm, bm);
+            params.wb.method = "autold";//same result as before muliple Auto WB
+
+            //       imgsrc->getAutoWBMultipliers (rm, gm, bm);
+            imgsrc->getAutoWBMultipliersloc (0, 0, fh, fw, 0, 0, fh, fw, rm, gm, bm, params.localwb, params.wb, params.icm);
 
             if (rm != -1) {
                 autoWB.update (rm, gm, bm, equal, tempBias);
                 lastAwbEqual = equal;
                 lastAwbTempBias = tempBias;
+                lastAwbauto = params.wb.method;
+
             } else {
                 lastAwbEqual = -1.;
                 autoWB.useDefaults (equal);
                 lastAwbTempBias = 0.0;
             }
         }
+
+//        }
 
         temp = autoWB.getTemp ();
         green = autoWB.getGreen ();
@@ -1479,28 +1489,55 @@ void ImProcCoordinator::saveInputICCReference (const Glib::ustring& fname, bool 
     imgsrc->preprocess ( ppar.raw, ppar.lensProf, ppar.coarse );
     imgsrc->demosaic (ppar.raw );
     ColorTemp currWB = ColorTemp (params.wb.temperature, params.wb.green, params.wb.equal, params.wb.method);
+    bool autowb = false;
+    autowb =  (params.wb.method == "autold" || params.wb.method == "aut"  || params.wb.method == "autosdw" || params.wb.method == "autedgsdw" || params.wb.method == "autitc"  || params.wb.method == "autedgrob" || params.wb.method == "autedg" || params.wb.method == "autorobust" );
 
     if (params.wb.method == "Camera") {
         currWB = imgsrc->getWB ();
-    } else if (params.wb.method == "Auto") {
-        if (lastAwbEqual != params.wb.equal || lastAwbTempBias != params.wb.tempBias) {
+    } else if (autowb) {
+        if (lastAwbEqual != params.wb.equal || lastAwbTempBias != params.wb.tempBias  || lastAwbauto != params.wb.method) {
             double rm, gm, bm;
-            imgsrc->getAutoWBMultipliers (rm, gm, bm);
+            // imgsrc->getAutoWBMultipliers (rm, gm, bm);
+            imgsrc->getAutoWBMultipliersloc (0, 0, fh, fw, 0, 0, fh, fw, rm, gm, bm, params.localwb, params.wb, params.icm);
 
             if (rm != -1.) {
                 autoWB.update (rm, gm, bm, params.wb.equal, params.wb.tempBias);
                 lastAwbEqual = params.wb.equal;
                 lastAwbTempBias = params.wb.tempBias;
+                lastAwbauto = params.wb.method;
             } else {
                 lastAwbEqual = -1.;
                 lastAwbTempBias = 0.0;
+                lastAwbauto = "";
                 autoWB.useDefaults (params.wb.equal);
             }
+
+            //double rr,gg,bb;
+            //autoWB.getMultipliers(rr,gg,bb);
         }
 
         currWB = autoWB;
     }
 
+    /*    } else if (params.wb.method == "Auto") {
+            if (lastAwbEqual != params.wb.equal || lastAwbTempBias != params.wb.tempBias) {
+                double rm, gm, bm;
+                imgsrc->getAutoWBMultipliers (rm, gm, bm);
+
+                if (rm != -1.) {
+                    autoWB.update (rm, gm, bm, params.wb.equal, params.wb.tempBias);
+                    lastAwbEqual = params.wb.equal;
+                    lastAwbTempBias = params.wb.tempBias;
+                } else {
+                    lastAwbEqual = -1.;
+                    lastAwbTempBias = 0.0;
+                    autoWB.useDefaults (params.wb.equal);
+                }
+            }
+
+            currWB = autoWB;
+        }
+    */
     if (!apply_wb) {
         currWB = ColorTemp(); // = no white balance
     }

@@ -22,12 +22,14 @@
 #include "imageio.h"
 #include "curves.h"
 #include "color.h"
+#include "procparams.h"
 
 #undef THREAD_PRIORITY_NORMAL
 
 namespace rtengine
 {
-
+using namespace procparams;
+ProcParams* params;
 extern const Settings* settings;
 
 template<class T> void freeArray (T** a, int H)
@@ -343,7 +345,7 @@ void StdImageSource::getAutoWBMultipliersloc (int begx, int begy, int yEn, int x
         return;
     }
 
-    img->getAutoWBMultipliersloc (begx, begy, yEn, xEn, cx, cy, bf_h, bf_w, rm, gm, bm);
+    img->getAutoWBMultipliersloc (begx, begy, yEn, xEn, cx, cy, bf_h, bf_w, rm, gm, bm, params->localwb, params->wb, params->icm);
 
     redAWBMul   = rm;
     greenAWBMul = gm;
