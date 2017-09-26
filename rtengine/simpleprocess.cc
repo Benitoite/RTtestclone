@@ -231,6 +231,8 @@ private:
             currWB.update (rm, gm, bm, params.wb.equal, params.wb.tempBias);
         }
 
+
+
         calclum = nullptr ;
         params.dirpyrDenoise.getCurves (noiseLCurve, noiseCCurve);
         autoNR = (float) settings->nrauto;//
@@ -703,6 +705,54 @@ private:
         if (pl) {
             pl->setProgress (0.50);
         }
+
+
+        //local wb
+        ColorTemp currWBloc;
+        double ptemp, pgreen;
+
+        Imagefloat *imageoriginal = nullptr;
+        Imagefloat *imagetransformed = nullptr;
+        Imagefloat *improv = nullptr;
+
+        if (params.localwb.enabled && params.localwb.expwb) {
+            currWBloc = ColorTemp (params.localwb.temp, params.localwb.green, 1.f, "Custom");
+
+            imageoriginal = new Imagefloat (fw, fh);
+            imagetransformed = new Imagefloat (fw, fh);
+            improv = new Imagefloat (fw, fh);
+#ifdef _OPENMP
+            #pragma omp parallel for
+#endif
+
+            for (int ir = 0; ir < fh; ir++)
+                for (int jr = 0; jr < fw; jr++) {
+                    imagetransformed->r (ir, jr) = imageoriginal->r (ir, jr) = baseImg->r (ir, jr);
+                    imagetransformed->g (ir, jr) = imageoriginal->g (ir, jr) = baseImg->g (ir, jr);
+                    imagetransformed->b (ir, jr) = imageoriginal->b (ir, jr) = baseImg->b (ir, jr);
+                }
+
+            ipf.WB_Local (imgsrc, 3, 1, 0, 0, 0, 0, fw, fh, fw, fh, improv, imagetransformed, currWBloc, tr, imageoriginal, pp, params.toneCurve, params.icm, params.raw, ptemp, pgreen);
+#ifdef _OPENMP
+            #pragma omp parallel for
+#endif
+
+            for (int ir = 0; ir < fh; ir++)
+                for (int jr = 0; jr < fw; jr++) {
+                    baseImg->r (ir, jr) = imagetransformed->r (ir, jr);
+                    baseImg->g (ir, jr) = imagetransformed->g (ir, jr);
+                    baseImg->b (ir, jr) = imagetransformed->b (ir, jr);
+                }
+
+            delete imageoriginal;
+            delete imagetransformed;
+            delete improv;
+
+
+        }
+
+
+
 
 //  LUTf Noisecurve (65536,0);
 //!!!// auto exposure!!!
