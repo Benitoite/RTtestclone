@@ -1058,7 +1058,7 @@ void RawImageSource::getImage (const ColorTemp &ctemp, int tran, Imagefloat* ima
         double adap = percat;
         float gree = ctemp.getGreen ();
         ColorTemp::temp2mulxyz (ctemp.getTemp(), ctemp.getGreen (), "", Xxyz, Zxyz);
-        ColorTemp::icieCAT02 (Xxyz, 1., Zxyz, iCAM02BB00, iCAM02BB01, iCAM02BB02, iCAM02BB10, iCAM02BB11, iCAM02BB12, iCAM02BB20, iCAM02BB21, iCAM02BB22, adap);
+        ColorTemp::cieCAT02 (Xxyz, 1., Zxyz, iCAM02BB00, iCAM02BB01, iCAM02BB02, iCAM02BB10, iCAM02BB11, iCAM02BB12, iCAM02BB20, iCAM02BB21, iCAM02BB22, adap);
         in[0][0] = iCAM02BB00;
         in[0][1] = iCAM02BB01;
         in[0][2] = iCAM02BB02;
@@ -1068,7 +1068,7 @@ void RawImageSource::getImage (const ColorTemp &ctemp, int tran, Imagefloat* ima
         in[2][0] = iCAM02BB20;
         in[2][1] = iCAM02BB21;
         in[2][2] = iCAM02BB22;
-        inverse (in, out, 3);
+  //      inverse (in, out, 3);
 
         for (int y = 0; y < H ; y++) //{
             for (int x = 0; x < W; x++) {
@@ -1083,14 +1083,12 @@ void RawImageSource::getImage (const ColorTemp &ctemp, int tran, Imagefloat* ima
                 //    Xcam02 = CAM02BB00 * X + CAM02BB01 * Y + CAM02BB02 * Z ;
                 //    Ycam02 = CAM02BB10 * X + CAM02BB11 * Y + CAM02BB12 * Z ;
                 //    Zcam02 = CAM02BB20 * X + CAM02BB21 * Y + CAM02BB22 * Z ;
-                Xcam02 = out[0][0] * X + out[0][1] * Y + out[0][2] * Z ;
-                Ycam02 = out[1][0] * X + out[1][1] * Y + out[1][2] * Z ;
-                Zcam02 = out[2][0] * X + out[2][1] * Y + out[2][2] * Z ;
-                /*
-                Xcam02 = percat * Xcam02 + (1.f - percat) * X;
-                Ycam02 = percat * Ycam02 + (1.f - percat) * Y;
-                Zcam02 = percat * Zcam02 + (1.f - percat) * Z;
-                */
+        //        Xcam02 = out[0][0] * X + out[0][1] * Y + out[0][2] * Z ;
+        //        Ycam02 = out[1][0] * X + out[1][1] * Y + out[1][2] * Z ;
+        //        Zcam02 = out[2][0] * X + out[2][1] * Y + out[2][2] * Z ;
+                Xcam02 = in[0][0] * X + in[0][1] * Y + in[0][2] * Z ;
+                Ycam02 = in[1][0] * X + in[1][1] * Y + in[1][2] * Z ;
+                Zcam02 = in[2][0] * X + in[2][1] * Y + in[2][2] * Z ;
                 red[y][x] = sRGBd65_xyz[0][0] *  Xcam02 + sRGBd65_xyz[0][1] * Ycam02 + sRGBd65_xyz[0][2] * Zcam02;
                 green[y][x] = gree * (sRGBd65_xyz[1][0] *  Xcam02 + sRGBd65_xyz[1][1] * Ycam02 + sRGBd65_xyz[1][2] * Zcam02);
                 blue[y][x] = sRGBd65_xyz[2][0] *  Xcam02 + sRGBd65_xyz[2][1] * Ycam02 + sRGBd65_xyz[2][2] * Zcam02;
