@@ -1276,7 +1276,7 @@ void ColorTemp::icieCAT02 (double Xw, double Yw, double Zw, double &iCAM02BB00, 
         {0.,  0.,  0.},
         {0.,  0.,  0.}
     };
-    double D = adap;
+    double D = adap / 2.;
 
     //white destination Wd : RT use always D50
     cam_dest[0] = INVCAT02[0][0] * whiteD50p[0] + INVCAT02[0][1] * whiteD50p[1] + INVCAT02[0][2] * whiteD50p[2]; //Cone reponse RoD

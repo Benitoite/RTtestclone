@@ -973,6 +973,8 @@ IImage8* Thumbnail::processImage (const procparams::ProcParams& params, int rhei
 
     // compute WB multipliers
     ColorTemp currWB = ColorTemp (params.wb.temperature, params.wb.green, params.wb.equal, params.wb.method);
+        bool autowb0 = false;
+        autowb0 =  (params.wb.method == "autold" || params.wb.method == "aut"  || params.wb.method == "autosdw" || params.wb.method == "autedgsdw" || params.wb.method == "autitc"  || params.wb.method == "autedgrob" || params.wb.method == "autedg" || params.wb.method == "autorobust" );
 
     if (params.wb.method == "Camera") {
         //recall colorMatrix is rgb_cam
@@ -980,7 +982,9 @@ IImage8* Thumbnail::processImage (const procparams::ProcParams& params, int rhei
         double cam_g = colorMatrix[1][0] * camwbRed + colorMatrix[1][1] * camwbGreen + colorMatrix[1][2] * camwbBlue;
         double cam_b = colorMatrix[2][0] * camwbRed + colorMatrix[2][1] * camwbGreen + colorMatrix[2][2] * camwbBlue;
         currWB = ColorTemp (cam_r, cam_g, cam_b, params.wb.equal);
-    } else if (params.wb.method == "Auto") {
+ //   } else if (params.wb.method == "Auto") {
+    } else if (autowb0) {
+		params.wb.method == "autold";
         currWB = ColorTemp (autoWBTemp, autoWBGreen, wbEqual, "Custom");
     }
 
