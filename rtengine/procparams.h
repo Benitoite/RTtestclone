@@ -1414,6 +1414,14 @@ public:
     ExifPairs                exif;            ///< List of modifications appplied on the exif tags of the input image
     IPTCPairs                iptc;            ///< The IPTC tags and values to be saved to the output image
 
+    typedef enum SubPart {
+        FLAGS = 1<<0,
+        EXIF  = 1<<1,
+        IPTC  = 1<<2,
+        TOOL  = 1<<3
+    } eSubPart;
+
+
     /**
       * The constructor only sets the hand-wired defaults.
       */
@@ -1421,7 +1429,7 @@ public:
     /**
       * Sets the hand-wired defaults parameters.
       */
-    void    setDefaults ();
+    void    setDefaults (int subPart = eSubPart::FLAGS|eSubPart::EXIF|eSubPart::IPTC|eSubPart::TOOL);
     /**
       * Saves the parameters to possibly two files. This is a performance improvement if a function has to
       * save the same file in two different location, i.e. the cache and the image's directory
@@ -1490,9 +1498,8 @@ public:
     PartialProfile      (ProcParams* pp, ParamsEdited* pe = nullptr, bool fullCopy = false);
     PartialProfile      (const ProcParams* pp, const ParamsEdited* pe = nullptr);
     void deleteInstance ();
-    void clearGeneral   ();
     int  load           (const Glib::ustring &fName);
-    void set            (bool v);
+    void set            (bool v, int subPart = ProcParams::FLAGS|ProcParams::EXIF|ProcParams::IPTC|ProcParams::TOOL);
     const void applyTo  (ProcParams *destParams) const ;
 };
 

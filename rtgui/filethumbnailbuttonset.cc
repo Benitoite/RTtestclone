@@ -21,8 +21,6 @@
 #include "rtimage.h"
 #include "multilangmgr.h"
 
-extern Glib::ustring argv0;
-
 bool FileThumbnailButtonSet::iconsLoaded = false;
 
 Cairo::RefPtr<Cairo::ImageSurface> FileThumbnailButtonSet::rankIcon;
@@ -31,6 +29,7 @@ Cairo::RefPtr<Cairo::ImageSurface> FileThumbnailButtonSet::unRankIcon;
 Cairo::RefPtr<Cairo::ImageSurface> FileThumbnailButtonSet::trashIcon;
 Cairo::RefPtr<Cairo::ImageSurface> FileThumbnailButtonSet::unTrashIcon;
 Cairo::RefPtr<Cairo::ImageSurface> FileThumbnailButtonSet::processIcon;
+Cairo::RefPtr<Cairo::ImageSurface> FileThumbnailButtonSet::clearProfileIcon;
 Cairo::RefPtr<Cairo::ImageSurface> FileThumbnailButtonSet::colorLabelIcon_0;
 Cairo::RefPtr<Cairo::ImageSurface> FileThumbnailButtonSet::colorLabelIcon_1;
 Cairo::RefPtr<Cairo::ImageSurface> FileThumbnailButtonSet::colorLabelIcon_2;
@@ -42,12 +41,13 @@ FileThumbnailButtonSet::FileThumbnailButtonSet (FileBrowserEntry* myEntry)
 {
 
     if (!iconsLoaded) {
-        unRankIcon  = RTImage::createFromPng ("ratednotg.png");
-        rankIcon    = RTImage::createFromPng ("rated.png");
-        gRankIcon   = RTImage::createFromPng ("grayrated.png");
-        trashIcon   = RTImage::createFromPng ("trash-thumbnail.png");
-        unTrashIcon = RTImage::createFromPng ("undelete-thumbnail.png");
-        processIcon = RTImage::createFromPng ("processing-thumbnail.png");
+        unRankIcon       = RTImage::createFromPng ("ratednotg.png");
+        rankIcon         = RTImage::createFromPng ("rated.png");
+        gRankIcon        = RTImage::createFromPng ("grayrated.png");
+        trashIcon        = RTImage::createFromPng ("trash-thumbnail.png");
+        unTrashIcon      = RTImage::createFromPng ("undelete-thumbnail.png");
+        processIcon      = RTImage::createFromPng ("processing-thumbnail.png");
+        clearProfileIcon = RTImage::createFromPng ("clear-profile-thumbnail.png");
 
         colorLabelIcon_0 = RTImage::createFromPng ("cglabel0.png"); //("nocolorlabel.png");
         colorLabelIcon_1 = RTImage::createFromPng ("clabel1.png");
@@ -68,6 +68,8 @@ FileThumbnailButtonSet::FileThumbnailButtonSet (FileBrowserEntry* myEntry)
     add (new LWButton (trashIcon, 7, myEntry, LWButton::Right, LWButton::Center, M("FILEBROWSER_POPUPTRASH")));
 
     add (new LWButton (colorLabelIcon_0, 8, myEntry, LWButton::Right, LWButton::Center, M("FILEBROWSER_COLORLABEL_TOOLTIP")));
+
+    add (new LWButton (clearProfileIcon, 9, myEntry, LWButton::Right, LWButton::Center, M("FILEBROWSER_CLEARPROFILE")));
 
     buttons[2]->setToolTip (M("FILEBROWSER_RANK1_TOOLTIP"));
     buttons[3]->setToolTip (M("FILEBROWSER_RANK2_TOOLTIP"));
@@ -117,4 +119,13 @@ void FileThumbnailButtonSet::setInTrash (bool inTrash)
 
     buttons[7]->setIcon (inTrash ? unTrashIcon : trashIcon);
     buttons[7]->setToolTip (inTrash ? M("FILEBROWSER_POPUPUNTRASH") : M("FILEBROWSER_POPUPTRASH"));
+}
+
+void FileThumbnailButtonSet::setHasProcParams (bool procParams)
+{
+    if (procParams) {
+        buttons[9]->show();
+    } else {
+        buttons[9]->hide();
+    }
 }

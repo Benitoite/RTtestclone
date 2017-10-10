@@ -41,6 +41,7 @@ protected:
     int fnlabw, fnlabh; // dimensions of the filename label
     int dtlabw, dtlabh; // dimensions of the date/time label
     int exlabw, exlabh; // dimensions of the exif label
+    int prebh;      // height of the thumbnail box
     int prew;       // width of the thumbnail
     int preh;       // height of the thumbnail
     int prex;
@@ -187,7 +188,7 @@ public:
     virtual std::vector<Glib::RefPtr<Gdk::Pixbuf> > getIconsOnImageArea ();
     virtual void getIconSize (int& w, int& h);
 
-    virtual bool    motionNotify  (int x, int y);
+    virtual bool    motionNotify  (int bstate, int x, int y);
     virtual bool    pressNotify   (int button, int type, int bstate, int x, int y);
     virtual bool    releaseNotify (int button, int type, int bstate, int x, int y);
     virtual Glib::ustring getToolTip (int x, int y);

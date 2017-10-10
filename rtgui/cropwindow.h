@@ -197,8 +197,8 @@ public:
     void setEditSubscriber (EditSubscriber* newSubscriber);
 
     // interface lwbuttonlistener
-    void buttonPressed (LWButton* button, int actionCode, void* actionData);
-    void redrawNeeded  (LWButton* button);
+    void button1Pressed (LWButton* button, int actionCode, void* actionData);
+    void redrawNeeded   (LWButton* button);
 
     // crop handling
     void getCropRectangle      (int& x, int& y, int& w, int& h);

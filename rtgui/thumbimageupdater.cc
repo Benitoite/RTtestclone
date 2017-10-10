@@ -146,15 +146,15 @@ public:
 
         if ( j.upgrade_ ) {
             if ( thm->isQuick() ) {
-                img = thm->upgradeThumbImage(thm->getProcParams(), j.tbe_->getPreviewHeight(), scale);
+                img = thm->upgradeThumbImage(thm->getToolParams(), j.tbe_->getPreviewHeight(), scale);
             }
         } else {
-            img = thm->processThumbImage(thm->getProcParams(), j.tbe_->getPreviewHeight(), scale);
+            img = thm->processThumbImage(thm->getToolParams(), j.tbe_->getPreviewHeight(), scale);
         }
 
         if (img) {
             DEBUG("pushing image %s", thm->getFileName().c_str());
-            j.listener_->updateImage(img, scale, thm->getProcParams().crop);
+            j.listener_->updateImage(img, scale, thm->getToolParams().crop);
         }
 
         {

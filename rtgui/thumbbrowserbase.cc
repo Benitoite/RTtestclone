@@ -906,7 +906,7 @@ bool ThumbBrowserBase::Internal::on_motion_notify_event (GdkEventMotion* event)
 
     for (size_t i = 0; i < parent->fd.size(); i++)
         if (parent->fd[i]->drawable && parent->fd[i]->insideWindow (0, 0, w, h)) {
-            parent->fd[i]->motionNotify ((int)event->x, (int)event->y);
+            parent->fd[i]->motionNotify ((int)event->state, (int)event->x, (int)event->y);
         }
 
     return true;

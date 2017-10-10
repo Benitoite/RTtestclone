@@ -122,39 +122,39 @@ void LWButtonSet::redraw (Cairo::RefPtr<Cairo::Context> context)
     }
 }
 
-bool LWButtonSet::motionNotify (int x, int y)
+bool LWButtonSet::motionNotify (int x, int y, int bstate)
 {
 
     bool res = false;
 
     for (size_t i = 0; i < buttons.size(); i++) {
-        bool handled = buttons[i]->motionNotify (x, y);
+        bool handled = buttons[i]->motionNotify (x, y, bstate);
         res = res || handled;
     }
 
     return res;
 }
 
-bool LWButtonSet::pressNotify (int x, int y)
+bool LWButtonSet::pressNotify (int x, int y, int button, int bstate)
 {
 
     bool res = false;
 
     for (size_t i = 0; i < buttons.size(); i++) {
-        bool handled = buttons[i]->pressNotify (x, y);
+        bool handled = buttons[i]->pressNotify (x, y, button, bstate);
         res = res || handled;
     }
 
     return res;
 }
 
-bool LWButtonSet::releaseNotify (int x, int y)
+bool LWButtonSet::releaseNotify (int x, int y, int button, int bstate)
 {
 
     bool res = false;
 
     for (size_t i = 0; i < buttons.size(); i++) {
-        bool handled = buttons[i]->releaseNotify (x, y);
+        bool handled = buttons[i]->releaseNotify (x, y, button, bstate);
         res = res || handled;
     }
 

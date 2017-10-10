@@ -68,8 +68,8 @@ public:
     void rightClicked (ThumbBrowserEntryBase* entry);
     void doubleClicked (ThumbBrowserEntryBase* entry);
     bool keyPressed (GdkEventKey* event);
-    void buttonPressed (LWButton* button, int actionCode, void* actionData);
-    void redrawNeeded  (LWButton* button);
+    void button1Pressed (LWButton* button, int actionCode, void* actionData);
+    void redrawNeeded (LWButton* button);
 
     void setBatchQueueListener (BatchQueueListener* l)
     {

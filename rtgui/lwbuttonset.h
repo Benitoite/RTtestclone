@@ -39,9 +39,9 @@ public:
     void    getAllocatedDimensions (int& w, int& h);
     void    arrangeButtons (int x, int y, int w, int h);
     void    setColors     (const Gdk::RGBA& bg, const Gdk::RGBA& fg);
-    bool    motionNotify  (int x, int y);
-    bool    pressNotify   (int x, int y);
-    bool    releaseNotify (int x, int y);
+    bool    motionNotify  (int x, int y, int bstate);
+    bool    pressNotify   (int x, int y, int button, int bstate);
+    bool    releaseNotify (int x, int y, int button, int bstate);
     void    move          (int nx, int ny);
     bool    inside        (int x, int y);
 

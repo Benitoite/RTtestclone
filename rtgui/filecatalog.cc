@@ -1098,7 +1098,7 @@ void FileCatalog::developRequested (std::vector<FileBrowserEntry*> tbe, bool fas
         for (size_t i = 0; i < tbe.size(); i++) {
             FileBrowserEntry* fbe = tbe[i];
             Thumbnail* th = fbe->thumbnail;
-            rtengine::procparams::ProcParams params = th->getProcParams();
+            rtengine::procparams::ProcParams params = th->getToolParams();
 
             // if fast mode is selected, override (disable) params
             // controlling time and resource consuming tasks

@@ -36,6 +36,7 @@ public:
     static Cairo::RefPtr<Cairo::ImageSurface> trashIcon;
     static Cairo::RefPtr<Cairo::ImageSurface> unTrashIcon;
     static Cairo::RefPtr<Cairo::ImageSurface> processIcon;
+    static Cairo::RefPtr<Cairo::ImageSurface> clearProfileIcon;
 
     static Cairo::RefPtr<Cairo::ImageSurface> colorLabelIcon_0;
     static Cairo::RefPtr<Cairo::ImageSurface> colorLabelIcon_1;
@@ -48,6 +49,7 @@ public:
     void    setRank (int stars);
     void    setColorLabel (int colorlabel);
     void    setInTrash (bool inTrash);
+    void    setHasProcParams(bool procParams);
 
 };
 

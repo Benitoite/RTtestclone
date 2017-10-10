@@ -351,7 +351,15 @@ FileBrowser::FileBrowser () :
         p++;
         submenuProfileOperations->attach (*Gtk::manage(resetdefaultprof = new Gtk::MenuItem (M("FILEBROWSER_RESETDEFAULTPROFILE"))), 0, 1, p, p + 1);
         p++;
-        submenuProfileOperations->attach (*Gtk::manage(clearprof = new Gtk::MenuItem (M("FILEBROWSER_CLEARPROFILE"))), 0, 1, p, p + 1);
+        submenuProfileOperations->attach (*Gtk::manage(new Gtk::SeparatorMenuItem ()), 0, 1, p, p + 1);
+        p++;
+        submenuProfileOperations->attach (*Gtk::manage(clearparams = new Gtk::MenuItem (M("FILEBROWSER_CLEARPARAMS"))), 0, 1, p, p + 1);
+        p++;
+        submenuProfileOperations->attach (*Gtk::manage(clearexif = new Gtk::MenuItem (M("FILEBROWSER_CLEAREXIF"))), 0, 1, p, p + 1);
+        p++;
+        submenuProfileOperations->attach (*Gtk::manage(cleariptc = new Gtk::MenuItem (M("FILEBROWSER_CLEARIPTC"))), 0, 1, p, p + 1);
+        p++;
+        submenuProfileOperations->attach (*Gtk::manage(clearall = new Gtk::MenuItem (M("FILEBROWSER_CLEARALL"))), 0, 1, p, p + 1);
         p++;
 
         submenuProfileOperations->show_all ();
@@ -369,7 +377,15 @@ FileBrowser::FileBrowser () :
         p++;
         pmenu->attach (*Gtk::manage(resetdefaultprof = new Gtk::MenuItem (M("FILEBROWSER_RESETDEFAULTPROFILE"))), 0, 1, p, p + 1);
         p++;
-        pmenu->attach (*Gtk::manage(clearprof = new Gtk::MenuItem (M("FILEBROWSER_CLEARPROFILE"))), 0, 1, p, p + 1);
+        pmenu->attach (*Gtk::manage(new Gtk::SeparatorMenuItem ()), 0, 1, p, p + 1);
+        p++;
+        pmenu->attach (*Gtk::manage(clearparams = new Gtk::MenuItem (M("FILEBROWSER_CLEARPARAMS"))), 0, 1, p, p + 1);
+        p++;
+        pmenu->attach (*Gtk::manage(clearexif = new Gtk::MenuItem (M("FILEBROWSER_CLEAREXIF"))), 0, 1, p, p + 1);
+        p++;
+        pmenu->attach (*Gtk::manage(cleariptc = new Gtk::MenuItem (M("FILEBROWSER_CLEARIPTC"))), 0, 1, p, p + 1);
+        p++;
+        pmenu->attach (*Gtk::manage(clearall = new Gtk::MenuItem (M("FILEBROWSER_CLEARALL"))), 0, 1, p, p + 1);
         p++;
     }
 
@@ -437,15 +453,17 @@ FileBrowser::FileBrowser () :
     applyprof->signal_activate().connect (sigc::bind(sigc::mem_fun(*this, &FileBrowser::menuItemActivated), applyprof));
     applypartprof->signal_activate().connect (sigc::bind(sigc::mem_fun(*this, &FileBrowser::menuItemActivated), applypartprof));
     resetdefaultprof->signal_activate().connect (sigc::bind(sigc::mem_fun(*this, &FileBrowser::menuItemActivated), resetdefaultprof));
-    clearprof->signal_activate().connect (sigc::bind(sigc::mem_fun(*this, &FileBrowser::menuItemActivated), clearprof));
+    clearparams->signal_activate().connect (sigc::bind(sigc::mem_fun(*this, &FileBrowser::menuItemActivated), clearparams));
+    clearexif->signal_activate().connect (sigc::bind(sigc::mem_fun(*this, &FileBrowser::menuItemActivated), clearexif));
+    cleariptc->signal_activate().connect (sigc::bind(sigc::mem_fun(*this, &FileBrowser::menuItemActivated), cleariptc));
     cachemenu->signal_activate().connect (sigc::bind(sigc::mem_fun(*this, &FileBrowser::menuItemActivated), cachemenu));
 
 
 
     // A separate pop-up menu for Color Labels
-    int c = 0;
     pmenuColorLabels = new Gtk::Menu ();
 
+    int c = 0;
     for (int i = 0; i <= 5; i++) {
         pmenuColorLabels->attach (*Gtk::manage(colorlabel_pop[i] = new MyImageMenuItem (M(Glib::ustring::compose("%1%2", "FILEBROWSER_POPUPCOLORLABEL", i)), i == 0 ? "cglabel0.png" : Glib::ustring::compose("%1%2%3", "clabel", i, ".png"))), 0, 1, c, c + 1);
         c++;
@@ -496,7 +514,9 @@ void FileBrowser::rightClicked (ThumbBrowserEntryBase* entry)
         pasteprof->set_sensitive (clipboard.hasProcParams());
         partpasteprof->set_sensitive (clipboard.hasProcParams());
         copyprof->set_sensitive (selected.size() == 1);
-        clearprof->set_sensitive (!selected.empty());
+        clearparams->set_sensitive (!selected.empty());
+        clearexif->set_sensitive (!selected.empty());
+        cleariptc->set_sensitive (!selected.empty());
     }
 
     // submenuDF
@@ -593,6 +613,7 @@ void FileBrowser::addEntry_ (FileBrowserEntry* entry)
     entry->getThumbButtonSet()->setRank (entry->thumbnail->getRank());
     entry->getThumbButtonSet()->setColorLabel (entry->thumbnail->getColorLabel());
     entry->getThumbButtonSet()->setInTrash (entry->thumbnail->getStage());
+    entry->getThumbButtonSet()->setHasProcParams (entry->thumbnail->hasToolParamsSet());
     entry->getThumbButtonSet()->setButtonListener (this);
     entry->resize (getThumbnailHeight());
 
@@ -729,7 +750,7 @@ void FileBrowser::menuItemActivated (Gtk::MenuItem* m)
             std::vector<Glib::ustring> selFileNames;
 
             for (size_t i = 0; i < mselected.size(); i++) {
-                Glib::ustring fn = mselected[i]->thumbnail->getFileName();
+                Glib::ustring fn = mselected.at(i)->thumbnail->getFileName();
 
                 // Maybe batch processed version
                 if (pAct->target == 2) {
@@ -799,7 +820,7 @@ void FileBrowser::menuItemActivated (Gtk::MenuItem* m)
         }
 
         for (size_t i = 0; i < mselected.size(); i++) {
-            rtengine::procparams::ProcParams pp = mselected[i]->thumbnail->getProcParams();
+            rtengine::procparams::ProcParams pp = mselected[i]->thumbnail->getToolParams();
             pp.raw.df_autoselect = true;
             pp.raw.dark_frame.clear();
             mselected[i]->thumbnail->setProcParams(pp, nullptr, FILEBROWSER, false);
@@ -811,7 +832,7 @@ void FileBrowser::menuItemActivated (Gtk::MenuItem* m)
 
     } else if (m == selectDF) {
         if( !mselected.empty() ) {
-            rtengine::procparams::ProcParams pp = mselected[0]->thumbnail->getProcParams();
+            rtengine::procparams::ProcParams pp = mselected[0]->thumbnail->getToolParams();
             Gtk::FileChooserDialog fc (getToplevelWindow (this), "Dark Frame", Gtk::FILE_CHOOSER_ACTION_OPEN );
             bindCurrentFolder (fc, options.lastDarkframeDir);
             fc.add_button( M("GENERAL_CANCEL"), Gtk::RESPONSE_CANCEL);
@@ -827,7 +848,7 @@ void FileBrowser::menuItemActivated (Gtk::MenuItem* m)
                 }
 
                 for (size_t i = 0; i < mselected.size(); i++) {
-                    rtengine::procparams::ProcParams pp = mselected[i]->thumbnail->getProcParams();
+                    rtengine::procparams::ProcParams pp = mselected[i]->thumbnail->getToolParams();
                     pp.raw.dark_frame = fc.get_filename();
                     pp.raw.df_autoselect = false;
                     mselected[i]->thumbnail->setProcParams(pp, nullptr, FILEBROWSER, false);
@@ -876,7 +897,7 @@ void FileBrowser::menuItemActivated (Gtk::MenuItem* m)
         }
 
         for (size_t i = 0; i < mselected.size(); i++) {
-            rtengine::procparams::ProcParams pp = mselected[i]->thumbnail->getProcParams();
+            rtengine::procparams::ProcParams pp = mselected[i]->thumbnail->getToolParams();
             pp.raw.ff_AutoSelect = true;
             pp.raw.ff_file.clear();
             mselected[i]->thumbnail->setProcParams(pp, nullptr, FILEBROWSER, false);
@@ -887,7 +908,7 @@ void FileBrowser::menuItemActivated (Gtk::MenuItem* m)
         }
     } else if (m == selectFF) {
         if( !mselected.empty() ) {
-            rtengine::procparams::ProcParams pp = mselected[0]->thumbnail->getProcParams();
+            rtengine::procparams::ProcParams pp = mselected[0]->thumbnail->getToolParams();
             Gtk::FileChooserDialog fc (getToplevelWindow (this), "Flat Field", Gtk::FILE_CHOOSER_ACTION_OPEN );
             bindCurrentFolder (fc, options.lastFlatfieldDir);
             fc.add_button( M("GENERAL_CANCEL"), Gtk::RESPONSE_CANCEL);
@@ -903,7 +924,7 @@ void FileBrowser::menuItemActivated (Gtk::MenuItem* m)
                 }
 
                 for (size_t i = 0; i < mselected.size(); i++) {
-                    rtengine::procparams::ProcParams pp = mselected[i]->thumbnail->getProcParams();
+                    rtengine::procparams::ProcParams pp = mselected[i]->thumbnail->getToolParams();
                     pp.raw.ff_file = fc.get_filename();
                     pp.raw.ff_AutoSelect = false;
                     mselected[i]->thumbnail->setProcParams(pp, nullptr, FILEBROWSER, false);
@@ -952,11 +973,25 @@ void FileBrowser::menuItemActivated (Gtk::MenuItem* m)
         pasteProfile ();
     } else if (m == partpasteprof) {
         partPasteProfile ();
-    } else if (m == clearprof) {
+    } else if (m == clearparams) {
         for (size_t i = 0; i < mselected.size(); i++) {
-            mselected[i]->thumbnail->clearProcParams (FILEBROWSER);
+            mselected[i]->thumbnail->clearProcParams (rtengine::ProcParams::eSubPart::TOOL, FILEBROWSER);
         }
-
+        queue_draw ();
+    } else if (m == clearexif) {
+        for (size_t i = 0; i < mselected.size(); i++) {
+            mselected[i]->thumbnail->clearProcParams (rtengine::ProcParams::eSubPart::EXIF, FILEBROWSER);
+        }
+        queue_draw ();
+    } else if (m == cleariptc) {
+        for (size_t i = 0; i < mselected.size(); i++) {
+            mselected[i]->thumbnail->clearProcParams (rtengine::ProcParams::eSubPart::IPTC, FILEBROWSER);
+        }
+        queue_draw ();
+    } else if (m == clearall) {
+        for (size_t i = 0; i < mselected.size(); i++) {
+            mselected[i]->thumbnail->clearProcParams (rtengine::ProcParams::eSubPart::TOOL|rtengine::ProcParams::SubPart::EXIF|rtengine::ProcParams::SubPart::IPTC, FILEBROWSER);
+        }
         queue_draw ();
     } else if (m == resetdefaultprof) {
         if (!mselected.empty() && bppcl) {
@@ -967,7 +1002,7 @@ void FileBrowser::menuItemActivated (Gtk::MenuItem* m)
             mselected[i]->thumbnail->createProcParamsForUpdate (false, true);
 
             // Empty run to update the thumb
-            rtengine::procparams::ProcParams params = mselected[i]->thumbnail->getProcParams ();
+            rtengine::procparams::ProcParams params = mselected[i]->thumbnail->getToolParams ();
             mselected[i]->thumbnail->setProcParams (params, nullptr, FILEBROWSER);
         }
 
@@ -992,7 +1027,7 @@ void FileBrowser::copyProfile ()
     MYREADERLOCK(l, entryRW);
 
     if (selected.size() == 1) {
-        clipboard.setProcParams ((static_cast<FileBrowserEntry*>(selected[0]))->thumbnail->getProcParams());
+        clipboard.setProcParams ((static_cast<FileBrowserEntry*>(selected[0]))->thumbnail->getToolParams());
     }
 }
 
@@ -1067,15 +1102,16 @@ void FileBrowser::partPasteProfile ()
             for (unsigned int i = 0; i < mselected.size(); i++) {
                 // copying read only clipboard PartialProfile to a temporary one, initialized to the thumb's ProcParams
                 mselected[i]->thumbnail->createProcParamsForUpdate(false, false); // this can execute customprofilebuilder to generate param file
-                rtengine::procparams::PartialProfile cbPartProf = clipboard.getPartialProfile();
-                rtengine::procparams::PartialProfile pastedPartProf(&mselected[i]->thumbnail->getProcParams (), nullptr);
+                rtengine::procparams::PartialProfile clipboardPartProf = clipboard.getPartialProfile();
+                ParamsEdited *pe = new ParamsEdited (false);
+                rtengine::procparams::PartialProfile mergedPartProf(&mselected[i]->thumbnail->getToolParams (), pe);
 
                 // pushing the selected values of the clipboard PartialProfile to the temporary PartialProfile
-                partialPasteDlg.applyPaste (pastedPartProf.pparams, pastedPartProf.pedited, cbPartProf.pparams, cbPartProf.pedited);
+                partialPasteDlg.applyPaste (mergedPartProf.pparams, mergedPartProf.pedited, clipboardPartProf.pparams, clipboardPartProf.pedited);
 
                 // applying the temporary PartialProfile to the thumb's ProcParams
-                mselected[i]->thumbnail->setProcParams (*pastedPartProf.pparams, pastedPartProf.pedited, FILEBROWSER);
-                pastedPartProf.deleteInstance();
+                mselected[i]->thumbnail->setProcParams (*mergedPartProf.pparams, mergedPartProf.pedited, FILEBROWSER);
+                mergedPartProf.deleteInstance();
             }
 
             if (!mselected.empty() && bppcl) {
@@ -1383,8 +1419,7 @@ void FileBrowser::applyPartialMenuItemActivated (ProfileStoreLabel *label)
                 selected[i]->thumbnail->createProcParamsForUpdate(false, false);  // this can execute customprofilebuilder to generate param file
 
                 rtengine::procparams::PartialProfile dstProfile(true);
-                *dstProfile.pparams = (static_cast<FileBrowserEntry*>(selected[i]))->thumbnail->getProcParams ();
-                dstProfile.set(true);
+                *dstProfile.pparams = (static_cast<FileBrowserEntry*>(selected[i]))->thumbnail->getToolParams ();
                 partialPasteDlg.applyPaste (dstProfile.pparams, dstProfile.pedited, srcProfiles->pparams, srcProfiles->pedited);
                 (static_cast<FileBrowserEntry*>(selected[i]))->thumbnail->setProcParams (*dstProfile.pparams, dstProfile.pedited, FILEBROWSER);
                 dstProfile.deleteInstance();
@@ -1454,8 +1489,8 @@ bool FileBrowser::checkFilter (ThumbBrowserEntryBase* entryb)   // true -> entry
     if ((!filter.showRanked[entry->thumbnail->getRank()] ) ||
             (!filter.showCLabeled[entry->thumbnail->getColorLabel()] ) ||
 
-            ((entry->thumbnail->hasProcParams() && filter.showEdited[0]) && !filter.showEdited[1]) ||
-            ((!entry->thumbnail->hasProcParams() && filter.showEdited[1]) && !filter.showEdited[0]) ||
+            ((entry->thumbnail->hasToolParamsSet() && filter.showEdited[0]) && !filter.showEdited[1]) ||
+            ((!entry->thumbnail->hasToolParamsSet() && filter.showEdited[1]) && !filter.showEdited[0]) ||
 
             ((entry->thumbnail->isRecentlySaved() && filter.showRecentlySaved[0]) && !filter.showRecentlySaved[1]) ||
             ((!entry->thumbnail->isRecentlySaved() && filter.showRecentlySaved[1]) && !filter.showRecentlySaved[0]) ||
@@ -1548,23 +1583,22 @@ bool FileBrowser::checkFilter (ThumbBrowserEntryBase* entryb)   // true -> entry
 void FileBrowser::toTrashRequested (std::vector<FileBrowserEntry*> tbe)
 {
 
-    for (size_t i = 0; i < tbe.size(); i++) {
-        // try to load the last saved parameters from the cache or from the paramfile file
-        tbe[i]->thumbnail->createProcParamsForUpdate(false, false, true);  // this can execute customprofilebuilder to generate param file in "flagging" mode
+    for (size_t i = 0; i < tbe.size(); ++i) {
+        FileBrowserEntry* currEntry = tbe.at(i);
+        Thumbnail* currThumb = currEntry->thumbnail;
 
-        // no need to notify listeners as item goes to trash, likely to be deleted
-
-        if (tbe[i]->thumbnail->getStage()) {
+        if (currThumb->getStage() == 1) {
             continue;
         }
 
-        tbe[i]->thumbnail->setStage (true);
+        currThumb->setStage (1);
+        currThumb->updateCache ();
 
-        if (tbe[i]->getThumbButtonSet()) {
-            tbe[i]->getThumbButtonSet()->setRank (tbe[i]->thumbnail->getRank());
-            tbe[i]->getThumbButtonSet()->setColorLabel (tbe[i]->thumbnail->getColorLabel());
-            tbe[i]->getThumbButtonSet()->setInTrash (true);
-            tbe[i]->thumbnail->updateCache (); // needed to save the colorlabel to disk in the procparam file(s) and the cache image data file
+        if (currEntry->getThumbButtonSet()) {
+            currEntry->getThumbButtonSet()->setRank (currThumb->getRank());
+            currEntry->getThumbButtonSet()->setColorLabel (currThumb->getColorLabel());
+            currEntry->getThumbButtonSet()->setInTrash (true);
+            currEntry->getThumbButtonSet()->setHasProcParams (currThumb->hasToolParamsSet());
         }
     }
 
@@ -1575,20 +1609,33 @@ void FileBrowser::toTrashRequested (std::vector<FileBrowserEntry*> tbe)
 void FileBrowser::fromTrashRequested (std::vector<FileBrowserEntry*> tbe)
 {
 
-    for (size_t i = 0; i < tbe.size(); i++) {
-        // if thumbnail was marked inTrash=true then param file must be there, no need to run customprofilebuilder
+    for (size_t i = 0; i < tbe.size(); ++i) {
+        FileBrowserEntry* currEntry = tbe.at(i);
+        Thumbnail* currThumb = currEntry->thumbnail;
 
-        if (!tbe[i]->thumbnail->getStage()) {
+        if (!currThumb->getStage()) {
             continue;
         }
 
-        tbe[i]->thumbnail->setStage (false);
+        currThumb->setStage (false);
 
-        if (tbe[i]->getThumbButtonSet()) {
-            tbe[i]->getThumbButtonSet()->setRank (tbe[i]->thumbnail->getRank());
-            tbe[i]->getThumbButtonSet()->setColorLabel (tbe[i]->thumbnail->getColorLabel());
-            tbe[i]->getThumbButtonSet()->setInTrash (false);
-            tbe[i]->thumbnail->updateCache (); // needed to save the colorlabel to disk in the procparam file(s) and the cache image data file
+        int newRank = currThumb->getRank();
+        int newColorLabel = currThumb->getColorLabel();
+
+        if (!newRank && !newColorLabel) {
+            // NULL values, we clear the FLAGS part of the procparams !
+            // This will call updateCache()
+            currThumb->clearProcParams(rtengine::ProcParams::eSubPart::FLAGS, FILEBROWSER);
+        }
+        else {
+            currThumb->updateCache ();
+        }
+
+        if (currEntry->getThumbButtonSet()) {
+            currEntry->getThumbButtonSet()->setRank (newRank);
+            currEntry->getThumbButtonSet()->setColorLabel (newColorLabel);
+            currEntry->getThumbButtonSet()->setInTrash (false);
+            currEntry->getThumbButtonSet()->setHasProcParams (currThumb->hasToolParamsSet());
         }
     }
 
@@ -1599,62 +1646,83 @@ void FileBrowser::fromTrashRequested (std::vector<FileBrowserEntry*> tbe)
 void FileBrowser::rankingRequested (std::vector<FileBrowserEntry*> tbe, int rank)
 {
 
+    /*
     if (!tbe.empty() && bppcl) {
         bppcl->beginBatchPParamsChange(tbe.size());
     }
+    */
 
-    for (size_t i = 0; i < tbe.size(); i++) {
+    for (size_t i = 0; i < tbe.size(); ++i) {
+        FileBrowserEntry* currEntry = tbe.at(i);
+        Thumbnail* currThumb = currEntry->thumbnail;
 
-        // try to load the last saved parameters from the cache or from the paramfile file
-        tbe[i]->thumbnail->createProcParamsForUpdate(false, false, true);  // this can execute customprofilebuilder to generate param file in "flagging" mode
+        currThumb->setRank (rank);
 
-        // notify listeners TODO: should do this ONLY when params changed by customprofilebuilder?
-        tbe[i]->thumbnail->notifylisterners_procParamsChanged(FILEBROWSER);
+        int newStage = currThumb->getStage();
+        int newColorLabel = currThumb->getColorLabel();
 
-        tbe[i]->thumbnail->setRank (rank);
-        tbe[i]->thumbnail->updateCache (); // needed to save the colorlabel to disk in the procparam file(s) and the cache image data file
-        //TODO? - should update pparams instead?
+        if (!rank && !newStage && !newColorLabel) {
+            // NULL values, we clear the FLAGS part of the procparams !
+            // This will call updateCache()
+            currThumb->clearProcParams(rtengine::ProcParams::eSubPart::FLAGS, FILEBROWSER);
+        }
+        else {
+            currThumb->updateCache ();
+        }
 
-        if (tbe[i]->getThumbButtonSet()) {
-            tbe[i]->getThumbButtonSet()->setRank (tbe[i]->thumbnail->getRank());
+        if (currEntry->getThumbButtonSet()) {
+            currEntry->getThumbButtonSet()->setRank (currThumb->getRank());
         }
     }
 
     applyFilter (filter);
 
+    /*
     if (!tbe.empty() && bppcl) {
         bppcl->endBatchPParamsChange();
     }
+    */
 }
 
 void FileBrowser::colorlabelRequested (std::vector<FileBrowserEntry*> tbe, int colorlabel)
 {
 
+    /*
     if (!tbe.empty() && bppcl) {
         bppcl->beginBatchPParamsChange(tbe.size());
     }
+    */
 
-    for (size_t i = 0; i < tbe.size(); i++) {
-        // try to load the last saved parameters from the cache or from the paramfile file
-        tbe[i]->thumbnail->createProcParamsForUpdate(false, false, true);  // this can execute customprofilebuilder to generate param file in "flagging" mode
+    for (size_t i = 0; i < tbe.size(); ++i) {
+        FileBrowserEntry* currEntry = tbe.at(i);
+        Thumbnail* currThumb = currEntry->thumbnail;
 
-        // notify listeners TODO: should do this ONLY when params changed by customprofilebuilder?
-        tbe[i]->thumbnail->notifylisterners_procParamsChanged(FILEBROWSER);
+        currThumb->setColorLabel (colorlabel);
 
-        tbe[i]->thumbnail->setColorLabel (colorlabel);
-        tbe[i]->thumbnail->updateCache(); // needed to save the colorlabel to disk in the procparam file(s) and the cache image data file
+        int newStage = currThumb->getStage();
+        int newRank = currThumb->getRank();
 
-        //TODO? - should update pparams instead?
-        if (tbe[i]->getThumbButtonSet()) {
-            tbe[i]->getThumbButtonSet()->setColorLabel (tbe[i]->thumbnail->getColorLabel());
+        if (!newRank && !newStage && !colorlabel) {
+            // NULL values, we clear the FLAGS part of the procparams !
+            // This will call updateCache()
+            currThumb->clearProcParams(rtengine::ProcParams::eSubPart::FLAGS, FILEBROWSER);
+        }
+        else {
+            currThumb->updateCache ();
+        }
+
+        if (currEntry->getThumbButtonSet()) {
+            currEntry->getThumbButtonSet()->setColorLabel (currThumb->getColorLabel());
         }
     }
 
     applyFilter (filter);
 
+    /*
     if (!tbe.empty() && bppcl) {
         bppcl->endBatchPParamsChange();
     }
+    */
 }
 
 void FileBrowser::requestRanking(int rank)
@@ -1663,7 +1731,7 @@ void FileBrowser::requestRanking(int rank)
     {
         MYREADERLOCK(l, entryRW);
 
-        for (size_t i = 0; i < selected.size(); i++) {
+        for (size_t i = 0; i < selected.size(); ++i) {
             mselected.push_back (static_cast<FileBrowserEntry*>(selected[i]));
         }
     }
@@ -1677,7 +1745,7 @@ void FileBrowser::requestColorLabel(int colorlabel)
     {
         MYREADERLOCK(l, entryRW);
 
-        for (size_t i = 0; i < selected.size(); i++) {
+        for (size_t i = 0; i < selected.size(); ++i) {
             mselected.push_back (static_cast<FileBrowserEntry*>(selected[i]));
         }
     }
@@ -1685,7 +1753,7 @@ void FileBrowser::requestColorLabel(int colorlabel)
     colorlabelRequested (mselected, colorlabel);
 }
 
-void FileBrowser::buttonPressed (LWButton* button, int actionCode, void* actionData)
+void FileBrowser::button1Pressed (LWButton* button, int actionCode, void* actionData)
 {
 
     if (actionCode >= 0 && actionCode <= 5) { // rank
@@ -1710,6 +1778,25 @@ void FileBrowser::buttonPressed (LWButton* button, int actionCode, void* actionD
         // show popup menu
         colorLabel_actionData = actionData;// this will be reused when pmenuColorLabels is clicked
         pmenuColorLabels->popup (3, this->eventTime);
+    } else if (actionCode == 9 && tbl) { // clear processing profile
+        FileBrowserEntry* entry = static_cast<FileBrowserEntry*>(actionData);
+        entry->thumbnail->clearProcParams(rtengine::ProcParams::eSubPart::TOOL);
+
+        if(entry->getThumbButtonSet()) {
+            entry->getThumbButtonSet()->setHasProcParams(false);
+        }
+    }
+}
+
+void FileBrowser::button2Pressed (LWButton* button, int actionCode, void* actionData)
+{
+    if (actionCode == 9 && tbl) { // poping-up the "clear" menu
+        FileBrowserEntry* entry = static_cast<FileBrowserEntry*>(actionData);
+        entry->thumbnail->clearProcParams(rtengine::ProcParams::eSubPart::TOOL);
+
+        if(entry->getThumbButtonSet()) {
+            entry->getThumbButtonSet()->setHasProcParams(false);
+        }
     }
 }
 

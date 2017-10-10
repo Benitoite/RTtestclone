@@ -27,8 +27,12 @@ class LWButtonListener
 
 public:
     virtual ~LWButtonListener () {}
-    virtual void buttonPressed (LWButton* button, int actionCode, void* actionData) {}
-    virtual void redrawNeeded  (LWButton* button) {}
+
+    // we could add more combination here if necessary, like button12 for B1 + B2
+    virtual void button1Pressed (LWButton* button, int actionCode, void* actionData) {}
+    virtual void button2Pressed (LWButton* button, int actionCode, void* actionData) {}
+    virtual void button3Pressed (LWButton* button, int actionCode, void* actionData) {}
+    virtual void redrawNeeded (LWButton* button) {}
 };
 
 class LWButton
@@ -36,7 +40,8 @@ class LWButton
 
 public:
     enum Alignment {Left, Right, Top, Bottom, Center};
-    enum State { Normal, Over, Pressed_In, Pressed_Out};
+    enum State { Normal, Over, Pressed_In, Pressed_Out, Invisible};
+    enum PressedButton { None = 0, Button1 = 1<<0, Button2 = 1<<1, Button3 = 1<<2 };
 
 private:
     int xpos, ypos, w, h;
@@ -45,6 +50,7 @@ private:
     double bgr, bgg, bgb;
     double fgr, fgg, fgb;
     State state;
+    int pressedButton;
     LWButtonListener* listener;
     int actionCode;
     void* actionData;
@@ -63,9 +69,9 @@ public:
     void    setColors           (const Gdk::RGBA& bg, const Gdk::RGBA& fg);
     void    setToolTip          (const Glib::ustring& tooltip);
 
-    bool    motionNotify        (int x, int y);
-    bool    pressNotify         (int x, int y);
-    bool    releaseNotify       (int x, int y);
+    bool    motionNotify        (int x, int y, int bstate);
+    bool    pressNotify         (int x, int y, int button, int bstate);
+    bool    releaseNotify       (int x, int y, int button, int bstate);
 
     Glib::ustring getToolTip (int x, int y);
 
@@ -75,6 +81,8 @@ public:
     }
 
     void    redraw              (Cairo::RefPtr<Cairo::Context> context);
+    void    show                ();
+    void    hide                ();
 };
 
 #endif

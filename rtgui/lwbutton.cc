@@ -20,7 +20,8 @@
 #include "guiutils.h"
 
 LWButton::LWButton (Cairo::RefPtr<Cairo::ImageSurface> i, int aCode, void* aData, Alignment ha, Alignment va, Glib::ustring tooltip)
-    : xpos(0), ypos(0), halign(ha), valign(va), icon(i), bgr(0.0), bgg(0.0), bgb(0.0), fgr(0.0), fgg(0.0), fgb(0.0), state(Normal), listener(nullptr), actionCode(aCode), actionData(aData), toolTip(tooltip)
+    : xpos(0), ypos(0), w(0), h(0), halign(ha), valign(va), icon(i), bgr(0.0), bgg(0.0), bgb(0.0), fgr(0.0), fgg(0.0), fgb(0.0), state(Normal),
+      pressedButton(None), listener(nullptr), actionCode(aCode), actionData(aData), toolTip(tooltip)
 {
 
     if (i)  {
@@ -84,12 +85,16 @@ void LWButton::setColors (const Gdk::RGBA& bg, const Gdk::RGBA& fg)
 
 bool LWButton::inside (int x, int y)
 {
+    if (state == Invisible)
+        return false;
 
     return x > xpos && x < xpos + w && y > ypos && y < ypos + h;
 }
 
-bool LWButton::motionNotify  (int x, int y)
+bool LWButton::motionNotify  (int x, int y, int bstate)
 {
+    if (state == Invisible)
+        return false;
 
     bool in = inside (x, y);
     State nstate = state;
@@ -117,14 +122,17 @@ bool LWButton::motionNotify  (int x, int y)
     return in;
 }
 
-bool LWButton::pressNotify   (int x, int y)
+bool LWButton::pressNotify   (int x, int y, int button, int bstate)
 {
+    if (state == Invisible || button > 2)
+        return false;
 
     bool in = inside (x, y);
     State nstate = state;
 
     if (in && (state == Normal || state == Over || state == Pressed_Out)) {
         nstate = Pressed_In;
+        pressedButton |= button;
     } else if (!in && state == Pressed_In) {
         nstate = Normal;
     }
@@ -142,8 +150,10 @@ bool LWButton::pressNotify   (int x, int y)
     return in;
 }
 
-bool LWButton::releaseNotify (int x, int y)
+bool LWButton::releaseNotify (int x, int y, int button, int bstate)
 {
+    if (state == Invisible || button > 2)
+        return false;
 
     bool in = inside (x, y);
     State nstate = state;
@@ -169,8 +179,20 @@ bool LWButton::releaseNotify (int x, int y)
     }
 
     if (action && listener) {
-        listener->buttonPressed (this, actionCode, actionData);
+        // triggering only one event, corresponding to the highest button number
+        // we could handle more button combination here, like pressing B1+B2 to trigger a specific action
+        if (pressedButton & Button3) {
+            listener->button1Pressed (this, actionCode, actionData);
+        }
+        else if (pressedButton & Button3) {
+            listener->button2Pressed (this, actionCode, actionData);
+        }
+        else if (pressedButton & Button3) {
+            listener->button3Pressed (this, actionCode, actionData);
+        }
     }
+
+    pressedButton |= ~button;
 
     return ret;
 }
@@ -189,7 +211,12 @@ void LWButton::redraw (Cairo::RefPtr<Cairo::Context> context)
         context->set_source_rgba (bgr, bgg, bgb, 0);
     }
 
-    context->fill_preserve ();
+    if (state == Invisible) {
+        context->fill ();
+        return;
+    } else {
+        context->fill_preserve ();
+    }
 
     if (state == Over) {
         context->set_source_rgb (fgr, fgg, fgb);
@@ -233,3 +260,21 @@ void LWButton::setToolTip (const Glib::ustring& tooltip)
     toolTip = tooltip;
 }
 
+void LWButton::show ()
+{
+    if (state == Invisible) {
+        state = Normal;
+        if (listener) {
+            listener->redrawNeeded (this);
+        }
+    }
+}
+void LWButton::hide ()
+{
+    if (state != Invisible) {
+        state = Invisible;
+        if (listener) {
+            listener->redrawNeeded (this);
+        }
+    }
+}

@@ -37,6 +37,8 @@ private:
     using Entries = std::map<std::string, Thumbnail*>;
     Entries openEntries;
     Glib::ustring    baseDir;
+    Glib::ustring    tempDirSmall;  // temp directory for small files, can be over network
+    Glib::ustring    tempDirBig;    // temp directory for big files, should be local
     mutable MyMutex  mutex;
 
     void deleteDir   (const Glib::ustring& dirName) const;
@@ -67,6 +69,11 @@ public:
                                        const Glib::ustring& fname,
                                        const Glib::ustring& fext,
                                        const Glib::ustring& md5) const;
+    Glib::ustring    getTempFileNameSmall (const Glib::ustring& fname,
+                                           const Glib::ustring& fext,
+                                           const Glib::ustring& md5) const;
+    Glib::ustring    getTempFileNameBig (const Glib::ustring& fname,
+                                         const Glib::ustring& fext) const;
 };
 
 #define cacheMgr CacheManager::getInstance()

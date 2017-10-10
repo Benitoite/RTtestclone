@@ -45,10 +45,14 @@ class Thumbnail
     rtengine::Thumbnail* tpp;
     int             tw, th;             // dimensions of timgdata (it stores tpp->width and tpp->height in processed mode for simplicity)
     float           imgRatio;           // hack to avoid rounding error
-//        double          scale;            // portion of the sizes of the processed thumbnail image and the full scale image
+//  double          scale;              // portion of the sizes of the processed thumbnail image and the full scale image
 
     rtengine::procparams::ProcParams      pparams;
-    bool            pparamsValid;
+    bool            tagsSet;
+    bool            exifSet;
+    bool            iptcSet;
+    bool            paramsSet;
+    bool            defaultParamsSet;
     bool            needsReProcessing;
     bool            imageLoading;
 
@@ -75,22 +79,29 @@ class Thumbnail
     void            generateExifDateTimeStrings ();
 
     Glib::ustring    getCacheFileName (const Glib::ustring& subdir, const Glib::ustring& fext) const;
+    Glib::ustring    getTempFileName (const Glib::ustring& fext);
 
 public:
     Thumbnail (CacheManager* cm, const Glib::ustring& fname, CacheImageData* cf);
     Thumbnail (CacheManager* cm, const Glib::ustring& fname, const std::string& md5);
     ~Thumbnail ();
 
-    bool              hasProcParams ();
-    const rtengine::procparams::ProcParams& getProcParams ();
-    const rtengine::procparams::ProcParams& getProcParamsU ();  // Unprotected version
+    // Tags (rank, color label & trash), Tools params, EXIF params and IPTC params may be differentiated in the future. For now, it send back the very same ProcParams object
+    const rtengine::procparams::ProcParams& getTagsParams ();
+    const rtengine::procparams::ProcParams& getTagsParamsU ();  // Unprotected version
+    const rtengine::procparams::ProcParams& getToolParams ();
+    const rtengine::procparams::ProcParams& getToolParamsU ();  // Unprotected version
+    const rtengine::procparams::ProcParams& getExifParams ();
+    const rtengine::procparams::ProcParams& getExifParamsU ();  // Unprotected version
+    const rtengine::procparams::ProcParams& getIptcParams ();
+    const rtengine::procparams::ProcParams& getIptcParamsU ();  // Unprotected version
 
     // Use this to create params on demand for update ; if flaggingMode=true, the procparams is created for a file being flagged (inTrash, rank, colorLabel)
     rtengine::procparams::ProcParams* createProcParamsForUpdate (bool returnParams, bool force, bool flaggingMode = false);
 
     void              setProcParams (const rtengine::procparams::ProcParams& pp, ParamsEdited* pe = nullptr, int whoChangedIt = -1, bool updateCacheNow = true);
-    void              clearProcParams (int whoClearedIt = -1);
-    void              loadProcParams ();
+    void              clearProcParams (int ppSubPart, int whoClearedIt = -1);
+    void              loadProcParams (Glib::ustring fname="");
 
     void              notifylisterners_procParamsChanged(int whoChangedIt);
 
@@ -98,10 +109,12 @@ public:
     {
         return cfs.thumbImgType == CacheImageData::QUICK_THUMBNAIL;
     }
-    bool              isPParamsValid()
-    {
-        return pparamsValid;
-    }
+
+    bool              hasTagsSet();
+    bool              hasToolParamsSet();
+    bool              hasExifParamsSet();
+    bool              hasIptcParamsSet();
+
     bool              isRecentlySaved ();
     void              imageDeveloped ();
     void              imageEnqueued ();
@@ -128,7 +141,7 @@ public:
     void                  getSpotWB (int x, int y, int rect, double& temp, double& green)
     {
         if (tpp) {
-            tpp->getSpotWB (getProcParams(), x, y, rect, temp, green);
+            tpp->getSpotWB (getToolParams(), x, y, rect, temp, green);
         } else {
             temp = green = -1.0;
         }
@@ -166,7 +179,7 @@ public:
     {
         if (pparams.rank != rank) {
             pparams.rank = rank;
-            pparamsValid = true;
+            tagsSet = true;
         }
     }
 
@@ -178,7 +191,7 @@ public:
     {
         if (pparams.colorlabel != colorlabel) {
             pparams.colorlabel = colorlabel;
-            pparamsValid = true;
+            tagsSet = true;
         }
     }
 
@@ -190,7 +203,7 @@ public:
     {
         if (pparams.inTrash != stage) {
             pparams.inTrash = stage;
-            pparamsValid = true;
+            tagsSet = true;
         }
     }
 

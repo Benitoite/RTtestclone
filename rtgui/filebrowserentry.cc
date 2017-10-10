@@ -101,7 +101,7 @@ void FileBrowserEntry::refreshQuickThumbnailImage ()
     }
 
     // Only make a (slow) processed preview if the picture has been edited at all
-    bool upgrade_to_processed = (!options.internalThumbIfUntouched || thumbnail->isPParamsValid());
+    bool upgrade_to_processed = (!options.internalThumbIfUntouched || thumbnail->hasToolParamsSet());
     thumbImageUpdater->add(this, &updatepriority, upgrade_to_processed, this);
 }
 
@@ -122,7 +122,7 @@ std::vector<Glib::RefPtr<Gdk::Pixbuf> > FileBrowserEntry::getIconsOnImageArea ()
         return ret;
     }
 
-    if (thumbnail->hasProcParams() && editedIcon) {
+    if (thumbnail->hasToolParamsSet() && editedIcon) {
         ret.push_back (editedIcon);
     }
 
@@ -134,6 +134,10 @@ std::vector<Glib::RefPtr<Gdk::Pixbuf> > FileBrowserEntry::getIconsOnImageArea ()
         ret.push_back (enqueuedIcon);
     }
 
+    if(getThumbButtonSet()) {
+        getThumbButtonSet()->setHasProcParams (thumbnail->hasToolParamsSet());
+    }
+
     return ret;
 }
 
@@ -143,7 +147,7 @@ void FileBrowserEntry::customBackBufferUpdate (Cairo::RefPtr<Cairo::Context> c)
         if (state == SCropSelecting || state == SResizeH1 || state == SResizeH2 || state == SResizeW1 || state == SResizeW2 || state == SResizeTL || state == SResizeTR || state == SResizeBL || state == SResizeBR || state == SCropMove) {
             drawCrop (c, prex, prey, prew, preh, 0, 0, scale, cropParams, true, false);
         } else {
-            rtengine::procparams::CropParams cparams = thumbnail->getProcParams().crop;
+            rtengine::procparams::CropParams cparams = thumbnail->getToolParams().crop;
 
             if (cparams.enabled && !thumbnail->isQuick()) { // Quick thumb have arbitrary sizes, so don't apply the crop
                 drawCrop (c, prex, prey, prew, preh, 0, 0, scale, cparams, true, false);
@@ -275,10 +279,10 @@ void FileBrowserEntry::_updateImage (rtengine::IImage8* img, double s, rtengine:
     }
 }
 
-bool FileBrowserEntry::motionNotify (int x, int y)
+bool FileBrowserEntry::motionNotify (int bstate, int x, int y)
 {
 
-    bool b = ThumbBrowserEntryBase::motionNotify (x, y);
+    bool b = ThumbBrowserEntryBase::motionNotify (bstate, x, y);
 
     int ix = x - startx - ofsX;
     int iy = y - starty - ofsY;

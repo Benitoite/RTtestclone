@@ -305,7 +305,8 @@ void Options::setDefaults ()
     meowY = 0;
     saveAsDialogWidth = 920;
     saveAsDialogHeight = 680;
-    savesParamsAtExit = true;
+    savesParamsEvenIfUnmodified = true;
+    savesParamsOnExit = true;
     saveFormat.format = "jpg";
     saveFormat.jpegQuality = 92;
     saveFormat.jpegSubSamp = 2;
@@ -683,8 +684,12 @@ void Options::readFromFile (Glib::ustring fname)
                     adjusterMaxDelay = keyFile.get_integer ("General", "AdjusterMaxDelay");
                 }
 
+                if (keyFile.has_key ("General", "StoreProfileEvenIfUnmodified")) {
+                    savesParamsEvenIfUnmodified = keyFile.get_boolean ("General", "StoreProfileEvenIfUnmodified");
+                }
+
                 if (keyFile.has_key ("General", "StoreLastProfile")) {
-                    savesParamsAtExit = keyFile.get_boolean ("General", "StoreLastProfile");
+                    savesParamsOnExit = keyFile.get_boolean ("General", "StoreLastProfile");
                 }
 
                 if (keyFile.has_key ("General", "MultiUser")) {
@@ -1814,7 +1819,9 @@ void Options::saveToFile (Glib::ustring fname)
         Glib::KeyFile keyFile;
 
         keyFile.set_boolean ("General", "TabbedEditor", tabbedUI);
-        keyFile.set_boolean ("General", "StoreLastProfile", savesParamsAtExit);
+
+        keyFile.set_boolean ("General", "StoreProfileEvenIfUnmodified", savesParamsEvenIfUnmodified);
+        keyFile.set_boolean ("General", "StoreLastProfile", savesParamsOnExit);
 
         if (startupDir == STARTUPDIR_HOME) {
             keyFile.set_string ("General", "StartupDirectory", "home");

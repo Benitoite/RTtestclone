@@ -60,6 +60,13 @@ void CacheManager::init ()
         error |= g_mkdir_with_parents (Glib::build_filename (baseDir, cacheDir).c_str(), cacheDirMode);
     }
 
+    Glib::ustring tmpDirRT = Glib::build_filename (g_get_tmp_dir(), "RawTherapee");
+    tempDirSmall = Glib::ustring(Glib::build_filename (tmpDirRT, "Small"));
+    tempDirBig = Glib::ustring(Glib::build_filename (tmpDirRT, "Big"));
+    error |= g_mkdir_with_parents (tmpDirRT.c_str(), cacheDirMode);
+    error |= g_mkdir_with_parents (tempDirSmall.c_str(), cacheDirMode);
+    error |= g_mkdir_with_parents (tempDirBig.c_str(), cacheDirMode);
+
     if (error != 0 && options.rtSettings.verbose) {
         std::cerr << "Failed to create all cache directories: " << g_strerror(errno) << std::endl;
     }
@@ -338,6 +345,18 @@ Glib::ustring CacheManager::getCacheFileName (const Glib::ustring& subDir,
     const auto dirName = Glib::build_filename (baseDir, subDir);
     const auto baseName = Glib::path_get_basename (fname) + "." + md5;
     return Glib::build_filename (dirName, baseName + fext);
+}
+
+Glib::ustring CacheManager::getTempFileNameSmall (const Glib::ustring& fname, const Glib::ustring& fext, const Glib::ustring& md5) const
+{
+    const auto baseName = Glib::path_get_basename (fname) + "." + md5;
+    return Glib::build_filename (tempDirSmall, baseName + fext);
+}
+
+Glib::ustring CacheManager::getTempFileNameBig (const Glib::ustring& fname, const Glib::ustring& fext) const
+{
+    const auto baseName = Glib::path_get_basename (fname);
+    return Glib::build_filename (tempDirBig, baseName + fext);
 }
 
 void CacheManager::applyCacheSizeLimitation () const

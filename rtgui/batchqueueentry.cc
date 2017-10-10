@@ -94,7 +94,13 @@ void BatchQueueEntry::refreshThumbnailImage ()
 void BatchQueueEntry::calcThumbnailSize ()
 {
 
-    prew = preh * origpw / origph;
+    float ratio = float(origpw) / float(origph);
+    prew = preh * ratio;
+
+    if ( ratio > 1.512f ) {
+        prew = int(1.5f * float(preh));
+        preh = int(float(prew) / ratio);
+    }
 }
 
 

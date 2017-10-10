@@ -440,7 +440,7 @@ void ToolPanelCoordinator::profileChange  (const PartialProfile *nparams, rtengi
         lParams[1] = *mergedParams;
         pe.initFrom (lParams);
 
-        filterRawRefresh = pe.raw.isUnchanged() && pe.lensProf.isUnchanged() && pe.retinex.isUnchanged();
+        filterRawRefresh = pe.raw && pe.lensProf && pe.retinex;
     }
 
     *params = *mergedParams;

@@ -908,7 +908,7 @@ void BatchQueue::setProgress (double p)
     idle_register.add(func, this);
 }
 
-void BatchQueue::buttonPressed (LWButton* button, int actionCode, void* actionData)
+void BatchQueue::button1Pressed (LWButton* button, int actionCode, void* actionData)
 {
 
     std::vector<ThumbBrowserEntryBase*> bqe;

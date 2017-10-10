@@ -116,7 +116,7 @@ void BatchToolPanelCoordinator::initSession ()
     initialPP.resize (selected.size());
 
     for (size_t i = 0; i < selected.size(); i++) {
-        initialPP[i] = selected[i]->getProcParams ();
+        initialPP[i] = selected[i]->getToolParams ();
         selected[i]->applyAutoExp (initialPP[i]);
         selected[i]->addThumbnailListener (this);
     }
@@ -140,7 +140,7 @@ void BatchToolPanelCoordinator::initSession ()
     if (!selected.empty()) {
 
         // The first selected image (in the thumbnail list, not the click list) is used to populate the EditorPanel and set the default values
-        pparams = selected[0]->getProcParams ();
+        pparams = selected[0]->getToolParams ();
 
         coarse->initBatchBehavior ();
 
@@ -411,7 +411,7 @@ void BatchToolPanelCoordinator::panelChanged (rtengine::ProcEvent event, const G
         }
 
         int w, h;
-        selected[0]->getFinalSize (selected[0]->getProcParams (), w, h);
+        selected[0]->getFinalSize (selected[0]->getToolParams (), w, h);
         crop->setDimensions(w, h);
 
         // Some transformations change the crop and resize parameter for convenience.
@@ -446,7 +446,7 @@ void BatchToolPanelCoordinator::panelChanged (rtengine::ProcEvent event, const G
         if (event == rtengine::EvCTHFlip) {
             for (size_t i = 0; i < selected.size(); i++) {
                 int w, h;
-                selected[i]->getFinalSize (selected[i]->getProcParams (), w, h);
+                selected[i]->getFinalSize (selected[i]->getToolParams (), w, h);
 
                 rtengine::procparams::CropParams& crop = initialPP[i].crop;
                 crop.x = w - crop.x - crop.w;
@@ -456,7 +456,7 @@ void BatchToolPanelCoordinator::panelChanged (rtengine::ProcEvent event, const G
         } else if (event == rtengine::EvCTVFlip) {
             for (size_t i = 0; i < selected.size(); i++) {
                 int w, h;
-                selected[i]->getFinalSize (selected[i]->getProcParams (), w, h);
+                selected[i]->getFinalSize (selected[i]->getToolParams (), w, h);
 
                 rtengine::procparams::CropParams& crop = initialPP[i].crop;
                 crop.y = h - crop.y - crop.h;
@@ -468,13 +468,13 @@ void BatchToolPanelCoordinator::panelChanged (rtengine::ProcEvent event, const G
 
             for (size_t i = 0; i < selected.size(); i++) {
                 int w, h;
-                selected[i]->getFinalSize (selected[i]->getProcParams (), w, h);
+                selected[i]->getFinalSize (selected[i]->getToolParams (), w, h);
 
                 int oldDeg = initialPP[i].coarse.rotate;
 
                 rtengine::procparams::CropParams& crop = initialPP[i].crop;
                 int rotation = (360 + newDeg - oldDeg) % 360;
-                ProcParams pptemp = selected[i]->getProcParams(); // Get actual procparams
+                ProcParams pptemp = selected[i]->getToolParams(); // Get actual procparams
 
                 if((pptemp.coarse.hflip != pptemp.coarse.vflip) && ((rotation % 180) == 90)) {
                     rotation = (rotation + 180) % 360;
@@ -667,7 +667,7 @@ CropGUIListener* BatchToolPanelCoordinator::startCropEditing (Thumbnail* thm)
 
     if (thm) {
         int w, h;
-        thm->getFinalSize (thm->getProcParams (), w, h);
+        thm->getFinalSize (thm->getToolParams (), w, h);
         crop->setDimensions (w, h);
     }
 

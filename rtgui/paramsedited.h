@@ -31,6 +31,9 @@ public:
     bool rank;
     bool colorlabel;
     bool intrash;
+
+    operator bool (void) const;
+    void set(bool v);
 };
 
 class ToneCurveParamsEdited
@@ -53,6 +56,8 @@ public:
     bool expcomp;
     bool hrenabled;
     bool method;
+
+    operator bool () const;
 };
 
 class RetinexParamsEdited
@@ -87,13 +92,13 @@ public:
     bool lhcurve;
     bool retinex;
     bool medianmap;
-    bool isUnchanged() const;
     bool highlights;
     bool htonalwidth;
     bool shadows;
     bool stonalwidth;
     bool radius;
 
+    operator bool () const;
 };
 
 
@@ -117,6 +122,8 @@ public:
     bool clcurve;
     bool enabled;
     bool method;
+
+    operator bool () const;
 };
 
 class RGBCurvesParamsEdited
@@ -127,6 +134,8 @@ public:
     bool rcurve;
     bool gcurve;
     bool bcurve;
+
+    operator bool () const;
 };
 
 class ColorToningEdited
@@ -159,6 +168,8 @@ public:
     bool satlow;
     bool sathigh;
     bool lumamode;
+
+    operator bool () const;
 };
 
 class SharpenEdgeParamsEdited
@@ -169,6 +180,8 @@ public :
     bool passes;
     bool amount;
     bool threechannels;
+
+    operator bool () const;
 };
 
 class SharpenMicroParamsEdited
@@ -179,6 +192,7 @@ public :
     bool amount;
     bool uniformity;
 
+    operator bool () const;
 };
 
 class SharpeningParamsEdited
@@ -200,6 +214,8 @@ public:
     bool deconvradius;
     bool deconviter;
     bool deconvdamping;
+
+    operator bool () const;
 };
 
 class VibranceParamsEdited
@@ -214,16 +230,9 @@ public:
     bool avoidcolorshift;
     bool pastsattog;
     bool skintonescurve;
+
+    operator bool () const;
 };
-
-/*class ColorBoostParamsEdited {
-
-    public:
-        bool amount;
-        bool avoidclip;
-        bool enable_saturationlimiter;
-        bool rstprotection;
-};*/
 
 class WBParamsEdited
 {
@@ -234,29 +243,9 @@ public:
     bool green;
     bool equal;
     bool tempBias;
+
+    operator bool () const;
 };
-
-/*class ColorShiftParamsEdited {
-
-    public:
-        bool a;
-        bool b;
-};*/
-
-/*class LumaDenoiseParamsEdited {
-
-    public:
-        bool enabled;
-        bool radius;
-        bool edgetolerance;
-};*/
-
-/*class ColorDenoiseParamsEdited {
-
-    public:
-        bool enabled;
-        bool amount;
-};*/
 
 class DefringeParamsEdited
 {
@@ -266,6 +255,8 @@ public:
     bool radius;
     bool threshold;
     bool huecurve;
+
+    operator bool () const;
 };
 
 class ImpulseDenoiseParamsEdited
@@ -274,6 +265,8 @@ class ImpulseDenoiseParamsEdited
 public:
     bool enabled;
     bool thresh;
+
+    operator bool () const;
 };
 
 class ColorAppearanceParamsEdited
@@ -322,6 +315,7 @@ public:
     bool tempsc;
     bool greensc;
 
+    operator bool () const;
 };
 
 class DirPyrDenoiseParamsEdited
@@ -351,6 +345,7 @@ public:
     bool rgbmethod;
     bool passes;
 
+    operator bool () const;
 };
 
 class EPDParamsEdited
@@ -362,6 +357,8 @@ public:
     bool edgeStopping;
     bool scale;
     bool reweightingIterates;
+
+    operator bool () const;
 };
 
 
@@ -377,6 +374,8 @@ public:
     bool stonalwidth;
     bool localcontrast;
     bool radius;
+
+    operator bool () const;
 };
 
 class CropParamsEdited
@@ -392,6 +391,8 @@ public:
     bool ratio;
     bool orientation;
     bool guide;
+
+    operator bool () const;
 };
 
 class CoarseTransformParamsEdited
@@ -401,6 +402,8 @@ public:
     bool rotate;
     bool hflip;
     bool vflip;
+
+    operator bool () const;
 };
 
 class CommonTransformParamsEdited
@@ -408,6 +411,8 @@ class CommonTransformParamsEdited
 
 public:
     bool autofill;
+
+    operator bool () const;
 };
 
 class RotateParamsEdited
@@ -415,6 +420,8 @@ class RotateParamsEdited
 
 public:
     bool degree;
+
+    operator bool () const;
 };
 
 class DistortionParamsEdited
@@ -422,6 +429,8 @@ class DistortionParamsEdited
 
 public:
     bool amount;
+
+    operator bool () const;
 };
 
 class LensProfParamsEdited
@@ -431,7 +440,7 @@ public:
     bool useLensfun, lfAutoMatch, lfCameraMake, lfCameraModel, lfLens;
     bool lcMode;
 
-    bool isUnchanged() const;
+    operator bool () const;
 };
 
 class PerspectiveParamsEdited
@@ -440,6 +449,8 @@ class PerspectiveParamsEdited
 public:
     bool horizontal;
     bool vertical;
+
+    operator bool () const;
 };
 
 class GradientParamsEdited
@@ -452,6 +463,8 @@ public:
     bool strength;
     bool centerX;
     bool centerY;
+
+    operator bool () const;
 };
 
 class PCVignetteParamsEdited
@@ -462,6 +475,8 @@ public:
     bool strength;
     bool feather;
     bool roundness;
+
+    operator bool () const;
 };
 
 class VignettingParamsEdited
@@ -473,6 +488,8 @@ public:
     bool strength;
     bool centerX;
     bool centerY;
+
+    operator bool () const;
 };
 
 class ChannelMixerParamsEdited
@@ -483,7 +500,9 @@ public:
     bool green[3];
     bool blue[3];
 
+    operator bool () const;
 };
+
 class BlackWhiteParamsEdited
 {
 
@@ -512,6 +531,7 @@ public:
     bool autoc;
     bool algo;
 
+    operator bool () const;
 };
 
 class CACorrParamsEdited
@@ -520,15 +540,21 @@ class CACorrParamsEdited
 public:
     bool red;
     bool blue;
+
+    operator bool () const;
 };
+
 /*
 class HRecParamsEdited {
 
     public:
         bool enabled;
         bool method;
+
+    operator bool () const;
 };
 */
+
 class ResizeParamsEdited
 {
 
@@ -540,6 +566,8 @@ public:
     bool width;
     bool height;
     bool enabled;
+
+    operator bool () const;
 };
 
 class ColorManagementParamsEdited
@@ -561,7 +589,10 @@ public:
     bool slpos;
     bool gamfree;
     bool freegamma;
+
+    operator bool () const;
 };
+
 class WaveletParamsEdited
 {
 
@@ -650,6 +681,7 @@ public:
     bool exptoning;
     bool expnoise;
 
+    operator bool () const;
 };
 
 class DirPyrEqualizerParamsEdited
@@ -664,6 +696,8 @@ public:
     bool skinprotect;
     bool hueskin;
     //     bool algo;
+
+    operator bool () const;
 };
 
 class HSVEqualizerParamsEdited
@@ -673,6 +707,8 @@ public:
     bool hcurve;
     bool scurve;
     bool vcurve;
+
+    operator bool () const;
 };
 
 class FilmSimulationParamsEdited
@@ -681,6 +717,8 @@ public:
     bool enabled;
     bool clutFilename;
     bool strength;
+
+    operator bool () const;
 };
 
 class RAWParamsEdited
@@ -737,7 +775,7 @@ public:
         bool greenEq;
         bool linenoise;
 
-        bool isUnchanged() const;
+        operator bool () const;
     };
 
     class XTransSensor
@@ -750,7 +788,7 @@ public:
         bool exBlackGreen;
         bool exBlackBlue;
 
-        bool isUnchanged() const;
+        operator bool () const;
     };
 
     BayerSensor bayersensor;
@@ -773,7 +811,7 @@ public:
     bool exPos;
     bool exPreser;
 
-    bool isUnchanged() const;
+    operator bool () const;
 };
 
 class ParamsEdited
@@ -785,18 +823,14 @@ public:
     LCurveParamsEdited            labCurve;
     RGBCurvesParamsEdited         rgbCurves;
     ColorToningEdited             colorToning;
-    RetinexParamsEdited             retinex;
+    RetinexParamsEdited           retinex;
     SharpeningParamsEdited        sharpening;
     SharpeningParamsEdited        prsharpening;
     SharpenEdgeParamsEdited       sharpenEdge;
     SharpenMicroParamsEdited      sharpenMicro;
     VibranceParamsEdited          vibrance;
     ColorAppearanceParamsEdited   colorappearance;
-    //ColorBoostParamsEdited        colorBoost;
     WBParamsEdited                wb;
-    //ColorShiftParamsEdited        colorShift;
-    //LumaDenoiseParamsEdited       lumaDenoise;
-    //ColorDenoiseParamsEdited      colorDenoise;
     DefringeParamsEdited          defringe;
     DirPyrDenoiseParamsEdited     dirpyrDenoise;
     EPDParamsEdited               epd;
@@ -819,7 +853,7 @@ public:
     ColorManagementParamsEdited   icm;
     RAWParamsEdited               raw;
     DirPyrEqualizerParamsEdited   dirpyrequalizer;
-    WaveletParamsEdited             wavelet;
+    WaveletParamsEdited           wavelet;
     HSVEqualizerParamsEdited      hsvequalizer;
     FilmSimulationParamsEdited    filmSimulation;
     bool                          exif;
@@ -827,9 +861,18 @@ public:
 
     explicit ParamsEdited (bool value = false);
 
-    void set   (bool v);
+    void set   (bool v, int subPart = rtengine::procparams::ProcParams::eSubPart::FLAGS
+                                     |rtengine::procparams::ProcParams::eSubPart::EXIF
+                                     |rtengine::procparams::ProcParams::eSubPart::IPTC
+                                     |rtengine::procparams::ProcParams::eSubPart::TOOL);
+
     void initFrom (const std::vector<rtengine::procparams::ProcParams>& src);
     void combine (rtengine::procparams::ProcParams& toEdit, const rtengine::procparams::ProcParams& mods, bool forceSet);
+
+    bool isTagsSet();
+    bool isToolSet();
+    bool isExifSet();
+    bool isIptcSet();
 
     bool operator== (const ParamsEdited& other);
     bool operator!= (const ParamsEdited& other);

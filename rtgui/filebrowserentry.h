@@ -95,7 +95,7 @@ public:
     void updateImage (rtengine::IImage8* img, double scale, rtengine::procparams::CropParams cropParams);
     void _updateImage (rtengine::IImage8* img, double scale, rtengine::procparams::CropParams cropParams); // inside gtk thread
 
-    virtual bool    motionNotify  (int x, int y);
+    virtual bool    motionNotify  (int bstate, int x, int y);
     virtual bool    pressNotify   (int button, int type, int bstate, int x, int y);
     virtual bool    releaseNotify (int button, int type, int bstate, int x, int y);
 };

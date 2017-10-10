@@ -484,7 +484,13 @@ public:
 };
 
 EditorPanel::EditorPanel (FilePanel* filePanel)
-    : catalogPane (nullptr), realized (false), tbBeforeLock (nullptr), iHistoryShow (nullptr), iHistoryHide (nullptr), iTopPanel_1_Show (nullptr), iTopPanel_1_Hide (nullptr), iRightPanel_1_Show (nullptr), iRightPanel_1_Hide (nullptr), iBeforeLockON (nullptr), iBeforeLockOFF (nullptr), previewHandler (nullptr), beforePreviewHandler (nullptr), beforeIarea (nullptr), beforeBox (nullptr), afterBox (nullptr), beforeLabel (nullptr), afterLabel (nullptr), beforeHeaderBox (nullptr), afterHeaderBox (nullptr), parent (nullptr), parentWindow (nullptr), openThm (nullptr), isrc (nullptr), ipc (nullptr), beforeIpc (nullptr), err (0), isProcessing (false)
+    : catalogPane (nullptr), unmodified(true), realized (false), tbBeforeLock (nullptr), iHistoryShow (nullptr),
+      iHistoryHide (nullptr), iTopPanel_1_Show (nullptr), iTopPanel_1_Hide (nullptr), iRightPanel_1_Show (nullptr),
+      iRightPanel_1_Hide (nullptr), iBeforeLockON (nullptr), iBeforeLockOFF (nullptr), previewHandler (nullptr),
+      beforePreviewHandler (nullptr), beforeIarea (nullptr), beforeBox (nullptr), afterBox (nullptr),
+      beforeLabel (nullptr), afterLabel (nullptr), beforeHeaderBox (nullptr), afterHeaderBox (nullptr),
+      parent (nullptr), parentWindow (nullptr), openThm (nullptr), isrc (nullptr), ipc (nullptr),
+      beforeIpc (nullptr), err (0), isProcessing (false)
 {
 
     epih = new EditorPanelIdleHelper;
@@ -524,6 +530,19 @@ EditorPanel::EditorPanel (FilePanel* filePanel)
 
     // build the middle of the screen
     Gtk::VBox* editbox = Gtk::manage (new Gtk::VBox ());
+
+    savePP3 = Gtk::manage (new Gtk::Button ());
+    Gtk::Image* saveimg = Gtk::manage (new RTImage ("gtk-save-large.png"));
+    savePP3->add(*saveimg);
+    savePP3->set_relief(Gtk::RELIEF_NONE);
+    savePP3->set_tooltip_text(M("MAIN_TOOLTIP_SAVEPROFILE"));
+    //savePP3->set_sensitive(false);
+    deletePP3 = Gtk::manage (new Gtk::Button ());
+    Gtk::Image* deleteimg = Gtk::manage (new RTImage ("clear-profile.png"));
+    deletePP3->add(*deleteimg);
+    deletePP3->set_relief(Gtk::RELIEF_NONE);
+    deletePP3->set_tooltip_text(M("MAIN_TOOLTIP_DELETEPROFILE"));
+    //deletePP3->set_sensitive(false);
 
     info = Gtk::manage (new Gtk::ToggleButton ());
     Gtk::Image* infoimg = Gtk::manage (new RTImage ("info.png"));
@@ -588,6 +607,8 @@ EditorPanel::EditorPanel (FilePanel* filePanel)
     toolBarPanel->set_name ("EditorTopPanel");
     toolBarPanel->pack_start (*hidehp, Gtk::PACK_SHRINK, 1);
     toolBarPanel->pack_start (*vseph, Gtk::PACK_SHRINK, 2);
+    toolBarPanel->pack_start (*savePP3, Gtk::PACK_SHRINK, 1);
+    toolBarPanel->pack_start (*deletePP3, Gtk::PACK_SHRINK, 1);
     toolBarPanel->pack_start (*info, Gtk::PACK_SHRINK, 1);
     toolBarPanel->pack_start (*beforeAfter, Gtk::PACK_SHRINK, 1);
     toolBarPanel->pack_start (*vsepi, Gtk::PACK_SHRINK, 2);
@@ -1061,7 +1082,9 @@ void EditorPanel::open (Thumbnail* tmb, rtengine::InitialImage* isrc)
 void EditorPanel::close ()
 {
     if (ipc) {
-        saveProfile ();
+        if (options.savesParamsOnExit) {
+            saveProfile ();
+        }
         // close image processor and the current thumbnail
         tpc->closeImage ();    // this call stops image processing
         tpc->writeOptions ();
@@ -1716,7 +1739,7 @@ void EditorPanel::procParamsChanged (Thumbnail* thm, int whoChangedIt)
     if (whoChangedIt != EDITOR) {
         PartialProfile pp (true);
         pp.set (true);
-        * (pp.pparams) = openThm->getProcParams();
+        * (pp.pparams) = openThm->getToolParams();
         tpc->profileChange (&pp, rtengine::EvProfileChangeNotification, M ("PROGRESSDLG_PROFILECHANGEDINBROWSER"));
         pp.deleteInstance();
     }
@@ -1993,18 +2016,14 @@ bool EditorPanel::idle_sendToGimp ( ProgressConnector<rtengine::IImage16*> *pc, 
     delete pc;
 
     if (img) {
-        // get file name base
-        Glib::ustring shortname = removeExtension (Glib::path_get_basename (fname));
-        Glib::ustring dirname = Glib::get_tmp_dir ();
-        Glib::ustring fname = Glib::build_filename (dirname, shortname);
-
         SaveFormat sf;
         sf.format = "tif";
         sf.tiffBits = 16;
         sf.tiffUncompressed = true;
         sf.saveParams = true;
 
-        Glib::ustring fileName = Glib::ustring::compose ("%1.%2", fname, sf.format);
+        // get file name base
+        Glib::ustring fileName = CacheManager::getInstance()->getTempFileNameBig (removeExtension(fname), sf.format);
 
         // TODO: Just list all file with a suitable name instead of brute force...
         int tries = 1;
