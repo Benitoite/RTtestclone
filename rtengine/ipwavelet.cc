@@ -777,14 +777,14 @@ SSEFUNCTION void ImProcFunctions::ip_wavelet (LabImage * lab, LabImage * dst, fl
     #pragma omp parallel num_threads(numthreads)
 #endif
     {
-        float *mean = new float [9];
-        float *meanN = new float [9];
-        float *sigma = new float [9];
-        float *sigmaN = new float [9];
-        float *MaxP = new float [9];
-        float *MaxN = new float [9];
-        float *textp = new float [9];
-        float *textn = new float [9];
+        float mean[10];
+        float meanN[10];
+        float sigma[10];
+        float sigmaN[10];
+        float MaxP[10];
+        float MaxN[10];
+        float textp[10];
+        float textn[10];
 
         float** varhue = new float*[tileheight];
 
@@ -1518,12 +1518,6 @@ SSEFUNCTION void ImProcFunctions::ip_wavelet (LabImage * lab, LabImage * dst, fl
 
         delete [] varchro;
 
-        delete [] mean;
-        delete [] meanN;
-        delete [] sigma;
-        delete [] sigmaN;
-        delete [] MaxP;
-        delete [] MaxN;
     }
 #ifdef _RT_NESTED_OPENMP
     omp_set_nested (oldNested);
