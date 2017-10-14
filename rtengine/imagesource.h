@@ -57,7 +57,7 @@ protected:
     double redAWBMul, greenAWBMul, blueAWBMul; // local copy of the multipliers, to avoid recomputing the values
     cmsHPROFILE embProfile;
     Glib::ustring fileName;
-    ImageData* idata;
+    FramesData* idata;
     ImageMatrices imatrices;
     double dirpyrdenoiseExpComp;
 
@@ -78,10 +78,10 @@ public:
     virtual void        HLRecovery_inpaint (float** red, float** green, float** blue) {};
     virtual void        MSR (LabImage* lab, LUTf & mapcurve, bool &mapcontlutili, int width, int height, int skip, RetinexParams deh, const RetinextransmissionCurve & dehatransmissionCurve, const RetinexgaintransmissionCurve & dehagaintransmissionCurve, float &minCD, float &maxCD, float &mini, float &maxi, float &Tmean, float &Tsigma, float &Tmin, float &Tmax) {};
 
-    virtual bool        IsrgbSourceModified() const = 0; // tracks whether cached rgb output of demosaic has been modified
+    virtual bool        isRGBSourceModified () const = 0; // tracks whether cached rgb output of demosaic has been modified
 
-    virtual void setCurrentFrame (unsigned int frameNum) = 0;
-    virtual int getFrameCount() = 0;
+    virtual void        setCurrentFrame (unsigned int frameNum) = 0;
+    virtual int         getFrameCount () = 0;
 
 
     // use right after demosaicing image, add coarse transformation and put the result in the provided Imagefloat*
@@ -111,10 +111,10 @@ public:
         return 0;
     }
 
-    virtual ImageData*     getImageData () = 0;
+    virtual FrameData*     getImageData (unsigned int frameNum) = 0;
     virtual ImageMatrices* getImageMatrices () = 0;
-    virtual bool        isRAW() const = 0;
-    virtual DCPProfile* getDCP (const ColorManagementParams &cmp, ColorTemp &wb, DCPProfile::ApplyState &as)
+    virtual bool           isRAW () const = 0;
+    virtual DCPProfile*    getDCP (const ColorManagementParams &cmp, ColorTemp &wb, DCPProfile::ApplyState &as)
     {
         return nullptr;
     };
@@ -154,7 +154,7 @@ public:
     {
         return embProfile;
     }
-    virtual const ImageMetaData* getMetaData ()
+    virtual const FramesMetaData* getMetaData ()
     {
         return idata;
     }

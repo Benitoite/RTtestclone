@@ -200,7 +200,7 @@ public:
     CoarsePanel* coarse;
     Gtk::Notebook* toolPanelNotebook;
 
-    ToolPanelCoordinator ();
+    ToolPanelCoordinator (bool batch = false);
     virtual ~ToolPanelCoordinator ();
 
     bool getChangedState                ()
