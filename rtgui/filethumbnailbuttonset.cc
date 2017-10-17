@@ -69,7 +69,7 @@ FileThumbnailButtonSet::FileThumbnailButtonSet (FileBrowserEntry* myEntry)
 
     add (new LWButton (colorLabelIcon_0, 8, myEntry, LWButton::Right, LWButton::Center, M("FILEBROWSER_COLORLABEL_TOOLTIP")));
 
-    add (new LWButton (clearProfileIcon, 9, myEntry, LWButton::Right, LWButton::Center, M("FILEBROWSER_CLEARPROFILE")));
+    add (new LWButton (clearProfileIcon, 9, myEntry, LWButton::Right, LWButton::Center, M("FILEBROWSER_CLEARPARAMS")));
 
     buttons[2]->setToolTip (M("FILEBROWSER_RANK1_TOOLTIP"));
     buttons[3]->setToolTip (M("FILEBROWSER_RANK2_TOOLTIP"));

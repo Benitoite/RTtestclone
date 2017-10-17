@@ -483,14 +483,36 @@ public:
 
 };
 
-EditorPanel::EditorPanel (FilePanel* filePanel)
-    : catalogPane (nullptr), unmodified(true), realized (false), tbBeforeLock (nullptr), iHistoryShow (nullptr),
-      iHistoryHide (nullptr), iTopPanel_1_Show (nullptr), iTopPanel_1_Hide (nullptr), iRightPanel_1_Show (nullptr),
-      iRightPanel_1_Hide (nullptr), iBeforeLockON (nullptr), iBeforeLockOFF (nullptr), previewHandler (nullptr),
-      beforePreviewHandler (nullptr), beforeIarea (nullptr), beforeBox (nullptr), afterBox (nullptr),
-      beforeLabel (nullptr), afterLabel (nullptr), beforeHeaderBox (nullptr), afterHeaderBox (nullptr),
-      parent (nullptr), parentWindow (nullptr), openThm (nullptr), isrc (nullptr), ipc (nullptr),
-      beforeIpc (nullptr), err (0), isProcessing (false)
+EditorPanel::EditorPanel (FilePanel* filePanel) :
+    catalogPane(nullptr),
+    realized(false),
+    unmodified(true),
+    tbBeforeLock(nullptr),
+    iHistoryShow(nullptr),
+    iHistoryHide(nullptr),
+    iTopPanel_1_Show(nullptr),
+    iTopPanel_1_Hide(nullptr),
+    iRightPanel_1_Show(nullptr),
+    iRightPanel_1_Hide(nullptr),
+    iBeforeLockON(nullptr),
+    iBeforeLockOFF(nullptr),
+    previewHandler(nullptr),
+    beforePreviewHandler(nullptr),
+    beforeIarea(nullptr),
+    beforeBox(nullptr),
+    afterBox(nullptr),
+    beforeLabel(nullptr),
+    afterLabel(nullptr),
+    beforeHeaderBox(nullptr),
+    afterHeaderBox(nullptr),
+    parent(nullptr),
+    parentWindow(nullptr),
+    openThm(nullptr),
+    isrc(nullptr),
+    ipc(nullptr),
+    beforeIpc(nullptr),
+    err(0),
+    isProcessing(false)
 {
 
     epih = new EditorPanelIdleHelper;

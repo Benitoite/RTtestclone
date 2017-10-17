@@ -29,7 +29,6 @@
 
 #include "../rtengine/dynamicprofile.h"
 #include "../rtengine/utils.h"
-#include "../rtengine/StopWatch.h"
 #include "guiutils.h"
 #include "batchqueue.h"
 #include "extprog.h"
@@ -37,10 +36,25 @@
 
 using namespace rtengine::procparams;
 
-Thumbnail::Thumbnail (CacheManager* cm, const Glib::ustring& fname, CacheImageData* cf)
-    : fname(fname), cfs(*cf), cachemgr(cm), ref(1), enqueueNumber(0), tpp(nullptr),
-      tagsSet(false), exifSet(false), iptcSet(false), paramsSet(false), defaultParamsSet(false), needsReProcessing(true),
-      imageLoading(false), lastImg(NULL), lastW(0), lastH(0), lastScale(0), initial_(false)
+Thumbnail::Thumbnail(CacheManager* cm, const Glib::ustring& fname, CacheImageData* cf) :
+    fname(fname),
+    cfs(*cf),
+    cachemgr(cm),
+    ref(1),
+    enqueueNumber(0),
+    tpp(nullptr),
+    tagsSet(false),
+    exifSet(false),
+    iptcSet(false),
+    paramsSet(false),
+    defaultParamsSet(false),
+    needsReProcessing(true),
+    imageLoading(false),
+    lastImg(nullptr),
+    lastW(0),
+    lastH(0),
+    lastScale(0),
+    initial_(false)
 {
 
     loadProcParams ();
@@ -60,10 +74,23 @@ Thumbnail::Thumbnail (CacheManager* cm, const Glib::ustring& fname, CacheImageDa
     tpp = nullptr;
 }
 
-Thumbnail::Thumbnail (CacheManager* cm, const Glib::ustring& fname, const std::string& md5)
-    : fname(fname), cachemgr(cm), ref(1), enqueueNumber(0), tpp(nullptr), tagsSet(false),
-      exifSet(false), iptcSet(false), paramsSet(false), defaultParamsSet(false), needsReProcessing(true),
-      lastW(0), lastH(0), imageLoading(false), lastImg(nullptr), initial_(true)
+Thumbnail::Thumbnail (CacheManager* cm, const Glib::ustring& fname, const std::string& md5) :
+    fname(fname),
+    cachemgr(cm),
+    ref(1),
+    enqueueNumber(0),
+    tpp(nullptr),
+    tagsSet(false),
+    exifSet(false),
+    iptcSet(false),
+    paramsSet(false),
+    defaultParamsSet(false),
+    needsReProcessing(true),
+    imageLoading(false),
+    lastImg(nullptr),
+    lastW(0),
+    lastH(0),
+    initial_(true)
 {
 
 
@@ -430,10 +457,7 @@ void Thumbnail::loadProcParams (Glib::ustring fileName)
     }
 
     if (pparamsValid) {
-        {
-        StopWatch("loadProcParams");
         paramsSet = pe.isToolSet();
-        }
         tagsSet = pe.isTagsSet();
         exifSet = pe.isExifSet();
         iptcSet = pe.isIptcSet();
@@ -545,11 +569,7 @@ void Thumbnail::setProcParams (const ProcParams& pp, ParamsEdited* pe, int whoCh
 
         if (pe) {
             pe->combine(pparams, pp, true);
-            {
-            StopWatch("setProcParams");
             paramsSet = pe->isToolSet();
-            }
-
             exifSet = pe->isExifSet();
             iptcSet = pe->isIptcSet();
         } else {
