@@ -296,7 +296,7 @@ bool ImProcFunctions::transCoord (int W, int H, int x, int y, int w, int h, int&
 }
 
 void ImProcFunctions::transform (Imagefloat* original, Imagefloat* transformed, int cx, int cy, int sx, int sy, int oW, int oH, int fW, int fH,
-                                 const ImageMetaData *metadata,
+                                 const FramesMetaData *metadata,
                                  int rawRotationDeg, bool fullImage)
 {
     double focalLen = metadata->getFocalLen();
@@ -796,9 +796,6 @@ void ImProcFunctions::transformGeneral(ImProcFunctions::TransformMode mode, Imag
 
         case ImProcFunctions::TRANSFORM_HIGH_QUALITY: {
             enableLCPDist = pLCPMap && params->lensProf.useDist;
-            if (enableLCPCA) {
-                enableLCPDist = false;
-            }
             enableCA = enableLCPCA || needsCA();
         }
         //no break on purpose
@@ -809,6 +806,10 @@ void ImProcFunctions::transformGeneral(ImProcFunctions::TransformMode mode, Imag
             break;
         }
     }
+
+    if (enableLCPCA) {
+        enableLCPDist = false;
+    }    
 
     if (!enableCA) {
         chDist[0] = 0.0;

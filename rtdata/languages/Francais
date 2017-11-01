@@ -68,6 +68,7 @@ EXIFPANEL_RESET;Réinitialiser
 EXIFPANEL_RESETALL;Réinitialiser tout
 EXIFPANEL_RESETALLHINT;Réinitialise tous les tags à leur valeur initiale
 EXIFPANEL_RESETHINT;Réinitialise les données sélectionnées à la valeur initiale
+EXIFPANEL_SHOWALL;Voir tout
 EXIFPANEL_SUBDIRECTORY;Sous-répertoire
 EXPORT_BYPASS;Étapes de traitement à ignorer
 EXPORT_BYPASS_ALL;Sélectionner / Désélectionner tout
@@ -961,7 +962,6 @@ PREFERENCES_D50;5000K
 PREFERENCES_D55;5500K
 PREFERENCES_D60;6000K
 PREFERENCES_D65;6500K
-PREFERENCES_DARKFRAME;Soustraction de Trame Noire
 PREFERENCES_DARKFRAMEFOUND;Trouvé
 PREFERENCES_DARKFRAMESHOTS;image(s)
 PREFERENCES_DARKFRAMETEMPLATES;modèle(s)
@@ -970,6 +970,7 @@ PREFERENCES_DATEFORMATHINT;<i>Vous pouvez utiliser les paramètres de chaînes f
 PREFERENCES_DAUB_LABEL;Utiliser les ondelettes de Daubechies D6 au lieu de D4
 PREFERENCES_DAUB_TOOLTIP;Les outils de Réduction de Bruit et de Niveaux d'Ondelettes utilisent une ondelette de Debauchie mère. Si vous choisissez D6 au lieu de D4 vous augmentez le nombre de coéf. orthogonaux de Daubechies et augmentez probablement la qualité des niveaux de taille moyenne. Il n'y a pas de différence de consommation mémoire ou de temps de traitement entre les deux.
 PREFERENCES_DIRDARKFRAMES;Dossier des images de Trame Noire
+PREFERENCES_DIRECTORIES;Dossiers
 PREFERENCES_DIRHOME;Racine de mes documents personnels
 PREFERENCES_DIRLAST;Dernier dossier visité
 PREFERENCES_DIROTHER;Autre
@@ -982,8 +983,6 @@ PREFERENCES_EXTERNALEDITOR;Éditeur externe
 PREFERENCES_FBROWSEROPTS;Options du navigateur de fichiers et de vignettes
 PREFERENCES_FILEBROWSERTOOLBARSINGLEROW;Barre de menu de l'explorateur de fichiers uni-ligne\n(à désactiver pour les écrans de faible résolution)
 PREFERENCES_FILEFORMAT;Format du fichier
-PREFERENCES_FILMSIMULATION;Simulation de Film
-PREFERENCES_FLATFIELD;Champ Uniforme
 PREFERENCES_FLATFIELDFOUND;Trouvé
 PREFERENCES_FLATFIELDSDIR;Dossier des images de Champ Uniforme
 PREFERENCES_FLATFIELDSHOTS;image(s)
@@ -1162,8 +1161,17 @@ PROGRESSBAR_SAVEPNG;Enregistrement du fichier PNG...
 PROGRESSBAR_SAVETIFF;Enregistrement du fichier TIFF...
 PROGRESSBAR_SNAPSHOT_ADDED;Signet ajouté
 PROGRESSDLG_PROFILECHANGEDINBROWSER;Profil modifié dans le navigateur
+QINFO_FRAMECOUNT;%2 images
+QINFO_HDR;HDR / %2 image(s)
 QINFO_ISO;ISO
 QINFO_NOEXIF;Données EXIF non disponibles.
+QINFO_PIXELSHIFT;PixelShift / %2 images
+SAMPLEFORMAT_0;Format de donnée inconnu
+SAMPLEFORMAT_1;8 bits non signé
+SAMPLEFORMAT_2;16 bits non signé
+SAMPLEFORMAT_4;LogLuv 24 bits
+SAMPLEFORMAT_8;LogLuv 32 bits
+SAMPLEFORMAT_16;32 bits à virgule flottante
 SAVEDLG_AUTOSUFFIX;Ajouter automatiquement un suffixe si le fichier existe déjà
 SAVEDLG_FILEFORMAT;Format de fichier
 SAVEDLG_FORCEFORMATOPTS;Forcer les options d'enregistrement
@@ -1182,8 +1190,8 @@ SAVEDLG_SUBSAMP_TOOLTIP;Meilleurs compression:\nJ:a:b 4:2:0\nh/v 2/2\nChroma div
 SAVEDLG_TIFFUNCOMPRESSED;TIFF non compressé
 SAVEDLG_WARNFILENAME;Le fichier sera nommé
 SHCSELECTOR_TOOLTIP;Cliquez le bouton droit de la souris\npour réinitialiser la position de ces 3 curseurs
-SOFTPROOF_GAMUTCHECK_TOOLTIP;Si activé, indique en gris les pixels dont la couleurs est en dehors du gamut du profil de sortie
-SOFTPROOF_TOOLTIP;Épreuvage écran\nSi activé, simule le rendu généré par le profile de sortie de l'outil ICM. Particulièrement utile pour simuler le rendu en sortie d'imprimante.
+SOFTPROOF_GAMUTCHECK_TOOLTIP;Si activé, indique en gris les pixels dont la couleurs est en dehors du gamut du profil Imprimante
+SOFTPROOF_TOOLTIP;Épreuvage écran\nSi activé, vous permet de simuler le rendu obtenu par votre imprimante en utilisant le profil Imprimante réglé dans Préférences > Gestion des couleurs.
 THRESHOLDSELECTOR_B;Bas
 THRESHOLDSELECTOR_BL;Bas-gauche
 THRESHOLDSELECTOR_BR;Bas-droite

@@ -69,6 +69,7 @@ public:
     Glib::ustring getMake() const;
     Glib::ustring getModel() const;
     float getCropFactor() const;
+    bool isFixedLens() const;
 
     Glib::ustring getDisplayString() const;
 
@@ -110,7 +111,7 @@ public:
     LFCamera findCamera(const Glib::ustring &make, const Glib::ustring &model) const;
     LFLens findLens(const LFCamera &camera, const Glib::ustring &name) const;
 
-    static std::unique_ptr<LFModifier> findModifier(const LensProfParams &lensProf, const ImageMetaData *idata, int width, int height, const CoarseTransformParams &coarse, int rawRotationDeg);
+    static std::unique_ptr<LFModifier> findModifier(const LensProfParams &lensProf, const FramesMetaData *idata, int width, int height, const CoarseTransformParams &coarse, int rawRotationDeg);
 
 private:
     std::unique_ptr<LFModifier> getModifier(const LFCamera &camera, const LFLens &lens,

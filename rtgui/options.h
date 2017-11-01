@@ -169,6 +169,7 @@ public:
     int dirBrowserHeight;
     int preferencesWidth;
     int preferencesHeight;
+    bool lastShowAllExif;
     int lastScale;
     int panAccelFactor;
     int lastCropSize;

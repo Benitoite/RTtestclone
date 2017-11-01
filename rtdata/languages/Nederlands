@@ -966,7 +966,6 @@ PREFERENCES_D50;5000K
 PREFERENCES_D55;5500K
 PREFERENCES_D60;6000K
 PREFERENCES_D65;6500K
-PREFERENCES_DARKFRAME;Donkerframe
 PREFERENCES_DARKFRAMEFOUND;Gevonden
 PREFERENCES_DARKFRAMESHOTS;foto's
 PREFERENCES_DARKFRAMETEMPLATES;sjablonen
@@ -987,8 +986,6 @@ PREFERENCES_EXTERNALEDITOR;Externe editor
 PREFERENCES_FBROWSEROPTS;Opties bestandsnavigator
 PREFERENCES_FILEBROWSERTOOLBARSINGLEROW;Enkele rij navigator werkbalk (de-activeer voor lage resolutie)
 PREFERENCES_FILEFORMAT;Bestandstype
-PREFERENCES_FILMSIMULATION;Film Simuleren
-PREFERENCES_FLATFIELD;Vlakveldopname (tbv. vignetteringscorrectie)
 PREFERENCES_FLATFIELDFOUND;Gevonden
 PREFERENCES_FLATFIELDSDIR;Vlakveldmap
 PREFERENCES_FLATFIELDSHOTS;foto's
@@ -2140,6 +2137,7 @@ ZOOMPANEL_ZOOMOUT;Zoom uit\nSneltoets: <b>-</b>
 !!!!!!!!!!!!!!!!!!!!!!!!!
 
 !DONT_SHOW_AGAIN;Don't show this message again.
+!EXIFPANEL_SHOWALL;Show all
 !GIMP_PLUGIN_INFO;Welcome to the RawTherapee GIMP plugin!\nOnce you are done editing, simply close the main RawTherapee window and the image will be automatically imported in GIMP.
 !HISTORY_MSG_441;Retinex - Gain transmission
 !HISTORY_MSG_475;PS - Equalize channel
@@ -2163,12 +2161,22 @@ ZOOMPANEL_ZOOMOUT;Zoom uit\nSneltoets: <b>-</b>
 !MAIN_TOOLTIP_BACKCOLOR3;Background color of the preview: <b>Middle grey</b>\nShortcut: <b>9</b>
 !PREFERENCES_AUTOSAVE_TP_OPEN;Automatically save tools collapsed/expanded\nstate before exiting
 !PREFERENCES_D50_OLD;5000K
+!PREFERENCES_DIRECTORIES;Directories
 !PREFERENCES_GREY18_OLD;Yb=18 CIE L#50
 !PREFERENCES_LANG;Language
 !PREFERENCES_PROFILESAVEBOTH;Save processing profile both to the cache and next to the input file
 !PREFERENCES_PROFILESAVELOCATION;Processing profile saving location
 !PREFERENCES_SAVE_TP_OPEN_NOW;Save tools collapsed/expanded state now
 !PREFERENCES_THEME;Theme
+!QINFO_FRAMECOUNT;%2 frames
+!QINFO_HDR;HDR / %2 frame(s)
+!QINFO_PIXELSHIFT;Pixel Shift / %2 frame(s)
+!SAMPLEFORMAT_0;Unknown data format
+!SAMPLEFORMAT_1;Unsigned 8 bits
+!SAMPLEFORMAT_2;Unsigned 16 bits
+!SAMPLEFORMAT_4;LogLuv 24 bits
+!SAMPLEFORMAT_8;LogLuv 32 bits
+!SAMPLEFORMAT_16;32 bits floating point
 !TP_COLORAPP_FREE;Free temp+green + CAT02 + [output]
 !TP_COLORAPP_NEUTRAL;Reset
 !TP_COLORAPP_NEUTRAL_TIP;Reset all sliders checkbox and curves to their default values
