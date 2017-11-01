@@ -48,10 +48,7 @@ class Thumbnail
 //  double          scale;              // portion of the sizes of the processed thumbnail image and the full scale image
 
     rtengine::procparams::ProcParams      pparams;
-    bool            tagsSet;
-    bool            exifSet;
-    bool            iptcSet;
-    bool            paramsSet;
+    int             subPartsSet;
     bool            defaultParamsSet;
     bool            needsReProcessing;
     bool            imageLoading;
@@ -99,11 +96,9 @@ public:
     // Use this to create params on demand for update ; if flaggingMode=true, the procparams is created for a file being flagged (inTrash, rank, colorLabel)
     rtengine::procparams::ProcParams* createProcParamsForUpdate (bool returnParams, bool force, bool flaggingMode = false);
 
-    void              setProcParams (const rtengine::procparams::ProcParams& pp, ParamsEdited* pe = nullptr, int whoChangedIt = -1, bool updateCacheNow = true);
-    void              clearProcParams (int ppSubPart, int whoClearedIt = -1);
+    void              setProcParams (const rtengine::procparams::ProcParams& pp, ParamsEdited* pe = nullptr, PPChanger whoChangedIt = PPChanger::UNKNOWN, bool updateCacheNow = true);
+    void              clearProcParams (int ppSubPart, PPChanger whoClearedIt = PPChanger::UNKNOWN);
     void              loadProcParams (Glib::ustring fname="");
-
-    void              notifylisterners_procParamsChanged(int whoChangedIt);
 
     bool              isQuick()
     {
@@ -179,7 +174,7 @@ public:
     {
         if (pparams.rank != rank) {
             pparams.rank = rank;
-            tagsSet = true;
+            subPartsSet |= rtengine::ProcParams::eSubPart::FLAGS;
         }
     }
 
@@ -191,7 +186,7 @@ public:
     {
         if (pparams.colorlabel != colorlabel) {
             pparams.colorlabel = colorlabel;
-            tagsSet = true;
+            subPartsSet |= rtengine::ProcParams::eSubPart::FLAGS;
         }
     }
 
@@ -203,7 +198,7 @@ public:
     {
         if (pparams.inTrash != stage) {
             pparams.inTrash = stage;
-            tagsSet = true;
+            subPartsSet |= rtengine::ProcParams::eSubPart::FLAGS;
         }
     }
 

@@ -513,6 +513,8 @@ Gtk::Widget* Preferences::getProcParamsPanel ()
     fdp->add (*vbdp);
     mvbpp->pack_start (*fdp, Gtk::PACK_SHRINK, 4);
 
+    saveParamsOnClose = Gtk::manage (new Gtk::CheckButton (M("PREFERENCES_PROFILESAVEONCLOSE")));
+    mvbpp->pack_start (*saveParamsOnClose, Gtk::PACK_SHRINK, 4);
     saveParamsEvenIfUnmodified = Gtk::manage (new Gtk::CheckButton (M("PREFERENCES_PROFILESAVEUNMODIFIED")));
     mvbpp->pack_start (*saveParamsEvenIfUnmodified, Gtk::PACK_SHRINK, 4);
 
@@ -1782,6 +1784,7 @@ void Preferences::storePreferences ()
     moptions.sameThumbSize = sameThumbSize->get_active();
     moptions.internalThumbIfUntouched = ckbInternalThumbIfUntouched->get_active ();
 
+    moptions.savesParamsOnClose = saveParamsOnClose->get_active ();
     moptions.savesParamsEvenIfUnmodified = saveParamsEvenIfUnmodified->get_active ();
     auto save_where = saveParamsPreference->get_active_row_number();
     moptions.saveParamsFile = save_where == 0 || save_where == 2;
@@ -2014,6 +2017,7 @@ void Preferences::fillPreferences ()
     sameThumbSize->set_active (moptions.sameThumbSize);
     ckbInternalThumbIfUntouched->set_active (moptions.internalThumbIfUntouched);
 
+    saveParamsOnClose->set_active (moptions.savesParamsOnClose);
     saveParamsEvenIfUnmodified->set_active (moptions.savesParamsEvenIfUnmodified);
     saveParamsPreference->set_active (moptions.saveParamsFile ? (moptions.saveParamsCache ? 2 : 0) : 1);
 

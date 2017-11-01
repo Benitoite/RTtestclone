@@ -793,6 +793,46 @@ void ProfilePanel::initProfile (const Glib::ustring& profileFullPath, ProcParams
     changeconn.block (ccPrevState);
 }
 
+void ProfilePanel::updateLastSaved (ProcParams* lastSaved)
+{
+
+    const ProfileStoreEntry *pse = nullptr;
+    const PartialProfile *defprofile = nullptr;
+
+    bool ccPrevState = changeconn.block(true);
+
+    bool noLastSavedBefore = true;
+
+    if (lastsaved) {
+        lastsaved->deleteInstance();
+        delete lastsaved;
+        lastsaved = nullptr;
+        noLastSavedBefore = false;
+    }
+
+    if (lastSaved) {
+        ParamsEdited* pe = new ParamsEdited(true);
+        // copying the provided last saved profile to ProfilePanel::lastsaved
+        lastsaved = new PartialProfile(lastSaved, pe);
+    }
+
+    // update the content of the combobox; will add 'custom' and 'lastSaved' if necessary
+    if (noLastSavedBefore) {
+        addLastSavedRow();
+    }
+
+    Gtk::TreeIter lastSavedEntry = getLastSavedRow();
+
+    // selecting the "Internal" entry
+    if (lastSavedEntry) {
+        profiles->set_active (lastSavedEntry);
+    }
+
+    currRow = profiles->get_active();
+
+    changeconn.block (ccPrevState);
+}
+
 void ProfilePanel::setInitialFileName (const Glib::ustring& filename)
 {
     lastFilename = Glib::path_get_basename(filename) + paramFileExtension;

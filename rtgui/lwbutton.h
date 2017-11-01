@@ -29,9 +29,9 @@ public:
     virtual ~LWButtonListener () {}
 
     // we could add more combination here if necessary, like button12 for B1 + B2
-    virtual void button1Pressed (LWButton* button, int actionCode, void* actionData) {}
-    virtual void button2Pressed (LWButton* button, int actionCode, void* actionData) {}
-    virtual void button3Pressed (LWButton* button, int actionCode, void* actionData) {}
+    virtual void button1Pressed (LWButton* button, int actionCode, void* actionData, int bstate) {}
+    virtual void button2Pressed (LWButton* button, int actionCode, void* actionData, int bstate) {}
+    virtual void button3Pressed (LWButton* button, int actionCode, void* actionData, int bstate) {}
     virtual void redrawNeeded (LWButton* button) {}
 };
 

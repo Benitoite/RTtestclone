@@ -182,7 +182,8 @@ protected:
 
     std::vector<MyExpander*> expList;
 
-    bool hasChanged;
+    short int changedId;
+    short int lastChangedId;
 
     void addPanel (Gtk::Box* where, FoldableToolPanel* panel, int level = 1);
     void foldThemAll (GdkEventButton* event);
@@ -201,8 +202,16 @@ public:
     ToolPanelCoordinator ();
     virtual ~ToolPanelCoordinator ();
 
-    bool getChangedState                ()
+    void setHasChanged ()
     {
+        changedId = (changedId + 1) % 65000;
+    }
+    // Calling this function will also reset the "changed" state to false
+    bool getChangedState ()
+    {
+        bool hasChanged = lastChangedId != changedId;
+        printf("ToolPanelCoordinator::getChangedState   /   lastChangedId=%d  changedId=%d  ->  hasChanged=%d\n", lastChangedId, changedId, hasChanged);
+        lastChangedId = changedId;
         return hasChanged;
     }
     void updateCurveBackgroundHistogram (LUTu & histToneCurve, LUTu & histLCurve, LUTu & histCCurve, /*LUTu & histCLurve, LUTu & histLLCurve,*/ LUTu & histLCAM,  LUTu & histCCAM, LUTu & histRed, LUTu & histGreen, LUTu & histBlue, LUTu & histLuma, LUTu & histLRETI);

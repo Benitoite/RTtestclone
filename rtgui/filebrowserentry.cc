@@ -169,12 +169,29 @@ FileThumbnailButtonSet* FileBrowserEntry::getThumbButtonSet ()
     return (static_cast<FileThumbnailButtonSet*>(buttonSet));
 }
 
-void FileBrowserEntry::procParamsChanged (Thumbnail* thm, int whoChangedIt)
+void FileBrowserEntry::showDelButton ()
 {
+    if(getThumbButtonSet()) {
+        printf("FileBrowserEntry::showDelButton\n");
+        getThumbButtonSet()->setHasProcParams(true);
+    }
+}
 
-    if ( thumbnail->isQuick() ) {
+void FileBrowserEntry::hideDelButton ()
+{
+    if(getThumbButtonSet()) {
+        printf("FileBrowserEntry::hideDelButton\n");
+        getThumbButtonSet()->setHasProcParams(false);
+    }
+}
+
+void FileBrowserEntry::thumbProcParamsChanged (Thumbnail* thm, PPChanger whoChangedIt, int subPartsSet)
+{
+    if (thumbnail->isQuick()) {
+        hideDelButton();
         refreshQuickThumbnailImage ();
     } else {
+        showDelButton();
         refreshThumbnailImage ();
     }
 }
@@ -185,8 +202,7 @@ void FileBrowserEntry::updateImage (rtengine::IImage8* img, double scale, rtengi
     {
         GThreadLock lock;
 
-        if ( feih == nullptr ||
-                feih->destroyed ) {
+        if (feih == nullptr || feih->destroyed) {
             img->free();
             return;
         }

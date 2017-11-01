@@ -170,8 +170,8 @@ public:
         return numFiltered;
     }
 
-    void button1Pressed (LWButton* button, int actionCode, void* actionData);
-    void button2Pressed (LWButton* button, int actionCode, void* actionData);
+    void button1Pressed (LWButton* button, int actionCode, void* actionData, int bstate);
+    void button2Pressed (LWButton* button, int actionCode, void* actionData, int bstate);
     void redrawNeeded  (LWButton* button);
     bool checkFilter (ThumbBrowserEntryBase* entry);
     void rightClicked (ThumbBrowserEntryBase* entry);

@@ -99,7 +99,7 @@ void BatchToolPanelCoordinator::closeSession (bool save)
                 toolPanels[j]->trimValues (&newParams);
             }
 
-            selected[i]->setProcParams (newParams, nullptr, BATCHEDITOR, true);
+            selected[i]->setProcParams (newParams, nullptr, PPChanger::BATCHEDITOR, true);
         }
     }
 
@@ -546,7 +546,7 @@ void BatchToolPanelCoordinator::panelChanged (rtengine::ProcEvent event, const G
             toolPanels[j]->trimValues (&newParams);
         }
 
-        selected[i]->setProcParams (newParams, nullptr, BATCHEDITOR, false);
+        selected[i]->setProcParams (newParams, nullptr, PPChanger::BATCHEDITOR, false);
     }
 
     for (size_t i = 0; i < paramcListeners.size(); i++) {
@@ -577,10 +577,10 @@ void BatchToolPanelCoordinator::optionsChanged ()
     initSession ();
 }
 
-void BatchToolPanelCoordinator::procParamsChanged (Thumbnail* thm, int whoChangedIt)
+void BatchToolPanelCoordinator::thumbProcParamsChanged (Thumbnail* thm, PPChanger whoChangedIt, int subPartsSet)
 {
 
-    if (whoChangedIt != BATCHEDITOR && !blockedUpdate) {
+    if (whoChangedIt != PPChanger::BATCHEDITOR && !blockedUpdate) {
         closeSession (false);
         initSession ();
     }
@@ -648,7 +648,7 @@ void BatchToolPanelCoordinator::profileChange  (const rtengine::procparams::Part
     for (size_t i = 0; i < selected.size(); i++) {
         newParams = initialPP[i];
         pparamsEdited.combine (newParams, pparams, selected.size() == 1);
-        selected[i]->setProcParams (newParams, nullptr, BATCHEDITOR, false);
+        selected[i]->setProcParams (newParams, nullptr, PPChanger::BATCHEDITOR, false);
     }
 
     for (size_t i = 0; i < paramcListeners.size(); i++) {

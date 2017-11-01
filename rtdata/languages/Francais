@@ -113,7 +113,7 @@ FILEBROWSER_CACHECLEARFROMPARTIAL;Supprimer du cache (partiel)
 FILEBROWSER_CLEARALL;Supprimer tout
 FILEBROWSER_CLEAREXIF;Supprimer les modifications de données EXIF
 FILEBROWSER_CLEARIPTC;Supprimer les  données IPTC
-FILEBROWSER_CLEARPARAMS;Supprimer les paramètres de traitement d'image
+FILEBROWSER_CLEARPARAMS;<b>Ctrl-Bouton milieu de la souris</b>: Supprimer les paramètres de traitement d'image
 FILEBROWSER_COLORLABEL_TOOLTIP;Label couleur\n\nUtilisez le menu déroulant ou le raccourci clavier:\n<b>Shift-Ctrl-0</b> Pas de couleur\n<b>Shift-Ctrl-1</b> Rouge\n<b>Shift-Ctrl-2</b> Jaune\n<b>Shift-Ctrl-3</b> Vert\n<b>Shift-Ctrl-4</b> Bleu\n<b>Shift-Ctrl-5</b> Pourpre
 FILEBROWSER_COPYPROFILE;Copier le profil
 FILEBROWSER_CURRENT_NAME;Nom courant:
@@ -705,6 +705,7 @@ HISTORY_MSG_472;PS - Adoucir les transitions
 HISTORY_MSG_473;PS - Utiliser LMMSE
 HISTORY_MSG_474;PS - Égaliser
 HISTORY_MSG_475;PS - Égaliser par canal
+HISTORY_MSG_488;Profil changé
 HISTORY_NEWSNAPSHOT;Ajouter
 HISTORY_NEWSNAPSHOT_TOOLTIP;Raccourci: <b>Alt-s</b>
 HISTORY_SNAPSHOT;Capture
@@ -777,6 +778,7 @@ MAIN_MSG_CANNOTLOAD;Impossible de charger l'image
 MAIN_MSG_CANNOTSAVE;Erreur d'enregistrement du fichier
 MAIN_MSG_CANNOTSTARTEDITOR;Impossible de lancer l'éditeur.
 MAIN_MSG_CANNOTSTARTEDITOR_SECONDARY;Veuillez saisir son chemin d'accès dans les "Préférences".
+MAIN_MSG_CLEARPARAMS;Param. de traitement supprimés
 MAIN_MSG_EMPTYFILENAME;Nom de fichier non spécifié!
 MAIN_MSG_IMAGEUNPROCESSED;Cette commande nécessite que toutes les images sélectionnées aient été préalablement traité.
 MAIN_MSG_NAVIGATOR;Navigateur
@@ -1072,7 +1074,7 @@ PREFERENCES_PROFILESAVEBOTH;Save processing profile both to the cache and next t
 PREFERENCES_PROFILESAVECACHE;Enregistrer les paramètres de traitement dans le Cache
 PREFERENCES_PROFILESAVEINPUT;Enregistrer les paramètres de traitement accolé au fichier d'entrée
 PREFERENCES_PROFILESAVELOCATION;Processing profile saving location
-PREFERENCES_PROFILESAVEONEXIT;Enregistrer le profile lors de la fermeture de l'Éditeur\nou lors du passage à une autre image
+PREFERENCES_PROFILESAVEONCLOSE;Enregistrer le profil lors de la fermeture de l'Éditeur\nou lors du passage à une autre image
 PREFERENCES_PROFILESAVEUNMODIFIED;Enregistrer le profil même si non modifié dans l'Éditeur
 PREFERENCES_PROFILE_NONE;Aucun
 PREFERENCES_PROPERTY;Propriété

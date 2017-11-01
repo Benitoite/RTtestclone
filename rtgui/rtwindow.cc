@@ -627,7 +627,9 @@ bool RTWindow::on_delete_event (GdkEventAny* event)
     }
 
     if ((isSingleTabMode() || simpleEditor) && epanel->isRealized()) {
-        epanel->saveProfile();
+        if (options.savesParamsOnClose && (epanel->getModified() || options.savesParamsEvenIfUnmodified)) {
+            epanel->saveProfile();
+        }
         epanel->writeOptions ();
     } else {
         if (options.multiDisplayMode > 0 && editWindow) {

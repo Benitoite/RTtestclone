@@ -515,6 +515,7 @@ enum ProcEvent {
     EvLensCorrMode = 484,
     EvLensCorrLensfunCamera = 485,
     EvLensCorrLensfunLens = 486,
+    EvProfileCleared = 487,
 
     NUMOFEVENTS
 

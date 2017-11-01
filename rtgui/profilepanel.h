@@ -86,6 +86,7 @@ public:
     void restoreValue();
 
     void initProfile (const Glib::ustring& profileFullPath, rtengine::procparams::ProcParams* lastSaved);
+    void updateLastSaved (rtengine::procparams::ProcParams* lastSaved);
     void setInitialFileName (const Glib::ustring& filename);
 
     // PParamsChangeListener interface

@@ -306,7 +306,7 @@ void Options::setDefaults ()
     saveAsDialogWidth = 920;
     saveAsDialogHeight = 680;
     savesParamsEvenIfUnmodified = true;
-    savesParamsOnExit = true;
+    savesParamsOnClose = true;  // true by default because was the case since RT exists
     saveFormat.format = "jpg";
     saveFormat.jpegQuality = 92;
     saveFormat.jpegSubSamp = 2;
@@ -689,7 +689,7 @@ void Options::readFromFile (Glib::ustring fname)
                 }
 
                 if (keyFile.has_key ("General", "StoreLastProfile")) {
-                    savesParamsOnExit = keyFile.get_boolean ("General", "StoreLastProfile");
+                    savesParamsOnClose = keyFile.get_boolean ("General", "StoreProfileOnClose");
                 }
 
                 if (keyFile.has_key ("General", "MultiUser")) {
@@ -1821,7 +1821,7 @@ void Options::saveToFile (Glib::ustring fname)
         keyFile.set_boolean ("General", "TabbedEditor", tabbedUI);
 
         keyFile.set_boolean ("General", "StoreProfileEvenIfUnmodified", savesParamsEvenIfUnmodified);
-        keyFile.set_boolean ("General", "StoreLastProfile", savesParamsOnExit);
+        keyFile.set_boolean ("General", "StoreProfileOnClose", savesParamsOnClose);
 
         if (startupDir == STARTUPDIR_HOME) {
             keyFile.set_string ("General", "StartupDirectory", "home");

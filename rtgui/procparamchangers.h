@@ -16,9 +16,17 @@
  *  You should have received a copy of the GNU General Public License
  *  along with RawTherapee.  If not, see <http://www.gnu.org/licenses/>.
  */
-#define UNKNOWN    -1
-#define FILEBROWSER 1
-#define EDITOR      2
-#define BATCHEDITOR 3
-#define CACHEMGR    4
-#define SAFETYUPDATE 5
+
+#ifndef __PROCPARAMCHANGERS__
+#define __PROCPARAMCHANGERS__
+
+enum class PPChanger {
+    UNKNOWN = -1,
+    FILEBROWSER = 1,
+    EDITOR = 2,
+    BATCHEDITOR = 3,
+    CACHEMGR = 4,
+    SAFETYUPDATE  = 5
+};
+
+#endif

@@ -116,7 +116,7 @@ FILEBROWSER_CACHECLEARFROMPARTIAL;Clear from cache - partial
 FILEBROWSER_CLEARALL;Clear all
 FILEBROWSER_CLEAREXIF;Clear EXIF modifications
 FILEBROWSER_CLEARIPTC;Clear IPTC data
-FILEBROWSER_CLEARPARAMS;Clear processing parameters
+FILEBROWSER_CLEARPARAMS;<b>Ctrl-Middle mouse button</b>: Clear processing parameters
 FILEBROWSER_COLORLABEL_TOOLTIP;Color label.\n\nUse dropdown menu or shortcuts:\n<b>Shift-Ctrl-0</b> No Color\n<b>Shift-Ctrl-1</b> Red\n<b>Shift-Ctrl-2</b> Yellow\n<b>Shift-Ctrl-3</b> Green\n<b>Shift-Ctrl-4</b> Blue\n<b>Shift-Ctrl-5</b> Purple
 FILEBROWSER_COPYPROFILE;Copy
 FILEBROWSER_CURRENT_NAME;Current name:
@@ -721,6 +721,7 @@ HISTORY_MSG_484;CAM02 - Auto Yb scene
 HISTORY_MSG_485;Lens Correction
 HISTORY_MSG_486;Lens Correction - Camera
 HISTORY_MSG_487;Lens Correction - Lens
+HISTORY_MSG_488;PP3 changé
 HISTORY_NEWSNAPSHOT;Add
 HISTORY_NEWSNAPSHOT_TOOLTIP;Shortcut: <b>Alt-s</b>
 HISTORY_SNAPSHOT;Snapshot
@@ -797,6 +798,7 @@ MAIN_MSG_CANNOTLOAD;Cannot load image
 MAIN_MSG_CANNOTSAVE;File saving error
 MAIN_MSG_CANNOTSTARTEDITOR;Cannot start editor.
 MAIN_MSG_CANNOTSTARTEDITOR_SECONDARY;Please set the correct path in Preferences.
+MAIN_MSG_CLEARPARAMS;Param. de traitement supprimés
 MAIN_MSG_EMPTYFILENAME;Filename unspecified!
 MAIN_MSG_IMAGEUNPROCESSED;This command requires all selected images to be queue-processed first.
 MAIN_MSG_NAVIGATOR;Navigator
@@ -1097,7 +1099,7 @@ PREFERENCES_PROFILESAVEBOTH;Save processing profile both to the cache and next t
 PREFERENCES_PROFILESAVECACHE;Save processing profile to the cache
 PREFERENCES_PROFILESAVEINPUT;Save processing profile next to the input file
 PREFERENCES_PROFILESAVELOCATION;Processing profile saving location
-PREFERENCES_PROFILESAVEONEXIT;Save profile the closing the editor or switching to another image
+PREFERENCES_PROFILESAVEONCLOSE;Save profile when closing the Editor or when switching to another image
 PREFERENCES_PROFILESAVEUNMODIFIED;Save profile even if leaved untouched in the Editor
 PREFERENCES_PROFILE_NONE;None
 PREFERENCES_PROPERTY;Property

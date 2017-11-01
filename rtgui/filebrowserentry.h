@@ -81,6 +81,8 @@ public:
     }
 
     FileThumbnailButtonSet* getThumbButtonSet ();
+    void showDelButton ();
+    void hideDelButton ();
 
     void refreshThumbnailImage ();
     void refreshQuickThumbnailImage ();
@@ -90,7 +92,7 @@ public:
     virtual void getIconSize (int& w, int& h);
 
     // thumbnaillistener interface
-    void procParamsChanged (Thumbnail* thm, int whoChangedIt);
+    void thumbProcParamsChanged (Thumbnail* thm, PPChanger whoChangedIt, int subPartsSet);
     // thumbimageupdatelistener interface
     void updateImage (rtengine::IImage8* img, double scale, rtengine::procparams::CropParams cropParams);
     void _updateImage (rtengine::IImage8* img, double scale, rtengine::procparams::CropParams cropParams); // inside gtk thread

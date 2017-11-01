@@ -20,6 +20,7 @@
 #define _THUMBNAILLISTENER_
 
 #include "thumbnail.h"
+#include "procparamchangers.h"
 
 class Thumbnail;
 class ThumbnailListener
@@ -28,7 +29,7 @@ class ThumbnailListener
 public:
 
     virtual ~ThumbnailListener() {}
-    virtual void procParamsChanged (Thumbnail* thm, int whoChangedIt) {}
+    virtual void thumbProcParamsChanged (Thumbnail* thm, PPChanger whoChangedIt, int subPartsSet) {}
 
 };
 

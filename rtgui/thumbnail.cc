@@ -43,10 +43,7 @@ Thumbnail::Thumbnail(CacheManager* cm, const Glib::ustring& fname, CacheImageDat
     ref(1),
     enqueueNumber(0),
     tpp(nullptr),
-    tagsSet(false),
-    exifSet(false),
-    iptcSet(false),
-    paramsSet(false),
+    subPartsSet(rtengine::ProcParams::eSubPart::NONE),
     defaultParamsSet(false),
     needsReProcessing(true),
     imageLoading(false),
@@ -80,10 +77,7 @@ Thumbnail::Thumbnail (CacheManager* cm, const Glib::ustring& fname, const std::s
     ref(1),
     enqueueNumber(0),
     tpp(nullptr),
-    tagsSet(false),
-    exifSet(false),
-    iptcSet(false),
-    paramsSet(false),
+    subPartsSet(rtengine::ProcParams::eSubPart::NONE),
     defaultParamsSet(false),
     needsReProcessing(true),
     imageLoading(false),
@@ -124,6 +118,8 @@ void Thumbnail::_generateThumbnailImage ()
         return;
     }
 
+    printf("Thumbnail::_generateThumbnailImage\n");
+
     cfs.supported = false;
     cfs.exifValid = false;
     cfs.timeValid = false;
@@ -158,11 +154,13 @@ void Thumbnail::_generateThumbnailImage ()
 
         if ( initial_ && options.internalThumbIfUntouched) {
             quick = true;
+            printf("Thumbnail::_generateThumbnailImage   /   rtengine::Thumbnail::loadQuickFromRaw\n");
             tpp = rtengine::Thumbnail::loadQuickFromRaw (fname, ri, tw, th, 1, TRUE);
         }
 
         if ( tpp == nullptr ) {
             quick = false;
+            printf("Thumbnail::_generateThumbnailImage   /   rtengine::Thumbnail::loadFromRaw\n");
             tpp = rtengine::Thumbnail::loadFromRaw (fname, ri, tw, th, 1, pparams.wb.equal, TRUE, pparams.raw.bayersensor.imageNum);
         }
 
@@ -216,16 +214,13 @@ const ProcParams& Thumbnail::getToolParams ()
 // Unprotected version of getToolParams
 const ProcParams& Thumbnail::getToolParamsU ()
 {
-    if (paramsSet || defaultParamsSet) {
+    if (hasToolParamsSet() || defaultParamsSet) {
         return pparams;
     } else {
-        // We are getting the default ProcParams for this kind of file, but preserving
-        // the FLAGS, EXIF and IPTC values, just in case that they have been set
+        // TOOLS, EXIF and IPTC sub-parts are applied, FLAGS are preserved
         const PartialProfile *partProf = ProfileStore::getInstance()->getDefaultPartialProfile(getType() == FT_Raw);
         PartialProfile partProfile(partProf->pparams, partProf->pedited, true);
         partProfile.applyTo(&pparams);
-        // resetting the FLAGS params, not sure that it's necessary
-        partProfile.pedited->set(false, ProcParams::eSubPart::FLAGS /*  |ProcParams::EXIF|ProcParams::IPTC */);  // If Exif and/or IPTC values are stored in the default ProcParams, we apply them
         partProfile.deleteInstance();
 
         if (pparams.wb.method == "Camera") {
@@ -388,26 +383,19 @@ rtengine::procparams::ProcParams* Thumbnail::createProcParamsForUpdate(bool retu
 
 bool Thumbnail::hasTagsSet()
 {
-    return tagsSet;
+    return subPartsSet & ProcParams::eSubPart::FLAGS;
 }
 bool Thumbnail::hasToolParamsSet()
 {
-    return paramsSet;
+    return subPartsSet & ProcParams::eSubPart::TOOL;
 }
 bool Thumbnail::hasExifParamsSet()
 {
-    return exifSet;
+    return subPartsSet & ProcParams::eSubPart::EXIF;
 }
 bool Thumbnail::hasIptcParamsSet()
 {
-    return iptcSet;
-}
-
-void Thumbnail::notifylisterners_procParamsChanged(int whoChangedIt)
-{
-    for (size_t i = 0; i < listeners.size(); i++) {
-        listeners[i]->procParamsChanged (this, whoChangedIt);
-    }
+    return subPartsSet & ProcParams::eSubPart::IPTC;
 }
 
 /*
@@ -424,7 +412,7 @@ void Thumbnail::loadProcParams (Glib::ustring fileName)
 
     bool pparamsValid;
     int ppres;
-    tagsSet = paramsSet = exifSet = iptcSet = false;
+    subPartsSet = ProcParams::eSubPart::NONE;
     pparams.setDefaults();
     {
     const PartialProfile *defaultPP = ProfileStore::getInstance()->getDefaultPartialProfile(getType() == FT_Raw);
@@ -457,14 +445,22 @@ void Thumbnail::loadProcParams (Glib::ustring fileName)
     }
 
     if (pparamsValid) {
-        paramsSet = pe.isToolSet();
-        tagsSet = pe.isTagsSet();
-        exifSet = pe.isExifSet();
-        iptcSet = pe.isIptcSet();
+        if (pe.isToolSet()) {
+            subPartsSet |= ProcParams::eSubPart::TOOL;
+        }
+        if (pe.isTagsSet()) {
+            subPartsSet |= ProcParams::eSubPart::FLAGS;
+        }
+        if (pe.isExifSet()) {
+            subPartsSet |= ProcParams::eSubPart::EXIF;
+        }
+        if (pe.isIptcSet()) {
+            subPartsSet |= ProcParams::eSubPart::IPTC;
+        }
     }
 }
 
-void Thumbnail::clearProcParams (int subPart, int whoClearedIt)
+void Thumbnail::clearProcParams (int subPart, PPChanger whoClearedIt)
 {
     /* NEW BEHAVIOR (Hombre, 2017-10-07):
      *
@@ -477,7 +473,7 @@ void Thumbnail::clearProcParams (int subPart, int whoClearedIt)
     {
         MyMutex::MyLock lock(mutex);
 
-        bool oldParamsSet = paramsSet;
+        bool oldParamsSet = hasToolParamsSet();
 
         //TODO: run though customprofilebuilder?
         // probably not as this is the only option to set param values to default
@@ -486,24 +482,25 @@ void Thumbnail::clearProcParams (int subPart, int whoClearedIt)
         pparams.setDefaults(subPart);
 
         if (subPart & ProcParams::eSubPart::FLAGS) {
-            tagsSet = false;
+            subPartsSet &= ~ProcParams::eSubPart::FLAGS;
         }
 
         if (subPart & ProcParams::eSubPart::TOOL) {
-            defaultParamsSet = paramsSet = false;
+            subPartsSet &= ~ProcParams::eSubPart::TOOL;
+            defaultParamsSet = false;
             cfs.recentlySaved = false;
             needsReProcessing = true;
         }
 
         if (subPart & ProcParams::eSubPart::EXIF) {
-            exifSet = false;
+            subPartsSet &= ~ProcParams::eSubPart::EXIF;
         }
 
         if (subPart & ProcParams::eSubPart::IPTC) {
-            iptcSet = false;
+            subPartsSet &= ~ProcParams::eSubPart::IPTC;
         }
 
-        if (tagsSet || paramsSet || exifSet || iptcSet) {
+        if (subPartsSet) {
             // There's still something in the procparams, so we save it
             updateCache();
         } else {
@@ -528,7 +525,7 @@ void Thumbnail::clearProcParams (int subPart, int whoClearedIt)
             */
         }
 
-        if (oldParamsSet != paramsSet && cfs.format == FT_Raw && options.internalThumbIfUntouched && cfs.thumbImgType != CacheImageData::QUICK_THUMBNAIL) {
+        if (oldParamsSet != hasToolParamsSet() && cfs.format == FT_Raw && options.internalThumbIfUntouched && cfs.thumbImgType != CacheImageData::QUICK_THUMBNAIL) {
             // regenerate thumbnail, ie load the quick thumb again. For the rare formats not supporting quick thumbs this will
             // be a bit slow as a new full thumbnail will be generated unnecessarily, but currently there is no way to pre-check
             // if the format supports quick thumbs.
@@ -540,11 +537,11 @@ void Thumbnail::clearProcParams (int subPart, int whoClearedIt)
     } // end of mutex lock
 
     for (size_t i = 0; i < listeners.size(); i++) {
-        listeners[i]->procParamsChanged (this, whoClearedIt);
+        listeners[i]->thumbProcParamsChanged (this, whoClearedIt, subPartsSet);
     }
 }
 
-void Thumbnail::setProcParams (const ProcParams& pp, ParamsEdited* pe, int whoChangedIt, bool updateCacheNow)
+void Thumbnail::setProcParams (const ProcParams& pp, ParamsEdited* pe, PPChanger whoChangedIt, bool updateCacheNow)
 {
 
     {
@@ -569,17 +566,23 @@ void Thumbnail::setProcParams (const ProcParams& pp, ParamsEdited* pe, int whoCh
 
         if (pe) {
             pe->combine(pparams, pp, true);
-            paramsSet = pe->isToolSet();
-            exifSet = pe->isExifSet();
-            iptcSet = pe->isIptcSet();
+            if (pe->isToolSet()) {
+                subPartsSet |= ProcParams::eSubPart::TOOL;
+            }
+            if (pe->isExifSet()) {
+                subPartsSet |= ProcParams::eSubPart::EXIF;
+            }
+            if (pe->isIptcSet()) {
+                subPartsSet |= ProcParams::eSubPart::IPTC;
+            }
         } else {
             pparams = pp;
-            paramsSet = exifSet = iptcSet = true;
+            subPartsSet |= ProcParams::eSubPart::TOOL|ProcParams::eSubPart::EXIF|ProcParams::eSubPart::IPTC;
         }
 
         needsReProcessing = true;
 
-        if (tagsSet) {
+        if (hasTagsSet()) {
             // restore tags
             setRank(rank);
             setColorLabel(colorlabel);
@@ -596,7 +599,7 @@ void Thumbnail::setProcParams (const ProcParams& pp, ParamsEdited* pe, int whoCh
     } // end of mutex lock
 
     for (size_t i = 0; i < listeners.size(); i++) {
-        listeners[i]->procParamsChanged (this, whoChangedIt);
+        listeners[i]->thumbProcParamsChanged (this, whoChangedIt, subPartsSet);
     }
 }
 
@@ -1046,19 +1049,19 @@ void Thumbnail::saveThumbnail ()
  */
 void Thumbnail::updateCache (bool updatePParams, bool updateCacheImageData)
 {
-    ParamsEdited pe(paramsSet);  // set to false by default in the constructor
+    ParamsEdited pe(hasToolParamsSet());  // set to false by default in the constructor
 
     // Now the the minor sub-parts of the ParamsEdited
-    if (tagsSet != paramsSet) {
-        pe.set(tagsSet, ProcParams::eSubPart::FLAGS);
+    if (hasTagsSet() != hasToolParamsSet()) {
+        pe.set(hasTagsSet(), ProcParams::eSubPart::FLAGS);
     }
 
-    if (exifSet != paramsSet) {
-        pe.set(exifSet, ProcParams::eSubPart::EXIF);
+    if (hasExifParamsSet() != hasToolParamsSet()) {
+        pe.set(hasExifParamsSet(), ProcParams::eSubPart::EXIF);
     }
 
-    if (iptcSet != paramsSet) {
-        pe.set(iptcSet, ProcParams::eSubPart::IPTC);
+    if (hasIptcParamsSet() != hasToolParamsSet()) {
+        pe.set(hasIptcParamsSet(), ProcParams::eSubPart::IPTC);
     }
 
     if (updatePParams) {

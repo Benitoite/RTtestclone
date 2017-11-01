@@ -28,7 +28,7 @@
 
 using namespace rtengine::procparams;
 
-ToolPanelCoordinator::ToolPanelCoordinator () : ipc (nullptr), hasChanged (false), editDataProvider (nullptr)
+ToolPanelCoordinator::ToolPanelCoordinator () : ipc (nullptr), changedId (0), lastChangedId (0), editDataProvider (nullptr)
 {
 
     exposurePanel   = Gtk::manage (new ToolVBox ());
@@ -373,7 +373,7 @@ void ToolPanelCoordinator::panelChanged (rtengine::ProcEvent event, const Glib::
     }
 
     // Update "on preview" geometry
-    if (event == rtengine::EvPhotoLoaded || event == rtengine::EvProfileChanged || event == rtengine::EvHistoryBrowsed || event == rtengine::EvCTRotate) {
+    if (event == rtengine::EvPhotoLoaded || event == rtengine::EvProfileChanged || event == rtengine::EvProfileCleared || event == rtengine::EvHistoryBrowsed || event == rtengine::EvCTRotate) {
         // updating the "on preview" geometry
         int fw, fh;
         ipc->getInitialImage()->getImageSource()->getFullSize (fw, fh, tr);
@@ -399,8 +399,10 @@ void ToolPanelCoordinator::panelChanged (rtengine::ProcEvent event, const Glib::
 
     ipc->endUpdateParams (changeFlags);   // starts the IPC processing
 
-    hasChanged = true;
+    printf("ToolPanelCoordinator::panelChanged   /   Lancement de setHasChanged\n");
+    setHasChanged();
 
+    printf("ToolPanelCoordinator::panelChanged   /   Lancement de procParamsChanged (params, event, descr)\n");
     for (auto paramcListener : paramcListeners) {
         paramcListener->procParamsChanged (params, event, descr);
     }
@@ -416,35 +418,43 @@ void ToolPanelCoordinator::profileChange  (const PartialProfile *nparams, rtengi
     }
 
     ProcParams *params = ipc->beginUpdateParams ();
-    ProcParams *mergedParams = new ProcParams();
-
-    // Copy the current params as default values for the fusion
-    *mergedParams = *params;
-
-    // Reset IPTC values when switching procparams from the History
-    if (event == rtengine::EvHistoryBrowsed) {
-        mergedParams->iptc.clear();
-        mergedParams->exif.clear();
-    }
-
-    // And apply the partial profile nparams to mergedParams
-    nparams->applyTo (mergedParams);
-
-    // Derive the effective changes, if it's a profile change, to prevent slow RAW rerendering if not necessary
+    ProcParams *mergedParams = nullptr;
     bool filterRawRefresh = false;
 
+    // optimization for EvProfileCleared, don't apply nparams to params but copy it entirely
+    if (event != rtengine::EvProfileCleared) {
+        mergedParams = new ProcParams();
+
+        // Copy the current params as default values for the fusion
+        *mergedParams = *params;
+
+        // Reset IPTC values when switching procparams from the History
+        if (event == rtengine::EvHistoryBrowsed) {
+            mergedParams->iptc.clear();
+            mergedParams->exif.clear();
+        }
+
+        // And apply the partial profile nparams to mergedParams
+        nparams->applyTo (mergedParams);
+    }
+
+    // Derive the effective changes, if it's a profile change, to prevent slow RAW rerendering if not necessary
     if (event != rtengine::EvPhotoLoaded) {
         ParamsEdited pe (true);
         std::vector<rtengine::procparams::ProcParams> lParams (2);
         lParams[0] = *params;
-        lParams[1] = *mergedParams;
+        lParams[1] = event == rtengine::EvProfileCleared ? *(nparams->pparams) : *mergedParams;
         pe.initFrom (lParams);
 
         filterRawRefresh = pe.raw && pe.lensProf && pe.retinex;
     }
 
-    *params = *mergedParams;
-    delete mergedParams;
+    if (event != rtengine::EvProfileCleared) {
+        *params = *mergedParams;
+        delete mergedParams;
+    } else {
+        *params = *(nparams->pparams);
+    }
 
     tr = TR_NONE;
 
@@ -481,7 +491,10 @@ void ToolPanelCoordinator::profileChange  (const PartialProfile *nparams, rtengi
         ipc->endUpdateParams (event);
     }
 
-    hasChanged = event != rtengine::EvProfileChangeNotification;
+    if (event != rtengine::EvPhotoLoaded && event != rtengine::EvProfileChangeNotification && event != rtengine::EvProfileCleared) {
+        printf("ToolPanelCoordinator::profileChange   /   Lancement de setHasChanged\n");
+        setHasChanged ();
+    }
 
     for (auto paramcListener : paramcListeners) {
         paramcListener->procParamsChanged (params, event, descr);
@@ -536,9 +549,7 @@ void ToolPanelCoordinator::initImage (rtengine::StagedImageProcessor* ipc_, bool
 
 
     toneCurve->setRaw (raw);
-    hasChanged = true;
 }
-
 
 void ToolPanelCoordinator::closeImage ()
 {

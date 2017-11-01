@@ -132,7 +132,7 @@ bool LWButton::pressNotify   (int x, int y, int button, int bstate)
 
     if (in && (state == Normal || state == Over || state == Pressed_Out)) {
         nstate = Pressed_In;
-        pressedButton |= button;
+        pressedButton |= (button > 0 ? 1 << (button - 1) : 0);
     } else if (!in && state == Pressed_In) {
         nstate = Normal;
     }
@@ -181,18 +181,18 @@ bool LWButton::releaseNotify (int x, int y, int button, int bstate)
     if (action && listener) {
         // triggering only one event, corresponding to the highest button number
         // we could handle more button combination here, like pressing B1+B2 to trigger a specific action
-        if (pressedButton & Button3) {
-            listener->button1Pressed (this, actionCode, actionData);
+        if (pressedButton & Button1) {
+            listener->button1Pressed (this, actionCode, actionData, bstate);
+        }
+        else if (pressedButton & Button2) {
+            listener->button2Pressed (this, actionCode, actionData, bstate);
         }
         else if (pressedButton & Button3) {
-            listener->button2Pressed (this, actionCode, actionData);
-        }
-        else if (pressedButton & Button3) {
-            listener->button3Pressed (this, actionCode, actionData);
+            listener->button3Pressed (this, actionCode, actionData, bstate);
         }
     }
 
-    pressedButton |= ~button;
+    pressedButton &= ~(button > 0 ? 1 << (button - 1) : 0);
 
     return ret;
 }

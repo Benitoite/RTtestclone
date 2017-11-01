@@ -1415,6 +1415,7 @@ public:
     IPTCPairs                iptc;            ///< The IPTC tags and values to be saved to the output image
 
     typedef enum SubPart {
+        NONE  = 0,
         FLAGS = 1<<0,
         EXIF  = 1<<1,
         IPTC  = 1<<2,

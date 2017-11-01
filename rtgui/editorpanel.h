@@ -93,7 +93,7 @@ public:
     void procParamsChanged (rtengine::procparams::ProcParams* params, rtengine::ProcEvent ev, Glib::ustring descr, ParamsEdited* paramsEdited = nullptr);
 
     // thumbnaillistener interface
-    void procParamsChanged (Thumbnail* thm, int whoChangedIt);
+    void thumbProcParamsChanged (Thumbnail* thm, PPChanger whoChangedIt, int subPartsSet);
 
     // HistoryBeforeLineListener
     void historyBeforeLineChanged (const rtengine::procparams::ProcParams& params);
@@ -109,6 +109,8 @@ public:
     void tbTopPanel_1_toggled ();
     void beforeAfterToggled ();
     void tbBeforeLock_toggled();
+    void savePP3Pressed ();
+    void deletePP3Pressed (GdkEventButton *event);
     void saveAsPressed ();
     void queueImgPressed ();
     void sendToGimpPressed ();
@@ -122,6 +124,7 @@ public:
     void toggleSidePanels();
     void toggleSidePanelsZoomFit();
 
+    bool getModified();
     void saveProfile ();
     Glib::ustring getShortName ();
     Glib::ustring getFileName ();
@@ -153,7 +156,7 @@ private:
 
     Glib::ustring lastSaveAsFileName;
     bool realized;
-    bool unmodified;
+    bool modified;
 
     MyProgressBar  *progressLabel;
     Gtk::Button* savePP3;

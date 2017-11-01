@@ -64,7 +64,7 @@ public:
     void getCamWB (double& temp, double& green);
 
     // thumbnaillistener interface
-    void procParamsChanged (Thumbnail* thm, int whoChangedIt);
+    void thumbProcParamsChanged (Thumbnail* thm, PPChanger whoChangedIt, int subPartsSet);
 
     // batchpparamschangelistener interface
     void beginBatchPParamsChange(int numberOfEntries);

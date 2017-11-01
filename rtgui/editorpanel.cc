@@ -486,7 +486,7 @@ public:
 EditorPanel::EditorPanel (FilePanel* filePanel) :
     catalogPane(nullptr),
     realized(false),
-    unmodified(true),
+    modified(false),
     tbBeforeLock(nullptr),
     iHistoryShow(nullptr),
     iHistoryHide(nullptr),
@@ -557,13 +557,14 @@ EditorPanel::EditorPanel (FilePanel* filePanel) :
     Gtk::Image* saveimg = Gtk::manage (new RTImage ("gtk-save-large.png"));
     savePP3->add(*saveimg);
     savePP3->set_relief(Gtk::RELIEF_NONE);
-    savePP3->set_tooltip_text(M("MAIN_TOOLTIP_SAVEPROFILE"));
+    savePP3->set_tooltip_markup(M("MAIN_TOOLTIP_SAVEPROFILE"));
+    savePP3->set_sensitive(false);
     //savePP3->set_sensitive(false);
     deletePP3 = Gtk::manage (new Gtk::Button ());
     Gtk::Image* deleteimg = Gtk::manage (new RTImage ("clear-profile.png"));
     deletePP3->add(*deleteimg);
     deletePP3->set_relief(Gtk::RELIEF_NONE);
-    deletePP3->set_tooltip_text(M("MAIN_TOOLTIP_DELETEPROFILE"));
+    deletePP3->set_tooltip_markup(M("MAIN_TOOLTIP_DELETEPROFILE"));
     //deletePP3->set_sensitive(false);
 
     info = Gtk::manage (new Gtk::ToggleButton ());
@@ -850,6 +851,8 @@ EditorPanel::EditorPanel (FilePanel* filePanel) :
     tpc->readOptions ();
 
     // connect event handlers
+    savePP3->signal_clicked().connect ( sigc::mem_fun (*this, &EditorPanel::savePP3Pressed) );
+    deletePP3->signal_button_release_event().connect_notify( sigc::mem_fun(*this, &EditorPanel::deletePP3Pressed) );
     info->signal_toggled().connect ( sigc::mem_fun (*this, &EditorPanel::info_toggled) );
     beforeAfter->signal_toggled().connect ( sigc::mem_fun (*this, &EditorPanel::beforeAfterToggled) );
     hidehp->signal_toggled().connect ( sigc::mem_fun (*this, &EditorPanel::hideHistoryActivated) );
@@ -1104,9 +1107,12 @@ void EditorPanel::open (Thumbnail* tmb, rtengine::InitialImage* isrc)
 void EditorPanel::close ()
 {
     if (ipc) {
-        if (options.savesParamsOnExit) {
+        if (options.savesParamsOnClose && (modified || options.savesParamsEvenIfUnmodified)) {
+            printf("EditorPanel::close () / saveProfile () appele : options.savesParamsOnExit=%d, modified=%d, options.savesParamsEvenIfUnmodified=%d\n",
+                    options.savesParamsOnClose, modified, options.savesParamsEvenIfUnmodified);
             saveProfile ();
         }
+        savePP3->set_sensitive(false);
         // close image processor and the current thumbnail
         tpc->closeImage ();    // this call stops image processing
         tpc->writeOptions ();
@@ -1154,7 +1160,7 @@ void EditorPanel::saveProfile ()
         ipc->getParams (&params);
 
         // Will call updateCache, which will update both the cached and sidecar files if necessary
-        openThm->setProcParams (params, nullptr, EDITOR);
+        openThm->setProcParams (params, nullptr, PPChanger::EDITOR);
     }
 }
 
@@ -1176,12 +1182,28 @@ Glib::ustring EditorPanel::getFileName ()
     }
 }
 
-// TODO!!!
 void EditorPanel::procParamsChanged (rtengine::procparams::ProcParams* params, rtengine::ProcEvent ev, Glib::ustring descr, ParamsEdited* paramsEdited)
 {
 
-//    if (ev!=EvPhotoLoaded)
-//        saveLabel->set_markup (Glib::ustring("<span foreground=\"#AA0000\" weight=\"bold\">") + M("MAIN_BUTTON_SAVE") + "</span>");
+    // filter out events
+    modified = ev != rtengine::EvPhotoLoaded && ev != rtengine::EvProfileCleared;
+    savePP3->set_sensitive(modified);
+}
+
+void EditorPanel::thumbProcParamsChanged (Thumbnail* thm, PPChanger whoChangedIt, int subPartsSet)
+{
+
+    if (whoChangedIt != PPChanger::EDITOR) {
+        PartialProfile pp (true);
+        pp.set (true);
+        * (pp.pparams) = openThm->getToolParams();
+        tpc->profileChange (&pp, rtengine::EvProfileChangeNotification, M ("PROGRESSDLG_PROFILECHANGEDINBROWSER"));
+        pp.deleteInstance();
+
+        if (!openThm->hasToolParamsSet()) {
+            modified = false;
+        }
+    }
 }
 
 void EditorPanel::setProgressState (bool inProcessing)
@@ -1258,7 +1280,8 @@ void EditorPanel::refreshProcessingState (bool inProcessingP)
         if (ipc && openThm && tpc->getChangedState()) {
             rtengine::procparams::ProcParams pparams;
             ipc->getParams (&pparams);
-            openThm->setProcParams (pparams, nullptr, EDITOR, false);
+            printf("Calling openThm->setProcParams\n");
+            openThm->setProcParams (pparams, nullptr, PPChanger::EDITOR, false);
         }
 
         // Ring a sound if it was a long event
@@ -1755,18 +1778,6 @@ bool EditorPanel::handleShortcutKey (GdkEventKey* event)
     return false;
 }
 
-void EditorPanel::procParamsChanged (Thumbnail* thm, int whoChangedIt)
-{
-
-    if (whoChangedIt != EDITOR) {
-        PartialProfile pp (true);
-        pp.set (true);
-        * (pp.pparams) = openThm->getToolParams();
-        tpc->profileChange (&pp, rtengine::EvProfileChangeNotification, M ("PROGRESSDLG_PROFILECHANGEDINBROWSER"));
-        pp.deleteInstance();
-    }
-}
-
 bool EditorPanel::idle_saveImage (ProgressConnector<rtengine::IImage16*> *pc, Glib::ustring fname, SaveFormat sf, rtengine::procparams::ProcParams &pparams)
 {
     rtengine::IImage16* img = pc->returnValue();
@@ -1852,7 +1863,34 @@ BatchQueueEntry* EditorPanel::createBatchQueueEntry ()
     return new BatchQueueEntry (job, pparams, openThm->getFileName(), prevw, prevh, openThm);
 }
 
+void EditorPanel::savePP3Pressed ()
+{
+    saveProfile();
+    modified = false;
+    savePP3->set_sensitive(modified);
+    setProgressStr (M ("PROGRESSBAR_PROCESSING_PROFILESAVED"));
+}
 
+void EditorPanel::deletePP3Pressed (GdkEventButton *event)
+{
+    if (event->button == 2 && (event->state & Gdk::CONTROL_MASK)) {
+        modified = false;
+        savePP3->set_sensitive(modified);
+        if (openThm) {
+            ProcParams* ldprof = openThm->createProcParamsForUpdate (true, true); // will be freed by initProfile
+
+            // initialize profile
+            Glib::ustring defProf = openThm->getType() == FT_Raw ? options.defProfRaw : options.defProfImg;
+            profilep->updateLastSaved (ldprof);
+            openThm->clearProcParams(ProcParams::eSubPart::TOOL, PPChanger::EDITOR);
+
+            if (tpc) {
+                PartialProfile partProf(ldprof);
+                tpc->profileChange (&partProf, rtengine::EvProfileCleared, M("MAIN_MSG_CLEARPARAMS"));
+            }
+        }
+    }
+}
 
 void EditorPanel::saveAsPressed ()
 {
@@ -2362,5 +2400,9 @@ void EditorPanel::updateHistogramPosition (int oldPosition, int newPosition)
 void EditorPanel::defaultMonitorProfileChanged (const Glib::ustring &profile_name, bool auto_monitor_profile)
 {
     colorMgmtToolBar->defaultMonitorProfileChanged (profile_name, auto_monitor_profile);
+}
+
+bool EditorPanel::getModified() {
+    return modified;
 }
 
