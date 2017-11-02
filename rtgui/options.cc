@@ -689,7 +689,7 @@ void Options::readFromFile (Glib::ustring fname)
                     savesParamsEvenIfUnmodified = keyFile.get_boolean ("General", "StoreProfileEvenIfUnmodified");
                 }
 
-                if (keyFile.has_key ("General", "StoreLastProfile")) {
+                if (keyFile.has_key ("General", "StoreProfileOnClose")) {
                     savesParamsOnClose = keyFile.get_boolean ("General", "StoreProfileOnClose");
                 }
 
