@@ -89,16 +89,15 @@ class Preferences : public Gtk::Dialog, public ProfileStoreListener
     Gtk::RadioButton* sdlast;
     Gtk::RadioButton* sdhome;
     Gtk::RadioButton* sdother;
-    Gtk::FileChooserButton* gimpDir;
-    Gtk::FileChooserButton* psDir;
+    MyFileChooserButton* gimpDir;
+    MyFileChooserButton* psDir;
     Gtk::Entry* editorToSendTo;
     Gtk::RadioButton* edGimp;
     Gtk::RadioButton* edPS;
     Gtk::RadioButton* edOther;
-    Gtk::FileChooserButton* darkFrameDir;
-    Gtk::FileChooserButton* flatFieldDir;
-//    Gtk::FileChooserButton* mergeDir;
-    Gtk::FileChooserButton* clutsDir;
+    MyFileChooserButton* darkFrameDir;
+    MyFileChooserButton* flatFieldDir;
+    MyFileChooserButton* clutsDir;
     Gtk::Label *dfLabel;
     Gtk::Label *ffLabel;
     Gtk::Label *mgLabel;
@@ -107,7 +106,7 @@ class Preferences : public Gtk::Dialog, public ProfileStoreListener
     Gtk::CheckButton* showBasicExif;
     Gtk::CheckButton* showExpComp;
 
-    Gtk::FileChooserButton* iccDir;
+    MyFileChooserButton* iccDir;
     Gtk::ComboBoxText* prtProfile;
     Gtk::ComboBoxText* prtIntent;
     Gtk::CheckButton* prtBPC;

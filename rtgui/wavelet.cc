@@ -1191,7 +1191,7 @@ Wavelet::Wavelet() :
     hbin->pack_start (*mFileReset, Gtk::PACK_SHRINK, 0);
     mergeBox->pack_start (*hbin);
 
-    inFile = inputeFile->signal_file_set().connect ( sigc::mem_fun (*this, &Wavelet::inputeChanged), true);
+    inFile = inputeFile->signal_file_set().connect ( sigc::mem_fun (*this, &Wavelet::inputeChanged));//, true);
     mFileReset->signal_clicked().connect ( sigc::mem_fun (*this, &Wavelet::mFile_Reset), true );
 
     // Set filename filters
