@@ -1188,7 +1188,7 @@ void EditorPanel::procParamsChanged (rtengine::procparams::ProcParams* params, r
 
     // filter out events
     modified = ev != rtengine::EvPhotoLoaded && ev != rtengine::EvProfileCleared;
-    savePP3->set_sensitive(modified);
+    savePP3->set_sensitive(ev != rtengine::EvProfileCleared);
 
     rtengine::eSensorType sensorType = isrc->getImageSource()->getSensorType();
 
@@ -1290,7 +1290,7 @@ void EditorPanel::refreshProcessingState (bool inProcessingP)
         s->val = 1.0;
     } else {
         // Set proc params of thumbnail. It saves it into the cache and updates the file browser.
-        if (ipc && openThm && tpc->getChangedState()) {
+        if (ipc && openThm && options.savesParamsOnClose && tpc->getChangedState()) {
             rtengine::procparams::ProcParams pparams;
             ipc->getParams (&pparams);
             printf("Calling openThm->setProcParams\n");
