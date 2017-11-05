@@ -1074,7 +1074,7 @@ PREFERENCES_PROFILESAVEBOTH;Save processing profile both to the cache and next t
 PREFERENCES_PROFILESAVECACHE;Enregistrer les paramètres de traitement dans le Cache
 PREFERENCES_PROFILESAVEINPUT;Enregistrer les paramètres de traitement accolé au fichier d'entrée
 PREFERENCES_PROFILESAVELOCATION;Processing profile saving location
-PREFERENCES_PROFILESAVEONCLOSE;Enregistrer le profil lors de la fermeture de l'Éditeur\nou lors du passage à une autre image
+PREFERENCES_PROFILESAVEONCLOSE;Enregistrer le profil lors de la fermeture de l'Éditeur ou lors du passage à une autre image
 PREFERENCES_PROFILESAVEUNMODIFIED;Enregistrer le profil même si non modifié dans l'Éditeur
 PREFERENCES_PROFILE_NONE;Aucun
 PREFERENCES_PROPERTY;Propriété

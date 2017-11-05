@@ -496,7 +496,7 @@ Gtk::Widget* Preferences::getProcParamsPanel ()
     mvbpp->pack_start (*cpfrm, Gtk::PACK_SHRINK, 4);
 
     Gtk::Frame* fdp = Gtk::manage (new Gtk::Frame (M ("PREFERENCES_PROFILEHANDLING")));
-    Gtk::Table* vbdp = Gtk::manage (new Gtk::Table (2, 2));
+    Gtk::Table* vbdp = Gtk::manage (new Gtk::Table (4, 2));
     saveParamsPreference = Gtk::manage (new Gtk::ComboBoxText ());
     saveParamsPreference->append (M ("PREFERENCES_PROFILESAVEINPUT"));
     saveParamsPreference->append (M ("PREFERENCES_PROFILESAVECACHE"));
@@ -510,13 +510,12 @@ Gtk::Widget* Preferences::getProcParamsPanel ()
     loadParamsPreference->append (M ("PREFERENCES_PROFILEPRFILE"));
     vbdp->attach (*lplab, 0, 1, 1, 2, Gtk::FILL, Gtk::SHRINK, 2, 2);
     vbdp->attach (*loadParamsPreference, 1, 2, 1, 2, Gtk::EXPAND | Gtk::FILL, Gtk::SHRINK, 2, 2);
+    saveParamsOnClose = Gtk::manage (new Gtk::CheckButton (M("PREFERENCES_PROFILESAVEONCLOSE")));
+    vbdp->attach (*saveParamsOnClose, 0, 2, 2, 3, Gtk::FILL, Gtk::SHRINK, 2, 2);
+    saveParamsEvenIfUnmodified = Gtk::manage (new Gtk::CheckButton (M("PREFERENCES_PROFILESAVEUNMODIFIED")));
+    vbdp->attach (*saveParamsEvenIfUnmodified, 0, 2, 3, 4, Gtk::FILL, Gtk::SHRINK, 2, 2);
     fdp->add (*vbdp);
     mvbpp->pack_start (*fdp, Gtk::PACK_SHRINK, 4);
-
-    saveParamsOnClose = Gtk::manage (new Gtk::CheckButton (M("PREFERENCES_PROFILESAVEONCLOSE")));
-    mvbpp->pack_start (*saveParamsOnClose, Gtk::PACK_SHRINK, 4);
-    saveParamsEvenIfUnmodified = Gtk::manage (new Gtk::CheckButton (M("PREFERENCES_PROFILESAVEUNMODIFIED")));
-    mvbpp->pack_start (*saveParamsEvenIfUnmodified, Gtk::PACK_SHRINK, 4);
 
     // Directories
     Gtk::Frame* cdf = Gtk::manage (new Gtk::Frame (M ("PREFERENCES_DIRECTORIES")) );
