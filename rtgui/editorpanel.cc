@@ -1112,6 +1112,16 @@ void EditorPanel::close ()
             printf("EditorPanel::close () / saveProfile () appele : options.savesParamsOnExit=%d, modified=%d, options.savesParamsEvenIfUnmodified=%d\n",
                     options.savesParamsOnClose, modified, options.savesParamsEvenIfUnmodified);
             saveProfile ();
+        } else if ((modified && !options.savesParamsOnClose) || options.savesParamsEvenIfUnmodified) {
+            if (openThm) {
+                Gtk::MessageDialog msd (Glib::ustring::compose (M("MAIN_MSG_SAVEBEFORECLOSING"), openThm->getFileName()), true, Gtk::MESSAGE_QUESTION, Gtk::BUTTONS_YES_NO, true);
+                msd.set_title(M("GENERAL_WARNING"));
+                //msd.set_secondary_text(M("MAIN_MSG_SAVEBEFORECLOSING"), true);
+
+                if (msd.run() == Gtk::RESPONSE_YES) {
+                    saveProfile ();
+                }
+            }
         }
         savePP3->set_sensitive(false);
         // close image processor and the current thumbnail

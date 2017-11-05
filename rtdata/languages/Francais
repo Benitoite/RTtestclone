@@ -786,6 +786,7 @@ MAIN_MSG_NAVIGATOR;Navigateur
 MAIN_MSG_OPERATIONCANCELLED;Opération annulée
 MAIN_MSG_PATHDOESNTEXIST;Le chemin \n\n<b>%1</b>\n\nn'existe pas. S.V.P indiquez un chemin correct dans la fenêtre Préférences.
 MAIN_MSG_QOVERWRITE;Voulez-vous l'écraser?
+MAIN_MSG_SAVEBEFORECLOSING;Vous avez modifié les paramètres d'édition de\n<b>%1</b>.\n\nVoulez-vous les enregistrer ?
 MAIN_MSG_SETPATHFIRST;Vous devez d'abord choisir un dossier cible dans Préférences\npour pouvoir utiliser cette fonction!
 MAIN_MSG_TOOMANYOPENEDITORS;Too many open editors.\nPlease close an editor to continue.
 MAIN_MSG_WRITEFAILED;Échec de l'enregistrement du fichier\n\n<b>"%1"</b>\n\nAssurez-vous que le dossier existe et qu'il est permis d'y écrire.
