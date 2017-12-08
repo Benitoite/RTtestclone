@@ -1,7 +1,7 @@
 /*
  *  This file is part of RawTherapee.
  *
- *  Copyright (c) 2004-2010 Gabor Horvath <hgabor@rawtherapee.com>
+ *  Copyright (c) 2017 Ingo Weyrich <heckflosse67@gmx.de>
  *
  *  RawTherapee is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -16,34 +16,14 @@
  *  You should have received a copy of the GNU General Public License
  *  along with RawTherapee.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "rtengine.h"
-#include "stdimagesource.h"
-#include "rawimagesource.h"
+
+#pragma once
+
+#include <cstddef>
 
 namespace rtengine
 {
 
-InitialImage* InitialImage::load (const Glib::ustring& fname, bool isRaw, int* errorCode, ProgressListener* pl)
-{
+void findMinMaxPercentile(const float* data, size_t size, float minPrct, float& minOut, float maxPrct, float& maxOut, bool multiThread = true);
 
-    ImageSource* isrc;
-
-    if (!isRaw) {
-        isrc = new StdImageSource ();
-    } else {
-        isrc = new RawImageSource ();
-    }
-
-    isrc->setProgressListener (pl);
-
-    *errorCode = isrc->load (fname);
-
-    if (*errorCode) {
-        delete isrc;
-        return nullptr;
-    }
-
-    return isrc;
 }
-}
-

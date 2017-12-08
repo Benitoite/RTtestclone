@@ -265,6 +265,9 @@ void ParamsEdited::set (bool v)
     epd.edgeStopping        = v;
     epd.scale               = v;
     epd.reweightingIterates = v;
+    fattal.enabled   = v;
+    fattal.threshold = v;
+    fattal.amount    = v;
     sh.enabled       = v;
     sh.hq            = v;
     sh.highlights    = v;
@@ -421,14 +424,14 @@ void ParamsEdited::set (bool v)
     raw.xtranssensor.exBlackRed = v;
     raw.xtranssensor.exBlackGreen = v;
     raw.xtranssensor.exBlackBlue = v;
-    raw.caCorrection = v;
-    raw.caBlue  = v;
-    raw.caRed   = v;
+    raw.ca_autocorrect = v;
+    raw.cablue  = v;
+    raw.cared   = v;
     raw.hotPixelFilter = v;
     raw.deadPixelFilter = v;
-    raw.hotDeadPixelThresh = v;
+    raw.hotdeadpix_thresh = v;
     raw.darkFrame = v;
-    raw.dfAuto = v;
+    raw.df_autoselect = v;
     raw.ff_file = v;
     raw.ff_AutoSelect = v;
     raw.ff_BlurRadius = v;
@@ -865,6 +868,10 @@ void ParamsEdited::initFrom (const std::vector<rtengine::procparams::ProcParams>
         epd.scale = epd.scale && p.epd.scale == other.epd.scale;
         epd.reweightingIterates = epd.reweightingIterates && p.epd.reweightingIterates == other.epd.reweightingIterates;
 
+        fattal.enabled = fattal.enabled && p.fattal.enabled == other.fattal.enabled;
+        fattal.threshold = fattal.threshold && p.fattal.threshold == other.fattal.threshold;
+        fattal.amount = fattal.amount && p.fattal.amount == other.fattal.amount;
+        
         sh.enabled = sh.enabled && p.sh.enabled == other.sh.enabled;
         sh.hq = sh.hq && p.sh.hq == other.sh.hq;
         sh.highlights = sh.highlights && p.sh.highlights == other.sh.highlights;
@@ -1019,14 +1026,14 @@ void ParamsEdited::initFrom (const std::vector<rtengine::procparams::ProcParams>
         raw.xtranssensor.exBlackRed = raw.xtranssensor.exBlackRed && p.raw.xtranssensor.blackred == other.raw.xtranssensor.blackred;
         raw.xtranssensor.exBlackGreen = raw.xtranssensor.exBlackGreen && p.raw.xtranssensor.blackgreen == other.raw.xtranssensor.blackgreen;
         raw.xtranssensor.exBlackBlue = raw.xtranssensor.exBlackBlue && p.raw.xtranssensor.blackblue == other.raw.xtranssensor.blackblue;
-        raw.caCorrection = raw.caCorrection && p.raw.ca_autocorrect == other.raw.ca_autocorrect;
-        raw.caRed = raw.caRed && p.raw.cared == other.raw.cared;
-        raw.caBlue = raw.caBlue && p.raw.cablue == other.raw.cablue;
+        raw.ca_autocorrect = raw.ca_autocorrect && p.raw.ca_autocorrect == other.raw.ca_autocorrect;
+        raw.cared = raw.cared && p.raw.cared == other.raw.cared;
+        raw.cablue = raw.cablue && p.raw.cablue == other.raw.cablue;
         raw.hotPixelFilter = raw.hotPixelFilter && p.raw.hotPixelFilter == other.raw.hotPixelFilter;
         raw.deadPixelFilter = raw.deadPixelFilter && p.raw.deadPixelFilter == other.raw.deadPixelFilter;
-        raw.hotDeadPixelThresh = raw.hotDeadPixelThresh && p.raw.hotdeadpix_thresh == other.raw.hotdeadpix_thresh;
+        raw.hotdeadpix_thresh = raw.hotdeadpix_thresh && p.raw.hotdeadpix_thresh == other.raw.hotdeadpix_thresh;
         raw.darkFrame = raw.darkFrame && p.raw.dark_frame == other.raw.dark_frame;
-        raw.dfAuto = raw.dfAuto && p.raw.df_autoselect == other.raw.df_autoselect;
+        raw.df_autoselect = raw.df_autoselect && p.raw.df_autoselect == other.raw.df_autoselect;
         raw.ff_file = raw.ff_file && p.raw.ff_file == other.raw.ff_file;
         raw.ff_AutoSelect = raw.ff_AutoSelect && p.raw.ff_AutoSelect == other.raw.ff_AutoSelect;
         raw.ff_BlurRadius = raw.ff_BlurRadius && p.raw.ff_BlurRadius == other.raw.ff_BlurRadius;
@@ -2094,6 +2101,16 @@ void ParamsEdited::combine (rtengine::procparams::ProcParams& toEdit, const rten
         toEdit.epd.reweightingIterates    = mods.epd.reweightingIterates;
     }
 
+    if (fattal.enabled) {
+        toEdit.fattal.enabled = mods.fattal.enabled;
+    }
+    if (fattal.threshold) {
+        toEdit.fattal.threshold = mods.fattal.threshold;
+    }
+    if (fattal.amount) {
+        toEdit.fattal.amount = mods.fattal.amount;
+    }    
+
     if (sh.enabled) {
         toEdit.sh.enabled         = mods.sh.enabled;
     }
@@ -2676,15 +2693,15 @@ void ParamsEdited::combine (rtengine::procparams::ProcParams& toEdit, const rten
         toEdit.raw.xtranssensor.blackblue       = dontforceSet && options.baBehav[ADDSET_RAWEXPOS_BLACKS] ? toEdit.raw.xtranssensor.blackblue + mods.raw.xtranssensor.blackblue : mods.raw.xtranssensor.blackblue;
     }
 
-    if (raw.caCorrection) {
+    if (raw.ca_autocorrect) {
         toEdit.raw.ca_autocorrect  = mods.raw.ca_autocorrect;
     }
 
-    if (raw.caRed) {
+    if (raw.cared) {
         toEdit.raw.cared           = dontforceSet && options.baBehav[ADDSET_RAWCACORR] ? toEdit.raw.cared + mods.raw.cared : mods.raw.cared;
     }
 
-    if (raw.caBlue) {
+    if (raw.cablue) {
         toEdit.raw.cablue          = dontforceSet && options.baBehav[ADDSET_RAWCACORR] ? toEdit.raw.cablue + mods.raw.cablue : mods.raw.cablue;
     }
 
@@ -2704,7 +2721,7 @@ void ParamsEdited::combine (rtengine::procparams::ProcParams& toEdit, const rten
         toEdit.raw.deadPixelFilter   = mods.raw.deadPixelFilter;
     }
 
-    if (raw.hotDeadPixelThresh) {
+    if (raw.hotdeadpix_thresh) {
         toEdit.raw.hotdeadpix_thresh = mods.raw.hotdeadpix_thresh;
     }
 
@@ -2712,7 +2729,7 @@ void ParamsEdited::combine (rtengine::procparams::ProcParams& toEdit, const rten
         toEdit.raw.dark_frame        = mods.raw.dark_frame;
     }
 
-    if (raw.dfAuto) {
+    if (raw.df_autoselect) {
         toEdit.raw.df_autoselect     = mods.raw.df_autoselect;
     }
 
@@ -3378,8 +3395,8 @@ bool RAWParamsEdited::XTransSensor::isUnchanged() const
 
 bool RAWParamsEdited::isUnchanged() const
 {
-    return  bayersensor.isUnchanged() && xtranssensor.isUnchanged() && caCorrection && caRed && caBlue && hotPixelFilter && deadPixelFilter && hotDeadPixelThresh && darkFrame
-            && dfAuto && ff_file && ff_AutoSelect && ff_BlurRadius && ff_BlurType && exPos && exPreser && ff_AutoClipControl && ff_clipControl;
+    return  bayersensor.isUnchanged() && xtranssensor.isUnchanged() && ca_autocorrect && cared && cablue && hotPixelFilter && deadPixelFilter && hotdeadpix_thresh && darkFrame
+            && df_autoselect && ff_file && ff_AutoSelect && ff_BlurRadius && ff_BlurType && exPos && exPreser && ff_AutoClipControl && ff_clipControl;
 }
 
 bool LensProfParamsEdited::isUnchanged() const

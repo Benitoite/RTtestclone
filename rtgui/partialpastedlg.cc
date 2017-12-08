@@ -51,6 +51,7 @@ PartialPasteDlg::PartialPasteDlg (const Glib::ustring &title, Gtk::Window* paren
     exposure    = Gtk::manage (new Gtk::CheckButton (M("PARTIALPASTE_EXPOSURE")));
     sh          = Gtk::manage (new Gtk::CheckButton (M("PARTIALPASTE_SHADOWSHIGHLIGHTS")));
     epd         = Gtk::manage (new Gtk::CheckButton (M("PARTIALPASTE_EPD")));
+    fattal      = Gtk::manage (new Gtk::CheckButton (M("PARTIALPASTE_TM_FATTAL")));
     retinex     = Gtk::manage (new Gtk::CheckButton (M("PARTIALPASTE_RETINEX")));
     pcvignette  = Gtk::manage (new Gtk::CheckButton (M("PARTIALPASTE_PCVIGNETTE")));
     gradient    = Gtk::manage (new Gtk::CheckButton (M("PARTIALPASTE_GRADIENT")));
@@ -143,6 +144,7 @@ PartialPasteDlg::PartialPasteDlg (const Glib::ustring &title, Gtk::Window* paren
     vboxes[0]->pack_start (*exposure, Gtk::PACK_SHRINK, 2);
     vboxes[0]->pack_start (*sh, Gtk::PACK_SHRINK, 2);
     vboxes[0]->pack_start (*epd, Gtk::PACK_SHRINK, 2);
+    vboxes[0]->pack_start (*fattal, Gtk::PACK_SHRINK, 2);
     vboxes[0]->pack_start (*retinex, Gtk::PACK_SHRINK, 2);
     vboxes[0]->pack_start (*pcvignette, Gtk::PACK_SHRINK, 2);
     vboxes[0]->pack_start (*gradient, Gtk::PACK_SHRINK, 2);
@@ -298,6 +300,7 @@ PartialPasteDlg::PartialPasteDlg (const Glib::ustring &title, Gtk::Window* paren
     exposureConn    = exposure->signal_toggled().connect (sigc::bind (sigc::mem_fun(*basic, &Gtk::CheckButton::set_inconsistent), true));
     shConn          = sh->signal_toggled().connect (sigc::bind (sigc::mem_fun(*basic, &Gtk::CheckButton::set_inconsistent), true));
     epdConn         = epd->signal_toggled().connect (sigc::bind (sigc::mem_fun(*basic, &Gtk::CheckButton::set_inconsistent), true));
+    fattalConn      = fattal->signal_toggled().connect (sigc::bind (sigc::mem_fun(*basic, &Gtk::CheckButton::set_inconsistent), true));
     retinexConn     = retinex->signal_toggled().connect (sigc::bind (sigc::mem_fun(*basic, &Gtk::CheckButton::set_inconsistent), true));
     pcvignetteConn  = pcvignette->signal_toggled().connect (sigc::bind (sigc::mem_fun(*basic, &Gtk::CheckButton::set_inconsistent), true));
     gradientConn    = gradient->signal_toggled().connect (sigc::bind (sigc::mem_fun(*basic, &Gtk::CheckButton::set_inconsistent), true));
@@ -517,6 +520,7 @@ void PartialPasteDlg::basicToggled ()
     exposure->set_active (basic->get_active ());
     sh->set_active (basic->get_active ());
     epd->set_active (basic->get_active ());
+    fattal->set_active (basic->get_active ());
     pcvignette->set_active (basic->get_active ());
     gradient->set_active (basic->get_active ());
     retinex->set_active (basic->get_active ());
@@ -709,6 +713,10 @@ void PartialPasteDlg::applyPaste (rtengine::procparams::ProcParams* dstPP, Param
 
     if (!epd->get_active ()) {
         filterPE.epd        = falsePE.epd;
+    }
+
+    if (!fattal->get_active ()) {
+        filterPE.fattal     = falsePE.fattal;
     }
 
     if (!retinex->get_active ()) {
@@ -935,12 +943,12 @@ void PartialPasteDlg::applyPaste (rtengine::procparams::ProcParams* dstPP, Param
     }
 
     if (!raw_ca_autocorrect->get_active ()) {
-        filterPE.raw.caCorrection       = falsePE.raw.caCorrection;
+        filterPE.raw.ca_autocorrect       = falsePE.raw.ca_autocorrect;
     }
 
     if (!raw_caredblue->get_active ()) {
-        filterPE.raw.caRed              = falsePE.raw.caRed;
-        filterPE.raw.caBlue             = falsePE.raw.caBlue;
+        filterPE.raw.cared              = falsePE.raw.cared;
+        filterPE.raw.cablue             = falsePE.raw.cablue;
     }
 
     if (!raw_hotpix_filt->get_active ())     {
@@ -952,7 +960,7 @@ void PartialPasteDlg::applyPaste (rtengine::procparams::ProcParams* dstPP, Param
     }
 
     if (!raw_deadpix_filt->get_active () && !raw_hotpix_filt->get_active ()) {
-        filterPE.raw.hotDeadPixelThresh = falsePE.raw.hotDeadPixelThresh;
+        filterPE.raw.hotdeadpix_thresh = falsePE.raw.hotdeadpix_thresh;
     }
 
     if (!df_file->get_active ()) {
@@ -960,7 +968,7 @@ void PartialPasteDlg::applyPaste (rtengine::procparams::ProcParams* dstPP, Param
     }
 
     if (!df_AutoSelect->get_active ()) {
-        filterPE.raw.dfAuto             = falsePE.raw.dfAuto;
+        filterPE.raw.df_autoselect             = falsePE.raw.df_autoselect;
     }
 
     if (!ff_file->get_active ()) {

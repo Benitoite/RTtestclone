@@ -366,6 +366,14 @@ public:
 };
 
 
+class FattalToneMappingParamsEdited {
+public:
+    bool enabled;
+    bool threshold;
+    bool amount;
+};
+
+
 class SHParamsEdited
 {
 
@@ -560,7 +568,6 @@ public:
     bool gamma;
     bool gampos;
     bool slpos;
-    bool gamfree;
     bool freegamma;
 };
 class WaveletParamsEdited
@@ -808,14 +815,14 @@ public:
     BayerSensor bayersensor;
     XTransSensor xtranssensor;
 
-    bool caCorrection;
-    bool caRed;
-    bool caBlue;
+    bool ca_autocorrect;
+    bool cared;
+    bool cablue;
     bool hotPixelFilter;
     bool deadPixelFilter;
-    bool hotDeadPixelThresh;
+    bool hotdeadpix_thresh;
     bool darkFrame;
-    bool dfAuto;
+    bool df_autoselect;
     bool ff_file;
     bool ff_AutoSelect;
     bool ff_BlurRadius;
@@ -852,6 +859,7 @@ public:
     DefringeParamsEdited          defringe;
     DirPyrDenoiseParamsEdited     dirpyrDenoise;
     EPDParamsEdited               epd;
+    FattalToneMappingParamsEdited fattal;
     ImpulseDenoiseParamsEdited    impulseDenoise;
     SHParamsEdited                sh;
     CropParamsEdited              crop;
@@ -882,8 +890,5 @@ public:
     void set   (bool v);
     void initFrom (const std::vector<rtengine::procparams::ProcParams>& src);
     void combine (rtengine::procparams::ProcParams& toEdit, const rtengine::procparams::ProcParams& mods, bool forceSet);
-
-    bool operator== (const ParamsEdited& other);
-    bool operator!= (const ParamsEdited& other);
 };
 #endif

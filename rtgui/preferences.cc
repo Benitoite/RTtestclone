@@ -188,6 +188,19 @@ Gtk::Widget* Preferences::getBatchProcPanel ()
     appendBehavList (mi, M ("TP_EXPOSURE_SATURATION"), ADDSET_TC_SATURATION, false);
 
     mi = behModel->append ();
+    mi->set_value (behavColumns.label, M ("TP_EPD_LABEL"));
+    appendBehavList (mi, M ("TP_EPD_STRENGTH"), ADDSET_EPD_STRENGTH, false);
+    appendBehavList (mi, M ("TP_EPD_GAMMA"), ADDSET_EPD_GAMMA, false);
+    appendBehavList (mi, M ("TP_EPD_EDGESTOPPING"), ADDSET_EPD_EDGESTOPPING, false);
+    appendBehavList (mi, M ("TP_EPD_SCALE"), ADDSET_EPD_SCALE, false);
+    appendBehavList (mi, M ("TP_EPD_REWEIGHTINGITERATES"), ADDSET_EPD_REWEIGHTINGITERATES, false);
+
+    mi = behModel->append ();
+    mi->set_value (behavColumns.label, M ("TP_TM_FATTAL_LABEL"));
+    appendBehavList (mi, M ("TP_TM_FATTAL_ALPHA"), ADDSET_FATTAL_ALPHA, false);
+    appendBehavList (mi, M ("TP_TM_FATTAL_BETA"), ADDSET_FATTAL_BETA, false);
+
+    mi = behModel->append ();
     mi->set_value (behavColumns.label, M ("TP_RETINEX_LABEL"));
     appendBehavList (mi, M ("TP_RETINEX_STRENGTH"), ADDSET_RETI_STR, false);
     appendBehavList (mi, M ("TP_RETINEX_NEIGHBOR"), ADDSET_RETI_NEIGH, false);
@@ -2194,7 +2207,7 @@ void Preferences::cancelPressed ()
 {
     // set the initial theme back
     if (themeFNames.at (theme->get_active_row_number ()).longFName != options.theme) {
-        rtengine::setPaths (options);
+        rtengine::setPaths();
         RTImage::updateImages();
         switchThemeTo (options.theme);
     }
@@ -2252,7 +2265,7 @@ void Preferences::themeChanged ()
 {
 
     moptions.theme = themeFNames.at (theme->get_active_row_number ()).longFName;
-    rtengine::setPaths (moptions);
+    rtengine::setPaths();
     RTImage::updateImages();
     switchThemeTo (moptions.theme);
 }
