@@ -724,58 +724,60 @@ HISTORY_MSG_487;Lens Correction - Lens
 HISTORY_MSG_488;HDR Tone Mapping
 HISTORY_MSG_489;HDR TM - Threshold
 HISTORY_MSG_490;HDR TM - Amount
-HISTORY_MSG_491;W - Unsharp method
-HISTORY_MSG_492;W - Merge luma
-HISTORY_MSG_494;W - Reti - gain
-HISTORY_MSG_495;W - Reti - brightness
-HISTORY_MSG_496;W - Reti - strength
-HISTORY_MSG_497;W - Reti - radius
-HISTORY_MSG_498;W - Reti - contrast
-HISTORY_MSG_499;W - Reti - threshold
-HISTORY_MSG_500;W - Retinex method
-HISTORY_MSG_501;W - Reti - transmission
-HISTORY_MSG_502;W - Reti - chroma
-HISTORY_MSG_503;W - Reti - process
-HISTORY_MSG_504;W - merge - enabled
-HISTORY_MSG_505;W - merge - file
-HISTORY_MSG_506;W - merge - type
-HISTORY_MSG_507;W - merge - preview
-HISTORY_MSG_508;W - merge - H shift
-HISTORY_MSG_509;W - merge - V shift
-HISTORY_MSG_510;W - merge - blend L
-HISTORY_MSG_511;W - merge - blend C
-HISTORY_MSG_512;W - merge - reset
-HISTORY_MSG_513;W - es - sharp method
-HISTORY_MSG_514;W - Reti - enabled
-HISTORY_MSG_515;W - merge - method
-HISTORY_MSG_516;W - Reti - radius
-HISTORY_MSG_517;W - Reti - highlight
-HISTORY_MSG_518;W - Reti - H tonal width
-HISTORY_MSG_519;W - Reti - shadows
-HISTORY_MSG_520;W - Reti - S tonal width
-HISTORY_MSG_521;W - Reti - Scale
-HISTORY_MSG_522;W - merge - gradient luma
-HISTORY_MSG_523;W - merge - merge curve
-HISTORY_MSG_524;W - Reti - gain curve
-HISTORY_MSG_525;CbDL - method
-HISTORY_MSG_526;W - merge - save size
-HISTORY_MSG_527;W - merge - luminance style
-HISTORY_MSG_528;W - merge - chroma
-HISTORY_MSG_529;W - merge - residual style
-HISTORY_MSG_530;W - merge - style targ/prot
-HISTORY_MSG_531;W - merge - shape detection curve hdr
-HISTORY_MSG_532;W - merge - style detection color
-HISTORY_MSG_533;W - merge - dirV
-HISTORY_MSG_534;W - merge - dirH
-HISTORY_MSG_535;W - merge - dirD
-HISTORY_MSG_536;W - merge - SH curve
-HISTORY_MSG_537;W - merge - luma curve++
-HISTORY_MSG_538;W - merge - luminance hdr
-HISTORY_MSG_539;W - merge - residual hdr
-HISTORY_MSG_540;W - merge - position
-HISTORY_MSG_541;W - merge - shape method
-HISTORY_MSG_542;W - merge - Neural index
-HISTORY_MSG_543;W - merge - shape detection curve sty
+HISTORY_MSG_491;White Balance
+HISTORY_MSG_492;RGB Curves
+HISTORY_MSG_493;W - Unsharp method
+HISTORY_MSG_494;W - Merge luma
+HISTORY_MSG_496;W - Reti - gain
+HISTORY_MSG_497;W - Reti - brightness
+HISTORY_MSG_498;W - Reti - strength
+HISTORY_MSG_499;W - Reti - radius
+HISTORY_MSG_500;W - Reti - contrast
+HISTORY_MSG_501;W - Reti - threshold
+HISTORY_MSG_502;W - Retinex method
+HISTORY_MSG_503;W - Reti - transmission
+HISTORY_MSG_504;W - Reti - chroma
+HISTORY_MSG_505;W - Reti - process
+HISTORY_MSG_506;W - merge - enabled
+HISTORY_MSG_507;W - merge - file
+HISTORY_MSG_508;W - merge - type
+HISTORY_MSG_509;W - merge - preview
+HISTORY_MSG_510;W - merge - H shift
+HISTORY_MSG_511;W - merge - V shift
+HISTORY_MSG_512;W - merge - blend L
+HISTORY_MSG_513;W - merge - blend C
+HISTORY_MSG_514;W - merge - reset
+HISTORY_MSG_515;W - es - sharp method
+HISTORY_MSG_516;W - Reti - enabled
+HISTORY_MSG_517;W - merge - method
+HISTORY_MSG_518;W - Reti - radius
+HISTORY_MSG_519;W - Reti - highlight
+HISTORY_MSG_520;W - Reti - H tonal width
+HISTORY_MSG_521;W - Reti - shadows
+HISTORY_MSG_522;W - Reti - S tonal width
+HISTORY_MSG_523;W - Reti - Scale
+HISTORY_MSG_524;W - merge - gradient luma
+HISTORY_MSG_525;W - merge - merge curve
+HISTORY_MSG_526;W - Reti - gain curve
+HISTORY_MSG_527;CbDL - method
+HISTORY_MSG_528;W - merge - save size
+HISTORY_MSG_529;W - merge - luminance style
+HISTORY_MSG_530;W - merge - chroma
+HISTORY_MSG_531;W - merge - residual style
+HISTORY_MSG_532;W - merge - style targ/prot
+HISTORY_MSG_533;W - merge - shape detection curve hdr
+HISTORY_MSG_534;W - merge - style detection color
+HISTORY_MSG_535;W - merge - dirV
+HISTORY_MSG_536;W - merge - dirH
+HISTORY_MSG_537;W - merge - dirD
+HISTORY_MSG_538;W - merge - SH curve
+HISTORY_MSG_539;W - merge - luma curve++
+HISTORY_MSG_540;W - merge - luminance hdr
+HISTORY_MSG_541;W - merge - residual hdr
+HISTORY_MSG_542;W - merge - position
+HISTORY_MSG_543;W - merge - shape method
+HISTORY_MSG_544;W - merge - Neural index
+HISTORY_MSG_545;W - merge - shape detection curve sty
 HISTORY_NEWSNAPSHOT;Add
 HISTORY_NEWSNAPSHOT_TOOLTIP;Shortcut: <b>Alt-s</b>
 HISTORY_SNAPSHOT;Snapshot

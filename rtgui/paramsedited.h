@@ -124,6 +124,7 @@ class RGBCurvesParamsEdited
 {
 
 public:
+    bool enabled;
     bool lumamode;
     bool rcurve;
     bool gcurve;
@@ -230,6 +231,7 @@ class WBParamsEdited
 {
 
 public:
+    bool enabled;
     bool method;
     bool temperature;
     bool green;
@@ -488,6 +490,7 @@ class ChannelMixerParamsEdited
 {
 
 public:
+    bool enabled;
     bool red[3];
     bool green[3];
     bool blue[3];
@@ -729,6 +732,7 @@ class HSVEqualizerParamsEdited
 {
 
 public:
+    bool enabled;
     bool hcurve;
     bool scurve;
     bool vcurve;
