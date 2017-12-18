@@ -519,7 +519,7 @@ int refreshmap[rtengine::NUMOFEVENTS] = {
     HDR,              // EvTMFattalAmount
     ALLNORAW,         // EvWBEnabled
     RGBCURVE,          // EvRGBEnabled
-    DIRPYREQUALIZER,  // EvWavusharpmet
+    LUMINANCECURVE,    // EvLEnabled
     DIRPYREQUALIZER,  // EvWavmergeL
     DIRPYREQUALIZER,  // EvWavmergeC
     DIRPYREQUALIZER,  // EvWavgain
@@ -573,6 +573,7 @@ int refreshmap[rtengine::NUMOFEVENTS] = {
     DIRPYREQUALIZER,    //EvWavmergMethod2
     DIRPYREQUALIZER,     //EvWavshapMethod
     DIRPYREQUALIZER,     //EvWavshapind
-    DIRPYREQUALIZER     //EvWavsty2Curve
+    DIRPYREQUALIZER,     //EvWavsty2Curve
+    DIRPYREQUALIZER  // EvWavusharpmet
 };
 

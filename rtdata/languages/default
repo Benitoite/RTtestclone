@@ -726,7 +726,7 @@ HISTORY_MSG_489;HDR TM - Threshold
 HISTORY_MSG_490;HDR TM - Amount
 HISTORY_MSG_491;White Balance
 HISTORY_MSG_492;RGB Curves
-HISTORY_MSG_493;W - Unsharp method
+HISTORY_MSG_493;L*a*b* Adjustments
 HISTORY_MSG_494;W - Merge luma
 HISTORY_MSG_496;W - Reti - gain
 HISTORY_MSG_497;W - Reti - brightness
@@ -778,6 +778,7 @@ HISTORY_MSG_542;W - merge - position
 HISTORY_MSG_543;W - merge - shape method
 HISTORY_MSG_544;W - merge - Neural index
 HISTORY_MSG_545;W - merge - shape detection curve sty
+HISTORY_MSG_546;W - Unsharp method
 HISTORY_NEWSNAPSHOT;Add
 HISTORY_NEWSNAPSHOT_TOOLTIP;Shortcut: <b>Alt-s</b>
 HISTORY_SNAPSHOT;Snapshot

@@ -348,6 +348,7 @@ struct RetinexParams
   */
 struct LCurveParams
 {
+    bool enabled;
     std::vector<double>   lcurve;
     std::vector<double>   acurve;
     std::vector<double>   bcurve;

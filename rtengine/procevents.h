@@ -519,7 +519,7 @@ enum ProcEvent {
     EvTMFattalAmount = 489,
     EvWBEnabled = 490,
     EvRGBEnabled = 491,
-    EvWavusharpmet = 492,
+    EvLEnabled = 492,
     EvWavmergeL = 493,
     EvWavmergeC = 494,
     EvWavgain = 495,
@@ -574,6 +574,7 @@ enum ProcEvent {
     EvWavshapMethod = 542,
     EvWavshapind = 543,
     EvWavsty2Curve = 544,
+    EvWavusharpmet = 545,
     NUMOFEVENTS
 };
 }

@@ -101,6 +101,7 @@ public:
 class LCurveParamsEdited
 {
 public:
+    bool enabled;
     bool brightness;
     bool contrast;
     bool chromaticity;
@@ -116,8 +117,6 @@ public:
     bool hhcurve;
     bool lccurve;
     bool clcurve;
-    bool enabled;
-    bool method;
 };
 
 class RGBCurvesParamsEdited
