@@ -79,6 +79,7 @@
 #include "filmsimulation.h"
 #include "prsharpening.h"
 #include "fattaltonemap.h"
+#include "localcontrast.h"
 #include "guiutils.h"
 
 class ImageEditorCoordinator;
@@ -121,6 +122,7 @@ protected:
     Crop* crop;
     ToneCurve* toneCurve;
     ShadowsHighlights* shadowshighlights;
+    LocalContrast *localContrast;
     Defringe* defringe;
     ImpulseDenoise* impulsedenoise;
     DirPyrDenoise* dirpyrdenoise;

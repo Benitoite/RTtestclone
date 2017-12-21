@@ -518,8 +518,9 @@ int refreshmap[rtengine::NUMOFEVENTS] = {
     HDR,              // EvTMFattalThreshold
     HDR,              // EvTMFattalAmount
     ALLNORAW,         // EvWBEnabled
-    RGBCURVE,          // EvRGBEnabled
-    LUMINANCECURVE,    // EvLEnabled
+    RGBCURVE,         // EvRGBEnabled
+    LUMINANCECURVE,   // EvLEnabled
+    DEMOSAIC,          // EvPixelShiftOneGreen
     DIRPYREQUALIZER,  // EvWavmergeL
     DIRPYREQUALIZER,  // EvWavmergeC
     DIRPYREQUALIZER,  // EvWavgain
@@ -577,3 +578,45 @@ int refreshmap[rtengine::NUMOFEVENTS] = {
     DIRPYREQUALIZER  // EvWavusharpmet
 };
 
+
+namespace rtengine {
+
+RefreshMapper::RefreshMapper():
+    next_event_(rtengine::NUMOFEVENTS)
+{
+    for (int event = 0; event < rtengine::NUMOFEVENTS; ++event) {
+        actions_[event] = refreshmap[event];
+    }
+}
+
+
+ProcEvent RefreshMapper::newEvent()
+{
+    return ProcEvent(++next_event_);
+}
+
+
+void RefreshMapper::mapEvent(ProcEvent event, int action)
+{
+    actions_[event] = action;
+}
+
+
+int RefreshMapper::getAction(ProcEvent event) const
+{
+    auto it = actions_.find(event);
+    if (it == actions_.end()) {
+        return 0;
+    } else {
+        return it->second;
+    }
+}
+
+
+RefreshMapper *RefreshMapper::getInstance()
+{
+    static RefreshMapper instance;
+    return &instance;
+}
+
+} // namespace rtengine
