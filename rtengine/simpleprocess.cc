@@ -1849,8 +1849,7 @@ private:
         if (params.prsharpening.enabled) {
             params.sharpening = params.prsharpening;
         } else {
-            adjust_radius (defaultparams.sharpening.radius, scale_factor,
-                           params.sharpening.radius);
+            params.sharpening.radius *= scale_factor;
         }
 
         params.impulseDenoise.thresh *= scale_factor;
@@ -1903,7 +1902,8 @@ private:
 
         adjust_radius (defaultparams.defringe.radius, scale_factor,
                        params.defringe.radius);
-        adjust_radius (defaultparams.sh.radius, scale_factor, params.sh.radius);
+        params.sh.radius *= scale_factor;
+        params.localContrast.radius *= scale_factor;
 
         if (params.raw.xtranssensor.method == procparams::RAWParams::XTransSensor::getMethodString(procparams::RAWParams::XTransSensor::Method::THREE_PASS)) {
             params.raw.xtranssensor.method = procparams::RAWParams::XTransSensor::getMethodString(procparams::RAWParams::XTransSensor::Method::ONE_PASS);
