@@ -117,6 +117,7 @@ option(WITH_MYFILE_MMAP "Build using memory mapped file" ON)
 option(WITH_LTO "Build with link-time optimizations" OFF)
 option(WITH_SAN "Build with run-time sanitizer" OFF)
 option(WITH_PROF "Build with profiling instrumentation" OFF)
+option(WITH_GTEST "Build with Google Test support" OFF)
 option(WITH_SYSTEM_KLT "Build using system KLT library." OFF)
 option(OPTION_OMP "Build with OpenMP support" ON)
 option(STRICT_MUTEX "True (recommended): MyMutex will behave like POSIX Mutex; False: MyMutex will behave like POSIX RecMutex; Note: forced to ON for Debug builds" ON)
@@ -311,24 +312,32 @@ find_package(ZLIB REQUIRED)
 if(WITH_SYSTEM_KLT)
     find_package(KLT REQUIRED)
 endif()
-find_package(Threads)
 
 # Build Google Test.
-set(GTEST_BUILD_DIR ${CMAKE_BINARY_DIR}/gtest-build)
-file(MAKE_DIRECTORY ${GTEST_BUILD_DIR})
-execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" /usr/src/gtest
-    RESULT_VARIABLE gtest_build_result
-    WORKING_DIRECTORY ${GTEST_BUILD_DIR})
-if(result)
-    message(FATAL_ERROR "Build step for Google Test failed: ${result} (did you install the Google C++ Testing Framework?)")
+if(WITH_GTEST)
+    find_package(Threads REQUIRED)
+
+    set(GTEST_BUILD_DIR ${CMAKE_BINARY_DIR}/gtest-build)
+    file(MAKE_DIRECTORY ${GTEST_BUILD_DIR})
+
+    execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" /usr/src/gtest
+        RESULT_VARIABLE gtest_build_result
+        ERROR_VARIABLE ep_err
+        WORKING_DIRECTORY ${GTEST_BUILD_DIR})
+    # On success, ep_err evaluates to false/is empty
+    if(ep_err)
+        message(FATAL_ERROR "Build step for Google Test failed:\n${ep_err}\nHave you installed the Google C++ Testing Framework?")
+    endif()
+
+    execute_process(COMMAND ${CMAKE_COMMAND} --build .
+        RESULT_VARIABLE gtest_build_result
+        ERROR_VARIABLE success
+        WORKING_DIRECTORY ${GTEST_BUILD_DIR})
+    if(ep_err)
+        message(FATAL_ERROR "Build step for Google Test failed:\n${result}")
+    endif()
+    #add_subdirectory(${GTEST_BUILD_DIR} EXCLUDE_FROM_ALL)
 endif()
-execute_process(COMMAND ${CMAKE_COMMAND} --build .
-    RESULT_VARIABLE gtest_build_result
-    WORKING_DIRECTORY ${GTEST_BUILD_DIR})
-if(result)
-    message(FATAL_ERROR "Build step for Google Test failed: ${result}")
-endif()
-#add_subdirectory(${GTEST_BUILD_DIR} EXCLUDE_FROM_ALL)
 
 # Check for libcanberra-gtk3 (sound events on Linux):
 if(UNIX AND(NOT APPLE))
