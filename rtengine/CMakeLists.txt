@@ -145,6 +145,13 @@ endif()
 include_directories(BEFORE "${CMAKE_CURRENT_BINARY_DIR}")
 
 add_library(rtengine ${RTENGINESOURCEFILES})
+add_executable(LUT_test LUT_test.cc)
+#add_test(LUT_test LUT_test)
+
+target_link_libraries(LUT_test
+        ${GTEST_BUILD_DIR}/libgtest.a
+        ${GTEST_BUILD_DIR}/libgtest_main.a
+        ${CMAKE_THREAD_LIBS_INIT})
 add_dependencies(rtengine UpdateInfo)
 
 # It may be nice to store library version too
