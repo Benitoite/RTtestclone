@@ -313,20 +313,20 @@ if(WITH_SYSTEM_KLT)
 endif()
 find_package(Threads)
 
-# Build Google test.
+# Build Google Test.
 set(GTEST_BUILD_DIR ${CMAKE_BINARY_DIR}/gtest-build)
 file(MAKE_DIRECTORY ${GTEST_BUILD_DIR})
 execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" /usr/src/gtest
-        RESULT_VARIABLE gtest_build_result
-        WORKING_DIRECTORY ${GTEST_BUILD_DIR})
+    RESULT_VARIABLE gtest_build_result
+    WORKING_DIRECTORY ${GTEST_BUILD_DIR})
 if(result)
-    message(FATAL_ERROR "Build step for googletest failed: ${result} (did you install libgtest-dev?)")
+    message(FATAL_ERROR "Build step for Google Test failed: ${result} (did you install the Google C++ Testing Framework?)")
 endif()
 execute_process(COMMAND ${CMAKE_COMMAND} --build .
-  RESULT_VARIABLE gtest_build_result
-  WORKING_DIRECTORY ${GTEST_BUILD_DIR})
+    RESULT_VARIABLE gtest_build_result
+    WORKING_DIRECTORY ${GTEST_BUILD_DIR})
 if(result)
-  message(FATAL_ERROR "Build step for googletest failed: ${result}")
+    message(FATAL_ERROR "Build step for Google Test failed: ${result}")
 endif()
 #add_subdirectory(${GTEST_BUILD_DIR} EXCLUDE_FROM_ALL)
 
