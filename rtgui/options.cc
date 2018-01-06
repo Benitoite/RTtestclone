@@ -426,7 +426,6 @@ void Options::setDefaults ()
     tabbedUI = false;
     mainNBVertical = true;
     multiDisplayMode = 0;
-    tunnelMetaData = true;
     histogramPosition = 1;
     histogramBar = true;
     histogramFullMode = false;
@@ -617,6 +616,8 @@ void Options::setDefaults ()
     gimpPluginShowInfoDialog = true;
     maxRecentFolders = 15;
     rtSettings.lensfunDbDirectory = ""; // set also in main.cc and main-cli.cc
+    cropGuides = CROP_GUIDE_FULL;
+    cropAutoFit = false;
 }
 
 Options* Options::copyFrom (Options* other)
@@ -869,10 +870,6 @@ void Options::readFromFile (Glib::ustring fname)
 
                 if (keyFile.has_key ("Output", "OverwriteOutputFile")) {
                     overwriteOutputFile = keyFile.get_boolean ("Output", "OverwriteOutputFile");
-                }
-
-                if (keyFile.has_key ("Output", "TunnelMetaData")) {
-                    tunnelMetaData = keyFile.get_boolean ("Output", "TunnelMetaData");
                 }
             }
 
@@ -1392,6 +1389,12 @@ void Options::readFromFile (Glib::ustring fname)
             if (keyFile.has_group ("Crop Settings")) {
                 if (keyFile.has_key ("Crop Settings", "PPI")) {
                     cropPPI = keyFile.get_integer ("Crop Settings", "PPI");
+                }
+                if (keyFile.has_key("Crop Settings", "GuidesMode")) {
+                    cropGuides = CropGuidesMode(std::max(int(CROP_GUIDE_NONE), std::min(keyFile.get_integer("Crop Settings", "GuidesMode"), int(CROP_GUIDE_FULL))));
+                }
+                if (keyFile.has_key("Crop Settings", "AutoFit")) {
+                    cropAutoFit = keyFile.get_boolean("Crop Settings", "AutoFit");
                 }
             }
 
@@ -1945,7 +1948,6 @@ void Options::saveToFile (Glib::ustring fname)
         keyFile.set_boolean ("Output", "UsePathTemplate", saveUsePathTemplate);
         keyFile.set_string  ("Output", "LastSaveAsPath", lastSaveAsPath);
         keyFile.set_boolean ("Output", "OverwriteOutputFile", overwriteOutputFile);
-        keyFile.set_boolean ("Output", "TunnelMetaData", tunnelMetaData);
 
         keyFile.set_string  ("Profiles", "Directory", profilePath);
         keyFile.set_boolean ("Profiles", "UseBundledProfiles", useBundledProfiles);
@@ -2027,6 +2029,8 @@ void Options::saveToFile (Glib::ustring fname)
         //keyFile.set_integer_list ("GUI", "CurvePanelsExpanded", crvopen);
 
         keyFile.set_integer ("Crop Settings", "PPI", cropPPI);
+        keyFile.set_integer("Crop Settings", "GuidesMode", cropGuides);
+        keyFile.set_boolean("Crop Settings", "AutoFit", cropAutoFit);
 
         keyFile.set_string  ("Color Management", "PrinterProfile", rtSettings.printerProfile);
         keyFile.set_integer ("Color Management", "PrinterIntent", rtSettings.printerIntent);
