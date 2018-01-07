@@ -40,73 +40,73 @@ class Imagefloat : public IImagefloat, public ImageIO
 
 public:
 
-    Imagefloat ();
-    Imagefloat (int width, int height);
-    ~Imagefloat ();
+    Imagefloat();
+    Imagefloat(int width, int height);
+    ~Imagefloat();
 
-    Imagefloat*          copy ();
+    Imagefloat*          copy();
 
     Image8*              to8();
     Image16*             to16();
 
-    virtual void         getStdImage (ColorTemp ctemp, int tran, Imagefloat* image, PreviewProps pp, bool first, procparams::ToneCurveParams hrp);
-    virtual void         getStdImageloc (int begx, int begy, int yEn, int xEn, int cx, int cy, ColorTemp ctemp, int tran, Imagefloat* image, Imagefloat* bufimage, PreviewProps pp, bool first, procparams::ToneCurveParams hrp);
+    virtual void         getStdImage(ColorTemp ctemp, int tran, Imagefloat* image, PreviewProps pp, bool first, procparams::ToneCurveParams hrp);
+    virtual void         getStdImageloc(int begx, int begy, int yEn, int xEn, int cx, int cy, ColorTemp ctemp, int tran, Imagefloat* image, Imagefloat* bufimage, PreviewProps pp, bool first, procparams::ToneCurveParams hrp);
 
-    virtual const char*  getType     () const
+    virtual const char*  getType() const
     {
         return sImagefloat;
     }
-    virtual int          getBPS      ()
+    virtual int          getBPS()
     {
-        return 8 * sizeof (float);
+        return 8 * sizeof(float);
     }
-    virtual void         getScanline (int row, unsigned char* buffer, int bps);
-    virtual void         setScanline (int row, unsigned char* buffer, int bps, float *minValue = nullptr, float *maxValue = nullptr);
+    virtual void         getScanline(int row, unsigned char* buffer, int bps);
+    virtual void         setScanline(int row, unsigned char* buffer, int bps, float *minValue = nullptr, float *maxValue = nullptr);
 
     // functions inherited from IImagefloat:
-    virtual MyMutex&     getMutex ()
+    virtual MyMutex&     getMutex()
     {
-        return mutex ();
+        return mutex();
     }
-    virtual cmsHPROFILE  getProfile ()
+    virtual cmsHPROFILE  getProfile()
     {
-        return getEmbeddedProfile ();
+        return getEmbeddedProfile();
     }
-    virtual int          getBitsPerPixel ()
+    virtual int          getBitsPerPixel()
     {
-        return 8 * sizeof (float);
+        return 8 * sizeof(float);
     }
-    virtual int          saveToFile (Glib::ustring fname)
+    virtual int          saveToFile(Glib::ustring fname)
     {
-        return save (fname);
+        return save(fname);
     }
-    virtual int          saveAsPNG  (Glib::ustring fname, int compression = -1, int bps = -1)
+    virtual int          saveAsPNG(Glib::ustring fname, int bps = -1)
     {
-        return savePNG (fname, compression, bps);
+        return savePNG(fname, bps);
     }
-    virtual int          saveAsJPEG (Glib::ustring fname, int quality = 100, int subSamp = 3)
+    virtual int          saveAsJPEG(Glib::ustring fname, int quality = 100, int subSamp = 3)
     {
-        return saveJPEG (fname, quality, subSamp);
+        return saveJPEG(fname, quality, subSamp);
     }
-    virtual int          saveAsTIFF (Glib::ustring fname, int bps = -1, bool uncompressed = false)
+    virtual int          saveAsTIFF(Glib::ustring fname, int bps = -1, bool uncompressed = false)
     {
-        return saveTIFF (fname, bps, uncompressed);
+        return saveTIFF(fname, bps, uncompressed);
     }
-    virtual void         setSaveProgressListener (ProgressListener* pl)
+    virtual void         setSaveProgressListener(ProgressListener* pl)
     {
-        setProgressListener (pl);
+        setProgressListener(pl);
     }
-    virtual void         free ()
+    virtual void         free()
     {
         delete this;
     }
 
-    virtual void         normalizeFloat (float srcMinVal, float srcMaxVal);
+    virtual void         normalizeFloat(float srcMinVal, float srcMaxVal);
     void                 normalizeFloatTo1();
     void                 normalizeFloatTo65535();
-    void                 calcCroppedHistogram (const ProcParams &params, float scale, LUTu & hist);
+    void                 calcCroppedHistogram(const ProcParams &params, float scale, LUTu & hist);
 
-    void                 ExecCMSTransform (cmsHTRANSFORM hTransform);
+    void                 ExecCMSTransform(cmsHTRANSFORM hTransform);
 };
 
 }

@@ -100,6 +100,7 @@ public:
 class LCurveParamsEdited
 {
 public:
+    bool enabled;
     bool brightness;
     bool contrast;
     bool chromaticity;
@@ -115,14 +116,24 @@ public:
     bool hhcurve;
     bool lccurve;
     bool clcurve;
-    bool enabled;
-    bool method;
 };
+
+
+class LocalContrastParamsEdited {
+public:
+    bool enabled;
+    bool radius;
+    bool amount;
+    bool darkness;
+    bool lightness;
+};
+
 
 class RGBCurvesParamsEdited
 {
 
 public:
+    bool enabled;
     bool lumamode;
     bool rcurve;
     bool gcurve;
@@ -229,6 +240,7 @@ class WBParamsEdited
 {
 
 public:
+    bool enabled;
     bool method;
     bool temperature;
     bool green;
@@ -367,6 +379,14 @@ public:
 };
 
 
+class FattalToneMappingParamsEdited {
+public:
+    bool enabled;
+    bool threshold;
+    bool amount;
+};
+
+
 class SHParamsEdited
 {
 
@@ -377,7 +397,6 @@ public:
     bool htonalwidth;
     bool shadows;
     bool stonalwidth;
-    bool localcontrast;
     bool radius;
 };
 
@@ -515,6 +534,7 @@ class ChannelMixerParamsEdited
 {
 
 public:
+    bool enabled;
     bool red[3];
     bool green[3];
     bool blue[3];
@@ -595,7 +615,6 @@ public:
     bool gamma;
     bool gampos;
     bool slpos;
-    bool gamfree;
     bool freegamma;
 };
 class WaveletParamsEdited
@@ -706,6 +725,7 @@ class HSVEqualizerParamsEdited
 {
 
 public:
+    bool enabled;
     bool hcurve;
     bool scurve;
     bool vcurve;
@@ -763,6 +783,7 @@ public:
         bool pixelShiftSmooth;
         bool pixelShiftExp0;
         bool pixelShiftLmmse;
+        bool pixelShiftOneGreen;
         bool pixelShiftEqualBright;
         bool pixelShiftEqualBrightChannel;
         bool pixelShiftNonGreenCross;
@@ -792,14 +813,14 @@ public:
     BayerSensor bayersensor;
     XTransSensor xtranssensor;
 
-    bool caCorrection;
-    bool caRed;
-    bool caBlue;
+    bool ca_autocorrect;
+    bool cared;
+    bool cablue;
     bool hotPixelFilter;
     bool deadPixelFilter;
-    bool hotDeadPixelThresh;
+    bool hotdeadpix_thresh;
     bool darkFrame;
-    bool dfAuto;
+    bool df_autoselect;
     bool ff_file;
     bool ff_AutoSelect;
     bool ff_BlurRadius;
@@ -812,6 +833,13 @@ public:
     bool isUnchanged() const;
 };
 
+
+class MetaDataParamsEdited {
+public:
+    bool mode;
+};
+
+
 class ParamsEdited
 {
 
@@ -819,6 +847,7 @@ public:
     GeneralParamsEdited           general;
     ToneCurveParamsEdited         toneCurve;
     LCurveParamsEdited            labCurve;
+    LocalContrastParamsEdited     localContrast;
     RGBCurvesParamsEdited         rgbCurves;
     ColorToningEdited             colorToning;
     RetinexParamsEdited             retinex;
@@ -836,6 +865,7 @@ public:
     DefringeParamsEdited          defringe;
     DirPyrDenoiseParamsEdited     dirpyrDenoise;
     EPDParamsEdited               epd;
+    FattalToneMappingParamsEdited fattal;
     ImpulseDenoiseParamsEdited    impulseDenoise;
     SHParamsEdited                sh;
     CropParamsEdited              crop;
@@ -859,6 +889,7 @@ public:
     WaveletParamsEdited             wavelet;
     HSVEqualizerParamsEdited      hsvequalizer;
     FilmSimulationParamsEdited    filmSimulation;
+    MetaDataParamsEdited          metadata;
     bool                          exif;
     bool                          iptc;
 
@@ -867,8 +898,5 @@ public:
     void set   (bool v);
     void initFrom (const std::vector<rtengine::procparams::ProcParams>& src);
     void combine (rtengine::procparams::ProcParams& toEdit, const rtengine::procparams::ProcParams& mods, bool forceSet);
-
-    bool operator== (const ParamsEdited& other);
-    bool operator!= (const ParamsEdited& other);
 };
 #endif

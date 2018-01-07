@@ -45,7 +45,7 @@ public:
         PIM_ForceRaw              /// Get a preview of the raw file, even if an embedded image exist
     } PreviewImageMode;
 
-    PreviewImage (const Glib::ustring &fname, const Glib::ustring &ext, const PreviewImageMode mode);
+    PreviewImage(const Glib::ustring &fname, const Glib::ustring &ext, const PreviewImageMode mode);
 
     Cairo::RefPtr<Cairo::ImageSurface> getImage();
 

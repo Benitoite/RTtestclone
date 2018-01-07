@@ -18,12 +18,13 @@
  */
 #ifndef _ALIGNEDBUFFER_
 #define _ALIGNEDBUFFER_
-#include <cstdint>
 #include <cstdlib>
-#include <vector>
 #include <utility>
-#include <glibmm.h>
-#include "../rtgui/threadutils.h"
+
+inline size_t padToAlignment(size_t size, size_t align = 16)
+{
+    return align * ((size + align - 1) / align);
+}
 
 // Aligned buffer that should be faster
 template <class T> class AlignedBuffer
@@ -43,14 +44,14 @@ public:
     * @param size Number of elements of size T to allocate, i.e. allocated size will be sizeof(T)*size ; set it to 0 if you want to defer the allocation
     * @param align Expressed in bytes; SSE instructions need 128 bits alignment, which mean 16 bytes, which is the default value
     */
-    AlignedBuffer (size_t size = 0, size_t align = 16) : real(nullptr), alignment(align), allocatedSize(0), unitSize(0), data(nullptr), inUse(false)
+    AlignedBuffer(size_t size = 0, size_t align = 16) : real(nullptr), alignment(align), allocatedSize(0), unitSize(0), data(nullptr), inUse(false)
     {
         if (size) {
             resize(size);
         }
     }
 
-    ~AlignedBuffer ()
+    ~AlignedBuffer()
     {
         if (real) {
             free(real);
@@ -94,25 +95,26 @@ public:
 
                 if (allocatedSize < oldAllocatedSize) {
                     void *temp = realloc(real, allocatedSize + alignment);
+
                     if (temp) { // realloc succeeded
                         real = temp;
                     } else { // realloc failed => free old buffer and allocate new one
                         if (real) {
-                            free (real);
+                            free(real);
                         }
+
                         real = malloc(allocatedSize + alignment);
                     }
                 } else {
                     if (real) {
-                        free (real);
+                        free(real);
                     }
 
                     real = malloc(allocatedSize + alignment);
                 }
 
                 if (real) {
-                    //data = (T*)( (uintptr_t)real + (alignment-((uintptr_t)real)%alignment) );
-                    data = (T*)( ( uintptr_t(real) + uintptr_t(alignment - 1)) / alignment * alignment);
+                    data = (T*)((uintptr_t(real) + uintptr_t(alignment - 1)) / alignment * alignment);
                     inUse = true;
                 } else {
                     allocatedSize = 0;
@@ -142,51 +144,4 @@ public:
     }
 };
 
-// Multi processor version, use with OpenMP
-template <class T> class AlignedBufferMP
-{
-private:
-    MyMutex mtx;
-    std::vector<AlignedBuffer<T>*> buffers;
-    size_t size;
-
-public:
-    explicit AlignedBufferMP(size_t sizeP)
-    {
-        size = sizeP;
-    }
-
-    ~AlignedBufferMP()
-    {
-        for (size_t i = 0; i < buffers.size(); i++) {
-            delete buffers[i];
-        }
-    }
-
-    AlignedBuffer<T>* acquire()
-    {
-        MyMutex::MyLock lock(mtx);
-
-        // Find available buffer
-        for (size_t i = 0; i < buffers.size(); i++) {
-            if (!buffers[i]->inUse) {
-                buffers[i]->inUse = true;
-                return buffers[i];
-            }
-        }
-
-        // Add new buffer if nothing is free
-        AlignedBuffer<T>* buffer = new AlignedBuffer<T>(size);
-        buffers.push_back(buffer);
-
-        return buffer;
-    }
-
-    void release(AlignedBuffer<T>* buffer)
-    {
-        MyMutex::MyLock lock(mtx);
-
-        buffer->inUse = false;
-    }
-};
 #endif

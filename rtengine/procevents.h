@@ -26,7 +26,7 @@ namespace rtengine
 
 
 // Aligned so the first entry starts on line 30
-enum ProcEvent {
+enum ProcEventCode {
     EvPhotoLoaded = 0,
     EvProfileLoaded = 1,
     EvProfileChanged = 2,
@@ -514,13 +514,15 @@ enum ProcEvent {
     EvLensCorrMode = 484,
     EvLensCorrLensfunCamera = 485,
     EvLensCorrLensfunLens = 486,
-    EvLocrgbenaexpose = 487,
-    EvlocalwbEnabled = 488,
-    EvlocalwblocY = 489,
-    EvlocalwblocX = 490,
-    EvlocalwbCenter = 491,
-    EvlocalwbDegree = 492,
-    Evlocalwbtransit = 493,
+
+    EvTMFattalEnabled = 487,
+    EvTMFattalThreshold = 488,
+    EvTMFattalAmount = 489,
+    EvWBEnabled = 490,
+    EvRGBEnabled = 491,
+    EvLEnabled = 492,
+    EvPixelShiftOneGreen = 493,
+
     EvlocalwblocYT = 494,
     EvlocalwblocXL = 495,
     EvlocalwbSmet = 496,
@@ -542,12 +544,61 @@ enum ProcEvent {
     EvlocalwbwbMethod = 512,
     Evlocalwbgamma = 513,
     EvlocalwbwbcamMethod = 514,
-	EvWBcamMethod = 515,
-	EvWBcat02 = 516,
-	
+    EvWBcamMethod = 515,
+    EvWBcat02 = 516,
+    EvLocrgbenaexpose = 517,
+    EvlocalwbEnabled = 518,
+    EvlocalwblocY = 519,
+    EvlocalwblocX = 520,
+    EvlocalwbCenter = 521,
+    EvlocalwbDegree = 522,
+    Evlocalwbtransit = 523,
     NUMOFEVENTS
 
 };
+
+
+class ProcEvent
+{
+public:
+    ProcEvent(): code_(0) {}
+    ProcEvent(ProcEventCode code): code_(code) {}
+    explicit ProcEvent(int code): code_(code) {}
+    operator int()
+    {
+        return code_;
+    }
+
+private:
+    int code_;
+};
+
+
+inline bool operator==(ProcEvent a, ProcEvent b)
+{
+    return int(a) == int(b);
+}
+inline bool operator==(ProcEvent a, ProcEventCode b)
+{
+    return int(a) == int(b);
+}
+inline bool operator==(ProcEventCode a, ProcEvent b)
+{
+    return int(a) == int(b);
+}
+inline bool operator!=(ProcEvent a, ProcEvent b)
+{
+    return int(a) != int(b);
+}
+inline bool operator!=(ProcEvent a, ProcEventCode b)
+{
+    return int(a) != int(b);
+}
+inline bool operator!=(ProcEventCode a, ProcEvent b)
+{
+    return int(a) != int(b);
+}
+
 }
 #endif
 

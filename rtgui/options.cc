@@ -309,7 +309,6 @@ void Options::setDefaults ()
     saveFormat.format = "jpg";
     saveFormat.jpegQuality = 92;
     saveFormat.jpegSubSamp = 2;
-    saveFormat.pngCompression = 6;
     saveFormat.pngBits = 8;
     saveFormat.tiffBits = 16;
     saveFormat.tiffUncompressed = true;
@@ -318,7 +317,6 @@ void Options::setDefaults ()
     saveFormatBatch.format = "jpg";
     saveFormatBatch.jpegQuality = 92;
     saveFormatBatch.jpegSubSamp = 2;
-    saveFormatBatch.pngCompression = 6;
     saveFormatBatch.pngBits = 8;
     saveFormatBatch.tiffBits = 16;
     saveFormatBatch.tiffUncompressed = true;
@@ -428,7 +426,6 @@ void Options::setDefaults ()
     tabbedUI = false;
     mainNBVertical = true;
     multiDisplayMode = 0;
-    tunnelMetaData = true;
     histogramPosition = 1;
     histogramBar = true;
     histogramFullMode = false;
@@ -626,6 +623,8 @@ void Options::setDefaults ()
     gimpPluginShowInfoDialog = true;
     maxRecentFolders = 15;
     rtSettings.lensfunDbDirectory = ""; // set also in main.cc and main-cli.cc
+    cropGuides = CROP_GUIDE_FULL;
+    cropAutoFit = false;
 }
 
 Options* Options::copyFrom (Options* other)
@@ -818,10 +817,6 @@ void Options::readFromFile (Glib::ustring fname)
                     saveFormat.jpegSubSamp = keyFile.get_integer ("Output", "JpegSubSamp");
                 }
 
-                if (keyFile.has_key ("Output", "PngCompression")) {
-                    saveFormat.pngCompression = keyFile.get_integer ("Output", "PngCompression");
-                }
-
                 if (keyFile.has_key ("Output", "PngBps")) {
                     saveFormat.pngBits = keyFile.get_integer ("Output", "PngBps");
                 }
@@ -849,10 +844,6 @@ void Options::readFromFile (Glib::ustring fname)
 
                 if (keyFile.has_key ("Output", "JpegSubSampBatch")) {
                     saveFormatBatch.jpegSubSamp = keyFile.get_integer ("Output", "JpegSubSampBatch");
-                }
-
-                if (keyFile.has_key ("Output", "PngCompressionBatch")) {
-                    saveFormatBatch.pngCompression = keyFile.get_integer ("Output", "PngCompressionBatch");
                 }
 
                 if (keyFile.has_key ("Output", "PngBpsBatch")) {
@@ -905,10 +896,6 @@ void Options::readFromFile (Glib::ustring fname)
 
                 if (keyFile.has_key ("Output", "OverwriteOutputFile")) {
                     overwriteOutputFile = keyFile.get_boolean ("Output", "OverwriteOutputFile");
-                }
-
-                if (keyFile.has_key ("Output", "TunnelMetaData")) {
-                    tunnelMetaData = keyFile.get_boolean ("Output", "TunnelMetaData");
                 }
             }
 
@@ -1408,10 +1395,14 @@ void Options::readFromFile (Glib::ustring fname)
                     FileBrowserToolbarSingleRow = keyFile.get_boolean ("GUI", "FileBrowserToolbarSingleRow");
                 }
 
+#if defined(__linux__) && ((GTK_MAJOR_VERSION == 3 && GTK_MINOR_VERSION > 18) || GTK_MAJOR_VERSION > 3)
+                // Cannot scroll toolbox with mousewheel when HideTPVScrollbar=true #3413
+                hideTPVScrollbar = false;
+#else
                 if (keyFile.has_key ("GUI", "HideTPVScrollbar")) {
                     hideTPVScrollbar = keyFile.get_boolean ("GUI", "HideTPVScrollbar");
                 }
-
+#endif
                 if (keyFile.has_key ("GUI", "UseIconNoText")) {
                     UseIconNoText = keyFile.get_boolean ("GUI", "UseIconNoText");
                 }
@@ -1428,6 +1419,12 @@ void Options::readFromFile (Glib::ustring fname)
             if (keyFile.has_group ("Crop Settings")) {
                 if (keyFile.has_key ("Crop Settings", "PPI")) {
                     cropPPI = keyFile.get_integer ("Crop Settings", "PPI");
+                }
+                if (keyFile.has_key("Crop Settings", "GuidesMode")) {
+                    cropGuides = CropGuidesMode(std::max(int(CROP_GUIDE_NONE), std::min(keyFile.get_integer("Crop Settings", "GuidesMode"), int(CROP_GUIDE_FULL))));
+                }
+                if (keyFile.has_key("Crop Settings", "AutoFit")) {
+                    cropAutoFit = keyFile.get_boolean("Crop Settings", "AutoFit");
                 }
             }
 
@@ -1964,7 +1961,6 @@ void Options::saveToFile (Glib::ustring fname)
         keyFile.set_string  ("Output", "Format", saveFormat.format);
         keyFile.set_integer ("Output", "JpegQuality", saveFormat.jpegQuality);
         keyFile.set_integer ("Output", "JpegSubSamp", saveFormat.jpegSubSamp);
-        keyFile.set_integer ("Output", "PngCompression", saveFormat.pngCompression);
         keyFile.set_integer ("Output", "PngBps", saveFormat.pngBits);
         keyFile.set_integer ("Output", "TiffBps", saveFormat.tiffBits);
         keyFile.set_boolean ("Output", "TiffUncompressed", saveFormat.tiffUncompressed);
@@ -1973,7 +1969,6 @@ void Options::saveToFile (Glib::ustring fname)
         keyFile.set_string  ("Output", "FormatBatch", saveFormatBatch.format);
         keyFile.set_integer ("Output", "JpegQualityBatch", saveFormatBatch.jpegQuality);
         keyFile.set_integer ("Output", "JpegSubSampBatch", saveFormatBatch.jpegSubSamp);
-        keyFile.set_integer ("Output", "PngCompressionBatch", saveFormatBatch.pngCompression);
         keyFile.set_integer ("Output", "PngBpsBatch", saveFormatBatch.pngBits);
         keyFile.set_integer ("Output", "TiffBpsBatch", saveFormatBatch.tiffBits);
         keyFile.set_boolean ("Output", "TiffUncompressedBatch", saveFormatBatch.tiffUncompressed);
@@ -1987,7 +1982,6 @@ void Options::saveToFile (Glib::ustring fname)
         keyFile.set_boolean ("Output", "UsePathTemplate", saveUsePathTemplate);
         keyFile.set_string  ("Output", "LastSaveAsPath", lastSaveAsPath);
         keyFile.set_boolean ("Output", "OverwriteOutputFile", overwriteOutputFile);
-        keyFile.set_boolean ("Output", "TunnelMetaData", tunnelMetaData);
 
         keyFile.set_string  ("Profiles", "Directory", profilePath);
         keyFile.set_boolean ("Profiles", "UseBundledProfiles", useBundledProfiles);
@@ -2070,6 +2064,8 @@ void Options::saveToFile (Glib::ustring fname)
         //keyFile.set_integer_list ("GUI", "CurvePanelsExpanded", crvopen);
 
         keyFile.set_integer ("Crop Settings", "PPI", cropPPI);
+        keyFile.set_integer("Crop Settings", "GuidesMode", cropGuides);
+        keyFile.set_boolean("Crop Settings", "AutoFit", cropAutoFit);
 
         keyFile.set_string  ("Color Management", "PrinterProfile", rtSettings.printerProfile);
         keyFile.set_integer ("Color Management", "PrinterIntent", rtSettings.printerIntent);
@@ -2365,7 +2361,7 @@ void Options::load (bool lightweight)
         }
     }
 
-    langMgr.load ({localeTranslation, languageTranslation, defaultTranslation});
+    langMgr.load (options.language, {localeTranslation, languageTranslation, defaultTranslation});
 
     rtengine::init (&options.rtSettings, argv0, rtdir, !lightweight);
 }

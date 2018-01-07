@@ -19,24 +19,22 @@
 #ifndef _COLORTEMP_
 #define _COLORTEMP_
 
-#include <glibmm.h>
 #include <cmath>
-#include "iccstore.h"
-#include "procparams.h"
-
-#define pow_F(a,b) (xexpf(b*xlogf(a)))
+//#include "iccstore.h"
+//#include "procparams.h"
+#include <map>
+#include <string>
 
 namespace rtengine
 {
 
-#define MINTEMP 1500
-#define MAXTEMP 60000
-#define MINGREEN 0.02
-#define MAXGREEN 10.0
-#define MINEQUAL 0.8
-#define MAXEQUAL 1.5
-
-#define INITIALBLACKBODY 4000
+constexpr double MINTEMP = 1500.0;
+constexpr double MAXTEMP = 60000.0;
+constexpr double MINGREEN = 0.02;
+constexpr double MAXGREEN = 10.0;
+constexpr double MINEQUAL = 0.8;
+constexpr double MAXEQUAL = 1.5;
+constexpr double INITIALBLACKBODY = 4000.0;
 
 
 class ColorTemp
@@ -47,31 +45,31 @@ private:
     double green;
     double equal;
     std::string method;
-    static void clip (double &temp, double &green);
-    static void clip (double &temp, double &green, double &equal);
-    int XYZtoCorColorTemp (double x0, double y0, double z0, double &temp) const;
-    void temp2mul (double temp, double green, double equal, double& rmul, double& gmul, double& bmul) const;
-
+    static void clip(double &temp, double &green);
+    static void clip(double &temp, double &green, double &equal);
+    int XYZtoCorColorTemp(double x0, double y0, double z0, double &temp) const;
+    void temp2mul(double temp, double green, double equal, double& rmul, double& gmul, double& bmul) const;
+    const static std::map<std::string, const double *> spectMap;
 public:
 
-    ColorTemp () : temp (-1.), green (-1.), equal (1.), method ("Custom") {}
-    explicit ColorTemp (double e) : temp (-1.), green (-1.), equal (e), method ("Custom") {}
-    ColorTemp (double t, double g, double e, const Glib::ustring &m);
-    ColorTemp (double mulr, double mulg, double mulb, double e);
-    static void tempxy (double &temp, float **Tx, float **Ty, float **TYY, float **Ta, float **Tb, float **TL, float **TX, float **TY, float **TZ);
-    static void xyz_to_cat02floatraw ( float & r, float & g, float & b, float x, float y, float z);
-    static void cat02_to_xyzfloatraw ( float & x, float & y, float & z, float r, float g, float b);
+    ColorTemp() : temp(-1.), green(-1.), equal(1.), method("Custom") {}
+    explicit ColorTemp(double e) : temp(-1.), green(-1.), equal(e), method("Custom") {}
+    ColorTemp(double t, double g, double e, const std::string &m);
+    ColorTemp(double mulr, double mulg, double mulb, double e);
+    static void tempxy(double &temp, float **Tx, float **Ty, float **TYY, float **Ta, float **Tb, float **TL, float **TX, float **TY, float **TZ);
+    static void xyz_to_cat02floatraw(float & r, float & g, float & b, float x, float y, float z);
+    static void cat02_to_xyzfloatraw(float & x, float & y, float & z, float r, float g, float b);
 
-    void update (const double rmul, const double gmul, const double bmul, const double equal, const double tempBias = 0.0)
+    void update(const double rmul, const double gmul, const double bmul, const double equal, const double tempBias = 0.0)
     {
         this->equal = equal;
-        mul2temp (rmul, gmul, bmul, this->equal, temp, green);
+        mul2temp(rmul, gmul, bmul, this->equal, temp, green);
 
         if (tempBias != 0.0 && tempBias >= -1.0 && tempBias <= 1.0) {
             temp += temp * tempBias;
         }
     }
-    void useDefaults (const double equal)
+    void useDefaults(const double equal)
     {
         temp = 6504;    // Values copied from procparams.cc
         green = 1.0;
@@ -82,43 +80,43 @@ public:
     {
         return method;
     }
-    inline double getTemp () const
+    inline double getTemp() const
     {
         return temp;
     }
-    inline double getGreen () const
+    inline double getGreen() const
     {
         return green;
     }
-    inline double getEqual () const
+    inline double getEqual() const
     {
         return equal;
     }
 
-    void  getMultipliers (double &mulr, double &mulg, double &mulb) const
+    void  getMultipliers(double &mulr, double &mulg, double &mulb) const
     {
-        temp2mul (temp, green, equal, mulr, mulg, mulb);
+        temp2mul(temp, green, equal, mulr, mulg, mulb);
     }
 
-    void mul2temp (const double rmul, const double gmul, const double bmul, const double equal, double& temp, double& green) const;
-    static void temp2mulxyz (double tem, double gree, const std::string &method, double &Xxyz, double &Zxyz);
+    void mul2temp(const double rmul, const double gmul, const double bmul, const double equal, double& temp, double& green) const;
+    static void temp2mulxyz(double tem, const std::string &method, double &Xxyz, double &Zxyz);
 
-    static void cieCAT02 (double Xw, double Yw, double Zw, double &CAM02BB00, double &CAM02BB01, double &CAM02BB02, double &CAM02BB10, double &CAM02BB11, double &CAM02BB12, double &CAM02BB20, double &CAM02BB21, double &CAM02BB22, double adap );
-    static void icieCAT02 (double Xw, double Yw, double Zw, double &iCAM02BB00, double &iCAM02BB01, double &iCAM02BB02, double &iCAM02BB10, double &iCAM02BB11, double &iCAM02BB12, double &iCAM02BB20, double &iCAM02BB21, double &iCAM02BB22, double adap );
+    static void cieCAT02(double Xw, double Yw, double Zw, double &CAM02BB00, double &CAM02BB01, double &CAM02BB02, double &CAM02BB10, double &CAM02BB11, double &CAM02BB12, double &CAM02BB20, double &CAM02BB21, double &CAM02BB22, double adap);
+    static void icieCAT02(double Xw, double Yw, double Zw, double &iCAM02BB00, double &iCAM02BB01, double &iCAM02BB02, double &iCAM02BB10, double &iCAM02BB11, double &iCAM02BB12, double &iCAM02BB20, double &iCAM02BB21, double &iCAM02BB22, double adap);
     //static    void CAT02 (Imagefloat* baseImg, const ProcParams* params);
     //static void ciecam_02 (LabImage* lab, const ProcParams* params);
 
     bool operator== (const ColorTemp& other) const
     {
-        return fabs (temp - other.temp) < 1e-10 && fabs (green - other.green) < 1e-10;
+        return fabs(temp - other.temp) < 1e-10 && fabs(green - other.green) < 1e-10;
     }
     bool operator!= (const ColorTemp& other) const
     {
-        return ! (*this == other);
+        return !(*this == other);
     }
 
-    static double blackbody_spect (double wavelength, double temperature);
-    static double daylight_spect  (double wavelength, double m1, double m2);
+    static double blackbody_spect(double wavelength, double temperature);
+    static double daylight_spect(double wavelength, double m1, double m2);
     static const double Cloudy6200_spect[97];
     static const double Daylight5300_spect[97];
     static const double Shade7600_spect[97];
@@ -150,9 +148,9 @@ public:
 
 
     //spectral data 8 color Colorchecker24
-    static double get_spectral_color (double wavelength, const double* array)
+    static double get_spectral_color(double wavelength, const double* array)
     {
-        int wlm = (int) ((wavelength - 350.) / 5.);
+        int wlm = (int)((wavelength - 350.) / 5.);
         return (array[wlm]);
     }
 
@@ -233,13 +231,13 @@ public:
     static const double ColabSky60_0_m31_spect[97];//Sky L=60
     static const double ColabSky42_0_m24_spect[97];//Sky L=42
 
-    static void spectrum_to_xyz_daylight  (double _m1, double _m2, double &x, double &y, double &z);
-    static void spectrum_to_xyz_blackbody (double _temp, double &x, double &y, double &z);
-    static void spectrum_to_xyz_preset    (const double* spec_intens, double &x, double &y, double &z);
+    static void spectrum_to_xyz_daylight(double _m1, double _m2, double &x, double &y, double &z);
+    static void spectrum_to_xyz_blackbody(double _temp, double &x, double &y, double &z);
+    static void spectrum_to_xyz_preset(const double* spec_intens, double &x, double &y, double &z);
 
-    static void spectrum_to_color_xyz_daylight  (const double* spec_color, double _m1, double _m2, double &xx, double &yy, double &zz);
-    static void spectrum_to_color_xyz_blackbody (const double* spec_color, double _temp, double &xx, double &yy, double &zz);
-    static void spectrum_to_color_xyz_preset    (const double* spec_color, const double* spec_intens, double &xx, double &yy, double &zz);
+    static void spectrum_to_color_xyz_daylight(const double* spec_color, double _m1, double _m2, double &xx, double &yy, double &zz);
+    static void spectrum_to_color_xyz_blackbody(const double* spec_color, double _temp, double &xx, double &yy, double &zz);
+    static void spectrum_to_color_xyz_preset(const double* spec_color, const double* spec_intens, double &xx, double &yy, double &zz);
 
 };
 }

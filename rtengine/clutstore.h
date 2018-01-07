@@ -13,7 +13,7 @@ namespace rtengine
 {
 
 class HaldCLUT final :
-    public NonCopyable
+        public NonCopyable
 {
 public:
     HaldCLUT();
@@ -52,7 +52,7 @@ private:
 };
 
 class CLUTStore final :
-    public NonCopyable
+        public NonCopyable
 {
 public:
     static CLUTStore& getInstance();

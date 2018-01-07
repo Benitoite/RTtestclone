@@ -24,7 +24,7 @@
 #include "iptcpairs.h"
 #include "imagesource.h"
 #include "rt_math.h"
-
+#pragma GCC diagnostic warning "-Wextra"
 #define PRINT_HDR_PS_DETECTION 0
 
 using namespace rtengine;
@@ -473,15 +473,15 @@ FrameData::FrameData (rtexif::TagDirectory* frameRootDir_, rtexif::TagDirectory*
     // -----------------------  Special file type detection (HDR, PixelShift) ------------------------
 
 
-    uint16 bitspersample = 0, sampleformat = 0, photometric = 0, compression = 0;
-    rtexif::Tag* bps = frameRootDir->findTag("BitsPerSample");
-    rtexif::Tag* spp = frameRootDir->findTag("SamplesPerPixel");
-    rtexif::Tag* sf = frameRootDir->findTag("SampleFormat");
-    rtexif::Tag* pi = frameRootDir->findTag("PhotometricInterpretation");
-    rtexif::Tag* c = frameRootDir->findTag("Compression");
+    uint16 bitspersample = 0, samplesperpixel = 0, sampleformat = 0, photometric = 0, compression = 0;
+    const rtexif::Tag* const bps = frameRootDir->findTag("BitsPerSample");
+    const rtexif::Tag* const spp = frameRootDir->findTag("SamplesPerPixel");
+    const rtexif::Tag* const sf = frameRootDir->findTag("SampleFormat");
+    const rtexif::Tag* const pi = frameRootDir->findTag("PhotometricInterpretation");
+    const rtexif::Tag* const c = frameRootDir->findTag("Compression");
 
     if (mnote && (!make.compare (0, 6, "PENTAX") || (!make.compare (0, 5, "RICOH") && !model.compare (0, 6, "PENTAX")))) {
-        rtexif::Tag* hdr = mnote->findTag("HDR");
+        const rtexif::Tag* const hdr = mnote->findTag("HDR");
         if (hdr) {
             if (hdr->toInt() > 0 && hdr->toInt(2) > 0) {
                 isHDR = true;
@@ -490,7 +490,7 @@ FrameData::FrameData (rtexif::TagDirectory* frameRootDir_, rtexif::TagDirectory*
 #endif
             }
         } else {
-            rtexif::Tag* dm = mnote->findTag("DriveMode");
+            const rtexif::Tag* const dm = mnote->findTag("DriveMode");
             if (dm) {
                 char buffer[60];
                 dm->toString(buffer, 3);
@@ -505,7 +505,7 @@ FrameData::FrameData (rtexif::TagDirectory* frameRootDir_, rtexif::TagDirectory*
         }
 
         if (!isHDR) {
-            rtexif::Tag* q = mnote->findTag("Quality");
+            const rtexif::Tag* const q = mnote->findTag("Quality");
             if (q && q->toInt() == 7) {
                 isPixelShift = true;
 #if PRINT_HDR_PS_DETECTION
@@ -530,11 +530,16 @@ FrameData::FrameData (rtexif::TagDirectory* frameRootDir_, rtexif::TagDirectory*
         sampleformat = sf->toInt();
     }
 
-    if ((!bps & !spp) || !pi) {
+    if (
+        !bps
+        || !spp
+        || !pi
+    ) {
         return;
     }
 
     bitspersample = bps->toInt();
+    samplesperpixel = spp->toInt();
 
     photometric = pi->toInt();
     if (photometric == PHOTOMETRIC_LOGLUV) {
@@ -580,6 +585,26 @@ FrameData::FrameData (rtexif::TagDirectory* frameRootDir_, rtexif::TagDirectory*
                 sampleFormat = IIOSF_UNSIGNED_CHAR;
             } else if (bitspersample <= 16) {
                 sampleFormat = IIOSF_UNSIGNED_SHORT;
+            }
+        }
+    } else if (photometric == 34892 || photometric == 32892  /* Linear RAW (see DNG spec ; 32892 seem to be a flaw from Sony's ARQ files) */) {
+        if (sampleformat == SAMPLEFORMAT_IEEEFP) {
+            sampleFormat = IIOSF_FLOAT;
+            isHDR = true;
+#if PRINT_HDR_PS_DETECTION
+            printf("HDR detected ! -> sampleFormat = %d\n", sampleFormat);
+#endif
+        } else if (sampleformat == SAMPLEFORMAT_INT || sampleformat == SAMPLEFORMAT_UINT) {
+            if (bitspersample == 8) {   // shouldn't occur...
+                sampleFormat = IIOSF_UNSIGNED_CHAR;
+            } else if (bitspersample <= 16) {
+                sampleFormat = IIOSF_UNSIGNED_SHORT;
+                if (mnote && (!make.compare (0, 4, "SONY")) && bitspersample >= 12 && samplesperpixel == 4) {
+                    isPixelShift = true;
+#if PRINT_HDR_PS_DETECTION
+                    printf("PixelShift detected ! -> \"Make\" = SONY, bitsPerPixel > 8, samplesPerPixel == 4\n");
+#endif
+                }
             }
         }
     } else if (photometric == PHOTOMETRIC_LOGLUV) {
@@ -764,7 +789,7 @@ FrameData *FramesData::getFrameData (unsigned int frame) const
 
 bool FramesData::getPixelShift (unsigned int frame) const
 {
-    // So far only Pentax provide multi-frame HDR file.
+    // So far only Pentax and Sony provide multi-frame HDR file.
     // Only the first frame contains the HDR tag
     // If more brand have to be supported, this rule may need
     // to evolve
@@ -813,8 +838,6 @@ rtexif::TagDirectory* FramesData::getBestExifData (ImageSource *imgSource, procp
         */
         }
 
-        frames[imgNum]->getExifData ();
-
         td = getFrameExifData (imgNum);
         rtexif::Tag* makeTag;
         if (td && (makeTag = td->findTag("Make", true))) {
@@ -857,8 +880,7 @@ bool FramesData::hasIPTC (unsigned int frame) const
 tm FramesData::getDateTime (unsigned int frame) const
 {
     if (frames.empty() || frame >= frames.size() ) {
-        tm emptytm = {0, 0, 0, 0, 0, 0, 0, 0, 0};
-        return emptytm;
+        return {};
     } else {
         return frames.at(frame)->getDateTime ();
     }
@@ -1041,7 +1063,7 @@ failure:
 
 }
 
-FramesData::FramesData (const Glib::ustring& fname, std::unique_ptr<RawMetaDataLocation> rml, bool firstFrameOnly, bool loadAll) :
+FramesData::FramesData (const Glib::ustring& fname, std::unique_ptr<RawMetaDataLocation> rml, bool firstFrameOnly) :
     iptc(nullptr), dcrawFrameCount (0)
 {
     if (rml && (rml->exifBase >= 0 || rml->ciffBase >= 0)) {

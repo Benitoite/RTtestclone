@@ -36,54 +36,54 @@ protected:
     bool rgbSourceModified;
 
     //void transformPixel             (int x, int y, int tran, int& tx, int& ty);
-    void getSampleFormat (const Glib::ustring &fname, IIOSampleFormat &sFormat, IIOSampleArrangement &sArrangement);
+    void getSampleFormat(const Glib::ustring &fname, IIOSampleFormat &sFormat, IIOSampleArrangement &sArrangement);
 
 public:
-    StdImageSource ();
-    ~StdImageSource ();
+    StdImageSource();
+    ~StdImageSource();
 
-    int         load        (const Glib::ustring &fname, int imageNum = 0, bool batch = false);
-    void        getImage    (const ColorTemp &ctemp, int tran, Imagefloat* image, const PreviewProps &pp, const ToneCurveParams &hrp, const ColorManagementParams &cmp, const RAWParams &raw, const WBParams &wbp);
-    void        getImage_local    (int begx, int begy, int yEn, int xEn, int cx, int cy, const ColorTemp &ctemp, int tran, Imagefloat* image, Imagefloat* bufimage, const PreviewProps &pp, const ToneCurveParams &hrp, const ColorManagementParams &cmp, const RAWParams &raw);
-    void        getrgbloc (bool local, bool gamma, bool  cat02, int begx, int begy, int yEn, int xEn, int cx, int cy, int bf_h, int bf_w);
-    ColorTemp   getWB       () const
+    int         load(const Glib::ustring &fname);
+    void        getImage(const ColorTemp &ctemp, int tran, Imagefloat* image, const PreviewProps &pp, const ToneCurveParams &hrp, const ColorManagementParams &cmp, const RAWParams &raw, const WBParams &wbp);
+    void        getImage_local(int begx, int begy, int yEn, int xEn, int cx, int cy, const ColorTemp &ctemp, int tran, Imagefloat* image, Imagefloat* bufimage, const PreviewProps &pp, const ToneCurveParams &hrp, const ColorManagementParams &cmp, const RAWParams &raw);
+    void        getrgbloc(bool local, bool gamma, bool  cat02, int begx, int begy, int yEn, int xEn, int cx, int cy, int bf_h, int bf_w);
+    ColorTemp   getWB() const
     {
         return wb;
     }
-    void        getAutoWBMultipliers (double &rm, double &gm, double &bm);
-    ColorTemp   getSpotWB   (std::vector<Coord2D> &red, std::vector<Coord2D> &green, std::vector<Coord2D> &blue, int tran, double equal);
-    void        WBauto (array2D<float> &redloc, array2D<float> &greenloc, array2D<float> &blueloc, int bfw, int bfh, double &avg_rm, double &avg_gm, double &avg_bm, const LocrgbParams &localr, const WBParams & wbpar, int begx, int begy, int yEn, int xEn, int cx, int cy, const ColorManagementParams &cmp);
-    void        getAutoWBMultipliersloc (int begx, int begy, int yEn, int xEn, int cx, int cy, int bf_h, int bf_w, double &rm, double &gm, double &bm, const LocrgbParams &localr, const WBParams & wbpar, const ColorManagementParams &cmp);
+    void        getAutoWBMultipliers(double &rm, double &gm, double &bm);
+    ColorTemp   getSpotWB(std::vector<Coord2D> &red, std::vector<Coord2D> &green, std::vector<Coord2D> &blue, int tran, double equal);
+    void        WBauto(array2D<float> &redloc, array2D<float> &greenloc, array2D<float> &blueloc, int bfw, int bfh, double &avg_rm, double &avg_gm, double &avg_bm, const LocrgbParams &localr, const WBParams & wbpar, int begx, int begy, int yEn, int xEn, int cx, int cy, const ColorManagementParams &cmp);
+    void        getAutoWBMultipliersloc(int begx, int begy, int yEn, int xEn, int cx, int cy, int bf_h, int bf_w, double &rm, double &gm, double &bm, const LocrgbParams &localr, const WBParams & wbpar, const ColorManagementParams &cmp);
 
     eSensorType getSensorType() const
     {
         return ST_NONE;
     }
 
-    bool        isWBProviderReady ()
+    bool        isWBProviderReady()
     {
         return true;
     };
 
-    void        getAutoExpHistogram (LUTu &histogram, int& histcompr);
+    void        getAutoExpHistogram(LUTu &histogram, int& histcompr);
 
-    double      getDefGain  () const
+    double      getDefGain() const
     {
         return 0.0;
     }
 
-    void        getFullSize (int& w, int& h, int tr = TR_NONE);
-    void        getSize     (const PreviewProps &pp, int& w, int& h);
+    void        getFullSize(int& w, int& h, int tr = TR_NONE);
+    void        getSize(const PreviewProps &pp, int& w, int& h);
 
-    FrameData*  getImageData (unsigned int frameNum)
+    FrameData*  getImageData(unsigned int frameNum)
     {
-        return idata->getFrameData (frameNum);
+        return idata->getFrameData(frameNum);
     }
-    ImageIO*    getImageIO   ()
+    ImageIO*    getImageIO()
     {
         return img;
     }
-    ImageMatrices* getImageMatrices ()
+    ImageMatrices* getImageMatrices()
     {
         return (ImageMatrices*)nullptr;
     }
@@ -92,26 +92,26 @@ public:
         return false;
     }
 
-    void        setProgressListener (ProgressListener* pl)
+    void        setProgressListener(ProgressListener* pl)
     {
         plistener = pl;
     }
 
-    void        convertColorSpace (Imagefloat* image, const ColorManagementParams &cmp, const ColorTemp &wb); // RAWParams raw will not be used for non-raw files (see imagesource.h)
-    static void colorSpaceConversion (Imagefloat* im, const ColorManagementParams &cmp, cmsHPROFILE embedded, IIOSampleFormat sampleFormat);
+    void        convertColorSpace(Imagefloat* image, const ColorManagementParams &cmp, const ColorTemp &wb);  // RAWParams raw will not be used for non-raw files (see imagesource.h)
+    static void colorSpaceConversion(Imagefloat* im, const ColorManagementParams &cmp, cmsHPROFILE embedded, IIOSampleFormat sampleFormat);
 
     bool        isRGBSourceModified() const
     {
         return rgbSourceModified;
     }
-    void setCurrentFrame (unsigned int frameNum) {}
+    void setCurrentFrame(unsigned int frameNum) {}
     int getFrameCount()
     {
         return 1;
     }
 
 
-    void getRawValues (int x, int y, int rotate, int &R, int &G, int &B)
+    void getRawValues(int x, int y, int rotate, int &R, int &G, int &B)
     {
         R = G = B = 0;
     }

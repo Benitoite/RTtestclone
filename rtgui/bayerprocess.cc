@@ -29,8 +29,8 @@ BayerProcess::BayerProcess () : FoldableToolPanel(this, "bayerprocess", M("TP_RA
     hb1->pack_start (*Gtk::manage (new Gtk::Label ( M("TP_RAW_DMETHOD") + ": ")), Gtk::PACK_SHRINK, 4);
     method = Gtk::manage (new MyComboBoxText ());
 
-    for( size_t i = 0; i < procparams::RAWParams::BayerSensor::numMethods; i++) {
-        method->append(M("TP_RAW_" + Glib::ustring(procparams::RAWParams::BayerSensor::methodstring[i]).uppercase()));
+    for(const auto method_string : procparams::RAWParams::BayerSensor::getMethodStrings()) {
+        method->append(M("TP_RAW_" + Glib::ustring(method_string).uppercase()));
     }
 
     method->set_active(0);
@@ -112,7 +112,7 @@ BayerProcess::BayerProcess () : FoldableToolPanel(this, "bayerprocess", M("TP_RA
     pixelShiftMotionMethod->append(M("TP_RAW_PIXELSHIFTMM_OFF"));
     pixelShiftMotionMethod->append(M("TP_RAW_PIXELSHIFTMM_AUTO"));
     pixelShiftMotionMethod->append(M("TP_RAW_PIXELSHIFTMM_CUSTOM"));
-    pixelShiftMotionMethod->set_active(RAWParams::BayerSensor::ePSMotionCorrectionMethod::Automatic);
+    pixelShiftMotionMethod->set_active(toUnderlying(RAWParams::BayerSensor::PSMotionCorrectionMethod::AUTO));
     pixelShiftMotionMethod->show();
     hb3->pack_start(*pixelShiftMotionMethod);
     pixelShiftFrame->pack_start(*hb3);
@@ -224,6 +224,11 @@ BayerProcess::BayerProcess () : FoldableToolPanel(this, "bayerprocess", M("TP_RA
     pixelShiftLmmse->setCheckBoxListener (this);
     pixelShiftLmmse->set_tooltip_text (M("TP_RAW_PIXELSHIFTLMMSE_TOOLTIP"));
     pixelShiftOptions->pack_start(*pixelShiftLmmse);
+
+//    pixelShiftOneGreen = Gtk::manage (new CheckBox(M("TP_RAW_PIXELSHIFTONEGREEN"), multiImage));
+//    pixelShiftOneGreen->setCheckBoxListener (this);
+//    pixelShiftOneGreen->set_tooltip_text (M("TP_RAW_PIXELSHIFTONEGREEN_TOOLTIP"));
+//    pixelShiftOptions->pack_start(*pixelShiftOneGreen);
 
 #ifdef PIXELSHIFTDEV
     pixelShiftMotion = Gtk::manage (new Adjuster (M("TP_RAW_PIXELSHIFTMOTION"), 0, 100, 1, 70));
@@ -347,11 +352,11 @@ void BayerProcess::read(const rtengine::procparams::ProcParams* pp, const Params
     pixelShiftMotionCorrection->block (true);
 #endif
 
-    method->set_active(procparams::RAWParams::BayerSensor::numMethods);
+    method->set_active(std::numeric_limits<int>::max());
     imageNumber->set_active(pp->raw.bayersensor.imageNum);
 
-    for( size_t i = 0; i < procparams::RAWParams::BayerSensor::numMethods; i++) {
-        if( pp->raw.bayersensor.method == procparams::RAWParams::BayerSensor::methodstring[i]) {
+    for (size_t i = 0; i < procparams::RAWParams::BayerSensor::getMethodStrings().size(); ++i) {
+        if (pp->raw.bayersensor.method == procparams::RAWParams::BayerSensor::getMethodStrings()[i]) {
             method->set_active(i);
             oldMethod = i;
             break;
@@ -376,6 +381,7 @@ void BayerProcess::read(const rtengine::procparams::ProcParams* pp, const Params
     }
     pixelShiftSmooth->setValue (pp->raw.bayersensor.pixelShiftSmoothFactor);
     pixelShiftLmmse->setValue (pp->raw.bayersensor.pixelShiftLmmse);
+//    pixelShiftOneGreen->setValue (pp->raw.bayersensor.pixelShiftOneGreen);
     pixelShiftEqualBright->setValue (pp->raw.bayersensor.pixelShiftEqualBright);
     pixelShiftEqualBrightChannel->set_sensitive (pp->raw.bayersensor.pixelShiftEqualBright);
     pixelShiftEqualBrightChannel->setValue (pp->raw.bayersensor.pixelShiftEqualBrightChannel);
@@ -427,6 +433,7 @@ void BayerProcess::read(const rtengine::procparams::ProcParams* pp, const Params
         pixelShiftBlur->setEdited (pedited->raw.bayersensor.pixelShiftBlur);
         pixelShiftSmooth->setEditedState ( pedited->raw.bayersensor.pixelShiftSmooth ? Edited : UnEdited);
         pixelShiftLmmse->setEdited (pedited->raw.bayersensor.pixelShiftLmmse);
+//        pixelShiftOneGreen->setEdited (pedited->raw.bayersensor.pixelShiftOneGreen);
         pixelShiftEqualBright->setEdited (pedited->raw.bayersensor.pixelShiftEqualBright);
         pixelShiftEqualBrightChannel->setEdited (pedited->raw.bayersensor.pixelShiftEqualBrightChannel);
         pixelShiftNonGreenCross->setEdited (pedited->raw.bayersensor.pixelShiftNonGreenCross);
@@ -452,7 +459,7 @@ void BayerProcess::read(const rtengine::procparams::ProcParams* pp, const Params
 #endif
 
         if(!pedited->raw.bayersensor.method) {
-            method->set_active(procparams::RAWParams::BayerSensor::numMethods);    // No name
+            method->set_active(std::numeric_limits<int>::max()); // No name
         }
         if(!pedited->raw.bayersensor.imageNum) {
             imageNumber->set_active_text(M("GENERAL_UNCHANGED"));
@@ -468,21 +475,21 @@ void BayerProcess::read(const rtengine::procparams::ProcParams* pp, const Params
     }
 
     if (!batchMode) {
-        if (pp->raw.bayersensor.method == procparams::RAWParams::BayerSensor::methodstring[procparams::RAWParams::BayerSensor::dcb] ||
-                method->get_active_row_number() == procparams::RAWParams::BayerSensor::numMethods) {
+        if (pp->raw.bayersensor.method == procparams::RAWParams::BayerSensor::getMethodString(procparams::RAWParams::BayerSensor::Method::DCB) ||
+                method->get_active_row_number() == std::numeric_limits<int>::max()) {
             dcbOptions->show();
         } else {
             dcbOptions->hide();
         }
-        if (pp->raw.bayersensor.method == procparams::RAWParams::BayerSensor::methodstring[procparams::RAWParams::BayerSensor::lmmse] ||
-                method->get_active_row_number() == procparams::RAWParams::BayerSensor::numMethods) {
+        if (pp->raw.bayersensor.method == procparams::RAWParams::BayerSensor::getMethodString(procparams::RAWParams::BayerSensor::Method::LMMSE) ||
+                method->get_active_row_number() == std::numeric_limits<int>::max()) {
             lmmseOptions->show();
         } else {
             lmmseOptions->hide();
         }
-        if (pp->raw.bayersensor.method == procparams::RAWParams::BayerSensor::methodstring[procparams::RAWParams::BayerSensor::pixelshift] ||
-                method->get_active_row_number() == procparams::RAWParams::BayerSensor::numMethods) {
-            if(pp->raw.bayersensor.pixelShiftMotionCorrectionMethod == RAWParams::BayerSensor::Custom) {
+        if (pp->raw.bayersensor.method == procparams::RAWParams::BayerSensor::getMethodString(procparams::RAWParams::BayerSensor::Method::PIXELSHIFT) ||
+                method->get_active_row_number() == std::numeric_limits<int>::max()) {
+            if(pp->raw.bayersensor.pixelShiftMotionCorrectionMethod == RAWParams::BayerSensor::PSMotionCorrectionMethod::CUSTOM) {
                 pixelShiftOptions->show();
             } else {
                 pixelShiftOptions->hide();
@@ -493,9 +500,9 @@ void BayerProcess::read(const rtengine::procparams::ProcParams* pp, const Params
         }
 
         // Flase color suppression is applied to all demozaicing method, so don't hide anything
-        /*if (pp->raw.bayersensor.method == procparams::RAWParams::BayerSensor::methodstring[procparams::RAWParams::BayerSensor::eahd] ||
-              pp->raw.bayersensor.method == procparams::RAWParams::BayerSensor::methodstring[procparams::RAWParams::BayerSensor::hphd] ||
-              pp->raw.bayersensor.method == procparams::RAWParams::BayerSensor::methodstring[procparams::RAWParams::BayerSensor::vng4])
+        /*if (pp->raw.bayersensor.method == procparams::RAWParams::BayerSensor::getMethodString(procparams::RAWParams::BayerSensor::Method::EAHD) ||
+              pp->raw.bayersensor.method == procparams::RAWParams::BayerSensor::getMethodString(procparams::RAWParams::BayerSensor::Method::HPHD) ||
+              pp->raw.bayersensor.method == procparams::RAWParams::BayerSensor::getMethodString(procparams::RAWParams::BayerSensor::Method::VNG4))
             ccSteps->show();
         else
             ccSteps->hide();*/
@@ -520,7 +527,7 @@ void BayerProcess::write( rtengine::procparams::ProcParams* pp, ParamsEdited* pe
     pp->raw.bayersensor.dcb_enhance = dcbEnhance->getLastActive ();
     //pp->raw.bayersensor.all_enhance = allEnhance->getLastActive ();
     pp->raw.bayersensor.lmmse_iterations = lmmseIterations->getIntValue();
-    pp->raw.bayersensor.pixelShiftMotionCorrectionMethod = (RAWParams::BayerSensor::ePSMotionCorrectionMethod)pixelShiftMotionMethod->get_active_row_number();
+    pp->raw.bayersensor.pixelShiftMotionCorrectionMethod = (RAWParams::BayerSensor::PSMotionCorrectionMethod)pixelShiftMotionMethod->get_active_row_number();
     pp->raw.bayersensor.pixelShiftEperIso = pixelShiftEperIso->getValue();
     pp->raw.bayersensor.pixelShiftSigma = pixelShiftSigma->getValue();
     pp->raw.bayersensor.pixelShiftShowMotion = pixelShiftShowMotion->getLastActive ();
@@ -531,6 +538,7 @@ void BayerProcess::write( rtengine::procparams::ProcParams* pp, ParamsEdited* pe
     pp->raw.bayersensor.pixelShiftBlur = pixelShiftBlur->getLastActive ();
     pp->raw.bayersensor.pixelShiftSmoothFactor = pixelShiftSmooth->getValue();
     pp->raw.bayersensor.pixelShiftLmmse = pixelShiftLmmse->getLastActive ();
+//    pp->raw.bayersensor.pixelShiftOneGreen = pixelShiftOneGreen->getLastActive ();
     pp->raw.bayersensor.pixelShiftEqualBright = pixelShiftEqualBright->getLastActive ();
     pp->raw.bayersensor.pixelShiftEqualBrightChannel = pixelShiftEqualBrightChannel->getLastActive ();
     pp->raw.bayersensor.pixelShiftNonGreenCross = pixelShiftNonGreenCross->getLastActive ();
@@ -554,8 +562,8 @@ void BayerProcess::write( rtengine::procparams::ProcParams* pp, ParamsEdited* pe
 #endif
 
     int currentRow = method->get_active_row_number();
-    if( currentRow >= 0 && currentRow < procparams::RAWParams::BayerSensor::numMethods) {
-        pp->raw.bayersensor.method = procparams::RAWParams::BayerSensor::methodstring[currentRow];
+    if( currentRow >= 0 && currentRow < std::numeric_limits<int>::max()) {
+        pp->raw.bayersensor.method = procparams::RAWParams::BayerSensor::getMethodString(RAWParams::BayerSensor::Method(currentRow));
     }
 
     currentRow = imageNumber->get_active_row_number();
@@ -566,7 +574,7 @@ void BayerProcess::write( rtengine::procparams::ProcParams* pp, ParamsEdited* pe
 
     if (pedited) {
         pedited->raw.bayersensor.ccSteps = ccSteps->getEditedState ();
-        pedited->raw.bayersensor.method = method->get_active_row_number() != procparams::RAWParams::BayerSensor::numMethods;
+        pedited->raw.bayersensor.method = method->get_active_row_number() != std::numeric_limits<int>::max();
         pedited->raw.bayersensor.imageNum = imageNumber->get_active_text() != M("GENERAL_UNCHANGED");
         pedited->raw.bayersensor.dcbIterations = dcbIterations->getEditedState ();
         pedited->raw.bayersensor.dcbEnhance = !dcbEnhance->get_inconsistent();
@@ -583,6 +591,7 @@ void BayerProcess::write( rtengine::procparams::ProcParams* pp, ParamsEdited* pe
         pedited->raw.bayersensor.pixelShiftBlur = !pixelShiftBlur->get_inconsistent();
         pedited->raw.bayersensor.pixelShiftSmooth = pixelShiftSmooth->getEditedState();
         pedited->raw.bayersensor.pixelShiftLmmse = !pixelShiftLmmse->get_inconsistent();
+//        pedited->raw.bayersensor.pixelShiftOneGreen = !pixelShiftOneGreen->get_inconsistent();
         pedited->raw.bayersensor.pixelShiftEqualBright = !pixelShiftEqualBright->get_inconsistent();
         pedited->raw.bayersensor.pixelShiftEqualBrightChannel = !pixelShiftEqualBrightChannel->get_inconsistent();
         pedited->raw.bayersensor.pixelShiftNonGreenCross = !pixelShiftNonGreenCross->get_inconsistent();
@@ -610,7 +619,7 @@ void BayerProcess::write( rtengine::procparams::ProcParams* pp, ParamsEdited* pe
 void BayerProcess::setBatchMode(bool batchMode)
 {
     method->append (M("GENERAL_UNCHANGED"));
-    method->set_active(procparams::RAWParams::BayerSensor::numMethods); // No name
+    method->set_active(std::numeric_limits<int>::max()); // No name
 #ifdef PIXELSHIFTDEV
     pixelShiftMotionCorrection->append (M("GENERAL_UNCHANGED"));
     pixelShiftMotionCorrection->set_active_text (M("GENERAL_UNCHANGED"));
@@ -750,22 +759,23 @@ void BayerProcess::psMotionCorrectionChanged ()
 
 void BayerProcess::methodChanged ()
 {
-    int  curSelection = method->get_active_row_number();
+    const int curSelection = method->get_active_row_number();
+    const RAWParams::BayerSensor::Method method = RAWParams::BayerSensor::Method(curSelection);
 
     if (!batchMode) {
-        if ( curSelection == procparams::RAWParams::BayerSensor::dcb) {
+        if (method == procparams::RAWParams::BayerSensor::Method::DCB) {
             dcbOptions->show();
         } else {
             dcbOptions->hide();
         }
 
-        if ( curSelection == procparams::RAWParams::BayerSensor::lmmse) {
+        if (method == procparams::RAWParams::BayerSensor::Method::LMMSE) {
             lmmseOptions->show();
         } else {
             lmmseOptions->hide();
         }
 
-        if ( curSelection == procparams::RAWParams::BayerSensor::pixelshift) {
+        if (method == procparams::RAWParams::BayerSensor::Method::PIXELSHIFT) {
             if(pixelShiftMotionMethod->get_active_row_number() == 2) {
                 pixelShiftOptions->show();
             } else {
@@ -780,10 +790,10 @@ void BayerProcess::methodChanged ()
     Glib::ustring methodName = "";
     bool ppreq = false;
 
-    if( curSelection >= 0 && curSelection < procparams::RAWParams::BayerSensor::numMethods) {
-        methodName = procparams::RAWParams::BayerSensor::methodstring[curSelection];
+    if (curSelection >= 0 && curSelection < std::numeric_limits<int>::max()) {
+        methodName = procparams::RAWParams::BayerSensor::getMethodString(method);
 
-        if (curSelection == procparams::RAWParams::BayerSensor::mono || oldMethod == procparams::RAWParams::BayerSensor::mono) {
+        if (method == procparams::RAWParams::BayerSensor::Method::MONO || RAWParams::BayerSensor::Method(oldMethod) == procparams::RAWParams::BayerSensor::Method::MONO) {
             ppreq = true;
         }
     }
@@ -848,6 +858,10 @@ void BayerProcess::checkBoxToggled (CheckBox* c, CheckValue newval)
         if (listener) {
             listener->panelChanged (EvPixelShiftLmmse, pixelShiftLmmse->getValueAsStr ());
         }
+//    } else if (c == pixelShiftOneGreen) {
+//        if (listener) {
+//            listener->panelChanged (EvPixelShiftOneGreen, pixelShiftOneGreen->getValueAsStr ());
+//        }
     } else if (c == pixelShiftEqualBright) {
         if (!batchMode) {
             pixelShiftEqualBrightChannel->set_sensitive(newval != CheckValue::off);

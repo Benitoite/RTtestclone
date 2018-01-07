@@ -30,8 +30,8 @@ class SpotWBListener
 {
 
 public:
-    virtual ~SpotWBListener () {}
-    virtual void spotWBRequested (int size) {}
+    virtual ~SpotWBListener() {}
+    virtual void spotWBRequested(int size) {}
 };
 
 class WhiteBalance : public ToolParamBlock, public AdjusterListener, public FoldableToolPanel, public rtengine::AutoWBListener
@@ -57,12 +57,12 @@ protected:
         }
     };
 
-    static Glib::RefPtr<Gdk::Pixbuf> wbPixbufs[rtengine::procparams::WBT_CUSTOM + 1];
+    static Glib::RefPtr<Gdk::Pixbuf> wbPixbufs[rtengine::toUnderlying(rtengine::procparams::WBEntry::Type::CUSTOM) + 1];
     Glib::RefPtr<Gtk::TreeStore> refTreeModel;
     MethodColumns methodColumns;
     MyComboBox* method;
     MyComboBoxText*   wbcamMethod;
-	
+
     MyComboBoxText* spotsize;
     Adjuster* temp;
     Adjuster* green;
@@ -80,49 +80,50 @@ protected:
     int custom_temp;
     double custom_green;
     double custom_equal;
-    void cache_customWB    (int temp, double green); //cache custom WB setting to allow its recall
-    void cache_customTemp  (int temp);               //cache Temperature only to allow its recall
-    void cache_customGreen (double green);           //cache Green only to allow its recall
-    void cache_customEqual (double equal);           //cache Equal only to allow its recall
+    void cache_customWB(int temp, double green);     //cache custom WB setting to allow its recall
+    void cache_customTemp(int temp);                 //cache Temperature only to allow its recall
+    void cache_customGreen(double green);            //cache Green only to allow its recall
+    void cache_customEqual(double equal);            //cache Equal only to allow its recall
     void wbcamMethodChanged();
 
-    int  setActiveMethod   (Glib::ustring label);
-    int _setActiveMethod   (Glib::ustring &label, Gtk::TreeModel::Children &children);
+    int  setActiveMethod(Glib::ustring label);
+    int _setActiveMethod(Glib::ustring &label, Gtk::TreeModel::Children &children);
 
-    Gtk::TreeModel::Row            getActiveMethod ();
-    unsigned int                   findWBEntryId   (const Glib::ustring &label, enum WB_LabelType lblType = WBLT_GUI);
-    rtengine::procparams::WBEntry* findWBEntry     (Glib::ustring label, enum WB_LabelType lblType = WBLT_GUI);
+    Gtk::TreeModel::Row                                   getActiveMethod();
+    unsigned int                                          findWBEntryId(const Glib::ustring& label, enum WB_LabelType lblType = WBLT_GUI);
+    std::pair<bool, const rtengine::procparams::WBEntry&> findWBEntry(const Glib::ustring& label, enum WB_LabelType lblType = WBLT_GUI);
 
 public:
 
-    WhiteBalance ();
-    ~WhiteBalance () {};
+    WhiteBalance();
+    ~WhiteBalance() {};
 
-    static void init    ();
-    static void cleanup ();
-    void read           (const rtengine::procparams::ProcParams* pp, const ParamsEdited* pedited = nullptr);
-    void write          (rtengine::procparams::ProcParams* pp, ParamsEdited* pedited = nullptr);
-    void setDefaults    (const rtengine::procparams::ProcParams* defParams, const ParamsEdited* pedited = nullptr);
-    void setBatchMode   (bool batchMode);
+    static void init();
+    static void cleanup();
+    void read(const rtengine::procparams::ProcParams* pp, const ParamsEdited* pedited = nullptr);
+    void write(rtengine::procparams::ProcParams* pp, ParamsEdited* pedited = nullptr);
+    void setDefaults(const rtengine::procparams::ProcParams* defParams, const ParamsEdited* pedited = nullptr);
+    void setBatchMode(bool batchMode);
 
-    void optChanged ();
-    void spotPressed ();
-    void spotSizeChanged ();
-    void adjusterChanged (Adjuster* a, double newval);
-    int  getSize ();
-    void setWBProvider (WBProvider* p)
+    void optChanged();
+    void spotPressed();
+    void spotSizeChanged();
+    void adjusterChanged(Adjuster* a, double newval);
+    int  getSize();
+    void setWBProvider(WBProvider* p)
     {
         wbp = p;
     }
-    void setSpotWBListener (SpotWBListener* l)
+    void setSpotWBListener(SpotWBListener* l)
     {
         wblistener = l;
     }
-    void setWB (int temp, double green);
-    void WBChanged           (double temp, double green);
+    void setWB(int temp, double green);
+    void WBChanged(double temp, double green);
 
-    void setAdjusterBehavior (bool tempadd, bool greenadd, bool equaladd, bool tempbiasadd);
-    void trimValues          (rtengine::procparams::ProcParams* pp);
+    void setAdjusterBehavior(bool tempadd, bool greenadd, bool equaladd, bool tempbiasadd);
+    void trimValues(rtengine::procparams::ProcParams* pp);
+    void enabledChanged();
 };
 
 #endif
