@@ -338,6 +338,7 @@ void ParamsEdited::set (bool v)
     localwb.sensi = v;
     localwb.qualityMethod = v;
     localwb.wbMethod = v;
+    localwb.wbshaMethod = v;
     localwb.wbcamMethod = v;
     localwb.expwb = v;
     localwb.temp = v;
@@ -928,6 +929,7 @@ void ParamsEdited::initFrom (const std::vector<rtengine::procparams::ProcParams>
         localwb.temp = localwb.temp && p.localwb.temp == other.localwb.temp;
         localwb.green = localwb.green && p.localwb.green == other.localwb.green;
         localwb.wbMethod = localwb.wbMethod && p.localwb.wbMethod == other.localwb.wbMethod;
+        localwb.wbshaMethod = localwb.wbshaMethod && p.localwb.wbshaMethod == other.localwb.wbshaMethod;
         localwb.gamma = localwb.gamma && p.localwb.gamma == other.localwb.gamma;
         localwb.wbcamMethod = localwb.wbcamMethod && p.localwb.wbcamMethod == other.localwb.wbcamMethod;
 
@@ -2347,6 +2349,10 @@ void ParamsEdited::combine (rtengine::procparams::ProcParams& toEdit, const rten
         toEdit.localwb.wbMethod   = mods.localwb.wbMethod;
     }
 
+    if (localwb.wbshaMethod) {
+        toEdit.localwb.wbshaMethod   = mods.localwb.wbshaMethod;
+    }
+	
     if (localwb.wbcamMethod) {
         toEdit.localwb.wbcamMethod   = mods.localwb.wbcamMethod;
     }

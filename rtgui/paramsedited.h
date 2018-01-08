@@ -470,6 +470,7 @@ public:
     bool sensi;
     bool qualityMethod;
     bool wbMethod;
+    bool wbshaMethod;
     bool wbcamMethod;
     bool expwb;
     bool temp;

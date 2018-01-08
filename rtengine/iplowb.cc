@@ -75,6 +75,29 @@ float calcLocalFactor (const float lox, const float loy, const float lcx, const 
 
 }
 
+float calcLocalFactorrect(const float lox, const float loy, const float lcx, const float dx, const float lcy, const float dy, const float ach)
+{
+    float eps = 0.0001f;
+    float krap = fabs(dx / dy);
+    float kx = (lox - lcx);
+    float ky = (loy - lcy);
+    float ref = 0.f;
+
+    if (fabs(kx / (ky + eps)) < krap) {
+        ref = sqrt(rtengine::SQR(dy) * (1.f + rtengine::SQR(kx / (ky + eps))));
+    } else {
+        ref = sqrt(rtengine::SQR(dx) * (1.f + rtengine::SQR(ky / (kx + eps))));
+    }
+
+    float rad = sqrt(rtengine::SQR(kx) + rtengine::SQR(ky));
+    float coef = rad / ref;
+    float ac = 1.f / (ach - 1.f);
+    float fact = ac * (coef - 1.f);
+    return fact;
+
+}
+
+
 }
 using namespace std;
 
@@ -105,6 +128,7 @@ struct local_params {
     double  green;
     double equal;
     int trans;
+	int shapmet;
 
 
 };
@@ -155,7 +179,12 @@ static void calcLocalParams (int oW, int oH, const LocrgbParams& localwb, struct
         lp.qualmet = 2;
     }
 
-
+    if (localwb.wbshaMethod == "eli") {
+        lp.shapmet = 0;
+    } else if (localwb.wbshaMethod == "rec") {
+        lp.shapmet = 1;
+	}
+	
     int local_sensi = localwb.sensi;
     int local_transit = localwb.transit;
 
@@ -181,6 +210,51 @@ static void calcLocalParams (int oW, int oH, const LocrgbParams& localwb, struct
     lp.green = localwb.green;
     lp.equal = localwb.equal;
 }
+
+
+static void calcTransitionrect(const float lox, const float loy, const float ach, const local_params& lp, int &zone, float &localFactor)
+{
+    zone = 0;
+
+    if (lox >= lp.xc && lox < (lp.xc + lp.lx) && loy >= lp.yc && loy < lp.yc + lp.ly) {
+        if (lox < (lp.xc + lp.lx * ach)  && loy < (lp.yc + lp.ly * ach)) {
+            zone = 2;
+        } else {
+            zone = 1;
+            localFactor = calcLocalFactorrect(lox, loy, lp.xc, lp.lx, lp.yc, lp.ly, ach);
+        }
+
+    } else if (lox >= lp.xc && lox < lp.xc + lp.lx && loy < lp.yc && loy > lp.yc - lp.lyT) {
+        if (lox < (lp.xc + lp.lx * ach) && loy > (lp.yc - lp.lyT * ach)) {
+            zone = 2;
+        } else {
+            zone = 1;
+            localFactor = calcLocalFactorrect(lox, loy, lp.xc, lp.lx, lp.yc, lp.lyT, ach);
+        }
+
+
+    } else if (lox < lp.xc && lox > lp.xc - lp.lxL && loy <= lp.yc && loy > lp.yc - lp.lyT) {
+        if (lox > (lp.xc - lp.lxL * ach) && loy > (lp.yc - lp.lyT * ach)) {
+            zone = 2;
+        } else {
+            zone = 1;
+            localFactor = calcLocalFactorrect(lox, loy, lp.xc, lp.lxL, lp.yc, lp.lyT, ach);
+        }
+
+    } else if (lox < lp.xc && lox > lp.xc - lp.lxL && loy > lp.yc && loy < lp.yc + lp.ly) {
+        if (lox > (lp.xc - lp.lxL * ach) && loy < (lp.yc + lp.ly * ach)) {
+            zone = 2;
+        } else {
+            zone = 1;
+            localFactor = calcLocalFactorrect(lox, loy, lp.xc, lp.lxL, lp.yc, lp.ly, ach);
+        }
+
+    }
+
+}
+
+
+
 
 static void calcTransition (const float lox, const float loy, const float ach, const local_params& lp, int &zone, float &localFactor)
 {
@@ -458,7 +532,14 @@ void ImProcFunctions::Whitebalance_Local (int call, int sp, Imagefloat* bufimage
             for (int x = 0, lox = cx + x; x < imagetransformed->getWidth(); x++, lox++) {
                 int zone = 0;
                 float localFactor = 1.f;
-                calcTransition (lox, loy, ach, lp, zone, localFactor);
+				
+                if (lp.shapmet == 0) {
+                    calcTransition(lox, loy, ach, lp, zone, localFactor);
+                } else if (lp.shapmet == 1) {
+                    calcTransitionrect(lox, loy, ach, lp, zone, localFactor);
+                }
+				
+               // calcTransition (lox, loy, ach, lp, zone, localFactor);
 
                 if (zone == 0) { // outside selection and outside transition zone => no effect, keep original values
                     imagetransformed->r (y, x) = imageoriginal->r (y, x);

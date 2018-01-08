@@ -438,6 +438,10 @@ void ImProcCoordinator::updatePreviewImage(int todo, Crop* cropCall)
 
         currWB = ColorTemp(params.wb.temperature, params.wb.green, params.wb.equal, params.wb.method);
 
+        if (params.localwb.enabled) {
+            params.wb.enabled = true;
+        }
+
         if (!params.wb.enabled) {
             currWB = ColorTemp();
         } else if (params.wb.method == "Camera") {
@@ -493,7 +497,6 @@ void ImProcCoordinator::updatePreviewImage(int todo, Crop* cropCall)
 
         imgsrc->getImage(currWB, tr, orig_prev, pp, params.toneCurve, params.icm, params.raw, params.wb);
         denoiseInfoStore.valid = false;
-
         Imagefloat *imageoriginal = nullptr;
         Imagefloat *imagetransformed = nullptr;
         Imagefloat *improv = nullptr;
@@ -507,40 +510,6 @@ void ImProcCoordinator::updatePreviewImage(int todo, Crop* cropCall)
         if (params.localwb.enabled && params.localwb.expwb) {
             currWBloc = ColorTemp(params.localwb.temp, params.localwb.green, 1.f, "Custom");
             wbm = 0;
-
-            //  if ((params.localwb.wbMethod == "aut"  || params.localwb.wbMethod == "autosdw"  || params.localwb.wbMethod == "autitc" || params.localwb.wbMethod == "autedgsdw"   || params.localwb.wbMethod == "autedgrob" || params.localwb.wbMethod == "autedg" || params.localwb.wbMethod == "autold" || params.localwb.wbMethod == "autorobust" )) {
-            if ((params.localwb.wbMethod != "man")) {
-                struct local_params lpall;
-                calcLocalrgbParams(fw, fh, params.localwb, lpall);
-                int begy = lpall.yc - lpall.lyT;
-                int begx = lpall.xc - lpall.lxL;
-                int yEn = lpall.yc + lpall.ly;
-                int xEn = lpall.xc + lpall.lx;
-                int bf_h = lpall.ly + lpall.lyT;
-                int bf_w = lpall.lx + lpall.lxL;
-
-                int cx = 0;
-                int cy = 0;
-                double rm, gm, bm;
-                printf("bx=%i by=%i yE=%i xE=%i cx=%i cy=%i bfh=%i bfw=%i \n", begx, begy, yEn, xEn, cx, cy, bf_h, bf_w);
-                imgsrc->getAutoWBMultipliersloc(begx, begy, yEn, xEn, cx, cy, bf_h, bf_w, rm, gm, bm, params.localwb, params.wb, params.icm);
-                //   imgsrc->getAutoWBMultipliersloc (0, 0, fh, fw, cx, cy, fh, fw, rm, gm, bm, params.localwb);
-                //     autoWBloc.mul2temp (rm, gm, bm, params.localrgb.equal, ptemp, pgreen);
-                autoWBloc.mul2temp(rm, gm, bm, 1.f, ptemp, pgreen);
-                currWBloc = autoWBloc;
-                //            currWB = autoWBloc;
-                params.wb.temperature = currWB.getTemp();
-                params.wb.green = currWB.getGreen();
-
-                if (params.wb.method == "Auto" && awbListener) {
-
-                    awbListener->WBChanged(params.wb.temperature, params.wb.green);
-                }
-
-
-            }
-
-            //       if ((params.localwb.wbMethod == "man")) {
 
             imageoriginal = new Imagefloat(pW, pH);
             imagetransformed = new Imagefloat(pW, pH);
@@ -574,110 +543,11 @@ void ImProcCoordinator::updatePreviewImage(int todo, Crop* cropCall)
 
             //     if ((params.localwb.wbMethod == "aut" || params.localwb.wbMethod == "autosdw" || params.localwb.wbMethod == "autitc" || params.localwb.wbMethod == "autedgsdw" || params.localwb.wbMethod == "autedgrob"  || params.localwb.wbMethod == "autedg" || params.localwb.wbMethod == "autold" || params.localwb.wbMethod == "autorobust" ) && alorgbListener) {
 
-            if ((params.localwb.wbMethod != "man"  && alorgbListener)) {
-
-                if (params.localwb.wbMethod == "man") {
-                    wbm = 1;
-                }
-
-                if (params.localwb.wbMethod == "aut") {
-                    wbm = 2;
-                }
-
-                if (params.localwb.wbMethod == "autedg") {
-                    wbm = 3;
-                }
-
-                if (params.localwb.wbMethod == "autold") {
-                    wbm = 4;
-                }
-
-                if (params.localwb.wbMethod == "autorobust") {
-                    wbm = 5;
-                }
-
-                if (params.localwb.wbMethod == "autosdw") {
-                    wbm = 6;
-                }
-
-                if (params.localwb.wbMethod == "autedgrob") {
-                    wbm = 7;
-                }
-
-                if (params.localwb.wbMethod == "autedgsdw") {
-                    wbm = 8;
-                }
-
-                if (params.localwb.wbMethod == "autitc") {
-                    wbm = 9;
-                }
-
-                alorgbListener ->WBChanged(ptemp, pgreen, 0); //change GUI and method to Custom
-                //params.localwb.wbMethod = "man";
-                //wbm = 0;
-
-            }
-
-            //   alorgbListener ->WBChanged (ptemp, pgreen, 0);//change GUI and method to Custom
-
-            // params.localwb.wbMethod = "man";
-
-            //    if (alorgbListener  && params.localwb.wbMethod != "man" ) { // display values Full image an last method auto
-            //     if (alorgbListener ) { // display values Full image an last method auto
-            //        alorgbListener->temptintChanged (params.wb.temperature, params.wb.green, params.wb.equal, wbm);
-            //   alorgbListener->temptintChanged (params.wb.temperature, params.wb.green, 1., wbm);
-            //    }
-
-            params.localwb.wbMethod = "man";
-            wbm = 0;
 
 
-
+            //Imagefloat *improv = nullptr;
         }
 
-        //ColorTemp::CAT02 (orig_prev, &params) ;
-        //   printf("orig_prevW=%d\n  scale=%d",orig_prev->width, scale);
-        /* Issue 2785, disabled some 1:1 tools
-                if (todo & M_LINDENOISE) {
-                    DirPyrDenoiseParams denoiseParams = params.dirpyrDenoise;
-                    if (denoiseParams.enabled && (scale==1)) {
-                        Imagefloat *calclum = NULL ;
-
-                        denoiseParams.getCurves(noiseLCurve,noiseCCurve);
-                        int nbw=6;//nb tile W
-                        int nbh=4;//
-
-                        float ch_M[nbw*nbh];
-                        float max_r[nbw*nbh];
-                        float max_b[nbw*nbh];
-
-                        if(denoiseParams.Lmethod == "CUR") {
-                            if(noiseLCurve)
-                                denoiseParams.luma = 0.5f;
-                            else
-                                denoiseParams.luma = 0.0f;
-                        } else if(denoiseParams.Lmethod == "SLI")
-                            noiseLCurve.Reset();
-
-
-                        if(noiseLCurve || noiseCCurve){//only allocate memory if enabled and scale=1
-                            // we only need image reduced to 1/4 here
-                            calclum = new Imagefloat ((pW+1)/2, (pH+1)/2);//for luminance denoise curve
-                            for(int ii=0;ii<pH;ii+=2){
-                                for(int jj=0;jj<pW;jj+=2){
-                                    calclum->r(ii>>1,jj>>1) = orig_prev->r(ii,jj);
-                                    calclum->g(ii>>1,jj>>1) = orig_prev->g(ii,jj);
-                                    calclum->b(ii>>1,jj>>1) = orig_prev->b(ii,jj);
-                                }
-                            }
-                            imgsrc->convertColorSpace(calclum, params.icm, currWB);//claculate values after colorspace conversion
-                        }
-
-                        int kall=1;
-                        ipf.RGB_denoise(kall, orig_prev, orig_prev, calclum, ch_M, max_r, max_b, imgsrc->isRAW(), denoiseParams, imgsrc->getDirPyrDenoiseExpComp(), noiseLCurve, noiseCCurve, chaut, redaut, blueaut, maxredaut, maxblueaut, nresi, highresi);
-                    }
-                }
-        */
         imgsrc->convertColorSpace(orig_prev, params.icm, currWB);
 
         ipf.firstAnalysis(orig_prev, params, vhist16);

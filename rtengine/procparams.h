@@ -909,6 +909,7 @@ struct LocrgbParams {
     int     retrab;
     bool expwb;
     Glib::ustring wbMethod;
+    Glib::ustring wbshaMethod;
     bool    gamma;
     Glib::ustring wbcamMethod;
     double temp;

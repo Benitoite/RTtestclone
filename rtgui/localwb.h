@@ -38,8 +38,8 @@ class Localwb :
 
 private:
     int lastObject;
-    void foldAllButMe (GdkEventButton* event, MyExpander *expander);
-    void enableToggled (MyExpander *expander);
+    void foldAllButMe(GdkEventButton* event, MyExpander *expander);
+    void enableToggled(MyExpander *expander);
 
     IdleRegister idle_register;
 
@@ -72,6 +72,7 @@ private:
     MyComboBoxText*   const Smethod;
     MyComboBoxText*   const qualityMethod;
     MyComboBoxText*   const wbMethod;
+    MyComboBoxText*   const wbshaMethod;
     MyComboBoxText*   const wbcamMethod;
 
     Gtk::Frame* const shapeFrame;
@@ -81,10 +82,12 @@ private:
     Gtk::Label* const labqual;
     Gtk::Label* const labmS;
     Gtk::Label* const labcam;
+    Gtk::Label* const labmeth;
 
     Gtk::HBox* const ctboxS;
     Gtk::HBox* const qualbox;
     Gtk::HBox* const cambox;
+    Gtk::HBox* const ctboxmet;
 
     Adjuster* temp;
     Adjuster* green;
@@ -104,8 +107,9 @@ private:
 
     sigc::connection  Smethodconn;
     sigc::connection qualityMethodConn;
-    sigc::connection wbMethodConn;
+    sigc::connection wbshaMethodConn;
     sigc::connection wbcamMethodConn;
+    sigc::connection wbMethodConn;
 
     Gtk::CheckButton* gamma;
     sigc::connection gammaconn;
@@ -128,49 +132,50 @@ private:
     double draggedlocXLOffset;
     rtengine::Coord draggedCenter;
 
-    void editToggled ();
+    void editToggled();
 
 
 
 public:
 
-    Localwb ();
-    ~Localwb ();
+    Localwb();
+    ~Localwb();
 
-    void writeOptions (std::vector<int> &tpOpen);
-    void updateToolState (std::vector<int> &tpOpen);
+    void writeOptions(std::vector<int> &tpOpen);
+    void updateToolState(std::vector<int> &tpOpen);
 
-    void read           (const rtengine::procparams::ProcParams* pp, const ParamsEdited* pedited = nullptr);
-    void write          (rtengine::procparams::ProcParams* pp, ParamsEdited* pedited = nullptr);
-    void setDefaults    (const rtengine::procparams::ProcParams* defParams, const ParamsEdited* pedited = nullptr);
-    void setBatchMode   (bool batchMode);
+    void read(const rtengine::procparams::ProcParams* pp, const ParamsEdited* pedited = nullptr);
+    void write(rtengine::procparams::ProcParams* pp, ParamsEdited* pedited = nullptr);
+    void setDefaults(const rtengine::procparams::ProcParams* defParams, const ParamsEdited* pedited = nullptr);
+    void setBatchMode(bool batchMode);
 
-    void adjusterChanged (Adjuster* a, double newval);
-    void enabledChanged  ();
+    void adjusterChanged(Adjuster* a, double newval);
+    void enabledChanged();
 
-    void setAdjusterBehavior (bool hadd, bool sadd, bool lcadd);
-    void trimValues          (rtengine::procparams::ProcParams* pp);
+    void setAdjusterBehavior(bool hadd, bool sadd, bool lcadd);
+    void trimValues(rtengine::procparams::ProcParams* pp);
 
-    void SmethodChanged      ();
-    void gamma_toggled ();
+    void SmethodChanged();
+    void gamma_toggled();
     void qualityMethodChanged();
     void wbMethodChanged();
+    void wbshaMethodChanged();
     void wbcamMethodChanged();
-    void setEditProvider (EditDataProvider* provider);
-    bool localwbComputed_ ();
+    void setEditProvider(EditDataProvider* provider);
+    bool localwbComputed_();
 
-    void temptintChanged (double ctemp, double ctint, double cequal, int meth);
-    bool temptintComputed_ ();
-    void updateLabel      ();
-    void WBChanged           (double temp, double green, int wbauto);
+    void temptintChanged(double ctemp, double ctint, double cequal, int meth);
+    bool temptintComputed_();
+    void updateLabel();
+    void WBChanged(double temp, double green, int wbauto);
 
-    CursorShape getCursor (int objectID);
-    bool mouseOver (int modifierKey);
-    bool button1Pressed (int modifierKey);
+    CursorShape getCursor(int objectID);
+    bool mouseOver(int modifierKey);
+    bool button1Pressed(int modifierKey);
     bool button1Released();
-    bool drag1 (int modifierKey);
-    void switchOffEditMode ();
-    void updateGeometry (const int centerX_, const int centerY_, const int circrad_, const int locY_, const double degree_, const int locX_, const int locYT_, const int locXL_, const int fullWidth = -1, const int fullHeight = -1);
+    bool drag1(int modifierKey);
+    void switchOffEditMode();
+    void updateGeometry(const int centerX_, const int centerY_, const int circrad_, const int locY_, const double degree_, const int locX_, const int locYT_, const int locXL_, const int fullWidth = -1, const int fullHeight = -1);
 
 
 };

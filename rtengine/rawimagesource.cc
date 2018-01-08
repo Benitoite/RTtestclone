@@ -1702,7 +1702,7 @@ void RawImageSource::getImage(const ColorTemp &ctemp, int tran, Imagefloat* imag
                 float XR, YR, ZR;
                 float LR, aR, bR;
                 float LL, aa, bb;
-                Color::rgbxyz(image->r(y, x), image->g(y, x), image->b(y, x), X, Y, Z, wip);
+                Color::rgbxyz(image->r(y, x), image->g(y, x), image->b(y, x), X, Y, Z, wp);
                 /*
                 X  = xyz_sRGBd65[0][0] * image->r(y, x)  + xyz_sRGBd65[0][1] *  image->g(y, x) + xyz_sRGBd65[0][2] *  image->b(y, x) ;
                 Y  = xyz_sRGBd65[1][0] * image->r(y, x)  + xyz_sRGBd65[1][1] *  image->g(y, x) + xyz_sRGBd65[1][2] * image->b(y, x);
@@ -1726,7 +1726,7 @@ void RawImageSource::getImage(const ColorTemp &ctemp, int tran, Imagefloat* imag
                 bb = bufcat02fin->b[y][x];
 
                 Color::Lab2XYZ(LL, aa, bb, XR, YR, ZR);
-                Color::xyz2rgb(XR, YR, ZR, image->r(y, x), image->g(y, x), image->b(y, x), wp);
+                Color::xyz2rgb(XR, YR, ZR, image->r(y, x), image->g(y, x), image->b(y, x), wip);
                 /*
                 image->r(y, x) = sRGBd65_xyz[0][0] *  XR + sRGBd65_xyz[0][1] * YR + sRGBd65_xyz[0][2] * ZR;
                 image->g(y, x) = sRGBd65_xyz[1][0] *  XR + sRGBd65_xyz[1][1] * YR + sRGBd65_xyz[1][2] * ZR;

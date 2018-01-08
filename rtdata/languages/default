@@ -1685,6 +1685,9 @@ TP_LENSPROFILE_LABEL;Profiled Lens Correction
 TP_LENSPROFILE_USECA;Chromatic aberration correction
 TP_LENSPROFILE_USEDIST;Distortion correction
 TP_LENSPROFILE_USEVIGN;Vignetting correction
+TP_LOCALRGB_MET;Shape RT-spot area
+TP_LOCALRGBWB_ELI;Elipse
+TP_LOCALRGBWB_REC;Rectangle
 TP_LOCALLAB_CENTER_X;Center X
 TP_LOCALLAB_CENTER_Y;Center Y
 TP_LOCALLAB_CIRCRADIUS;Spot size
