@@ -39,7 +39,7 @@ extern const Settings* settings;
 
 ImProcCoordinator::ImProcCoordinator()
     : orig_prev(nullptr), oprevi(nullptr), oprevl(nullptr), nprevl(nullptr), fattal_11_dcrop_cache(nullptr), previmg(nullptr), workimg(nullptr),
-      ncie(nullptr), imgsrc(nullptr), shmap(nullptr), lastAwbEqual(0.), lastAwbTempBias(0.0), lastAwbauto(""), ipf(&params, true), monitorIntent(RI_RELATIVE),
+      ncie(nullptr), imgsrc(nullptr), shmap(nullptr), lastAwbEqual(0.), lastAwbTempBias(0.0), lastAwbauto(""), lastwbgamma(""), ipf(&params, true), monitorIntent(RI_RELATIVE),
       softProof(false), gamutCheck(false), scale(10), highDetailPreprocessComputed(false), highDetailRawComputed(false),
       allocated(false), bwAutoR(-9000.f), bwAutoG(-9000.f), bwAutoB(-9000.f), CAMMean(NAN),
 
@@ -365,7 +365,6 @@ void ImProcCoordinator::updatePreviewImage(int todo, Crop* cropCall)
 
         bool autowb0 = false;
         autowb0 = (params.wb.method == "autold" || params.wb.method == "aut"  || params.wb.method == "autosdw" || params.wb.method == "autedgsdw" || params.wb.method == "autitc"  || params.wb.method == "autedgrob" || params.wb.method == "autedg" || params.wb.method == "autorobust");
-//autowb0 = false;
         bool gamma = false;
 
         if (params.wb.wbcamMethod == "gam") {
@@ -445,7 +444,7 @@ void ImProcCoordinator::updatePreviewImage(int todo, Crop* cropCall)
             currWB = imgsrc->getWB();
             //   } else if (params.wb.method == "Auto") {
         } else if (autowb) {
-            if (lastAwbEqual != params.wb.equal || lastAwbTempBias != params.wb.tempBias  || lastAwbauto != params.wb.method) {
+            if (lastAwbEqual != params.wb.equal || lastAwbTempBias != params.wb.tempBias  || lastAwbauto != params.wb.method  || lastwbgamma != params.wb.wbcamMethod) {
                 double rm, gm, bm;
                 // imgsrc->getAutoWBMultipliers (rm, gm, bm);
                 imgsrc->getAutoWBMultipliersloc(0, 0, fh, fw, 0, 0, fh, fw, rm, gm, bm, params.localwb, params.wb, params.icm);
@@ -455,10 +454,12 @@ void ImProcCoordinator::updatePreviewImage(int todo, Crop* cropCall)
                     lastAwbEqual = params.wb.equal;
                     lastAwbTempBias = params.wb.tempBias;
                     lastAwbauto = params.wb.method;
+                    lastwbgamma = params.wb.wbcamMethod;
                 } else {
                     lastAwbEqual = -1.;
                     lastAwbTempBias = 0.0;
                     lastAwbauto = "";
+                    lastwbgamma = "";
                     autoWB.useDefaults(params.wb.equal);
                 }
 
@@ -1360,7 +1361,7 @@ bool ImProcCoordinator::getAutoWB(double& temp, double& green, double equal, dou
 //       autowb =  (params.wb.method == "autold" || params.wb.method == "aut"  || params.wb.method == "autosdw" || params.wb.method == "autedgsdw" || params.wb.method == "autitc"  || params.wb.method == "autedgrob" || params.wb.method == "autedg" || params.wb.method == "autorobust" );
 
 //       if (autowb) {
-        if (lastAwbEqual != equal || lastAwbTempBias != tempBias || lastAwbauto != params.wb.method) {
+        if (lastAwbEqual != equal || lastAwbTempBias != tempBias || lastAwbauto != params.wb.method  || lastwbgamma != params.wb.wbcamMethod) {
 // Issue 2500            MyMutex::MyLock lock(minit);  // Also used in crop window
             double rm, gm, bm;
             params.wb.method = "autold";//same result as before muliple Auto WB
@@ -1373,9 +1374,11 @@ bool ImProcCoordinator::getAutoWB(double& temp, double& green, double equal, dou
                 lastAwbEqual = equal;
                 lastAwbTempBias = tempBias;
                 lastAwbauto = params.wb.method;
-
+                lastwbgamma = params.wb.wbcamMethod;
             } else {
                 lastAwbEqual = -1.;
+                lastwbgamma = "";
+                lastAwbauto = "";
                 autoWB.useDefaults(equal);
                 lastAwbTempBias = 0.0;
             }

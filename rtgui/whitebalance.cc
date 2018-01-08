@@ -264,7 +264,7 @@ WhiteBalance::WhiteBalance() : FoldableToolPanel(this, "whitebalance", M("TP_WBA
     catbox->set_spacing(4);
     catbox->show();
 
-    cat02 = Gtk::manage(new Adjuster(M("TP_WBALANCE_CAT"), 0, 100, 1, 0));
+    cat02 = Gtk::manage(new Adjuster(M("TP_WBALANCE_CAT"), 0, 100, 1, 70));
     cat02->set_tooltip_markup(M("TP_WBALANCE_CAT_TOOLTIP"));
     cat02->show();
     catbox->pack_start(*cat02);
