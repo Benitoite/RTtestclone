@@ -3090,9 +3090,9 @@ int ProcParams::save(const Glib::ustring& fname, const Glib::ustring& fname2, bo
 // Local wb
         saveToKeyfile(!pedited || pedited->localwb.enabled, "Locrgb", "Enabled", localwb.enabled, keyFile);
         saveToKeyfile(!pedited || pedited->localwb.locY, "Locrgb", "LocY", localwb.locY, keyFile);
-        saveToKeyfile(!pedited || pedited->localwb.locY, "Locrgb", "LocY", localwb.locY, keyFile);
-        saveToKeyfile(!pedited || pedited->localwb.locX, "Locrgb", "LocYT", localwb.locYT, keyFile);
-        saveToKeyfile(!pedited || pedited->localwb.locY, "Locrgb", "LocXL", localwb.locXL, keyFile);
+        saveToKeyfile(!pedited || pedited->localwb.locYT, "Locrgb", "LocYT", localwb.locYT, keyFile);
+        saveToKeyfile(!pedited || pedited->localwb.locX, "Locrgb", "LocX", localwb.locX, keyFile);
+        saveToKeyfile(!pedited || pedited->localwb.locXL, "Locrgb", "LocXL", localwb.locXL, keyFile);
         saveToKeyfile(!pedited || pedited->localwb.centerX, "Locrgb", "CenterX", localwb.centerX, keyFile);
         saveToKeyfile(!pedited || pedited->localwb.centerY, "Locrgb", "CenterY", localwb.centerY, keyFile);
         saveToKeyfile(!pedited || pedited->localwb.circrad, "Locrgb", "Circrad", localwb.circrad, keyFile);

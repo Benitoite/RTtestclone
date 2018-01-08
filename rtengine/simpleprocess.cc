@@ -716,7 +716,8 @@ private:
         Imagefloat *imagetransformed = nullptr;
         Imagefloat *improv = nullptr;
 
-        if (params.localwb.enabled && params.localwb.expwb) {
+      //  if (params.localwb.enabled && params.localwb.expwb) {
+        if (params.localwb.enabled) {
             currWBloc = ColorTemp(params.localwb.temp, params.localwb.green, 1.f, "Custom");
 
             imageoriginal = new Imagefloat(fw, fh);

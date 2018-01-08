@@ -379,7 +379,7 @@ Localwb::Localwb() :
 //    expwb->setLevel (2);
     expwb->setEnabled(true);
 
-//   pack_start (*expwb);
+  //  pack_start(*expwb);
 
     // Instantiating the Editing geometry; positions will be initialized later
     Line *locYLine[2], *locXLine[2];
@@ -694,6 +694,7 @@ bool Localwb::temptintComputed_()
 
 void Localwb::updateLabel()
 {
+    /*
     if (!batchMode) {
         float nX, nY, nZ;
         int nM;
@@ -747,6 +748,7 @@ void Localwb::updateLabel()
 
         nextmeth = 0;
     }
+    */
 }
 
 void Localwb::foldAllButMe(GdkEventButton* event, MyExpander *expander)

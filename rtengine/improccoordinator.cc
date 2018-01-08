@@ -501,13 +501,10 @@ void ImProcCoordinator::updatePreviewImage(int todo, Crop* cropCall)
         Imagefloat *imagetransformed = nullptr;
         Imagefloat *improv = nullptr;
 
-        //    if (alorgbListener ) { // display values Full image an last method auto
-        //         alorgbListener->temptintChanged (params.wb.temperature, params.wb.green, params.wb.equal, wbm);
-        //   alorgbListener->temptintChanged (params.wb.temperature, params.wb.green, 1., wbm);
-        //     }
 
 
-        if (params.localwb.enabled && params.localwb.expwb) {
+     //   if (params.localwb.enabled && params.localwb.expwb) {
+        if (params.localwb.enabled) {
             currWBloc = ColorTemp(params.localwb.temp, params.localwb.green, 1.f, "Custom");
             wbm = 0;
 
@@ -541,11 +538,6 @@ void ImProcCoordinator::updatePreviewImage(int todo, Crop* cropCall)
             delete imagetransformed;
             delete improv;
 
-            //     if ((params.localwb.wbMethod == "aut" || params.localwb.wbMethod == "autosdw" || params.localwb.wbMethod == "autitc" || params.localwb.wbMethod == "autedgsdw" || params.localwb.wbMethod == "autedgrob"  || params.localwb.wbMethod == "autedg" || params.localwb.wbMethod == "autold" || params.localwb.wbMethod == "autorobust" ) && alorgbListener) {
-
-
-
-            //Imagefloat *improv = nullptr;
         }
 
         imgsrc->convertColorSpace(orig_prev, params.icm, currWB);

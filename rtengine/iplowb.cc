@@ -411,8 +411,9 @@ void ImProcFunctions::WB_Local (ImageSource* imgsrc, int call, int sp, int sx, i
                     bufimage->g (ir, jr) = 0.f;
                     bufimage->b (ir, jr) = 0.f;
                 }
-
-            if (lp.expwb) {// && params->localwb.wbMethod != "man") {
+			bool tjvr = true;
+          //  if (lp.expwb) {// && params->localwb.wbMethod != "man") {
+            if (tjvr) {// && params->localwb.wbMethod != "man") {
 
                 /*                float hueplus = hueref + dhue;
                                 float huemoins = hueref - dhue;

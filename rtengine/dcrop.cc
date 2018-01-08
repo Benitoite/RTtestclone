@@ -677,7 +677,8 @@ void Crop::update(int todo)
         Imagefloat *imagetransformed = nullptr;
         Imagefloat *improv = nullptr;
 
-        if (params.localwb.enabled && params.localwb.expwb) {
+     //   if (params.localwb.enabled && params.localwb.expwb) {
+        if (params.localwb.enabled) {
 			printf("dcrop loc\n");
             //   parent->currWBloc = ColorTemp (params.localrgb.temp, params.localrgb.green, params.localrgb.equal, "Custom");
             parent->currWBloc = ColorTemp(params.localwb.temp, params.localwb.green, 1., "Custom");
