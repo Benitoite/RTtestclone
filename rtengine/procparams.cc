@@ -1135,7 +1135,7 @@ WBParams::WBParams() :
     temperature(6504),
     green(1.0),
     equal(1.0),
-    cat02(70),
+    cat02(90),
     tempBias(0.0)
 {
 }
@@ -2284,7 +2284,7 @@ LocrgbParams::LocrgbParams():
     Smethod("IND"),
     qualityMethod("enhden"),
     transit(60),
-    cat02(70),
+    cat02(90),
     sensi(19),
     hueref(1.),
     chromaref(50.),
