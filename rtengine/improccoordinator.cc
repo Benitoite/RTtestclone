@@ -438,7 +438,7 @@ void ImProcCoordinator::updatePreviewImage(int todo, Crop* cropCall)
 
         currWB = ColorTemp(params.wb.temperature, params.wb.green, params.wb.equal, params.wb.method);
 
-        if (params.localwb.enabled) {
+        if (params.localwb.enabled  || params.colorappearance.enabled) {
             params.wb.enabled = true;
         }
 
@@ -503,9 +503,9 @@ void ImProcCoordinator::updatePreviewImage(int todo, Crop* cropCall)
 
 
 
-     //   if (params.localwb.enabled && params.localwb.expwb) {
+        //   if (params.localwb.enabled && params.localwb.expwb) {
         if (params.localwb.enabled) {
-            currWBloc = ColorTemp(params.localwb.temp, params.localwb.green, 1.f, "Custom");
+            currWBloc = ColorTemp(params.localwb.temp, params.localwb.green, params.localwb.equal, "Custom");
             wbm = 0;
 
             imageoriginal = new Imagefloat(pW, pH);
@@ -522,7 +522,7 @@ void ImProcCoordinator::updatePreviewImage(int todo, Crop* cropCall)
                     imagetransformed->b(ir, jr) = imageoriginal->b(ir, jr) = orig_prev->b(ir, jr);
                 }
 
-            ipf.WB_Local(imgsrc, 3, 1, 0, 0, 0, 0, pW, pH, fw, fh, improv, imagetransformed, currWBloc, tr, imageoriginal, pp, params.toneCurve, params.icm, params.raw, ptemp, pgreen);
+            ipf.WB_Local(imgsrc, 3, 1, 0, 0, 0, 0, pW, pH, fw, fh, improv, imagetransformed, currWBloc, tr, imageoriginal, pp, params.toneCurve, params.icm, params.raw, params.localwb, ptemp, pgreen);
 #ifdef _OPENMP
             #pragma omp parallel for
 #endif

@@ -21,13 +21,13 @@
 #include "options.h"
 #include "addsetids.h"
 
-ParamsEdited::ParamsEdited (bool value)
+ParamsEdited::ParamsEdited(bool value)
 {
 
-    set (value);
+    set(value);
 }
 
-void ParamsEdited::set (bool v)
+void ParamsEdited::set(bool v)
 {
 
     general.rank         = v;
@@ -327,6 +327,8 @@ void ParamsEdited::set (bool v)
     localwb.centerY = v;
     localwb.circrad = v;
     localwb.thres = v;
+    localwb.transit = v;
+    localwb.cat02 = v;
     localwb.proxi = v;
     localwb.nbspot = v;
     localwb.anbspot = v;
@@ -603,10 +605,10 @@ void ParamsEdited::set (bool v)
 using namespace rtengine;
 using namespace rtengine::procparams;
 
-void ParamsEdited::initFrom (const std::vector<rtengine::procparams::ProcParams>& src)
+void ParamsEdited::initFrom(const std::vector<rtengine::procparams::ProcParams>& src)
 {
 
-    set (true);
+    set(true);
 
     if (src.empty()) {
         return;
@@ -681,12 +683,12 @@ void ParamsEdited::initFrom (const std::vector<rtengine::procparams::ProcParams>
         labCurve.rstprotection = labCurve.rstprotection && p.labCurve.rstprotection == other.labCurve.rstprotection;
         labCurve.lcredsk = labCurve.lcredsk && p.labCurve.lcredsk == other.labCurve.lcredsk;
 
-        localContrast.enabled = localContrast.enabled && p.localContrast.enabled == other.localContrast.enabled;        
+        localContrast.enabled = localContrast.enabled && p.localContrast.enabled == other.localContrast.enabled;
         localContrast.radius = localContrast.radius && p.localContrast.radius == other.localContrast.radius;
         localContrast.amount = localContrast.amount && p.localContrast.amount == other.localContrast.amount;
         localContrast.darkness = localContrast.darkness && p.localContrast.darkness == other.localContrast.darkness;
         localContrast.lightness = localContrast.lightness && p.localContrast.lightness == other.localContrast.lightness;
-        
+
         rgbCurves.enabled = rgbCurves.enabled && p.rgbCurves.enabled == other.rgbCurves.enabled;
         rgbCurves.lumamode = rgbCurves.lumamode && p.rgbCurves.lumamode == other.rgbCurves.lumamode;
         rgbCurves.rcurve = rgbCurves.rcurve && p.rgbCurves.rcurve == other.rgbCurves.rcurve;
@@ -863,7 +865,7 @@ void ParamsEdited::initFrom (const std::vector<rtengine::procparams::ProcParams>
         fattal.enabled = fattal.enabled && p.fattal.enabled == other.fattal.enabled;
         fattal.threshold = fattal.threshold && p.fattal.threshold == other.fattal.threshold;
         fattal.amount = fattal.amount && p.fattal.amount == other.fattal.amount;
-        
+
         sh.enabled = sh.enabled && p.sh.enabled == other.sh.enabled;
         sh.hq = sh.hq && p.sh.hq == other.sh.hq;
         sh.highlights = sh.highlights && p.sh.highlights == other.sh.highlights;
@@ -918,6 +920,8 @@ void ParamsEdited::initFrom (const std::vector<rtengine::procparams::ProcParams>
         localwb.thres = localwb.thres && p.localwb.thres == other.localwb.thres;
         localwb.proxi = localwb.proxi && p.localwb.proxi == other.localwb.proxi;
         localwb.sensi = localwb.sensi && p.localwb.sensi == other.localwb.sensi;
+        localwb.transit = localwb.transit && p.localwb.transit == other.localwb.transit;
+        localwb.cat02 = localwb.cat02 && p.localwb.cat02 == other.localwb.cat02;
         localwb.nbspot = localwb.nbspot && p.localwb.nbspot == other.localwb.nbspot;
         localwb.anbspot = localwb.anbspot && p.localwb.anbspot == other.localwb.anbspot;
         localwb.retrab = localwb.retrab && p.localwb.retrab == other.localwb.retrab;
@@ -1167,7 +1171,7 @@ void ParamsEdited::initFrom (const std::vector<rtengine::procparams::ProcParams>
         dirpyrequalizer.skinprotect = dirpyrequalizer.skinprotect && p.dirpyrequalizer.skinprotect == other.dirpyrequalizer.skinprotect;
         //    dirpyrequalizer.algo = dirpyrequalizer.algo && p.dirpyrequalizer.algo == other.dirpyrequalizer.algo;
         dirpyrequalizer.hueskin = dirpyrequalizer.hueskin && p.dirpyrequalizer.hueskin == other.dirpyrequalizer.hueskin;
-        hsvequalizer.enabled = hsvequalizer.enabled && p.hsvequalizer.enabled == other.hsvequalizer.enabled;        
+        hsvequalizer.enabled = hsvequalizer.enabled && p.hsvequalizer.enabled == other.hsvequalizer.enabled;
         hsvequalizer.hcurve = hsvequalizer.hcurve && p.hsvequalizer.hcurve == other.hsvequalizer.hcurve;
         hsvequalizer.scurve = hsvequalizer.scurve && p.hsvequalizer.scurve == other.hsvequalizer.scurve;
         hsvequalizer.vcurve = hsvequalizer.vcurve && p.hsvequalizer.vcurve == other.hsvequalizer.vcurve;
@@ -1182,7 +1186,7 @@ void ParamsEdited::initFrom (const std::vector<rtengine::procparams::ProcParams>
     }
 }
 
-void ParamsEdited::combine (rtengine::procparams::ProcParams& toEdit, const rtengine::procparams::ProcParams& mods, bool forceSet)
+void ParamsEdited::combine(rtengine::procparams::ProcParams& toEdit, const rtengine::procparams::ProcParams& mods, bool forceSet)
 {
 
     bool dontforceSet = !forceSet;
@@ -1384,7 +1388,7 @@ void ParamsEdited::combine (rtengine::procparams::ProcParams& toEdit, const rten
     if (labCurve.enabled) {
         toEdit.labCurve.enabled = mods.labCurve.enabled;
     }
-    
+
     if (labCurve.lcurve) {
         toEdit.labCurve.lcurve        = mods.labCurve.lcurve;
     }
@@ -1448,15 +1452,19 @@ void ParamsEdited::combine (rtengine::procparams::ProcParams& toEdit, const rten
     if (localContrast.enabled) {
         toEdit.localContrast.enabled = mods.localContrast.enabled;
     }
+
     if (localContrast.radius) {
         toEdit.localContrast.radius = mods.localContrast.radius;
     }
+
     if (localContrast.amount) {
         toEdit.localContrast.amount = mods.localContrast.amount;
     }
+
     if (localContrast.darkness) {
         toEdit.localContrast.darkness = mods.localContrast.darkness;
     }
+
     if (localContrast.lightness) {
         toEdit.localContrast.lightness = mods.localContrast.lightness;
     }
@@ -1646,7 +1654,7 @@ void ParamsEdited::combine (rtengine::procparams::ProcParams& toEdit, const rten
     }
 
     if (sharpening.edges_radius) {
-        toEdit.sharpening.edges_radius = dontforceSet && options.baBehav[ADDSET_SHARP_RADIUS] ? toEdit.sharpening.edges_radius + mods.sharpening.edges_radius: mods.sharpening.edges_radius;
+        toEdit.sharpening.edges_radius = dontforceSet && options.baBehav[ADDSET_SHARP_RADIUS] ? toEdit.sharpening.edges_radius + mods.sharpening.edges_radius : mods.sharpening.edges_radius;
     }
 
     if (sharpening.edges_tolerance) {
@@ -1776,7 +1784,7 @@ void ParamsEdited::combine (rtengine::procparams::ProcParams& toEdit, const rten
     if (wb.enabled) {
         toEdit.wb.enabled = mods.wb.enabled;
     }
-    
+
     if (wb.method) {
         toEdit.wb.method  = mods.wb.method;
     }
@@ -1788,7 +1796,7 @@ void ParamsEdited::combine (rtengine::procparams::ProcParams& toEdit, const rten
     if (wb.cat02) {
         toEdit.wb.cat02  = mods.wb.cat02;
     }
-	
+
     if (wb.equal) {
         toEdit.wb.equal   = dontforceSet && options.baBehav[ADDSET_WB_EQUAL] ? toEdit.wb.equal + mods.wb.equal : mods.wb.equal;
     }
@@ -2103,12 +2111,14 @@ void ParamsEdited::combine (rtengine::procparams::ProcParams& toEdit, const rten
     if (fattal.enabled) {
         toEdit.fattal.enabled = mods.fattal.enabled;
     }
+
     if (fattal.threshold) {
         toEdit.fattal.threshold = mods.fattal.threshold;
     }
+
     if (fattal.amount) {
         toEdit.fattal.amount = mods.fattal.amount;
-    }    
+    }
 
     if (sh.enabled) {
         toEdit.sh.enabled         = mods.sh.enabled;
@@ -2316,6 +2326,9 @@ void ParamsEdited::combine (rtengine::procparams::ProcParams& toEdit, const rten
         toEdit.localwb.transit     = mods.localwb.transit;
     }
 
+    if (localwb.cat02) {
+        toEdit.localwb.cat02     = mods.localwb.cat02;
+    }
 
     if (localwb.nbspot) {
         toEdit.localwb.nbspot   = mods.localwb.nbspot;
@@ -2352,7 +2365,7 @@ void ParamsEdited::combine (rtengine::procparams::ProcParams& toEdit, const rten
     if (localwb.wbshaMethod) {
         toEdit.localwb.wbshaMethod   = mods.localwb.wbshaMethod;
     }
-	
+
     if (localwb.wbcamMethod) {
         toEdit.localwb.wbcamMethod   = mods.localwb.wbcamMethod;
     }
@@ -2426,7 +2439,7 @@ void ParamsEdited::combine (rtengine::procparams::ProcParams& toEdit, const rten
     if (chmixer.enabled) {
         toEdit.chmixer.enabled = mods.chmixer.enabled;
     }
-    
+
     for (int i = 0; i < 3; i++) {
         if (chmixer.red[i]) {
             toEdit.chmixer.red[i]     = dontforceSet && options.baBehav[ADDSET_CHMIXER] ? toEdit.chmixer.red[i] + mods.chmixer.red[i] : mods.chmixer.red[i];
@@ -3253,7 +3266,7 @@ void ParamsEdited::combine (rtengine::procparams::ProcParams& toEdit, const rten
     if (hsvequalizer.enabled) {
         toEdit.hsvequalizer.enabled = mods.hsvequalizer.enabled;
     }
-    
+
     if (hsvequalizer.hcurve) {
         toEdit.hsvequalizer.hcurve        = mods.hsvequalizer.hcurve;
     }

@@ -147,7 +147,7 @@ static double wbTemp2Slider(double temp)
     return sval;
 }
 
-WhiteBalance::WhiteBalance() : FoldableToolPanel(this, "whitebalance", M("TP_WBALANCE_LABEL"), false, true), wbp(nullptr), wblistener(nullptr)
+WhiteBalance::WhiteBalance() : FoldableToolPanel(this, "whitebalance", M("TP_WBALANCE_LABEL"), true, true), wbp(nullptr), wblistener(nullptr)
 {
 
     Gtk::HBox* hbox = Gtk::manage(new Gtk::HBox());
@@ -622,6 +622,7 @@ void WhiteBalance::read(const ProcParams* pp, const ParamsEdited* pedited)
         equal->setEditedState(pedited->wb.equal ? Edited : UnEdited);
         tempBias->setEditedState(pedited->wb.tempBias ? Edited : UnEdited);
         cat02->setEditedState(pedited->wb.cat02 ? Edited : UnEdited);
+        set_inconsistent(multiImage && !pedited->wb.enabled);
 
         if (!pedited->wb.wbcamMethod) {
             wbcamMethod->set_active_text(M("GENERAL_UNCHANGED"));
@@ -755,6 +756,7 @@ void WhiteBalance::read(const ProcParams* pp, const ParamsEdited* pedited)
     wbcamMethodConn.block(false);
 
     wbcamMethodChanged();
+    setEnabled(pp->wb.enabled);
 
     methconn.block(false);
     enableListener();

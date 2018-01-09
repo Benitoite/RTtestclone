@@ -144,6 +144,7 @@ Localwb::Localwb() :
     proxi(Gtk::manage(new Adjuster(M("TP_LOCALLAB_PROXI"), 0, 60, 1, 20))),
     sensi(Gtk::manage(new Adjuster(M("TP_LOCALLAB_SENSI"), 0, 100, 1, 19))),
     transit(Gtk::manage(new Adjuster(M("TP_LOCALLAB_TRANSIT"), 5, 95, 1, 60))),
+    cat02(Gtk::manage(new Adjuster(M("TP_WBALANCE_CAT"), 0, 100, 1, 70))),
     retrab(Gtk::manage(new Adjuster(M("TP_LOCALLAB_RETRAB"), 0, 10000, 1, 500))),
 
     hueref(Gtk::manage(new Adjuster(M("TP_LOCALLAB_HUEREF"), -3.15, 3.15, 0.01, 0))),
@@ -262,6 +263,10 @@ Localwb::Localwb() :
 
     transit->set_tooltip_text(M("TP_LOCALLAB_TRANSIT_TOOLTIP"));
     transit->setAdjusterListener(this);
+
+    cat02->set_tooltip_text(M("TP_WBALANCE_CAT_TOOLTIP"));
+    cat02->setAdjusterListener(this);
+
     wbMethodConn = wbshaMethod->signal_changed().connect(sigc::mem_fun(*this, &Localwb::wbMethodChanged));
 
     ctboxmet->pack_start(*labmeth, Gtk::PACK_SHRINK, 4);
@@ -301,6 +306,7 @@ Localwb::Localwb() :
 //    qualbox->pack_start (*qualityMethod);
 //    shapeBox->pack_start (*qualbox);
     shapeBox->pack_start(*transit);
+    shapeBox->pack_start(*cat02);
 
     artifFrame->set_label_align(0.025, 0.5);
     artifFrame->set_tooltip_text(M("TP_LOCALLAB_ARTIF_TOOLTIP"));
@@ -353,7 +359,7 @@ Localwb::Localwb() :
     wbcamMethod->show();
     temp->show();
     green->show();
-//    equal->show();
+    equal->show();
 //  wbBox->pack_start (*spotbox);
 //    wbBox->pack_start (*wbMethod);
 //    wbBox->pack_start (*ttLabels);
@@ -361,7 +367,7 @@ Localwb::Localwb() :
 
     wbBox->pack_start(*temp);
     wbBox->pack_start(*green);
-//    wbBox->pack_start(*equal);
+    wbBox->pack_start(*equal);
     cambox->pack_start(*labcam, Gtk::PACK_SHRINK, 4);
     cambox->pack_start(*wbcamMethod);
 
@@ -379,7 +385,7 @@ Localwb::Localwb() :
 //    expwb->setLevel (2);
     expwb->setEnabled(true);
 
-  //  pack_start(*expwb);
+    //  pack_start(*expwb);
 
     // Instantiating the Editing geometry; positions will be initialized later
     Line *locYLine[2], *locXLine[2];
@@ -1002,6 +1008,7 @@ void Localwb::read(const ProcParams* pp, const ParamsEdited* pedited)
         chromaref->setEditedState(pedited->localwb.chromaref ? Edited : UnEdited);
         lumaref->setEditedState(pedited->localwb.lumaref ? Edited : UnEdited);
         transit->setEditedState(pedited->localwb.transit ? Edited : UnEdited);
+        cat02->setEditedState(pedited->localwb.cat02 ? Edited : UnEdited);
         expwb->set_inconsistent(!pedited->localwb.expwb);
 
         temp->setEditedState(pedited->localwb.temp ? Edited : UnEdited);
@@ -1053,6 +1060,7 @@ void Localwb::read(const ProcParams* pp, const ParamsEdited* pedited)
     thres->setValue(pp->localwb.thres);
     proxi->setValue(pp->localwb.proxi);
     transit->setValue(pp->localwb.transit);
+    cat02->setValue(pp->localwb.cat02);
     nbspot->setValue(pp->localwb.nbspot);
     anbspot->setValue(pp->localwb.anbspot);
     retrab->setValue(pp->localwb.retrab);
@@ -1194,6 +1202,7 @@ void Localwb::write(ProcParams* pp, ParamsEdited* pedited)
     pp->localwb.proxi = proxi->getIntValue();
     pp->localwb.thres = thres->getIntValue();
     pp->localwb.transit = transit->getIntValue();
+    pp->localwb.cat02 = cat02->getIntValue();
     pp->localwb.nbspot = nbspot->getIntValue();
     pp->localwb.anbspot = anbspot->getIntValue();
     pp->localwb.gamma = gamma->get_active();
@@ -1227,6 +1236,7 @@ void Localwb::write(ProcParams* pp, ParamsEdited* pedited)
         pedited->localwb.thres = thres->getEditedState();
         pedited->localwb.sensi = sensi->getEditedState();
         pedited->localwb.transit = transit->getEditedState();
+        pedited->localwb.cat02 = cat02->getEditedState();
         pedited->localwb.nbspot = nbspot->getEditedState();
         pedited->localwb.anbspot = anbspot->getEditedState();
         pedited->localwb.retrab = retrab->getEditedState();
@@ -1484,6 +1494,7 @@ void Localwb::setDefaults(const ProcParams* defParams, const ParamsEdited* pedit
 
     sensi->setDefault(defParams->localwb.sensi);
     transit->setDefault(defParams->localwb.transit);
+    cat02->setDefault(defParams->localwb.cat02);
     nbspot->setDefault(defParams->localwb.nbspot);
     anbspot->setDefault(defParams->localwb.anbspot);
     retrab->setDefault(defParams->localwb.retrab);
@@ -1509,6 +1520,7 @@ void Localwb::setDefaults(const ProcParams* defParams, const ParamsEdited* pedit
         proxi->setDefaultEditedState(pedited->localwb.proxi ? Edited : UnEdited);
         sensi->setDefaultEditedState(pedited->localwb.sensi ? Edited : UnEdited);
         transit->setDefaultEditedState(pedited->localwb.transit ? Edited : UnEdited);
+        cat02->setDefaultEditedState(pedited->localwb.cat02 ? Edited : UnEdited);
         nbspot->setDefaultEditedState(pedited->localwb.nbspot ? Edited : UnEdited);
         anbspot->setDefaultEditedState(pedited->localwb.anbspot ? Edited : UnEdited);
         retrab->setDefaultEditedState(pedited->localwb.retrab ? Edited : UnEdited);
@@ -1533,6 +1545,7 @@ void Localwb::setDefaults(const ProcParams* defParams, const ParamsEdited* pedit
         proxi->setDefaultEditedState(Irrelevant);
         sensi->setDefaultEditedState(Irrelevant);
         transit->setDefaultEditedState(Irrelevant);
+        cat02->setDefaultEditedState(Irrelevant);
         nbspot->setDefaultEditedState(Irrelevant);
         anbspot->setDefaultEditedState(Irrelevant);
         retrab->setDefaultEditedState(Irrelevant);
@@ -1592,6 +1605,8 @@ void Localwb::adjusterChanged(Adjuster* a, double newval)
             listener->panelChanged(Evlocalwbsensi, sensi->getTextValue());
         } else if (a == transit) {
             listener->panelChanged(Evlocalwbtransit, transit->getTextValue());
+        } else if (a == cat02) {
+            listener->panelChanged(Evlocalwbcat02, cat02->getTextValue());
         } else if (a == nbspot) {
             listener->panelChanged(Evlocalwbnbspot, nbspot->getTextValue());
         } else if (a == retrab) {
@@ -2412,6 +2427,7 @@ void Localwb::setBatchMode(bool batchMode)
 
     sensi->showEditedCB();
     transit->showEditedCB();
+    cat02->showEditedCB();
     Smethod->append(M("GENERAL_UNCHANGED"));
     nbspot->showEditedCB();
     anbspot->showEditedCB();
@@ -2438,6 +2454,7 @@ void Localwb::trimValues(rtengine::procparams::ProcParams* pp)
     proxi->trimValue(pp->localwb.proxi);
     sensi->trimValue(pp->localwb.sensi);
     transit->trimValue(pp->localwb.transit);
+    cat02->trimValue(pp->localwb.cat02);
     nbspot->trimValue(pp->localwb.nbspot);
     anbspot->trimValue(pp->localwb.anbspot);
     retrab->trimValue(pp->localwb.retrab);

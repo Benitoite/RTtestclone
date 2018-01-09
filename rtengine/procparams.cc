@@ -1135,7 +1135,7 @@ WBParams::WBParams() :
     temperature(6504),
     green(1.0),
     equal(1.0),
-	cat02(70),
+    cat02(70),
     tempBias(0.0)
 {
 }
@@ -2284,6 +2284,7 @@ LocrgbParams::LocrgbParams():
     Smethod("IND"),
     qualityMethod("enhden"),
     transit(60),
+    cat02(70),
     sensi(19),
     hueref(1.),
     chromaref(50.),
@@ -2293,7 +2294,7 @@ LocrgbParams::LocrgbParams():
     retrab(500),
     expwb(false),
     wbMethod("man"),
-	wbshaMethod("eli"),
+    wbshaMethod("eli"),
     gamma(true),
     wbcamMethod("gam"),
     temp(4750.),
@@ -2325,6 +2326,8 @@ bool LocrgbParams::operator ==(const LocrgbParams& other) const
         && temp == other.temp
         && green == other.green
         && equal == other.equal
+        && transit == other.transit
+        && cat02 == other.cat02
         && gamma == other.gamma;
 
 }
@@ -3105,7 +3108,8 @@ int ProcParams::save(const Glib::ustring& fname, const Glib::ustring& fname2, bo
         saveToKeyfile(!pedited || pedited->localwb.hueref, "Locrgb", "Hueref", localwb.hueref, keyFile);
         saveToKeyfile(!pedited || pedited->localwb.chromaref, "Locrgb", "Chromaref", localwb.chromaref, keyFile);
         saveToKeyfile(!pedited || pedited->localwb.lumaref, "Locrgb", "Lumaref", localwb.lumaref, keyFile);
-        saveToKeyfile(!pedited || pedited->localwb.transit, "Locrgb", "Transt", localwb.transit, keyFile);
+        saveToKeyfile(!pedited || pedited->localwb.transit, "Locrgb", "Transit", localwb.transit, keyFile);
+        saveToKeyfile(!pedited || pedited->localwb.cat02, "Locrgb", "Cat02", localwb.cat02, keyFile);
         saveToKeyfile(!pedited || pedited->localwb.sensi, "Locrgb", "Sensi", localwb.sensi, keyFile);
         saveToKeyfile(!pedited || pedited->localwb.qualityMethod, "Locrgb", "qualityMethod", localwb.qualityMethod, keyFile);
         saveToKeyfile(!pedited || pedited->localwb.wbMethod, "Locrgb", "wbMethod", localwb.wbMethod, keyFile);
@@ -3920,6 +3924,7 @@ int ProcParams::load(const Glib::ustring& fname, ParamsEdited* pedited)
         }
 
         if (keyFile.has_group("White Balance")) {
+
             assignFromKeyfile(keyFile, "White Balance", "Enabled", pedited, wb.enabled, pedited->wb.enabled);
             assignFromKeyfile(keyFile, "White Balance", "Setting", pedited, wb.method, pedited->wb.method);
             assignFromKeyfile(keyFile, "White Balance", "Temperature", pedited, wb.temperature, pedited->wb.temperature);
@@ -4033,6 +4038,7 @@ int ProcParams::load(const Glib::ustring& fname, ParamsEdited* pedited)
             assignFromKeyfile(keyFile, "Locrgb", "Chromaref", pedited, localwb.chromaref, pedited->localwb.chromaref);
             assignFromKeyfile(keyFile, "Locrgb", "Lumaref", pedited, localwb.lumaref, pedited->localwb.lumaref);
             assignFromKeyfile(keyFile, "Locrgb", "Transit", pedited, localwb.transit, pedited->localwb.transit);
+            assignFromKeyfile(keyFile, "Locrgb", "Cat02", pedited, localwb.cat02, pedited->localwb.cat02);
             assignFromKeyfile(keyFile, "Locrgb", "qualityMethod", pedited, localwb.qualityMethod, pedited->localwb.qualityMethod);
             assignFromKeyfile(keyFile, "Locrgb", "wbMethod", pedited, localwb.wbMethod, pedited->localwb.wbMethod);
             assignFromKeyfile(keyFile, "Locrgb", "wbshaMethod", pedited, localwb.wbshaMethod, pedited->localwb.wbshaMethod);
@@ -4042,7 +4048,7 @@ int ProcParams::load(const Glib::ustring& fname, ParamsEdited* pedited)
             assignFromKeyfile(keyFile, "Locrgb", "Green", pedited, localwb.green, pedited->localwb.green);
             assignFromKeyfile(keyFile, "Locrgb", "Equal", pedited, localwb.equal, pedited->localwb.equal);
             assignFromKeyfile(keyFile, "Locrgb", "Gamma", pedited, localwb.gamma, pedited->localwb.gamma);
-			
+
         }
 
         if (keyFile.has_group("Impulse Denoising")) {

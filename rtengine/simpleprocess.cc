@@ -716,9 +716,9 @@ private:
         Imagefloat *imagetransformed = nullptr;
         Imagefloat *improv = nullptr;
 
-      //  if (params.localwb.enabled && params.localwb.expwb) {
+        //  if (params.localwb.enabled && params.localwb.expwb) {
         if (params.localwb.enabled) {
-            currWBloc = ColorTemp(params.localwb.temp, params.localwb.green, 1.f, "Custom");
+            currWBloc = ColorTemp(params.localwb.temp, params.localwb.green, params.localwb.equal, "Custom");
 
             imageoriginal = new Imagefloat(fw, fh);
             imagetransformed = new Imagefloat(fw, fh);
@@ -734,7 +734,7 @@ private:
                     imagetransformed->b(ir, jr) = imageoriginal->b(ir, jr) = baseImg->b(ir, jr);
                 }
 
-            ipf.WB_Local(imgsrc, 3, 1, 0, 0, 0, 0, fw, fh, fw, fh, improv, imagetransformed, currWBloc, tr, imageoriginal, pp, params.toneCurve, params.icm, params.raw, ptemp, pgreen);
+            ipf.WB_Local(imgsrc, 3, 1, 0, 0, 0, 0, fw, fh, fw, fh, improv, imagetransformed, currWBloc, tr, imageoriginal, pp, params.toneCurve, params.icm, params.raw, params.localwb, ptemp, pgreen);
 #ifdef _OPENMP
             #pragma omp parallel for
 #endif

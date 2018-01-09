@@ -65,6 +65,7 @@ Enabled=false
 Enabled=false
 
 [White Balance]
+Enabled=true
 Setting=Camera
 Equal=1
 TemperatureBias=0

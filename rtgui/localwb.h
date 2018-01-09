@@ -64,6 +64,7 @@ private:
     Adjuster* const proxi;
     Adjuster* const sensi;
     Adjuster* const transit;
+    Adjuster* const cat02;
     Adjuster* const retrab;
     Adjuster* const hueref;
     Adjuster* const chromaref;

@@ -523,7 +523,6 @@ int refreshmap[rtengine::NUMOFEVENTS] = {
     LUMINANCECURVE,   // EvLEnabled
     DEMOSAIC,          // EvPixelShiftOneGreen
 
-    DEMOSAIC, //Evlocalwbtransit
     DEMOSAIC, //EvlocalwblocYT
     DEMOSAIC, //EvlocalwblocXL
     DEMOSAIC, //EvlocalwbSmet
@@ -552,7 +551,9 @@ int refreshmap[rtengine::NUMOFEVENTS] = {
     DEMOSAIC, //EvlocalwblocY
     DEMOSAIC, //EvlocalwblocX
     DEMOSAIC, //EvlocalwbCenter
-    DEMOSAIC //EvlocalwbDegree
+    DEMOSAIC, //EvlocalwbDegree
+    DEMOSAIC, //Evlocalwbtransit
+    DEMOSAIC //Evlocalwbcat02
 
 };
 

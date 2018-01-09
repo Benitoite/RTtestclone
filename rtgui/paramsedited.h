@@ -119,7 +119,8 @@ public:
 };
 
 
-class LocalContrastParamsEdited {
+class LocalContrastParamsEdited
+{
 public:
     bool enabled;
     bool radius;
@@ -245,9 +246,9 @@ public:
     bool temperature;
     bool green;
     bool equal;
-	bool cat02;
+    bool cat02;
     bool tempBias;
-	bool wbcamMethod;
+    bool wbcamMethod;
 };
 
 /*class ColorShiftParamsEdited {
@@ -379,7 +380,8 @@ public:
 };
 
 
-class FattalToneMappingParamsEdited {
+class FattalToneMappingParamsEdited
+{
 public:
     bool enabled;
     bool threshold;
@@ -461,6 +463,7 @@ public:
     bool proxi;
     bool Smethod;
     bool transit;
+    bool cat02;
     bool nbspot;
     bool anbspot;
     bool retrab;
@@ -835,7 +838,8 @@ public:
 };
 
 
-class MetaDataParamsEdited {
+class MetaDataParamsEdited
+{
 public:
     bool mode;
 };
@@ -894,10 +898,10 @@ public:
     bool                          exif;
     bool                          iptc;
 
-    explicit ParamsEdited (bool value = false);
+    explicit ParamsEdited(bool value = false);
 
-    void set   (bool v);
-    void initFrom (const std::vector<rtengine::procparams::ProcParams>& src);
-    void combine (rtengine::procparams::ProcParams& toEdit, const rtengine::procparams::ProcParams& mods, bool forceSet);
+    void set(bool v);
+    void initFrom(const std::vector<rtengine::procparams::ProcParams>& src);
+    void combine(rtengine::procparams::ProcParams& toEdit, const rtengine::procparams::ProcParams& mods, bool forceSet);
 };
 #endif

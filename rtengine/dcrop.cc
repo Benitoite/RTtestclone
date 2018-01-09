@@ -677,11 +677,11 @@ void Crop::update(int todo)
         Imagefloat *imagetransformed = nullptr;
         Imagefloat *improv = nullptr;
 
-     //   if (params.localwb.enabled && params.localwb.expwb) {
+        //   if (params.localwb.enabled && params.localwb.expwb) {
         if (params.localwb.enabled) {
-			printf("dcrop loc\n");
+            printf("dcrop loc\n");
             //   parent->currWBloc = ColorTemp (params.localrgb.temp, params.localrgb.green, params.localrgb.equal, "Custom");
-            parent->currWBloc = ColorTemp(params.localwb.temp, params.localwb.green, 1., "Custom");
+            parent->currWBloc = ColorTemp(params.localwb.temp, params.localwb.green, params.localwb.equal, "Custom");
 
             imageoriginal = new Imagefloat(trafw, trafh);
             imagetransformed = new Imagefloat(trafw, trafh);
@@ -702,7 +702,7 @@ void Crop::update(int todo)
                 }
 
             PreviewProps pp(trafx, trafy, trafw * skip, trafh * skip, skip);
-            parent->ipf.WB_Local(parent->imgsrc, 1, 1, trafx / skip, trafy / skip, cropx / skip, cropy / skip, skips(parent->fw, skip), skips(parent->fh, skip), parent->fw, parent->fh, improv, imagetransformed, parent->currWBloc, tr, imageoriginal, pp, params.toneCurve, params.icm, params.raw, parent->ptemp, parent->pgreen);
+            parent->ipf.WB_Local(parent->imgsrc, 1, 1, trafx / skip, trafy / skip, cropx / skip, cropy / skip, skips(parent->fw, skip), skips(parent->fh, skip), parent->fw, parent->fh, improv, imagetransformed, parent->currWBloc, tr, imageoriginal, pp, params.toneCurve, params.icm, params.raw, params.localwb, parent->ptemp, parent->pgreen);
 #ifdef _OPENMP
             #pragma omp parallel for
 #endif

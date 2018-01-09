@@ -900,6 +900,7 @@ struct LocrgbParams {
     Glib::ustring qualityMethod;
 
     int     transit;
+    int cat02;
     int sensi;
     double  hueref;
     double  chromaref;
