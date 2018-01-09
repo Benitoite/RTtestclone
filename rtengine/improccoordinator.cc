@@ -426,7 +426,7 @@ void ImProcCoordinator::updatePreviewImage(int todo, Crop* cropCall)
     autowb = (params.wb.method == "autold" || params.wb.method == "aut"  || params.wb.method == "autosdw" || params.wb.method == "autedgsdw" || params.wb.method == "autitc"  || params.wb.method == "autedgrob" || params.wb.method == "autedg" || params.wb.method == "autorobust");
 
 //  Glib::ustring
-    if (todo & (M_INIT | M_LINDENOISE)) {
+    if (todo & (M_INIT | M_LINDENOISE | M_HDR)) {
         MyMutex::MyLock initLock(minit);  // Also used in crop window
 
         imgsrc->HLRecovery_Global(params.toneCurve);   // this handles Color HLRecovery

@@ -743,11 +743,11 @@ void Options::readFromFile (Glib::ustring fname)
                 if (keyFile.has_key ("General", "BotRight")) {
                     rtSettings.bot_right = keyFile.get_double ("General", "BotRight");
                 }
-
+/*
                 if (keyFile.has_key ("General", "Nspot")) {
                     rtSettings.nspot          = keyFile.get_integer ("General", "Nspot");
                 }
-				
+*/				
                 if (keyFile.has_key ("General", "EDdetec")) {
                     rtSettings.ed_detec = keyFile.get_double ("General", "EDdetec");
                 }

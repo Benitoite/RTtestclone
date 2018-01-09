@@ -757,6 +757,9 @@ void WhiteBalance::read(const ProcParams* pp, const ParamsEdited* pedited)
 
     wbcamMethodChanged();
     setEnabled(pp->wb.enabled);
+    if (pedited) {
+        set_inconsistent(multiImage && !pedited->wb.enabled);
+    }
 
     methconn.block(false);
     enableListener();
