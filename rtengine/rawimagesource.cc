@@ -1238,12 +1238,12 @@ void RawImageSource::getImage_local(int begx, int begy, int yEn, int xEn, int cx
 
     }
 
-    if (wbl.cat02 > 1) {
+    if (wbl.cat02 > 1) { // different place from getimage to see if there is differences
         //  printf("OK cat02 local\n");
         LabImage *bufcat02 = nullptr;
-        bufcat02 = new LabImage(image->getWidth(), image->getWidth());
+        bufcat02 = new LabImage(image->getWidth(), image->getHeight());
         LabImage *bufcat02fin = nullptr;
-        bufcat02fin = new LabImage(image->getWidth(), image->getWidth());
+        bufcat02fin = new LabImage(image->getWidth(), image->getHeight());
         TMatrix wiprof = ICCStore::getInstance()->workingSpaceInverseMatrix(cmp.working);
         TMatrix wprof = ICCStore::getInstance()->workingSpaceMatrix(cmp.working);
 
@@ -1279,11 +1279,6 @@ void RawImageSource::getImage_local(int begx, int begy, int yEn, int xEn, int cx
                 float LR, aR, bR;
                 float LL, aa, bb;
                 Color::rgbxyz(image->r(y, x), image->g(y, x), image->b(y, x), X, Y, Z, wp);
-                /*
-                X  = xyz_sRGBd65[0][0] * image->r(y, x)  + xyz_sRGBd65[0][1] *  image->g(y, x) + xyz_sRGBd65[0][2] *  image->b(y, x) ;
-                Y  = xyz_sRGBd65[1][0] * image->r(y, x)  + xyz_sRGBd65[1][1] *  image->g(y, x) + xyz_sRGBd65[1][2] * image->b(y, x);
-                Z  = xyz_sRGBd65[2][0] * image->r(y, x)  + xyz_sRGBd65[2][1] *  image->g(y, x) + xyz_sRGBd65[2][2] * image->b(y, x);
-                */
                 Color::XYZ2Lab(X, Y, Z, LR, aR, bR);
                 bufcat02->L[y][x] = LR;
                 bufcat02->a[y][x] = aR;
@@ -1303,11 +1298,6 @@ void RawImageSource::getImage_local(int begx, int begy, int yEn, int xEn, int cx
 
                 Color::Lab2XYZ(LL, aa, bb, XR, YR, ZR);
                 Color::xyz2rgb(XR, YR, ZR, image->r(y, x), image->g(y, x), image->b(y, x), wip);
-                /*
-                image->r(y, x) = sRGBd65_xyz[0][0] *  XR + sRGBd65_xyz[0][1] * YR + sRGBd65_xyz[0][2] * ZR;
-                image->g(y, x) = sRGBd65_xyz[1][0] *  XR + sRGBd65_xyz[1][1] * YR + sRGBd65_xyz[1][2] * ZR;
-                image->b(y, x) = sRGBd65_xyz[2][0] *  XR + sRGBd65_xyz[2][1] * YR + sRGBd65_xyz[2][2] * ZR;
-                */
             }
 
         delete bufcat02;
@@ -1480,6 +1470,72 @@ void RawImageSource::getImage(const ColorTemp &ctemp, int tran, Imagefloat* imag
         maximwidth = image->getWidth();
         maximheight = image->getHeight();
     }
+
+    if (wbp.cat02 > 1) {
+        LabImage *bufcat02 = nullptr;
+        bufcat02 = new LabImage(imwidth, imheight);
+        LabImage *bufcat02fin = nullptr;
+        bufcat02fin = new LabImage(imwidth, imheight);
+        TMatrix wiprof = ICCStore::getInstance()->workingSpaceInverseMatrix(cmp.working);
+        TMatrix wprof = ICCStore::getInstance()->workingSpaceMatrix(cmp.working);
+
+        double wip[3][3] = {
+            {wiprof[0][0], wiprof[0][1], wiprof[0][2]},
+            {wiprof[1][0], wiprof[1][1], wiprof[1][2]},
+            {wiprof[2][0], wiprof[2][1], wiprof[2][2]}
+        };
+
+        double wp[3][3] = {
+            {wprof[0][0], wprof[0][1], wprof[0][2]},
+            {wprof[1][0], wprof[1][1], wprof[1][2]},
+            {wprof[2][0], wprof[2][1], wprof[2][2]}
+        };
+
+
+
+        for (int y = 0; y < imheight  ; y++) //{
+            for (int x = 0; x < imwidth; x++) {
+                bufcat02->L[y][x] = 0.f;
+                bufcat02->a[y][x] = 0.f;
+                bufcat02->b[y][x] = 0.f;
+                bufcat02fin->L[y][x] = 0.f;
+                bufcat02fin->a[y][x] = 0.f;
+                bufcat02fin->b[y][x] = 0.f;
+
+            }
+
+        for (int y = 0; y <  imheight ; y++) //{
+            for (int x = 0; x < imwidth; x++) {
+                float X, Y, Z;
+                float XR, YR, ZR;
+                float LR, aR, bR;
+                float LL, aa, bb;
+                Color::rgbxyz(image->r(y, x), image->g(y, x), image->b(y, x), X, Y, Z, wp);
+                Color::XYZ2Lab(X, Y, Z, LR, aR, bR);
+                bufcat02->L[y][x] = LR;
+                bufcat02->a[y][x] = aR;
+                bufcat02->b[y][x] = bR;
+            }
+
+        ciecamcat02loc_float(bufcat02, bufcat02fin, wbp.temperature, wbp.cat02, cmp);
+
+        for (int y = 0; y <  imheight ; y++) //{
+            for (int x = 0; x < imwidth; x++) {
+                float XR, YR, ZR;
+                float LR, aR, bR;
+                float LL, aa, bb;
+                LL = bufcat02fin->L[y][x];
+                aa = bufcat02fin->a[y][x];
+                bb = bufcat02fin->b[y][x];
+
+                Color::Lab2XYZ(LL, aa, bb, XR, YR, ZR);
+                Color::xyz2rgb(XR, YR, ZR, image->r(y, x), image->g(y, x), image->b(y, x), wip);
+            }
+
+        delete bufcat02;
+        delete bufcat02fin;
+    }
+
 
     if (d1x) {
         // D1X has only half of the required rows
@@ -1718,6 +1774,9 @@ void RawImageSource::getImage(const ColorTemp &ctemp, int tran, Imagefloat* imag
 
         }
     */
+
+
+
     // Flip if needed
     if (tran & TR_HFLIP) {
         hflip(image);
@@ -1744,80 +1803,7 @@ void RawImageSource::getImage(const ColorTemp &ctemp, int tran, Imagefloat* imag
         }
     }
 
-    if (wbp.cat02 > 1) {
-        LabImage *bufcat02 = nullptr;
-        bufcat02 = new LabImage(image->getWidth(), image->getWidth());
-        LabImage *bufcat02fin = nullptr;
-        bufcat02fin = new LabImage(image->getWidth(), image->getWidth());
-        TMatrix wiprof = ICCStore::getInstance()->workingSpaceInverseMatrix(cmp.working);
-        TMatrix wprof = ICCStore::getInstance()->workingSpaceMatrix(cmp.working);
 
-        double wip[3][3] = {
-            {wiprof[0][0], wiprof[0][1], wiprof[0][2]},
-            {wiprof[1][0], wiprof[1][1], wiprof[1][2]},
-            {wiprof[2][0], wiprof[2][1], wiprof[2][2]}
-        };
-
-        double wp[3][3] = {
-            {wprof[0][0], wprof[0][1], wprof[0][2]},
-            {wprof[1][0], wprof[1][1], wprof[1][2]},
-            {wprof[2][0], wprof[2][1], wprof[2][2]}
-        };
-
-
-
-        for (int y = 0; y <  image->getHeight() ; y++) //{
-            for (int x = 0; x < image->getWidth(); x++) {
-                bufcat02->L[y][x] = 0.f;
-                bufcat02->a[y][x] = 0.f;
-                bufcat02->b[y][x] = 0.f;
-                bufcat02fin->L[y][x] = 0.f;
-                bufcat02fin->a[y][x] = 0.f;
-                bufcat02fin->b[y][x] = 0.f;
-
-            }
-
-        for (int y = 0; y <  image->getHeight() ; y++) //{
-            for (int x = 0; x < image->getWidth(); x++) {
-                float X, Y, Z;
-                float XR, YR, ZR;
-                float LR, aR, bR;
-                float LL, aa, bb;
-                Color::rgbxyz(image->r(y, x), image->g(y, x), image->b(y, x), X, Y, Z, wp);
-                /*
-                X  = xyz_sRGBd65[0][0] * image->r(y, x)  + xyz_sRGBd65[0][1] *  image->g(y, x) + xyz_sRGBd65[0][2] *  image->b(y, x) ;
-                Y  = xyz_sRGBd65[1][0] * image->r(y, x)  + xyz_sRGBd65[1][1] *  image->g(y, x) + xyz_sRGBd65[1][2] * image->b(y, x);
-                Z  = xyz_sRGBd65[2][0] * image->r(y, x)  + xyz_sRGBd65[2][1] *  image->g(y, x) + xyz_sRGBd65[2][2] * image->b(y, x);
-                */
-                Color::XYZ2Lab(X, Y, Z, LR, aR, bR);
-                bufcat02->L[y][x] = LR;
-                bufcat02->a[y][x] = aR;
-                bufcat02->b[y][x] = bR;
-            }
-
-        ciecamcat02loc_float(bufcat02, bufcat02fin, wbp.temperature, wbp.cat02, cmp);
-
-        for (int y = 0; y <  image->getHeight() ; y++) //{
-            for (int x = 0; x < image->getWidth(); x++) {
-                float XR, YR, ZR;
-                float LR, aR, bR;
-                float LL, aa, bb;
-                LL = bufcat02fin->L[y][x];
-                aa = bufcat02fin->a[y][x];
-                bb = bufcat02fin->b[y][x];
-
-                Color::Lab2XYZ(LL, aa, bb, XR, YR, ZR);
-                Color::xyz2rgb(XR, YR, ZR, image->r(y, x), image->g(y, x), image->b(y, x), wip);
-                /*
-                image->r(y, x) = sRGBd65_xyz[0][0] *  XR + sRGBd65_xyz[0][1] * YR + sRGBd65_xyz[0][2] * ZR;
-                image->g(y, x) = sRGBd65_xyz[1][0] *  XR + sRGBd65_xyz[1][1] * YR + sRGBd65_xyz[1][2] * ZR;
-                image->b(y, x) = sRGBd65_xyz[2][0] *  XR + sRGBd65_xyz[2][1] * YR + sRGBd65_xyz[2][2] * ZR;
-                */
-            }
-
-        delete bufcat02;
-        delete bufcat02fin;
-    }
 }
 
 
