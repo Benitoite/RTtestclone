@@ -1923,12 +1923,13 @@ void ColorTemp::tempxy(double &temp, float **Tx, float **Ty, float **TYY, float 
         float c33;
     } TCAT02;
 //to continue ==> 12000K if necessary
+/*
     TCAT02 Tcat[2] = {//temperature Xwb Zwb 91 values
         {2001.f, 0.85431f, -0.23940f, 0.79205f, -0.17526f, 1.17758f, 0.31437f, 0.01556f, 0.05581f, 5.15369f },
         {2101.f, 0.85819f, -0.21859f, 0.67859f, -0.15965f, 1.15346f, 0.26944f, 0.01345f, 0.04755f, 4.53740f }
 
     };
-
+*/
     int N_c = sizeof(spec_colorforxcyc) / sizeof(spec_colorforxcyc[0]);   //number of color
     int N_t = sizeof(Txyz) / sizeof(Txyz[0]);   //number of temperature White point
     typedef struct XYZref {

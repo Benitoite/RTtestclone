@@ -1134,8 +1134,8 @@ WBParams::WBParams() :
     method("Camera"),
     temperature(6504),
     green(1.0),
-    equal(1.0),
     cat02(90),
+    equal(1.0),
     tempBias(0.0)
 {
 }

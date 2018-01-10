@@ -723,6 +723,21 @@ HISTORY_MSG_490;HDR TM - Amount
 HISTORY_MSG_491;White Balance
 HISTORY_MSG_492;RGB Curves
 HISTORY_MSG_493;L*a*b* Adjustments
+HISTORY_MSG_495;WB local - top
+HISTORY_MSG_496;WB local - left
+HISTORY_MSG_497;WB local - Shape method
+HISTORY_MSG_510;WB local - temp
+HISTORY_MSG_511;WB local - tint
+HISTORY_MSG_512;WB local - equalizer
+HISTORY_MSG_513;WB local - RT-spot area
+HISTORY_MSG_516;White Balance - Auto - gamma
+HISTORY_MSG_517;White Balance - cat02 adaptation
+HISTORY_MSG_519;WB local - enabled
+HISTORY_MSG_520;WB local - bottom
+HISTORY_MSG_521;WB local - right
+HISTORY_MSG_522;WB local - center
+HISTORY_MSG_524;WB local - transition
+HISTORY_MSG_525;WB local - cat02 adaptation
 HISTORY_MSG_LOCALCONTRAST_AMOUNT;Local Contrast - Amount
 HISTORY_MSG_LOCALCONTRAST_DARKNESS;Local Contrast - Darkness
 HISTORY_MSG_LOCALCONTRAST_ENABLED;Local Contrast
