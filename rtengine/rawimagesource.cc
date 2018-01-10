@@ -462,12 +462,13 @@ RawImageSource::RawImageSource()
     , cache(nullptr)
     , threshold(0)
     , rawData(0, 0)
-    , green(0, 0)
-    , red(0, 0)
-    , blue(0, 0)
     , rawDataloc(0, 0)
+    , green(0, 0)
     , greenloc(0, 0)
+    , red(0, 0)
     , redloc(0, 0)
+    , blue(0, 0)
+    , blueloc(0, 0)
     , rawDirty(true)
 {
     camProfile = nullptr;
@@ -1275,9 +1276,7 @@ void RawImageSource::getImage_local(int begx, int begy, int yEn, int xEn, int cx
         for (int y = 0; y <  image->getHeight() ; y++) //{
             for (int x = 0; x < image->getWidth(); x++) {
                 float X, Y, Z;
-                float XR, YR, ZR;
                 float LR, aR, bR;
-                float LL, aa, bb;
                 Color::rgbxyz(image->r(y, x), image->g(y, x), image->b(y, x), X, Y, Z, wp);
                 Color::XYZ2Lab(X, Y, Z, LR, aR, bR);
                 bufcat02->L[y][x] = LR;
@@ -1290,7 +1289,6 @@ void RawImageSource::getImage_local(int begx, int begy, int yEn, int xEn, int cx
         for (int y = 0; y <  image->getHeight() ; y++) //{
             for (int x = 0; x < image->getWidth(); x++) {
                 float XR, YR, ZR;
-                float LR, aR, bR;
                 float LL, aa, bb;
                 LL = bufcat02fin->L[y][x];
                 aa = bufcat02fin->a[y][x];
@@ -1357,7 +1355,7 @@ void RawImageSource::getImage(const ColorTemp &ctemp, int tran, Imagefloat* imag
     MyMutex::MyLock lock(getImageMutex);
 
     tran = defTransform(tran);
-    double wbcat02 = wbp.cat02;
+//   double wbcat02 = wbp.cat02;
     // compute channel multipliers
     double r, g, b;
     float rm, gm, bm;
@@ -1746,9 +1744,7 @@ void RawImageSource::getImage(const ColorTemp &ctemp, int tran, Imagefloat* imag
         for (int y = 0; y <  image->getHeight() ; y++) //{
             for (int x = 0; x < image->getWidth(); x++) {
                 float X, Y, Z;
-                float XR, YR, ZR;
                 float LR, aR, bR;
-                float LL, aa, bb;
                 Color::rgbxyz(image->r(y, x), image->g(y, x), image->b(y, x), X, Y, Z, wp);
                 Color::XYZ2Lab(X, Y, Z, LR, aR, bR);
                 bufcat02->L[y][x] = LR;
@@ -1761,7 +1757,6 @@ void RawImageSource::getImage(const ColorTemp &ctemp, int tran, Imagefloat* imag
         for (int y = 0; y <  image->getHeight() ; y++) //{
             for (int x = 0; x < image->getWidth(); x++) {
                 float XR, YR, ZR;
-                float LR, aR, bR;
                 float LL, aa, bb;
                 LL = bufcat02fin->L[y][x];
                 aa = bufcat02fin->a[y][x];
@@ -6239,7 +6234,7 @@ void RawImageSource::ItcWB(array2D<float> &redloc, array2D<float> &greenloc, arr
     yc(bfwitc, bfhitc);
     Yc(bfwitc, bfhitc);
 
-    double avprov = 1.f;
+//   double avprov = 1.f;
 
     typedef struct WbTxyz {
         double Tem;
@@ -6460,7 +6455,7 @@ void RawImageSource::ItcWB(array2D<float> &redloc, array2D<float> &greenloc, arr
         rm = new_scale_mul[0] / scale_mul[0] * gain;
         gm = new_scale_mul[1] / scale_mul[1] * gain;
         bm = new_scale_mul[2] / scale_mul[2] * gain;
-        float som = rm + gm + bm;
+//       float som = rm + gm + bm;
         //  printf ("ZZZ rm=%f gm=%f bm=%f\n", rm / gm, gm / gm, bm / gm);
         rmm[tt] = rm / gm;
         gmm[tt] = gm / gm;
@@ -6480,7 +6475,7 @@ void RawImageSource::ItcWB(array2D<float> &redloc, array2D<float> &greenloc, arr
         }
     }
 
-    float epsx = 0.001f, epsy = 0.001f;//delta value to have result!
+//    float epsx = 0.001f, epsy = 0.001f;//delta value to have result!
 
     //calculate for this image the mean values for each family of color, near histogram x y (number)
     //xy vary from x 0..0.77  y 0..0.82
@@ -6521,6 +6516,7 @@ void RawImageSource::ItcWB(array2D<float> &redloc, array2D<float> &greenloc, arr
     float YYY[siza] = {};//not used directly, but necessary to keep good range
     int nc = 0, nc2 = 0; //near reference color perhaps not need
     float histY[siza] = {};//#mean Y of xyY : not used directly, but necessary to keep good range
+    printf("nc2=%i nc=%i", nc2, nc);
 
     for (int p = 0; p < siza; p++) {
         histxy[p] = 0.f;
@@ -8272,9 +8268,9 @@ void RawImageSource::ItcWB(array2D<float> &redloc, array2D<float> &greenloc, arr
     float deltac[N_t] = {};
     float avgx42 = 0.f;
     float avgy42 = 0.f;
-    float sigx42 = 0.f;
-    float sigy42 = 0.f;
-    float delta = 0.f;
+//    float sigx42 = 0.f;
+//    float sigy42 = 0.f;
+//    float delta = 0.f;
 
     for (int tt = 0; tt < N_t; tt++) {
         avgx[tt] = 0.f;
@@ -8381,7 +8377,7 @@ void RawImageSource::ItcWB(array2D<float> &redloc, array2D<float> &greenloc, arr
             }
 
 
-            //     printf("12 == tt=%i pos=%i corr=%f\n", tt, pos, correl[tt]);
+            printf("12 == tempc=%i tt=%i pos=%i corr=%f\n", tempcor, tt, pos, correl[tt]);
 
 
         }
@@ -9060,22 +9056,22 @@ void RawImageSource::WBauto(array2D<float> &redloc, array2D<float> &greenloc, ar
     greensobel(bfw, bfh);
     bluesobel(bfw, bfh);
     //ColorManagementParams cmp;
-    TMatrix wprof = ICCStore::getInstance()->workingSpaceMatrix("sRGB");
-    TMatrix wiprof = ICCStore::getInstance()->workingSpaceInverseMatrix("sRGB");
+//    TMatrix wprof = ICCStore::getInstance()->workingSpaceMatrix("sRGB");
+//    TMatrix wiprof = ICCStore::getInstance()->workingSpaceInverseMatrix("sRGB");
     //inverse matrix user select
-    double wip[3][3] = {
-        {wiprof[0][0], wiprof[0][1], wiprof[0][2]},
-        {wiprof[1][0], wiprof[1][1], wiprof[1][2]},
-        {wiprof[2][0], wiprof[2][1], wiprof[2][2]}
-    };
+    /*    double wip[3][3] = {
+            {wiprof[0][0], wiprof[0][1], wiprof[0][2]},
+            {wiprof[1][0], wiprof[1][1], wiprof[1][2]},
+            {wiprof[2][0], wiprof[2][1], wiprof[2][2]}
+        };
 
-    double wp[3][3] = {
-        {wprof[0][0], wprof[0][1], wprof[0][2]},
-        {wprof[1][0], wprof[1][1], wprof[1][2]},
-        {wprof[2][0], wprof[2][1], wprof[2][2]}
-    };
+        double wp[3][3] = {
+            {wprof[0][0], wprof[0][1], wprof[0][2]},
+            {wprof[1][0], wprof[1][1], wprof[1][2]},
+            {wprof[2][0], wprof[2][1], wprof[2][2]}
+        };
 
-
+    */
     double avg_r = 0.;
     double avg_g = 0.;
     double avg_b = 0.;
@@ -9103,7 +9099,10 @@ void RawImageSource::WBauto(array2D<float> &redloc, array2D<float> &greenloc, ar
 
     if (wbpar.method == "autitc") {
         itc = true;
-        ItcWB(redloc, greenloc, blueloc, bfw, bfh, avg_rm, avg_gm, avg_bm, cmp);
+
+        if (itc) {
+            ItcWB(redloc, greenloc, blueloc, bfw, bfh, avg_rm, avg_gm, avg_bm, cmp);
+        }
 
     }
 
@@ -9171,8 +9170,8 @@ void RawImageSource::WBauto(array2D<float> &redloc, array2D<float> &greenloc, ar
         }
     }
 
-    float varir = localr.equal;
-    float varib = 1.f - (varir - 1.f);
+//   float varir = localr.equal;
+//    float varib = 1.f - (varir - 1.f);
 
 
 
@@ -9330,10 +9329,10 @@ void  RawImageSource::getrgbloc(bool local, bool gamma, bool cat02, int begx, in
             for (int j = 0; j < bfw; j++) {
                 float X = 0.f, Y = 0.f, Z = 0.f;
                 Color::rgbxyz(redloc[i][j], greenloc[i][j], blueloc[i][j], X, Y, Z, wp);
-                double temp;
-                double Xr = X / 65535.;
-                double Yr = Y / 65535.;
-                double Zr = Z / 65535.;
+                //     double temp;
+                //    double Xr = X / 65535.;
+                //    double Yr = Y / 65535.;
+                //    double Zr = Z / 65535.;
 
                 //          xyz_to_cat02floatraw ( redloc[i][j], greenloc[i][j], blueloc[i][j], X, Y, Z);
 
