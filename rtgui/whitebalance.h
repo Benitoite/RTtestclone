@@ -123,7 +123,7 @@ public:
     void setWB(int temp, double green);
     void WBChanged(double temp, double green);
 
-    void setAdjusterBehavior(bool tempadd, bool greenadd, bool equaladd, bool tempbiasadd);
+    void setAdjusterBehavior(bool tempadd, bool greenadd, bool equaladd, bool tempbiasadd, bool cat02add);
     void trimValues(rtengine::procparams::ProcParams* pp);
     void enabledChanged();
 };

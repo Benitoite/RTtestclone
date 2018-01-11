@@ -1794,7 +1794,9 @@ void ParamsEdited::combine(rtengine::procparams::ProcParams& toEdit, const rteng
     }
 
     if (wb.cat02) {
-        toEdit.wb.cat02  = mods.wb.cat02;
+      // toEdit.wb.cat02  = mods.wb.cat02;
+        toEdit.wb.cat02   = dontforceSet && options.baBehav[ADDSET_WB_CAT02] ? toEdit.wb.cat02 + mods.wb.cat02 : mods.wb.cat02;
+		
     }
 
     if (wb.equal) {

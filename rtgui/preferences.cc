@@ -262,6 +262,7 @@ Gtk::Widget* Preferences::getBatchProcPanel ()
 
     mi = behModel->append ();
     mi->set_value (behavColumns.label, M ("TP_WBALANCE_LABEL"));
+    appendBehavList (mi, M ("TP_WBALANCE_CAT"), ADDSET_WB_CAT02, true);
     appendBehavList (mi, M ("TP_WBALANCE_TEMPERATURE"), ADDSET_WB_TEMPERATURE, true);
     appendBehavList (mi, M ("TP_WBALANCE_GREEN"), ADDSET_WB_GREEN, true);
     appendBehavList (mi, M ("TP_WBALANCE_EQBLUERED"), ADDSET_WB_EQUAL, true);
