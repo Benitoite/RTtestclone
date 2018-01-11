@@ -2229,7 +2229,7 @@ TP_WBALANCE_AUTOEDGESW;Auto Edge + Standard deviation
 TP_WBALANCE_AUTOEDGEROB;Auto Edge + Robust
 TP_WBALANCE_AUTOITC;Auto iterate temperature correlation
 TP_WBALANCE_CAT;CAT02 adaptation
-TP_WBALANCE_CAT_TOOLTIP;Performs a chromatic adaptation, between the chosen temperature and 5000K.\n90% should satisfy the majority of cases.\nIf the absolute luminance conditions (scene or viewing) are very low, you can lower the value.\nif conversely they are very high you can increase the value up to 100.
+TP_WBALANCE_CAT_TOOLTIP;Performs a chromatic adaptation, between the chosen temperature and 5000K.\n90% should satisfy the majority of cases.\nIf the absolute luminance conditions (scene or viewing) are very low, you can lower the value.\nif conversely they are very high you can increase the value up to 100.\nDisabled when Ciecam02 enabled.
 TP_WBALANCE_FLUO1;F1 - Daylight
 TP_WBALANCE_FLUO2;F2 - Cool White
 TP_WBALANCE_FLUO3;F3 - White
