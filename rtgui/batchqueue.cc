@@ -382,7 +382,7 @@ Glib::ustring BatchQueue::getTempFilenameForParams ( const Glib::ustring &filena
 {
     timeval tv;
     gettimeofday (&tv, nullptr);
-    char mseconds[4];
+    char mseconds[11];
     sprintf (mseconds, "%d", (int) (tv.tv_usec / 1000));
     time_t rawtime;
     struct tm *timeinfo;
@@ -597,7 +597,7 @@ void BatchQueue::startProcessing ()
     }
 }
 
-rtengine::ProcessingJob* BatchQueue::imageReady (rtengine::IImage16* img)
+rtengine::ProcessingJob* BatchQueue::imageReady (rtengine::IImagefloat* img)
 {
 
     // save image img
