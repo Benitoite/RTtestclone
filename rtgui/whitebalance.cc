@@ -242,6 +242,8 @@ WhiteBalance::WhiteBalance() : FoldableToolPanel(this, "whitebalance", M("TP_WBA
 
         custom_green = 1.0;
         custom_equal = 1.0;
+ //       custom_cat02 = 90;
+		
     }
 
     //Add the model columns to the Combo (which is a kind of view),
@@ -360,6 +362,8 @@ WhiteBalance::WhiteBalance() : FoldableToolPanel(this, "whitebalance", M("TP_WBA
     cache_customTemp(0);
     cache_customGreen(0);
     cache_customEqual(0);
+//    cache_customcat02(0);
+	
     equal->set_tooltip_markup(M("TP_WBALANCE_EQBLUERED_TOOLTIP"));
     tempBias->set_tooltip_markup(M("TP_WBALANCE_TEMPBIAS_TOOLTIP"));
     temp->show();
@@ -411,6 +415,7 @@ void WhiteBalance::adjusterChanged(Adjuster* a, double newval)
     int tVal = (int)temp->getValue();
     double gVal = green->getValue();
     double eVal = equal->getValue();
+ //   int tcat02 = (int)cat02->getValue();
     Gtk::TreeModel::Row row = getActiveMethod();
 
     if (row == refTreeModel->children().end()) {
@@ -444,6 +449,9 @@ void WhiteBalance::adjusterChanged(Adjuster* a, double newval)
         if (a != equal) {
             cache_customEqual(eVal);
         }
+        if (a != cat02) {
+         //   cache_customcat02(tcat02);
+        }
 
         methconn.block(false);
     }
@@ -455,6 +463,8 @@ void WhiteBalance::adjusterChanged(Adjuster* a, double newval)
         cache_customGreen(gVal);
     } else if (a == equal) {
         cache_customEqual(eVal);
+    } else if (a == cat02) {
+     //   cache_customcat02(tcat02);
     }
 
     // Recomputing AutoWB if it's the current method will happen in improccoordinator.cc
@@ -544,16 +554,19 @@ void WhiteBalance::optChanged()
                         temp->setValue(temp->getAddMode() ? 0.0 : custom_temp);
                         green->setValue(green->getAddMode() ? 0.0 : custom_green);
                         equal->setValue(equal->getAddMode() ? 0.0 : custom_equal);
+                     //   cat02->setValue(custom_cat02);
                     } else {
                         cache_customTemp(temp->getValue());
                         cache_customGreen(green->getValue());
                         cache_customEqual(equal->getValue());
+                     //   cache_customcat02(cat02->getValue());
                     }
 
                     if (batchMode) {
                         temp->setEditedState(Edited);
                         green->setEditedState(Edited);
                         equal->setEditedState(Edited);
+                    //    cat02->setEditedState(Edited);
                     }
 
                     break;
@@ -572,11 +585,13 @@ void WhiteBalance::optChanged()
                     temp->setValue(temp->getAddMode() ? 0.0 : (double)(currMethod.temperature));
                     green->setValue(green->getAddMode() ? 0.0 : (double)(currMethod.green));
                     equal->setValue(equal->getAddMode() ? 0.0 : (double)(currMethod.equal));
+               //     cat02->setValue((double)(currMethod.cat02));
 
                     if (batchMode) {
                         temp->setEditedState(Edited);
                         green->setEditedState(Edited);
                         equal->setEditedState(Edited);
+				//		cat02->setEditedState(Edited);
                     }
 
                     break;
@@ -931,6 +946,10 @@ void WhiteBalance::cache_customGreen(double green)
 void WhiteBalance::cache_customEqual(double equal)
 {
     custom_equal = equal;
+}
+void WhiteBalance::cache_customcat02(int cat02)
+{
+    custom_cat02 = cat02;
 }
 
 void WhiteBalance::cache_customWB(int temp, double green)

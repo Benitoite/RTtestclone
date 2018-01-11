@@ -228,18 +228,18 @@ void Crop::update(int todo)
         if (settings->leveldnautsimpl == 1) {
             if (params.dirpyrDenoise.Cmethod == "MAN" || params.dirpyrDenoise.Cmethod == "PON")  {
                 PreviewProps pp(trafx, trafy, trafw * skip, trafh * skip, skip);
-                parent->imgsrc->getImage(parent->currWB, tr, origCrop, pp, params.toneCurve, params.icm, params.raw, params.wb);
+                parent->imgsrc->getImage(parent->currWB, tr, origCrop, pp, params.toneCurve, params.icm, params.raw, params.wb, params.colorappearance);
             }
         } else {
             if (params.dirpyrDenoise.C2method == "MANU")  {
                 PreviewProps pp(trafx, trafy, trafw * skip, trafh * skip, skip);
-                parent->imgsrc->getImage(parent->currWB, tr, origCrop, pp, params.toneCurve, params.icm, params.raw, params.wb);
+                parent->imgsrc->getImage(parent->currWB, tr, origCrop, pp, params.toneCurve, params.icm, params.raw, params.wb, params.colorappearance);
             }
         }
 
         if ((settings->leveldnautsimpl == 1 && params.dirpyrDenoise.Cmethod == "PRE") || (settings->leveldnautsimpl == 0 && params.dirpyrDenoise.C2method == "PREV")) {
             PreviewProps pp(trafx, trafy, trafw * skip, trafh * skip, skip);
-            parent->imgsrc->getImage(parent->currWB, tr, origCrop, pp, params.toneCurve, params.icm, params.raw, params.wb);
+            parent->imgsrc->getImage(parent->currWB, tr, origCrop, pp, params.toneCurve, params.icm, params.raw, params.wb, params.colorappearance);
 
             if ((!isDetailWindow) && parent->adnListener && skip == 1 && params.dirpyrDenoise.enabled) {
                 float lowdenoise = 1.f;
@@ -451,7 +451,7 @@ void Crop::update(int todo)
                 for (int wcr = 0; wcr <= 2; wcr++) {
                     for (int hcr = 0; hcr <= 2; hcr++) {
                         PreviewProps ppP(coordW[wcr], coordH[hcr], crW, crH, 1);
-                        parent->imgsrc->getImage(parent->currWB, tr, origCropPart, ppP, params.toneCurve, params.icm, params.raw, params.wb);
+                        parent->imgsrc->getImage(parent->currWB, tr, origCropPart, ppP, params.toneCurve, params.icm, params.raw, params.wb, params.colorappearance);
 
                         // we only need image reduced to 1/4 here
                         for (int ii = 0; ii < crH; ii += 2) {
@@ -613,7 +613,7 @@ void Crop::update(int todo)
         //  if(params.dirpyrDenoise.Cmethod=="AUT" || params.dirpyrDenoise.Cmethod=="PON") {//reinit origCrop after Auto
         if ((settings->leveldnautsimpl == 1 && params.dirpyrDenoise.Cmethod == "AUT")  || (settings->leveldnautsimpl == 0 && params.dirpyrDenoise.C2method == "AUTO")) { //reinit origCrop after Auto
             PreviewProps pp(trafx, trafy, trafw * skip, trafh * skip, skip);
-            parent->imgsrc->getImage(parent->currWB, tr, origCrop, pp, params.toneCurve, params.icm, params.raw, params.wb);
+            parent->imgsrc->getImage(parent->currWB, tr, origCrop, pp, params.toneCurve, params.icm, params.raw, params.wb, params.colorappearance);
         }
 
         DirPyrDenoiseParams denoiseParams = params.dirpyrDenoise;
@@ -702,7 +702,7 @@ void Crop::update(int todo)
                 }
 
             PreviewProps pp(trafx, trafy, trafw * skip, trafh * skip, skip);
-            parent->ipf.WB_Local(parent->imgsrc, 1, 1, trafx / skip, trafy / skip, cropx / skip, cropy / skip, skips(parent->fw, skip), skips(parent->fh, skip), parent->fw, parent->fh, improv, imagetransformed, parent->currWBloc, tr, imageoriginal, pp, params.toneCurve, params.icm, params.raw, params.localwb, parent->ptemp, parent->pgreen);
+            parent->ipf.WB_Local(parent->imgsrc, 1, 1, trafx / skip, trafy / skip, cropx / skip, cropy / skip, skips(parent->fw, skip), skips(parent->fh, skip), parent->fw, parent->fh, improv, imagetransformed, parent->currWBloc, tr, imageoriginal, pp, params.toneCurve, params.icm, params.raw, params.localwb, params.colorappearance, parent->ptemp, parent->pgreen);
 #ifdef _OPENMP
             #pragma omp parallel for
 #endif
@@ -761,7 +761,7 @@ void Crop::update(int todo)
                 PreviewProps pp(0, 0, parent->fw, parent->fh, skip);
                 int tr = getCoarseBitMask(params.coarse);
                 //  parent->imgsrc->getImage(parent->currWB, tr, f, pp, params.toneCurve, params.raw);
-                parent->imgsrc->getImage(parent->currWB, tr, f, pp, params.toneCurve, params.icm, params.raw, params.wb);
+                parent->imgsrc->getImage(parent->currWB, tr, f, pp, params.toneCurve, params.icm, params.raw, params.wb, params.colorappearance);
 
                 parent->imgsrc->convertColorSpace(f, params.icm, parent->currWB);
 

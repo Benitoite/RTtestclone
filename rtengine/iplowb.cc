@@ -360,7 +360,7 @@ void ImProcFunctions::calcrgb_ref (LabImage * original, LabImage * transformed, 
 
 
 
-void ImProcFunctions::WB_Local (ImageSource* imgsrc, int call, int sp, int sx, int sy, int cx, int cy, int oW, int oH,  int fw, int fh, Imagefloat* improv, Imagefloat* imagetransformed, const ColorTemp &ctemploc, int tran, Imagefloat* imageoriginal, const PreviewProps &pp, const ToneCurveParams &hrp, const ColorManagementParams &cmp, const RAWParams &raw, const LocrgbParams &wbl, double &ptemp, double &pgreen)
+void ImProcFunctions::WB_Local (ImageSource* imgsrc, int call, int sp, int sx, int sy, int cx, int cy, int oW, int oH,  int fw, int fh, Imagefloat* improv, Imagefloat* imagetransformed, const ColorTemp &ctemploc, int tran, Imagefloat* imageoriginal, const PreviewProps &pp, const ToneCurveParams &hrp, const ColorManagementParams &cmp, const RAWParams &raw, const LocrgbParams &wbl, const ColorAppearanceParams &cap, double &ptemp, double &pgreen)
 {
     if (params->localwb.enabled) {
         // BENCHFUN
@@ -368,7 +368,7 @@ void ImProcFunctions::WB_Local (ImageSource* imgsrc, int call, int sp, int sx, i
         MyTime t1e, t2e;
         t1e.set();
 // init variables to display Munsell corrections
-        MunsellDebugInfo* MunsDebugInfo = new MunsellDebugInfo();
+    //    MunsellDebugInfo* MunsDebugInfo = new MunsellDebugInfo();
 #endif
 
 
@@ -376,14 +376,14 @@ void ImProcFunctions::WB_Local (ImageSource* imgsrc, int call, int sp, int sx, i
         struct local_params lp;
         calcLocalParams (oW, oH, params->localwb, lp);
 
-        double ave = 0.;
-        int n = 0;
-        float av = 0;
-        constexpr float ared = (rtengine::RT_PI - 0.05f) / 100.f;
+      //  double ave = 0.;
+      //  int n = 0;
+      //  float av = 0;
+    //    constexpr float ared = (rtengine::RT_PI - 0.05f) / 100.f;
 
-        constexpr float bred = 0.05f;
+    //    constexpr float bred = 0.05f;
 
-        float dhue = ared * lp.sens + bred; //delta hue lght chroma
+     //   float dhue = ared * lp.sens + bred; //delta hue lght chroma
 
         Imagefloat* bufimage = nullptr;
 
@@ -427,7 +427,7 @@ void ImProcFunctions::WB_Local (ImageSource* imgsrc, int call, int sp, int sx, i
                                     huemoins = hueref - dhue + 2.f * rtengine::RT_PI;
                                 }
                 */
-                imgsrc->getImage_local (begx, begy, yEn, xEn, cx, cy, ctemploc, tran, improv, bufimage, pp, hrp, cmp, raw, wbl);
+                imgsrc->getImage_local (begx, begy, yEn, xEn, cx, cy, ctemploc, tran, improv, bufimage, pp, hrp, cmp, raw, wbl, cap);
 
                 Whitebalance_Local (call, sp, bufimage, lp, imageoriginal, imagetransformed, cx, cy);
                 /*
@@ -559,8 +559,8 @@ void ImProcFunctions::Whitebalance_Local (int call, int sp, Imagefloat* bufimage
 #endif
 
                 //prepare shape detection
-                float kch = 1.f;
-                float fach = 1.f;
+            //    float kch = 1.f;
+            //    float fach = 1.f;
                 //  float deltachro = fabs (rchro - chromaref);
                 //  float deltahue = fabs (rhue - hueref);
                 /*

@@ -960,7 +960,7 @@ static void ciecamcat02loc_float(LabImage* lab, LabImage* dest, int tempa, int c
 #endif
 }
 
-void RawImageSource::getImage_local(int begx, int begy, int yEn, int xEn, int cx, int cy, const ColorTemp &ctemploc, int tran, Imagefloat* image, Imagefloat* bufimage,  const PreviewProps &pp, const ToneCurveParams &hrp, const ColorManagementParams &cmp, const RAWParams &raw, const LocrgbParams &wbl)
+void RawImageSource::getImage_local(int begx, int begy, int yEn, int xEn, int cx, int cy, const ColorTemp &ctemploc, int tran, Imagefloat* image, Imagefloat* bufimage,  const PreviewProps &pp, const ToneCurveParams &hrp, const ColorManagementParams &cmp, const RAWParams &raw, const LocrgbParams &wbl, const ColorAppearanceParams &cap)
 {
     MyMutex::MyLock lock(getImageMutex);
 //     printf ("ok getimalocal  cat02=%i\n", wbl.cat02);
@@ -1235,11 +1235,11 @@ void RawImageSource::getImage_local(int begx, int begy, int yEn, int xEn, int cx
             image->r(image->getHeight() - 1, j) = (image->r(image->getHeight() - 2, j) + image->r(image->getHeight() - 1, j + 1) + image->r(image->getHeight() - 1, j - 1)) / 3;
             image->g(image->getHeight() - 1, j) = (image->g(image->getHeight() - 2, j) + image->g(image->getHeight() - 1, j + 1) + image->g(image->getHeight() - 1, j - 1)) / 3;
             image->b(image->getHeight() - 1, j) = (image->b(image->getHeight() - 2, j) + image->b(image->getHeight() - 1, j + 1) + image->b(image->getHeight() - 1, j - 1)) / 3;
-        }
+        }  
 
     }
 
-    if (wbl.cat02 > 1) { // different place from getimage to see if there is differences
+    if (wbl.cat02 > 1  && !cap.enabled) { // different place from getimage to see if there is differences
         //  printf("OK cat02 local\n");
         LabImage *bufcat02 = nullptr;
         bufcat02 = new LabImage(image->getWidth(), image->getHeight());
@@ -1350,7 +1350,7 @@ void RawImageSource::getImage_local(int begx, int begy, int yEn, int xEn, int cx
 }
 
 
-void RawImageSource::getImage(const ColorTemp &ctemp, int tran, Imagefloat* image, const PreviewProps &pp, const ToneCurveParams &hrp, const ColorManagementParams &cmp, const RAWParams &raw, const WBParams &wbp)
+void RawImageSource::getImage(const ColorTemp &ctemp, int tran, Imagefloat* image, const PreviewProps &pp, const ToneCurveParams &hrp, const ColorManagementParams &cmp, const RAWParams &raw, const WBParams &wbp, const ColorAppearanceParams &cap)
 {
     MyMutex::MyLock lock(getImageMutex);
 
@@ -1707,7 +1707,7 @@ void RawImageSource::getImage(const ColorTemp &ctemp, int tran, Imagefloat* imag
         }
     */
 
-    if (wbp.cat02 > 1) { //
+    if (wbp.cat02 > 1  && !cap.enabled) { //
         //  printf("OK cat02 local\n");
         LabImage *bufcat02 = nullptr;
         bufcat02 = new LabImage(image->getWidth(), image->getHeight());

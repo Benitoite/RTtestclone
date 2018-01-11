@@ -553,6 +553,7 @@ struct WBEntry {
     double green;
     double equal;
     double tempBias;
+	int cat02;
 };
 
 struct WBParams {

@@ -141,8 +141,6 @@ protected:
     WavOpacityCurveWL waOpacityCurveWL;
     RetinextransmissionCurve dehatransmissionCurve;
     RetinexgaintransmissionCurve dehagaintransmissionCurve;
-    double ptemp, pgreen;
-    int wbauto;
 
     ColorAppearance customColCurve1;
     ColorAppearance customColCurve2;
@@ -220,6 +218,9 @@ protected:
     float colourToningSatLimit;
     float colourToningSatLimitOpacity;
     int wbm;
+    int wbauto;
+	
+    double ptemp, pgreen;
 
 public:
 

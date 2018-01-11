@@ -282,7 +282,7 @@ public:
     static void strcurv_data(std::string retistr, int *s_datc, int &siz);
 
     //locargb
-    void WB_Local(ImageSource* imgsrc, int call, int sp, int sx, int sy, int cx, int cy, int oW, int oH,  int fw, int fh, Imagefloat* imageoriginal, Imagefloat* imagetransformed, const ColorTemp &ctemp, int tran, Imagefloat* orig_prev, const PreviewProps &pp, const ToneCurveParams &hrp, const ColorManagementParams &cmp, const RAWParams &raw, const LocrgbParams & wbl, double &ptemp, double &pgreen);
+    void WB_Local(ImageSource* imgsrc, int call, int sp, int sx, int sy, int cx, int cy, int oW, int oH,  int fw, int fh, Imagefloat* imageoriginal, Imagefloat* imagetransformed, const ColorTemp &ctemp, int tran, Imagefloat* orig_prev, const PreviewProps &pp, const ToneCurveParams &hrp, const ColorManagementParams &cmp, const RAWParams &raw, const LocrgbParams & wbl, const ColorAppearanceParams &cap, double &ptemp, double &pgreen);
     void Whitebalance_Local(int call, int sp, Imagefloat* bufimage, const struct local_params & lp, Imagefloat* imageoriginal, Imagefloat* imagetransformed, int cx, int cy);
 
     void Tile_calc(int tilesize, int overlap, int kall, int imwidth, int imheight, int &numtiles_W, int &numtiles_H, int &tilewidth, int &tileheight, int &tileWskip, int &tileHskip);

@@ -483,8 +483,8 @@ void ImProcFunctions::ciecam_02(CieImage* ncie, double adap, int pW, int pwb, La
         int width = lab->W, height = lab->H;
         float minQ = 10000.f;
         float maxQ = -1000.f;
-        float a_w;
-        float c_;
+        float a_w = 0.f;
+        float c_ = 0.f;
         float f_l;
         double Yw;
         Yw = 1.0;

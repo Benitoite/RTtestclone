@@ -26,7 +26,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
-#include "../rtgui/md5helper.h"
+//#include "../rtgui/md5helper.h"
 
 #include "iccstore.h"
 #ifdef _OPENMP
@@ -95,8 +95,8 @@ ImProcCoordinator::ImProcCoordinator()
       pW(-1), pH(-1),
       plistener(nullptr), imageListener(nullptr), aeListener(nullptr), acListener(nullptr), abwListener(nullptr), alorgbListener(nullptr), awbListener(nullptr), frameCountListener(nullptr), imageTypeListener(nullptr), actListener(nullptr), adnListener(nullptr), awavListener(nullptr), dehaListener(nullptr), hListener(nullptr),
       resultValid(false), lastOutputProfile("BADFOOD"), lastOutputIntent(RI__COUNT), lastOutputBPC(false), thread(nullptr), changeSinceLast(0), updaterRunning(false), destroying(false), utili(false), autili(false),
-      butili(false), ccutili(false), cclutili(false), clcutili(false), opautili(false), wavcontlutili(false), colourToningSatLimit(0.f), colourToningSatLimitOpacity(0.f),
-      ptemp(0.), pgreen(0.), wbauto(0), wbm(0)
+      butili(false), ccutili(false), cclutili(false), clcutili(false), opautili(false), wavcontlutili(false), colourToningSatLimit(0.f),  colourToningSatLimitOpacity(0.f),
+        wbm(0), wbauto(0),ptemp(0.), pgreen(0.)
       /*
       =======
             plistener (nullptr), imageListener (nullptr), aeListener (nullptr), acListener (nullptr), abwListener (nullptr), awbListener (nullptr), frameCountListener (nullptr), imageTypeListener (nullptr), actListener (nullptr), adnListener (nullptr), awavListener (nullptr), dehaListener (nullptr), hListener (nullptr),
@@ -167,7 +167,7 @@ struct local_params {
 
 
 };
-
+/*
 static void calcLocalrgbParams(int oW, int oH, const LocrgbParams& localwb, struct local_params& lp)
 {
     int w = oW;
@@ -221,7 +221,7 @@ static void calcLocalrgbParams(int oW, int oH, const LocrgbParams& localwb, stru
 
 }
 
-
+*/
 
 // todo: bitmask containing desired actions, taken from changesSinceLast
 // cropCall: calling crop, used to prevent self-updates  ...doesn't seem to be used
@@ -495,7 +495,7 @@ void ImProcCoordinator::updatePreviewImage(int todo, Crop* cropCall)
         // Tells to the ImProcFunctions' tools what is the preview scale, which may lead to some simplifications
         ipf.setScale(scale);
 
-        imgsrc->getImage(currWB, tr, orig_prev, pp, params.toneCurve, params.icm, params.raw, params.wb);
+        imgsrc->getImage(currWB, tr, orig_prev, pp, params.toneCurve, params.icm, params.raw, params.wb, params.colorappearance);
         denoiseInfoStore.valid = false;
         Imagefloat *imageoriginal = nullptr;
         Imagefloat *imagetransformed = nullptr;
@@ -522,7 +522,7 @@ void ImProcCoordinator::updatePreviewImage(int todo, Crop* cropCall)
                     imagetransformed->b(ir, jr) = imageoriginal->b(ir, jr) = orig_prev->b(ir, jr);
                 }
 
-            ipf.WB_Local(imgsrc, 3, 1, 0, 0, 0, 0, pW, pH, fw, fh, improv, imagetransformed, currWBloc, tr, imageoriginal, pp, params.toneCurve, params.icm, params.raw, params.localwb, ptemp, pgreen);
+            ipf.WB_Local(imgsrc, 3, 1, 0, 0, 0, 0, pW, pH, fw, fh, improv, imagetransformed, currWBloc, tr, imageoriginal, pp, params.toneCurve, params.icm, params.raw, params.localwb, params.colorappearance, ptemp, pgreen);
 #ifdef _OPENMP
             #pragma omp parallel for
 #endif
@@ -1430,7 +1430,7 @@ void ImProcCoordinator::saveInputICCReference(const Glib::ustring& fname, bool a
         currWB = ColorTemp(); // = no white balance
     }
 
-    imgsrc->getImage(currWB, tr, im, pp, ppar.toneCurve, ppar.icm, ppar.raw, ppar.wb);
+    imgsrc->getImage(currWB, tr, im, pp, ppar.toneCurve, ppar.icm, ppar.raw, ppar.wb, ppar.colorappearance);
     ImProcFunctions ipf(&ppar, true);
 
     if (ipf.needsTransform()) {
