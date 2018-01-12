@@ -565,6 +565,7 @@ struct WBParams {
     double          equal;
     double          tempBias;
     Glib::ustring   wbcamMethod;
+    bool          autocat02;
 
     WBParams();
 

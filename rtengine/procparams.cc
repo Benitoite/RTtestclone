@@ -1136,7 +1136,9 @@ WBParams::WBParams() :
     green(1.0),
     cat02(90),
     equal(1.0),
-    tempBias(0.0)
+    tempBias(0.0),
+	autocat02(true)	
+	
 {
 }
 
@@ -1149,6 +1151,7 @@ bool WBParams::operator ==(const WBParams& other) const
         && green == other.green
         && equal == other.equal
         && cat02 == other.cat02
+        && autocat02 == other.autocat02
         && tempBias == other.tempBias;
 }
 
@@ -3031,6 +3034,7 @@ int ProcParams::save(const Glib::ustring& fname, const Glib::ustring& fname2, bo
         saveToKeyfile(!pedited || pedited->wb.equal, "White Balance", "Equal", wb.equal, keyFile);
         saveToKeyfile(!pedited || pedited->wb.tempBias, "White Balance", "TemperatureBias", wb.tempBias, keyFile);
         saveToKeyfile(!pedited || pedited->wb.cat02, "White Balance", "Cat02", wb.cat02, keyFile);
+        saveToKeyfile(!pedited || pedited->wb.autocat02, "White Balance", "Autocat02", wb.autocat02, keyFile);
 
 // Colorappearance
         saveToKeyfile(!pedited || pedited->colorappearance.enabled, "Color appearance", "Enabled", colorappearance.enabled, keyFile);
@@ -3932,7 +3936,8 @@ int ProcParams::load(const Glib::ustring& fname, ParamsEdited* pedited)
             assignFromKeyfile(keyFile, "White Balance", "Equal", pedited, wb.equal, pedited->wb.equal);
             assignFromKeyfile(keyFile, "White Balance", "TemperatureBias", pedited, wb.tempBias, pedited->wb.tempBias);
             assignFromKeyfile(keyFile, "White Balance", "Cat02", pedited, wb.cat02, pedited->wb.cat02);
-        }
+            assignFromKeyfile(keyFile, "White Balance", "Autocat02", pedited, wb.autocat02, pedited->wb.autocat02);
+   }
 
         if (keyFile.has_group("Defringing")) {
             assignFromKeyfile(keyFile, "Defringing", "Enabled", pedited, defringe.enabled, pedited->defringe.enabled);

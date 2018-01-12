@@ -249,6 +249,8 @@ public:
     bool cat02;
     bool tempBias;
     bool wbcamMethod;
+    bool autocat02;
+	
 };
 
 /*class ColorShiftParamsEdited {

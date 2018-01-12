@@ -269,6 +269,15 @@ WhiteBalance::WhiteBalance() : FoldableToolPanel(this, "whitebalance", M("TP_WBA
     cat02 = Gtk::manage(new Adjuster(M("TP_WBALANCE_CAT"), 0, 100, 1, 90));
     cat02->set_tooltip_markup(M("TP_WBALANCE_CAT_TOOLTIP"));
     cat02->show();
+	
+    if (cat02->delay < options.adjusterMaxDelay) {
+        cat02->delay = options.adjusterMaxDelay;
+    }
+
+    cat02->throwOnButtonRelease();
+    cat02->addAutoButton (M ("TP_WBALANCE_DEGREE_AUTO_TOOLTIP"));//TP_COLORAPP_DEGREE_AUTO_TOOLTIP
+    cat02->set_tooltip_markup (M ("TP_WBALANCE_CAT_TOOLTIP"));//TP_COLORAPP_DEGREE_TOOLTIP
+	
     catbox->pack_start(*cat02);
     pack_start(*catbox);
 
@@ -646,8 +655,10 @@ void WhiteBalance::read(const ProcParams* pp, const ParamsEdited* pedited)
         if (!pedited->wb.wbcamMethod) {
             wbcamMethod->set_active_text(M("GENERAL_UNCHANGED"));
         }
+        cat02->setAutoInconsistent (multiImage && !pedited->wb.autocat02);
 
     }
+    lastAutocat02 = pp->wb.autocat02;
 
     if (pedited && !pedited->wb.method) {
         opt = setActiveMethod(M("GENERAL_UNCHANGED"));
@@ -670,6 +681,7 @@ void WhiteBalance::read(const ProcParams* pp, const ParamsEdited* pedited)
                 green->setValue(green->getAddMode() ? 0.0 : pp->wb.green);
                 equal->setValue(equal->getAddMode() ? 0.0 : pp->wb.equal);
                 cat02->setValue(cat02->getAddMode() ? 0.0 : pp->wb.cat02);
+				
                 tempBias->setValue(tempBias->getAddMode() ? 0.0 : pp->wb.tempBias);
                 cache_customTemp(pp->wb.temperature);
                 cache_customGreen(pp->wb.green);
@@ -761,6 +773,7 @@ void WhiteBalance::read(const ProcParams* pp, const ParamsEdited* pedited)
                 //cache_customGreen (pp->wb.green);
                 break;
         }
+		cat02->setAutoValue (pp->wb.autocat02);
 
         tempBias->set_sensitive(wbValues.type == WBEntry::Type::AUTO);
         wbcamMethod->set_sensitive(wbValues.type == WBEntry::Type::AUTO);
@@ -807,6 +820,8 @@ void WhiteBalance::write(ProcParams* pp, ParamsEdited* pedited)
         pedited->wb.method = row[methodColumns.colLabel] != M("GENERAL_UNCHANGED");
         pedited->wb.wbcamMethod    = wbcamMethod->get_active_text() != M("GENERAL_UNCHANGED");
         pedited->wb.enabled = !get_inconsistent();
+        pedited->wb.autocat02 = !cat02->getAutoInconsistent();
+		
     }
 
     pp->wb.enabled = getEnabled();
@@ -822,6 +837,7 @@ void WhiteBalance::write(ProcParams* pp, ParamsEdited* pedited)
     pp->wb.equal = equal->getValue();
     pp->wb.tempBias = tempBias->getValue();
     pp->wb.cat02 = cat02->getValue();
+    pp->wb.autocat02  = cat02->getAutoValue ();
 
     if (wbcamMethod->get_active_row_number() == 0) {
         pp->wb.wbcamMethod = "none";
@@ -1047,5 +1063,14 @@ void WhiteBalance::WBChanged(double temperature, double greenVal)
     green->setValue(greenVal);
     temp->setDefault(temperature);
     green->setDefault(greenVal);
+    enableListener();
+}
+
+void WhiteBalance::Cat02Changed(int cat_02)
+{
+    GThreadLock lock;
+    disableListener();
+    cat02->setValue(cat_02);
+    cat02->setDefault(cat_02);
     enableListener();
 }

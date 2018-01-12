@@ -233,6 +233,9 @@ void ParamsEdited::set(bool v)
     wb.equal                   = v;
     wb.tempBias                = v;
     wb.wbcamMethod                = v;
+	wb.cat02 = v;
+    wb.autocat02 = v;
+	
     //colorShift.a               = v;
     //colorShift.b               = v;
     //lumaDenoise.enabled        = v;
@@ -1793,6 +1796,10 @@ void ParamsEdited::combine(rtengine::procparams::ProcParams& toEdit, const rteng
         toEdit.wb.wbcamMethod  = mods.wb.wbcamMethod;
     }
 
+    if (wb.autocat02) {
+        toEdit.wb.autocat02   = mods.wb.autocat02;
+    }
+	
     if (wb.cat02) {
       // toEdit.wb.cat02  = mods.wb.cat02;
         toEdit.wb.cat02   = dontforceSet && options.baBehav[ADDSET_WB_CAT02] ? toEdit.wb.cat02 + mods.wb.cat02 : mods.wb.cat02;

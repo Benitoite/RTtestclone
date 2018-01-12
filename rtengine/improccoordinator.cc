@@ -96,7 +96,7 @@ ImProcCoordinator::ImProcCoordinator()
       plistener(nullptr), imageListener(nullptr), aeListener(nullptr), acListener(nullptr), abwListener(nullptr), alorgbListener(nullptr), awbListener(nullptr), frameCountListener(nullptr), imageTypeListener(nullptr), actListener(nullptr), adnListener(nullptr), awavListener(nullptr), dehaListener(nullptr), hListener(nullptr),
       resultValid(false), lastOutputProfile("BADFOOD"), lastOutputIntent(RI__COUNT), lastOutputBPC(false), thread(nullptr), changeSinceLast(0), updaterRunning(false), destroying(false), utili(false), autili(false),
       butili(false), ccutili(false), cclutili(false), clcutili(false), opautili(false), wavcontlutili(false), colourToningSatLimit(0.f),  colourToningSatLimitOpacity(0.f),
-        wbm(0), wbauto(0),ptemp(0.), pgreen(0.)
+      wbm(0), wbauto(0), ptemp(0.), pgreen(0.)
       /*
       =======
             plistener (nullptr), imageListener (nullptr), aeListener (nullptr), acListener (nullptr), abwListener (nullptr), awbListener (nullptr), frameCountListener (nullptr), imageTypeListener (nullptr), actListener (nullptr), adnListener (nullptr), awavListener (nullptr), dehaListener (nullptr), hListener (nullptr),
@@ -440,6 +440,73 @@ void ImProcCoordinator::updatePreviewImage(int todo, Crop* cropCall)
 
         if (params.localwb.enabled  || params.colorappearance.enabled) {
             params.wb.enabled = true;
+        }
+
+        const FramesMetaData* metaDatac = imgsrc->getMetaData();
+        int imgNumc = 0;
+
+        if (imgsrc->isRAW()) {
+            if (imgsrc->getSensorType() == ST_BAYER) {
+                imgNumc = rtengine::LIM<unsigned int>(params.raw.bayersensor.imageNum, 0, metaDatac->getFrameCount() - 1);
+            } else if (imgsrc->getSensorType() == ST_FUJI_XTRANS) {
+                //imgNum = rtengine::LIM<unsigned int>(params.raw.xtranssensor.imageNum, 0, metaData->getFrameCount() - 1);
+            }
+        }
+
+        float fnumc = metaDatac->getFNumber(imgNumc);          // F number
+        float fisoc = metaDatac->getISOSpeed(imgNumc) ;        // ISO
+        float fspeedc = metaDatac->getShutterSpeed(imgNumc) ;  // Speed
+        double fcompc = metaDatac->getExpComp(imgNumc);        // Compensation +/-
+        float ada = 1.f;
+
+        if (fnumc < 0.3f || fisoc < 5.f || fspeedc < 0.00001f) { //if no exif data or wrong
+            ada = 2000.;
+        } else {
+            double E_V = fcompc + log2(double ((fnumc * fnumc) / fspeedc / (fisoc / 100.f)));
+            E_V += params.toneCurve.expcomp;// exposure compensation in tonecurve ==> direct EV
+            E_V += log2(params.raw.expos);  // exposure raw white point ; log2 ==> linear to EV
+            ada = powf(2.f, E_V - 3.f);  // cd / m2
+            // end calculation adaptation scene luminosity
+        }
+
+        int cat0 = 100;
+
+        if (params.wb.temperature < 4000.) {
+            if (ada < 5.f) {
+                cat0 = 1;
+            } else if (ada < 10.f) {
+                cat0 = 2;
+            } else if (ada < 30.f) {
+                cat0 = 4;
+            } else if (ada < 100.f) {
+                cat0 = 50;
+            } else if (ada < 300.f) {
+                cat0 = 80;
+            } else if (ada < 500.f) {
+                cat0 = 90;
+            } else if (ada < 3000.f) {
+                cat0 = 95;
+            }
+        } else {
+            if (ada < 5.f) {
+                cat0 = 30;
+            } else if (ada < 10.f) {
+                cat0 = 50;
+            } else if (ada < 30.f) {
+                cat0 = 60;
+            } else if (ada < 100.f) {
+                cat0 = 70;
+            } else if (ada < 300.f) {
+                cat0 = 80;
+            } else if (ada < 500.f) {
+                cat0 = 90;
+            } else if (ada < 1000.f) {
+                cat0 = 95;
+            }
+        }
+
+        if (awbListener  && params.wb.autocat02) {
+            awbListener->Cat02Changed(cat0);
         }
 
         if (!params.wb.enabled) {
@@ -1476,15 +1543,15 @@ void ImProcCoordinator::saveInputICCReference(const Glib::ustring& fname, bool a
     double tmpScale = ipf.resizeScale(&params, fW, fH, imw, imh);
 
     if (tmpScale != 1.0) {
-        Imagefloat* tempImage = new Imagefloat (imw, imh);
-        ipf.resize (im, tempImage, tmpScale);
+        Imagefloat* tempImage = new Imagefloat(imw, imh);
+        ipf.resize(im, tempImage, tmpScale);
         delete im;
         im = tempImage;
     }
 
-    im->setMetadata (imgsrc->getMetaData()->getRootExifData ());
+    im->setMetadata(imgsrc->getMetaData()->getRootExifData());
 
-    im->saveTIFF (fname, 16, true);
+    im->saveTIFF(fname, 16, true);
     delete im;
 
     if (plistener) {

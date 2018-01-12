@@ -69,6 +69,7 @@ protected:
     Adjuster* equal;
     Adjuster* tempBias;
     Adjuster* cat02;
+    bool lastAutocat02;
 
     Gtk::Button* spotbutton;
     int opt;
@@ -122,6 +123,7 @@ public:
     }
     void setWB(int temp, double green);
     void WBChanged(double temp, double green);
+    void Cat02Changed(int cat_02);
 
     void setAdjusterBehavior(bool tempadd, bool greenadd, bool equaladd, bool tempbiasadd, bool cat02add);
     void trimValues(rtengine::procparams::ProcParams* pp);
