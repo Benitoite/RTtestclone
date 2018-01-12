@@ -1058,7 +1058,7 @@ void WhiteBalance::WBChanged(double temperature, double greenVal)
 {
     GThreadLock lock;
     disableListener();
-    setEnabled(true);
+ //   setEnabled(true);
     temp->setValue(temperature);
     green->setValue(greenVal);
     temp->setDefault(temperature);

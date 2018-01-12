@@ -473,11 +473,13 @@ void ImProcCoordinator::updatePreviewImage(int todo, Crop* cropCall)
 
         if (params.wb.temperature < 4000.) {
             if (ada < 5.f) {
-                cat0 = 1;
+                cat0 = 0;
             } else if (ada < 10.f) {
+                cat0 = 1;
+            } else if (ada < 15.f) {
                 cat0 = 2;
             } else if (ada < 30.f) {
-                cat0 = 4;
+                cat0 = 5;
             } else if (ada < 100.f) {
                 cat0 = 50;
             } else if (ada < 300.f) {
