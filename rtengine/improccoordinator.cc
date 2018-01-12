@@ -469,9 +469,19 @@ void ImProcCoordinator::updatePreviewImage(int todo, Crop* cropCall)
             // end calculation adaptation scene luminosity
         }
 
+
+        currWB = ColorTemp();
+
+        if (params.wb.method == "Camera") {
+            currWB = imgsrc->getWB();
+        }
+
+        params.wb.temperature = currWB.getTemp();
+
         int cat0 = 100;
 
-        if (params.wb.temperature < 4000.) {
+        //printf("temp=%i \n", params.wb.temperature);
+        if (params.wb.temperature < 4000) {
             if (ada < 5.f) {
                 cat0 = 0;
             } else if (ada < 10.f) {
@@ -553,6 +563,7 @@ void ImProcCoordinator::updatePreviewImage(int todo, Crop* cropCall)
 
             awbListener->WBChanged(params.wb.temperature, params.wb.green);
         }
+
 
         int tr = getCoarseBitMask(params.coarse);
 

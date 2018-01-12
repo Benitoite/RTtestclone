@@ -1070,7 +1070,15 @@ void WhiteBalance::Cat02Changed(int cat_02)
 {
     GThreadLock lock;
     disableListener();
+	
+ //   setEnabled(true);
+	
     cat02->setValue(cat_02);
     cat02->setDefault(cat_02);
     enableListener();
+	/*
+    if (listener) {
+            listener->panelChanged(EvWBEnabled, M("GENERAL_UNCHANGED"));
+	}
+	*/
 }
