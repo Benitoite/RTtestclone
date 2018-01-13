@@ -2760,7 +2760,7 @@ void ImProcFunctions::ciecam_02float(CieImage* ncie, float adap, int pW, int pwb
                             Ciecam02::jch2xyz_ciecam02float(xx, yy, zz,
                                                             J,  C, h,
                                                             xw2, yw2,  zw2,
-                                                              c2, nc2, gamu, pow1n, nbbj, ncbj, flj, czj, dj, awj);
+                                                            c2, nc2, gamu, pow1n, nbbj, ncbj, flj, czj, dj, awj);
                             float x, y, z;
                             x = xx * 655.35f;
                             y = yy * 655.35f;
@@ -3103,7 +3103,7 @@ void ImProcFunctions::ciecam_02float(CieImage* ncie, float adap, int pW, int pwb
                         Ciecam02::jch2xyz_ciecam02float(xx, yy, zz,
                                                         ncie->J_p[i][j],  ncie_C_p, ncie->h_p[i][j],
                                                         xw2, yw2,  zw2,
-                                                          c2, nc2, gamu, pow1n, nbbj, ncbj, flj, czj, dj, awj);
+                                                        c2, nc2, gamu, pow1n, nbbj, ncbj, flj, czj, dj, awj);
                         float x = (float)xx * 655.35f;
                         float y = (float)yy * 655.35f;
                         float z = (float)zz * 655.35f;
@@ -3956,11 +3956,13 @@ void ImProcFunctions::rgbProc(Imagefloat* working, LabImage* lab, PipetteBuffer 
 
                 if (sat != 0 || hCurveEnabled || sCurveEnabled || vCurveEnabled) {
                     const float satby100 = sat / 100.f;
+
                     for (int i = istart, ti = 0; i < tH; i++, ti++) {
                         for (int j = jstart, tj = 0; j < tW; j++, tj++) {
                             float h, s, v;
                             Color::rgb2hsvtc(rtemp[ti * TS + tj], gtemp[ti * TS + tj], btemp[ti * TS + tj], h, s, v);
                             h /= 6.f;
+
                             if (sat > 0) {
                                 s = std::max(0.f, intp(satby100, 1.f - SQR(SQR(1.f - std::min(s, 1.0f))), s));
                             } else { /*if (sat < 0)*/

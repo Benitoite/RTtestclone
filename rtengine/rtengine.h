@@ -306,6 +306,14 @@ public :
 
 };
 
+class AutocatListener
+{
+public :
+    virtual ~AutocatListener() {}
+    virtual void cat02catChanged(int cat) {}
+
+};
+
 class AutoChromaListener
 {
 public :
@@ -354,7 +362,7 @@ class AutoWBListener
 public :
     virtual ~AutoWBListener() = default;
     virtual void WBChanged(double temp, double green) = 0;
-    virtual void Cat02Changed(int cat_02) = 0;
+//   virtual void Cat02Changed(int cat_02) = 0;
 };
 
 class FrameCountListener
@@ -475,6 +483,7 @@ public:
     virtual void        setHistogramListener(HistogramListener *l) = 0;
     virtual void        setPreviewImageListener(PreviewImageListener* l) = 0;
     virtual void        setAutoCamListener(AutoCamListener* l) = 0;
+    virtual void        setAutocatListener(AutocatListener* l) = 0;
     virtual void        setFrameCountListener(FrameCountListener* l) = 0;
     virtual void        setAutoBWListener(AutoBWListener* l) = 0;
     virtual void        setlocalrgbListener(localrgbListener* l) = 0;
@@ -549,7 +558,7 @@ public:
    * @param errorCode is the error code if an error occured (e.g. the input image could not be loaded etc.)
    * @param pl is an optional ProgressListener if you want to keep track of the progress
    * @return the resulting image, with the output profile applied, exif and iptc data set. You have to save it or you can access the pixel data directly.  */
-IImagefloat* processImage (ProcessingJob* job, int& errorCode, ProgressListener* pl = nullptr, bool flush = false);
+IImagefloat* processImage(ProcessingJob* job, int& errorCode, ProgressListener* pl = nullptr, bool flush = false);
 
 /** This class is used to control the batch processing. The class implementing this interface will be called when the full processing of an
    * image is ready and the next job to process is needed. */
@@ -560,7 +569,7 @@ public:
                    * there is no jobs left.
                    * @param img is the result of the last ProcessingJob
                    * @return the next ProcessingJob to process */
-    virtual ProcessingJob* imageReady (IImagefloat* img) = 0;
+    virtual ProcessingJob* imageReady(IImagefloat* img) = 0;
     virtual void error(Glib::ustring message) = 0;
 };
 /** This function performs all the image processinf steps corresponding to the given ProcessingJob. It runs in the background, thus it returns immediately,

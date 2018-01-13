@@ -242,8 +242,7 @@ WhiteBalance::WhiteBalance() : FoldableToolPanel(this, "whitebalance", M("TP_WBA
 
         custom_green = 1.0;
         custom_equal = 1.0;
-        custom_cat02 = 90;
-		
+
     }
 
     //Add the model columns to the Combo (which is a kind of view),
@@ -261,25 +260,6 @@ WhiteBalance::WhiteBalance() : FoldableToolPanel(this, "whitebalance", M("TP_WBA
     hbox->pack_start(*method);
     pack_start(*hbox, Gtk::PACK_SHRINK, 0);
     opt = 0;
-
-    Gtk::HBox* catbox = Gtk::manage(new Gtk::HBox());
-    catbox->set_spacing(4);
-    catbox->show();
-
-    cat02 = Gtk::manage(new Adjuster(M("TP_WBALANCE_CAT"), 0, 100, 1, 90));
-    cat02->set_tooltip_markup(M("TP_WBALANCE_CAT_TOOLTIP"));
-    cat02->show();
-	
-    if (cat02->delay < options.adjusterMaxDelay) {
-        cat02->delay = options.adjusterMaxDelay;
-    }
-
-    cat02->throwOnButtonRelease();
-    cat02->addAutoButton (M ("TP_WBALANCE_DEGREE_AUTO_TOOLTIP"));//TP_COLORAPP_DEGREE_AUTO_TOOLTIP
-    cat02->set_tooltip_markup (M ("TP_WBALANCE_CAT_TOOLTIP"));//TP_COLORAPP_DEGREE_TOOLTIP
-	
-    catbox->pack_start(*cat02);
-    pack_start(*catbox);
 
     Gtk::HBox* cambox = Gtk::manage(new Gtk::HBox());
     cambox->set_spacing(4);
@@ -371,8 +351,7 @@ WhiteBalance::WhiteBalance() : FoldableToolPanel(this, "whitebalance", M("TP_WBA
     cache_customTemp(0);
     cache_customGreen(0);
     cache_customEqual(0);
-    cache_customcat02(0);
-	
+
     equal->set_tooltip_markup(M("TP_WBALANCE_EQBLUERED_TOOLTIP"));
     tempBias->set_tooltip_markup(M("TP_WBALANCE_TEMPBIAS_TOOLTIP"));
     temp->show();
@@ -397,7 +376,6 @@ WhiteBalance::WhiteBalance() : FoldableToolPanel(this, "whitebalance", M("TP_WBA
     green->setAdjusterListener(this);
     equal->setAdjusterListener(this);
     tempBias->setAdjusterListener(this);
-    cat02->setAdjusterListener(this);
 
     spotbutton->signal_pressed().connect(sigc::mem_fun(*this, &WhiteBalance::spotPressed));
     methconn = method->signal_changed().connect(sigc::mem_fun(*this, &WhiteBalance::optChanged));
@@ -424,7 +402,6 @@ void WhiteBalance::adjusterChanged(Adjuster* a, double newval)
     int tVal = (int)temp->getValue();
     double gVal = green->getValue();
     double eVal = equal->getValue();
-    int tcat02 = (int)cat02->getValue();
     Gtk::TreeModel::Row row = getActiveMethod();
 
     if (row == refTreeModel->children().end()) {
@@ -442,7 +419,7 @@ void WhiteBalance::adjusterChanged(Adjuster* a, double newval)
             && !(
                 (
                     a == equal
-                    || a == tempBias || a == cat02
+                    || a == tempBias
                 )
                 && ppMethod.second.type == WBEntry::Type::AUTO
             )
@@ -458,9 +435,6 @@ void WhiteBalance::adjusterChanged(Adjuster* a, double newval)
         if (a != equal) {
             cache_customEqual(eVal);
         }
-        if (a != cat02) {
-            cache_customcat02(tcat02);
-        }
 
         methconn.block(false);
     }
@@ -472,8 +446,6 @@ void WhiteBalance::adjusterChanged(Adjuster* a, double newval)
         cache_customGreen(gVal);
     } else if (a == equal) {
         cache_customEqual(eVal);
-    } else if (a == cat02) {
-        cache_customcat02(tcat02);
     }
 
     // Recomputing AutoWB if it's the current method will happen in improccoordinator.cc
@@ -485,8 +457,6 @@ void WhiteBalance::adjusterChanged(Adjuster* a, double newval)
             listener->panelChanged(EvWBGreen, Glib::ustring::format(std::setw(4), std::fixed, std::setprecision(3), a->getValue()));
         } else if (a == equal) {
             listener->panelChanged(EvWBequal, Glib::ustring::format(std::setw(4), std::fixed, std::setprecision(3), a->getValue()));
-        } else if (a == cat02) {
-            listener->panelChanged(EvWBcat02, Glib::ustring::format((int)a->getValue()));
         } else if (a == tempBias) {
             listener->panelChanged(EvWBtempBias, Glib::ustring::format(std::setw(4), std::fixed, std::setprecision(2), a->getValue()));
         }
@@ -517,7 +487,6 @@ void WhiteBalance::optChanged()
             temp->setEditedState(UnEdited);
             green->setEditedState(UnEdited);
             equal->setEditedState(UnEdited);
-            cat02->setEditedState(UnEdited);
             tempBias->setEditedState(UnEdited);
         } else {
             unsigned int methodId = findWBEntryId(row[methodColumns.colLabel], WBLT_GUI);
@@ -535,13 +504,11 @@ void WhiteBalance::optChanged()
                         temp->setValue(temp->getAddMode() ? 0.0 : (int)ctemp);
                         green->setValue(green->getAddMode() ? 0.0 : cgreen);
                         equal->setValue(equal->getAddMode() ? 0.0 : 1.0);
-                        cat02->setValue(cat02->getAddMode() ? 0.0 : 90);
 
                         if (batchMode) {
                             temp->setEditedState(UnEdited);
                             green->setEditedState(UnEdited);
                             equal->setEditedState(UnEdited);
-                            cat02->setEditedState(UnEdited);
                         }
                     }
 
@@ -553,7 +520,7 @@ void WhiteBalance::optChanged()
                             temp->setEditedState(UnEdited);
                             green->setEditedState(UnEdited);
                             // equal remain as is
-							// cat 02
+                            // cat 02
                         }
 
                         // Recomputing AutoWB will happen in improccoordinator.cc
@@ -566,20 +533,16 @@ void WhiteBalance::optChanged()
                         temp->setValue(temp->getAddMode() ? 0.0 : custom_temp);
                         green->setValue(green->getAddMode() ? 0.0 : custom_green);
                         equal->setValue(equal->getAddMode() ? 0.0 : custom_equal);
-                        cat02->setValue(cat02->getAddMode() ? 0.0 : custom_cat02);
-                     //   cat02->setValue(custom_cat02);
                     } else {
                         cache_customTemp(temp->getValue());
                         cache_customGreen(green->getValue());
                         cache_customEqual(equal->getValue());
-                        cache_customcat02(cat02->getValue());
                     }
 
                     if (batchMode) {
                         temp->setEditedState(Edited);
                         green->setEditedState(Edited);
                         equal->setEditedState(Edited);
-                        cat02->setEditedState(Edited);
                     }
 
                     break;
@@ -598,13 +561,11 @@ void WhiteBalance::optChanged()
                     temp->setValue(temp->getAddMode() ? 0.0 : (double)(currMethod.temperature));
                     green->setValue(green->getAddMode() ? 0.0 : (double)(currMethod.green));
                     equal->setValue(equal->getAddMode() ? 0.0 : (double)(currMethod.equal));
-                    cat02->setValue(equal->getAddMode() ? 0.0 : (double)(currMethod.cat02));
 
                     if (batchMode) {
                         temp->setEditedState(Edited);
                         green->setEditedState(Edited);
                         equal->setEditedState(Edited);
-						cat02->setEditedState(Edited);
                     }
 
                     break;
@@ -639,7 +600,6 @@ void WhiteBalance::read(const ProcParams* pp, const ParamsEdited* pedited)
 
     methconn.block(true);
     equal->setValue(pp->wb.equal);
-    cat02->setValue(pp->wb.cat02);
     tempBias->setValue(pp->wb.tempBias);
     tempBias->set_sensitive(true);
 
@@ -649,16 +609,13 @@ void WhiteBalance::read(const ProcParams* pp, const ParamsEdited* pedited)
         green->setEditedState(UnEdited);
         equal->setEditedState(pedited->wb.equal ? Edited : UnEdited);
         tempBias->setEditedState(pedited->wb.tempBias ? Edited : UnEdited);
-        cat02->setEditedState(pedited->wb.cat02 ? Edited : UnEdited);
         set_inconsistent(multiImage && !pedited->wb.enabled);
 
         if (!pedited->wb.wbcamMethod) {
             wbcamMethod->set_active_text(M("GENERAL_UNCHANGED"));
         }
-        cat02->setAutoInconsistent (multiImage && !pedited->wb.autocat02);
 
     }
-    lastAutocat02 = pp->wb.autocat02;
 
     if (pedited && !pedited->wb.method) {
         opt = setActiveMethod(M("GENERAL_UNCHANGED"));
@@ -680,13 +637,11 @@ void WhiteBalance::read(const ProcParams* pp, const ParamsEdited* pedited)
                 temp->setValue(temp->getAddMode() ? 0.0 : pp->wb.temperature);
                 green->setValue(green->getAddMode() ? 0.0 : pp->wb.green);
                 equal->setValue(equal->getAddMode() ? 0.0 : pp->wb.equal);
-                cat02->setValue(cat02->getAddMode() ? 0.0 : pp->wb.cat02);
-				
+
                 tempBias->setValue(tempBias->getAddMode() ? 0.0 : pp->wb.tempBias);
                 cache_customTemp(pp->wb.temperature);
                 cache_customGreen(pp->wb.green);
                 cache_customEqual(pp->wb.equal);
-                cache_customcat02(pp->wb.cat02);
 
                 if (pedited) {
                     // The user may have changed the temperature and green value
@@ -708,14 +663,12 @@ void WhiteBalance::read(const ProcParams* pp, const ParamsEdited* pedited)
                         // Set the camera's green value, or 0.0 if in ADD mode
                         green->setValue(green->getAddMode() ? 0.0 : cgreen);
                         equal->setValue(equal->getAddMode() ? 0.0 : 1.);
-                        cat02->setValue(cat02->getAddMode() ? 0.0 : 90);
-						
+
                     } else {
                         temp->setValue(temp->getAddMode() ? 0.0 : pp->wb.temperature);
                         green->setValue(green->getAddMode() ? 0.0 : pp->wb.green);
                         equal->setValue(equal->getAddMode() ? 0.0 : pp->wb.equal);
-                        cat02->setValue(cat02->getAddMode() ? 0.0 : pp->wb.cat02);
-						
+
                     }
 
                     tempBias->setValue(equal->getAddMode() ? 0.0 : pp->wb.tempBias);
@@ -727,7 +680,6 @@ void WhiteBalance::read(const ProcParams* pp, const ParamsEdited* pedited)
                 // the equalizer's value is restored for the AutoWB
                 equal->setValue(equal->getAddMode() ? 0.0 : pp->wb.equal);
                 tempBias->setValue(tempBias->getAddMode() ? 0.0 : pp->wb.tempBias);
-                cat02->setValue(cat02->getAddMode() ? 0.0 : pp->wb.cat02);
 
                 // set default values first if in ADD mode, otherwise keep the current ones
                 if (temp->getAddMode()) {
@@ -760,20 +712,17 @@ void WhiteBalance::read(const ProcParams* pp, const ParamsEdited* pedited)
                 green->setValue(green->getAddMode() ? 0.0 : pp->wb.green);
                 equal->setValue(equal->getAddMode() ? 0.0 : pp->wb.equal);
                 tempBias->setValue(tempBias->getAddMode() ? 0.0 : pp->wb.tempBias);
-                cat02->setValue(cat02->getAddMode() ? 0.0 : pp->wb.cat02);
 
                 // The user may have changed the green value even for predefined WB values
                 if (pedited) {
                     green->setEditedState(pedited->wb.green ? Edited : UnEdited);
                     equal->setEditedState(pedited->wb.equal ? Edited : UnEdited);
-                    cat02->setEditedState(pedited->wb.cat02 ? Edited : UnEdited);
                     tempBias->setEditedState(pedited->wb.tempBias ? Edited : UnEdited);
                 }
 
                 //cache_customGreen (pp->wb.green);
                 break;
         }
-		cat02->setAutoValue (pp->wb.autocat02);
 
         tempBias->set_sensitive(wbValues.type == WBEntry::Type::AUTO);
         wbcamMethod->set_sensitive(wbValues.type == WBEntry::Type::AUTO);
@@ -798,6 +747,7 @@ void WhiteBalance::read(const ProcParams* pp, const ParamsEdited* pedited)
 
     wbcamMethodChanged();
     setEnabled(pp->wb.enabled);
+
     if (pedited) {
         set_inconsistent(multiImage && !pedited->wb.enabled);
     }
@@ -815,13 +765,11 @@ void WhiteBalance::write(ProcParams* pp, ParamsEdited* pedited)
         pedited->wb.temperature = temp->getEditedState();
         pedited->wb.green = green->getEditedState();
         pedited->wb.equal = equal->getEditedState();
-        pedited->wb.cat02 = cat02->getEditedState();
         pedited->wb.tempBias = tempBias->getEditedState();
         pedited->wb.method = row[methodColumns.colLabel] != M("GENERAL_UNCHANGED");
         pedited->wb.wbcamMethod    = wbcamMethod->get_active_text() != M("GENERAL_UNCHANGED");
         pedited->wb.enabled = !get_inconsistent();
-        pedited->wb.autocat02 = !cat02->getAutoInconsistent();
-		
+
     }
 
     pp->wb.enabled = getEnabled();
@@ -836,8 +784,6 @@ void WhiteBalance::write(ProcParams* pp, ParamsEdited* pedited)
     pp->wb.green = green->getValue();
     pp->wb.equal = equal->getValue();
     pp->wb.tempBias = tempBias->getValue();
-    pp->wb.cat02 = cat02->getValue();
-    pp->wb.autocat02  = cat02->getAutoValue ();
 
     if (wbcamMethod->get_active_row_number() == 0) {
         pp->wb.wbcamMethod = "none";
@@ -869,7 +815,6 @@ void WhiteBalance::setDefaults(const ProcParams* defParams, const ParamsEdited* 
 
     equal->setDefault(defParams->wb.equal);
     tempBias->setDefault(defParams->wb.tempBias);
-    cat02->setDefault(defParams->wb.cat02);
 
     if (wbp && defParams->wb.method == "Camera") {
         double ctemp;
@@ -892,13 +837,11 @@ void WhiteBalance::setDefaults(const ProcParams* defParams, const ParamsEdited* 
         temp->setDefaultEditedState(pedited->wb.temperature ? Edited : UnEdited);
         green->setDefaultEditedState(pedited->wb.green ? Edited : UnEdited);
         equal->setDefaultEditedState(pedited->wb.equal ? Edited : UnEdited);
-        cat02->setDefaultEditedState(pedited->wb.cat02 ? Edited : UnEdited);
         tempBias->setDefaultEditedState(pedited->wb.tempBias ? Edited : UnEdited);
     } else {
         temp->setDefaultEditedState(Irrelevant);
         green->setDefaultEditedState(Irrelevant);
         equal->setDefaultEditedState(Irrelevant);
-        cat02->setDefaultEditedState(Irrelevant);
         tempBias->setDefaultEditedState(Irrelevant);
     }
 }
@@ -910,7 +853,6 @@ void WhiteBalance::setBatchMode(bool batchMode)
     temp->showEditedCB();
     green->showEditedCB();
     equal->showEditedCB();
-    cat02->showEditedCB();
     tempBias->showEditedCB();
     Gtk::TreeModel::Row row = * (refTreeModel->append());
     row[methodColumns.colId] = WBParams::getWbEntries().size();
@@ -935,7 +877,6 @@ void WhiteBalance::setWB(int vtemp, double vgreen)
     opt = setActiveMethod(wbValues.second.GUILabel);
     cache_customWB(vtemp, vgreen);  // sequence in which this call is made is important; must be before "method->set_active (2);"
     cache_customEqual(equal->getValue());
-    cache_customcat02(cat02->getValue());
     temp->setEditedState(Edited);
     green->setEditedState(Edited);
     methconn.block(false);
@@ -945,15 +886,14 @@ void WhiteBalance::setWB(int vtemp, double vgreen)
     }
 }
 
-void WhiteBalance::setAdjusterBehavior(bool tempadd, bool greenadd, bool equaladd, bool tempbiasadd, bool cat02add)
+void WhiteBalance::setAdjusterBehavior(bool tempadd, bool greenadd, bool equaladd, bool tempbiasadd)
 {
 
     temp->setAddMode(tempadd);
     green->setAddMode(greenadd);
     equal->setAddMode(equaladd);
     tempBias->setAddMode(tempbiasadd);
-    cat02->setAddMode(cat02add);
-	
+
 }
 
 void WhiteBalance::trimValues(rtengine::procparams::ProcParams* pp)
@@ -962,7 +902,6 @@ void WhiteBalance::trimValues(rtengine::procparams::ProcParams* pp)
     temp->trimValue(pp->wb.temperature);
     green->trimValue(pp->wb.green);
     equal->trimValue(pp->wb.equal);
-    cat02->trimValue(pp->wb.cat02);
     tempBias->trimValue(pp->wb.tempBias);
 }
 
@@ -979,11 +918,6 @@ void WhiteBalance::cache_customEqual(double equal)
 {
     custom_equal = equal;
 }
-void WhiteBalance::cache_customcat02(int cat02)
-{
-    custom_cat02 = cat02;
-}
-
 void WhiteBalance::cache_customWB(int temp, double green)
 {
     cache_customTemp(temp);
@@ -1058,27 +992,10 @@ void WhiteBalance::WBChanged(double temperature, double greenVal)
 {
     GThreadLock lock;
     disableListener();
- //   setEnabled(true);
+//   setEnabled(true);
     temp->setValue(temperature);
     green->setValue(greenVal);
     temp->setDefault(temperature);
     green->setDefault(greenVal);
     enableListener();
-}
-
-void WhiteBalance::Cat02Changed(int cat_02)
-{
-    GThreadLock lock;
-    disableListener();
-	
- //   setEnabled(true);
-	
-    cat02->setValue(cat_02);
-    cat02->setDefault(cat_02);
-    enableListener();
-	/*
-    if (listener) {
-            listener->panelChanged(EvWBEnabled, M("GENERAL_UNCHANGED"));
-	}
-	*/
 }

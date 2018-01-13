@@ -161,6 +161,7 @@ protected:
     PreviewImageListener* imageListener;
     AutoExpListener* aeListener;
     AutoCamListener* acListener;
+    AutocatListener* acatListener;
     AutoBWListener* abwListener;
     localrgbListener* alorgbListener;
     AutoWBListener* awbListener;
@@ -219,7 +220,7 @@ protected:
     float colourToningSatLimitOpacity;
     int wbm;
     int wbauto;
-	
+
     double ptemp, pgreen;
 
 public:
@@ -322,6 +323,11 @@ public:
     {
         acListener = acl;
     }
+    void setAutocatListener(AutocatListener* aca)
+    {
+        acatListener = aca;
+    }
+	
     void setAutoBWListener(AutoBWListener* abw)
     {
         abwListener = abw;

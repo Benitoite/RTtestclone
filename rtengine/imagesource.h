@@ -85,7 +85,7 @@ public:
 
 
     // use right after demosaicing image, add coarse transformation and put the result in the provided Imagefloat*
-    virtual void        getImage(const ColorTemp &ctemp, int tran, Imagefloat* image, const PreviewProps &pp, const ToneCurveParams &hlp, const ColorManagementParams &cmp, const RAWParams &raw, const WBParams &wbp, const ColorAppearanceParams &cap) = 0;
+    virtual void        getImage(const ColorTemp &ctemp, int tran, Imagefloat* image, const PreviewProps &pp, const ToneCurveParams &hlp, const ColorManagementParams &cmp, const RAWParams &raw, const WBParams &wbp, const ColorAppearanceParams &cap, const Cat02adapParams &cat) = 0;
     virtual void        getImage_local(int begx, int begy, int yEn, int xEn, int cx, int cy, const ColorTemp &ctemp, int tran, Imagefloat* image, Imagefloat* bufimage, const PreviewProps &pp, const ToneCurveParams &hlp, const ColorManagementParams &cmp, const RAWParams &raw, const LocrgbParams &wbl, const ColorAppearanceParams &cap) = 0;
     virtual eSensorType getSensorType() const = 0;
     // true is ready to provide the AutoWB, i.e. when the image has been demosaiced for RawImageSource

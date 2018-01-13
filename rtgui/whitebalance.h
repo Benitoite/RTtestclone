@@ -68,8 +68,6 @@ protected:
     Adjuster* green;
     Adjuster* equal;
     Adjuster* tempBias;
-    Adjuster* cat02;
-    bool lastAutocat02;
 
     Gtk::Button* spotbutton;
     int opt;
@@ -81,12 +79,10 @@ protected:
     int custom_temp;
     double custom_green;
     double custom_equal;
-	int custom_cat02;
     void cache_customWB(int temp, double green);     //cache custom WB setting to allow its recall
     void cache_customTemp(int temp);                 //cache Temperature only to allow its recall
     void cache_customGreen(double green);            //cache Green only to allow its recall
     void cache_customEqual(double equal);            //cache Equal only to allow its recall
-    void cache_customcat02(int cat02);            //cache cat02 only to allow its recall
     void wbcamMethodChanged();
 
     int  setActiveMethod(Glib::ustring label);
@@ -123,9 +119,8 @@ public:
     }
     void setWB(int temp, double green);
     void WBChanged(double temp, double green);
-    void Cat02Changed(int cat_02);
 
-    void setAdjusterBehavior(bool tempadd, bool greenadd, bool equaladd, bool tempbiasadd, bool cat02add);
+    void setAdjusterBehavior(bool tempadd, bool greenadd, bool equaladd, bool tempbiasadd);
     void trimValues(rtengine::procparams::ProcParams* pp);
     void enabledChanged();
 };

@@ -32,7 +32,7 @@
 
 #define MINTEMP 1500   //1200
 #define MAXTEMP 60000  //12000
-#define CENTERTEMP 4750
+#define CENTERTEMP 5000
 #define MINGREEN 0.02
 #define MAXGREEN 10.0
 #define MINEQUAL 0.8
@@ -144,7 +144,7 @@ Localwb::Localwb() :
     proxi(Gtk::manage(new Adjuster(M("TP_LOCALLAB_PROXI"), 0, 60, 1, 20))),
     sensi(Gtk::manage(new Adjuster(M("TP_LOCALLAB_SENSI"), 0, 100, 1, 19))),
     transit(Gtk::manage(new Adjuster(M("TP_LOCALLAB_TRANSIT"), 5, 95, 1, 60))),
-    cat02(Gtk::manage(new Adjuster(M("TP_WBALANCE_CAT"), 0, 100, 1, 90))),
+    cat02(Gtk::manage(new Adjuster(M("TP_CAT02_SLI"), 0, 100, 1, 0))),
     retrab(Gtk::manage(new Adjuster(M("TP_LOCALLAB_RETRAB"), 0, 10000, 1, 500))),
 
     hueref(Gtk::manage(new Adjuster(M("TP_LOCALLAB_HUEREF"), -3.15, 3.15, 0.01, 0))),
@@ -264,7 +264,7 @@ Localwb::Localwb() :
     transit->set_tooltip_text(M("TP_LOCALLAB_TRANSIT_TOOLTIP"));
     transit->setAdjusterListener(this);
 
-    cat02->set_tooltip_text(M("TP_WBALANCE_CAT_TOOLTIP"));
+    cat02->set_tooltip_text(M("TP_LOCAL_CAT_TOOLTIP"));
     cat02->setAdjusterListener(this);
 
     wbMethodConn = wbshaMethod->signal_changed().connect(sigc::mem_fun(*this, &Localwb::wbMethodChanged));

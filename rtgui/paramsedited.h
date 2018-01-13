@@ -246,11 +246,9 @@ public:
     bool temperature;
     bool green;
     bool equal;
-    bool cat02;
     bool tempBias;
     bool wbcamMethod;
-    bool autocat02;
-	
+
 };
 
 /*class ColorShiftParamsEdited {
@@ -292,6 +290,17 @@ public:
     bool enabled;
     bool thresh;
 };
+
+class Cat02adapParamsEdited
+{
+
+public:
+    bool enabled;
+    bool cat02;
+    bool autocat02;
+
+};
+
 
 class ColorAppearanceParamsEdited
 {
@@ -874,6 +883,7 @@ public:
     EPDParamsEdited               epd;
     FattalToneMappingParamsEdited fattal;
     ImpulseDenoiseParamsEdited    impulseDenoise;
+    Cat02adapParamsEdited         cat02adap;
     SHParamsEdited                sh;
     CropParamsEdited              crop;
     CoarseTransformParamsEdited   coarse;

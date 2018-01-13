@@ -233,9 +233,10 @@ void ParamsEdited::set(bool v)
     wb.equal                   = v;
     wb.tempBias                = v;
     wb.wbcamMethod                = v;
-	wb.cat02 = v;
-    wb.autocat02 = v;
-	
+    cat02adap.enabled     = v;
+    cat02adap.cat02      = v;
+    cat02adap.autocat02      = v;
+
     //colorShift.a               = v;
     //colorShift.b               = v;
     //lumaDenoise.enabled        = v;
@@ -821,6 +822,11 @@ void ParamsEdited::initFrom(const std::vector<rtengine::procparams::ProcParams>&
         wb.temperature = wb.temperature && p.wb.temperature == other.wb.temperature;
         wb.tempBias = wb.tempBias && p.wb.tempBias == other.wb.tempBias;
         wb.wbcamMethod = wb.wbcamMethod && p.wb.wbcamMethod == other.wb.wbcamMethod;
+
+        cat02adap.enabled = cat02adap.enabled && p.cat02adap.enabled == other.cat02adap.enabled;
+        cat02adap.cat02 = cat02adap.cat02 && p.cat02adap.cat02 == other.cat02adap.cat02;
+        cat02adap.autocat02 = cat02adap.autocat02 && p.cat02adap.autocat02 == other.cat02adap.autocat02;
+
         //colorShift.a = colorShift.a && p.colorShift.a == other.colorShift.a;
         //colorShift.b = colorShift.b && p.colorShift.b == other.colorShift.b;
         //lumaDenoise.enabled = lumaDenoise.enabled && p.lumaDenoise.enabled == other.lumaDenoise.enabled;
@@ -1796,15 +1802,6 @@ void ParamsEdited::combine(rtengine::procparams::ProcParams& toEdit, const rteng
         toEdit.wb.wbcamMethod  = mods.wb.wbcamMethod;
     }
 
-    if (wb.autocat02) {
-        toEdit.wb.autocat02   = mods.wb.autocat02;
-    }
-	
-    if (wb.cat02) {
-      // toEdit.wb.cat02  = mods.wb.cat02;
-        toEdit.wb.cat02   = dontforceSet && options.baBehav[ADDSET_WB_CAT02] ? toEdit.wb.cat02 + mods.wb.cat02 : mods.wb.cat02;
-		
-    }
 
     if (wb.equal) {
         toEdit.wb.equal   = dontforceSet && options.baBehav[ADDSET_WB_EQUAL] ? toEdit.wb.equal + mods.wb.equal : mods.wb.equal;
@@ -1820,6 +1817,19 @@ void ParamsEdited::combine(rtengine::procparams::ProcParams& toEdit, const rteng
 
     if (wb.temperature) {
         toEdit.wb.temperature     = dontforceSet && options.baBehav[ADDSET_WB_TEMPERATURE] ? toEdit.wb.temperature + mods.wb.temperature : mods.wb.temperature;
+    }
+
+
+    if (cat02adap.enabled) {
+        toEdit.cat02adap.enabled     = mods.cat02adap.enabled;
+    }
+
+    if (cat02adap.autocat02) {
+        toEdit.cat02adap.autocat02   = mods.cat02adap.autocat02;
+    }
+
+    if (cat02adap.cat02) {
+        toEdit.cat02adap.cat02  = mods.cat02adap.cat02;
     }
 
     //if (colorShift.a)                     toEdit.colorShift.a     = dontforceSet && options.baBehav[ADDSET_CS_BLUEYELLOW] ? toEdit.colorShift.a + mods.colorShift.a : mods.colorShift.a;

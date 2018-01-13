@@ -321,7 +321,7 @@ private:
                             int beg_tileW = wcr * tileWskip + tileWskip / 2.f - crW / 2.f;
                             int beg_tileH = hcr * tileHskip + tileHskip / 2.f - crH / 2.f;
                             PreviewProps ppP(beg_tileW, beg_tileH, crW, crH, skipP);
-                            imgsrc->getImage(currWB, tr, origCropPart, ppP, params.toneCurve, params.icm, params.raw, params.wb, params.colorappearance);
+                            imgsrc->getImage(currWB, tr, origCropPart, ppP, params.toneCurve, params.icm, params.raw, params.wb, params.colorappearance, params.cat02adap);
                             //baseImg->getStdImage(currWB, tr, origCropPart, ppP, true, params.toneCurve);
 
                             // we only need image reduced to 1/4 here
@@ -541,7 +541,7 @@ private:
                     for (int wcr = 0; wcr <= 2; wcr++) {
                         for (int hcr = 0; hcr <= 2; hcr++) {
                             PreviewProps ppP(coordW[wcr], coordH[hcr], crW, crH, 1);
-                            imgsrc->getImage(currWB, tr, origCropPart, ppP, params.toneCurve, params.icm, params.raw, params.wb, params.colorappearance);
+                            imgsrc->getImage(currWB, tr, origCropPart, ppP, params.toneCurve, params.icm, params.raw, params.wb, params.colorappearance, params.cat02adap);
                             //baseImg->getStdImage(currWB, tr, origCropPart, ppP, true, params.toneCurve);
 
 
@@ -701,7 +701,7 @@ private:
         }
 
         baseImg = new Imagefloat(fw, fh);
-        imgsrc->getImage(currWB, tr, baseImg, pp, params.toneCurve, params.icm, params.raw, params.wb, params.colorappearance);
+        imgsrc->getImage(currWB, tr, baseImg, pp, params.toneCurve, params.icm, params.raw, params.wb, params.colorappearance, params.cat02adap);
 
         if (pl) {
             pl->setProgress(0.50);
@@ -1294,7 +1294,7 @@ private:
 
             GammaValues ga;
             //  if(params.blackwhite.enabled) params.toneCurve.hrenabled=false;
-            readyImg = ipf.lab2rgbOut (labView, cx, cy, cw, ch, params.icm, &ga);
+            readyImg = ipf.lab2rgbOut(labView, cx, cy, cw, ch, params.icm, &ga);
             customGamma = true;
 
             //or selected Free gamma
@@ -1308,7 +1308,7 @@ private:
             // if Default gamma mode: we use the profile selected in the "Output profile" combobox;
             // gamma come from the selected profile, otherwise it comes from "Free gamma" tool
 
-            readyImg = ipf.lab2rgbOut (labView, cx, cy, cw, ch, params.icm);
+            readyImg = ipf.lab2rgbOut(labView, cx, cy, cw, ch, params.icm);
 
             if (settings->verbose) {
                 printf("Output profile_: \"%s\"\n", params.icm.output.c_str());
@@ -1338,7 +1338,7 @@ private:
         }
 
         if (tmpScale != 1.0 && params.resize.method == "Nearest") { // resize rgb data (gamma applied)
-            Imagefloat* tempImage = new Imagefloat (imw, imh);
+            Imagefloat* tempImage = new Imagefloat(imw, imh);
             ipf.resize(readyImg, tempImage, tmpScale);
             delete readyImg;
             readyImg = tempImage;
@@ -1499,7 +1499,7 @@ private:
         auto &lcurve = params.dirpyrDenoise.lcurve;
 
         for (size_t i = 2; i < lcurve.size(); i += 4) {
-            lcurve[i] *= min (scale_factor * scale_factor, 1.0);
+            lcurve[i] *= min(scale_factor * scale_factor, 1.0);
         }
 
         noiseLCurve.Set(lcurve);
@@ -1626,7 +1626,7 @@ private:
 } // namespace
 
 
-IImagefloat* processImage (ProcessingJob* pjob, int& errorCode, ProgressListener* pl, bool flush)
+IImagefloat* processImage(ProcessingJob* pjob, int& errorCode, ProgressListener* pl, bool flush)
 {
     ImageProcessor proc(pjob, errorCode, pl, flush);
     return proc();
@@ -1639,7 +1639,7 @@ void batchProcessingThread(ProcessingJob* job, BatchProcessingListener* bpl)
 
     while (currentJob) {
         int errorCode;
-        IImagefloat* img = processImage (currentJob, errorCode, bpl, true);
+        IImagefloat* img = processImage(currentJob, errorCode, bpl, true);
 
         if (errorCode) {
             bpl->error(M("MAIN_MSG_CANNOTLOAD"));

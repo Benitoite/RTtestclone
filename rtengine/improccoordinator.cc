@@ -93,7 +93,7 @@ ImProcCoordinator::ImProcCoordinator()
       fw(0), fh(0), tr(0),
       fullw(1), fullh(1),
       pW(-1), pH(-1),
-      plistener(nullptr), imageListener(nullptr), aeListener(nullptr), acListener(nullptr), abwListener(nullptr), alorgbListener(nullptr), awbListener(nullptr), frameCountListener(nullptr), imageTypeListener(nullptr), actListener(nullptr), adnListener(nullptr), awavListener(nullptr), dehaListener(nullptr), hListener(nullptr),
+      plistener(nullptr), imageListener(nullptr), aeListener(nullptr), acListener(nullptr), acatListener(nullptr), abwListener(nullptr), alorgbListener(nullptr), awbListener(nullptr), frameCountListener(nullptr), imageTypeListener(nullptr), actListener(nullptr), adnListener(nullptr), awavListener(nullptr), dehaListener(nullptr), hListener(nullptr),
       resultValid(false), lastOutputProfile("BADFOOD"), lastOutputIntent(RI__COUNT), lastOutputBPC(false), thread(nullptr), changeSinceLast(0), updaterRunning(false), destroying(false), utili(false), autili(false),
       butili(false), ccutili(false), cclutili(false), clcutili(false), opautili(false), wavcontlutili(false), colourToningSatLimit(0.f),  colourToningSatLimitOpacity(0.f),
       wbm(0), wbauto(0), ptemp(0.), pgreen(0.)
@@ -438,7 +438,7 @@ void ImProcCoordinator::updatePreviewImage(int todo, Crop* cropCall)
 
         currWB = ColorTemp(params.wb.temperature, params.wb.green, params.wb.equal, params.wb.method);
 
-        if (params.localwb.enabled  || params.colorappearance.enabled) {
+        if (params.localwb.enabled  || params.colorappearance.enabled  || params.cat02adap.enabled) {
             params.wb.enabled = true;
         }
 
@@ -470,56 +470,6 @@ void ImProcCoordinator::updatePreviewImage(int todo, Crop* cropCall)
         }
 
 
-        currWB = ColorTemp();
-
-        if (params.wb.method == "Camera") {
-            currWB = imgsrc->getWB();
-        }
-
-        params.wb.temperature = currWB.getTemp();
-
-        int cat0 = 100;
-
-        //printf("temp=%i \n", params.wb.temperature);
-        if (params.wb.temperature < 4000) {
-            if (ada < 5.f) {
-                cat0 = 0;
-            } else if (ada < 10.f) {
-                cat0 = 1;
-            } else if (ada < 15.f) {
-                cat0 = 2;
-            } else if (ada < 30.f) {
-                cat0 = 5;
-            } else if (ada < 100.f) {
-                cat0 = 50;
-            } else if (ada < 300.f) {
-                cat0 = 80;
-            } else if (ada < 500.f) {
-                cat0 = 90;
-            } else if (ada < 3000.f) {
-                cat0 = 95;
-            }
-        } else {
-            if (ada < 5.f) {
-                cat0 = 30;
-            } else if (ada < 10.f) {
-                cat0 = 50;
-            } else if (ada < 30.f) {
-                cat0 = 60;
-            } else if (ada < 100.f) {
-                cat0 = 70;
-            } else if (ada < 300.f) {
-                cat0 = 80;
-            } else if (ada < 500.f) {
-                cat0 = 90;
-            } else if (ada < 1000.f) {
-                cat0 = 95;
-            }
-        }
-
-        if (awbListener  && params.wb.autocat02) {
-            awbListener->Cat02Changed(cat0);
-        }
 
         if (!params.wb.enabled) {
             currWB = ColorTemp();
@@ -564,6 +514,48 @@ void ImProcCoordinator::updatePreviewImage(int todo, Crop* cropCall)
             awbListener->WBChanged(params.wb.temperature, params.wb.green);
         }
 
+        int cat0 = 100;
+
+        //printf("temp=%i \n", params.wb.temperature);
+        if (params.wb.temperature < 4000  || params.wb.temperature > 20000) { //20000 arbitrary value - no test enough
+            if (ada < 5.f) {
+                cat0 = 0;
+            } else if (ada < 10.f) {
+                cat0 = 1;
+            } else if (ada < 15.f) {
+                cat0 = 2;
+            } else if (ada < 30.f) {
+                cat0 = 5;
+            } else if (ada < 100.f) {
+                cat0 = 50;
+            } else if (ada < 300.f) {
+                cat0 = 80;
+            } else if (ada < 500.f) {
+                cat0 = 90;
+            } else if (ada < 3000.f) {
+                cat0 = 95;
+            }
+        } else {
+            if (ada < 5.f) {
+                cat0 = 30;
+            } else if (ada < 10.f) {
+                cat0 = 50;
+            } else if (ada < 30.f) {
+                cat0 = 60;
+            } else if (ada < 100.f) {
+                cat0 = 70;
+            } else if (ada < 300.f) {
+                cat0 = 80;
+            } else if (ada < 500.f) {
+                cat0 = 90;
+            } else if (ada < 1000.f) {
+                cat0 = 95;
+            }
+        }
+
+        if (acatListener  && params.cat02adap.autocat02) {
+            acatListener->cat02catChanged(cat0);
+        }
 
         int tr = getCoarseBitMask(params.coarse);
 
@@ -575,7 +567,7 @@ void ImProcCoordinator::updatePreviewImage(int todo, Crop* cropCall)
         // Tells to the ImProcFunctions' tools what is the preview scale, which may lead to some simplifications
         ipf.setScale(scale);
 
-        imgsrc->getImage(currWB, tr, orig_prev, pp, params.toneCurve, params.icm, params.raw, params.wb, params.colorappearance);
+        imgsrc->getImage(currWB, tr, orig_prev, pp, params.toneCurve, params.icm, params.raw, params.wb, params.colorappearance, params.cat02adap);
         denoiseInfoStore.valid = false;
         Imagefloat *imageoriginal = nullptr;
         Imagefloat *imagetransformed = nullptr;
@@ -1510,7 +1502,7 @@ void ImProcCoordinator::saveInputICCReference(const Glib::ustring& fname, bool a
         currWB = ColorTemp(); // = no white balance
     }
 
-    imgsrc->getImage(currWB, tr, im, pp, ppar.toneCurve, ppar.icm, ppar.raw, ppar.wb, ppar.colorappearance);
+    imgsrc->getImage(currWB, tr, im, pp, ppar.toneCurve, ppar.icm, ppar.raw, ppar.wb, ppar.colorappearance, ppar.cat02adap);
     ImProcFunctions ipf(&ppar, true);
 
     if (ipf.needsTransform()) {

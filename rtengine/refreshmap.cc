@@ -518,7 +518,7 @@ int refreshmap[rtengine::NUMOFEVENTS] = {
     ALLNORAW,         // EvTMFattalEnabled
     HDR,              // EvTMFattalThreshold
     HDR,              // EvTMFattalAmount
-    DEMOSAIC,         // EvWBEnabled  ALLNORAW, 
+    DEMOSAIC,         // EvWBEnabled  ALLNORAW,
     RGBCURVE,         // EvRGBEnabled
     LUMINANCECURVE,   // EvLEnabled
     DEMOSAIC,          // EvPixelShiftOneGreen
@@ -553,7 +553,10 @@ int refreshmap[rtengine::NUMOFEVENTS] = {
     DEMOSAIC, //EvlocalwbCenter
     DEMOSAIC, //EvlocalwbDegree
     DEMOSAIC, //Evlocalwbtransit
-    DEMOSAIC //Evlocalwbcat02
+    DEMOSAIC, //Evlocalwbcat02
+    DEMOSAIC, //EvCat02cat02
+    DEMOSAIC, //EvCat02enabled
+    DEMOSAIC  //EvCATAutocat02
 
 };
 

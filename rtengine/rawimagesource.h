@@ -151,7 +151,7 @@ public:
 
     void        getAutoWBMultipliersloc(int begx, int begy, int yEn, int xEn, int cx, int cy, int bf_h, int bf_w, double &rm, double &gm, double &bm, const LocrgbParams &localr, const WBParams & wbpar, const ColorManagementParams &cmp);
 
-    void        getImage(const ColorTemp &ctemp, int tran, Imagefloat* image, const PreviewProps &pp, const ToneCurveParams &hrp, const ColorManagementParams &cmp, const RAWParams &raw, const WBParams &wbp, const ColorAppearanceParams &cap);
+    void        getImage(const ColorTemp &ctemp, int tran, Imagefloat* image, const PreviewProps &pp, const ToneCurveParams &hrp, const ColorManagementParams &cmp, const RAWParams &raw, const WBParams &wbp, const ColorAppearanceParams &cap, const Cat02adapParams &cat);
     eSensorType getSensorType() const
     {
         return ri != nullptr ? ri->getSensorType() : ST_NONE;

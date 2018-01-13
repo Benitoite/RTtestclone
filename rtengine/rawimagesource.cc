@@ -954,7 +954,7 @@ static void ciecamcat02loc_float(LabImage* lab, LabImage* dest, int tempa, int c
 
     if (settings->verbose) {
         t2e.set();
-        printf("CAT02 Loc performed in %d usec:\n", t2e.etime(t1e));
+        printf("CAT02 performed in %d usec:\n", t2e.etime(t1e));
     }
 
 #endif
@@ -963,7 +963,6 @@ static void ciecamcat02loc_float(LabImage* lab, LabImage* dest, int tempa, int c
 void RawImageSource::getImage_local(int begx, int begy, int yEn, int xEn, int cx, int cy, const ColorTemp &ctemploc, int tran, Imagefloat* image, Imagefloat* bufimage,  const PreviewProps &pp, const ToneCurveParams &hrp, const ColorManagementParams &cmp, const RAWParams &raw, const LocrgbParams &wbl, const ColorAppearanceParams &cap)
 {
     MyMutex::MyLock lock(getImageMutex);
-//     printf ("ok getimalocal  cat02=%i\n", wbl.cat02);
 
     tran = defTransform(tran);
     // compute channel multipliers
@@ -1235,12 +1234,11 @@ void RawImageSource::getImage_local(int begx, int begy, int yEn, int xEn, int cx
             image->r(image->getHeight() - 1, j) = (image->r(image->getHeight() - 2, j) + image->r(image->getHeight() - 1, j + 1) + image->r(image->getHeight() - 1, j - 1)) / 3;
             image->g(image->getHeight() - 1, j) = (image->g(image->getHeight() - 2, j) + image->g(image->getHeight() - 1, j + 1) + image->g(image->getHeight() - 1, j - 1)) / 3;
             image->b(image->getHeight() - 1, j) = (image->b(image->getHeight() - 2, j) + image->b(image->getHeight() - 1, j + 1) + image->b(image->getHeight() - 1, j - 1)) / 3;
-        }  
+        }
 
     }
 
     if (wbl.cat02 > 1  && !cap.enabled) { // different place from getimage to see if there is differences
-        //  printf("OK cat02 local\n");
         LabImage *bufcat02 = nullptr;
         bufcat02 = new LabImage(image->getWidth(), image->getHeight());
         LabImage *bufcat02fin = nullptr;
@@ -1350,7 +1348,7 @@ void RawImageSource::getImage_local(int begx, int begy, int yEn, int xEn, int cx
 }
 
 
-void RawImageSource::getImage(const ColorTemp &ctemp, int tran, Imagefloat* image, const PreviewProps &pp, const ToneCurveParams &hrp, const ColorManagementParams &cmp, const RAWParams &raw, const WBParams &wbp, const ColorAppearanceParams &cap)
+void RawImageSource::getImage(const ColorTemp &ctemp, int tran, Imagefloat* image, const PreviewProps &pp, const ToneCurveParams &hrp, const ColorManagementParams &cmp, const RAWParams &raw, const WBParams &wbp, const ColorAppearanceParams &cap, const Cat02adapParams &cat)
 {
     MyMutex::MyLock lock(getImageMutex);
 
@@ -1707,8 +1705,8 @@ void RawImageSource::getImage(const ColorTemp &ctemp, int tran, Imagefloat* imag
         }
     */
 
-    if (wbp.cat02 > 1  && !cap.enabled) { //
-        //  printf("OK cat02 local\n");
+    if (cat.cat02 > 1  && !cap.enabled) { //
+        //    printf("OK cat02 CAT\n");
         LabImage *bufcat02 = nullptr;
         bufcat02 = new LabImage(image->getWidth(), image->getHeight());
         LabImage *bufcat02fin = nullptr;
@@ -1752,7 +1750,7 @@ void RawImageSource::getImage(const ColorTemp &ctemp, int tran, Imagefloat* imag
                 bufcat02->b[y][x] = bR;
             }
 
-        ciecamcat02loc_float(bufcat02, bufcat02fin, wbp.temperature, wbp.cat02, cmp);
+        ciecamcat02loc_float(bufcat02, bufcat02fin, wbp.temperature, cat.cat02, cmp);
 
         for (int y = 0; y <  image->getHeight() ; y++) //{
             for (int x = 0; x < image->getWidth(); x++) {

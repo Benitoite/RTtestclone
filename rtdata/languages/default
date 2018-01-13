@@ -737,7 +737,10 @@ HISTORY_MSG_520;WB local - bottom
 HISTORY_MSG_521;WB local - right
 HISTORY_MSG_522;WB local - center
 HISTORY_MSG_524;WB local - transition
-HISTORY_MSG_525;WB local - cat02 adaptation
+HISTORY_MSG_525;Cat02 - local - cat02 adaptation
+HISTORY_MSG_526;Cat02 adaptation level
+HISTORY_MSG_527;Cat02 adaptation
+HISTORY_MSG_528;Cat02 auto adaptation
 HISTORY_MSG_LOCALCONTRAST_AMOUNT;Local Contrast - Amount
 HISTORY_MSG_LOCALCONTRAST_DARKNESS;Local Contrast - Darkness
 HISTORY_MSG_LOCALCONTRAST_ENABLED;Local Contrast
@@ -1317,6 +1320,10 @@ TP_BWMIX_VAL;L
 TP_CACORRECTION_BLUE;Blue
 TP_CACORRECTION_LABEL;Chromatic Aberration Correction
 TP_CACORRECTION_RED;Red
+TP_CAT02_LABEL;CAT02 adaptation
+TP_CAT02_SLI;CAT02 adaptation level
+TP_CAT02_DEGREE_AUTO_TOOLTIP;If the check-box is checked, RawTherapee calculates an optimum value, which is then used by CAT02\nTo set the value manually, uncheck the check-box first.
+TP_CAT02_CAT_TOOLTIP;Performs a chromatic adaptation, between the chosen temperature and 5000K.\n80% to 100% should satisfy the majority of cases.\nIf the absolute luminance conditions (scene or viewing) are very low, you can lower the value till 1.\nDisabled when Ciecam02 enabled.
 TP_CBDL_AFT;After Black-and-White
 TP_CBDL_BEF;Before Black-and-White
 TP_CBDL_METHOD;Process located
@@ -1721,6 +1728,7 @@ TP_METADATA_EDIT;Apply modifications
 TP_METADATA_MODE;Metadata copy mode
 TP_METADATA_STRIP;Strip all metadata
 TP_METADATA_TUNNEL;Copy unchanged
+TP_LOCAL_CAT_TOOLTIP;Performs a chromatic adaptation, between the chosen temperature and 5000K.\n80% to 100% should satisfy the majority of cases.
 TP_LOCALLAB_SYMSL;Symmetrical (mouse + sliders)
 TP_LOCALLAB_SYM;Symmetrical (mouse)
 TP_LOCALLAB_TRANSIT;Transition
@@ -2228,9 +2236,6 @@ TP_WBALANCE_AUTOSDW;Auto Standard deviation
 TP_WBALANCE_AUTOEDGESW;Auto Edge + Standard deviation
 TP_WBALANCE_AUTOEDGEROB;Auto Edge + Robust
 TP_WBALANCE_AUTOITC;Auto iterate temperature correlation
-TP_WBALANCE_CAT;CAT02 adaptation
-TP_WBALANCE_DEGREE_AUTO_TOOLTIP;If the check-box is checked, RawTherapee calculates an optimum value, which is then used by CAT02\nTo set the value manually, uncheck the check-box first.
-TP_WBALANCE_CAT_TOOLTIP;Performs a chromatic adaptation, between the chosen temperature and 5000K.\n80% to 100% should satisfy the majority of cases.\nIf the absolute luminance conditions (scene or viewing) are very low, you can lower the value till 1.\nDisabled when Ciecam02 enabled.
 TP_WBALANCE_FLUO1;F1 - Daylight
 TP_WBALANCE_FLUO2;F2 - Cool White
 TP_WBALANCE_FLUO3;F3 - White

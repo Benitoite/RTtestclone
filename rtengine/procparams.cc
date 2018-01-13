@@ -1134,11 +1134,9 @@ WBParams::WBParams() :
     method("Camera"),
     temperature(6504),
     green(1.0),
-    cat02(90),
     equal(1.0),
-    tempBias(0.0),
-	autocat02(true)	
-	
+    tempBias(0.0)
+
 {
 }
 
@@ -1150,8 +1148,6 @@ bool WBParams::operator ==(const WBParams& other) const
         && temperature == other.temperature
         && green == other.green
         && equal == other.equal
-        && cat02 == other.cat02
-        && autocat02 == other.autocat02
         && tempBias == other.tempBias;
 }
 
@@ -1209,6 +1205,29 @@ const std::vector<WBEntry>& WBParams::getWbEntries()
 
     return wb_entries;
 }
+
+Cat02adapParams::Cat02adapParams() :
+    enabled(true),
+    cat02(0),
+    autocat02(true)
+
+{
+}
+
+bool Cat02adapParams::operator ==(const Cat02adapParams& other) const
+{
+    return
+        enabled == other.enabled
+        && autocat02 == other.autocat02
+        && cat02 == other.cat02;
+
+}
+
+bool Cat02adapParams::operator !=(const Cat02adapParams& other) const
+{
+    return !(*this == other);
+}
+
 
 ColorAppearanceParams::ColorAppearanceParams() :
     enabled(false),
@@ -2287,7 +2306,7 @@ LocrgbParams::LocrgbParams():
     Smethod("IND"),
     qualityMethod("enhden"),
     transit(60),
-    cat02(90),
+    cat02(0),
     sensi(19),
     hueref(1.),
     chromaref(50.),
@@ -2300,7 +2319,7 @@ LocrgbParams::LocrgbParams():
     wbshaMethod("eli"),
     gamma(true),
     wbcamMethod("gam"),
-    temp(4750.),
+    temp(5000.),
     green(1.),
     equal(1.)
 {
@@ -2746,6 +2765,8 @@ void ProcParams::setDefaults()
 
     wb = WBParams();
 
+    cat02adap = Cat02adapParams();
+
     colorappearance = ColorAppearanceParams();
 
     defringe = DefringeParams();
@@ -3033,8 +3054,6 @@ int ProcParams::save(const Glib::ustring& fname, const Glib::ustring& fname2, bo
         saveToKeyfile(!pedited || pedited->wb.green, "White Balance", "Green", wb.green, keyFile);
         saveToKeyfile(!pedited || pedited->wb.equal, "White Balance", "Equal", wb.equal, keyFile);
         saveToKeyfile(!pedited || pedited->wb.tempBias, "White Balance", "TemperatureBias", wb.tempBias, keyFile);
-        saveToKeyfile(!pedited || pedited->wb.cat02, "White Balance", "Cat02", wb.cat02, keyFile);
-        saveToKeyfile(!pedited || pedited->wb.autocat02, "White Balance", "Autocat02", wb.autocat02, keyFile);
 
 // Colorappearance
         saveToKeyfile(!pedited || pedited->colorappearance.enabled, "Color appearance", "Enabled", colorappearance.enabled, keyFile);
@@ -3124,6 +3143,12 @@ int ProcParams::save(const Glib::ustring& fname, const Glib::ustring& fname2, bo
         saveToKeyfile(!pedited || pedited->localwb.equal, "Locrgb", "Equal", localwb.equal, keyFile);
         saveToKeyfile(!pedited || pedited->localwb.expwb, "Locrgb", "Expwb", localwb.expwb, keyFile);
         saveToKeyfile(!pedited || pedited->localwb.gamma, "Locrgb", "Gamma", localwb.gamma, keyFile);
+
+// Cat02 adap
+        saveToKeyfile(!pedited || pedited->cat02adap.enabled, "Cat02adap", "Enabled", cat02adap.enabled, keyFile);
+        saveToKeyfile(!pedited || pedited->cat02adap.cat02, "Cat02adap", "Cat02", cat02adap.cat02, keyFile);
+        saveToKeyfile(!pedited || pedited->cat02adap.autocat02, "Cat02adap", "Autocat02", cat02adap.autocat02, keyFile);
+
 
 // Impulse denoise
         saveToKeyfile(!pedited || pedited->impulseDenoise.enabled, "Impulse Denoising", "Enabled", impulseDenoise.enabled, keyFile);
@@ -3935,9 +3960,7 @@ int ProcParams::load(const Glib::ustring& fname, ParamsEdited* pedited)
             assignFromKeyfile(keyFile, "White Balance", "Green", pedited, wb.green, pedited->wb.green);
             assignFromKeyfile(keyFile, "White Balance", "Equal", pedited, wb.equal, pedited->wb.equal);
             assignFromKeyfile(keyFile, "White Balance", "TemperatureBias", pedited, wb.tempBias, pedited->wb.tempBias);
-            assignFromKeyfile(keyFile, "White Balance", "Cat02", pedited, wb.cat02, pedited->wb.cat02);
-            assignFromKeyfile(keyFile, "White Balance", "Autocat02", pedited, wb.autocat02, pedited->wb.autocat02);
-   }
+        }
 
         if (keyFile.has_group("Defringing")) {
             assignFromKeyfile(keyFile, "Defringing", "Enabled", pedited, defringe.enabled, pedited->defringe.enabled);
@@ -4054,6 +4077,12 @@ int ProcParams::load(const Glib::ustring& fname, ParamsEdited* pedited)
             assignFromKeyfile(keyFile, "Locrgb", "Equal", pedited, localwb.equal, pedited->localwb.equal);
             assignFromKeyfile(keyFile, "Locrgb", "Gamma", pedited, localwb.gamma, pedited->localwb.gamma);
 
+        }
+
+        if (keyFile.has_group("Cat02adap")) {
+            assignFromKeyfile(keyFile, "Cat02adap", "Enabled", pedited, cat02adap.enabled, pedited->cat02adap.enabled);
+            assignFromKeyfile(keyFile, "Cat02adap", "Cat02", pedited, cat02adap.cat02, pedited->cat02adap.cat02);
+            assignFromKeyfile(keyFile, "Cat02adap", "Autocat02", pedited, cat02adap.autocat02, pedited->cat02adap.autocat02);
         }
 
         if (keyFile.has_group("Impulse Denoising")) {
@@ -5003,6 +5032,7 @@ bool ProcParams::operator ==(const ProcParams& other) const
         && prsharpening == other.prsharpening
         && vibrance == other.vibrance
         && wb == other.wb
+        && cat02adap == other.cat02adap
         && colorappearance == other.colorappearance
         && impulseDenoise == other.impulseDenoise
         && localwb == other.localwb
