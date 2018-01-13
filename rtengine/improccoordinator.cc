@@ -515,7 +515,6 @@ void ImProcCoordinator::updatePreviewImage(int todo, Crop* cropCall)
         }
 
         int cat0 = 100;
-
         //printf("temp=%i \n", params.wb.temperature);
         if (params.wb.temperature < 4000  || params.wb.temperature > 20000) { //20000 arbitrary value - no test enough
             if (ada < 5.f) {
@@ -556,7 +555,6 @@ void ImProcCoordinator::updatePreviewImage(int todo, Crop* cropCall)
         if (acatListener  && params.cat02adap.autocat02) {
             acatListener->cat02catChanged(cat0);
         }
-
         int tr = getCoarseBitMask(params.coarse);
 
         imgsrc->getFullSize(fw, fh, tr);

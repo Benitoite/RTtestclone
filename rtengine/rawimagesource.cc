@@ -1705,7 +1705,7 @@ void RawImageSource::getImage(const ColorTemp &ctemp, int tran, Imagefloat* imag
         }
     */
 
-    if (cat.cat02 > 1  && !cap.enabled) { //
+    if (cat.cat02 > 1  && !cap.enabled  && cat.enabled) { //
         //    printf("OK cat02 CAT\n");
         LabImage *bufcat02 = nullptr;
         bufcat02 = new LabImage(image->getWidth(), image->getHeight());
