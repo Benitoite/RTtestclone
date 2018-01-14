@@ -152,6 +152,7 @@ set(NONCLISOURCEFILES
     localcontrast.cc
     eventmapper.cc
     metadatapanel.cc
+    labgrid.cc
 	cat02adap.cc
     )
 
