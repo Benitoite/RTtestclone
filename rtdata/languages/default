@@ -741,6 +741,7 @@ HISTORY_MSG_525;Cat02 - local - cat02 adaptation
 HISTORY_MSG_526;Cat02 adaptation level
 HISTORY_MSG_527;Cat02 adaptation
 HISTORY_MSG_528;Cat02 auto adaptation
+HISTORY_MSG_529;Cat02 Tint
 HISTORY_MSG_COLORTONING_LABGRID_VALUE;CT - Color correction
 HISTORY_MSG_LOCALCONTRAST_AMOUNT;Local Contrast - Amount
 HISTORY_MSG_LOCALCONTRAST_DARKNESS;Local Contrast - Darkness
@@ -1323,6 +1324,7 @@ TP_CACORRECTION_LABEL;Chromatic Aberration Correction
 TP_CACORRECTION_RED;Red
 TP_CAT02_LABEL;CAT02 adaptation
 TP_CAT02_SLI;CAT02 adaptation level
+TP_CAT02_GREE;Tint (Viewing conditions)
 TP_CAT02_DEGREE_AUTO_TOOLTIP;If the check-box is checked, RawTherapee calculates an optimum value, which is then used by CAT02\nTo set the value manually, uncheck the check-box first.
 TP_CAT02_CAT_TOOLTIP;Performs a chromatic adaptation, between the chosen temperature and 5000K.\n80% to 100% should satisfy the majority of cases.\nIf the absolute luminance conditions (scene or viewing) are very low, you can lower the value till 1.\nDisabled when Ciecam02 enabled.
 TP_CBDL_AFT;After Black-and-White

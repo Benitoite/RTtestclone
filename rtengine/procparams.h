@@ -560,7 +560,6 @@ struct WBEntry {
     double green;
     double equal;
     double tempBias;
-//  int cat02;
 };
 
 struct WBParams {
@@ -568,11 +567,9 @@ struct WBParams {
     Glib::ustring   method;
     int             temperature;
     double          green;
-    double          cat02;
     double          equal;
     double          tempBias;
     Glib::ustring   wbcamMethod;
-//   bool          autocat02;
 
     WBParams();
 
@@ -589,7 +586,7 @@ struct Cat02adapParams {
     bool    enabled;
     int     cat02;
     bool          autocat02;
-
+	double 	gree;
     Cat02adapParams();
 
     bool operator ==(const Cat02adapParams& other) const;

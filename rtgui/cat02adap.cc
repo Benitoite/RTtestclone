@@ -40,6 +40,10 @@ Cat02adap::Cat02adap() : FoldableToolPanel(this, "cat02adap", M("TP_CAT02_LABEL"
     pack_start(*cat02);
 
     cat02->setAdjusterListener(this);
+    gree = Gtk::manage(new Adjuster(M("TP_CAT02_GREE"), 0.9, 1.1, 0.001, 1));
+    gree->setAdjusterListener(this);
+	
+    pack_start(*gree);
 
     show_all_children();
 }
@@ -54,6 +58,8 @@ void Cat02adap::read(const ProcParams* pp, const ParamsEdited* pedited)
         cat02->setAutoInconsistent(multiImage && !pedited->cat02adap.autocat02);
 
         set_inconsistent(multiImage && !pedited->cat02adap.enabled);
+        gree->setEditedState(pedited->cat02adap.gree ? Edited : UnEdited);
+		
     }
 
     lastAutocat02 = pp->cat02adap.autocat02;
@@ -62,6 +68,7 @@ void Cat02adap::read(const ProcParams* pp, const ParamsEdited* pedited)
 
     cat02->setValue(pp->cat02adap.cat02);
     cat02->setAutoValue(pp->cat02adap.autocat02);
+    gree->setValue(pp->cat02adap.gree);
 
     enableListener();
 }
@@ -72,11 +79,13 @@ void Cat02adap::write(ProcParams* pp, ParamsEdited* pedited)
     pp->cat02adap.cat02    = cat02->getValue();
     pp->cat02adap.enabled   = getEnabled();
     pp->cat02adap.autocat02  = cat02->getAutoValue();
+    pp->cat02adap.gree    = gree->getValue();
 
     if (pedited) {
         pedited->cat02adap.cat02        = cat02->getEditedState();
         pedited->cat02adap.enabled       = !get_inconsistent();
         pedited->cat02adap.autocat02  = !cat02->getAutoInconsistent();
+        pedited->cat02adap.gree        = gree->getEditedState();
 
     }
 }
@@ -85,11 +94,14 @@ void Cat02adap::setDefaults(const ProcParams* defParams, const ParamsEdited* ped
 {
 
     cat02->setDefault(defParams->cat02adap.cat02);
+    gree->setDefault(defParams->cat02adap.gree);
 
     if (pedited) {
         cat02->setDefaultEditedState(pedited->cat02adap.cat02 ? Edited : UnEdited);
+        gree->setDefaultEditedState(pedited->cat02adap.gree ? Edited : UnEdited);
     } else {
         cat02->setDefaultEditedState(Irrelevant);
+        gree->setDefaultEditedState(Irrelevant);
     }
 }
 
@@ -97,8 +109,12 @@ void Cat02adap::adjusterChanged(Adjuster* a, double newval)
 {
 
     if (listener && getEnabled()) {
-
-        listener->panelChanged(EvCat02cat02, Glib::ustring::format(std::setw(2), std::fixed, std::setprecision(1), a->getValue()));
+        if (a == cat02) {
+            listener->panelChanged(EvCat02cat02, cat02->getTextValue());
+        } else if (a == gree) {
+            listener->panelChanged(EvCat02gree, gree->getTextValue());
+		}
+        //listener->panelChanged(EvCat02cat02, Glib::ustring::format(std::setw(2), std::fixed, std::setprecision(1), a->getValue()));
     }
 }
 
@@ -178,6 +194,7 @@ void Cat02adap::setBatchMode(bool batchMode)
 
     ToolPanel::setBatchMode(batchMode);
     cat02->showEditedCB();
+    gree->showEditedCB();
 }
 /*
 void Cat02adap::setAdjusterBehavior (bool cat02add)
@@ -188,6 +205,7 @@ void Cat02adap::setAdjusterBehavior (bool cat02add)
 */
 void Cat02adap::trimValues(rtengine::procparams::ProcParams* pp)
 {
+    gree->trimValue(pp->cat02adap.cat02);
 
     cat02->trimValue(pp->cat02adap.cat02);
 }

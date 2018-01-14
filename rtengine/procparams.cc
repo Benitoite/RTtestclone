@@ -1218,8 +1218,9 @@ const std::vector<WBEntry>& WBParams::getWbEntries()
 
 Cat02adapParams::Cat02adapParams() :
     enabled(true),
-    cat02(0),
-    autocat02(true)
+    cat02(2),
+    autocat02(true),
+	gree(1.0)
 
 {
 }
@@ -1229,7 +1230,8 @@ bool Cat02adapParams::operator ==(const Cat02adapParams& other) const
     return
         enabled == other.enabled
         && autocat02 == other.autocat02
-        && cat02 == other.cat02;
+        && cat02 == other.cat02
+        && gree == other.gree;
 
 }
 
@@ -3158,6 +3160,7 @@ int ProcParams::save(const Glib::ustring& fname, const Glib::ustring& fname2, bo
         saveToKeyfile(!pedited || pedited->cat02adap.enabled, "Cat02adap", "Enabled", cat02adap.enabled, keyFile);
         saveToKeyfile(!pedited || pedited->cat02adap.cat02, "Cat02adap", "Cat02", cat02adap.cat02, keyFile);
         saveToKeyfile(!pedited || pedited->cat02adap.autocat02, "Cat02adap", "Autocat02", cat02adap.autocat02, keyFile);
+        saveToKeyfile(!pedited || pedited->cat02adap.gree, "Cat02adap", "Green", cat02adap.gree, keyFile);
 
 
 // Impulse denoise
@@ -4097,6 +4100,7 @@ int ProcParams::load(const Glib::ustring& fname, ParamsEdited* pedited)
             assignFromKeyfile(keyFile, "Cat02adap", "Enabled", pedited, cat02adap.enabled, pedited->cat02adap.enabled);
             assignFromKeyfile(keyFile, "Cat02adap", "Cat02", pedited, cat02adap.cat02, pedited->cat02adap.cat02);
             assignFromKeyfile(keyFile, "Cat02adap", "Autocat02", pedited, cat02adap.autocat02, pedited->cat02adap.autocat02);
+            assignFromKeyfile(keyFile, "Cat02adap", "Green", pedited, cat02adap.gree, pedited->cat02adap.gree);
         }
 
         if (keyFile.has_group("Impulse Denoising")) {

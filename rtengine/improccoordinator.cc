@@ -426,7 +426,7 @@ void ImProcCoordinator::updatePreviewImage(int todo, Crop* cropCall)
     autowb = (params.wb.method == "autold" || params.wb.method == "aut"  || params.wb.method == "autosdw" || params.wb.method == "autedgsdw" || params.wb.method == "autitc"  || params.wb.method == "autedgrob" || params.wb.method == "autedg" || params.wb.method == "autorobust");
 
 //  Glib::ustring
-    if (todo & (M_INIT | M_LINDENOISE | M_HDR)) {
+    if (todo & (M_INIT | M_LINDENOISE | M_HDR) ||  params.cat02adap.enabled) {
         MyMutex::MyLock initLock(minit);  // Also used in crop window
 
         imgsrc->HLRecovery_Global(params.toneCurve);   // this handles Color HLRecovery
@@ -518,11 +518,11 @@ void ImProcCoordinator::updatePreviewImage(int todo, Crop* cropCall)
         //printf("temp=%i \n", params.wb.temperature);
         if (params.wb.temperature < 4000  || params.wb.temperature > 20000) { //20000 arbitrary value - no test enough
             if (ada < 5.f) {
-                cat0 = 0;
-            } else if (ada < 10.f) {
                 cat0 = 1;
-            } else if (ada < 15.f) {
+            } else if (ada < 10.f) {
                 cat0 = 2;
+            } else if (ada < 15.f) {
+                cat0 = 3;
             } else if (ada < 30.f) {
                 cat0 = 5;
             } else if (ada < 100.f) {
@@ -554,7 +554,12 @@ void ImProcCoordinator::updatePreviewImage(int todo, Crop* cropCall)
 
         if (acatListener  && params.cat02adap.autocat02) {
             acatListener->cat02catChanged(cat0);
+			params.cat02adap.cat02 = cat0;
+			
+			
         }
+		//params.cat02adap.cat02
+		//printf("par cat02=%i \n", params.cat02adap.cat02);
         int tr = getCoarseBitMask(params.coarse);
 
         imgsrc->getFullSize(fw, fh, tr);

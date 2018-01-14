@@ -240,6 +240,7 @@ void ParamsEdited::set(bool v)
     cat02adap.enabled     = v;
     cat02adap.cat02      = v;
     cat02adap.autocat02      = v;
+    cat02adap.gree      = v;
 
     //colorShift.a               = v;
     //colorShift.b               = v;
@@ -834,6 +835,7 @@ void ParamsEdited::initFrom(const std::vector<rtengine::procparams::ProcParams>&
         cat02adap.enabled = cat02adap.enabled && p.cat02adap.enabled == other.cat02adap.enabled;
         cat02adap.cat02 = cat02adap.cat02 && p.cat02adap.cat02 == other.cat02adap.cat02;
         cat02adap.autocat02 = cat02adap.autocat02 && p.cat02adap.autocat02 == other.cat02adap.autocat02;
+        cat02adap.gree = cat02adap.gree && p.cat02adap.gree == other.cat02adap.gree;
 
         //colorShift.a = colorShift.a && p.colorShift.a == other.colorShift.a;
         //colorShift.b = colorShift.b && p.colorShift.b == other.colorShift.b;
@@ -1845,6 +1847,10 @@ void ParamsEdited::combine(rtengine::procparams::ProcParams& toEdit, const rteng
         toEdit.cat02adap.enabled     = mods.cat02adap.enabled;
     }
 
+    if (cat02adap.gree) {
+        toEdit.cat02adap.gree     = mods.cat02adap.gree;
+    }
+	
     if (cat02adap.autocat02) {
         toEdit.cat02adap.autocat02   = mods.cat02adap.autocat02;
     }

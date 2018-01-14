@@ -675,14 +675,14 @@ static void inverse(double (*in)[3], double (*out)[3], int size)
 }
 
 */
-static void ciecamcat02loc_float(LabImage* lab, LabImage* dest, int tempa, int cat_02, const ColorManagementParams &cmp)
+static void ciecamcat02loc_float(LabImage* lab, LabImage* dest, int tempa, double gree, int cat_02, const ColorManagementParams &cmp, const ColorAppearanceParams &cap)
 {
     BENCHFUN
 #ifdef _DEBUG
     MyTime t1e, t2e;
     t1e.set();
 #endif
-
+	printf("Call ciecamcat02\n");
     int width = lab->W, height = lab->H;
     float Yw;
     Yw = 1.0f;
@@ -712,7 +712,7 @@ static void ciecamcat02loc_float(LabImage* lab, LabImage* dest, int tempa, int c
 
     xwd = 100.f * Xwout;
     zwd = 100.f * Zwout;
-    ywd = 100.f;
+    ywd = 100.f / (float) gree;
 
     xws = 100.f * Xwsc;
     zws = 100.f * Zwsc;
@@ -1282,7 +1282,7 @@ void RawImageSource::getImage_local(int begx, int begy, int yEn, int xEn, int cx
                 bufcat02->b[y][x] = bR;
             }
 
-        ciecamcat02loc_float(bufcat02, bufcat02fin, wbl.temp, wbl.cat02, cmp);
+        ciecamcat02loc_float(bufcat02, bufcat02fin, wbl.temp, 1.0 , wbl.cat02, cmp, cap);
 
         for (int y = 0; y <  image->getHeight() ; y++) //{
             for (int x = 0; x < image->getWidth(); x++) {
@@ -1351,7 +1351,7 @@ void RawImageSource::getImage_local(int begx, int begy, int yEn, int xEn, int cx
 void RawImageSource::getImage(const ColorTemp &ctemp, int tran, Imagefloat* image, const PreviewProps &pp, const ToneCurveParams &hrp, const ColorManagementParams &cmp, const RAWParams &raw, const WBParams &wbp, const ColorAppearanceParams &cap, const Cat02adapParams &cat)
 {
     MyMutex::MyLock lock(getImageMutex);
-
+//	printf("call getimage  cat02=%i\n", cat.cat02);
     tran = defTransform(tran);
 //   double wbcat02 = wbp.cat02;
     // compute channel multipliers
@@ -1750,7 +1750,7 @@ void RawImageSource::getImage(const ColorTemp &ctemp, int tran, Imagefloat* imag
                 bufcat02->b[y][x] = bR;
             }
 
-        ciecamcat02loc_float(bufcat02, bufcat02fin, wbp.temperature, cat.cat02, cmp);
+        ciecamcat02loc_float(bufcat02, bufcat02fin, wbp.temperature, cat.gree, cat.cat02, cmp, cap);
 
         for (int y = 0; y <  image->getHeight() ; y++) //{
             for (int x = 0; x < image->getWidth(); x++) {

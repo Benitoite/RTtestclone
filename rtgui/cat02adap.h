@@ -32,6 +32,7 @@ class Cat02adap :
 
 protected:
     Adjuster* cat02;
+	Adjuster* gree;
     bool lastAutocat02;
     IdleRegister idle_register;
 	int nextCadap;
