@@ -1243,8 +1243,8 @@ void RawImageSource::getImage_local(int begx, int begy, int yEn, int xEn, int cx
         bufcat02 = new LabImage(image->getWidth(), image->getHeight());
         LabImage *bufcat02fin = nullptr;
         bufcat02fin = new LabImage(image->getWidth(), image->getHeight());
-        TMatrix wiprof = ICCStore::getInstance()->workingSpaceInverseMatrix(cmp.working);
-        TMatrix wprof = ICCStore::getInstance()->workingSpaceMatrix(cmp.working);
+        TMatrix wiprof = ICCStore::getInstance()->workingSpaceInverseMatrix("ProPhoto");
+        TMatrix wprof = ICCStore::getInstance()->workingSpaceMatrix("ProPhoto");//cmp.working
 
         double wip[3][3] = {
             {wiprof[0][0], wiprof[0][1], wiprof[0][2]},
@@ -1711,8 +1711,8 @@ void RawImageSource::getImage(const ColorTemp &ctemp, int tran, Imagefloat* imag
         bufcat02 = new LabImage(image->getWidth(), image->getHeight());
         LabImage *bufcat02fin = nullptr;
         bufcat02fin = new LabImage(image->getWidth(), image->getHeight());
-        TMatrix wiprof = ICCStore::getInstance()->workingSpaceInverseMatrix(cmp.working);
-        TMatrix wprof = ICCStore::getInstance()->workingSpaceMatrix(cmp.working);
+        TMatrix wiprof = ICCStore::getInstance()->workingSpaceInverseMatrix("ProPhoto");
+        TMatrix wprof = ICCStore::getInstance()->workingSpaceMatrix("ProPhoto");//cmp.working
 
         double wip[3][3] = {
             {wiprof[0][0], wiprof[0][1], wiprof[0][2]},
