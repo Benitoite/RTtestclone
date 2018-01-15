@@ -23,19 +23,21 @@
 #include "adjuster.h"
 #include "toolpanel.h"
 
-class Cat02adap : 
-	public ToolParamBlock, 
-	public AdjusterListener, 
-	public rtengine::AutocatListener,
-	public FoldableToolPanel
+class Cat02adap :
+    public ToolParamBlock,
+    public AdjusterListener,
+    public rtengine::AutocatListener,
+    public FoldableToolPanel
 {
 
 protected:
     Adjuster* cat02;
-	Adjuster* gree;
+    Adjuster* gree;
     bool lastAutocat02;
+    bool lastAutogree;
     IdleRegister idle_register;
-	int nextCadap;
+    int nextCadap;
+    double nextGree;
 
 public:
 
@@ -50,8 +52,10 @@ public:
     void adjusterAutoToggled(Adjuster* a, bool newval);
 
     void enabledChanged();
-    void cat02catChanged (int cat);
-    bool cat02catComputed_ ();
+    void cat02catChanged(int cat);
+    bool cat02catComputed_();
+    void cat02greeChanged(double gree);
+    bool cat02greeComputed_();
 
 //    void setAdjusterBehavior (bool threshadd);
     void trimValues(rtengine::procparams::ProcParams* pp);

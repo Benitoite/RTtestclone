@@ -515,6 +515,7 @@ void ImProcCoordinator::updatePreviewImage(int todo, Crop* cropCall)
         }
 
         int cat0 = 100;
+
         //printf("temp=%i \n", params.wb.temperature);
         if (params.wb.temperature < 4000  || params.wb.temperature > 20000) { //20000 arbitrary value - no test enough
             if (ada < 5.f) {
@@ -554,12 +555,33 @@ void ImProcCoordinator::updatePreviewImage(int todo, Crop* cropCall)
 
         if (acatListener  && params.cat02adap.autocat02) {
             acatListener->cat02catChanged(cat0);
-			params.cat02adap.cat02 = cat0;
-			
-			
+            params.cat02adap.cat02 = cat0;
         }
-		//params.cat02adap.cat02
-		//printf("par cat02=%i \n", params.cat02adap.cat02);
+
+
+        double gree0 = 1.0;
+        float Tref = (float) params.wb.temperature;
+
+        if (Tref > 8000.f) {
+            Tref = 8000.f;
+        }
+
+        if (Tref < 4000.f) {
+            Tref = 4000.f;
+        }
+
+        float dT = fabs((Tref - 5000.) / 1000.f);
+        float dG = params.wb.green - 1.;
+        gree0 = 1.f + 0.00055f * dT * dG * params.cat02adap.cat02;//empirical formula
+
+        if (acatListener  && params.cat02adap.autogree) {
+            acatListener->cat02greeChanged(gree0);
+            params.cat02adap.gree = gree0;
+        }
+
+
+        //params.cat02adap.cat02
+        //printf("par cat02=%i \n", params.cat02adap.cat02);
         int tr = getCoarseBitMask(params.coarse);
 
         imgsrc->getFullSize(fw, fh, tr);

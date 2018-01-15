@@ -586,7 +586,8 @@ struct Cat02adapParams {
     bool    enabled;
     int     cat02;
     bool          autocat02;
-	double 	gree;
+    double  gree;
+    bool          autogree;
     Cat02adapParams();
 
     bool operator ==(const Cat02adapParams& other) const;

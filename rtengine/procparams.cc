@@ -658,11 +658,11 @@ colorCurve{
     0.25
 },
 satProtectionThreshold(30),
-saturatedOpacity(80),
-strength(50),
-balance(0),
-hlColSat(60, 80, false),
-shadowsColSat(80, 208, false),
+                       saturatedOpacity(80),
+                       strength(50),
+                       balance(0),
+                       hlColSat(60, 80, false),
+                       shadowsColSat(80, 208, false),
 clcurve{
     DCT_NURBS,
     0.00,
@@ -694,11 +694,11 @@ greenhigh(0.0),
 bluehigh(0.0),
 satlow(0.0),
 sathigh(0.0),
-    lumamode(true),
-    labgridALow(0.0),
-    labgridBLow(0.0),
-    labgridAHigh(0.0),
-    labgridBHigh(0.0)
+lumamode(true),
+labgridALow(0.0),
+labgridBLow(0.0),
+labgridAHigh(0.0),
+labgridBHigh(0.0)
 {
 }
 
@@ -1220,7 +1220,8 @@ Cat02adapParams::Cat02adapParams() :
     enabled(true),
     cat02(2),
     autocat02(true),
-	gree(1.0)
+    gree(1.0),
+    autogree(true)
 
 {
 }
@@ -1231,7 +1232,8 @@ bool Cat02adapParams::operator ==(const Cat02adapParams& other) const
         enabled == other.enabled
         && autocat02 == other.autocat02
         && cat02 == other.cat02
-        && gree == other.gree;
+        && gree == other.gree
+        && autogree == other.autogree;
 
 }
 
@@ -3161,6 +3163,7 @@ int ProcParams::save(const Glib::ustring& fname, const Glib::ustring& fname2, bo
         saveToKeyfile(!pedited || pedited->cat02adap.cat02, "Cat02adap", "Cat02", cat02adap.cat02, keyFile);
         saveToKeyfile(!pedited || pedited->cat02adap.autocat02, "Cat02adap", "Autocat02", cat02adap.autocat02, keyFile);
         saveToKeyfile(!pedited || pedited->cat02adap.gree, "Cat02adap", "Green", cat02adap.gree, keyFile);
+        saveToKeyfile(!pedited || pedited->cat02adap.autogree, "Cat02adap", "Autogree", cat02adap.autogree, keyFile);
 
 
 // Impulse denoise
@@ -4101,6 +4104,7 @@ int ProcParams::load(const Glib::ustring& fname, ParamsEdited* pedited)
             assignFromKeyfile(keyFile, "Cat02adap", "Cat02", pedited, cat02adap.cat02, pedited->cat02adap.cat02);
             assignFromKeyfile(keyFile, "Cat02adap", "Autocat02", pedited, cat02adap.autocat02, pedited->cat02adap.autocat02);
             assignFromKeyfile(keyFile, "Cat02adap", "Green", pedited, cat02adap.gree, pedited->cat02adap.gree);
+            assignFromKeyfile(keyFile, "Cat02adap", "Autogree", pedited, cat02adap.autogree, pedited->cat02adap.autogree);
         }
 
         if (keyFile.has_group("Impulse Denoising")) {
@@ -4818,7 +4822,7 @@ int ProcParams::load(const Glib::ustring& fname, ParamsEdited* pedited)
             assignFromKeyfile(keyFile, "ColorToning", "LabGridALow", pedited, colorToning.labgridALow, pedited->colorToning.labgridALow);
             assignFromKeyfile(keyFile, "ColorToning", "LabGridBLow", pedited, colorToning.labgridBLow, pedited->colorToning.labgridBLow);
             assignFromKeyfile(keyFile, "ColorToning", "LabGridAHigh", pedited, colorToning.labgridAHigh, pedited->colorToning.labgridAHigh);
-            assignFromKeyfile(keyFile, "ColorToning", "LabGridBHigh", pedited, colorToning.labgridBHigh, pedited->colorToning.labgridBHigh);            
+            assignFromKeyfile(keyFile, "ColorToning", "LabGridBHigh", pedited, colorToning.labgridBHigh, pedited->colorToning.labgridBHigh);
         }
 
         if (keyFile.has_group("RAW")) {

@@ -40,9 +40,20 @@ Cat02adap::Cat02adap() : FoldableToolPanel(this, "cat02adap", M("TP_CAT02_LABEL"
     pack_start(*cat02);
 
     cat02->setAdjusterListener(this);
+
     gree = Gtk::manage(new Adjuster(M("TP_CAT02_GREE"), 0.9, 1.1, 0.001, 1));
+
+    if (gree->delay < options.adjusterMaxDelay) {
+        gree->delay = options.adjusterMaxDelay;
+    }
+
+    gree->throwOnButtonRelease();
+    gree->addAutoButton(M("TP_CAT02_DEGREE_AUTO_TOOLTIP"));
+    gree->set_tooltip_markup(M("TP_CAT02_GREE_TOOLTIP"));
+
+
     gree->setAdjusterListener(this);
-	
+
     pack_start(*gree);
 
     show_all_children();
@@ -59,16 +70,19 @@ void Cat02adap::read(const ProcParams* pp, const ParamsEdited* pedited)
 
         set_inconsistent(multiImage && !pedited->cat02adap.enabled);
         gree->setEditedState(pedited->cat02adap.gree ? Edited : UnEdited);
-		
+        gree->setAutoInconsistent(multiImage && !pedited->cat02adap.autogree);
+
     }
 
     lastAutocat02 = pp->cat02adap.autocat02;
+    lastAutogree = pp->cat02adap.autogree;
 
     setEnabled(pp->cat02adap.enabled);
 
     cat02->setValue(pp->cat02adap.cat02);
     cat02->setAutoValue(pp->cat02adap.autocat02);
     gree->setValue(pp->cat02adap.gree);
+    gree->setAutoValue(pp->cat02adap.autogree);
 
     enableListener();
 }
@@ -80,12 +94,14 @@ void Cat02adap::write(ProcParams* pp, ParamsEdited* pedited)
     pp->cat02adap.enabled   = getEnabled();
     pp->cat02adap.autocat02  = cat02->getAutoValue();
     pp->cat02adap.gree    = gree->getValue();
+    pp->cat02adap.autogree  = gree->getAutoValue();
 
     if (pedited) {
         pedited->cat02adap.cat02        = cat02->getEditedState();
         pedited->cat02adap.enabled       = !get_inconsistent();
         pedited->cat02adap.autocat02  = !cat02->getAutoInconsistent();
         pedited->cat02adap.gree        = gree->getEditedState();
+        pedited->cat02adap.autogree  = !gree->getAutoInconsistent();
 
     }
 }
@@ -113,7 +129,8 @@ void Cat02adap::adjusterChanged(Adjuster* a, double newval)
             listener->panelChanged(EvCat02cat02, cat02->getTextValue());
         } else if (a == gree) {
             listener->panelChanged(EvCat02gree, gree->getTextValue());
-		}
+        }
+
         //listener->panelChanged(EvCat02cat02, Glib::ustring::format(std::setw(2), std::fixed, std::setprecision(1), a->getValue()));
     }
 }
@@ -131,6 +148,14 @@ void Cat02adap::adjusterAutoToggled(Adjuster* a, bool newval)
 
         lastAutocat02 = cat02->getAutoValue();
 
+        if (gree->getAutoInconsistent()) {
+            gree->setAutoInconsistent(false);
+            gree->setAutoValue(false);
+        } else if (lastAutogree) {
+            gree->setAutoInconsistent(true);
+        }
+
+        lastAutogree = gree->getAutoValue();
 
     }
 
@@ -146,6 +171,15 @@ void Cat02adap::adjusterAutoToggled(Adjuster* a, bool newval)
             }
         }
 
+        if (a == gree) {
+            if (gree->getAutoInconsistent()) {
+                listener->panelChanged(EvCATAutogree, M("GENERAL_UNCHANGED"));
+            } else if (gree->getAutoValue()) {
+                listener->panelChanged(EvCATAutogree, M("GENERAL_ENABLED"));
+            } else {
+                listener->panelChanged(EvCATAutogree, M("GENERAL_DISABLED"));
+            }
+        }
 
 
 
@@ -153,28 +187,49 @@ void Cat02adap::adjusterAutoToggled(Adjuster* a, bool newval)
     }
 }
 
-void Cat02adap::cat02catChanged (int cat)
+void Cat02adap::cat02catChanged(int cat)
 {
     nextCadap = cat;
 
-    const auto func = [] (gpointer data) -> gboolean {
-        static_cast<Cat02adap*> (data)->cat02catComputed_();
+    const auto func = [](gpointer data) -> gboolean {
+        static_cast<Cat02adap*>(data)->cat02catComputed_();
         return FALSE;
     };
 
-    idle_register.add (func, this);
+    idle_register.add(func, this);
 }
 
-bool Cat02adap::cat02catComputed_ ()
+bool Cat02adap::cat02catComputed_()
 {
 
-    disableListener ();
-    cat02->setValue (nextCadap);
-    enableListener ();
+    disableListener();
+    cat02->setValue(nextCadap);
+    enableListener();
 
     return false;
 }
 
+void Cat02adap::cat02greeChanged(double gree)
+{
+    nextGree = gree;
+
+    const auto func = [](gpointer data) -> gboolean {
+        static_cast<Cat02adap*>(data)->cat02greeComputed_();
+        return FALSE;
+    };
+
+    idle_register.add(func, this);
+}
+
+bool Cat02adap::cat02greeComputed_()
+{
+
+    disableListener();
+    gree->setValue(nextGree);
+    enableListener();
+
+    return false;
+}
 
 void Cat02adap::enabledChanged()
 {

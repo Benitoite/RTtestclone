@@ -682,7 +682,7 @@ static void ciecamcat02loc_float(LabImage* lab, LabImage* dest, int tempa, doubl
     MyTime t1e, t2e;
     t1e.set();
 #endif
-	printf("Call ciecamcat02\n");
+    printf("Call ciecamcat02\n");
     int width = lab->W, height = lab->H;
     float Yw;
     Yw = 1.0f;
@@ -1282,7 +1282,7 @@ void RawImageSource::getImage_local(int begx, int begy, int yEn, int xEn, int cx
                 bufcat02->b[y][x] = bR;
             }
 
-        ciecamcat02loc_float(bufcat02, bufcat02fin, wbl.temp, 1.0 , wbl.cat02, cmp, cap);
+        ciecamcat02loc_float(bufcat02, bufcat02fin, wbl.temp, 1.0, wbl.cat02, cmp, cap);
 
         for (int y = 0; y <  image->getHeight() ; y++) //{
             for (int x = 0; x < image->getWidth(); x++) {
@@ -1351,7 +1351,7 @@ void RawImageSource::getImage_local(int begx, int begy, int yEn, int xEn, int cx
 void RawImageSource::getImage(const ColorTemp &ctemp, int tran, Imagefloat* image, const PreviewProps &pp, const ToneCurveParams &hrp, const ColorManagementParams &cmp, const RAWParams &raw, const WBParams &wbp, const ColorAppearanceParams &cap, const Cat02adapParams &cat)
 {
     MyMutex::MyLock lock(getImageMutex);
-//	printf("call getimage  cat02=%i\n", cat.cat02);
+//  printf("call getimage  cat02=%i\n", cat.cat02);
     tran = defTransform(tran);
 //   double wbcat02 = wbp.cat02;
     // compute channel multipliers

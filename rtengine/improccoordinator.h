@@ -327,7 +327,7 @@ public:
     {
         acatListener = aca;
     }
-	
+
     void setAutoBWListener(AutoBWListener* abw)
     {
         abwListener = abw;

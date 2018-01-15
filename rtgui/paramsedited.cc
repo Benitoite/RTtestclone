@@ -241,6 +241,7 @@ void ParamsEdited::set(bool v)
     cat02adap.cat02      = v;
     cat02adap.autocat02      = v;
     cat02adap.gree      = v;
+    cat02adap.autogree      = v;
 
     //colorShift.a               = v;
     //colorShift.b               = v;
@@ -836,6 +837,7 @@ void ParamsEdited::initFrom(const std::vector<rtengine::procparams::ProcParams>&
         cat02adap.cat02 = cat02adap.cat02 && p.cat02adap.cat02 == other.cat02adap.cat02;
         cat02adap.autocat02 = cat02adap.autocat02 && p.cat02adap.autocat02 == other.cat02adap.autocat02;
         cat02adap.gree = cat02adap.gree && p.cat02adap.gree == other.cat02adap.gree;
+        cat02adap.autogree = cat02adap.autogree && p.cat02adap.autogree == other.cat02adap.autogree;
 
         //colorShift.a = colorShift.a && p.colorShift.a == other.colorShift.a;
         //colorShift.b = colorShift.b && p.colorShift.b == other.colorShift.b;
@@ -1623,12 +1625,15 @@ void ParamsEdited::combine(rtengine::procparams::ProcParams& toEdit, const rteng
     if (colorToning.labgridALow) {
         toEdit.colorToning.labgridALow = mods.colorToning.labgridALow;
     }
+
     if (colorToning.labgridBLow) {
         toEdit.colorToning.labgridBLow = mods.colorToning.labgridBLow;
     }
+
     if (colorToning.labgridAHigh) {
         toEdit.colorToning.labgridAHigh = mods.colorToning.labgridAHigh;
     }
+
     if (colorToning.labgridBHigh) {
         toEdit.colorToning.labgridBHigh = mods.colorToning.labgridBHigh;
     }
@@ -1850,13 +1855,17 @@ void ParamsEdited::combine(rtengine::procparams::ProcParams& toEdit, const rteng
     if (cat02adap.gree) {
         toEdit.cat02adap.gree     = mods.cat02adap.gree;
     }
-	
+
     if (cat02adap.autocat02) {
         toEdit.cat02adap.autocat02   = mods.cat02adap.autocat02;
     }
 
     if (cat02adap.cat02) {
         toEdit.cat02adap.cat02  = mods.cat02adap.cat02;
+    }
+
+    if (cat02adap.autogree) {
+        toEdit.cat02adap.autogree   = mods.cat02adap.autogree;
     }
 
     //if (colorShift.a)                     toEdit.colorShift.a     = dontforceSet && options.baBehav[ADDSET_CS_BLUEYELLOW] ? toEdit.colorShift.a + mods.colorShift.a : mods.colorShift.a;

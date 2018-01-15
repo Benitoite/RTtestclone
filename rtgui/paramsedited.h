@@ -303,6 +303,7 @@ public:
     bool cat02;
     bool autocat02;
     bool gree;
+    bool autogree;
 
 };
 

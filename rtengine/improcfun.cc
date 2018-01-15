@@ -4193,7 +4193,7 @@ void ImProcFunctions::rgbProc(Imagefloat* working, LabImage* lab, PipetteBuffer 
                                 // Luminance = (0.299f*r + 0.587f*g + 0.114f*b)
 
                                 float s, l;
-                                Color::rgb2slfloat (r, g, b, s, l);
+                                Color::rgb2slfloat(r, g, b, s, l);
 
                                 float l_ = Color::gammatab_srgb1[l * 65535.f];
 
@@ -4208,9 +4208,9 @@ void ImProcFunctions::rgbProc(Imagefloat* working, LabImage* lab, PipetteBuffer 
                                 ctColorCurve.getVal(l_, r2, g2, b2);  // get the color from the color curve
 
                                 float h2, s2, l2;
-                                Color::rgb2hslfloat (r2, g2, b2, h2, s2, l2); // transform this new color to hsl
+                                Color::rgb2hslfloat(r2, g2, b2, h2, s2, l2);  // transform this new color to hsl
 
-                                Color::hsl2rgbfloat (h2, s + ((1.f - s) * (1.f - l) * 0.7f), l, r2, g2, b2);
+                                Color::hsl2rgbfloat(h2, s + ((1.f - s) * (1.f - l) * 0.7f), l, r2, g2, b2);
 
                                 rtemp[ti * TS + tj] = r + (r2 - r) * opacity; // merge the color to the old color, depending on the opacity
                                 gtemp[ti * TS + tj] = g + (g2 - g) * opacity;
@@ -4535,6 +4535,7 @@ void ImProcFunctions::rgbProc(Imagefloat* working, LabImage* lab, PipetteBuffer 
                     for (int i = istart, ti = 0; i < tH; i++, ti++) {
                         Color::RGB2Lab(&rtemp[ti * TS], &gtemp[ti * TS], &btemp[ti * TS], &(lab->L[i][jstart]), &(lab->a[i][jstart]), &(lab->b[i][jstart]), toxyz, tW - jstart);
                     }
+
                     if (hasColorToningLabGrid) {
                         colorToningLabGrid(lab, jstart, tW, istart, tH, false);
                     }
@@ -4947,6 +4948,7 @@ void ImProcFunctions::rgbProc(Imagefloat* working, LabImage* lab, PipetteBuffer 
 
         for (int i = 0; i < tH; i++) {
             Color::RGB2Lab(tmpImage->r(i), tmpImage->g(i), tmpImage->b(i), lab->L[i], lab->a[i], lab->b[i], toxyz, tW);
+
             if (hasColorToningLabGrid) {
                 colorToningLabGrid(lab, 0, tW, i, i + 1, false);
             }
@@ -5344,13 +5346,13 @@ void ImProcFunctions::toningsmh(float r, float g, float b, float &ro, float &go,
 * @param balanH [0..1] balance for highlights (same slider than for balanS)
 * @param reducac value of the reduction in the middle of the range for second degree, increase or decrease action
 **/
-void ImProcFunctions::toning2col (float r, float g, float b, float &ro, float &go, float &bo, float iplow, float iphigh, float krl, float kgl, float kbl, float krh, float kgh, float kbh, float SatLow, float SatHigh, float balanS, float balanH, float reducac, int mode, int preser, float strProtect)
+void ImProcFunctions::toning2col(float r, float g, float b, float &ro, float &go, float &bo, float iplow, float iphigh, float krl, float kgl, float kbl, float krh, float kgh, float kbh, float SatLow, float SatHigh, float balanS, float balanH, float reducac, int mode, int preser, float strProtect)
 {
     const float lumbefore = 0.299f * r + 0.587f * g + 0.114f * b;
     const float v = max(r, g, b) / 65535.f;
 
-    const float rlo = pow_F (strProtect, 0.4f);  //0.5 ==> 0.75  transfered value for more action
-    const float rlh = 2.2f * pow_F (strProtect, 0.4f);
+    const float rlo = pow_F(strProtect, 0.4f);   //0.5 ==> 0.75  transfered value for more action
+    const float rlh = 2.2f * pow_F(strProtect, 0.4f);
 
     //low tones
     //second degree
@@ -5363,15 +5365,18 @@ void ImProcFunctions::toning2col (float r, float g, float b, float &ro, float &g
 
     if (SatLow > 0.f) {
         float kl = 1.f;
+
         if (v > iplow) {
             kl = aa * v * v + bb * v + cc;
         } else if (mode == 0) {
             kl = aab * v * v + bbb * v;
         }
+
         const float kmgb = min(r, g, b);
+
         if (kmgb < 20000.f) {
             //I have tested ...0.85 compromise...
-            kl *= pow_F ((kmgb / 20000.f), 0.85f);
+            kl *= pow_F((kmgb / 20000.f), 0.85f);
         }
 
         const float factor = 20000.f * SatLow * kl * rlo * balanS;
@@ -5408,6 +5413,7 @@ void ImProcFunctions::toning2col (float r, float g, float b, float &ro, float &g
 
     if (SatHigh > 0.f) {
         float kh = 1.f;
+
         if (v > iphigh) {
             kh = (1.f - v) / (1.f - iphigh);    //Low light ==> decrease action after iplow
         } else {
@@ -5415,11 +5421,13 @@ void ImProcFunctions::toning2col (float r, float g, float b, float &ro, float &g
         }
 
         const float kmgb = max(r, g, b);
+
         if (kmgb > 45535.f) {
             constexpr float cora = 1.f / (45535.f - 65535.f);
             constexpr float corb = 1.f - cora * 45535.f;
             kh *= kmgb * cora + corb;
         }
+
         const float factor = 20000.f * SatHigh * kh * rlh * balanH;
         r += factor * (krh > 0.f ? krh : 0.f);
         g += factor * (kgh > 0.f ? kgh : 0.f);
@@ -5431,6 +5439,7 @@ void ImProcFunctions::toning2col (float r, float g, float b, float &ro, float &g
     }
 
     float preserv = 1.f;
+
     if (preser == 1) {
         float lumafter = 0.299f * r + 0.587f * g + 0.114f * b;
         preserv = lumbefore / lumafter;
@@ -7157,6 +7166,7 @@ void ImProcFunctions::colorToningLabGrid(LabImage *lab, int xstart, int xend, in
 #ifdef _OPENMP
     #pragma omp parallel for if (multiThread)
 #endif
+
     for (int y = ystart; y < yend; ++y) {
         for (int x = xstart; x < xend; ++x) {
             lab->a[y][x] += lab->L[y][x] * a_scale + a_base;
