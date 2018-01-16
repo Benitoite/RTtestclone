@@ -1259,6 +1259,9 @@ void RawImageSource::getImage_local(int begx, int begy, int yEn, int xEn, int cx
         };
 
 
+#ifdef _OPENMP
+        #pragma omp parallel for schedule(dynamic,16)
+#endif
 
         for (int y = 0; y <  image->getHeight() ; y++) //{
             for (int x = 0; x < image->getWidth(); x++) {
@@ -1270,6 +1273,10 @@ void RawImageSource::getImage_local(int begx, int begy, int yEn, int xEn, int cx
                 bufcat02fin->b[y][x] = 0.f;
 
             }
+
+#ifdef _OPENMP
+        #pragma omp parallel for schedule(dynamic,16)
+#endif
 
         for (int y = 0; y <  image->getHeight() ; y++) //{
             for (int x = 0; x < image->getWidth(); x++) {
@@ -1283,6 +1290,9 @@ void RawImageSource::getImage_local(int begx, int begy, int yEn, int xEn, int cx
             }
 
         ciecamcat02loc_float(bufcat02, bufcat02fin, wbl.temp, 1.0, wbl.cat02, cmp, cap);
+#ifdef _OPENMP
+        #pragma omp parallel for schedule(dynamic,16)
+#endif
 
         for (int y = 0; y <  image->getHeight() ; y++) //{
             for (int x = 0; x < image->getWidth(); x++) {
@@ -1350,6 +1360,8 @@ void RawImageSource::getImage_local(int begx, int begy, int yEn, int xEn, int cx
 
 void RawImageSource::getImage(const ColorTemp &ctemp, int tran, Imagefloat* image, const PreviewProps &pp, const ToneCurveParams &hrp, const ColorManagementParams &cmp, const RAWParams &raw, const WBParams &wbp, const ColorAppearanceParams &cap, const Cat02adapParams &cat)
 {
+    BENCHFUN
+
     MyMutex::MyLock lock(getImageMutex);
 //  printf("call getimage  cat02=%i\n", cat.cat02);
     tran = defTransform(tran);
@@ -1400,57 +1412,6 @@ void RawImageSource::getImage(const ColorTemp &ctemp, int tran, Imagefloat* imag
         bm *= camInitialGain;
     }
 
-    /*
-        if (wbcat02 > 0.) {
-            double in[3][3];
-            double out[3][3];
-
-            float percat = (float) wbcat02 / 100.;
-    //      printf("OK Cat02=%f\n", wbcat02);
-            double Xxyz, Zxyz;
-            double iCAM02BB00, iCAM02BB01, iCAM02BB02, iCAM02BB10, iCAM02BB11, iCAM02BB12, iCAM02BB20, iCAM02BB21, iCAM02BB22; //for CIECAT02
-            double adap = percat;
-            float gree = ctemp.getGreen();
-            ColorTemp::temp2mulxyz(ctemp.getTemp(), "", Xxyz, Zxyz);
-            ColorTemp::cieCAT02(Xxyz, 1., Zxyz, iCAM02BB00, iCAM02BB01, iCAM02BB02, iCAM02BB10, iCAM02BB11, iCAM02BB12, iCAM02BB20, iCAM02BB21, iCAM02BB22, adap);
-            in[0][0] = iCAM02BB00;
-            in[0][1] = iCAM02BB01;
-            in[0][2] = iCAM02BB02;
-            in[1][0] = iCAM02BB10;
-            in[1][1] = iCAM02BB11;
-            in[1][2] = iCAM02BB12;
-            in[2][0] = iCAM02BB20;
-            in[2][1] = iCAM02BB21;
-            in[2][2] = iCAM02BB22;
-            //      inverse (in, out, 3);
-
-            for (int y = 0; y < H ; y++) //{
-                for (int x = 0; x < W; x++) {
-                    float X, Y, Z;
-                    float Xcam02, Ycam02, Zcam02;
-                    //    X  = xyz_sRGBd65[0][0] * image->r (y, x)   + xyz_sRGBd65[0][1] * image->g (y, x) / gree + xyz_sRGBd65[0][2] * image->b (y, x);
-                    //    Y  = xyz_sRGBd65[1][0] * image->r (y, x)   + xyz_sRGBd65[1][1] * image->g (y, x) / gree + xyz_sRGBd65[1][2] * image->b (y, x);
-                    //    Z  = xyz_sRGBd65[2][0] * image->r (y, x)   + xyz_sRGBd65[2][1] * image->g (y, x) / gree + xyz_sRGBd65[2][2] * image->b (y, x);
-                    X  = xyz_sRGBd65[0][0] * red[y][x]   + xyz_sRGBd65[0][1] * green[y][x]  / gree + xyz_sRGBd65[0][2] *  blue[y][x] ;
-                    Y  = xyz_sRGBd65[1][0] * red[y][x]    + xyz_sRGBd65[1][1] *  green[y][x]  / gree + xyz_sRGBd65[1][2] * blue[y][x];
-                    Z  = xyz_sRGBd65[2][0] * red[y][x]    + xyz_sRGBd65[2][1] *  green[y][x]  / gree + xyz_sRGBd65[2][2] * blue[y][x];
-                    //    Xcam02 = CAM02BB00 * X + CAM02BB01 * Y + CAM02BB02 * Z ;
-                    //    Ycam02 = CAM02BB10 * X + CAM02BB11 * Y + CAM02BB12 * Z ;
-                    //    Zcam02 = CAM02BB20 * X + CAM02BB21 * Y + CAM02BB22 * Z ;
-                    //        Xcam02 = out[0][0] * X + out[0][1] * Y + out[0][2] * Z ;
-                    //        Ycam02 = out[1][0] * X + out[1][1] * Y + out[1][2] * Z ;
-                    //        Zcam02 = out[2][0] * X + out[2][1] * Y + out[2][2] * Z ;
-                    Xcam02 = in[0][0] * X + in[0][1] * Y + in[0][2] * Z ;
-                    Ycam02 = in[1][0] * X + in[1][1] * Y + in[1][2] * Z ;
-                    Zcam02 = in[2][0] * X + in[2][1] * Y + in[2][2] * Z ;
-                    red[y][x] = sRGBd65_xyz[0][0] *  Xcam02 + sRGBd65_xyz[0][1] * Ycam02 + sRGBd65_xyz[0][2] * Zcam02;
-                    green[y][x] = gree * (sRGBd65_xyz[1][0] *  Xcam02 + sRGBd65_xyz[1][1] * Ycam02 + sRGBd65_xyz[1][2] * Zcam02);
-                    blue[y][x] = sRGBd65_xyz[2][0] *  Xcam02 + sRGBd65_xyz[2][1] * Ycam02 + sRGBd65_xyz[2][2] * Zcam02;
-
-                }
-
-        }
-    */
     defGain = 0.0;
     // compute image area to render in order to provide the requested part of the image
     int sx1, sy1, imwidth, imheight, fw, d1xHeightOdd = 0;
@@ -1660,50 +1621,7 @@ void RawImageSource::getImage(const ColorTemp &ctemp, int tran, Imagefloat* imag
         }
     }
 
-//Cat02 correction
-    /*
-        rmul = sRGBd65_xyz[0][0] * Xwb * adj + sRGBd65_xyz[0][1] * Ywb + sRGBd65_xyz[0][2] * Zwb / adj; // Jacques' empirical modification 5/2013
-        gmul = sRGBd65_xyz[1][0] * Xwb     + sRGBd65_xyz[1][1] * Ywb + sRGBd65_xyz[1][2] * Zwb;
-        bmul = sRGBd65_xyz[2][0] * Xwb * adj + sRGBd65_xyz[2][1] * Ywb + sRGBd65_xyz[2][2] * Zwb / adj;
-        //};
-        gmul /= green;
-        */
 
-
-    /*
-    //not at good place ...see above
-        if (wbcat02 > 0.) {
-            float percat = (float) wbcat02 / 100.;
-    //      printf("OK Cat02=%f\n", wbcat02);
-            double Xxyz, Zxyz;
-            double CAM02BB00, CAM02BB01, CAM02BB02, CAM02BB10, CAM02BB11, CAM02BB12, CAM02BB20, CAM02BB21, CAM02BB22; //for CIECAT02
-            double adap = 1.0;
-            float gree = ctemp.getGreen ();
-            ColorTemp::temp2mulxyz (ctemp.getTemp(), ctemp.getGreen (), "", Xxyz, Zxyz);
-            ColorTemp::cieCAT02 (Xxyz, 1., Zxyz, CAM02BB00, CAM02BB01, CAM02BB02, CAM02BB10, CAM02BB11, CAM02BB12, CAM02BB20, CAM02BB21, CAM02BB22, adap);
-
-            for (int y = 0; y < image->getHeight() ; y++) //{
-                for (int x = 0; x < image->getWidth(); x++) {
-                    float X, Y, Z;
-                    float Xcam02, Ycam02, Zcam02;
-                    X  = xyz_sRGBd65[0][0] * image->r (y, x)   + xyz_sRGBd65[0][1] * image->g (y, x) / gree + xyz_sRGBd65[0][2] * image->b (y, x);
-                    Y  = xyz_sRGBd65[1][0] * image->r (y, x)   + xyz_sRGBd65[1][1] * image->g (y, x) / gree + xyz_sRGBd65[1][2] * image->b (y, x);
-                    Z  = xyz_sRGBd65[2][0] * image->r (y, x)   + xyz_sRGBd65[2][1] * image->g (y, x) / gree + xyz_sRGBd65[2][2] * image->b (y, x);
-                    Xcam02 = CAM02BB00 * X + CAM02BB01 * Y + CAM02BB02 * Z ;
-                    Ycam02 = CAM02BB10 * X + CAM02BB11 * Y + CAM02BB12 * Z ;
-                    Zcam02 = CAM02BB20 * X + CAM02BB21 * Y + CAM02BB22 * Z ;
-                    Xcam02 = percat * Xcam02 + (1.f - percat) * X;
-                    Ycam02 = percat * Ycam02 + (1.f - percat) * Y;
-                    Zcam02 = percat * Zcam02 + (1.f - percat) * Z;
-
-                    image->r (y, x) = sRGBd65_xyz[0][0] *  Xcam02 + sRGBd65_xyz[0][1] * Ycam02 + sRGBd65_xyz[0][2] * Zcam02;
-                    image->g (y, x) = gree * (sRGBd65_xyz[1][0] *  Xcam02 + sRGBd65_xyz[1][1] * Ycam02 + sRGBd65_xyz[1][2] * Zcam02);
-                    image->b (y, x) = sRGBd65_xyz[2][0] *  Xcam02 + sRGBd65_xyz[2][1] * Ycam02 + sRGBd65_xyz[2][2] * Zcam02;
-
-                }
-
-        }
-    */
 
     if (cat.cat02 > 1  && !cap.enabled  && cat.enabled) { //
         //    printf("OK cat02 CAT\n");
@@ -1727,6 +1645,9 @@ void RawImageSource::getImage(const ColorTemp &ctemp, int tran, Imagefloat* imag
         };
 
 
+#ifdef _OPENMP
+        #pragma omp parallel for schedule(dynamic,16)
+#endif
 
         for (int y = 0; y <  image->getHeight() ; y++) //{
             for (int x = 0; x < image->getWidth(); x++) {
@@ -1738,6 +1659,10 @@ void RawImageSource::getImage(const ColorTemp &ctemp, int tran, Imagefloat* imag
                 bufcat02fin->b[y][x] = 0.f;
 
             }
+
+#ifdef _OPENMP
+        #pragma omp parallel for schedule(dynamic,16)
+#endif
 
         for (int y = 0; y <  image->getHeight() ; y++) //{
             for (int x = 0; x < image->getWidth(); x++) {
@@ -1751,6 +1676,9 @@ void RawImageSource::getImage(const ColorTemp &ctemp, int tran, Imagefloat* imag
             }
 
         ciecamcat02loc_float(bufcat02, bufcat02fin, wbp.temperature, cat.gree, cat.cat02, cmp, cap);
+#ifdef _OPENMP
+        #pragma omp parallel for schedule(dynamic,16)
+#endif
 
         for (int y = 0; y <  image->getHeight() ; y++) //{
             for (int x = 0; x < image->getWidth(); x++) {
