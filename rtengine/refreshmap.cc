@@ -558,7 +558,8 @@ int refreshmap[rtengine::NUMOFEVENTS] = {
     DEMOSAIC, //EvCat02enabled
     DEMOSAIC,  //EvCATAutocat02
     DEMOSAIC,  //EvCat02gree
-    DEMOSAIC  //EvCATAutogree
+    DEMOSAIC,  //EvCATAutogree
+    DEMOSAIC  //Evlocalwbytint
 
 };
 

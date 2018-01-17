@@ -65,6 +65,8 @@ private:
     Adjuster* const sensi;
     Adjuster* const transit;
     Adjuster* const cat02;
+    Adjuster* const ytint;
+	
     Adjuster* const retrab;
     Adjuster* const hueref;
     Adjuster* const chromaref;
@@ -79,6 +81,7 @@ private:
     Gtk::Frame* const shapeFrame;
     Gtk::Frame* const artifFrame;
     Gtk::Frame* const superFrame;
+    Gtk::Frame* const cat02Frame;
 
     Gtk::Label* const labqual;
     Gtk::Label* const labmS;

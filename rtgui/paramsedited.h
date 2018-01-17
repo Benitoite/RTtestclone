@@ -481,6 +481,7 @@ public:
     bool Smethod;
     bool transit;
     bool cat02;
+	bool ytint;
     bool nbspot;
     bool anbspot;
     bool retrab;

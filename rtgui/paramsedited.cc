@@ -339,6 +339,7 @@ void ParamsEdited::set(bool v)
     localwb.thres = v;
     localwb.transit = v;
     localwb.cat02 = v;
+    localwb.ytint = v;
     localwb.proxi = v;
     localwb.nbspot = v;
     localwb.anbspot = v;
@@ -943,6 +944,7 @@ void ParamsEdited::initFrom(const std::vector<rtengine::procparams::ProcParams>&
         localwb.sensi = localwb.sensi && p.localwb.sensi == other.localwb.sensi;
         localwb.transit = localwb.transit && p.localwb.transit == other.localwb.transit;
         localwb.cat02 = localwb.cat02 && p.localwb.cat02 == other.localwb.cat02;
+        localwb.ytint = localwb.ytint && p.localwb.ytint == other.localwb.ytint;
         localwb.nbspot = localwb.nbspot && p.localwb.nbspot == other.localwb.nbspot;
         localwb.anbspot = localwb.anbspot && p.localwb.anbspot == other.localwb.anbspot;
         localwb.retrab = localwb.retrab && p.localwb.retrab == other.localwb.retrab;
@@ -2385,6 +2387,10 @@ void ParamsEdited::combine(rtengine::procparams::ProcParams& toEdit, const rteng
         toEdit.localwb.cat02     = mods.localwb.cat02;
     }
 
+    if (localwb.ytint) {
+        toEdit.localwb.ytint     = mods.localwb.ytint;
+    }
+	
     if (localwb.nbspot) {
         toEdit.localwb.nbspot   = mods.localwb.nbspot;
     }

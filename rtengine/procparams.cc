@@ -2321,6 +2321,7 @@ LocrgbParams::LocrgbParams():
     qualityMethod("enhden"),
     transit(60),
     cat02(0),
+    ytint(1.0),
     sensi(19),
     hueref(1.),
     chromaref(50.),
@@ -2364,6 +2365,7 @@ bool LocrgbParams::operator ==(const LocrgbParams& other) const
         && equal == other.equal
         && transit == other.transit
         && cat02 == other.cat02
+        && ytint == other.ytint
         && gamma == other.gamma;
 
 }
@@ -3147,6 +3149,7 @@ int ProcParams::save(const Glib::ustring& fname, const Glib::ustring& fname2, bo
         saveToKeyfile(!pedited || pedited->localwb.lumaref, "Locrgb", "Lumaref", localwb.lumaref, keyFile);
         saveToKeyfile(!pedited || pedited->localwb.transit, "Locrgb", "Transit", localwb.transit, keyFile);
         saveToKeyfile(!pedited || pedited->localwb.cat02, "Locrgb", "Cat02", localwb.cat02, keyFile);
+        saveToKeyfile(!pedited || pedited->localwb.ytint, "Locrgb", "Ytint", localwb.ytint, keyFile);
         saveToKeyfile(!pedited || pedited->localwb.sensi, "Locrgb", "Sensi", localwb.sensi, keyFile);
         saveToKeyfile(!pedited || pedited->localwb.qualityMethod, "Locrgb", "qualityMethod", localwb.qualityMethod, keyFile);
         saveToKeyfile(!pedited || pedited->localwb.wbMethod, "Locrgb", "wbMethod", localwb.wbMethod, keyFile);
@@ -4087,6 +4090,7 @@ int ProcParams::load(const Glib::ustring& fname, ParamsEdited* pedited)
             assignFromKeyfile(keyFile, "Locrgb", "Lumaref", pedited, localwb.lumaref, pedited->localwb.lumaref);
             assignFromKeyfile(keyFile, "Locrgb", "Transit", pedited, localwb.transit, pedited->localwb.transit);
             assignFromKeyfile(keyFile, "Locrgb", "Cat02", pedited, localwb.cat02, pedited->localwb.cat02);
+            assignFromKeyfile(keyFile, "Locrgb", "Ytint", pedited, localwb.ytint, pedited->localwb.ytint);
             assignFromKeyfile(keyFile, "Locrgb", "qualityMethod", pedited, localwb.qualityMethod, pedited->localwb.qualityMethod);
             assignFromKeyfile(keyFile, "Locrgb", "wbMethod", pedited, localwb.wbMethod, pedited->localwb.wbMethod);
             assignFromKeyfile(keyFile, "Locrgb", "wbshaMethod", pedited, localwb.wbshaMethod, pedited->localwb.wbshaMethod);

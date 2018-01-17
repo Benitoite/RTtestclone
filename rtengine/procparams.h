@@ -923,6 +923,7 @@ struct LocrgbParams {
 
     int     transit;
     int cat02;
+    double ytint;
     int sensi;
     double  hueref;
     double  chromaref;

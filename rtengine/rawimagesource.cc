@@ -1239,6 +1239,7 @@ void RawImageSource::getImage_local(int begx, int begy, int yEn, int xEn, int cx
     }
 
     if (wbl.cat02 > 1  && !cap.enabled) { // different place from getimage to see if there is differences
+//	printf("catLocal tint=%f \n", wbl.ytint);
         LabImage *bufcat02 = nullptr;
         bufcat02 = new LabImage(image->getWidth(), image->getHeight());
         LabImage *bufcat02fin = nullptr;
@@ -1289,7 +1290,7 @@ void RawImageSource::getImage_local(int begx, int begy, int yEn, int xEn, int cx
                 bufcat02->b[y][x] = bR;
             }
 
-        ciecamcat02loc_float(bufcat02, bufcat02fin, wbl.temp, 1.0, wbl.cat02, cmp, cap);
+        ciecamcat02loc_float(bufcat02, bufcat02fin, wbl.temp, wbl.ytint, wbl.cat02, cmp, cap);
 #ifdef _OPENMP
         #pragma omp parallel for schedule(dynamic,16)
 #endif

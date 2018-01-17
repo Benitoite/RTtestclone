@@ -737,12 +737,13 @@ HISTORY_MSG_520;WB local - bottom
 HISTORY_MSG_521;WB local - right
 HISTORY_MSG_522;WB local - center
 HISTORY_MSG_524;WB local - transition
-HISTORY_MSG_525;Cat02 - local - cat02 adaptation
+HISTORY_MSG_525;WB local - cat02 level
 HISTORY_MSG_526;Cat02 adaptation level
 HISTORY_MSG_527;Cat02 adaptation
 HISTORY_MSG_528;Cat02 auto adaptation
 HISTORY_MSG_529;Cat02 Y tint
 HISTORY_MSG_530;Cat02 auto Y tint
+HISTORY_MSG_531;WB local - cat02 Y tint
 HISTORY_MSG_COLORTONING_LABGRID_VALUE;CT - Color correction
 HISTORY_MSG_LOCALCONTRAST_AMOUNT;Local Contrast - Amount
 HISTORY_MSG_LOCALCONTRAST_DARKNESS;Local Contrast - Darkness
@@ -1328,7 +1329,7 @@ TP_CAT02_SLI;CAT02 adaptation level
 TP_CAT02_GREE;Y Tint (Viewing conditions)
 TP_CAT02_DEGREE_AUTO_TOOLTIP;If the check-box is checked, RawTherapee calculates an optimum value, which is then used by CAT02\nTo set the value manually, uncheck the check-box first.
 TP_CAT02_CAT_TOOLTIP;Performs a chromatic adaptation, between the chosen temperature and 5000K.\n80% to 100% should satisfy the majority of cases.\nIf the absolute luminance conditions (scene or viewing) are very low, you can lower the value till 1.\nDisabled when Ciecam02 enabled.
-TP_CAT02_GREE_TOOLTIP;Adapts Y tint in function of chromatic adaptation.\nDisabled when Ciecam02 enabled.
+TP_CAT02_GREE_TOOLTIP;Adapts Y tint in function of chromatic adaptation level.\nDisabled when Ciecam02 enabled.
 TP_CBDL_AFT;After Black-and-White
 TP_CBDL_BEF;Before Black-and-White
 TP_CBDL_METHOD;Process located
@@ -1715,6 +1716,7 @@ TP_LENSPROFILE_USECA;Chromatic aberration correction
 TP_LENSPROFILE_USEDIST;Distortion correction
 TP_LENSPROFILE_USEVIGN;Vignetting correction
 TP_LOCALRGB_MET;Shape RT-spot area
+TP_LOCAL_CATYTINT_TOOLTIP;Adapts Y tint in function of Cat02 level\nDisabled when Ciecam02 enabled.
 TP_LOCALRGBWB_ELI;Elipse
 TP_LOCALRGBWB_REC;Rectangle
 TP_LOCALLAB_CENTER_X;Center X

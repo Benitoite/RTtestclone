@@ -145,6 +145,7 @@ Localwb::Localwb() :
     sensi(Gtk::manage(new Adjuster(M("TP_LOCALLAB_SENSI"), 0, 100, 1, 19))),
     transit(Gtk::manage(new Adjuster(M("TP_LOCALLAB_TRANSIT"), 5, 95, 1, 60))),
     cat02(Gtk::manage(new Adjuster(M("TP_CAT02_SLI"), 0, 100, 1, 0))),
+    ytint(Gtk::manage(new Adjuster(M("TP_CAT02_GREE"), 0.9, 1.1, 0.001, 1))),
     retrab(Gtk::manage(new Adjuster(M("TP_LOCALLAB_RETRAB"), 0, 10000, 1, 500))),
 
     hueref(Gtk::manage(new Adjuster(M("TP_LOCALLAB_HUEREF"), -3.15, 3.15, 0.01, 0))),
@@ -160,6 +161,7 @@ Localwb::Localwb() :
     shapeFrame(Gtk::manage(new Gtk::Frame(M("TP_LOCALLAB_SHFR")))),
     artifFrame(Gtk::manage(new Gtk::Frame(M("TP_LOCALLAB_ARTIF")))),
     superFrame(Gtk::manage(new Gtk::Frame())),
+    cat02Frame(Gtk::manage(new Gtk::Frame(M("TP_CAT02_LABEL")))),
 
     labqual(Gtk::manage(new Gtk::Label(M("TP_LOCALLAB_QUAL_METHOD") + ":"))),
 
@@ -266,6 +268,8 @@ Localwb::Localwb() :
 
     cat02->set_tooltip_text(M("TP_LOCAL_CAT_TOOLTIP"));
     cat02->setAdjusterListener(this);
+    ytint->set_tooltip_text(M("TP_LOCAL_CATYTINT_TOOLTIP"));
+    ytint->setAdjusterListener(this);
 
     wbMethodConn = wbshaMethod->signal_changed().connect(sigc::mem_fun(*this, &Localwb::wbMethodChanged));
 
@@ -306,7 +310,14 @@ Localwb::Localwb() :
 //    qualbox->pack_start (*qualityMethod);
 //    shapeBox->pack_start (*qualbox);
     shapeBox->pack_start(*transit);
-    shapeBox->pack_start(*cat02);
+	
+    cat02Frame->set_label_align(0.025, 0.5);
+    ToolParamBlock* const catBox = Gtk::manage(new ToolParamBlock());
+	
+    catBox->pack_start(*cat02);
+    catBox->pack_start(*ytint);
+    cat02Frame->add(*catBox);
+    shapeBox->pack_start(*cat02Frame);
 
     artifFrame->set_label_align(0.025, 0.5);
     artifFrame->set_tooltip_text(M("TP_LOCALLAB_ARTIF_TOOLTIP"));
@@ -1010,6 +1021,7 @@ void Localwb::read(const ProcParams* pp, const ParamsEdited* pedited)
         transit->setEditedState(pedited->localwb.transit ? Edited : UnEdited);
         cat02->setEditedState(pedited->localwb.cat02 ? Edited : UnEdited);
         expwb->set_inconsistent(!pedited->localwb.expwb);
+        ytint->setEditedState(pedited->localwb.ytint ? Edited : UnEdited);
 
         temp->setEditedState(pedited->localwb.temp ? Edited : UnEdited);
         green->setEditedState(pedited->localwb.green ? Edited : UnEdited);
@@ -1061,6 +1073,7 @@ void Localwb::read(const ProcParams* pp, const ParamsEdited* pedited)
     proxi->setValue(pp->localwb.proxi);
     transit->setValue(pp->localwb.transit);
     cat02->setValue(pp->localwb.cat02);
+    ytint->setValue(pp->localwb.ytint);
     nbspot->setValue(pp->localwb.nbspot);
     anbspot->setValue(pp->localwb.anbspot);
     retrab->setValue(pp->localwb.retrab);
@@ -1203,6 +1216,7 @@ void Localwb::write(ProcParams* pp, ParamsEdited* pedited)
     pp->localwb.thres = thres->getIntValue();
     pp->localwb.transit = transit->getIntValue();
     pp->localwb.cat02 = cat02->getIntValue();
+    pp->localwb.ytint = ytint->getValue();
     pp->localwb.nbspot = nbspot->getIntValue();
     pp->localwb.anbspot = anbspot->getIntValue();
     pp->localwb.gamma = gamma->get_active();
@@ -1237,6 +1251,7 @@ void Localwb::write(ProcParams* pp, ParamsEdited* pedited)
         pedited->localwb.sensi = sensi->getEditedState();
         pedited->localwb.transit = transit->getEditedState();
         pedited->localwb.cat02 = cat02->getEditedState();
+        pedited->localwb.ytint = ytint->getEditedState();
         pedited->localwb.nbspot = nbspot->getEditedState();
         pedited->localwb.anbspot = anbspot->getEditedState();
         pedited->localwb.retrab = retrab->getEditedState();
@@ -1495,6 +1510,7 @@ void Localwb::setDefaults(const ProcParams* defParams, const ParamsEdited* pedit
     sensi->setDefault(defParams->localwb.sensi);
     transit->setDefault(defParams->localwb.transit);
     cat02->setDefault(defParams->localwb.cat02);
+    ytint->setDefault(defParams->localwb.ytint);
     nbspot->setDefault(defParams->localwb.nbspot);
     anbspot->setDefault(defParams->localwb.anbspot);
     retrab->setDefault(defParams->localwb.retrab);
@@ -1521,6 +1537,7 @@ void Localwb::setDefaults(const ProcParams* defParams, const ParamsEdited* pedit
         sensi->setDefaultEditedState(pedited->localwb.sensi ? Edited : UnEdited);
         transit->setDefaultEditedState(pedited->localwb.transit ? Edited : UnEdited);
         cat02->setDefaultEditedState(pedited->localwb.cat02 ? Edited : UnEdited);
+        ytint->setDefaultEditedState(pedited->localwb.ytint ? Edited : UnEdited);
         nbspot->setDefaultEditedState(pedited->localwb.nbspot ? Edited : UnEdited);
         anbspot->setDefaultEditedState(pedited->localwb.anbspot ? Edited : UnEdited);
         retrab->setDefaultEditedState(pedited->localwb.retrab ? Edited : UnEdited);
@@ -1546,6 +1563,7 @@ void Localwb::setDefaults(const ProcParams* defParams, const ParamsEdited* pedit
         sensi->setDefaultEditedState(Irrelevant);
         transit->setDefaultEditedState(Irrelevant);
         cat02->setDefaultEditedState(Irrelevant);
+        ytint->setDefaultEditedState(Irrelevant);
         nbspot->setDefaultEditedState(Irrelevant);
         anbspot->setDefaultEditedState(Irrelevant);
         retrab->setDefaultEditedState(Irrelevant);
@@ -1607,6 +1625,8 @@ void Localwb::adjusterChanged(Adjuster* a, double newval)
             listener->panelChanged(Evlocalwbtransit, transit->getTextValue());
         } else if (a == cat02) {
             listener->panelChanged(Evlocalwbcat02, cat02->getTextValue());
+        } else if (a == ytint) {
+            listener->panelChanged(Evlocalwbytint, ytint->getTextValue());
         } else if (a == nbspot) {
             listener->panelChanged(Evlocalwbnbspot, nbspot->getTextValue());
         } else if (a == retrab) {
@@ -2428,6 +2448,7 @@ void Localwb::setBatchMode(bool batchMode)
     sensi->showEditedCB();
     transit->showEditedCB();
     cat02->showEditedCB();
+    ytint->showEditedCB();
     Smethod->append(M("GENERAL_UNCHANGED"));
     nbspot->showEditedCB();
     anbspot->showEditedCB();
@@ -2455,6 +2476,7 @@ void Localwb::trimValues(rtengine::procparams::ProcParams* pp)
     sensi->trimValue(pp->localwb.sensi);
     transit->trimValue(pp->localwb.transit);
     cat02->trimValue(pp->localwb.cat02);
+    ytint->trimValue(pp->localwb.ytint);
     nbspot->trimValue(pp->localwb.nbspot);
     anbspot->trimValue(pp->localwb.anbspot);
     retrab->trimValue(pp->localwb.retrab);
