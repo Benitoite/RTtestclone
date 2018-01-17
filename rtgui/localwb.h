@@ -66,7 +66,7 @@ private:
     Adjuster* const transit;
     Adjuster* const cat02;
     Adjuster* const ytint;
-	
+
     Adjuster* const retrab;
     Adjuster* const hueref;
     Adjuster* const chromaref;
@@ -124,6 +124,8 @@ private:
     double nextequal;
     double next_temp;
     double next_green;
+    double next_equal;
+
     int next_wbauto;
     int nextmeth;
 
@@ -137,7 +139,13 @@ private:
     rtengine::Coord draggedCenter;
 
     void editToggled();
-
+    bool lastAutotemp;
+    bool lastAutogreen;
+    bool lastAutoequal;
+    int nextCadap;
+    double nextGree;
+    bool lastAutocat02;
+    bool lastAutoytint;
 
 
 public:
@@ -155,6 +163,7 @@ public:
 
     void adjusterChanged(Adjuster* a, double newval);
     void enabledChanged();
+    void adjusterAutoToggled(Adjuster* a, bool newval);
 
     void setAdjusterBehavior(bool hadd, bool sadd, bool lcadd);
     void trimValues(rtengine::procparams::ProcParams* pp);
@@ -171,7 +180,19 @@ public:
     void temptintChanged(double ctemp, double ctint, double cequal, int meth);
     bool temptintComputed_();
     void updateLabel();
-    void WBChanged(double temp, double green, int wbauto);
+    void WBTChanged(double temp);
+    bool WBTComputed_();
+
+    void WBGChanged(double green);
+    bool WBGComputed_();
+
+    void WBEChanged(double equal);
+    bool WBEComputed_();
+
+    void cat02catChanged(int cat);
+    bool cat02catComputed_();
+    void cat02greeChanged(double ytin);
+    bool cat02greeComputed_();
 
     CursorShape getCursor(int objectID);
     bool mouseOver(int modifierKey);

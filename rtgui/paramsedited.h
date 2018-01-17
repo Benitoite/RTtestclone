@@ -481,7 +481,7 @@ public:
     bool Smethod;
     bool transit;
     bool cat02;
-	bool ytint;
+    bool ytint;
     bool nbspot;
     bool anbspot;
     bool retrab;
@@ -498,6 +498,12 @@ public:
     bool green;
     bool equal;
     bool gamma;
+    bool autotemp;
+    bool autogreen;
+    bool autoequal;
+    bool autocat02;
+    bool autoytint;
+
 };
 
 

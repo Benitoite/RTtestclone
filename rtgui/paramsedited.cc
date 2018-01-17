@@ -358,6 +358,11 @@ void ParamsEdited::set(bool v)
     localwb.green = v;
     localwb.equal = v;
     localwb.gamma = v;
+    localwb.autotemp      = v;
+    localwb.autogreen      = v;
+    localwb.autoequal      = v;
+    localwb.autocat02      = v;
+    localwb.autoytint      = v;
 
     pcvignette.enabled = v;
     pcvignette.strength = v;
@@ -959,6 +964,11 @@ void ParamsEdited::initFrom(const std::vector<rtengine::procparams::ProcParams>&
         localwb.wbshaMethod = localwb.wbshaMethod && p.localwb.wbshaMethod == other.localwb.wbshaMethod;
         localwb.gamma = localwb.gamma && p.localwb.gamma == other.localwb.gamma;
         localwb.wbcamMethod = localwb.wbcamMethod && p.localwb.wbcamMethod == other.localwb.wbcamMethod;
+        localwb.autotemp = localwb.autotemp && p.localwb.autotemp == other.localwb.autotemp;
+        localwb.autogreen = localwb.autogreen && p.localwb.autogreen == other.localwb.autogreen;
+        localwb.autoequal = localwb.autoequal && p.localwb.autoequal == other.localwb.autoequal;
+        localwb.autocat02 = localwb.autocat02 && p.localwb.autocat02 == other.localwb.autocat02;
+        localwb.autoytint = localwb.autoytint && p.localwb.autoytint == other.localwb.autoytint;
 
         pcvignette.enabled = pcvignette.enabled && p.pcvignette.enabled == other.pcvignette.enabled;
         pcvignette.strength = pcvignette.strength && p.pcvignette.strength == other.pcvignette.strength;
@@ -2390,7 +2400,7 @@ void ParamsEdited::combine(rtengine::procparams::ProcParams& toEdit, const rteng
     if (localwb.ytint) {
         toEdit.localwb.ytint     = mods.localwb.ytint;
     }
-	
+
     if (localwb.nbspot) {
         toEdit.localwb.nbspot   = mods.localwb.nbspot;
     }
@@ -2438,6 +2448,26 @@ void ParamsEdited::combine(rtengine::procparams::ProcParams& toEdit, const rteng
 
     if (localwb.temp) {
         toEdit.localwb.temp      = mods.localwb.temp;
+    }
+
+    if (localwb.autotemp) {
+        toEdit.localwb.autotemp   = mods.localwb.autotemp;
+    }
+
+    if (localwb.autogreen) {
+        toEdit.localwb.autogreen   = mods.localwb.autogreen;
+    }
+
+    if (localwb.autoequal) {
+        toEdit.localwb.autoequal   = mods.localwb.autoequal;
+    }
+
+    if (localwb.autoytint) {
+        toEdit.localwb.autoytint   = mods.localwb.autoytint;
+    }
+
+    if (localwb.autocat02) {
+        toEdit.localwb.autocat02   = mods.localwb.autocat02;
     }
 
     if (localwb.green) {

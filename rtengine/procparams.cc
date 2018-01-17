@@ -2320,7 +2320,13 @@ LocrgbParams::LocrgbParams():
     wbcamMethod("gam"),
     temp(5000.),
     green(1.),
-    equal(1.)
+    equal(1.),
+    autotemp(true),
+    autogreen(true),
+    autoequal(true),
+    autocat02(true),
+    autoytint(true)
+
 {
 }
 
@@ -2345,6 +2351,11 @@ bool LocrgbParams::operator ==(const LocrgbParams& other) const
         && wbshaMethod == other.wbshaMethod
         && wbcamMethod == other.wbcamMethod
         && temp == other.temp
+        && autotemp == other.autotemp
+        && autogreen == other.autogreen
+        && autoequal == other.autoequal
+        && autocat02 == other.autocat02
+        && autoytint == other.autoytint
         && green == other.green
         && equal == other.equal
         && transit == other.transit
@@ -3144,6 +3155,11 @@ int ProcParams::save(const Glib::ustring& fname, const Glib::ustring& fname2, bo
         saveToKeyfile(!pedited || pedited->localwb.equal, "Locrgb", "Equal", localwb.equal, keyFile);
         saveToKeyfile(!pedited || pedited->localwb.expwb, "Locrgb", "Expwb", localwb.expwb, keyFile);
         saveToKeyfile(!pedited || pedited->localwb.gamma, "Locrgb", "Gamma", localwb.gamma, keyFile);
+        saveToKeyfile(!pedited || pedited->localwb.autotemp, "Locrgb", "Autotemp", localwb.autotemp, keyFile);
+        saveToKeyfile(!pedited || pedited->localwb.autogreen, "Locrgb", "Autogreen", localwb.autogreen, keyFile);
+        saveToKeyfile(!pedited || pedited->localwb.autoequal, "Locrgb", "Autoequal", localwb.autoequal, keyFile);
+        saveToKeyfile(!pedited || pedited->localwb.autocat02, "Locrgb", "Autocat02", localwb.autocat02, keyFile);
+        saveToKeyfile(!pedited || pedited->localwb.autoytint, "Locrgb", "Autoytint", localwb.autoytint, keyFile);
 
 // Cat02 adap
         saveToKeyfile(!pedited || pedited->cat02adap.enabled, "Cat02adap", "Enabled", cat02adap.enabled, keyFile);
@@ -4084,6 +4100,11 @@ int ProcParams::load(const Glib::ustring& fname, ParamsEdited* pedited)
             assignFromKeyfile(keyFile, "Locrgb", "Green", pedited, localwb.green, pedited->localwb.green);
             assignFromKeyfile(keyFile, "Locrgb", "Equal", pedited, localwb.equal, pedited->localwb.equal);
             assignFromKeyfile(keyFile, "Locrgb", "Gamma", pedited, localwb.gamma, pedited->localwb.gamma);
+            assignFromKeyfile(keyFile, "Locrgb", "Autotemp", pedited, localwb.autotemp, pedited->localwb.autotemp);
+            assignFromKeyfile(keyFile, "Locrgb", "Autogreen", pedited, localwb.autogreen, pedited->localwb.autogreen);
+            assignFromKeyfile(keyFile, "Locrgb", "Autoequal", pedited, localwb.autoequal, pedited->localwb.autoequal);
+            assignFromKeyfile(keyFile, "Locrgb", "Autocat02", pedited, localwb.autocat02, pedited->localwb.autocat02);
+            assignFromKeyfile(keyFile, "Locrgb", "Autoytint", pedited, localwb.autoytint, pedited->localwb.autoytint);
 
         }
 

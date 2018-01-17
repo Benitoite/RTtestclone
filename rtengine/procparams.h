@@ -938,6 +938,11 @@ struct LocrgbParams {
     double temp;
     double green;
     double equal;
+    bool          autotemp;
+    bool          autogreen;
+    bool          autoequal;
+    bool          autocat02;
+    bool          autoytint;
 
 
     LocrgbParams();

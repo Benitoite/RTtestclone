@@ -583,8 +583,89 @@ void ImProcCoordinator::updatePreviewImage(int todo, Crop* cropCall)
 
         //   if (params.localwb.enabled && params.localwb.expwb) {
         if (params.localwb.enabled) {
+            if (alorgbListener && params.localwb.autotemp) {
+                alorgbListener->WBTChanged((double) params.wb.temperature);
+                params.localwb.temp = params.wb.temperature;
+                //  params.localwb.equal = params.wb.equal;
+            }
+
+            if (alorgbListener && params.localwb.autogreen) {
+                alorgbListener->WBGChanged(params.wb.green);
+                params.localwb.green = params.wb.green;
+            }
+
+            if (alorgbListener && params.localwb.autoequal) {
+                alorgbListener->WBEChanged(params.wb.equal);
+                params.localwb.equal = params.wb.equal;
+            }
+
             currWBloc = ColorTemp(params.localwb.temp, params.localwb.green, params.localwb.equal, "Custom");
             wbm = 0;
+
+            int catlo0 = 100;
+
+            if (params.localwb.temp < 4000  || params.localwb.temp > 20000) { //20000 arbitrary value - no test enough
+                if (ada < 5.f) {
+                    catlo0 = 1;
+                } else if (ada < 10.f) {
+                    catlo0 = 2;
+                } else if (ada < 15.f) {
+                    catlo0 = 3;
+                } else if (ada < 30.f) {
+                    catlo0 = 5;
+                } else if (ada < 100.f) {
+                    catlo0 = 50;
+                } else if (ada < 300.f) {
+                    catlo0 = 80;
+                } else if (ada < 500.f) {
+                    catlo0 = 90;
+                } else if (ada < 3000.f) {
+                    catlo0 = 95;
+                }
+            } else {
+                if (ada < 5.f) {
+                    catlo0 = 30;
+                } else if (ada < 10.f) {
+                    catlo0 = 50;
+                } else if (ada < 30.f) {
+                    catlo0 = 60;
+                } else if (ada < 100.f) {
+                    catlo0 = 70;
+                } else if (ada < 300.f) {
+                    catlo0 = 80;
+                } else if (ada < 500.f) {
+                    catlo0 = 90;
+                } else if (ada < 1000.f) {
+                    catlo0 = 95;
+                }
+            }
+
+            if (alorgbListener  && params.localwb.autocat02) {
+                alorgbListener->cat02catChanged(catlo0);
+                params.localwb.cat02 = cat0;
+            }
+
+
+            double greelo0 = 1.0;
+            float Treflo = (float) params.localwb.temp;
+
+            if (Treflo > 8000.f) {
+                Treflo = 8000.f;
+            }
+
+            if (Treflo < 4000.f) {
+                Treflo = 4000.f;
+            }
+
+            float dTlo = fabs((Treflo - 5000.) / 1000.f);
+            float dGlo = params.localwb.green - 1.;
+            greelo0 = 1.f + 0.00055f * dTlo * dGlo * params.localwb.cat02;//empirical formula
+
+            if (alorgbListener  && params.localwb.autoytint) {
+                alorgbListener->cat02greeChanged(greelo0);
+                params.localwb.ytint = greelo0;
+            }
+
 
             imageoriginal = new Imagefloat(pW, pH);
             imagetransformed = new Imagefloat(pW, pH);

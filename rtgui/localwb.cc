@@ -266,8 +266,25 @@ Localwb::Localwb() :
     transit->set_tooltip_text(M("TP_LOCALLAB_TRANSIT_TOOLTIP"));
     transit->setAdjusterListener(this);
 
+    if (cat02->delay < options.adjusterMaxDelay) {
+        cat02->delay = options.adjusterMaxDelay;
+    }
+
+    cat02->throwOnButtonRelease();
+    cat02->addAutoButton(M("TP_CAT02_DEGREE_AUTO_TOOLTIP"));
+    cat02->set_tooltip_markup(M("TP_CAT02_CAT_TOOLTIP"));
+
     cat02->set_tooltip_text(M("TP_LOCAL_CAT_TOOLTIP"));
     cat02->setAdjusterListener(this);
+
+    if (ytint->delay < options.adjusterMaxDelay) {
+        ytint->delay = options.adjusterMaxDelay;
+    }
+
+    ytint->throwOnButtonRelease();
+    ytint->addAutoButton(M("TP_CAT02_DEGREE_AUTO_TOOLTIP"));
+    ytint->set_tooltip_markup(M("TP_CAT02_CAT_TOOLTIP"));
+
     ytint->set_tooltip_text(M("TP_LOCAL_CATYTINT_TOOLTIP"));
     ytint->setAdjusterListener(this);
 
@@ -310,10 +327,10 @@ Localwb::Localwb() :
 //    qualbox->pack_start (*qualityMethod);
 //    shapeBox->pack_start (*qualbox);
     shapeBox->pack_start(*transit);
-	
+
     cat02Frame->set_label_align(0.025, 0.5);
     ToolParamBlock* const catBox = Gtk::manage(new ToolParamBlock());
-	
+
     catBox->pack_start(*cat02);
     catBox->pack_start(*ytint);
     cat02Frame->add(*catBox);
@@ -368,9 +385,39 @@ Localwb::Localwb() :
     equal = Gtk::manage(new Adjuster(M("TP_WBALANCE_EQBLUERED"), MINEQUAL, MAXEQUAL, 0.001, 1.0, iblueredL, iblueredR));
     wbshaMethod->show();
     wbcamMethod->show();
+
+    if (temp->delay < options.adjusterMaxDelay) {
+        temp->delay = options.adjusterMaxDelay;
+    }
+
+    temp->throwOnButtonRelease();
+    temp->addAutoButton(M("TP_LOC_DEGREE_AUTO_TOOLTIP"));
+//   temp->set_tooltip_markup(M("TP_CAT02_CAT_TOOLTIP"));
+
     temp->show();
+
+    if (green->delay < options.adjusterMaxDelay) {
+        green->delay = options.adjusterMaxDelay;
+    }
+
+    green->throwOnButtonRelease();
+    green->addAutoButton(M("TP_LOC_DEGREE_AUTO_TOOLTIP"));
+    //  green->set_tooltip_markup(M("TP_CAT02_CAT_TOOLTIP"));
+
     green->show();
+
+    if (equal->delay < options.adjusterMaxDelay) {
+        equal->delay = options.adjusterMaxDelay;
+    }
+
+    equal->throwOnButtonRelease();
+    equal->addAutoButton(M("TP_LOC_DEGREE_AUTO_TOOLTIP"));
+//   equal->set_tooltip_markup(M("TP_LOC_CAT_TOOLTIP"));
+
+
     equal->show();
+
+
 //  wbBox->pack_start (*spotbox);
 //    wbBox->pack_start (*wbMethod);
 //    wbBox->pack_start (*ttLabels);
@@ -1020,12 +1067,19 @@ void Localwb::read(const ProcParams* pp, const ParamsEdited* pedited)
         lumaref->setEditedState(pedited->localwb.lumaref ? Edited : UnEdited);
         transit->setEditedState(pedited->localwb.transit ? Edited : UnEdited);
         cat02->setEditedState(pedited->localwb.cat02 ? Edited : UnEdited);
+        cat02->setAutoInconsistent(multiImage && !pedited->localwb.autocat02);
         expwb->set_inconsistent(!pedited->localwb.expwb);
         ytint->setEditedState(pedited->localwb.ytint ? Edited : UnEdited);
+        ytint->setAutoInconsistent(multiImage && !pedited->localwb.autoytint);
 
         temp->setEditedState(pedited->localwb.temp ? Edited : UnEdited);
+        temp->setAutoInconsistent(multiImage && !pedited->localwb.autotemp);
+
         green->setEditedState(pedited->localwb.green ? Edited : UnEdited);
+        green->setAutoInconsistent(multiImage && !pedited->localwb.autogreen);
+
         equal->setEditedState(pedited->localwb.equal ? Edited : UnEdited);
+        equal->setAutoInconsistent(multiImage && !pedited->localwb.autoequal);
 
         if (!pedited->localwb.Smethod) {
             Smethod->set_active_text(M("GENERAL_UNCHANGED"));
@@ -1049,6 +1103,11 @@ void Localwb::read(const ProcParams* pp, const ParamsEdited* pedited)
     }
 
     setEnabled(pp->localwb.enabled);
+    lastAutotemp = pp->localwb.autotemp;
+    lastAutogreen = pp->localwb.autogreen;
+    lastAutoequal = pp->localwb.autoequal;
+    lastAutocat02 = pp->localwb.autocat02;
+    lastAutoytint = pp->localwb.autoytint;
 
     gammaconn.block(true);
     gamma->set_active(pp->localwb.gamma);
@@ -1073,7 +1132,9 @@ void Localwb::read(const ProcParams* pp, const ParamsEdited* pedited)
     proxi->setValue(pp->localwb.proxi);
     transit->setValue(pp->localwb.transit);
     cat02->setValue(pp->localwb.cat02);
+    cat02->setAutoValue(pp->localwb.autocat02);
     ytint->setValue(pp->localwb.ytint);
+    ytint->setAutoValue(pp->localwb.autoytint);
     nbspot->setValue(pp->localwb.nbspot);
     anbspot->setValue(pp->localwb.anbspot);
     retrab->setValue(pp->localwb.retrab);
@@ -1086,8 +1147,14 @@ void Localwb::read(const ProcParams* pp, const ParamsEdited* pedited)
     expwb->setEnabled(true);
 
     temp->setValue(pp->localwb.temp);
+    temp->setAutoValue(pp->localwb.autotemp);
+
     green->setValue(pp->localwb.green);
+    green->setAutoValue(pp->localwb.autogreen);
+
     equal->setValue(pp->localwb.equal);
+    equal->setAutoValue(pp->localwb.autoequal);
+
     updateGeometry(pp->localwb.centerX, pp->localwb.centerY, pp->localwb.circrad, pp->localwb.locY, pp->localwb.degree,  pp->localwb.locX, pp->localwb.locYT, pp->localwb.locXL);
 
     if (pp->localwb.Smethod == "IND") {
@@ -1216,7 +1283,9 @@ void Localwb::write(ProcParams* pp, ParamsEdited* pedited)
     pp->localwb.thres = thres->getIntValue();
     pp->localwb.transit = transit->getIntValue();
     pp->localwb.cat02 = cat02->getIntValue();
+    pp->localwb.autocat02  = cat02->getAutoValue();
     pp->localwb.ytint = ytint->getValue();
+    pp->localwb.autoytint  = ytint->getAutoValue();
     pp->localwb.nbspot = nbspot->getIntValue();
     pp->localwb.anbspot = anbspot->getIntValue();
     pp->localwb.gamma = gamma->get_active();
@@ -1225,8 +1294,13 @@ void Localwb::write(ProcParams* pp, ParamsEdited* pedited)
     pp->localwb.chromaref = chromaref->getValue();
     pp->localwb.lumaref = lumaref->getValue();
     pp->localwb.temp = temp->getValue();
+    pp->localwb.autotemp  = temp->getAutoValue();
+
     pp->localwb.green = green->getValue();
+    pp->localwb.autogreen  = green->getAutoValue();
+
     pp->localwb.equal = equal->getValue();
+    pp->localwb.autoequal  = equal->getAutoValue();
 
     pp->localwb.enabled       = getEnabled();
     pp->localwb.expwb      = expwb->getEnabled();
@@ -1251,7 +1325,9 @@ void Localwb::write(ProcParams* pp, ParamsEdited* pedited)
         pedited->localwb.sensi = sensi->getEditedState();
         pedited->localwb.transit = transit->getEditedState();
         pedited->localwb.cat02 = cat02->getEditedState();
+        pedited->localwb.autocat02  = !cat02->getAutoInconsistent();
         pedited->localwb.ytint = ytint->getEditedState();
+        pedited->localwb.autoytint  = !ytint->getAutoInconsistent();
         pedited->localwb.nbspot = nbspot->getEditedState();
         pedited->localwb.anbspot = anbspot->getEditedState();
         pedited->localwb.retrab = retrab->getEditedState();
@@ -1262,8 +1338,12 @@ void Localwb::write(ProcParams* pp, ParamsEdited* pedited)
 
 
         pedited->localwb.temp    = temp->getEditedState();
+        pedited->localwb.autotemp  = !temp->getAutoInconsistent();
+
         pedited->localwb.green    = green->getEditedState();
+        pedited->localwb.autogreen  = !green->getAutoInconsistent();
         pedited->localwb.equal    = equal->getEditedState();
+        pedited->localwb.autoequal  = !equal->getAutoInconsistent();
 
         pedited->localwb.enabled         = !get_inconsistent();
         pedited->localwb.expwb     = !expwb->get_inconsistent();
@@ -1327,6 +1407,115 @@ void Localwb::write(ProcParams* pp, ParamsEdited* pedited)
 
 
 }
+
+void Localwb::adjusterAutoToggled(Adjuster* a, bool newval)
+{
+
+    if (multiImage) {
+        if (temp->getAutoInconsistent()) {
+            temp->setAutoInconsistent(false);
+            temp->setAutoValue(false);
+        } else if (lastAutotemp) {
+            temp->setAutoInconsistent(true);
+        }
+
+        lastAutotemp = temp->getAutoValue();
+
+        if (green->getAutoInconsistent()) {
+            green->setAutoInconsistent(false);
+            green->setAutoValue(false);
+        } else if (lastAutogreen) {
+            green->setAutoInconsistent(true);
+        }
+
+        lastAutogreen = green->getAutoValue();
+
+        if (equal->getAutoInconsistent()) {
+            equal->setAutoInconsistent(false);
+            equal->setAutoValue(false);
+        } else if (lastAutoequal) {
+            equal->setAutoInconsistent(true);
+        }
+
+        lastAutoequal = equal->getAutoValue();
+
+        if (cat02->getAutoInconsistent()) {
+            cat02->setAutoInconsistent(false);
+            cat02->setAutoValue(false);
+        } else if (lastAutocat02) {
+            cat02->setAutoInconsistent(true);
+        }
+
+        lastAutocat02 = cat02->getAutoValue();
+
+        if (ytint->getAutoInconsistent()) {
+            ytint->setAutoInconsistent(false);
+            ytint->setAutoValue(false);
+        } else if (lastAutoytint) {
+            ytint->setAutoInconsistent(true);
+        }
+
+        lastAutoytint = ytint->getAutoValue();
+
+    }
+
+    if (listener && (multiImage || getEnabled())) {
+
+        if (a == temp) {
+            if (temp->getAutoInconsistent()) {
+                listener->panelChanged(EvlocalwbAutotemp, M("GENERAL_UNCHANGED"));
+            } else if (temp->getAutoValue()) {
+                listener->panelChanged(EvlocalwbAutotemp, M("GENERAL_ENABLED"));
+            } else {
+                listener->panelChanged(EvlocalwbAutotemp, M("GENERAL_DISABLED"));
+            }
+        }
+
+        if (a == green) {
+            if (green->getAutoInconsistent()) {
+                listener->panelChanged(EvlocalwbAutogreen, M("GENERAL_UNCHANGED"));
+            } else if (green->getAutoValue()) {
+                listener->panelChanged(EvlocalwbAutogreen, M("GENERAL_ENABLED"));
+            } else {
+                listener->panelChanged(EvlocalwbAutogreen, M("GENERAL_DISABLED"));
+            }
+        }
+
+        if (a == equal) {
+            if (equal->getAutoInconsistent()) {
+                listener->panelChanged(EvlocalwbAutoequal, M("GENERAL_UNCHANGED"));
+            } else if (equal->getAutoValue()) {
+                listener->panelChanged(EvlocalwbAutoequal, M("GENERAL_ENABLED"));
+            } else {
+                listener->panelChanged(EvlocalwbAutoequal, M("GENERAL_DISABLED"));
+            }
+        }
+
+        if (a == cat02) {
+            if (cat02->getAutoInconsistent()) {
+                listener->panelChanged(EvlocalwbAutocat02, M("GENERAL_UNCHANGED"));
+            } else if (cat02->getAutoValue()) {
+                listener->panelChanged(EvlocalwbAutocat02, M("GENERAL_ENABLED"));
+            } else {
+                listener->panelChanged(EvlocalwbAutocat02, M("GENERAL_DISABLED"));
+            }
+        }
+
+        if (a == ytint) {
+            if (ytint->getAutoInconsistent()) {
+                listener->panelChanged(EvlocalwbAutoytint, M("GENERAL_UNCHANGED"));
+            } else if (ytint->getAutoValue()) {
+                listener->panelChanged(EvlocalwbAutoytint, M("GENERAL_ENABLED"));
+            } else {
+                listener->panelChanged(EvlocalwbAutoytint, M("GENERAL_DISABLED"));
+            }
+        }
+
+
+    }
+}
+
+
 
 void Localwb::qualityMethodChanged()
 {
@@ -1421,15 +1610,118 @@ bool Localwb::localwbComputed_()
 
 }
 
-void Localwb::WBChanged(double temperature, double greenVal, int wbauto)
+void Localwb::cat02catChanged(int cat)
 {
-    //  printf ("wbauto=%i\n", wbauto);
-    next_temp = temperature;
-    next_green = greenVal;
-    next_wbauto = wbauto;
+    nextCadap = cat;
 
-    g_idle_add(localwbChangedUI, this);
+    const auto func = [](gpointer data) -> gboolean {
+        static_cast<Localwb*>(data)->cat02catComputed_();
+        return FALSE;
+    };
+
+    idle_register.add(func, this);
 }
+
+bool Localwb::cat02catComputed_()
+{
+
+    disableListener();
+    cat02->setValue(nextCadap);
+    enableListener();
+
+    return false;
+}
+
+void Localwb::cat02greeChanged(double ytin)
+{
+    nextGree = ytin;
+
+    const auto func = [](gpointer data) -> gboolean {
+        static_cast<Localwb*>(data)->cat02greeComputed_();
+        return FALSE;
+    };
+
+    idle_register.add(func, this);
+}
+
+bool Localwb::cat02greeComputed_()
+{
+
+    disableListener();
+    ytint->setValue(nextGree);
+    enableListener();
+
+    return false;
+}
+
+
+
+void Localwb::WBTChanged(double temperature)
+{
+    next_temp = temperature;
+
+    const auto func = [](gpointer data) -> gboolean {
+        static_cast<Localwb*>(data)->WBTComputed_();
+        return FALSE;
+    };
+
+    idle_register.add(func, this);
+}
+
+bool Localwb::WBTComputed_()
+{
+
+    disableListener();
+    temp->setValue(next_temp);
+    enableListener();
+
+    return false;
+}
+
+void Localwb::WBGChanged(double green)
+{
+    next_green = green;
+
+    const auto func = [](gpointer data) -> gboolean {
+        static_cast<Localwb*>(data)->WBGComputed_();
+        return FALSE;
+    };
+
+    idle_register.add(func, this);
+}
+
+bool Localwb::WBGComputed_()
+{
+
+    disableListener();
+    green->setValue(next_green);
+    enableListener();
+
+    return false;
+}
+
+void Localwb::WBEChanged(double equal)
+{
+    next_equal = equal;
+
+    const auto func = [](gpointer data) -> gboolean {
+        static_cast<Localwb*>(data)->WBEComputed_();
+        return FALSE;
+    };
+
+    idle_register.add(func, this);
+}
+
+bool Localwb::WBEComputed_()
+{
+
+    disableListener();
+    equal->setValue(next_equal);
+    enableListener();
+
+    return false;
+}
+
 
 void Localwb::SmethodChanged()
 {

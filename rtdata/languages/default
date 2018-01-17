@@ -744,6 +744,11 @@ HISTORY_MSG_528;Cat02 auto adaptation
 HISTORY_MSG_529;Cat02 Y tint
 HISTORY_MSG_530;Cat02 auto Y tint
 HISTORY_MSG_531;WB local - cat02 Y tint
+HISTORY_MSG_532;WB local - auto temp
+HISTORY_MSG_533;WB local - auto tint
+HISTORY_MSG_534;WB local - auto equal
+HISTORY_MSG_535;WB local - auto cat02
+HISTORY_MSG_536;WB local - auto Ytint
 HISTORY_MSG_COLORTONING_LABGRID_VALUE;CT - Color correction
 HISTORY_MSG_LOCALCONTRAST_AMOUNT;Local Contrast - Amount
 HISTORY_MSG_LOCALCONTRAST_DARKNESS;Local Contrast - Darkness
@@ -1327,6 +1332,7 @@ TP_CACORRECTION_RED;Red
 TP_CAT02_LABEL;CAT02 adaptation
 TP_CAT02_SLI;CAT02 adaptation level
 TP_CAT02_GREE;Y Tint (Viewing conditions)
+TP_LOC_DEGREE_AUTO_TOOLTIP;If the check-box is checked, Rawtherapee uses WB general parameters:\nTemperature, Tint, Blue/Red equalizer.\nUnchecked the parameters you want to change. 
 TP_CAT02_DEGREE_AUTO_TOOLTIP;If the check-box is checked, RawTherapee calculates an optimum value, which is then used by CAT02\nTo set the value manually, uncheck the check-box first.
 TP_CAT02_CAT_TOOLTIP;Performs a chromatic adaptation, between the chosen temperature and 5000K.\n80% to 100% should satisfy the majority of cases.\nIf the absolute luminance conditions (scene or viewing) are very low, you can lower the value till 1.\nDisabled when Ciecam02 enabled.
 TP_CAT02_GREE_TOOLTIP;Adapts Y tint in function of chromatic adaptation level.\nDisabled when Ciecam02 enabled.
