@@ -37,7 +37,10 @@ protected:
     bool lastAutogree;
     IdleRegister idle_register;
     int nextCadap;
+    int nextciecam;
     double nextGree;
+    Gtk::Label* labena;
+    Gtk::Label* labdis;
 
 public:
 
@@ -52,7 +55,7 @@ public:
     void adjusterAutoToggled(Adjuster* a, bool newval);
 
     void enabledChanged();
-    void cat02catChanged(int cat);
+    void cat02catChanged(int cat, int ciecam);
     bool cat02catComputed_();
     void cat02greeChanged(double gree);
     bool cat02greeComputed_();

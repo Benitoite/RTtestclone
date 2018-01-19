@@ -51,12 +51,19 @@ Cat02adap::Cat02adap() : FoldableToolPanel(this, "cat02adap", M("TP_CAT02_LABEL"
     gree->addAutoButton(M("TP_CAT02_DEGREE_AUTO_TOOLTIP"));
     gree->set_tooltip_markup(M("TP_CAT02_GREE_TOOLTIP"));
 
+    labena = Gtk::manage(new Gtk::Label(M("TP_CAT02_CIECAM_ENA")));
+    labdis = Gtk::manage(new Gtk::Label(M("TP_CAT02_CIECAM_DISA")));
 
     gree->setAdjusterListener(this);
 
     pack_start(*gree);
 
+    pack_start(*labena);
+    pack_start(*labdis);
+
+
     show_all_children();
+    labdis->hide();
 }
 
 void Cat02adap::read(const ProcParams* pp, const ParamsEdited* pedited)
@@ -187,9 +194,10 @@ void Cat02adap::adjusterAutoToggled(Adjuster* a, bool newval)
     }
 }
 
-void Cat02adap::cat02catChanged(int cat)
+void Cat02adap::cat02catChanged(int cat, int ciecam)
 {
     nextCadap = cat;
+    nextciecam = ciecam;
 
     const auto func = [](gpointer data) -> gboolean {
         static_cast<Cat02adap*>(data)->cat02catComputed_();
@@ -204,6 +212,16 @@ bool Cat02adap::cat02catComputed_()
 
     disableListener();
     cat02->setValue(nextCadap);
+    labdis->hide();
+
+    if (nextciecam == 1) {
+        labena->show();
+        labdis->hide();
+    } else {
+        labena->hide();
+        labdis->show();
+    }
+
     enableListener();
 
     return false;

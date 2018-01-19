@@ -1332,6 +1332,8 @@ TP_CACORRECTION_RED;Red
 TP_CAT02_LABEL;CAT02 adaptation
 TP_CAT02_SLI;CAT02 adaptation level
 TP_CAT02_GREE;Y Tint (Viewing conditions)
+TP_CAT02_CIECAM_ENA;Ciecam enabled
+TP_CAT02_CIECAM_DISA;Ciecam disabled
 TP_LOC_DEGREE_AUTO_TOOLTIP;If the check-box is checked, Rawtherapee uses WB general parameters:\nTemperature, Tint, Blue/Red equalizer.\nUnchecked the parameters you want to change. 
 TP_CAT02_DEGREE_AUTO_TOOLTIP;If the check-box is checked, RawTherapee calculates an optimum value, which is then used by CAT02\nTo set the value manually, uncheck the check-box first.
 TP_CAT02_CAT_TOOLTIP;Performs a chromatic adaptation, between the chosen temperature and 5000K.\n80% to 100% should satisfy the majority of cases.\nIf the absolute luminance conditions (scene or viewing) are very low, you can lower the value till 1.\nDisabled when Ciecam02 enabled.

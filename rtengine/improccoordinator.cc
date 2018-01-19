@@ -535,7 +535,7 @@ void ImProcCoordinator::updatePreviewImage(int todo, Crop* cropCall)
         }
 
         if (acatListener  && params.cat02adap.autocat02) {
-            acatListener->cat02catChanged(cat0);
+            acatListener->cat02catChanged(cat0, 0);
             params.cat02adap.cat02 = cat0;
         }
 
@@ -558,6 +558,16 @@ void ImProcCoordinator::updatePreviewImage(int todo, Crop* cropCall)
         if (acatListener  && params.cat02adap.autogree) {
             acatListener->cat02greeChanged(gree0);
             params.cat02adap.gree = gree0;
+        }
+		
+		
+        if (acatListener  && params.colorappearance.enabled) {
+            acatListener->cat02catChanged(0, 1);
+			
+            params.cat02adap.cat02 = cat0;
+            acatListener->cat02greeChanged(1.);
+            params.cat02adap.gree = gree0;
+			
         }
 
 

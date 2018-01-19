@@ -310,7 +310,7 @@ class AutocatListener
 {
 public :
     virtual ~AutocatListener() {}
-    virtual void cat02catChanged(int cat) {}
+    virtual void cat02catChanged(int cat, int ciecam) {}
     virtual void cat02greeChanged(double gree) {}
 
 
