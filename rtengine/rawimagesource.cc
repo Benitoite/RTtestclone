@@ -765,6 +765,7 @@ static void ciecamcat02loc_float(LabImage* lab, LabImage* dest, int tempa, doubl
     {
 #ifdef __SSE2__
         // one line buffer per channel and thread
+        //we can suppress thes buffer if no threatment between => and <=
         float Jbuffer[bufferLength] ALIGNED16;
         float Cbuffer[bufferLength] ALIGNED16;
         float hbuffer[bufferLength] ALIGNED16;
@@ -866,16 +867,9 @@ static void ciecamcat02loc_float(LabImage* lab, LabImage* dest, int tempa, doubl
                 Mpro = M;
                 spro = s;
                 /*
-                                // we cannot have all algorithms with all chroma curves
-                                if (alg == 0) {
-                                    // Jpro = CAMBrightCurveJ[Jpro * 327.68f]; //lightness CIECAM02 + contrast
-                                    Qpro = QproFactor * sqrtf(Jpro);
-                                    float Cp = (spro * spro * Qpro) / (1000000.f);
-                                    Cpro = Cp * 100.f;
-                                    float sres;
-                                    Ciecam02::curvecolorfloat(chr, Cp, sres, 1.8f);
-                                    Color::skinredfloat(Jpro, hpro, sres, Cp, 55.f, 30.f, 1, rstprotection, 100.f, Cpro);
-                                }
+                //we can here make some adjustements if necessary
+                //On J or C
+
                 */
 
 
@@ -887,7 +881,7 @@ static void ciecamcat02loc_float(LabImage* lab, LabImage* dest, int tempa, doubl
                 h = hpro;
                 s = spro;
 
-                if (LabPassOne) {
+                if (LabPassOne) {//always true, but I keep
 #ifdef __SSE2__
                     // write to line buffers
                     Jbuffer[j] = J;
@@ -968,6 +962,7 @@ void RawImageSource::getImage_local(int begx, int begy, int yEn, int xEn, int cx
     // compute channel multipliers
     double r, g, b;
     float rm, gm, bm;
+    float gain;
 
     if (ctemploc.getTemp() < 0) {
         // no white balance, ie revert the pre-process white balance to restore original unbalanced raw camera color
@@ -987,7 +982,7 @@ void RawImageSource::getImage_local(int begx, int begy, int yEn, int xEn, int cx
         float new_scale_mul[4];
         bool isMono = (ri->getSensorType() == ST_FUJI_XTRANS && raw.xtranssensor.method == RAWParams::XTransSensor::getMethodString(RAWParams::XTransSensor::Method::MONO))
                       || (ri->getSensorType() == ST_BAYER && raw.bayersensor.method == RAWParams::BayerSensor::getMethodString(RAWParams::BayerSensor::Method::MONO));
-        float gain = calculate_scale_mul(new_scale_mul, new_pre_mul, c_white, cblacksom, isMono, ri->get_colors());
+        gain = calculate_scale_mul(new_scale_mul, new_pre_mul, c_white, cblacksom, isMono, ri->get_colors());
 
         rm = new_scale_mul[0] / scale_mul[0] * gain;
         gm = new_scale_mul[1] / scale_mul[1] * gain;
@@ -1239,7 +1234,7 @@ void RawImageSource::getImage_local(int begx, int begy, int yEn, int xEn, int cx
     }
 
     if (wbl.cat02 > 1  && !cap.enabled) { // different place from getimage to see if there is differences
-//	printf("catLocal tint=%f \n", wbl.ytint);
+//  printf("catLocal tint=%f \n", wbl.ytint);
         LabImage *bufcat02 = nullptr;
         bufcat02 = new LabImage(image->getWidth(), image->getHeight());
         LabImage *bufcat02fin = nullptr;
@@ -1283,7 +1278,7 @@ void RawImageSource::getImage_local(int begx, int begy, int yEn, int xEn, int cx
             for (int x = 0; x < image->getWidth(); x++) {
                 float X, Y, Z;
                 float LR, aR, bR;
-                Color::rgbxyz(image->r(y, x), image->g(y, x), image->b(y, x), X, Y, Z, wp);
+                Color::rgbxyz(gain * image->r(y, x), gain * image->g(y, x), gain * image->b(y, x), X, Y, Z, wp);
                 Color::XYZ2Lab(X, Y, Z, LR, aR, bR);
                 bufcat02->L[y][x] = LR;
                 bufcat02->a[y][x] = aR;
@@ -1305,6 +1300,10 @@ void RawImageSource::getImage_local(int begx, int begy, int yEn, int xEn, int cx
 
                 Color::Lab2XYZ(LL, aa, bb, XR, YR, ZR);
                 Color::xyz2rgb(XR, YR, ZR, image->r(y, x), image->g(y, x), image->b(y, x), wip);
+                image->r(y, x) /= gain;
+                image->g(y, x) /= gain;
+                image->b(y, x) /= gain;
+
             }
 
         delete bufcat02;
@@ -1370,6 +1369,7 @@ void RawImageSource::getImage(const ColorTemp &ctemp, int tran, Imagefloat* imag
     // compute channel multipliers
     double r, g, b;
     float rm, gm, bm;
+    float gain;
 
     if (ctemp.getTemp() < 0) {
         // no white balance, ie revert the pre-process white balance to restore original unbalanced raw camera color
@@ -1390,7 +1390,7 @@ void RawImageSource::getImage(const ColorTemp &ctemp, int tran, Imagefloat* imag
 
         bool isMono = (ri->getSensorType() == ST_FUJI_XTRANS && raw.xtranssensor.method == RAWParams::XTransSensor::getMethodString(RAWParams::XTransSensor::Method::MONO))
                       || (ri->getSensorType() == ST_BAYER && raw.bayersensor.method == RAWParams::BayerSensor::getMethodString(RAWParams::BayerSensor::Method::MONO));
-        float gain = calculate_scale_mul(new_scale_mul, new_pre_mul, c_white, cblacksom, isMono, ri->get_colors());
+        gain = calculate_scale_mul(new_scale_mul, new_pre_mul, c_white, cblacksom, isMono, ri->get_colors());
         rm = new_scale_mul[0] / scale_mul[0] * gain;
         gm = new_scale_mul[1] / scale_mul[1] * gain;
         bm = new_scale_mul[2] / scale_mul[2] * gain;
@@ -1631,7 +1631,7 @@ void RawImageSource::getImage(const ColorTemp &ctemp, int tran, Imagefloat* imag
         LabImage *bufcat02fin = nullptr;
         bufcat02fin = new LabImage(image->getWidth(), image->getHeight());
         TMatrix wiprof = ICCStore::getInstance()->workingSpaceInverseMatrix("WideGamut");//Widegamut gives generaly best results than Prophoto (blue) or sRGBD65
-        TMatrix wprof = ICCStore::getInstance()->workingSpaceMatrix("WideGamut");//cmp.working
+        TMatrix wprof = ICCStore::getInstance()->workingSpaceMatrix("WideGamut");
 
         double wip[3][3] = {
             {wiprof[0][0], wiprof[0][1], wiprof[0][2]},
@@ -1669,7 +1669,9 @@ void RawImageSource::getImage(const ColorTemp &ctemp, int tran, Imagefloat* imag
             for (int x = 0; x < image->getWidth(); x++) {
                 float X, Y, Z;
                 float LR, aR, bR;
-                Color::rgbxyz(image->r(y, x), image->g(y, x), image->b(y, x), X, Y, Z, wp);
+                //Color::gammatab_srgb[ try with but not good results
+				// I add gain to best results
+                Color::rgbxyz(gain * image->r(y, x), gain * image->g(y, x), gain * image->b(y, x), X, Y, Z, wp);
                 Color::XYZ2Lab(X, Y, Z, LR, aR, bR);
                 bufcat02->L[y][x] = LR;
                 bufcat02->a[y][x] = aR;
@@ -1691,6 +1693,13 @@ void RawImageSource::getImage(const ColorTemp &ctemp, int tran, Imagefloat* imag
 
                 Color::Lab2XYZ(LL, aa, bb, XR, YR, ZR);
                 Color::xyz2rgb(XR, YR, ZR, image->r(y, x), image->g(y, x), image->b(y, x), wip);
+                //image->r(y, x) = Color::igammatab_srgb[image->r(y, x)];
+                //image->g(y, x) = Color::igammatab_srgb[image->g(y, x)];
+                //image->b(y, x) = Color::igammatab_srgb[image->b(y, x)];
+                image->r(y, x) /= gain;
+                image->g(y, x) /= gain;
+                image->b(y, x) /= gain;
+
             }
 
         delete bufcat02;
