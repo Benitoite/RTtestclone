@@ -568,8 +568,6 @@ void Options::setDefaults ()
     rtSettings.ed_detec = 3; //between 2 and 10
     rtSettings.ed_detecStr = 1.3; //not use
     rtSettings.ed_low = 15.; //between 5 to 40
-    rtSettings.ed_lipinfl = 0.8; //between 0.5 to 0.9
-    rtSettings.ed_lipampl = 1.1; //between 1 and 2
 
 //locallab locrgb
     rtSettings.nspot = 8;//between 1 and ??
@@ -760,14 +758,6 @@ void Options::readFromFile (Glib::ustring fname)
                     rtSettings.ed_low = keyFile.get_double ("General", "EDLow");
                 }
 
-                if (keyFile.has_key ("General", "EDLipinfl")) {
-                    rtSettings.ed_lipinfl = keyFile.get_double ("General", "EDLipinfl");
-                }
-
-                if (keyFile.has_key ("General", "EDLipampl")) {
-                    rtSettings.ed_lipampl = keyFile.get_double ("General", "EDLipampl");
-                }
-
                 if (keyFile.has_key ("General", "Locdelay")) {
                     rtSettings.locdelay          = keyFile.get_boolean ("General", "Locdelay");
                 }
@@ -783,7 +773,6 @@ void Options::readFromFile (Glib::ustring fname)
                 if (keyFile.has_key ("General", "Reduclow")) {
                     rtSettings.reduclow          = keyFile.get_double ("General", "Reduclow");
                 }
-
             }
 
             if (keyFile.has_group ("External Editor")) {
@@ -1879,9 +1868,6 @@ void Options::saveToFile (Glib::ustring fname)
         keyFile.set_double  ("General", "EDdetec", rtSettings.ed_detec);
         keyFile.set_double  ("General", "EDdetecStr", rtSettings.ed_detecStr);
         keyFile.set_double  ("General", "EDLow", rtSettings.ed_low);
-        keyFile.set_double  ("General", "EDLipinfl", rtSettings.ed_lipinfl);
-        keyFile.set_double  ("General", "EDLipampl", rtSettings.ed_lipampl);
-
         keyFile.set_integer ("General", "Nspot", rtSettings.nspot);
         keyFile.set_boolean ("General", "Locdelay", rtSettings.locdelay);
         keyFile.set_integer ("General", "Cropsleep", rtSettings.cropsleep);
