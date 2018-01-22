@@ -62,6 +62,7 @@ ToolPanelCoordinator::ToolPanelCoordinator (bool batch) : ipc (nullptr), hasChan
     vignetting          = Gtk::manage (new Vignetting ());
     retinex             = Gtk::manage (new Retinex ());
     gradient            = Gtk::manage (new Gradient ());
+    cat02adap           = Gtk::manage(new Cat02adap());
     pcvignette          = Gtk::manage (new PCVignette ());
     perspective         = Gtk::manage (new PerspCorrection ());
     cacorrection        = Gtk::manage (new CACorrection ());
@@ -100,6 +101,7 @@ ToolPanelCoordinator::ToolPanelCoordinator (bool batch) : ipc (nullptr), hasChan
     //     Medium -> High ISO
 
     addPanel (colorPanel, whitebalance);
+    addPanel (colorPanel, cat02adap);
     addPanel (exposurePanel, toneCurve);
     addPanel (colorPanel, vibrance);
     addPanel (colorPanel, chmixer);
@@ -469,6 +471,7 @@ void ToolPanelCoordinator::initImage (rtengine::StagedImageProcessor* ipc_, bool
 
         ipc->setAutoExpListener (toneCurve);
         ipc->setAutoCamListener (colorappearance);
+        ipc->setAutocatListener(cat02adap);
         ipc->setAutoBWListener (blackwhite);
         ipc->setFrameCountListener (bayerprocess);
         ipc->setAutoWBListener (whitebalance);

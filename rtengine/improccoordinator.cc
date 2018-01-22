@@ -88,7 +88,7 @@ ImProcCoordinator::ImProcCoordinator ()
       fw (0), fh (0), tr (0),
       fullw (1), fullh (1),
       pW (-1), pH (-1),
-      plistener (nullptr), imageListener (nullptr), aeListener (nullptr), acListener (nullptr), abwListener (nullptr), awbListener (nullptr), frameCountListener (nullptr), imageTypeListener (nullptr), actListener (nullptr), adnListener (nullptr), awavListener (nullptr), dehaListener (nullptr), hListener (nullptr),
+      plistener (nullptr), imageListener (nullptr), aeListener (nullptr), acListener (nullptr), acatListener(nullptr), abwListener (nullptr), awbListener (nullptr), frameCountListener (nullptr), imageTypeListener (nullptr), actListener (nullptr), adnListener (nullptr), awavListener (nullptr), dehaListener (nullptr), hListener (nullptr),
       resultValid (false), lastOutputProfile ("BADFOOD"), lastOutputIntent (RI__COUNT), lastOutputBPC (false), thread (nullptr), changeSinceLast (0), updaterRunning (false), destroying (false), utili (false), autili (false),
       butili (false), ccutili (false), cclutili (false), clcutili (false), opautili (false), wavcontlutili (false), colourToningSatLimit (0.f), colourToningSatLimitOpacity (0.f)
 {}
@@ -322,7 +322,8 @@ void ImProcCoordinator::updatePreviewImage (int todo, Crop* cropCall)
         // Tells to the ImProcFunctions' tools what is the preview scale, which may lead to some simplifications
         ipf.setScale (scale);
 
-        imgsrc->getImage (currWB, tr, orig_prev, pp, params.toneCurve, params.raw);
+  //      imgsrc->getImage (currWB, tr, orig_prev, pp, params.toneCurve, params.raw);
+        imgsrc->getImage(currWB, tr, orig_prev, pp, params.toneCurve, params.icm, params.raw, params.wb, params.colorappearance, params.cat02adap);
         denoiseInfoStore.valid = false;
         //ColorTemp::CAT02 (orig_prev, &params) ;
         //   printf("orig_prevW=%d\n  scale=%d",orig_prev->width, scale);
@@ -1231,7 +1232,8 @@ void ImProcCoordinator::saveInputICCReference (const Glib::ustring& fname, bool 
         currWB = ColorTemp(); // = no white balance
     }
 
-    imgsrc->getImage (currWB, tr, im, pp, ppar.toneCurve, ppar.raw);
+   // imgsrc->getImage (currWB, tr, im, pp, ppar.toneCurve, ppar.raw);
+    imgsrc->getImage(currWB, tr, im, pp, ppar.toneCurve, ppar.icm, ppar.raw, ppar.wb, ppar.colorappearance, ppar.cat02adap);
     ImProcFunctions ipf (&ppar, true);
 
     if (ipf.needsTransform()) {

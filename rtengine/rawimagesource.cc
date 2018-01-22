@@ -34,6 +34,8 @@
 #include "rt_math.h"
 #include "improcfun.h"
 #include "rtlensfun.h"
+#include "ciecam02.h"
+
 #ifdef _OPENMP
 #include <omp.h>
 #endif
@@ -623,6 +625,668 @@ float calculate_scale_mul(float scale_mul[4], const float pre_mul_[4], const flo
     return gain;
 }
 
+static void ciecamcat02loc_float(LabImage* lab, LabImage* dest, int tempa, double gree, int cat_02, const ColorManagementParams &cmp, const ColorAppearanceParams &cap)
+{
+    BENCHFUN
+#ifdef _DEBUG
+    MyTime t1e, t2e;
+    t1e.set();
+#endif
+    printf("Call ciecamcat02\n");
+    int width = lab->W, height = lab->H;
+    float Yw;
+    Yw = 1.0f;
+    double Xw, Zw;
+    float f = 0.f, nc = 0.f, la, c = 0.f, xw, yw, zw, f2 = 1.f, c2 = 1.f, nc2 = 1.f, yb2;
+    float fl, n, nbb, ncb, aw; //d
+    float xwd, ywd, zwd, xws, yws, zws;
+    //  int alg = 0;
+    double Xwout, Zwout;
+    double Xwsc, Zwsc;
+
+    int tempo;
+    tempo = tempa;
+    ColorTemp::temp2mulxyz(tempa, "Custom", Xw, Zw); //compute white Xw Yw Zw  : white current WB
+    ColorTemp::temp2mulxyz(tempo, "Custom", Xwout, Zwout);
+    ColorTemp::temp2mulxyz(5000, "Custom", Xwsc, Zwsc);
+
+    //viewing condition for surrsrc
+    f  = 1.00f;
+    c  = 0.69f;
+    nc = 1.00f;
+    //viewing condition for surround
+    f2 = 1.0f, c2 = 0.69f, nc2 = 1.0f;
+    //with which algorithm
+    //  alg = 0;
+
+
+    xwd = 100.f * Xwout;
+    zwd = 100.f * Zwout;
+    ywd = 100.f / (float) gree;
+
+    xws = 100.f * Xwsc;
+    zws = 100.f * Zwsc;
+    yws = 100.f;
+
+
+    yb2 = 18;
+    //La and la2 = ambiant luminosity scene and viewing
+    la = 400.f;
+    const float la2 = 400.f;
+    float pilotout;
+    const float pilot = (float)(cat_02) / 100.0f;
+    pilotout = pilot;
+    //  printf("pilot=%f temp=%i\n", pilot, tempo);
+    LUTu hist16J;
+    LUTu hist16Q;
+    float yb = 18.f;
+    float d, dj;
+
+    const int gamu = 0; //(params->colorappearance.gamut) ? 1 : 0;
+    xw = 100.0f * Xw;
+    yw = 100.0f * Yw;
+    zw = 100.0f * Zw;
+    float xw1 = 0.f, yw1 = 0.f, zw1 = 0.f, xw2 = 0.f, yw2 = 0.f, zw2 = 0.f;
+// free temp and green
+    xw1 = xws;
+    yw1 = yws;
+    zw1 = zws;
+    xw2 = xwd;
+    yw2 = ywd;
+    zw2 = zwd;
+
+    float cz, wh, pfl;
+    Ciecam02::initcam1float(gamu, yb, pilot, f, la, xw, yw, zw, n, d, nbb, ncb, cz, aw, wh, pfl, fl, c);
+//   const float chr = 0.f;
+    const float pow1 = pow_F(1.64f - pow_F(0.29f, n), 0.73f);
+    float nj, nbbj, ncbj, czj, awj, flj;
+    Ciecam02::initcam2float(gamu, yb2, pilotout, f2,  la2,  xw2,  yw2,  zw2, nj, dj, nbbj, ncbj, czj, awj, flj);
+    const float reccmcz = 1.f / (c2 * czj);
+    const float pow1n = pow_F(1.64f - pow_F(0.29f, nj), 0.73f);
+//    const float QproFactor = (0.4f / c) * (aw + 4.0f) ;
+    const bool LabPassOne = true;
+
+#ifdef __SSE2__
+    int bufferLength = ((width + 3) / 4) * 4; // bufferLength has to be a multiple of 4
+#endif
+#ifndef _DEBUG
+    #pragma omp parallel
+#endif
+    {
+#ifdef __SSE2__
+        // one line buffer per channel and thread
+        //we can suppress thes buffer if no threatment between => and <=
+        float Jbuffer[bufferLength] ALIGNED16;
+        float Cbuffer[bufferLength] ALIGNED16;
+        float hbuffer[bufferLength] ALIGNED16;
+        float Qbuffer[bufferLength] ALIGNED16;
+        float Mbuffer[bufferLength] ALIGNED16;
+        float sbuffer[bufferLength] ALIGNED16;
+#endif
+#ifndef _DEBUG
+        #pragma omp for schedule(dynamic, 16)
+#endif
+
+        for (int i = 0; i < height; i++) {
+#ifdef __SSE2__
+            // vectorized conversion from Lab to jchqms
+            int k;
+            vfloat x, y, z;
+            vfloat J, C, h, Q, M, s;
+
+            vfloat c655d35 = F2V(655.35f);
+
+            for (k = 0; k < width - 3; k += 4) {
+                Color::Lab2XYZ(LVFU(lab->L[i][k]), LVFU(lab->a[i][k]), LVFU(lab->b[i][k]), x, y, z);
+                x = x / c655d35;
+                y = y / c655d35;
+                z = z / c655d35;
+                Ciecam02::xyz2jchqms_ciecam02float(J, C,  h,
+                                                   Q,  M,  s, F2V(aw), F2V(fl), F2V(wh),
+                                                   x,  y,  z,
+                                                   F2V(xw1), F2V(yw1),  F2V(zw1),
+                                                   F2V(c),  F2V(nc), F2V(pow1), F2V(nbb), F2V(ncb), F2V(pfl), F2V(cz), F2V(d));
+                STVF(Jbuffer[k], J);
+                STVF(Cbuffer[k], C);
+                STVF(hbuffer[k], h);
+                STVF(Qbuffer[k], Q);
+                STVF(Mbuffer[k], M);
+                STVF(sbuffer[k], s);
+            }
+
+            for (; k < width; k++) {
+                float L = lab->L[i][k];
+                float a = lab->a[i][k];
+                float b = lab->b[i][k];
+                float x, y, z;
+                //convert Lab => XYZ
+                Color::Lab2XYZ(L, a, b, x, y, z);
+                x = x / 655.35f;
+                y = y / 655.35f;
+                z = z / 655.35f;
+                float J, C, h, Q, M, s;
+                Ciecam02::xyz2jchqms_ciecam02float(J, C,  h,
+                                                   Q,  M,  s, aw, fl, wh,
+                                                   x,  y,  z,
+                                                   xw1, yw1,  zw1,
+                                                   c,  nc, gamu, pow1, nbb, ncb, pfl, cz, d);
+                Jbuffer[k] = J;
+                Cbuffer[k] = C;
+                hbuffer[k] = h;
+                Qbuffer[k] = Q;
+                Mbuffer[k] = M;
+                sbuffer[k] = s;
+            }
+
+#endif // __SSE2__
+
+            for (int j = 0; j < width; j++) {
+                float J, C, h, Q, M, s;
+
+#ifdef __SSE2__
+                // use precomputed values from above
+                J = Jbuffer[j];
+                C = Cbuffer[j];
+                h = hbuffer[j];
+                Q = Qbuffer[j];
+                M = Mbuffer[j];
+                s = sbuffer[j];
+#else
+                float x, y, z;
+                float L = lab->L[i][j];
+                float a = lab->a[i][j];
+                float b = lab->b[i][j];
+                float x1, y1, z1;
+                //convert Lab => XYZ
+                Color::Lab2XYZ(L, a, b, x1, y1, z1);
+                x = (float)x1 / 655.35f;
+                y = (float)y1 / 655.35f;
+                z = (float)z1 / 655.35f;
+                //process source==> normal
+                Ciecam02::xyz2jchqms_ciecam02float(J, C,  h,
+                                                   Q,  M,  s, aw, fl, wh,
+                                                   x,  y,  z,
+                                                   xw1, yw1,  zw1,
+                                                   c,  nc, gamu, pow1, nbb, ncb, pfl, cz, d);
+#endif
+                float Jpro, Cpro, hpro, Qpro, Mpro, spro;
+                Jpro = J;
+                Cpro = C;
+                hpro = h;
+                Qpro = Q;
+                Mpro = M;
+                spro = s;
+                /*
+                //we can here make some adjustements if necessary
+                //On J or C
+
+                */
+
+
+                //retrieve values C,J...s
+                C = Cpro;
+                J = Jpro;
+                Q = Qpro;
+                M = Mpro;
+                h = hpro;
+                s = spro;
+
+                if (LabPassOne) {//always true, but I keep
+#ifdef __SSE2__
+                    // write to line buffers
+                    Jbuffer[j] = J;
+                    Cbuffer[j] = C;
+                    hbuffer[j] = h;
+#else
+                    float xx, yy, zz;
+                    //process normal==> viewing
+
+                    Ciecam02::jch2xyz_ciecam02float(xx, yy, zz,
+                                                    J,  C, h,
+                                                    xw2, yw2,  zw2,
+                                                    f2,  c2, nc2, gamu, pow1n, nbbj, ncbj, flj, czj, dj, awj);
+                    float x, y, z;
+                    x = xx * 655.35f;
+                    y = yy * 655.35f;
+                    z = zz * 655.35f;
+                    float Ll, aa, bb;
+                    //convert xyz=>lab
+                    Color::XYZ2Lab(x,  y,  z, Ll, aa, bb);
+                    dest->L[i][j] = Ll;
+                    dest->a[i][j] = aa;
+                    dest->b[i][j] = bb;
+
+#endif
+                }
+
+                //    }
+            }
+
+#ifdef __SSE2__
+            // process line buffers
+            float *xbuffer = Qbuffer;
+            float *ybuffer = Mbuffer;
+            float *zbuffer = sbuffer;
+
+            for (k = 0; k < bufferLength; k += 4) {
+                Ciecam02::jch2xyz_ciecam02float(x, y, z,
+                                                LVF(Jbuffer[k]), LVF(Cbuffer[k]), LVF(hbuffer[k]),
+                                                F2V(xw2), F2V(yw2), F2V(zw2),
+                                                F2V(nc2), F2V(pow1n), F2V(nbbj), F2V(ncbj), F2V(flj), F2V(dj), F2V(awj), F2V(reccmcz));
+                STVF(xbuffer[k], x * c655d35);
+                STVF(ybuffer[k], y * c655d35);
+                STVF(zbuffer[k], z * c655d35);
+            }
+
+            // XYZ2Lab uses a lookup table. The function behind that lut is a cube root.
+            // SSE can't beat the speed of that lut, so it doesn't make sense to use SSE
+            for (int j = 0; j < width; j++) {
+                float Ll, aa, bb;
+                //convert xyz=>lab
+                Color::XYZ2Lab(xbuffer[j], ybuffer[j], zbuffer[j], Ll, aa, bb);
+
+                dest->L[i][j] = Ll;
+                dest->a[i][j] = aa;
+                dest->b[i][j] = bb;
+            }
+
+#endif
+        }
+
+    }
+#ifdef _DEBUG
+
+    if (settings->verbose) {
+        t2e.set();
+        printf("CAT02 performed in %d usec:\n", t2e.etime(t1e));
+    }
+
+#endif
+}
+
+
+
+void RawImageSource::getImage(const ColorTemp &ctemp, int tran, Imagefloat* image, const PreviewProps &pp, const ToneCurveParams &hrp, const ColorManagementParams &cmp, const RAWParams &raw, const WBParams &wbp, const ColorAppearanceParams &cap, const Cat02adapParams &cat)
+{
+    BENCHFUN
+
+    MyMutex::MyLock lock(getImageMutex);
+//  printf("call getimage  cat02=%i\n", cat.cat02);
+    tran = defTransform(tran);
+//   double wbcat02 = wbp.cat02;
+    // compute channel multipliers
+    double r, g, b;
+    float rm, gm, bm;
+    float gain;
+
+    if (ctemp.getTemp() < 0) {
+        // no white balance, ie revert the pre-process white balance to restore original unbalanced raw camera color
+        rm = ri->get_pre_mul(0);
+        gm = ri->get_pre_mul(1);
+        bm = ri->get_pre_mul(2);
+    } else {
+        ctemp.getMultipliers(r, g, b);
+        rm = imatrices.cam_rgb[0][0] * r + imatrices.cam_rgb[0][1] * g + imatrices.cam_rgb[0][2] * b;
+        gm = imatrices.cam_rgb[1][0] * r + imatrices.cam_rgb[1][1] * g + imatrices.cam_rgb[1][2] * b;
+        bm = imatrices.cam_rgb[2][0] * r + imatrices.cam_rgb[2][1] * g + imatrices.cam_rgb[2][2] * b;
+    }
+
+    if (true) {
+        // adjust gain so the maximum raw value of the least scaled channel just hits max
+        const float new_pre_mul[4] = { ri->get_pre_mul(0) / rm, ri->get_pre_mul(1) / gm, ri->get_pre_mul(2) / bm, ri->get_pre_mul(3) / gm };
+        float new_scale_mul[4];
+
+        bool isMono = (ri->getSensorType() == ST_FUJI_XTRANS && raw.xtranssensor.method == RAWParams::XTransSensor::getMethodString(RAWParams::XTransSensor::Method::MONO))
+                      || (ri->getSensorType() == ST_BAYER && raw.bayersensor.method == RAWParams::BayerSensor::getMethodString(RAWParams::BayerSensor::Method::MONO));
+        gain = calculate_scale_mul(new_scale_mul, new_pre_mul, c_white, cblacksom, isMono, ri->get_colors());
+        rm = new_scale_mul[0] / scale_mul[0] * gain;
+        gm = new_scale_mul[1] / scale_mul[1] * gain;
+        bm = new_scale_mul[2] / scale_mul[2] * gain;
+        //fprintf(stderr, "camera gain: %f, current wb gain: %f, diff in stops %f\n", camInitialGain, gain, log2(camInitialGain) - log2(gain));
+    } else {
+        // old scaling: used a fixed reference gain based on camera (as-shot) white balance
+
+        // how much we need to scale each channel to get our new white balance
+        rm = refwb_red / rm;
+        gm = refwb_green / gm;
+        bm = refwb_blue / bm;
+        // normalize so larger multiplier becomes 1.0
+        float minval = min(rm, gm, bm);
+        rm /= minval;
+        gm /= minval;
+        bm /= minval;
+        // multiply with reference gain, ie as-shot WB
+        rm *= camInitialGain;
+        gm *= camInitialGain;
+        bm *= camInitialGain;
+    }
+
+    defGain = 0.0;
+    // compute image area to render in order to provide the requested part of the image
+    int sx1, sy1, imwidth, imheight, fw, d1xHeightOdd = 0;
+    transformRect(pp, tran, sx1, sy1, imwidth, imheight, fw);
+
+    // check possible overflows
+    int maximwidth, maximheight;
+
+    if ((tran & TR_ROT) == TR_R90 || (tran & TR_ROT) == TR_R270) {
+        maximwidth = image->getHeight();
+        maximheight = image->getWidth();
+    } else {
+        maximwidth = image->getWidth();
+        maximheight = image->getHeight();
+    }
+
+    if (d1x) {
+        // D1X has only half of the required rows
+        // we interpolate the missing ones later to get correct aspect ratio
+        // if the height is odd we also have to add an additional row to avoid a black line
+        d1xHeightOdd = maximheight & 1;
+        maximheight /= 2;
+        imheight = maximheight;
+    }
+
+    // correct if overflow (very rare), but not fuji because it is corrected in transline
+    if (!fuji && imwidth > maximwidth) {
+        imwidth = maximwidth;
+    }
+
+    if (!fuji && imheight > maximheight) {
+        imheight = maximheight;
+    }
+
+    if (fuji) { // zero image to avoid access to uninitialized values in further processing because fuji super-ccd processing is not clean...
+        for (int i = 0; i < image->getHeight(); ++i) {
+            for (int j = 0; j < image->getWidth(); ++j) {
+                image->r(i, j) = image->g(i, j) = image->b(i, j) = 0;
+            }
+        }
+    }
+
+    int maxx = this->W, maxy = this->H, skip = pp.getSkip();
+
+    // raw clip levels after white balance
+    hlmax[0] = clmax[0] * rm;
+    hlmax[1] = clmax[1] * gm;
+    hlmax[2] = clmax[2] * bm;
+
+    const bool doClip = (chmax[0] >= clmax[0] || chmax[1] >= clmax[1] || chmax[2] >= clmax[2]) && !hrp.hrenabled;
+
+    float area = skip * skip;
+    rm /= area;
+    gm /= area;
+    bm /= area;
+    bool doHr = (hrp.hrenabled && hrp.method != "Color");
+#ifdef _OPENMP
+    #pragma omp parallel if(!d1x)       // omp disabled for D1x to avoid race conditions (see Issue 1088 http://code.google.com/p/rawtherapee/issues/detail?id=1088)
+    {
+#endif
+        // render the requested image part
+        float line_red[imwidth] ALIGNED16;
+        float line_grn[imwidth] ALIGNED16;
+        float line_blue[imwidth] ALIGNED16;
+
+#ifdef _OPENMP
+        #pragma omp for schedule(dynamic,16)
+#endif
+
+        for (int ix = 0; ix < imheight; ix++) {
+            int i = sy1 + skip * ix;
+
+            if (i >= maxy - skip) {
+                i = maxy - skip - 1;    // avoid trouble
+            }
+
+            if (ri->getSensorType() == ST_BAYER || ri->getSensorType() == ST_FUJI_XTRANS || ri->get_colors() == 1) {
+                for (int j = 0, jx = sx1; j < imwidth; j++, jx += skip) {
+                    jx = std::min(jx, maxx - skip - 1);  // avoid trouble
+
+                    float rtot = 0.f, gtot = 0.f, btot = 0.f;
+
+                    for (int m = 0; m < skip; m++)
+                        for (int n = 0; n < skip; n++) {
+                            rtot += red[i + m][jx + n];
+                            gtot += green[i + m][jx + n];
+                            btot += blue[i + m][jx + n];
+                        }
+
+                    rtot *= rm;
+                    gtot *= gm;
+                    btot *= bm;
+
+                    if (doClip) {
+                        // note: as hlmax[] can be larger than CLIP and we can later apply negative
+                        // exposure this means that we can clip away local highlights which actually
+                        // are not clipped. We have to do that though as we only check pixel by pixel
+                        // and don't know if this will transition into a clipped area, if so we need
+                        // to clip also surrounding to make a good colour transition
+                        rtot = CLIP(rtot);
+                        gtot = CLIP(gtot);
+                        btot = CLIP(btot);
+                    }
+
+                    line_red[j] = rtot;
+                    line_grn[j] = gtot;
+                    line_blue[j] = btot;
+                }
+            } else {
+                for (int j = 0, jx = sx1; j < imwidth; j++, jx += skip) {
+                    if (jx > maxx - skip) {
+                        jx = maxx - skip - 1;
+                    }
+
+                    float rtot, gtot, btot;
+                    rtot = gtot = btot = 0;
+
+                    for (int m = 0; m < skip; m++)
+                        for (int n = 0; n < skip; n++) {
+                            rtot += rawData[i + m][(jx + n) * 3 + 0];
+                            gtot += rawData[i + m][(jx + n) * 3 + 1];
+                            btot += rawData[i + m][(jx + n) * 3 + 2];
+                        }
+
+                    rtot *= rm;
+                    gtot *= gm;
+                    btot *= bm;
+
+                    if (doClip) {
+                        rtot = CLIP(rtot);
+                        gtot = CLIP(gtot);
+                        btot = CLIP(btot);
+                    }
+
+                    line_red[j] = rtot;
+                    line_grn[j] = gtot;
+                    line_blue[j] = btot;
+
+                }
+            }
+
+            //process all highlight recovery other than "Color"
+            if (doHr) {
+                hlRecovery(hrp.method, line_red, line_grn, line_blue, imwidth, hlmax);
+            }
+
+            if (d1x) {
+                transLineD1x(line_red, line_grn, line_blue, ix, image, tran, imwidth, imheight, d1xHeightOdd, doClip);
+            } else if (fuji) {
+                transLineFuji(line_red, line_grn, line_blue, ix, image, tran, imheight, fw);
+
+            } else {
+                transLineStandard(line_red, line_grn, line_blue, ix, image, tran, imwidth, imheight);
+            }
+
+        }
+
+#ifdef _OPENMP
+    }
+#endif
+
+    if (fuji) {
+        int a = ((tran & TR_ROT) == TR_R90 && image->getWidth() % 2 == 0) || ((tran & TR_ROT) == TR_R180 && image->getHeight() % 2 + image->getWidth() % 2 == 1) || ((tran & TR_ROT) == TR_R270 && image->getHeight() % 2 == 0);
+
+        // first row
+        for (int j = 1 + a; j < image->getWidth() - 1; j += 2) {
+            image->r(0, j) = (image->r(1, j) + image->r(0, j + 1) + image->r(0, j - 1)) / 3;
+            image->g(0, j) = (image->g(1, j) + image->g(0, j + 1) + image->g(0, j - 1)) / 3;
+            image->b(0, j) = (image->b(1, j) + image->b(0, j + 1) + image->b(0, j - 1)) / 3;
+        }
+
+        // other rows
+        for (int i = 1; i < image->getHeight() - 1; i++) {
+            for (int j = 2 - (a + i + 1) % 2; j < image->getWidth() - 1; j += 2) {
+                // edge-adaptive interpolation
+                double dh = (ABS(image->r(i, j + 1) - image->r(i, j - 1)) + ABS(image->g(i, j + 1) - image->g(i, j - 1)) + ABS(image->b(i, j + 1) - image->b(i, j - 1))) / 1.0;
+                double dv = (ABS(image->r(i + 1, j) - image->r(i - 1, j)) + ABS(image->g(i + 1, j) - image->g(i - 1, j)) + ABS(image->b(i + 1, j) - image->b(i - 1, j))) / 1.0;
+                double eh = 1.0 / (1.0 + dh);
+                double ev = 1.0 / (1.0 + dv);
+                image->r(i, j) = (eh * (image->r(i, j + 1) + image->r(i, j - 1)) + ev * (image->r(i + 1, j) + image->r(i - 1, j))) / (2.0 * (eh + ev));
+                image->g(i, j) = (eh * (image->g(i, j + 1) + image->g(i, j - 1)) + ev * (image->g(i + 1, j) + image->g(i - 1, j))) / (2.0 * (eh + ev));
+                image->b(i, j) = (eh * (image->b(i, j + 1) + image->b(i, j - 1)) + ev * (image->b(i + 1, j) + image->b(i - 1, j))) / (2.0 * (eh + ev));
+            }
+
+            // first pixel
+            if (2 - (a + i + 1) % 2 == 2) {
+                image->r(i, 0) = (image->r(i + 1, 0) + image->r(i - 1, 0) + image->r(i, 1)) / 3;
+                image->g(i, 0) = (image->g(i + 1, 0) + image->g(i - 1, 0) + image->g(i, 1)) / 3;
+                image->b(i, 0) = (image->b(i + 1, 0) + image->b(i - 1, 0) + image->b(i, 1)) / 3;
+            }
+
+            // last pixel
+            if (2 - (a + i + image->getWidth()) % 2 == 2) {
+                image->r(i, image->getWidth() - 1) = (image->r(i + 1, image->getWidth() - 1) + image->r(i - 1, image->getWidth() - 1) + image->r(i, image->getWidth() - 2)) / 3;
+                image->g(i, image->getWidth() - 1) = (image->g(i + 1, image->getWidth() - 1) + image->g(i - 1, image->getWidth() - 1) + image->g(i, image->getWidth() - 2)) / 3;
+                image->b(i, image->getWidth() - 1) = (image->b(i + 1, image->getWidth() - 1) + image->b(i - 1, image->getWidth() - 1) + image->b(i, image->getWidth() - 2)) / 3;
+            }
+        }
+
+        // last row
+        int b = (a == 1 && image->getHeight() % 2) || (a == 0 && image->getHeight() % 2 == 0);
+
+        for (int j = 1 + b; j < image->getWidth() - 1; j += 2) {
+            image->r(image->getHeight() - 1, j) = (image->r(image->getHeight() - 2, j) + image->r(image->getHeight() - 1, j + 1) + image->r(image->getHeight() - 1, j - 1)) / 3;
+            image->g(image->getHeight() - 1, j) = (image->g(image->getHeight() - 2, j) + image->g(image->getHeight() - 1, j + 1) + image->g(image->getHeight() - 1, j - 1)) / 3;
+            image->b(image->getHeight() - 1, j) = (image->b(image->getHeight() - 2, j) + image->b(image->getHeight() - 1, j + 1) + image->b(image->getHeight() - 1, j - 1)) / 3;
+        }
+    }
+
+
+
+    if (cat.cat02 > 1  && !cap.enabled  && cat.enabled) { //
+        //    printf("OK cat02 CAT\n");
+        LabImage *bufcat02 = nullptr;
+        bufcat02 = new LabImage(image->getWidth(), image->getHeight());
+        LabImage *bufcat02fin = nullptr;
+        bufcat02fin = new LabImage(image->getWidth(), image->getHeight());
+        TMatrix wiprof = ICCStore::getInstance()->workingSpaceInverseMatrix("WideGamut");//Widegamut gives generaly best results than Prophoto (blue) or sRGBD65
+        TMatrix wprof = ICCStore::getInstance()->workingSpaceMatrix("WideGamut");
+
+        double wip[3][3] = {
+            {wiprof[0][0], wiprof[0][1], wiprof[0][2]},
+            {wiprof[1][0], wiprof[1][1], wiprof[1][2]},
+            {wiprof[2][0], wiprof[2][1], wiprof[2][2]}
+        };
+
+        double wp[3][3] = {
+            {wprof[0][0], wprof[0][1], wprof[0][2]},
+            {wprof[1][0], wprof[1][1], wprof[1][2]},
+            {wprof[2][0], wprof[2][1], wprof[2][2]}
+        };
+
+
+#ifdef _OPENMP
+        #pragma omp parallel for schedule(dynamic,16)
+#endif
+
+        for (int y = 0; y <  image->getHeight() ; y++) //{
+            for (int x = 0; x < image->getWidth(); x++) {
+                bufcat02->L[y][x] = 0.f;
+                bufcat02->a[y][x] = 0.f;
+                bufcat02->b[y][x] = 0.f;
+                bufcat02fin->L[y][x] = 0.f;
+                bufcat02fin->a[y][x] = 0.f;
+                bufcat02fin->b[y][x] = 0.f;
+
+            }
+
+#ifdef _OPENMP
+        #pragma omp parallel for schedule(dynamic,16)
+#endif
+
+        for (int y = 0; y <  image->getHeight() ; y++) //{
+            for (int x = 0; x < image->getWidth(); x++) {
+                float X, Y, Z;
+                float LR, aR, bR;
+                //Color::gammatab_srgb[ try with but not good results
+				// I add gain to best results
+                Color::rgbxyz(gain * image->r(y, x), gain * image->g(y, x), gain * image->b(y, x), X, Y, Z, wp);
+                Color::XYZ2Lab(X, Y, Z, LR, aR, bR);
+                bufcat02->L[y][x] = LR;
+                bufcat02->a[y][x] = aR;
+                bufcat02->b[y][x] = bR;
+            }
+
+        ciecamcat02loc_float(bufcat02, bufcat02fin, wbp.temperature, cat.gree, cat.cat02, cmp, cap);
+#ifdef _OPENMP
+        #pragma omp parallel for schedule(dynamic,16)
+#endif
+
+        for (int y = 0; y <  image->getHeight() ; y++) //{
+            for (int x = 0; x < image->getWidth(); x++) {
+                float XR, YR, ZR;
+                float LL, aa, bb;
+                LL = bufcat02fin->L[y][x];
+                aa = bufcat02fin->a[y][x];
+                bb = bufcat02fin->b[y][x];
+
+                Color::Lab2XYZ(LL, aa, bb, XR, YR, ZR);
+                Color::xyz2rgb(XR, YR, ZR, image->r(y, x), image->g(y, x), image->b(y, x), wip);
+                //image->r(y, x) = Color::igammatab_srgb[image->r(y, x)];
+                //image->g(y, x) = Color::igammatab_srgb[image->g(y, x)];
+                //image->b(y, x) = Color::igammatab_srgb[image->b(y, x)];
+                image->r(y, x) /= gain;
+                image->g(y, x) /= gain;
+                image->b(y, x) /= gain;
+
+            }
+
+        delete bufcat02;
+        delete bufcat02fin;
+    }
+
+
+    // Flip if needed
+    if (tran & TR_HFLIP) {
+        hflip(image);
+    }
+
+    if (tran & TR_VFLIP) {
+        vflip(image);
+    }
+
+    // Colour correction (only when running on full resolution)
+    if (pp.getSkip() == 1) {
+        switch (ri->getSensorType()) {
+            case ST_BAYER:
+                processFalseColorCorrection(image, raw.bayersensor.ccSteps);
+                break;
+
+            case ST_FUJI_XTRANS:
+                processFalseColorCorrection(image, raw.xtranssensor.ccSteps);
+                break;
+
+            case ST_FOVEON:
+            case ST_NONE:
+                break;
+        }
+    }
+
+
+}
+
+
+
+/*
 void RawImageSource::getImage (const ColorTemp &ctemp, int tran, Imagefloat* image, const PreviewProps &pp, const ToneCurveParams &hrp, const RAWParams &raw )
 {
     MyMutex::MyLock lock(getImageMutex);
@@ -909,7 +1573,7 @@ void RawImageSource::getImage (const ColorTemp &ctemp, int tran, Imagefloat* ima
         }
     }
 }
-
+*/
 DCPProfile *RawImageSource::getDCP(const ColorManagementParams &cmp, DCPProfile::ApplyState &as)
 {
     DCPProfile *dcpProf = nullptr;

@@ -308,6 +308,17 @@ public :
 
 };
 
+class AutocatListener
+{
+public :
+    virtual ~AutocatListener() {}
+    virtual void cat02catChanged(int cat, int ciecam) {}
+    virtual void cat02greeChanged(double gree) {}
+
+
+};
+
+
 class AutoChromaListener
 {
 public :
@@ -463,6 +474,7 @@ public:
     virtual void        setHistogramListener    (HistogramListener *l) = 0;
     virtual void        setPreviewImageListener (PreviewImageListener* l) = 0;
     virtual void        setAutoCamListener      (AutoCamListener* l) = 0;
+    virtual void        setAutocatListener		(AutocatListener* l) = 0;
     virtual void        setFrameCountListener   (FrameCountListener* l) = 0;
     virtual void        setAutoBWListener       (AutoBWListener* l) = 0;
     virtual void        setAutoWBListener       (AutoWBListener* l) = 0;

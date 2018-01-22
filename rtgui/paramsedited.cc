@@ -237,6 +237,13 @@ void ParamsEdited::set (bool v)
     wb.temperature             = v;
     wb.equal                   = v;
     wb.tempBias                = v;
+    cat02adap.enabled     = v;
+    cat02adap.cat02      = v;
+    cat02adap.autocat02      = v;
+    cat02adap.gree      = v;
+    cat02adap.autogree      = v;
+	
+	
     //colorShift.a               = v;
     //colorShift.b               = v;
     //lumaDenoise.enabled        = v;
@@ -794,6 +801,13 @@ void ParamsEdited::initFrom (const std::vector<rtengine::procparams::ProcParams>
         wb.equal = wb.equal && p.wb.equal == other.wb.equal;
         wb.temperature = wb.temperature && p.wb.temperature == other.wb.temperature;
         wb.tempBias = wb.tempBias && p.wb.tempBias == other.wb.tempBias;
+
+        cat02adap.enabled = cat02adap.enabled && p.cat02adap.enabled == other.cat02adap.enabled;
+        cat02adap.cat02 = cat02adap.cat02 && p.cat02adap.cat02 == other.cat02adap.cat02;
+        cat02adap.autocat02 = cat02adap.autocat02 && p.cat02adap.autocat02 == other.cat02adap.autocat02;
+        cat02adap.gree = cat02adap.gree && p.cat02adap.gree == other.cat02adap.gree;
+        cat02adap.autogree = cat02adap.autogree && p.cat02adap.autogree == other.cat02adap.autogree;
+
         //colorShift.a = colorShift.a && p.colorShift.a == other.colorShift.a;
         //colorShift.b = colorShift.b && p.colorShift.b == other.colorShift.b;
         //lumaDenoise.enabled = lumaDenoise.enabled && p.lumaDenoise.enabled == other.lumaDenoise.enabled;
@@ -1763,6 +1777,27 @@ void ParamsEdited::combine (rtengine::procparams::ProcParams& toEdit, const rten
         toEdit.wb.temperature     = dontforceSet && options.baBehav[ADDSET_WB_TEMPERATURE] ? toEdit.wb.temperature + mods.wb.temperature : mods.wb.temperature;
     }
 
+    if (cat02adap.enabled) {
+        toEdit.cat02adap.enabled     = mods.cat02adap.enabled;
+    }
+
+    if (cat02adap.gree) {
+        toEdit.cat02adap.gree     = mods.cat02adap.gree;
+    }
+
+    if (cat02adap.autocat02) {
+        toEdit.cat02adap.autocat02   = mods.cat02adap.autocat02;
+    }
+
+    if (cat02adap.cat02) {
+        toEdit.cat02adap.cat02  = mods.cat02adap.cat02;
+    }
+
+    if (cat02adap.autogree) {
+        toEdit.cat02adap.autogree   = mods.cat02adap.autogree;
+    }
+	
+	
     //if (colorShift.a)                     toEdit.colorShift.a     = dontforceSet && options.baBehav[ADDSET_CS_BLUEYELLOW] ? toEdit.colorShift.a + mods.colorShift.a : mods.colorShift.a;
     //if (colorShift.b)                     toEdit.colorShift.b     = dontforceSet && options.baBehav[ADDSET_CS_GREENMAGENTA] ? toEdit.colorShift.b + mods.colorShift.b : mods.colorShift.b;
     //if (lumaDenoise.enabled)              toEdit.lumaDenoise.enabled  = mods.lumaDenoise.enabled;

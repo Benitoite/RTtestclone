@@ -521,6 +521,11 @@ enum ProcEventCode {
     EvRGBEnabled = 491,
     EvLEnabled = 492,
     EvPixelShiftOneGreen = 493,
+    EvCat02cat02 = 494,
+    EvCat02enabled = 495,
+    EvCATAutocat02 = 496,
+    EvCat02gree = 497,
+    EvCATAutogree = 498,
 
     NUMOFEVENTS
 
