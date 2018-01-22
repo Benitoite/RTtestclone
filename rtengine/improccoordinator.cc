@@ -553,7 +553,7 @@ void ImProcCoordinator::updatePreviewImage(int todo, Crop* cropCall)
 
         float dT = fabs((Tref - 5000.) / 1000.f);
         float dG = params.wb.green - 1.;
-        gree0 = 1.f + 0.00055f * dT * dG * params.cat02adap.cat02;//empirical formula
+        gree0 = 1.f - 0.00055f * dT * dG * params.cat02adap.cat02;//empirical formula
 
         if (acatListener  && params.cat02adap.autogree) {
             acatListener->cat02greeChanged(gree0);
@@ -669,7 +669,7 @@ void ImProcCoordinator::updatePreviewImage(int todo, Crop* cropCall)
 
             float dTlo = fabs((Treflo - 5000.) / 1000.f);
             float dGlo = params.localwb.green - 1.;
-            greelo0 = 1.f + 0.00055f * dTlo * dGlo * params.localwb.cat02;//empirical formula
+            greelo0 = 1.f - 0.00055f * dTlo * dGlo * params.localwb.cat02;//empirical formula
 
             if (alorgbListener  && params.localwb.autoytint) {
                 alorgbListener->cat02greeChanged(greelo0);
