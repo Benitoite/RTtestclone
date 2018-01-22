@@ -161,7 +161,7 @@ protected:
     ToolVBox* colorPanel;
     ToolVBox* transformPanel;
     ToolVBox* rawPanel;
-    ToolVBox* waveletPanel;
+    ToolVBox* advancedPanel;
     ToolBar* toolBar;
 
     TextOrIcon* toiE;
@@ -180,7 +180,7 @@ protected:
     Gtk::ScrolledWindow* colorPanelSW;
     Gtk::ScrolledWindow* transformPanelSW;
     Gtk::ScrolledWindow* rawPanelSW;
-    Gtk::ScrolledWindow* waveletPanelSW;
+    Gtk::ScrolledWindow* advancedPanelSW;
 
     std::vector<MyExpander*> expList;
 
