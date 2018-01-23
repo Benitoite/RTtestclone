@@ -1984,8 +1984,7 @@ WaveletParams::WaveletParams() :
     bllev       (   0,    2,   50,   25, false),
     pastlev     (   0,    2,   30,   20, false),
     satlev      (  30,   45,  130,  100, false),
-    edgcont     (  options.rtSettings.bot_left,   options.rtSettings.top_left,   options.rtSettings.bot_right,   options.rtSettings.top_right, false),
-    /*edgcont     (   0,   10,   75,   40, false),*/
+    edgcont     (   0,   10,   75,   40, false),
     level0noise (0, 0, false),
     level1noise (0, 0, false),
     level2noise (0, 0, false),
