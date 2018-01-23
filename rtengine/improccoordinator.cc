@@ -265,7 +265,7 @@ void ImProcCoordinator::updatePreviewImage (int todo, Crop* cropCall)
         }
     }
 
-    if (todo & (M_INIT | M_LINDENOISE | M_HDR)) {
+    if (todo & (M_INIT | M_LINDENOISE | M_HDR)||  params.cat02adap.enabled) {
         MyMutex::MyLock initLock (minit); // Also used in crop window
 
         imgsrc->HLRecovery_Global ( params.toneCurve); // this handles Color HLRecovery
@@ -277,6 +277,37 @@ void ImProcCoordinator::updatePreviewImage (int todo, Crop* cropCall)
 
         currWB = ColorTemp (params.wb.temperature, params.wb.green, params.wb.equal, params.wb.method);
 
+        if (params.colorappearance.enabled  || params.cat02adap.enabled) {
+            params.wb.enabled = true;
+        }
+
+        const FramesMetaData* metaDatac = imgsrc->getMetaData();
+        int imgNumc = 0;
+
+        if (imgsrc->isRAW()) {
+            if (imgsrc->getSensorType() == ST_BAYER) {
+                imgNumc = rtengine::LIM<unsigned int>(params.raw.bayersensor.imageNum, 0, metaDatac->getFrameCount() - 1);
+            } else if (imgsrc->getSensorType() == ST_FUJI_XTRANS) {
+                //imgNum = rtengine::LIM<unsigned int>(params.raw.xtranssensor.imageNum, 0, metaData->getFrameCount() - 1);
+            }
+        }
+
+        float fnumc = metaDatac->getFNumber(imgNumc);          // F number
+        float fisoc = metaDatac->getISOSpeed(imgNumc) ;        // ISO
+        float fspeedc = metaDatac->getShutterSpeed(imgNumc) ;  // Speed
+        double fcompc = metaDatac->getExpComp(imgNumc);        // Compensation +/-
+        float ada = 1.f;
+
+        if (fnumc < 0.3f || fisoc < 5.f || fspeedc < 0.00001f) { //if no exif data or wrong
+            ada = 2000.;
+        } else {
+            double E_V = fcompc + log2(double ((fnumc * fnumc) / fspeedc / (fisoc / 100.f)));
+            E_V += params.toneCurve.expcomp;// exposure compensation in tonecurve ==> direct EV
+            E_V += log2(params.raw.expos);  // exposure raw white point ; log2 ==> linear to EV
+            ada = powf(2.f, E_V - 3.f);  // cd / m2
+            // end calculation adaptation scene luminosity
+        }
+		
         if (!params.wb.enabled) {
             currWB = ColorTemp();
         } else if (params.wb.method == "Camera") {
@@ -312,6 +343,82 @@ void ImProcCoordinator::updatePreviewImage (int todo, Crop* cropCall)
             awbListener->WBChanged (params.wb.temperature, params.wb.green);
         }
 
+        int cat0 = 100;
+
+        //printf("temp=%i \n", params.wb.temperature);
+        if (params.wb.temperature < 4000  || params.wb.temperature > 20000) { //20000 arbitrary value - no test enough
+            if (ada < 5.f) {
+                cat0 = 1;
+            } else if (ada < 10.f) {
+                cat0 = 2;
+            } else if (ada < 15.f) {
+                cat0 = 3;
+            } else if (ada < 30.f) {
+                cat0 = 5;
+            } else if (ada < 100.f) {
+                cat0 = 50;
+            } else if (ada < 300.f) {
+                cat0 = 80;
+            } else if (ada < 500.f) {
+                cat0 = 90;
+            } else if (ada < 3000.f) {
+                cat0 = 95;
+            }
+        } else {
+            if (ada < 5.f) {
+                cat0 = 30;
+            } else if (ada < 10.f) {
+                cat0 = 50;
+            } else if (ada < 30.f) {
+                cat0 = 60;
+            } else if (ada < 100.f) {
+                cat0 = 70;
+            } else if (ada < 300.f) {
+                cat0 = 80;
+            } else if (ada < 500.f) {
+                cat0 = 90;
+            } else if (ada < 1000.f) {
+                cat0 = 95;
+            }
+        }
+
+        if (acatListener  && params.cat02adap.autocat02) {
+            acatListener->cat02catChanged(cat0, 0);
+            params.cat02adap.cat02 = cat0;
+        }
+
+
+        double gree0 = 1.0;
+        float Tref = (float) params.wb.temperature;
+
+        if (Tref > 8000.f) {
+            Tref = 8000.f;
+        }
+
+        if (Tref < 4000.f) {
+            Tref = 4000.f;
+        }
+
+        float dT = fabs((Tref - 5000.) / 1000.f);
+        float dG = params.wb.green - 1.;
+        gree0 = 1.f - 0.00055f * dT * dG * params.cat02adap.cat02;//empirical formula
+
+        if (acatListener  && params.cat02adap.autogree) {
+            acatListener->cat02greeChanged(gree0);
+            params.cat02adap.gree = gree0;
+        }
+		
+		
+        if (acatListener  && params.colorappearance.enabled) {
+            acatListener->cat02catChanged(0, 1);
+			
+            params.cat02adap.cat02 = cat0;
+            acatListener->cat02greeChanged(1.);
+            params.cat02adap.gree = gree0;
+			
+        }
+		
+		
         int tr = getCoarseBitMask (params.coarse);
 
         imgsrc->getFullSize (fw, fh, tr);
