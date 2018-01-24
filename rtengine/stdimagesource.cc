@@ -191,7 +191,7 @@ int StdImageSource::load (const Glib::ustring &fname)
 void StdImageSource::getImage(const ColorTemp &ctemp, int tran, Imagefloat* image, const PreviewProps &pp, const ProcParams &params)
 {
     const ToneCurveParams &hrp = params.toneCurve;
-    const ColorManagementParams &cmp = params.icm;
+//    const ColorManagementParams &cmp = params.icm;
     
     // the code will use OpenMP as of now.
 

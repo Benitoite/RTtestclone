@@ -632,9 +632,9 @@ void RawImageSource::getImage(const ColorTemp &ctemp, int tran, Imagefloat* imag
     MyMutex::MyLock lock(getImageMutex);
 
     const ToneCurveParams &hrp = params.toneCurve;
-    const ColorManagementParams &cmp = params.icm;
+//    const ColorManagementParams &cmp = params.icm;
     const RAWParams &raw = params.raw;
-    const WBParams &wbp = params.wb;
+ //   const WBParams &wbp = params.wb;
     
 //  printf("call getimage  cat02=%i\n", cat.cat02);
     tran = defTransform(tran);
