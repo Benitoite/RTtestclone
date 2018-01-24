@@ -5608,31 +5608,41 @@ static void SdwWB(array2D<float> &redloc, array2D<float> &greenloc, array2D<floa
     }
 
 #ifdef _OPENMP
-//        #pragma omp parallel for //reduction(+:MeanG, MeanR, MeanB, nG, nR, nB )
+        #pragma omp parallel for schedule(dynamic) collapse(2)
 #endif
-
     for (int w = 0; w < xw ; w++) {
         for (int h = 0; h < yh ; h++) {
-            int i = w + h * xw;
-
+            float meanr = 0.f;
+            float meang = 0.f;
+            float meanb = 0.f;
+            int nr = 0;
+            int ng = 0;
+            int nb = 0;
             for (int y = (h) * parth; y < (h + 1) * parth; y++) {
                 for (int x = (w) * partw; x < (w + 1) * partw; x++) {
                     if (greenloc[y][x] > clipLow && greenloc[y][x] < clipHigh) {
-                        MeanG[i] += greenloc[y][x];
-                        nG[i]++;
+                        meang += greenloc[y][x];
+                        ng++;
                     }
 
                     if (redloc[y][x] > clipLow && redloc[y][x] < clipHigh) {
-                        MeanR[i] += redloc[y][x];
-                        nR[i]++;
+                        meanr += redloc[y][x];
+                        nr++;
                     }
 
                     if (blueloc[y][x] > clipLow && blueloc[y][x] < clipHigh) {
-                        MeanB[i] += blueloc[y][x];
-                        nB[i]++;
+                        meanb += blueloc[y][x];
+                        nb++;
                     }
                 }
             }
+            int i = w + h * xw;
+            MeanG[i] = meang;
+            MeanR[i] = meanr;
+            MeanB[i] = meanb;
+            nG[i] = ng;
+            nR[i] = nr;
+            nB[i] = nb;
         }
     }
 
@@ -5655,30 +5665,37 @@ static void SdwWB(array2D<float> &redloc, array2D<float> &greenloc, array2D<floa
     }
 
 #ifdef _OPENMP
-    //      #pragma omp parallel for // reduction(+:SigmaG, SigmaR, SigmaB)
+    #pragma omp parallel for schedule(dynamic) collapse(2)
 #endif
 
     for (int w = 0; w < xw ; w++) {
         for (int h = 0; h < yh ; h++) {
             int i = w + h * xw;
+            float sigmar = 0.f;
+            float sigmag = 0.f;
+            float sigmab = 0.f;
 
             for (int y = (h) * parth; y < (h + 1) * parth; y++) {
                 for (int x = (w) * partw; x < (w + 1) * partw; x++) {
                     if (greenloc[y][x] > clipLow && greenloc[y][x] < clipHigh) {
-                        SigmaG[i]  += SQR(MeanG[i] - greenloc[y][x]) ;
+                        sigmag += SQR(MeanG[i] - greenloc[y][x]) ;
                     }
 
                     if (redloc[y][x] > clipLow && redloc[y][x] < clipHigh) {
 
-                        SigmaR[i]  += SQR(MeanR[i] - redloc[y][x]);
+                        sigmar += SQR(MeanR[i] - redloc[y][x]);
                     }
 
                     if (blueloc[y][x] > clipLow && blueloc[y][x] < clipHigh) {
 
-                        SigmaB[i]  += SQR(MeanB[i] - blueloc[y][x]);
+                        sigmab += SQR(MeanB[i] - blueloc[y][x]);
                     }
                 }
             }
+
+            SigmaG[i] = sigmag;
+            SigmaR[i] = sigmar;
+            SigmaB[i] = sigmab;
         }
     }
 
@@ -5968,7 +5985,7 @@ static void SobelWB(array2D<float> &redsobel, array2D<float> &greensobel, array2
 
 void RawImageSource::ItcWB(array2D<float> &redloc, array2D<float> &greenloc, array2D<float> &blueloc, int bfw, int bfh, double &avg_rm, double &avg_gm, double &avg_bm, const ColorManagementParams &cmp)
 {
-
+BENCHFUN
     //  ColorManagementParams cmp;
     TMatrix wprof = ICCStore::getInstance()->workingSpaceMatrix("sRGB");
     TMatrix wiprof = ICCStore::getInstance()->workingSpaceInverseMatrix("sRGB");
@@ -8827,6 +8844,7 @@ void cat02_to_xyzfloatraw ( float & x, float & y, float & z, float r, float g, f
 
 void RawImageSource::WBauto(array2D<float> &redloc, array2D<float> &greenloc, array2D<float> &blueloc, int bfw, int bfh, double & avg_rm, double & avg_gm, double & avg_bm, const LocrgbParams & localr, const WBParams & wbpar, int begx, int begy, int yEn, int xEn, int cx, int cy, const ColorManagementParams &cmp)
 {
+    BENCHFUN
     //auto white balance
 //   printf ("AUtoWB OK\n");
     array2D<float> redsobel;
