@@ -61,7 +61,7 @@ protected:
     Glib::RefPtr<Gtk::TreeStore> refTreeModel;
     MethodColumns methodColumns;
     MyComboBox* method;
-    MyComboBoxText*   wbcamMethod;
+    MyComboBoxText*   wbgammaMethod;
 
     MyComboBoxText* spotsize;
     Adjuster* temp;
@@ -75,7 +75,7 @@ protected:
     double nextGreen;
     WBProvider *wbp;  // pointer to a ToolPanelCoordinator object, or its subclass BatchToolPanelCoordinator
     SpotWBListener* wblistener;
-    sigc::connection methconn, wbcamMethodConn;
+    sigc::connection methconn, wbgammaMethodConn;
     int custom_temp;
     double custom_green;
     double custom_equal;
@@ -83,7 +83,7 @@ protected:
     void cache_customTemp(int temp);                 //cache Temperature only to allow its recall
     void cache_customGreen(double green);            //cache Green only to allow its recall
     void cache_customEqual(double equal);            //cache Equal only to allow its recall
-    void wbcamMethodChanged();
+    void wbgammaMethodChanged();
 
     int  setActiveMethod(Glib::ustring label);
     int _setActiveMethod(Glib::ustring &label, Gtk::TreeModel::Children &children);

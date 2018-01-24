@@ -261,25 +261,23 @@ WhiteBalance::WhiteBalance() : FoldableToolPanel(this, "whitebalance", M("TP_WBA
     pack_start(*hbox, Gtk::PACK_SHRINK, 0);
     opt = 0;
 
-    Gtk::HBox* cambox = Gtk::manage(new Gtk::HBox());
-    cambox->set_spacing(4);
-    cambox->show();
+    Gtk::HBox* gammabox = Gtk::manage(new Gtk::HBox());
+    gammabox->set_spacing(4);
+    gammabox->show();
 
-    Gtk::Label* labcam = Gtk::manage(new Gtk::Label(M("TP_LOCALRGB_CAM") + ":"));
-    labcam->show();
-    wbcamMethod = Gtk::manage(new MyComboBoxText());
-    wbcamMethod->append(M("TP_LOCALWBCAM_NONE"));
-    wbcamMethod->append(M("TP_LOCALWBCAM_GAM"));
-//    wbcamMethod->append (M ("TP_LOCALWBCAM_CAT02"));
-//    wbcamMethod->append (M ("TP_LOCALWBCAM_GACAT"));
-    wbcamMethod->set_active(1);
-    wbcamMethodConn = wbcamMethod->signal_changed().connect(sigc::mem_fun(*this, &WhiteBalance::wbcamMethodChanged));
-    wbcamMethod->set_tooltip_markup(M("TP_LOCALWBCAM_TOOLTIP"));
-    wbcamMethod->show();
-    cambox->pack_start(*labcam, Gtk::PACK_SHRINK, 4);
-    cambox->pack_start(*wbcamMethod);
+    Gtk::Label* labgamma = Gtk::manage(new Gtk::Label(M("TP_LOCALRGB_CAM") + ":"));
+    labgamma->show();
+    wbgammaMethod = Gtk::manage(new MyComboBoxText());
+    wbgammaMethod->append(M("TP_LOCALWBCAM_NONE"));
+    wbgammaMethod->append(M("TP_LOCALWBCAM_GAM"));
+    wbgammaMethod->set_active(1);
+    wbgammaMethodConn = wbgammaMethod->signal_changed().connect(sigc::mem_fun(*this, &WhiteBalance::wbgammaMethodChanged));
+    wbgammaMethod->set_tooltip_markup(M("TP_LOCALWBCAM_TOOLTIP"));
+    wbgammaMethod->show();
+    gammabox->pack_start(*labgamma, Gtk::PACK_SHRINK, 4);
+    gammabox->pack_start(*wbgammaMethod);
 
-    pack_start(*cambox);
+    pack_start(*gammabox);
 
 
     Gtk::HBox* spotbox = Gtk::manage(new Gtk::HBox());
@@ -428,7 +426,7 @@ void WhiteBalance::adjusterChanged(Adjuster* a, double newval)
         methconn.block(true);
         opt = setActiveMethod(wbCustom.second.GUILabel);
         tempBias->set_sensitive(false);
-        wbcamMethod->set_sensitive(false);
+        wbgammaMethod->set_sensitive(false);
 
         cache_customWB(tVal, gVal);
 
@@ -493,7 +491,7 @@ void WhiteBalance::optChanged()
             const WBEntry& currMethod = WBParams::getWbEntries()[methodId];
 
             tempBias->set_sensitive(currMethod.type == WBEntry::Type::AUTO);
-            wbcamMethod->set_sensitive(currMethod.type == WBEntry::Type::AUTO);
+            wbgammaMethod->set_sensitive(currMethod.type == WBEntry::Type::AUTO);
 
 
             switch (currMethod.type) {
@@ -611,8 +609,8 @@ void WhiteBalance::read(const ProcParams* pp, const ParamsEdited* pedited)
         tempBias->setEditedState(pedited->wb.tempBias ? Edited : UnEdited);
         set_inconsistent(multiImage && !pedited->wb.enabled);
 
-        if (!pedited->wb.wbcamMethod) {
-            wbcamMethod->set_active_text(M("GENERAL_UNCHANGED"));
+        if (!pedited->wb.wbgammaMethod) {
+            wbgammaMethod->set_active_text(M("GENERAL_UNCHANGED"));
         }
 
     }
@@ -725,27 +723,21 @@ void WhiteBalance::read(const ProcParams* pp, const ParamsEdited* pedited)
         }
 
         tempBias->set_sensitive(wbValues.type == WBEntry::Type::AUTO);
-        wbcamMethod->set_sensitive(wbValues.type == WBEntry::Type::AUTO);
+        wbgammaMethod->set_sensitive(wbValues.type == WBEntry::Type::AUTO);
 
     }
 
-    wbcamMethodConn.block(true);
+    wbgammaMethodConn.block(true);
 
-    if (pp->wb.wbcamMethod == "none") {
-        wbcamMethod->set_active(0);
-    } else if (pp->wb.wbcamMethod == "gam") {
-        wbcamMethod->set_active(1);
-        /*
-        } else if (pp->wb.wbcamMethod == "cat") {
-        wbcamMethod->set_active (2);
-        } else if (pp->wb.wbcamMethod == "gamcat") {
-        wbcamMethod->set_active (3);
-        */
+    if (pp->wb.wbgammaMethod == "none") {
+        wbgammaMethod->set_active(0);
+    } else if (pp->wb.wbgammaMethod == "gam") {
+        wbgammaMethod->set_active(1);
     }
 
-    wbcamMethodConn.block(false);
+    wbgammaMethodConn.block(false);
 
-    wbcamMethodChanged();
+    wbgammaMethodChanged();
     setEnabled(pp->wb.enabled);
 
     if (pedited) {
@@ -767,7 +759,7 @@ void WhiteBalance::write(ProcParams* pp, ParamsEdited* pedited)
         pedited->wb.equal = equal->getEditedState();
         pedited->wb.tempBias = tempBias->getEditedState();
         pedited->wb.method = row[methodColumns.colLabel] != M("GENERAL_UNCHANGED");
-        pedited->wb.wbcamMethod    = wbcamMethod->get_active_text() != M("GENERAL_UNCHANGED");
+        pedited->wb.wbgammaMethod    = wbgammaMethod->get_active_text() != M("GENERAL_UNCHANGED");
         pedited->wb.enabled = !get_inconsistent();
 
     }
@@ -785,27 +777,22 @@ void WhiteBalance::write(ProcParams* pp, ParamsEdited* pedited)
     pp->wb.equal = equal->getValue();
     pp->wb.tempBias = tempBias->getValue();
 
-    if (wbcamMethod->get_active_row_number() == 0) {
-        pp->wb.wbcamMethod = "none";
-    } else if (wbcamMethod->get_active_row_number() == 1) {
-        pp->wb.wbcamMethod = "gam";
-        /*    } else if (wbcamMethod->get_active_row_number() == 2) {
-                pp->wb.wbcamMethod = "cat";
-            } else if (wbcamMethod->get_active_row_number() == 3) {
-                pp->wb.wbcamMethod = "gamcat";
-        */
+    if (wbgammaMethod->get_active_row_number() == 0) {
+        pp->wb.wbgammaMethod = "none";
+    } else if (wbgammaMethod->get_active_row_number() == 1) {
+        pp->wb.wbgammaMethod = "gam";
     }
 
 
 }
 
-void WhiteBalance::wbcamMethodChanged()
+void WhiteBalance::wbgammaMethodChanged()
 {
     if (!batchMode) {
     }
 
     if (listener) {
-        listener->panelChanged(EvWBcamMethod, wbcamMethod->get_active_text());
+        listener->panelChanged(EvWBcamMethod, wbgammaMethod->get_active_text());
     }
 }
 

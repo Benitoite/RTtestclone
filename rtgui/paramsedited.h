@@ -252,7 +252,7 @@ public:
     bool green;
     bool equal;
     bool tempBias;
-    bool wbcamMethod;
+    bool wbgammaMethod;
 
 };
 

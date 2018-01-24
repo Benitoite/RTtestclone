@@ -237,7 +237,7 @@ void ParamsEdited::set(bool v)
     wb.temperature             = v;
     wb.equal                   = v;
     wb.tempBias                = v;
-    wb.wbcamMethod                = v;
+    wb.wbgammaMethod           = v;
 
     //colorShift.a               = v;
     //colorShift.b               = v;
@@ -834,7 +834,7 @@ void ParamsEdited::initFrom(const std::vector<rtengine::procparams::ProcParams>&
         wb.equal = wb.equal && p.wb.equal == other.wb.equal;
         wb.temperature = wb.temperature && p.wb.temperature == other.wb.temperature;
         wb.tempBias = wb.tempBias && p.wb.tempBias == other.wb.tempBias;
-        wb.wbcamMethod = wb.wbcamMethod && p.wb.wbcamMethod == other.wb.wbcamMethod;
+        wb.wbgammaMethod = wb.wbgammaMethod && p.wb.wbgammaMethod == other.wb.wbgammaMethod;
 
 
         //colorShift.a = colorShift.a && p.colorShift.a == other.colorShift.a;
@@ -1834,8 +1834,8 @@ void ParamsEdited::combine(rtengine::procparams::ProcParams& toEdit, const rteng
         toEdit.wb.method  = mods.wb.method;
     }
 
-    if (wb.wbcamMethod) {
-        toEdit.wb.wbcamMethod  = mods.wb.wbcamMethod;
+    if (wb.wbgammaMethod) {
+        toEdit.wb.wbgammaMethod  = mods.wb.wbgammaMethod;
     }
 
 

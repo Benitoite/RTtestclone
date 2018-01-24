@@ -569,7 +569,7 @@ struct WBParams {
     double          green;
     double          equal;
     double          tempBias;
-    Glib::ustring   wbcamMethod;
+    Glib::ustring   wbgammaMethod;
 
     WBParams();
 
