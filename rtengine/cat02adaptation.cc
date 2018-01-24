@@ -1,5 +1,5 @@
 /*  -*- C++ -*-
- *  
+ *
  *  This file is part of RawTherapee.
  *
  *  Copyright (c) 2004-2010 Gabor Horvath <hgabor@rawtherapee.com>
@@ -25,11 +25,13 @@
 #include "improcfun.h"
 #include "StopWatch.h"
 
-namespace rtengine {
+namespace rtengine
+{
 
 extern const Settings* settings;
 
-namespace {
+namespace
+{
 
 void ciecamcat02loc_float(LabImage* lab, LabImage* dest, int tempa, double gree, int cat_02, const ColorManagementParams &cmp, const ColorAppearanceParams &cap)
 {
@@ -349,27 +351,33 @@ void cat02adaptationAutoCompute(ImageSource *imgsrc, ProcParams &params)
         ada = powf(2.f, E_V - 3.f);  // cd / m2
         // end calculation adaptation scene luminosity
     }
-		
+
     int cat0 = 100;
 
     //printf("temp=%i \n", params.wb.temperature);
-    if (params.wb.temperature < 4000  || params.wb.temperature > 20000) { //20000 arbitrary value - no test enough
+    if (params.wb.temperature < 4000  || params.wb.temperature > 15000) { //15000 arbitrary value
+        float kunder = 1.f;
+
+        if (params.wb.temperature > 20000) {
+            kunder = 0.05f;    //underwater photos
+        }
+
         if (ada < 5.f) {
             cat0 = 1;
         } else if (ada < 10.f) {
-            cat0 = 2;
+            cat0 = 2 * kunder;
         } else if (ada < 15.f) {
-            cat0 = 3;
+            cat0 = 3 * kunder;
         } else if (ada < 30.f) {
-            cat0 = 5;
+            cat0 = 5 * kunder;
         } else if (ada < 100.f) {
-            cat0 = 50;
+            cat0 = 50 * kunder;
         } else if (ada < 300.f) {
-            cat0 = 80;
+            cat0 = 80 * kunder;
         } else if (ada < 500.f) {
-            cat0 = 90;
+            cat0 = 90 * kunder;
         } else if (ada < 3000.f) {
-            cat0 = 95;
+            cat0 = 95 * kunder;
         }
     } else {
         if (ada < 5.f) {
@@ -467,7 +475,7 @@ void cat02adaptation(Imagefloat *image, float gain, const ProcParams &params)
                 float X, Y, Z;
                 float LR, aR, bR;
                 //Color::gammatab_srgb[ try with but not good results
-				// I add gain to best results
+                // I add gain to best results
                 Color::rgbxyz(gain * image->r(y, x), gain * image->g(y, x), gain * image->b(y, x), X, Y, Z, wp);
                 Color::XYZ2Lab(X, Y, Z, LR, aR, bR);
                 bufcat02->L[y][x] = LR;
