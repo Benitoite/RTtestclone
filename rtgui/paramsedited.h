@@ -293,15 +293,15 @@ public:
     bool thresh;
 };
 
-class Cat02adapParamsEdited
+class CAT02AdaptationParamsEdited
 {
 
 public:
     bool enabled;
-    bool cat02;
-    bool autocat02;
-    bool gree;
-    bool autogree;
+    bool amount;
+    bool autoAmount;
+    bool luminanceScaling;
+    bool autoLuminanceScaling;
 
 };
 
@@ -848,7 +848,7 @@ public:
     EPDParamsEdited               epd;
     FattalToneMappingParamsEdited fattal;
     ImpulseDenoiseParamsEdited    impulseDenoise;
-    Cat02adapParamsEdited         cat02adap;
+    CAT02AdaptationParamsEdited   cat02adap;
     SHParamsEdited                sh;
     CropParamsEdited              crop;
     CoarseTransformParamsEdited   coarse;

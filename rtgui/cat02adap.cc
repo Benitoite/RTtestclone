@@ -20,43 +20,50 @@
 #include <cmath>
 #include <iomanip>
 #include "guiutils.h"
+#include "eventmapper.h"
 
 using namespace rtengine;
 using namespace rtengine::procparams;
 
-Cat02adap::Cat02adap() : FoldableToolPanel(this, "cat02adap", M("TP_CAT02_LABEL"), true, true)
+CAT02Adaptation::CAT02Adaptation(): FoldableToolPanel(this, "cat02adap", M("TP_CAT02ADAPTATION_LABEL"), true, true)
 {
+    auto m = ProcEventMapper::getInstance();
+    EvCAT02AdaptationEnabled = m->newEvent(ALLNORAW, "HISTORY_MSG_CAT02ADAPTATION_ENABLED");
+    EvCAT02AdaptationAmount = m->newEvent(ALLNORAW, "HISTORY_MSG_CAT02ADAPTATION_AMOUNT");
+    EvCAT02AdaptationAutoAmount = m->newEvent(ALLNORAW, "HISTORY_MSG_CAT02ADAPTATION_AUTO_AMOUNT");
+    EvCAT02AdaptationLuminanceScaling = m->newEvent(ALLNORAW, "HISTORY_MSG_CAT02ADAPTATION_LUMINANCE_SCALING");
+    EvCAT02AdaptationAutoLuminanceScaling = m->newEvent(ALLNORAW, "HISTORY_MSG_CAT02ADAPTATION_AUTO_LUMINANCE_SCALING");
+    
+    amount = Gtk::manage(new Adjuster(M("TP_CAT02ADAPTATION_AMOUNT"), 0, 100, 1, 0));
 
-    cat02 = Gtk::manage(new Adjuster(M("TP_CAT02_SLI"), 0, 100, 1, 0));
-
-    if (cat02->delay < options.adjusterMaxDelay) {
-        cat02->delay = options.adjusterMaxDelay;
+    if (amount->delay < options.adjusterMaxDelay) {
+        amount->delay = options.adjusterMaxDelay;
     }
 
-    cat02->throwOnButtonRelease();
-    cat02->addAutoButton(M("TP_CAT02_DEGREE_AUTO_TOOLTIP"));
-    cat02->set_tooltip_markup(M("TP_CAT02_CAT_TOOLTIP"));
+    amount->throwOnButtonRelease();
+    amount->addAutoButton(M("TP_CAT02ADAPTATION_AUTO_AMOUNT_TOOLTIP"));
+    amount->set_tooltip_markup(M("TP_CAT02ADAPTATION_AMOUNT_TOOLTIP"));
 
-    pack_start(*cat02);
+    pack_start(*amount);
 
-    cat02->setAdjusterListener(this);
+    amount->setAdjusterListener(this);
 
-    gree = Gtk::manage(new Adjuster(M("TP_CAT02_GREE"), 0.9, 1.1, 0.001, 1));
+    luminanceScaling = Gtk::manage(new Adjuster(M("TP_CAT02ADAPTATION_LUMINANCE_SCALING"), 0.9, 1.1, 0.001, 1));
 
-    if (gree->delay < options.adjusterMaxDelay) {
-        gree->delay = options.adjusterMaxDelay;
+    if (luminanceScaling->delay < options.adjusterMaxDelay) {
+        luminanceScaling->delay = options.adjusterMaxDelay;
     }
 
-    gree->throwOnButtonRelease();
-    gree->addAutoButton(M("TP_CAT02_DEGREE_AUTO_TOOLTIP"));
-    gree->set_tooltip_markup(M("TP_CAT02_GREE_TOOLTIP"));
+    luminanceScaling->throwOnButtonRelease();
+    luminanceScaling->addAutoButton(M("TP_CAT02ADAPTATION_AUTO_LUMINANCE_SCALING_TOOLTIP"));
+    luminanceScaling->set_tooltip_markup(M("TP_CAT02ADAPTATION_LUMINANCE_SCALING_TOOLTIP"));
 
-    labena = Gtk::manage(new Gtk::Label(M("TP_CAT02_CIECAM_ENA")));
-    labdis = Gtk::manage(new Gtk::Label(M("TP_CAT02_CIECAM_DISA")));
+    labena = Gtk::manage(new Gtk::Label(M("TP_CAT02ADAPTATION_CIECAM_ENABLED")));
+    labdis = Gtk::manage(new Gtk::Label(M("TP_CAT02ADAPTATION_CIECAM_DISABLED")));
 
-    gree->setAdjusterListener(this);
+    luminanceScaling->setAdjusterListener(this);
 
-    pack_start(*gree);
+    pack_start(*luminanceScaling);
 
     pack_start(*labena);
     pack_start(*labdis);
@@ -66,125 +73,125 @@ Cat02adap::Cat02adap() : FoldableToolPanel(this, "cat02adap", M("TP_CAT02_LABEL"
     labdis->hide();
 }
 
-void Cat02adap::read(const ProcParams* pp, const ParamsEdited* pedited)
+void CAT02Adaptation::read(const ProcParams* pp, const ParamsEdited* pedited)
 {
 
     disableListener();
 
     if (pedited) {
-        cat02->setEditedState(pedited->cat02adap.cat02 ? Edited : UnEdited);
-        cat02->setAutoInconsistent(multiImage && !pedited->cat02adap.autocat02);
+        amount->setEditedState(pedited->cat02adap.amount ? Edited : UnEdited);
+        amount->setAutoInconsistent(multiImage && !pedited->cat02adap.autoAmount);
 
         set_inconsistent(multiImage && !pedited->cat02adap.enabled);
-        gree->setEditedState(pedited->cat02adap.gree ? Edited : UnEdited);
-        gree->setAutoInconsistent(multiImage && !pedited->cat02adap.autogree);
+        luminanceScaling->setEditedState(pedited->cat02adap.luminanceScaling ? Edited : UnEdited);
+        luminanceScaling->setAutoInconsistent(multiImage && !pedited->cat02adap.autoLuminanceScaling);
 
     }
 
-    lastAutocat02 = pp->cat02adap.autocat02;
-    lastAutogree = pp->cat02adap.autogree;
+    lastAutoAmount = pp->cat02adap.autoAmount;
+    lastAutoLuminanceScaling = pp->cat02adap.autoLuminanceScaling;
 
     setEnabled(pp->cat02adap.enabled);
 
-    cat02->setValue(pp->cat02adap.cat02);
-    cat02->setAutoValue(pp->cat02adap.autocat02);
-    gree->setValue(pp->cat02adap.gree);
-    gree->setAutoValue(pp->cat02adap.autogree);
+    amount->setValue(pp->cat02adap.amount);
+    amount->setAutoValue(pp->cat02adap.autoAmount);
+    luminanceScaling->setValue(pp->cat02adap.luminanceScaling);
+    luminanceScaling->setAutoValue(pp->cat02adap.autoLuminanceScaling);
 
     enableListener();
 }
 
-void Cat02adap::write(ProcParams* pp, ParamsEdited* pedited)
+void CAT02Adaptation::write(ProcParams* pp, ParamsEdited* pedited)
 {
 
-    pp->cat02adap.cat02    = cat02->getValue();
+    pp->cat02adap.amount    = amount->getValue();
     pp->cat02adap.enabled   = getEnabled();
-    pp->cat02adap.autocat02  = cat02->getAutoValue();
-    pp->cat02adap.gree    = gree->getValue();
-    pp->cat02adap.autogree  = gree->getAutoValue();
+    pp->cat02adap.autoAmount  = amount->getAutoValue();
+    pp->cat02adap.luminanceScaling    = luminanceScaling->getValue();
+    pp->cat02adap.autoLuminanceScaling  = luminanceScaling->getAutoValue();
 
     if (pedited) {
-        pedited->cat02adap.cat02        = cat02->getEditedState();
+        pedited->cat02adap.amount        = amount->getEditedState();
         pedited->cat02adap.enabled       = !get_inconsistent();
-        pedited->cat02adap.autocat02  = !cat02->getAutoInconsistent();
-        pedited->cat02adap.gree        = gree->getEditedState();
-        pedited->cat02adap.autogree  = !gree->getAutoInconsistent();
+        pedited->cat02adap.autoAmount  = !amount->getAutoInconsistent();
+        pedited->cat02adap.luminanceScaling        = luminanceScaling->getEditedState();
+        pedited->cat02adap.autoLuminanceScaling  = !luminanceScaling->getAutoInconsistent();
 
     }
 }
 
-void Cat02adap::setDefaults(const ProcParams* defParams, const ParamsEdited* pedited)
+void CAT02Adaptation::setDefaults(const ProcParams* defParams, const ParamsEdited* pedited)
 {
 
-    cat02->setDefault(defParams->cat02adap.cat02);
-    gree->setDefault(defParams->cat02adap.gree);
+    amount->setDefault(defParams->cat02adap.amount);
+    luminanceScaling->setDefault(defParams->cat02adap.luminanceScaling);
 
     if (pedited) {
-        cat02->setDefaultEditedState(pedited->cat02adap.cat02 ? Edited : UnEdited);
-        gree->setDefaultEditedState(pedited->cat02adap.gree ? Edited : UnEdited);
+        amount->setDefaultEditedState(pedited->cat02adap.amount ? Edited : UnEdited);
+        luminanceScaling->setDefaultEditedState(pedited->cat02adap.luminanceScaling ? Edited : UnEdited);
     } else {
-        cat02->setDefaultEditedState(Irrelevant);
-        gree->setDefaultEditedState(Irrelevant);
+        amount->setDefaultEditedState(Irrelevant);
+        luminanceScaling->setDefaultEditedState(Irrelevant);
     }
 }
 
-void Cat02adap::adjusterChanged(Adjuster* a, double newval)
+void CAT02Adaptation::adjusterChanged(Adjuster* a, double newval)
 {
 
     if (listener && getEnabled()) {
-        if (a == cat02) {
-            listener->panelChanged(EvCat02cat02, cat02->getTextValue());
-        } else if (a == gree) {
-            listener->panelChanged(EvCat02gree, gree->getTextValue());
+        if (a == amount) {
+            listener->panelChanged(EvCAT02AdaptationAmount, amount->getTextValue());
+        } else if (a == luminanceScaling) {
+            listener->panelChanged(EvCAT02AdaptationLuminanceScaling, luminanceScaling->getTextValue());
         }
 
         //listener->panelChanged(EvCat02cat02, Glib::ustring::format(std::setw(2), std::fixed, std::setprecision(1), a->getValue()));
     }
 }
 
-void Cat02adap::adjusterAutoToggled(Adjuster* a, bool newval)
+void CAT02Adaptation::adjusterAutoToggled(Adjuster* a, bool newval)
 {
 
     if (multiImage) {
-        if (cat02->getAutoInconsistent()) {
-            cat02->setAutoInconsistent(false);
-            cat02->setAutoValue(false);
-        } else if (lastAutocat02) {
-            cat02->setAutoInconsistent(true);
+        if (amount->getAutoInconsistent()) {
+            amount->setAutoInconsistent(false);
+            amount->setAutoValue(false);
+        } else if (lastAutoAmount) {
+            amount->setAutoInconsistent(true);
         }
 
-        lastAutocat02 = cat02->getAutoValue();
+        lastAutoAmount = amount->getAutoValue();
 
-        if (gree->getAutoInconsistent()) {
-            gree->setAutoInconsistent(false);
-            gree->setAutoValue(false);
-        } else if (lastAutogree) {
-            gree->setAutoInconsistent(true);
+        if (luminanceScaling->getAutoInconsistent()) {
+            luminanceScaling->setAutoInconsistent(false);
+            luminanceScaling->setAutoValue(false);
+        } else if (lastAutoLuminanceScaling) {
+            luminanceScaling->setAutoInconsistent(true);
         }
 
-        lastAutogree = gree->getAutoValue();
+        lastAutoLuminanceScaling = luminanceScaling->getAutoValue();
 
     }
 
     if (listener && (multiImage || getEnabled())) {
 
-        if (a == cat02) {
-            if (cat02->getAutoInconsistent()) {
-                listener->panelChanged(EvCATAutocat02, M("GENERAL_UNCHANGED"));
-            } else if (cat02->getAutoValue()) {
-                listener->panelChanged(EvCATAutocat02, M("GENERAL_ENABLED"));
+        if (a == amount) {
+            if (amount->getAutoInconsistent()) {
+                listener->panelChanged(EvCAT02AdaptationAutoAmount, M("GENERAL_UNCHANGED"));
+            } else if (amount->getAutoValue()) {
+                listener->panelChanged(EvCAT02AdaptationAutoAmount, M("GENERAL_ENABLED"));
             } else {
-                listener->panelChanged(EvCATAutocat02, M("GENERAL_DISABLED"));
+                listener->panelChanged(EvCAT02AdaptationAutoAmount, M("GENERAL_DISABLED"));
             }
         }
 
-        if (a == gree) {
-            if (gree->getAutoInconsistent()) {
-                listener->panelChanged(EvCATAutogree, M("GENERAL_UNCHANGED"));
-            } else if (gree->getAutoValue()) {
-                listener->panelChanged(EvCATAutogree, M("GENERAL_ENABLED"));
+        if (a == luminanceScaling) {
+            if (luminanceScaling->getAutoInconsistent()) {
+                listener->panelChanged(EvCAT02AdaptationAutoLuminanceScaling, M("GENERAL_UNCHANGED"));
+            } else if (luminanceScaling->getAutoValue()) {
+                listener->panelChanged(EvCAT02AdaptationAutoLuminanceScaling, M("GENERAL_ENABLED"));
             } else {
-                listener->panelChanged(EvCATAutogree, M("GENERAL_DISABLED"));
+                listener->panelChanged(EvCAT02AdaptationAutoLuminanceScaling, M("GENERAL_DISABLED"));
             }
         }
 
@@ -194,27 +201,27 @@ void Cat02adap::adjusterAutoToggled(Adjuster* a, bool newval)
     }
 }
 
-void Cat02adap::cat02catChanged(int cat, int ciecam)
+void CAT02Adaptation::cat02AmountChanged(int amount, bool ciecamEnabled)
 {
-    nextCadap = cat;
-    nextciecam = ciecam;
+    nextAmount = amount;
+    nextciecam = ciecamEnabled;
 
     const auto func = [](gpointer data) -> gboolean {
-        static_cast<Cat02adap*>(data)->cat02catComputed_();
+        static_cast<CAT02Adaptation*>(data)->cat02AmountComputed_();
         return FALSE;
     };
 
     idle_register.add(func, this);
 }
 
-bool Cat02adap::cat02catComputed_()
+bool CAT02Adaptation::cat02AmountComputed_()
 {
 
     disableListener();
-    cat02->setValue(nextCadap);
+    amount->setValue(nextAmount);
     labdis->hide();
 
-    if (nextciecam == 1) {
+    if (nextciecam) {
         labena->show();
         labdis->hide();
     } else {
@@ -227,58 +234,51 @@ bool Cat02adap::cat02catComputed_()
     return false;
 }
 
-void Cat02adap::cat02greeChanged(double gree)
+void CAT02Adaptation::cat02LuminanceScalingChanged(double scaling)
 {
-    nextGree = gree;
+    nextLuminanceScaling = scaling;
 
     const auto func = [](gpointer data) -> gboolean {
-        static_cast<Cat02adap*>(data)->cat02greeComputed_();
+        static_cast<CAT02Adaptation*>(data)->cat02LuminanceScalingComputed_();
         return FALSE;
     };
 
     idle_register.add(func, this);
 }
 
-bool Cat02adap::cat02greeComputed_()
+bool CAT02Adaptation::cat02LuminanceScalingComputed_()
 {
 
     disableListener();
-    gree->setValue(nextGree);
+    luminanceScaling->setValue(nextLuminanceScaling);
     enableListener();
 
     return false;
 }
 
-void Cat02adap::enabledChanged()
+void CAT02Adaptation::enabledChanged()
 {
     if (listener) {
         if (get_inconsistent()) {
-            listener->panelChanged(EvCat02enabled, M("GENERAL_UNCHANGED"));
+            listener->panelChanged(EvCAT02AdaptationEnabled, M("GENERAL_UNCHANGED"));
         } else if (getEnabled()) {
-            listener->panelChanged(EvCat02enabled, M("GENERAL_ENABLED"));
+            listener->panelChanged(EvCAT02AdaptationEnabled, M("GENERAL_ENABLED"));
         } else {
-            listener->panelChanged(EvCat02enabled, M("GENERAL_DISABLED"));
+            listener->panelChanged(EvCAT02AdaptationEnabled, M("GENERAL_DISABLED"));
         }
     }
 }
 
-void Cat02adap::setBatchMode(bool batchMode)
+void CAT02Adaptation::setBatchMode(bool batchMode)
 {
 
     ToolPanel::setBatchMode(batchMode);
-    cat02->showEditedCB();
-    gree->showEditedCB();
+    amount->showEditedCB();
+    luminanceScaling->showEditedCB();
 }
-/*
-void Cat02adap::setAdjusterBehavior (bool cat02add)
-{
 
-    cat02->setAddMode(cat02add);
-}
-*/
-void Cat02adap::trimValues(rtengine::procparams::ProcParams* pp)
+void CAT02Adaptation::trimValues(rtengine::procparams::ProcParams* pp)
 {
-    gree->trimValue(pp->cat02adap.cat02);
-
-    cat02->trimValue(pp->cat02adap.cat02);
+    luminanceScaling->trimValue(pp->cat02adap.amount);
+    amount->trimValue(pp->cat02adap.amount);
 }

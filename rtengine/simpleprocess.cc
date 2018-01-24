@@ -29,6 +29,7 @@
 #include "rawimagesource.h"
 #include "../rtgui/multilangmgr.h"
 #include "mytime.h"
+#include "cat02adaptation.h"
 #undef THREAD_PRIORITY_NORMAL
 
 namespace rtengine
@@ -251,6 +252,13 @@ private:
             currWB.update (rm, gm, bm, params.wb.equal, params.wb.tempBias);
         }
 
+        if (params.wb.enabled) {
+            params.wb.temperature = currWB.getTemp();
+            params.wb.green = currWB.getGreen();
+        }
+
+        cat02adaptationAutoCompute(imgsrc, params);        
+
         calclum = nullptr ;
         params.dirpyrDenoise.getCurves (noiseLCurve, noiseCCurve);
         autoNR = (float) settings->nrauto;//
@@ -338,8 +346,7 @@ private:
                             int beg_tileW = wcr * tileWskip + tileWskip / 2.f - crW / 2.f;
                             int beg_tileH = hcr * tileHskip + tileHskip / 2.f - crH / 2.f;
                             PreviewProps ppP (beg_tileW, beg_tileH, crW, crH, skipP);
-                        //    imgsrc->getImage (currWB, tr, origCropPart, ppP, params.toneCurve, params.raw );
-                            imgsrc->getImage(currWB, tr, origCropPart, ppP, params.toneCurve, params.icm, params.raw, params.wb, params.colorappearance, params.cat02adap);
+                            imgsrc->getImage(currWB, tr, origCropPart, ppP, params);
                             //baseImg->getStdImage(currWB, tr, origCropPart, ppP, true, params.toneCurve);
 
                             // we only need image reduced to 1/4 here
@@ -559,8 +566,7 @@ private:
                     for (int wcr = 0; wcr <= 2; wcr++) {
                         for (int hcr = 0; hcr <= 2; hcr++) {
                             PreviewProps ppP (coordW[wcr], coordH[hcr], crW, crH, 1);
-                     //       imgsrc->getImage (currWB, tr, origCropPart, ppP, params.toneCurve, params.raw);
-                            imgsrc->getImage(currWB, tr, origCropPart, ppP, params.toneCurve, params.icm, params.raw, params.wb, params.colorappearance, params.cat02adap);
+                            imgsrc->getImage(currWB, tr, origCropPart, ppP, params);
                             //baseImg->getStdImage(currWB, tr, origCropPart, ppP, true, params.toneCurve);
 
 
@@ -720,8 +726,7 @@ private:
         }
 
         baseImg = new Imagefloat (fw, fh);
-      //  imgsrc->getImage (currWB, tr, baseImg, pp, params.toneCurve, params.raw);
-        imgsrc->getImage(currWB, tr, baseImg, pp, params.toneCurve, params.icm, params.raw, params.wb, params.colorappearance, params.cat02adap);
+        imgsrc->getImage(currWB, tr, baseImg, pp, params);
 
         if (pl) {
             pl->setProgress (0.50);

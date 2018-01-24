@@ -1189,28 +1189,28 @@ const std::vector<WBEntry>& WBParams::getWbEntries()
     return wb_entries;
 }
 
-Cat02adapParams::Cat02adapParams() :
+CAT02AdaptationParams::CAT02AdaptationParams() :
     enabled(true),
-    cat02(2),
-    autocat02(true),
-    gree(1.0),
-    autogree(true)
+    amount(2),
+    autoAmount(true),
+    luminanceScaling(1.0),
+    autoLuminanceScaling(true)
 
 {
 }
 
-bool Cat02adapParams::operator ==(const Cat02adapParams& other) const
+bool CAT02AdaptationParams::operator ==(const CAT02AdaptationParams& other) const
 {
     return
         enabled == other.enabled
-        && autocat02 == other.autocat02
-        && cat02 == other.cat02
-        && gree == other.gree
-        && autogree == other.autogree;
+        && autoAmount == other.autoAmount
+        && amount == other.amount
+        && luminanceScaling == other.luminanceScaling
+        && autoLuminanceScaling == other.autoLuminanceScaling;
 
 }
 
-bool Cat02adapParams::operator !=(const Cat02adapParams& other) const
+bool CAT02AdaptationParams::operator !=(const CAT02AdaptationParams& other) const
 {
     return !(*this == other);
 }
@@ -2678,7 +2678,7 @@ void ProcParams::setDefaults ()
 
     wb = WBParams();
 
-    cat02adap = Cat02adapParams();
+    cat02adap = CAT02AdaptationParams();
 	
     colorappearance = ColorAppearanceParams();
 
@@ -3028,11 +3028,11 @@ int ProcParams::save(const Glib::ustring& fname, const Glib::ustring& fname2, bo
         saveToKeyfile(!pedited || pedited->colorappearance.curve3, "Color appearance", "Curve3", colorappearance.curve3, keyFile);
 
 // Cat02 adap
-        saveToKeyfile(!pedited || pedited->cat02adap.enabled, "Cat02adap", "Enabled", cat02adap.enabled, keyFile);
-        saveToKeyfile(!pedited || pedited->cat02adap.cat02, "Cat02adap", "Cat02", cat02adap.cat02, keyFile);
-        saveToKeyfile(!pedited || pedited->cat02adap.autocat02, "Cat02adap", "Autocat02", cat02adap.autocat02, keyFile);
-        saveToKeyfile(!pedited || pedited->cat02adap.gree, "Cat02adap", "Green", cat02adap.gree, keyFile);
-        saveToKeyfile(!pedited || pedited->cat02adap.autogree, "Cat02adap", "Autogree", cat02adap.autogree, keyFile);
+        saveToKeyfile(!pedited || pedited->cat02adap.enabled, "CAT02Adaptation", "Enabled", cat02adap.enabled, keyFile);
+        saveToKeyfile(!pedited || pedited->cat02adap.amount, "CAT02Adaptation", "Amount", cat02adap.amount, keyFile);
+        saveToKeyfile(!pedited || pedited->cat02adap.autoAmount, "CAT02Adaptation", "AutoAmount", cat02adap.autoAmount, keyFile);
+        saveToKeyfile(!pedited || pedited->cat02adap.luminanceScaling, "CAT02Adaptation", "LuminanceScaling", cat02adap.luminanceScaling, keyFile);
+        saveToKeyfile(!pedited || pedited->cat02adap.autoLuminanceScaling, "CAT02Adaptation", "AutoLuminanceScaling", cat02adap.autoLuminanceScaling, keyFile);
 		
 		
 // Impulse denoise
@@ -3930,12 +3930,12 @@ int ProcParams::load(const Glib::ustring& fname, ParamsEdited* pedited)
 
         }
 
-        if (keyFile.has_group("Cat02adap")) {
-            assignFromKeyfile(keyFile, "Cat02adap", "Enabled", pedited, cat02adap.enabled, pedited->cat02adap.enabled);
-            assignFromKeyfile(keyFile, "Cat02adap", "Cat02", pedited, cat02adap.cat02, pedited->cat02adap.cat02);
-            assignFromKeyfile(keyFile, "Cat02adap", "Autocat02", pedited, cat02adap.autocat02, pedited->cat02adap.autocat02);
-            assignFromKeyfile(keyFile, "Cat02adap", "Green", pedited, cat02adap.gree, pedited->cat02adap.gree);
-            assignFromKeyfile(keyFile, "Cat02adap", "Autogree", pedited, cat02adap.autogree, pedited->cat02adap.autogree);
+        if (keyFile.has_group("CAT02Adaptation")) {
+            assignFromKeyfile(keyFile, "CAT02Adaptation", "Enabled", pedited, cat02adap.enabled, pedited->cat02adap.enabled);
+            assignFromKeyfile(keyFile, "CAT02Adaptation", "Amount", pedited, cat02adap.amount, pedited->cat02adap.amount);
+            assignFromKeyfile(keyFile, "CAT02Adaptation", "AutoAmount", pedited, cat02adap.autoAmount, pedited->cat02adap.autoAmount);
+            assignFromKeyfile(keyFile, "CAT02Adaptation", "LuminanceScaling", pedited, cat02adap.luminanceScaling, pedited->cat02adap.luminanceScaling);
+            assignFromKeyfile(keyFile, "CAT02Adaptation", "AutoLuminanceScaling", pedited, cat02adap.autoLuminanceScaling, pedited->cat02adap.autoLuminanceScaling);
         }
 		
 		

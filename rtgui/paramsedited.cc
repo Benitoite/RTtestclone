@@ -237,11 +237,11 @@ void ParamsEdited::set (bool v)
     wb.temperature             = v;
     wb.equal                   = v;
     wb.tempBias                = v;
-    cat02adap.enabled     = v;
-    cat02adap.cat02      = v;
-    cat02adap.autocat02      = v;
-    cat02adap.gree      = v;
-    cat02adap.autogree      = v;
+    cat02adap.enabled = v;
+    cat02adap.amount = v;
+    cat02adap.autoAmount = v;
+    cat02adap.luminanceScaling = v;
+    cat02adap.autoLuminanceScaling = v;
 	
 	
     //colorShift.a               = v;
@@ -803,10 +803,10 @@ void ParamsEdited::initFrom (const std::vector<rtengine::procparams::ProcParams>
         wb.tempBias = wb.tempBias && p.wb.tempBias == other.wb.tempBias;
 
         cat02adap.enabled = cat02adap.enabled && p.cat02adap.enabled == other.cat02adap.enabled;
-        cat02adap.cat02 = cat02adap.cat02 && p.cat02adap.cat02 == other.cat02adap.cat02;
-        cat02adap.autocat02 = cat02adap.autocat02 && p.cat02adap.autocat02 == other.cat02adap.autocat02;
-        cat02adap.gree = cat02adap.gree && p.cat02adap.gree == other.cat02adap.gree;
-        cat02adap.autogree = cat02adap.autogree && p.cat02adap.autogree == other.cat02adap.autogree;
+        cat02adap.amount = cat02adap.amount && p.cat02adap.amount == other.cat02adap.amount;
+        cat02adap.autoAmount = cat02adap.autoAmount && p.cat02adap.autoAmount == other.cat02adap.autoAmount;
+        cat02adap.luminanceScaling = cat02adap.luminanceScaling && p.cat02adap.luminanceScaling == other.cat02adap.luminanceScaling;
+        cat02adap.autoLuminanceScaling = cat02adap.autoLuminanceScaling && p.cat02adap.autoLuminanceScaling == other.cat02adap.autoLuminanceScaling;
 
         //colorShift.a = colorShift.a && p.colorShift.a == other.colorShift.a;
         //colorShift.b = colorShift.b && p.colorShift.b == other.colorShift.b;
@@ -1781,20 +1781,20 @@ void ParamsEdited::combine (rtengine::procparams::ProcParams& toEdit, const rten
         toEdit.cat02adap.enabled     = mods.cat02adap.enabled;
     }
 
-    if (cat02adap.gree) {
-        toEdit.cat02adap.gree     = mods.cat02adap.gree;
+    if (cat02adap.luminanceScaling) {
+        toEdit.cat02adap.luminanceScaling     = mods.cat02adap.luminanceScaling;
     }
 
-    if (cat02adap.autocat02) {
-        toEdit.cat02adap.autocat02   = mods.cat02adap.autocat02;
+    if (cat02adap.autoAmount) {
+        toEdit.cat02adap.autoAmount   = mods.cat02adap.autoAmount;
     }
 
-    if (cat02adap.cat02) {
-        toEdit.cat02adap.cat02  = mods.cat02adap.cat02;
+    if (cat02adap.amount) {
+        toEdit.cat02adap.amount  = mods.cat02adap.amount;
     }
 
-    if (cat02adap.autogree) {
-        toEdit.cat02adap.autogree   = mods.cat02adap.autogree;
+    if (cat02adap.autoLuminanceScaling) {
+        toEdit.cat02adap.autoLuminanceScaling   = mods.cat02adap.autoLuminanceScaling;
     }
 	
 	

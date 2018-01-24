@@ -1,4 +1,5 @@
-/*
+/*  -*- C++ -*-
+ *  
  *  This file is part of RawTherapee.
  *
  *  Copyright (c) 2004-2010 Gabor Horvath <hgabor@rawtherapee.com>
@@ -16,35 +17,33 @@
  *  You should have received a copy of the GNU General Public License
  *  along with RawTherapee.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef _CAT02ADAP_H_
-#define _CAT02ADAP_H_
+#pragma once
 
 #include <gtkmm.h>
 #include "adjuster.h"
 #include "toolpanel.h"
 
-class Cat02adap :
-    public ToolParamBlock,
-    public AdjusterListener,
-    public rtengine::AutocatListener,
-    public FoldableToolPanel
-{
-
-protected:
-    Adjuster* cat02;
-    Adjuster* gree;
-    bool lastAutocat02;
-    bool lastAutogree;
+class CAT02Adaptation: public ToolParamBlock, public AdjusterListener, public rtengine::AutoCAT02Listener, public FoldableToolPanel {
+private:
+    Adjuster* amount;
+    Adjuster* luminanceScaling;
+    bool lastAutoAmount;
+    bool lastAutoLuminanceScaling;
     IdleRegister idle_register;
-    int nextCadap;
-    int nextciecam;
-    double nextGree;
+    int nextAmount;
+    bool nextciecam;
+    double nextLuminanceScaling;
     Gtk::Label* labena;
     Gtk::Label* labdis;
 
+    rtengine::ProcEvent EvCAT02AdaptationEnabled;
+    rtengine::ProcEvent EvCAT02AdaptationAmount;
+    rtengine::ProcEvent EvCAT02AdaptationAutoAmount;
+    rtengine::ProcEvent EvCAT02AdaptationLuminanceScaling;
+    rtengine::ProcEvent EvCAT02AdaptationAutoLuminanceScaling;
+    
 public:
-
-    Cat02adap();
+    CAT02Adaptation();
 
     void read(const rtengine::procparams::ProcParams* pp, const ParamsEdited* pedited = nullptr);
     void write(rtengine::procparams::ProcParams* pp, ParamsEdited* pedited = nullptr);
@@ -55,13 +54,10 @@ public:
     void adjusterAutoToggled(Adjuster* a, bool newval);
 
     void enabledChanged();
-    void cat02catChanged(int cat, int ciecam);
-    bool cat02catComputed_();
-    void cat02greeChanged(double gree);
-    bool cat02greeComputed_();
+    void cat02AmountChanged(int amount, bool ciecamEnabled);
+    bool cat02AmountComputed_();
+    void cat02LuminanceScalingChanged(double scaling);
+    bool cat02LuminanceScalingComputed_();
 
-//    void setAdjusterBehavior (bool threshadd);
     void trimValues(rtengine::procparams::ProcParams* pp);
 };
-
-#endif

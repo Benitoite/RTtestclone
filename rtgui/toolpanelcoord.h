@@ -124,7 +124,7 @@ protected:
     LocalContrast *localContrast;
     Defringe* defringe;
     ImpulseDenoise* impulsedenoise;
-    Cat02adap* cat02adap;
+    CAT02Adaptation* cat02adap;
     DirPyrDenoise* dirpyrdenoise;
     EdgePreservingDecompositionUI *epd;
     Sharpening* sharpening;

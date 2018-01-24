@@ -583,16 +583,16 @@ struct WBParams {
 /**
   * Parameters of cat02adap
   */
-struct Cat02adapParams {
+struct CAT02AdaptationParams {
     bool    enabled;
-    int     cat02;
-    bool          autocat02;
-    double  gree;
-    bool          autogree;
-    Cat02adapParams();
+    int     amount;
+    bool    autoAmount;
+    double  luminanceScaling; 
+    bool    autoLuminanceScaling;
+    CAT02AdaptationParams();
 
-    bool operator ==(const Cat02adapParams& other) const;
-    bool operator !=(const Cat02adapParams& other) const;
+    bool operator ==(const CAT02AdaptationParams& other) const;
+    bool operator !=(const CAT02AdaptationParams& other) const;
 };
 
 
@@ -1409,7 +1409,7 @@ public:
     SharpenMicroParams      sharpenMicro;    ///< Sharpen microcontrast parameters
     VibranceParams          vibrance;        ///< Vibrance parameters
     WBParams                wb;              ///< White balance parameters
-    Cat02adapParams         cat02adap;       ///< cat02adap parameters
+    CAT02AdaptationParams   cat02adap;       ///< cat02adap parameters
     ColorAppearanceParams   colorappearance;
     DefringeParams          defringe;        ///< Defringing parameters
     ImpulseDenoiseParams    impulseDenoise;  ///< Impulse denoising parameters

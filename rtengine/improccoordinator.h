@@ -157,7 +157,7 @@ protected:
     PreviewImageListener* imageListener;
     AutoExpListener* aeListener;
     AutoCamListener* acListener;
-    AutocatListener* acatListener;
+    AutoCAT02Listener* acatListener;
     AutoBWListener* abwListener;
     AutoWBListener* awbListener;
     FrameCountListener *frameCountListener;
@@ -314,7 +314,7 @@ public:
     {
         acListener = acl;
     }
-    void setAutocatListener(AutocatListener* aca)
+    void setAutoCAT02Listener(AutoCAT02Listener* aca)
     {
         acatListener = aca;
     }	

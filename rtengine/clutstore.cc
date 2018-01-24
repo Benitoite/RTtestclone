@@ -49,14 +49,13 @@ bool loadFile(
         std::unique_ptr<rtengine::Imagefloat> img_float = std::unique_ptr<rtengine::Imagefloat>(new rtengine::Imagefloat(fw, fh));
         const PreviewProps pp(0, 0, fw, fh, 1);
 
-        rtengine::procparams::ColorManagementParams icm;
-        icm.working = working_color_space;
+        rtengine::ProcParams pparams;
+        pparams.icm.working = working_color_space;
 
- //       img_src.getImage(curr_wb, TR_NONE, img_float.get(), pp, rtengine::procparams::ToneCurveParams(), rtengine::procparams::RAWParams());
-        img_src.getImage(curr_wb, TR_NONE, img_float.get(), pp, rtengine::procparams::ToneCurveParams(), icm, rtengine::procparams::RAWParams(), rtengine::procparams::WBParams(), rtengine::procparams:: ColorAppearanceParams(), rtengine::procparams::Cat02adapParams());
+        img_src.getImage(curr_wb, TR_NONE, img_float.get(), pp, pparams);
 
         if (!working_color_space.empty()) {
-            img_src.convertColorSpace(img_float.get(), icm, curr_wb);
+            img_src.convertColorSpace(img_float.get(), pparams.icm, curr_wb);
         }
 
         AlignedBuffer<std::uint16_t> image(fw * fh * 4 + 4); // getClutValues() loads one pixel in advance
