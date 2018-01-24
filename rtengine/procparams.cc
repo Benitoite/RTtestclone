@@ -1190,7 +1190,7 @@ const std::vector<WBEntry>& WBParams::getWbEntries()
 }
 
 CAT02AdaptationParams::CAT02AdaptationParams() :
-    enabled(true),
+    enabled(false),
     amount(2),
     autoAmount(true),
     luminanceScaling(1.0),
