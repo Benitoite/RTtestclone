@@ -161,7 +161,6 @@ protected:
     PreviewImageListener* imageListener;
     AutoExpListener* aeListener;
     AutoCamListener* acListener;
-    AutocatListener* acatListener;
     AutoBWListener* abwListener;
     localrgbListener* alorgbListener;
     AutoWBListener* awbListener;
@@ -322,10 +321,6 @@ public:
     void setAutoCamListener(AutoCamListener* acl)
     {
         acListener = acl;
-    }
-    void setAutocatListener(AutocatListener* aca)
-    {
-        acatListener = aca;
     }
 
     void setAutoBWListener(AutoBWListener* abw)

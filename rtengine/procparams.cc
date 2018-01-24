@@ -1202,31 +1202,6 @@ const std::vector<WBEntry>& WBParams::getWbEntries()
     return wb_entries;
 }
 
-Cat02adapParams::Cat02adapParams() :
-    enabled(true),
-    cat02(2),
-    autocat02(true),
-    gree(1.0),
-    autogree(true)
-
-{
-}
-
-bool Cat02adapParams::operator ==(const Cat02adapParams& other) const
-{
-    return
-        enabled == other.enabled
-        && autocat02 == other.autocat02
-        && cat02 == other.cat02
-        && gree == other.gree
-        && autogree == other.autogree;
-
-}
-
-bool Cat02adapParams::operator !=(const Cat02adapParams& other) const
-{
-    return !(*this == other);
-}
 
 
 ColorAppearanceParams::ColorAppearanceParams() :
@@ -2778,7 +2753,6 @@ void ProcParams::setDefaults()
 
     wb = WBParams();
 
-    cat02adap = Cat02adapParams();
 
     colorappearance = ColorAppearanceParams();
 
@@ -3163,13 +3137,6 @@ int ProcParams::save(const Glib::ustring& fname, const Glib::ustring& fname2, bo
         saveToKeyfile(!pedited || pedited->localwb.autoequal, "Locrgb", "Autoequal", localwb.autoequal, keyFile);
         saveToKeyfile(!pedited || pedited->localwb.autocat02, "Locrgb", "Autocat02", localwb.autocat02, keyFile);
         saveToKeyfile(!pedited || pedited->localwb.autoytint, "Locrgb", "Autoytint", localwb.autoytint, keyFile);
-
-// Cat02 adap
-        saveToKeyfile(!pedited || pedited->cat02adap.enabled, "Cat02adap", "Enabled", cat02adap.enabled, keyFile);
-        saveToKeyfile(!pedited || pedited->cat02adap.cat02, "Cat02adap", "Cat02", cat02adap.cat02, keyFile);
-        saveToKeyfile(!pedited || pedited->cat02adap.autocat02, "Cat02adap", "Autocat02", cat02adap.autocat02, keyFile);
-        saveToKeyfile(!pedited || pedited->cat02adap.gree, "Cat02adap", "Green", cat02adap.gree, keyFile);
-        saveToKeyfile(!pedited || pedited->cat02adap.autogree, "Cat02adap", "Autogree", cat02adap.autogree, keyFile);
 
 
 // Impulse denoise
@@ -4112,13 +4079,6 @@ int ProcParams::load(const Glib::ustring& fname, ParamsEdited* pedited)
 
         }
 
-        if (keyFile.has_group("Cat02adap")) {
-            assignFromKeyfile(keyFile, "Cat02adap", "Enabled", pedited, cat02adap.enabled, pedited->cat02adap.enabled);
-            assignFromKeyfile(keyFile, "Cat02adap", "Cat02", pedited, cat02adap.cat02, pedited->cat02adap.cat02);
-            assignFromKeyfile(keyFile, "Cat02adap", "Autocat02", pedited, cat02adap.autocat02, pedited->cat02adap.autocat02);
-            assignFromKeyfile(keyFile, "Cat02adap", "Green", pedited, cat02adap.gree, pedited->cat02adap.gree);
-            assignFromKeyfile(keyFile, "Cat02adap", "Autogree", pedited, cat02adap.autogree, pedited->cat02adap.autogree);
-        }
 
         if (keyFile.has_group("Impulse Denoising")) {
             assignFromKeyfile(keyFile, "Impulse Denoising", "Enabled", pedited, impulseDenoise.enabled, pedited->impulseDenoise.enabled);
@@ -5072,7 +5032,6 @@ bool ProcParams::operator ==(const ProcParams& other) const
         && prsharpening == other.prsharpening
         && vibrance == other.vibrance
         && wb == other.wb
-        && cat02adap == other.cat02adap
         && colorappearance == other.colorappearance
         && impulseDenoise == other.impulseDenoise
         && localwb == other.localwb

@@ -554,17 +554,12 @@ enum ProcEventCode {
     EvlocalwbDegree = 522,
     Evlocalwbtransit = 523,
     Evlocalwbcat02 = 524,
-    EvCat02cat02 = 525,
-    EvCat02enabled = 526,
-    EvCATAutocat02 = 527,
-    EvCat02gree = 528,
-    EvCATAutogree = 529,
-    Evlocalwbytint = 530,
-    EvlocalwbAutotemp = 531,
-    EvlocalwbAutogreen = 532,
-    EvlocalwbAutoequal = 533,
-    EvlocalwbAutocat02 = 534,
-    EvlocalwbAutoytint = 535,
+    Evlocalwbytint = 525,
+    EvlocalwbAutotemp = 526,
+    EvlocalwbAutogreen = 527,
+    EvlocalwbAutoequal = 528,
+    EvlocalwbAutocat02 = 529,
+    EvlocalwbAutoytint = 530,
 
     NUMOFEVENTS
 

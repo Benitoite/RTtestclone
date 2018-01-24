@@ -579,21 +579,6 @@ struct WBParams {
     static const std::vector<WBEntry>& getWbEntries();
 };
 
-/**
-  * Parameters of cat02adap
-  */
-struct Cat02adapParams {
-    bool    enabled;
-    int     cat02;
-    bool          autocat02;
-    double  gree;
-    bool          autogree;
-    Cat02adapParams();
-
-    bool operator ==(const Cat02adapParams& other) const;
-    bool operator !=(const Cat02adapParams& other) const;
-};
-
 
 /**
  * Parameters of colorappearance
@@ -1460,7 +1445,6 @@ public:
     SharpenMicroParams      sharpenMicro;    ///< Sharpen microcontrast parameters
     VibranceParams          vibrance;        ///< Vibrance parameters
     WBParams                wb;              ///< White balance parameters
-    Cat02adapParams         cat02adap;       ///< cat02adap parameters
     ColorAppearanceParams   colorappearance;
     DefringeParams          defringe;        ///< Defringing parameters
     ImpulseDenoiseParams    impulseDenoise;  ///< Impulse denoising parameters

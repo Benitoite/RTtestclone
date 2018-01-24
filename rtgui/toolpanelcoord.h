@@ -30,7 +30,6 @@
 #include "coarsepanel.h"
 #include "tonecurve.h"
 #include "vibrance.h"
-#include "cat02adap.h"
 #include "colorappearance.h"
 #include "shadowshighlights.h"
 #include "impulsedenoise.h"
@@ -126,7 +125,6 @@ protected:
     LocalContrast *localContrast;
     Defringe* defringe;
     ImpulseDenoise* impulsedenoise;
-    Cat02adap* cat02adap;
     DirPyrDenoise* dirpyrdenoise;
     EdgePreservingDecompositionUI *epd;
     Sharpening* sharpening;

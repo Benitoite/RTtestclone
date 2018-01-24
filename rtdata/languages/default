@@ -738,17 +738,12 @@ HISTORY_MSG_521;WB local - right
 HISTORY_MSG_522;WB local - center
 HISTORY_MSG_524;WB local - transition
 HISTORY_MSG_525;WB local - cat02 level
-HISTORY_MSG_526;Cat02 adaptation level
-HISTORY_MSG_527;Cat02 adaptation
-HISTORY_MSG_528;Cat02 auto adaptation
-HISTORY_MSG_529;Cat02 Y tint
-HISTORY_MSG_530;Cat02 auto Y tint
-HISTORY_MSG_531;WB local - cat02 Y tint
-HISTORY_MSG_532;WB local - auto temp
-HISTORY_MSG_533;WB local - auto tint
-HISTORY_MSG_534;WB local - auto equal
-HISTORY_MSG_535;WB local - auto cat02
-HISTORY_MSG_536;WB local - auto Ytint
+HISTORY_MSG_526;WB local - cat02 Y tint
+HISTORY_MSG_527;WB local - auto temp
+HISTORY_MSG_528;WB local - auto tint
+HISTORY_MSG_529;WB local - auto equal
+HISTORY_MSG_530;WB local - auto cat02
+HISTORY_MSG_531;WB local - auto Ytint
 HISTORY_MSG_COLORTONING_LABGRID_VALUE;CT - Color correction
 HISTORY_MSG_HISTMATCHING;Auto-matched Tone Curve
 HISTORY_MSG_LOCALCONTRAST_AMOUNT;Local Contrast - Amount

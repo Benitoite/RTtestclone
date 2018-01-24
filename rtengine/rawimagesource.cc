@@ -1358,18 +1358,16 @@ void RawImageSource::getImage_local(int begx, int begy, int yEn, int xEn, int cx
 }
 
 
-void RawImageSource::getImage(const ColorTemp &ctemp, int tran, Imagefloat* image, const PreviewProps &pp, const ToneCurveParams &hrp, const ColorManagementParams &cmp, const RAWParams &raw, const WBParams &wbp, const ColorAppearanceParams &cap, const Cat02adapParams &cat)
+void RawImageSource::getImage(const ColorTemp &ctemp, int tran, Imagefloat* image, const PreviewProps &pp, const ToneCurveParams &hrp, const RAWParams &raw)
 {
     BENCHFUN
 
     MyMutex::MyLock lock(getImageMutex);
 //  printf("call getimage  cat02=%i\n", cat.cat02);
     tran = defTransform(tran);
-//   double wbcat02 = wbp.cat02;
     // compute channel multipliers
     double r, g, b;
     float rm, gm, bm;
-    float gain;
 
     if (ctemp.getTemp() < 0) {
         // no white balance, ie revert the pre-process white balance to restore original unbalanced raw camera color
@@ -1390,7 +1388,7 @@ void RawImageSource::getImage(const ColorTemp &ctemp, int tran, Imagefloat* imag
 
         bool isMono = (ri->getSensorType() == ST_FUJI_XTRANS && raw.xtranssensor.method == RAWParams::XTransSensor::getMethodString(RAWParams::XTransSensor::Method::MONO))
                       || (ri->getSensorType() == ST_BAYER && raw.bayersensor.method == RAWParams::BayerSensor::getMethodString(RAWParams::BayerSensor::Method::MONO));
-        gain = calculate_scale_mul(new_scale_mul, new_pre_mul, c_white, cblacksom, isMono, ri->get_colors());
+        float gain = calculate_scale_mul(new_scale_mul, new_pre_mul, c_white, cblacksom, isMono, ri->get_colors());
         rm = new_scale_mul[0] / scale_mul[0] * gain;
         gm = new_scale_mul[1] / scale_mul[1] * gain;
         bm = new_scale_mul[2] / scale_mul[2] * gain;
@@ -1620,90 +1618,6 @@ void RawImageSource::getImage(const ColorTemp &ctemp, int tran, Imagefloat* imag
             image->g(image->getHeight() - 1, j) = (image->g(image->getHeight() - 2, j) + image->g(image->getHeight() - 1, j + 1) + image->g(image->getHeight() - 1, j - 1)) / 3;
             image->b(image->getHeight() - 1, j) = (image->b(image->getHeight() - 2, j) + image->b(image->getHeight() - 1, j + 1) + image->b(image->getHeight() - 1, j - 1)) / 3;
         }
-    }
-
-
-
-    if (cat.cat02 > 1  && !cap.enabled  && cat.enabled) { //
-        //    printf("OK cat02 CAT\n");
-        LabImage *bufcat02 = nullptr;
-        bufcat02 = new LabImage(image->getWidth(), image->getHeight());
-        LabImage *bufcat02fin = nullptr;
-        bufcat02fin = new LabImage(image->getWidth(), image->getHeight());
-        TMatrix wiprof = ICCStore::getInstance()->workingSpaceInverseMatrix("WideGamut");//Widegamut gives generaly best results than Prophoto (blue) or sRGBD65
-        TMatrix wprof = ICCStore::getInstance()->workingSpaceMatrix("WideGamut");
-
-        double wip[3][3] = {
-            {wiprof[0][0], wiprof[0][1], wiprof[0][2]},
-            {wiprof[1][0], wiprof[1][1], wiprof[1][2]},
-            {wiprof[2][0], wiprof[2][1], wiprof[2][2]}
-        };
-
-        double wp[3][3] = {
-            {wprof[0][0], wprof[0][1], wprof[0][2]},
-            {wprof[1][0], wprof[1][1], wprof[1][2]},
-            {wprof[2][0], wprof[2][1], wprof[2][2]}
-        };
-
-
-#ifdef _OPENMP
-        #pragma omp parallel for schedule(dynamic,16)
-#endif
-
-        for (int y = 0; y <  image->getHeight() ; y++) //{
-            for (int x = 0; x < image->getWidth(); x++) {
-                bufcat02->L[y][x] = 0.f;
-                bufcat02->a[y][x] = 0.f;
-                bufcat02->b[y][x] = 0.f;
-                bufcat02fin->L[y][x] = 0.f;
-                bufcat02fin->a[y][x] = 0.f;
-                bufcat02fin->b[y][x] = 0.f;
-
-            }
-
-#ifdef _OPENMP
-        #pragma omp parallel for schedule(dynamic,16)
-#endif
-
-        for (int y = 0; y <  image->getHeight() ; y++) //{
-            for (int x = 0; x < image->getWidth(); x++) {
-                float X, Y, Z;
-                float LR, aR, bR;
-                //Color::gammatab_srgb[ try with but not good results
-				// I add gain to best results
-                Color::rgbxyz(gain * image->r(y, x), gain * image->g(y, x), gain * image->b(y, x), X, Y, Z, wp);
-                Color::XYZ2Lab(X, Y, Z, LR, aR, bR);
-                bufcat02->L[y][x] = LR;
-                bufcat02->a[y][x] = aR;
-                bufcat02->b[y][x] = bR;
-            }
-
-        ciecamcat02loc_float(bufcat02, bufcat02fin, wbp.temperature, cat.gree, cat.cat02, cmp, cap);
-#ifdef _OPENMP
-        #pragma omp parallel for schedule(dynamic,16)
-#endif
-
-        for (int y = 0; y <  image->getHeight() ; y++) //{
-            for (int x = 0; x < image->getWidth(); x++) {
-                float XR, YR, ZR;
-                float LL, aa, bb;
-                LL = bufcat02fin->L[y][x];
-                aa = bufcat02fin->a[y][x];
-                bb = bufcat02fin->b[y][x];
-
-                Color::Lab2XYZ(LL, aa, bb, XR, YR, ZR);
-                Color::xyz2rgb(XR, YR, ZR, image->r(y, x), image->g(y, x), image->b(y, x), wip);
-                //image->r(y, x) = Color::igammatab_srgb[image->r(y, x)];
-                //image->g(y, x) = Color::igammatab_srgb[image->g(y, x)];
-                //image->b(y, x) = Color::igammatab_srgb[image->b(y, x)];
-                image->r(y, x) /= gain;
-                image->g(y, x) /= gain;
-                image->b(y, x) /= gain;
-
-            }
-
-        delete bufcat02;
-        delete bufcat02fin;
     }
 
 
@@ -5590,6 +5504,7 @@ void RawImageSource::getRAWHistogram(LUTu & histRedRaw, LUTu & histGreenRaw, LUT
     } // end of parallel region
 
     constexpr float gammaLimit = 32767.f * 65536.f; // Color::gamma overflows when the LUT is accessed with too large values
+
     for (int i = 0; i < 65536; i++) {
         int idx;
         idx = CLIP((int)Color::gamma(std::min(mult[0] * (i - (cblacksom[0]/*+black_lev[0]*/)), gammaLimit)));
@@ -5841,9 +5756,11 @@ static void RobustWB(array2D<float> &redloc, array2D<float> &greenloc, array2D<f
 #ifdef _OPENMP
     #pragma omp parallel for
 #endif
+
     for (int y = 0; y < bfh ; y += 4) {
         int yy = y / 4;
-        for (int x = 0; x < bfw ; x+= 4) {
+
+        for (int x = 0; x < bfw ; x += 4) {
             int xx = x / 4;
             rl[yy][xx] = redloc[y][x];
             gl[yy][xx] = greenloc[y][x];
@@ -5867,6 +5784,7 @@ static void RobustWB(array2D<float> &redloc, array2D<float> &greenloc, array2D<f
     int realitera = 1;
 
     int Kx = 0;
+
     do {//iterative WB
         float Ubarohm = 0.f, Vbarohm = 0.f;
         itera++;
@@ -5921,6 +5839,7 @@ static void RobustWB(array2D<float> &redloc, array2D<float> &greenloc, array2D<f
         int ind = 1;
 
         float phi = 0.f;
+
         if ((fabs(Ubarohm) > fabs(Vbarohm)) || (Ubarohm != 0.f && fabs(Ubarohm) == fabs(Vbarohm))) {
             phi = Ubarohm;
             ind = 1;
@@ -5962,7 +5881,7 @@ static void RobustWB(array2D<float> &redloc, array2D<float> &greenloc, array2D<f
         }
 
         //printf ("epsil=%f iter=%i wb=%f wr=%f U=%f V=%f mu=%f\n", fabs (epsil), itera, wb, wr, Ubarohm, Vbarohm, mur);
-        } while (Kx != 0 && itera <= 200); //stop iterations in normal case Kx =0, or if WB iteration do not converge
+    } while (Kx != 0 && itera <= 200); //stop iterations in normal case Kx =0, or if WB iteration do not converge
 
     delete Uba;
     delete Vba;
@@ -6008,6 +5927,7 @@ static void SobelWB(array2D<float> &redsobel, array2D<float> &greensobel, array2
 #ifdef _OPENMP
         #pragma omp parallel for
 #endif
+
         for (int y = 0; y < bfh ; y++) {
             for (int x = 0; x < bfw ; x++) {
                 /*Image Boundaries*/
@@ -6022,6 +5942,7 @@ static void SobelWB(array2D<float> &redsobel, array2D<float> &greensobel, array2
                     float sumYg    = 0.f;
                     float sumXb    = 0.f;
                     float sumYb    = 0.f;
+
                     for (int i = -1; i < 2; i++) {
                         for (int j = -1; j < 2; j++) {
                             sumXr += GX[j + 1][i + 1] * redloc[y + i][x + j];
@@ -8991,6 +8912,7 @@ void RawImageSource::WBauto(array2D<float> &redloc, array2D<float> &greenloc, ar
 #ifdef _OPENMP
         #pragma omp parallel for reduction(+:avg_r, avg_g, avg_b, rn, gn, bn)
 #endif
+
         for (int y = 0; y < bfh ; y++) {
             for (int x = 0; x < bfw ; x++) {
                 if (redsobel[y][x] < clipHigh && redsobel[y][x] > clipLow) {
@@ -9015,6 +8937,7 @@ void RawImageSource::WBauto(array2D<float> &redloc, array2D<float> &greenloc, ar
 #ifdef _OPENMP
         #pragma omp parallel for reduction(+:avg_r, avg_g, avg_b, rn, gn, bn)
 #endif
+
         for (int y = 0; y < bfh ; y++) {
             for (int x = 0; x < bfw ; x++) {
                 if (redloc[y][x] < clipHigh && redloc[y][x] > clipLow) {

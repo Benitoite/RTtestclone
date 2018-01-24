@@ -210,7 +210,7 @@ void StdImageSource::getImage_local(int begx, int begy, int yEn, int xEn, int cx
 }
 
 
-void StdImageSource::getImage(const ColorTemp &ctemp, int tran, Imagefloat* image, const PreviewProps &pp, const ToneCurveParams &hrp, const ColorManagementParams &cmp, const RAWParams &raw, const WBParams &wbp, const ColorAppearanceParams &cap, const Cat02adapParams &cat)
+void StdImageSource::getImage(const ColorTemp &ctemp, int tran, Imagefloat* image, const PreviewProps &pp, const ToneCurveParams &hrp, const RAWParams &raw)
 {
 
     // the code will use OpenMP as of now.
