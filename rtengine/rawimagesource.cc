@@ -5638,6 +5638,7 @@ void RawImageSource::getRowStartEnd(int x, int &start, int &end)
 
 static void SdwWB(array2D<float> &redloc, array2D<float> &greenloc, array2D<float> &blueloc, int bfw, int bfh, double &avg_rm, double &avg_gm, double &avg_bm, int begx, int begy, int yEn,  int xEn,  int cx,  int cy)
 {
+    BENCHFUN
     //Standard deviation weighted Gary World - from Lan rt al.
     int partw, parth;
     int yh, xw;
@@ -5679,10 +5680,6 @@ static void SdwWB(array2D<float> &redloc, array2D<float> &greenloc, array2D<floa
     }
 
     //initialize to 0
-#ifdef _OPENMP
-    #pragma omp parallel for schedule(dynamic,16)
-#endif
-
     for (int k = 0; k < 12 ; k++) {
         MeanG[k] = 0.f;
         MeanR[k] = 0.f;
@@ -5828,88 +5825,71 @@ static void SdwWB(array2D<float> &redloc, array2D<float> &greenloc, array2D<floa
 
 static void RobustWB(array2D<float> &redloc, array2D<float> &greenloc, array2D<float> &blueloc, int bfw, int bfh, double &avg_rm, double &avg_gm, double &avg_bm)
 {
-    // inspired by "Robust automatic WB algorithm using gray color points in Images"
+    BENCHFUN
+    // inspired by "Robust automatic WB algorithm using grey colour points in Images"
     // Jy Huo, Yl Chang, J.Wang Xx Wei
     //  robust = true;
 //   printf("Robust WB\n");
-    array2D<float> Y0;
-    array2D<float> U0;
-    array2D<float> V0;
+    const int bfwr = bfw / 4 + 1 ;//5 middle value to keep good result and reduce time
+    const int bfhr = bfh / 4 + 1;
 
-    int bfwr = bfw / 4 + 1 ;//5 midle value to kept good result and reduce time
-    int bfhr = bfh / 4 + 1;
+    array2D<float> rl(bfwr, bfhr);
+    array2D<float> gl(bfwr, bfhr);
+    array2D<float> bl(bfwr, bfhr);
 
-    Y0(bfwr, bfhr);
-    U0(bfwr, bfhr);
-    V0(bfwr, bfhr);
+    // copy data to smaller arrays to reduce memory pressure in do-while loop
+#ifdef _OPENMP
+    #pragma omp parallel for
+#endif
+    for (int y = 0; y < bfh ; y += 4) {
+        int yy = y / 4;
+        for (int x = 0; x < bfw ; x+= 4) {
+            int xx = x / 4;
+            rl[yy][xx] = redloc[y][x];
+            gl[yy][xx] = greenloc[y][x];
+            bl[yy][xx] = blueloc[y][x];
+        }
+    }
 
-    float *Uba = nullptr;
-    float *Vba = nullptr;
-    Uba = new float [204];
-    Vba = new float [204];
+    float *Uba = new float [204];
+    float *Vba = new float [204];
 
-    array2D<float> FYUV;
-    FYUV(bfwr, bfhr);
-
-    bool contin;
-    float Th = 0.1321f; //Threshold 0.1321f  0.097f  0.2753f  if necessary
-    float Ubarohm = 0.f, Vbarohm = 0.f;
-    float ep = 0.1f;
+    constexpr float Th = 0.1321f; //Threshold 0.1321f  0.097f  0.2753f  if necessary
     //wr, wb, wg multipliers for each channel RGB
     float wr = 1.f;
     float wg = 1.f;
     float wb = 1.f;
-    float mu = 0.002f;//std variation
-    float mu2 = 0.0012f;//first reduce variation
-    float mu3 = 0.0007f;//second variation
-    float phi = 0.f;
+    constexpr float mu = 0.002f;//std variation
+    constexpr float mu2 = 0.0012f;//first reduce variation
+    constexpr float mu3 = 0.0007f;//second variation
     int itera = 0;
-    float epsil;
     int minim = 1;
     int realitera = 1;
-    float mur;
 
+    int Kx = 0;
     do {//iterative WB
-        contin = false;
-
+        float Ubarohm = 0.f, Vbarohm = 0.f;
         itera++;
-#ifdef _OPENMP
-        #pragma omp parallel for schedule(dynamic,16)
-#endif
-
-        for (int y = 0; y < bfh ; y += 4) {
-            for (int x = 0; x < bfw ; x += 4) {
-                int yy = y / 4;
-                int xx = x / 4 ;
-
-                //claculate YUV from RGB and wr, wg, wb
-                Y0[yy][xx] = 0.299f * wr * redloc[y][x] + 0.587f * wg * greenloc[y][x] + 0.114f * wb * blueloc[y][x];
-                U0[yy][xx] = -0.14713f * wr * redloc[y][x] - 0.28886f * wg * greenloc[y][x] + 0.436f * wb * blueloc[y][x];
-                V0[yy][xx] = 0.615f * wr * redloc[y][x] - 0.51498f * wg * greenloc[y][x] - 0.10001f * wb * blueloc[y][x];
-
-                if (Y0[yy][xx] == 0.f) {
-                    Y0[yy][xx] = ep;//avoid divide by zero
-                }
-
-                //FYUX fonction to dtect grey points
-                FYUV[yy][xx] = (fabs(U0[yy][xx]) + fabs(V0[yy][xx])) / Y0[yy][xx];
-
-
-            }
-        }
-
         int Nf = 0;
 #ifdef _OPENMP
-        #pragma omp parallel for reduction(+:Ubarohm, Vbarohm, Nf)
+        #pragma omp parallel for reduction(+:Ubarohm, Vbarohm, Nf) schedule(dynamic,16)
 #endif
 
-        for (int y = 0; y < bfhr ; y++) {
-            for (int x = 0; x < bfwr ; x++) {
-                if (FYUV[y][x] < Th) {//grey values
+        for (int y = 0; y < bfhr ; ++y) {
+            for (int x = 0; x < bfwr ; ++x) {
+
+                //calculate YUV from RGB and wr, wg, wb
+                float Y0 = 0.299f * wr * rl[y][x] + 0.587f * wg * gl[y][x] + 0.114f * wb * bl[y][x];
+                float U0 = -0.14713f * wr * rl[y][x] - 0.28886f * wg * gl[y][x] + 0.436f * wb * bl[y][x];
+                float V0 = 0.615f * wr * rl[y][x] - 0.51498f * wg * gl[y][x] - 0.10001f * wb * bl[y][x];
+
+                //FYUX function to detect grey points
+                if (fabs(U0) + fabs(V0) < Th * Y0) {//grey values
                     Nf++;
-                    Ubarohm +=  U0[y][x];
-                    Vbarohm +=  V0[y][x];
+                    Ubarohm += U0;
+                    Vbarohm += V0;
                 }
+
 
             }
         }
@@ -5933,13 +5913,14 @@ static void RobustWB(array2D<float> &redloc, array2D<float> &greenloc, array2D<f
 
         }
 
-        Vbarohm /= Nf;
+        Vbarohm /= Nf; // QUESTION INGO: why is this not done before the value is saved to Vba[itera]? Bug or intentional?
         //  printf ("Nf=%i max=%i  U=%f V=%f\n", Nf, bfh*bfw, Ubarohm, Vbarohm);
-        int Kx = 0;
-        float aa = 0.8f;//superior limit if epsil > aa increase variation
-        float bb = 0.15f;//inferior limit if epsil < bb exit
+        Kx = 0;
+        constexpr float aa = 0.8f;//superior limit if epsil > aa increase variation
+        constexpr float bb = 0.15f;//inferior limit if epsil < bb exit
         int ind = 1;
 
+        float phi = 0.f;
         if ((fabs(Ubarohm) > fabs(Vbarohm)) || (Ubarohm != 0.f && fabs(Ubarohm) == fabs(Vbarohm))) {
             phi = Ubarohm;
             ind = 1;
@@ -5951,58 +5932,37 @@ static void RobustWB(array2D<float> &redloc, array2D<float> &greenloc, array2D<f
             ind = 3;
         }
 
-        epsil = - phi;
-        int sign = 0;
+        int sign = SGN(-phi);
 
-        if (epsil > 0.f) {
-            sign = 1;
-        } else if (epsil == 0.f) {
-            sign = 0;
-        } else if (epsil < 0.f) {
-            sign = -1;
-        }
-
-        if (fabs(epsil) >= aa) {
+        if (fabs(phi) >= aa) {
             Kx = 2 * sign;
         }
 
-        if (fabs(epsil) < aa && fabs(epsil) >= bb) {
+        if (fabs(phi) < aa && fabs(phi) >= bb) {
             Kx = sign;
         }
 
-        if (fabs(epsil) >= 0.f && fabs(epsil) < bb) {
+        if (fabs(phi) < bb) {
             Kx = 0;
         }
 
         //
-        mur = mu;
+        float mur = mu;
 
         if (minim == 2) {
             mur = mu2;
-        }
-
-        if (minim == 3) {
+        } else if (minim == 3) {
             mur = mu3;
         }
 
         if (ind == 1) {
             wb += mur * Kx;
-        }
-
-        if (ind == 2) {
+        } else if (ind == 2) {
             wr += mur * Kx;
         }
 
-        if (Kx == 0 || itera > 200) {//stop iterations in normal case Kx =0, or if WB iteration do not converge
-            contin = true;
-        }
-
         //printf ("epsil=%f iter=%i wb=%f wr=%f U=%f V=%f mu=%f\n", fabs (epsil), itera, wb, wr, Ubarohm, Vbarohm, mur);
-        Ubarohm = 0.f;
-        Vbarohm = 0.f;
-
-
-    } while (contin == false);
+        } while (Kx != 0 && itera <= 200); //stop iterations in normal case Kx =0, or if WB iteration do not converge
 
     delete Uba;
     delete Vba;
@@ -6012,23 +5972,13 @@ static void RobustWB(array2D<float> &redloc, array2D<float> &greenloc, array2D<f
     avg_gm = 10000.* wg;
     avg_bm = 10000.* wb;
 
-    Y0(0, 0);
-    U0(0, 0);
-    V0(0, 0);
-    FYUV(0, 0);
-
-
 }
 
 static void SobelWB(array2D<float> &redsobel, array2D<float> &greensobel, array2D<float> &bluesobel, array2D<float> &redloc, array2D<float> &greenloc, array2D<float> &blueloc, int bfw, int bfh)
 {
+    BENCHFUN
     int GX[3][3];
     int GY[3][3];
-    float SUMR, SUMG, SUMB;
-
-    float sumXr, sumYr;
-    float sumXg, sumYg;
-    float sumXb, sumYb;
 
     //Sobel Horizontal
     GX[0][0] = 1;
@@ -6051,49 +6001,32 @@ static void SobelWB(array2D<float> &redsobel, array2D<float> &greensobel, array2
     GY[2][0] = -1;
     GY[2][1] = -2;
     GY[2][2] = -1;
-    //inspired from Chen Guanghua Zhang Xiaolong
+    // inspired from Chen Guanghua Zhang Xiaolong
     // edge detection to improve auto WB
 
-    //  if (edg) {
     {
+#ifdef _OPENMP
+        #pragma omp parallel for
+#endif
         for (int y = 0; y < bfh ; y++) {
             for (int x = 0; x < bfw ; x++) {
-                redsobel[y][x] = 0.f;
-                greensobel[y][x] = 0.f;
-                bluesobel[y][x] = 0.f;
-            }
-        }
-
-
-        for (int y = 0; y < bfh ; y++) {
-            for (int x = 0; x < bfw ; x++) {
-                sumXr    = 0.f;
-                sumYr    = 0.f;
-                sumXg    = 0.f;
-                sumYg    = 0.f;
-                sumXb    = 0.f;
-                sumYb    = 0.f;
-
                 /*Image Boundaries*/
-                if (y == 0 || y == bfh - 1) {
-                    SUMR = 0.f;
-                    SUMG = 0.f;
-                    SUMB = 0.f;
-                } else if (x == 0 || x == bfw - 1) {
-                    SUMR = 0.f;
-                    SUMG = 0.f;
-                    SUMB = 0.f;
+                if (y == 0 || y == bfh - 1 || x == 0 || x == bfw - 1) {
+                    redsobel[y][x] = 0.f;
+                    greensobel[y][x] = 0.f;
+                    bluesobel[y][x] = 0.f;
                 } else {
+                    float sumXr    = 0.f;
+                    float sumYr    = 0.f;
+                    float sumXg    = 0.f;
+                    float sumYg    = 0.f;
+                    float sumXb    = 0.f;
+                    float sumYb    = 0.f;
                     for (int i = -1; i < 2; i++) {
                         for (int j = -1; j < 2; j++) {
                             sumXr += GX[j + 1][i + 1] * redloc[y + i][x + j];
                             sumXg += GX[j + 1][i + 1] * greenloc[y + i][x + j];
                             sumXb += GX[j + 1][i + 1] * blueloc[y + i][x + j];
-                        }
-                    }
-
-                    for (int i = -1; i < 2; i++) {
-                        for (int j = -1; j < 2; j++) {
                             sumYr += GY[j + 1][i + 1] * redloc[y + i][x + j];
                             sumYg += GY[j + 1][i + 1] * greenloc[y + i][x + j];
                             sumYb += GY[j + 1][i + 1] * blueloc[y + i][x + j];
@@ -6101,23 +6034,13 @@ static void SobelWB(array2D<float> &redsobel, array2D<float> &greensobel, array2
                     }
 
                     //Edge strength
-                    SUMR = sqrt(SQR(sumXr) + SQR(sumYr));
-                    SUMG = sqrt(SQR(sumXg) + SQR(sumYg));
-                    SUMB = sqrt(SQR(sumXb) + SQR(sumYb));
                     //we can add if need teta = atan2 (sumYr, sumXr)
+                    redsobel[y][x] = CLIP(sqrt(SQR(sumXr) + SQR(sumYr)));
+                    greensobel[y][x] = CLIP(sqrt(SQR(sumXg) + SQR(sumYg)));
+                    bluesobel[y][x] = CLIP(sqrt(SQR(sumXb) + SQR(sumYb)));
                 }
-
-                SUMR = CLIP(SUMR);
-                SUMG = CLIP(SUMG);
-                SUMB = CLIP(SUMB);
-
-                redsobel[y][x] = SUMR;
-                greensobel[y][x] = SUMG;
-                bluesobel[y][x] = SUMB;
-
             }
         }
-
     }
 }
 
@@ -9065,6 +8988,9 @@ void RawImageSource::WBauto(array2D<float> &redloc, array2D<float> &greenloc, ar
     if (edg) {
         SobelWB(redsobel, greensobel, bluesobel, redloc, greenloc, blueloc, bfw, bfh);
 
+#ifdef _OPENMP
+        #pragma omp parallel for reduction(+:avg_r, avg_g, avg_b, rn, gn, bn)
+#endif
         for (int y = 0; y < bfh ; y++) {
             for (int x = 0; x < bfw ; x++) {
                 if (redsobel[y][x] < clipHigh && redsobel[y][x] > clipLow) {
@@ -9086,7 +9012,9 @@ void RawImageSource::WBauto(array2D<float> &redloc, array2D<float> &greenloc, ar
     }
 
     if (greyn) {
-
+#ifdef _OPENMP
+        #pragma omp parallel for reduction(+:avg_r, avg_g, avg_b, rn, gn, bn)
+#endif
         for (int y = 0; y < bfh ; y++) {
             for (int x = 0; x < bfw ; x++) {
                 if (redloc[y][x] < clipHigh && redloc[y][x] > clipLow) {
