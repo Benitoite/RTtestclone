@@ -5550,37 +5550,24 @@ void RawImageSource::getRowStartEnd(int x, int &start, int &end)
     }
 }
 
-static void SdwWB(array2D<float> &redloc, array2D<float> &greenloc, array2D<float> &blueloc, int bfw, int bfh, double &avg_rm, double &avg_gm, double &avg_bm, int begx, int begy, int yEn,  int xEn,  int cx,  int cy)
+static void SdwWB(const array2D<float> &redloc, const array2D<float> &greenloc, const array2D<float> &blueloc, int bfw, int bfh, double &avg_rm, double &avg_gm, double &avg_bm)
 {
-    BENCHFUN
     //Standard deviation weighted Gary World - from Lan rt al.
-    int partw, parth;
-    int yh, xw;
-    constexpr double clipHigh = 64000.0;
-    constexpr double clipLow = 1500.0;
+    constexpr float clipHigh = 64000.f;
+    constexpr float clipLow = 1500.f;
 
-    float *MeanG = nullptr;
-    float *SigmaG = nullptr;
-    float *nG = nullptr;
-    MeanG = new float [12];
-    SigmaG = new float [12];
-    nG = new float [12];
+    float MeanG[12] = { };
+    float SigmaG[12] = { };
 
-    float *MeanR = nullptr;
-    float *SigmaR = nullptr;
-    float *nR = nullptr;
-    MeanR = new float [12];
-    SigmaR = new float [12];
-    nR = new float [12];
+    float MeanR[12] = { };
+    float SigmaR[12] = { };
 
-    float *MeanB = nullptr;
-    float *SigmaB = nullptr;
-    float *nB = nullptr;
-    MeanB = new float [12];
-    SigmaB = new float [12];
-    nB = new float [12];
+    float MeanB[12] = { };
+    float SigmaB[12] = { };
 
     //divide in 12 areas
+    int partw, parth;
+    int yh, xw;
     if (bfw > bfh) {
         partw = bfw / 4;
         parth = bfh / 3;
@@ -5593,32 +5580,21 @@ static void SdwWB(array2D<float> &redloc, array2D<float> &greenloc, array2D<floa
         yh = 4;
     }
 
-    //initialize to 0
-    for (int k = 0; k < 12 ; k++) {
-        MeanG[k] = 0.f;
-        MeanR[k] = 0.f;
-        MeanB[k] = 0.f;
-        SigmaG[k] = 0.f;
-        SigmaR[k] = 0.f;
-        SigmaB[k] = 0.f;
-        nG[k] = 0.f;
-        nR[k] = 0.f;
-        nB[k] = 0.f;
-    }
+    float SigmaGG = 0.f, SigmaRR = 0.f, SigmaBB = 0.f;
 
 #ifdef _OPENMP
         #pragma omp parallel for schedule(dynamic) collapse(2)
 #endif
-    for (int w = 0; w < xw ; w++) {
-        for (int h = 0; h < yh ; h++) {
+    for (int w = 0; w < xw ; ++w) {
+        for (int h = 0; h < yh ; ++h) {
             float meanr = 0.f;
             float meang = 0.f;
             float meanb = 0.f;
             int nr = 0;
             int ng = 0;
             int nb = 0;
-            for (int y = (h) * parth; y < (h + 1) * parth; y++) {
-                for (int x = (w) * partw; x < (w + 1) * partw; x++) {
+            for (int y = h * parth; y < (h + 1) * parth; ++y) {
+                for (int x = w * partw; x < (w + 1) * partw; ++x) {
                     if (greenloc[y][x] > clipLow && greenloc[y][x] < clipHigh) {
                         meang += greenloc[y][x];
                         ng++;
@@ -5636,58 +5612,39 @@ static void SdwWB(array2D<float> &redloc, array2D<float> &greenloc, array2D<floa
                 }
             }
             int i = w + h * xw;
+
+            if (ng > 0) {
+                meang /= ng;
+            }
+
+            if (nr > 0) {
+                meanr /= nr;
+            }
+
+            if (nb > 0) {
+                meanb /= nb;
+            }
+
             MeanG[i] = meang;
             MeanR[i] = meanr;
             MeanB[i] = meanb;
-            nG[i] = ng;
-            nR[i] = nr;
-            nB[i] = nb;
-        }
-    }
 
-    for (int w = 0; w < xw ; w++) {
-        for (int h = 0; h < yh ; h++) {
-            int i = w + h * xw;
-
-            if (nG[i] > 0) {
-                MeanG[i] /= nG[i];
-            }
-
-            if (nR[i] > 0) {
-                MeanR[i] /= nR[i];
-            }
-
-            if (nB[i] > 0) {
-                MeanB[i] /= nB[i];
-            }
-        }
-    }
-
-#ifdef _OPENMP
-    #pragma omp parallel for schedule(dynamic) collapse(2)
-#endif
-
-    for (int w = 0; w < xw ; w++) {
-        for (int h = 0; h < yh ; h++) {
-            int i = w + h * xw;
             float sigmar = 0.f;
             float sigmag = 0.f;
             float sigmab = 0.f;
 
-            for (int y = (h) * parth; y < (h + 1) * parth; y++) {
-                for (int x = (w) * partw; x < (w + 1) * partw; x++) {
+            for (int y = h * parth; y < (h + 1) * parth; ++y) {
+                for (int x = w * partw; x < (w + 1) * partw; ++x) {
                     if (greenloc[y][x] > clipLow && greenloc[y][x] < clipHigh) {
-                        sigmag += SQR(MeanG[i] - greenloc[y][x]) ;
+                        sigmag += SQR(meang - greenloc[y][x]) ;
                     }
 
                     if (redloc[y][x] > clipLow && redloc[y][x] < clipHigh) {
-
-                        sigmar += SQR(MeanR[i] - redloc[y][x]);
+                        sigmar += SQR(meanr - redloc[y][x]);
                     }
 
                     if (blueloc[y][x] > clipLow && blueloc[y][x] < clipHigh) {
-
-                        sigmab += SQR(MeanB[i] - blueloc[y][x]);
+                        sigmab += SQR(meanb - blueloc[y][x]);
                     }
                 }
             }
@@ -5695,36 +5652,31 @@ static void SdwWB(array2D<float> &redloc, array2D<float> &greenloc, array2D<floa
             SigmaG[i] = sigmag;
             SigmaR[i] = sigmar;
             SigmaB[i] = sigmab;
-        }
-    }
 
-    float SigmaGG = 0.f, SigmaRR = 0.f, SigmaBB = 0.f;
-
-    for (int w = 0; w < xw ; w++) {
-        for (int h = 0; h < yh ; h++) {
-            int i = w + h * xw;
-
-            if (nG[i] > 0) {
-                SigmaG[i] = sqrt(SigmaG[i] / nG[i]);
+            if (ng > 0) {
+                SigmaG[i] = sqrt(SigmaG[i] / ng);
             }
 
-            if (nR[i] > 0) {
-                SigmaR[i] = sqrt(SigmaR[i] / nR[i]);
+            if (nr > 0) {
+                SigmaR[i] = sqrt(SigmaR[i] / nr);
             }
 
-            if (nB[i] > 0) {
-                SigmaB[i] = sqrt(SigmaB[i] / nB[i]);
+            if (nb > 0) {
+                SigmaB[i] = sqrt(SigmaB[i] / nb);
             }
-
-            SigmaGG += SigmaG[i];
-            SigmaRR += SigmaR[i];
-            SigmaBB += SigmaB[i];
-
+#ifdef _OPENMP
+            #pragma omp critical
+#endif
+            {
+                SigmaGG += SigmaG[i];
+                SigmaRR += SigmaR[i];
+                SigmaBB += SigmaB[i];
+            }
         }
     }
 
     float StdavgG = 0.f, StdavgR = 0.f, StdavgB = 0.f;
-    float epsilo = 0.01f;
+    constexpr float epsilo = 0.01f;
 
     for (int k = 0; k < 12 ; k++) {
         StdavgG += (SigmaG[k] * MeanG[k]) / (SigmaGG + epsilo);
@@ -5740,17 +5692,6 @@ static void SdwWB(array2D<float> &redloc, array2D<float> &greenloc, array2D<floa
     avg_gm *= 10000.f;
     avg_rm *= 10000.f;
     avg_bm *= 10000.f;
-
-
-    delete MeanG;
-    delete SigmaG;
-    delete MeanR;
-    delete SigmaR;
-    delete MeanB;
-    delete SigmaB;
-    delete nG;
-    delete nR;
-    delete nB;
 
 }
 
@@ -8906,7 +8847,7 @@ void RawImageSource::WBauto(array2D<float> &redloc, array2D<float> &greenloc, ar
 
     if (wbpar.method == "autedgsdw") {
         SobelWB(redsobel, greensobel, bluesobel, redloc, greenloc, blueloc, bfw, bfh);
-        SdwWB(redsobel, greensobel, bluesobel, bfw, bfh, avg_rm, avg_gm, avg_bm,  begx, begy, yEn,  xEn,  cx,  cy);
+        SdwWB(redsobel, greensobel, bluesobel, bfw, bfh, avg_rm, avg_gm, avg_bm);
 
     }
 
@@ -8917,7 +8858,7 @@ void RawImageSource::WBauto(array2D<float> &redloc, array2D<float> &greenloc, ar
     }
 
     if (wbpar.method == "autosdw") {
-        SdwWB(redloc, greenloc, blueloc, bfw, bfh, avg_rm, avg_gm, avg_bm,  begx, begy, yEn,  xEn,  cx,  cy);
+        SdwWB(redloc, greenloc, blueloc, bfw, bfh, avg_rm, avg_gm, avg_bm);
 
         //   printf("bfw=%i bfh=%i begx=%i begy=%i xEn=%i yEn=%i cx=%i\n", bfw, bfh, begx, begy, xEn, yEn, cx);
     }
