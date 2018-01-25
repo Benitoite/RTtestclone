@@ -1311,7 +1311,7 @@ TP_CACORRECTION_LABEL;Chromatic Aberration Correction
 TP_CACORRECTION_RED;Red
 TP_CAT02ADAPTATION_LABEL;CAT02 Adaptation
 TP_CAT02ADAPTATION_AMOUNT;Amount
-TP_CAT02ADAPTATION_LUMINANCE_SCALING;Luminance scaling
+TP_CAT02ADAPTATION_LUMINANCE_SCALING;Luminance Y scaling
 TP_CAT02ADAPTATION_CIECAM_ENABLED;Ciecam enabled
 TP_CAT02ADAPTATION_CIECAM_DISABLED;Ciecam disabled
 TP_CAT02ADAPTATION_AUTO_AMOUNT_TOOLTIP;If the check-box is checked, RawTherapee calculates an optimum value, which is then used by CAT02\nTo set the value manually, uncheck the check-box first.
