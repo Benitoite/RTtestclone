@@ -22,6 +22,7 @@
 
 #include "rtimage.h"
 #include "options.h"
+#include "eventmapper.h"
 
 #define MINTEMP 1500   //1200
 #define MAXTEMP 60000  //12000
@@ -149,6 +150,14 @@ static double wbTemp2Slider(double temp)
 
 WhiteBalance::WhiteBalance() : FoldableToolPanel(this, "whitebalance", M("TP_WBALANCE_LABEL"), true, true), wbp(nullptr), wblistener(nullptr)
 {
+    auto m = ProcEventMapper::getInstance();
+    EvWBgammaMethod = m->newEvent(DEMOSAIC, "HISTORY_MSG_WBGAMMA");
+    EvWBMethod = m->newEvent(DEMOSAIC, "HISTORY_MSG_WBMETHOD");
+    EvWBTemp = m->newEvent(DEMOSAIC, "HISTORY_MSG_WBTEMP");
+    EvWBGreen = m->newEvent(DEMOSAIC, "HISTORY_MSG_WBGREEN");
+    EvWBequal = m->newEvent(DEMOSAIC, "HISTORY_MSG_WBEQUAL");
+    EvWBtempBias = m->newEvent(DEMOSAIC, "HISTORY_MSG_WBTEMPBIAS");
+    EvWBEnabled = m->newEvent(DEMOSAIC, "HISTORY_MSG_WBENABLED");
 
     Gtk::HBox* hbox = Gtk::manage(new Gtk::HBox());
     hbox->set_spacing(4);
@@ -792,7 +801,7 @@ void WhiteBalance::wbgammaMethodChanged()
     }
 
     if (listener) {
-        listener->panelChanged(EvWBcamMethod, wbgammaMethod->get_active_text());
+        listener->panelChanged(EvWBgammaMethod, wbgammaMethod->get_active_text());
     }
 }
 

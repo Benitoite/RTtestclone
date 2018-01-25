@@ -64,9 +64,9 @@ int refreshmap[rtengine::NUMOFEVENTS] = {
     DARKFRAME,        // EvLCPUseVign,
     TRANSFORM,        // EvLCPUseCA,
     M_VOID,           // EvFixedExp
-    DEMOSAIC,         // EvWBMethod,
-    DEMOSAIC,         // EvWBTemp,
-    DEMOSAIC,         // EvWBGreen,
+//    DEMOSAIC,         // EvWBMethod,
+//    DEMOSAIC,         // EvWBTemp,
+//    DEMOSAIC,         // EvWBGreen,
     RGBCURVE,         // EvToneCurveMode1,
     RGBCURVE,         // EvToneCurve2,
     RGBCURVE,         // EvToneCurveMode2,
@@ -234,8 +234,8 @@ int refreshmap[rtengine::NUMOFEVENTS] = {
     LUMINANCECURVE,   // EvCATbadpix
     LUMINANCECURVE,   // EvCATAutoadap
     DEFRINGE,         // EvPFCurve
-    DEMOSAIC,         // EvWBequal
-    DEMOSAIC,         // EvWBequalbo
+//    DEMOSAIC,         // EvWBequal
+//    DEMOSAIC,         // EvWBequalbo
     TRANSFORM,        // EvGradientDegree
     TRANSFORM,        // EvGradientEnabled
     TRANSFORM,        // EvPCVignetteStrength
@@ -470,7 +470,7 @@ int refreshmap[rtengine::NUMOFEVENTS] = {
     RETINEX,          // EvRetinexgaintransmission
     RETINEX,          // EvLskal
     OUTPUTPROFILE,    // EvOBPCompens
-    DEMOSAIC,          // EvWBtempBias
+//    DEMOSAIC,          // EvWBtempBias
     DARKFRAME,        // EvRawImageNum
     DEMOSAIC,         // EvPixelShiftMotion
     DEMOSAIC,         // EvPixelShiftMotionCorrection
@@ -518,7 +518,7 @@ int refreshmap[rtengine::NUMOFEVENTS] = {
     ALLNORAW,         // EvTMFattalEnabled
     HDR,              // EvTMFattalThreshold
     HDR,              // EvTMFattalAmount
-    DEMOSAIC,         // EvWBEnabled  ALLNORAW,
+//    DEMOSAIC,         // EvWBEnabled  ALLNORAW,
     RGBCURVE,         // EvRGBEnabled
     LUMINANCECURVE,   // EvLEnabled
     DEMOSAIC,          // EvPixelShiftOneGreen
@@ -544,8 +544,8 @@ int refreshmap[rtengine::NUMOFEVENTS] = {
     DEMOSAIC, //EvlocalwbwbMethod
     DEMOSAIC, //Evlocalwbgamma
     DEMOSAIC, //EvlocalwbwbcamMethod
-    DEMOSAIC, //EvWBcamMethod
-    DEMOSAIC, //EvWBcat02
+ //   DEMOSAIC, //EvWBcamMethod
+ //   DEMOSAIC, //EvWBcat02
     DEMOSAIC, //EvLocrgbenaexpose
     DEMOSAIC, //EvlocalwbEnabled
     DEMOSAIC, //EvlocalwblocY

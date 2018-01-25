@@ -41,7 +41,17 @@ class WhiteBalance : public ToolParamBlock, public AdjusterListener, public Fold
         WBLT_GUI,
         WBLT_PP
     };
+	
+private:
+    rtengine::ProcEvent EvWBgammaMethod;
+    rtengine::ProcEvent EvWBMethod;
+    rtengine::ProcEvent EvWBTemp;
+    rtengine::ProcEvent EvWBGreen;
+    rtengine::ProcEvent EvWBequal;
+    rtengine::ProcEvent EvWBtempBias;
+    rtengine::ProcEvent EvWBEnabled;
 
+	
 protected:
     class MethodColumns : public Gtk::TreeModel::ColumnRecord
     {
