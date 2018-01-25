@@ -64,9 +64,9 @@ enum ProcEventCode {
     EvLCPUseVign = 34,
     EvLCPUseCA = 35,
     EvFixedExp = 36,
-//    EvWBMethod = 37,
-//    EvWBTemp = 38,
-//    EvWBGreen = 39,
+    EvWBMethoda = 37,//obsolet
+    EvWBTempa = 38,//obsolet
+    EvWBGreena = 39,//obsolet
     EvToneCurveMode1 = 40,
     EvToneCurve2 = 41,
     EvToneCurveMode2 = 42,
@@ -234,8 +234,8 @@ enum ProcEventCode {
     EvCATbadpix = 204,
     EvCATAutoAdap = 205,
     EvPFCurve = 206,
-//    EvWBequal = 207,
-//    EvWBequalbo = 208,
+    EvWBequala = 207,//obsolet
+    EvWBequalboa = 208,//obsolet
     EvGradientDegree = 209,
     EvGradientEnabled = 210,
     EvPCVignetteStrength = 211,
@@ -470,7 +470,7 @@ enum ProcEventCode {
     EvRetinexgaintransmission = 440,
     EvLskal = 441,
     EvOBPCompens = 442,
-//    EvWBtempBias = 443,
+    EvWBtempBiasa = 443,//obsolet
     EvRawImageNum = 444,
     EvPixelShiftMotion = 445,
     EvPixelShiftMotionCorrection = 446,
@@ -518,49 +518,10 @@ enum ProcEventCode {
     EvTMFattalEnabled = 487,
     EvTMFattalThreshold = 488,
     EvTMFattalAmount = 489,
-  //  EvWBEnabled = 490,
+    EvWBEnableda = 490,//obsolet
     EvRGBEnabled = 491,
     EvLEnabled = 492,
     EvPixelShiftOneGreen = 493,
-
-    EvlocalwblocYT = 494,
-    EvlocalwblocXL = 495,
-    EvlocalwbSmet = 496,
-    Evlocalwbsensi = 497,
-    Evlocalwbnbspot = 498,
-    Evlocalwbanbspot = 499,
-    Evlocalwbhueref = 500,
-    Evlocalwbchromaref = 501,
-    Evlocalwblumaref = 502,
-    Evlocalwbthres = 503,
-    Evlocalwbproxi = 504,
-    Evlocalwbcircrad = 505,
-    EvlocalwbqualityMethod = 506,
-    Evlocalwbretrab = 507,
-    EvLocrgbenawb = 508,
-    Evlocalwbtemp = 509,
-    Evlocalwbgreen = 510,
-    Evlocalwbequal = 511,
-    EvlocalwbwbMethod = 512,
-    Evlocalwbgamma = 513,
-    EvlocalwbwbcamMethod = 514,
-//    EvWBcamMethod = 515,
-//    EvWBcat02 = 516,
-    EvLocrgbenaexpose = 517,
-    EvlocalwbEnabled = 518,
-    EvlocalwblocY = 519,
-    EvlocalwblocX = 520,
-    EvlocalwbCenter = 521,
-    EvlocalwbDegree = 522,
-    Evlocalwbtransit = 523,
-    Evlocalwbcat02 = 524,
-    Evlocalwbytint = 525,
-    EvlocalwbAutotemp = 526,
-    EvlocalwbAutogreen = 527,
-    EvlocalwbAutoequal = 528,
-    EvlocalwbAutocat02 = 529,
-    EvlocalwbAutoytint = 530,
-
     NUMOFEVENTS
 
 };

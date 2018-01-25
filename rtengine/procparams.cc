@@ -331,8 +331,8 @@ curveMode(ToneCurveParams::TcMode::STD),
           saturation(0),
           shcompr(50),
           hlcompr(0),
-    hlcomprthresh(33),
-    histmatching(false)
+          hlcomprthresh(33),
+          histmatching(false)
 {
 }
 
@@ -1132,7 +1132,7 @@ WBParams::WBParams() :
     green(1.0),
     equal(1.0),
     tempBias(0.0),
-	wbgammaMethod("none")
+    wbgammaMethod("none")
 {
 }
 
@@ -1146,7 +1146,7 @@ bool WBParams::operator ==(const WBParams& other) const
         && equal == other.equal
         && tempBias == other.tempBias
         && wbgammaMethod == other.wbgammaMethod;
-		
+
 }
 
 bool WBParams::operator !=(const WBParams& other) const
@@ -2281,22 +2281,14 @@ LocrgbParams::LocrgbParams():
     thres(18),
     proxi(20),
     Smethod("IND"),
-    qualityMethod("enhden"),
     transit(60),
     cat02(0),
     ytint(1.0),
     sensi(19),
-    hueref(1.),
-    chromaref(50.),
-    lumaref(50.),
-    nbspot(1),
-    anbspot(0),
-    retrab(500),
-    expwb(false),
-    wbMethod("man"),
+//   hueref(1.),
+//   chromaref(50.),
+//   lumaref(50.),
     wbshaMethod("eli"),
-    gamma(true),
-    wbcamMethod("gam"),
     temp(5000.),
     green(1.),
     equal(1.),
@@ -2324,11 +2316,8 @@ bool LocrgbParams::operator ==(const LocrgbParams& other) const
         && proxi == other.proxi
         && degree == other.degree
         && Smethod == other.Smethod
-        && qualityMethod == other.qualityMethod
         && sensi == other.sensi
-        && wbMethod == other.wbMethod
         && wbshaMethod == other.wbshaMethod
-        && wbcamMethod == other.wbcamMethod
         && temp == other.temp
         && autotemp == other.autotemp
         && autogreen == other.autogreen
@@ -2339,8 +2328,7 @@ bool LocrgbParams::operator ==(const LocrgbParams& other) const
         && equal == other.equal
         && transit == other.transit
         && cat02 == other.cat02
-        && ytint == other.ytint
-        && gamma == other.gamma;
+        && ytint == other.ytint;
 
 }
 
@@ -3116,25 +3104,17 @@ int ProcParams::save(const Glib::ustring& fname, const Glib::ustring& fname2, bo
         saveToKeyfile(!pedited || pedited->localwb.thres, "Locrgb", "Thres", localwb.thres, keyFile);
         saveToKeyfile(!pedited || pedited->localwb.proxi, "Locrgb", "Proxi", localwb.proxi, keyFile);
         saveToKeyfile(!pedited || pedited->localwb.Smethod, "Locrgb", "Smethod", localwb.Smethod, keyFile);
-        saveToKeyfile(!pedited || pedited->localwb.nbspot, "Locrgb", "Nbspot", localwb.nbspot, keyFile);
-        saveToKeyfile(!pedited || pedited->localwb.anbspot, "Locrgb", "ANbspot", localwb.anbspot, keyFile);
-        saveToKeyfile(!pedited || pedited->localwb.retrab, "Locrgb", "Retrab", localwb.retrab, keyFile);
-        saveToKeyfile(!pedited || pedited->localwb.hueref, "Locrgb", "Hueref", localwb.hueref, keyFile);
-        saveToKeyfile(!pedited || pedited->localwb.chromaref, "Locrgb", "Chromaref", localwb.chromaref, keyFile);
-        saveToKeyfile(!pedited || pedited->localwb.lumaref, "Locrgb", "Lumaref", localwb.lumaref, keyFile);
+        //     saveToKeyfile(!pedited || pedited->localwb.hueref, "Locrgb", "Hueref", localwb.hueref, keyFile);
+        //     saveToKeyfile(!pedited || pedited->localwb.chromaref, "Locrgb", "Chromaref", localwb.chromaref, keyFile);
+        //     saveToKeyfile(!pedited || pedited->localwb.lumaref, "Locrgb", "Lumaref", localwb.lumaref, keyFile);
         saveToKeyfile(!pedited || pedited->localwb.transit, "Locrgb", "Transit", localwb.transit, keyFile);
         saveToKeyfile(!pedited || pedited->localwb.cat02, "Locrgb", "Cat02", localwb.cat02, keyFile);
         saveToKeyfile(!pedited || pedited->localwb.ytint, "Locrgb", "Ytint", localwb.ytint, keyFile);
         saveToKeyfile(!pedited || pedited->localwb.sensi, "Locrgb", "Sensi", localwb.sensi, keyFile);
-        saveToKeyfile(!pedited || pedited->localwb.qualityMethod, "Locrgb", "qualityMethod", localwb.qualityMethod, keyFile);
-        saveToKeyfile(!pedited || pedited->localwb.wbMethod, "Locrgb", "wbMethod", localwb.wbMethod, keyFile);
-        saveToKeyfile(!pedited || pedited->localwb.wbMethod, "Locrgb", "wbshaMethod", localwb.wbshaMethod, keyFile);
-        saveToKeyfile(!pedited || pedited->localwb.wbcamMethod, "Locrgb", "WbcamMethod", localwb.wbcamMethod, keyFile);
+        saveToKeyfile(!pedited || pedited->localwb.wbshaMethod, "Locrgb", "WbshaMethod", localwb.wbshaMethod, keyFile);
         saveToKeyfile(!pedited || pedited->localwb.temp, "Locrgb", "Temp", localwb.temp, keyFile);
         saveToKeyfile(!pedited || pedited->localwb.green, "Locrgb", "Green", localwb.green, keyFile);
         saveToKeyfile(!pedited || pedited->localwb.equal, "Locrgb", "Equal", localwb.equal, keyFile);
-        saveToKeyfile(!pedited || pedited->localwb.expwb, "Locrgb", "Expwb", localwb.expwb, keyFile);
-        saveToKeyfile(!pedited || pedited->localwb.gamma, "Locrgb", "Gamma", localwb.gamma, keyFile);
         saveToKeyfile(!pedited || pedited->localwb.autotemp, "Locrgb", "Autotemp", localwb.autotemp, keyFile);
         saveToKeyfile(!pedited || pedited->localwb.autogreen, "Locrgb", "Autogreen", localwb.autogreen, keyFile);
         saveToKeyfile(!pedited || pedited->localwb.autoequal, "Locrgb", "Autoequal", localwb.autoequal, keyFile);
@@ -3670,6 +3650,7 @@ int ProcParams::load(const Glib::ustring& fname, ParamsEdited* pedited)
                 assignFromKeyfile(keyFile, "Exposure", "Curve", pedited, toneCurve.curve, pedited->toneCurve.curve);
                 assignFromKeyfile(keyFile, "Exposure", "Curve2", pedited, toneCurve.curve2, pedited->toneCurve.curve2);
             }
+
             assignFromKeyfile(keyFile, "Exposure", "HistogramMatching", pedited, toneCurve.histmatching, pedited->toneCurve.histmatching);
         }
 
@@ -4057,24 +4038,15 @@ int ProcParams::load(const Glib::ustring& fname, ParamsEdited* pedited)
             assignFromKeyfile(keyFile, "Locrgb", "Thres", pedited, localwb.thres, pedited->localwb.thres);
             assignFromKeyfile(keyFile, "Locrgb", "Proxi", pedited, localwb.proxi, pedited->localwb.proxi);
             assignFromKeyfile(keyFile, "Locrgb", "Sensi", pedited, localwb.sensi, pedited->localwb.sensi);
-            assignFromKeyfile(keyFile, "Locrgb", "Nbspot", pedited, localwb.nbspot, pedited->localwb.nbspot);
-            assignFromKeyfile(keyFile, "Locrgb", "ANbspot", pedited, localwb.anbspot, pedited->localwb.anbspot);
-            assignFromKeyfile(keyFile, "Locrgb", "Retrab", pedited, localwb.retrab, pedited->localwb.retrab);
-            assignFromKeyfile(keyFile, "Locrgb", "Hueref", pedited, localwb.hueref, pedited->localwb.hueref);
-            assignFromKeyfile(keyFile, "Locrgb", "Chromaref", pedited, localwb.chromaref, pedited->localwb.chromaref);
-            assignFromKeyfile(keyFile, "Locrgb", "Lumaref", pedited, localwb.lumaref, pedited->localwb.lumaref);
+            //      assignFromKeyfile(keyFile, "Locrgb", "Chromaref", pedited, localwb.chromaref, pedited->localwb.chromaref);
+            //      assignFromKeyfile(keyFile, "Locrgb", "Lumaref", pedited, localwb.lumaref, pedited->localwb.lumaref);
             assignFromKeyfile(keyFile, "Locrgb", "Transit", pedited, localwb.transit, pedited->localwb.transit);
             assignFromKeyfile(keyFile, "Locrgb", "Cat02", pedited, localwb.cat02, pedited->localwb.cat02);
             assignFromKeyfile(keyFile, "Locrgb", "Ytint", pedited, localwb.ytint, pedited->localwb.ytint);
-            assignFromKeyfile(keyFile, "Locrgb", "qualityMethod", pedited, localwb.qualityMethod, pedited->localwb.qualityMethod);
-            assignFromKeyfile(keyFile, "Locrgb", "wbMethod", pedited, localwb.wbMethod, pedited->localwb.wbMethod);
-            assignFromKeyfile(keyFile, "Locrgb", "wbshaMethod", pedited, localwb.wbshaMethod, pedited->localwb.wbshaMethod);
-            assignFromKeyfile(keyFile, "Locrgb", "WbcamMethod", pedited, localwb.wbcamMethod, pedited->localwb.wbcamMethod);
-            assignFromKeyfile(keyFile, "Locrgb", "Expwb", pedited, localwb.expwb, pedited->localwb.expwb);
+            assignFromKeyfile(keyFile, "Locrgb", "WbshaMethod", pedited, localwb.wbshaMethod, pedited->localwb.wbshaMethod);
             assignFromKeyfile(keyFile, "Locrgb", "Temp", pedited, localwb.temp, pedited->localwb.temp);
             assignFromKeyfile(keyFile, "Locrgb", "Green", pedited, localwb.green, pedited->localwb.green);
             assignFromKeyfile(keyFile, "Locrgb", "Equal", pedited, localwb.equal, pedited->localwb.equal);
-            assignFromKeyfile(keyFile, "Locrgb", "Gamma", pedited, localwb.gamma, pedited->localwb.gamma);
             assignFromKeyfile(keyFile, "Locrgb", "Autotemp", pedited, localwb.autotemp, pedited->localwb.autotemp);
             assignFromKeyfile(keyFile, "Locrgb", "Autogreen", pedited, localwb.autogreen, pedited->localwb.autogreen);
             assignFromKeyfile(keyFile, "Locrgb", "Autoequal", pedited, localwb.autoequal, pedited->localwb.autoequal);

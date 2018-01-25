@@ -904,23 +904,15 @@ struct LocrgbParams {
     int     thres;
     int     proxi;
     Glib::ustring Smethod;
-    Glib::ustring qualityMethod;
 
     int     transit;
     int cat02;
     double ytint;
     int sensi;
-    double  hueref;
-    double  chromaref;
-    double  lumaref;
-    int     nbspot;
-    int     anbspot;
-    int     retrab;
-    bool expwb;
-    Glib::ustring wbMethod;
+//    double  hueref;
+//    double  chromaref;
+//    double  lumaref;
     Glib::ustring wbshaMethod;
-    bool    gamma;
-    Glib::ustring wbcamMethod;
     double temp;
     double green;
     double equal;

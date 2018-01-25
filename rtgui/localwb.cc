@@ -29,6 +29,7 @@
 #include <unistd.h>
 #include "../rtengine/improcfun.h"
 //#include "../rtengine/color.h"
+#include "eventmapper.h"
 
 #define MINTEMP 1500   //1200
 #define MAXTEMP 60000  //12000
@@ -130,8 +131,6 @@ Localwb::Localwb() :
     EditSubscriber(ET_OBJECTS), lastObject(-1),
 
     expsettings(new MyExpander(false, M("TP_LOCALLAB_SETTINGS"))),
-    expwb(new MyExpander(true, M("TP_LOCALRGB_WB"))),
-    anbspot(Gtk::manage(new Adjuster(M("TP_LOCALLAB_ANBSPOT"), 0, 1, 1, 0))),
     locX(Gtk::manage(new Adjuster(M("TP_LOCAL_WIDTH"), 0, 2250, 1, 250))),
     locXL(Gtk::manage(new Adjuster(M("TP_LOCAL_WIDTH_L"), 0, 2250, 1, 250))),
     degree(Gtk::manage(new Adjuster(M("TP_LOCAL_DEGREE"), -180, 180, 1, 0))),
@@ -146,18 +145,14 @@ Localwb::Localwb() :
     transit(Gtk::manage(new Adjuster(M("TP_LOCALLAB_TRANSIT"), 5, 95, 1, 60))),
     cat02(Gtk::manage(new Adjuster(M("TP_CAT02_SLI"), 0, 100, 1, 0))),
     ytint(Gtk::manage(new Adjuster(M("TP_CAT02_GREE"), 0.9, 1.1, 0.001, 1))),
-    retrab(Gtk::manage(new Adjuster(M("TP_LOCALLAB_RETRAB"), 0, 10000, 1, 500))),
-
-    hueref(Gtk::manage(new Adjuster(M("TP_LOCALLAB_HUEREF"), -3.15, 3.15, 0.01, 0))),
-    chromaref(Gtk::manage(new Adjuster(M("TP_LOCALLAB_CHROMAREF"), 0, 200, 0.01, 0))),
-    lumaref(Gtk::manage(new Adjuster(M("TP_LOCALLAB_LUMAMAREF"), 0, 100, 0.01, 0))),
-
+    /*
+        hueref(Gtk::manage(new Adjuster(M("TP_LOCALLAB_HUEREF"), -3.15, 3.15, 0.01, 0))),
+        chromaref(Gtk::manage(new Adjuster(M("TP_LOCALLAB_CHROMAREF"), 0, 200, 0.01, 0))),
+        lumaref(Gtk::manage(new Adjuster(M("TP_LOCALLAB_LUMAMAREF"), 0, 100, 0.01, 0))),
+    */
 
     Smethod(Gtk::manage(new MyComboBoxText())),
-    qualityMethod(Gtk::manage(new MyComboBoxText())),
-    wbMethod(Gtk::manage(new MyComboBoxText())),
     wbshaMethod(Gtk::manage(new MyComboBoxText())),
-    wbcamMethod(Gtk::manage(new MyComboBoxText())),
     shapeFrame(Gtk::manage(new Gtk::Frame(M("TP_LOCALLAB_SHFR")))),
     artifFrame(Gtk::manage(new Gtk::Frame(M("TP_LOCALLAB_ARTIF")))),
     superFrame(Gtk::manage(new Gtk::Frame())),
@@ -166,12 +161,10 @@ Localwb::Localwb() :
     labqual(Gtk::manage(new Gtk::Label(M("TP_LOCALLAB_QUAL_METHOD") + ":"))),
 
     labmS(Gtk::manage(new Gtk::Label(M("TP_LOCALLAB_STYPE") + ":"))),
-    labcam(Gtk::manage(new Gtk::Label(M("TP_LOCALRGB_CAM") + ":"))),
     labmeth(Gtk::manage(new Gtk::Label(M("TP_LOCALRGB_MET") + ":"))),
 
     ctboxS(Gtk::manage(new Gtk::HBox())),
     qualbox(Gtk::manage(new Gtk::HBox())),
-    cambox(Gtk::manage(new Gtk::HBox())),
     ctboxmet(Gtk::manage(new Gtk::HBox()))
 
 
@@ -183,8 +176,33 @@ Localwb::Localwb() :
     next_green = 0.;
     next_wbauto = 0;
     nextmeth = 0;
+    nextCadap = 0;
+    nextGree = 0.;
 
     ProcParams params;
+    auto m = ProcEventMapper::getInstance();
+    EvlocalWBAutotemp = m->newEvent(DEMOSAIC, "HISTORY_MSG_LOCAUTOTEMP");
+    EvlocalWBAutogreen = m->newEvent(DEMOSAIC, "HISTORY_MSG_LOCAUTOGREEN");
+    EvlocalWBAutoequal = m->newEvent(DEMOSAIC, "HISTORY_MSG_LOCAUTOEQUAL");
+    EvlocalWBAutocat02 = m->newEvent(DEMOSAIC, "HISTORY_MSG_LOCAUTOCAT02");
+    EvlocalWBAutoytint = m->newEvent(DEMOSAIC, "HISTORY_MSG_LOCAUTOYTINT");
+    EvlocalWBMethod = m->newEvent(DEMOSAIC, "HISTORY_MSG_LOCWBMETH");
+    EvlocalWBSmet = m->newEvent(DEMOSAIC, "HISTORY_MSG_LOCWBSMETH");
+    EvlocalWBDegree = m->newEvent(DEMOSAIC, "HISTORY_MSG_LOCWBDEG");
+    EvlocalWBlocY  = m->newEvent(DEMOSAIC, "HISTORY_MSG_LOCWBLOCY");
+    EvlocalWBlocX = m->newEvent(DEMOSAIC, "HISTORY_MSG_LOCWBLOCX");
+    EvlocalWBlocYT = m->newEvent(DEMOSAIC, "HISTORY_MSG_LOCYT");
+    EvlocalWBlocXL = m->newEvent(DEMOSAIC, "HISTORY_MSG_LOCWBLOCXL");
+    EvlocalWBsensi = m->newEvent(DEMOSAIC, "HISTORY_MSG_LOCWBSENSI");
+    EvlocalWBtransit = m->newEvent(DEMOSAIC, "HISTORY_MSG_LOCWBTRANSIT");
+    EvlocalWBcat02 = m->newEvent(DEMOSAIC, "HISTORY_MSG_LOCWBAMOUNT");
+    EvlocalWBytint = m->newEvent(DEMOSAIC, "HISTORY_MSG_LOCWBLUMY");
+    EvlocalWBtemp = m->newEvent(DEMOSAIC, "HISTORY_MSG_LOCWBTEMP");
+    EvlocalWBgreen = m->newEvent(DEMOSAIC, "HISTORY_MSG_LOCWBTINT");
+    EvlocalWBequal = m->newEvent(DEMOSAIC, "HISTORY_MSG_LOCWBEQUAL");
+    EvlocalWBcircrad = m->newEvent(DEMOSAIC, "HISTORY_MSG_LOCWBCIRCRAD");
+    EvlocalWBCenter = m->newEvent(DEMOSAIC, "HISTORY_MSG_LOCWBCENTER");
+    EvlocalWBEnabled = m->newEvent(DEMOSAIC, "HISTORY_MSG_LOCWBENA");
 
     editHBox = Gtk::manage(new Gtk::HBox());
     edit = Gtk::manage(new Gtk::ToggleButton());
@@ -194,33 +212,10 @@ Localwb::Localwb() :
     editHBox->pack_start(*edit, Gtk::PACK_SHRINK, 0);
     pack_start(*editHBox, Gtk::PACK_SHRINK, 0);
 
-    int realnbspot;
-
-
-    realnbspot = options.rtSettings.nspot;
-
-    nbspot = Gtk::manage(new Adjuster(M("TP_LOCALLAB_NBSPOT"), 1, realnbspot, 1, 1));
-
-    if (options.rtSettings.locdelay) {
-
-        if (nbspot->delay < 200) {
-            nbspot->delay = 200;
-        }
-    }
-
-    nbspot->setAdjusterListener(this);
-    nbspot->set_tooltip_text(M("TP_LOCALLAB_NBSPOT_TOOLTIP"));
-
-
-    anbspot->setAdjusterListener(this);
-    anbspot->set_tooltip_text(M("TP_LOCALLAB_ANBSPOT_TOOLTIP"));
-    retrab->setAdjusterListener(this);
 
     shapeFrame->set_label_align(0.025, 0.5);
 
     expsettings->signal_button_release_event().connect_notify(sigc::bind(sigc::mem_fun(this, &Localwb::foldAllButMe), expsettings));
-    expwb->signal_button_release_event().connect_notify(sigc::bind(sigc::mem_fun(this, &Localwb::foldAllButMe), expwb));
-    enablewbConn = expwb->signal_enabled_toggled().connect(sigc::bind(sigc::mem_fun(this, &Localwb::enableToggled), expwb));
 
 
     ctboxS->pack_start(*labmS, Gtk::PACK_SHRINK, 4);
@@ -253,11 +248,6 @@ Localwb::Localwb() :
     proxi->setAdjusterListener(this);
 
 
-    qualityMethod->append(M("TP_LOCALLAB_STD"));
-    qualityMethod->append(M("TP_LOCALLAB_ENH"));
-    qualityMethod->append(M("TP_LOCALLAB_ENHDEN"));
-    qualityMethod->set_active(0);
-    qualityMethodConn = qualityMethod->signal_changed().connect(sigc::mem_fun(*this, &Localwb::qualityMethodChanged));
 
 
     sensi->set_tooltip_text(M("TP_LOCALLAB_SENSI_TOOLTIP"));
@@ -288,7 +278,6 @@ Localwb::Localwb() :
     ytint->set_tooltip_text(M("TP_LOCAL_CATYTINT_TOOLTIP"));
     ytint->setAdjusterListener(this);
 
-    wbMethodConn = wbshaMethod->signal_changed().connect(sigc::mem_fun(*this, &Localwb::wbMethodChanged));
 
     ctboxmet->pack_start(*labmeth, Gtk::PACK_SHRINK, 4);
 
@@ -302,16 +291,14 @@ Localwb::Localwb() :
 
     ToolParamBlock* const shapeBox = Gtk::manage(new ToolParamBlock());
 
-    //  shapeBox->pack_start (*nbspot);
-    pack_start(*anbspot);
 
-    hueref->setAdjusterListener(this);
-    chromaref->setAdjusterListener(this);
-    lumaref->setAdjusterListener(this);
+//    hueref->setAdjusterListener(this);
+//    chromaref->setAdjusterListener(this);
+//    lumaref->setAdjusterListener(this);
 
-    pack_start(*hueref);
-    pack_start(*chromaref);
-    pack_start(*lumaref);
+//    pack_start(*hueref);
+//    pack_start(*chromaref);
+//    pack_start(*lumaref);
     shapeBox->pack_start(*ctboxmet);
     ctboxS->pack_start(*Smethod);
     shapeBox->pack_start(*ctboxS);
@@ -322,19 +309,14 @@ Localwb::Localwb() :
     shapeBox->pack_start(*locYT);
     shapeBox->pack_start(*centerX);
     shapeBox->pack_start(*centerY);
-//    shapeBox->pack_start (*circrad);
-//    qualbox->pack_start (*labqual, Gtk::PACK_SHRINK, 4);
-//    qualbox->pack_start (*qualityMethod);
-//    shapeBox->pack_start (*qualbox);
     shapeBox->pack_start(*transit);
 
     cat02Frame->set_label_align(0.025, 0.5);
     ToolParamBlock* const catBox = Gtk::manage(new ToolParamBlock());
-
     catBox->pack_start(*cat02);
     catBox->pack_start(*ytint);
     cat02Frame->add(*catBox);
-    shapeBox->pack_start(*cat02Frame);
+//    shapeBox->pack_start(*cat02Frame);
 
     artifFrame->set_label_align(0.025, 0.5);
     artifFrame->set_tooltip_text(M("TP_LOCALLAB_ARTIF_TOOLTIP"));
@@ -343,7 +325,6 @@ Localwb::Localwb() :
 
     artifBox->pack_start(*thres);
     artifBox->pack_start(*proxi);
-    artifBox->pack_start(*retrab);
 
     artifFrame->add(*artifBox);
 //    shapeBox->pack_start (*artifFrame);
@@ -354,14 +335,10 @@ Localwb::Localwb() :
 
     superFrame->set_label_align(0.025, 0.5);
 
+    ToolParamBlock* const cat02Box = Gtk::manage(new ToolParamBlock());
 
-    wbcamMethod->append(M("TP_LOCALWBCAM_NONE"));
-    wbcamMethod->append(M("TP_LOCALWBCAM_GAM"));
-//    wbcamMethod->append (M ("TP_LOCALWBCAM_CAT02"));
-//    wbcamMethod->append (M ("TP_LOCALWBCAM_GACAT"));
-    wbcamMethod->set_active(1);
-    wbcamMethodConn = wbcamMethod->signal_changed().connect(sigc::mem_fun(*this, &Localwb::wbcamMethodChanged));
-    wbcamMethod->set_tooltip_markup(M("TP_LOCALWBCAM_TOOLTIP"));
+    cat02Box->pack_start(*cat02Frame);
+    pack_start(*cat02Box);
 
     Gtk::Image* itempL =  Gtk::manage(new RTImage("ajd-wb-temp1.png"));
     Gtk::Image* itempR =  Gtk::manage(new RTImage("ajd-wb-temp2.png"));
@@ -384,7 +361,6 @@ Localwb::Localwb() :
     green = Gtk::manage(new Adjuster(M("TP_WBALANCE_GREEN"), MINGREEN, MAXGREEN, 0.001, 1.0, igreenL, igreenR));
     equal = Gtk::manage(new Adjuster(M("TP_WBALANCE_EQBLUERED"), MINEQUAL, MAXEQUAL, 0.001, 1.0, iblueredL, iblueredR));
     wbshaMethod->show();
-    wbcamMethod->show();
 
     if (temp->delay < options.adjusterMaxDelay) {
         temp->delay = options.adjusterMaxDelay;
@@ -418,32 +394,16 @@ Localwb::Localwb() :
     equal->show();
 
 
-//  wbBox->pack_start (*spotbox);
-//    wbBox->pack_start (*wbMethod);
-//    wbBox->pack_start (*ttLabels);
-//    wbBox->pack_start (*metLabels);
 
     wbBox->pack_start(*temp);
     wbBox->pack_start(*green);
     wbBox->pack_start(*equal);
-    cambox->pack_start(*labcam, Gtk::PACK_SHRINK, 4);
-    cambox->pack_start(*wbcamMethod);
-
-//   wbBox->pack_start (*cambox);
 
     temp->setAdjusterListener(this);
     green->setAdjusterListener(this);
     equal->setAdjusterListener(this);
 
-    gamma = Gtk::manage(new Gtk::CheckButton(M("TP_LOCALRGBWB_GAMMA")));
-    gammaconn = gamma->signal_toggled().connect(sigc::mem_fun(*this, &Localwb::gamma_toggled));
     pack_start(*wbBox);
-
-//  expwb->add (*wbBox);
-//    expwb->setLevel (2);
-    expwb->setEnabled(true);
-
-    //  pack_start(*expwb);
 
     // Instantiating the Editing geometry; positions will be initialized later
     Line *locYLine[2], *locXLine[2];
@@ -651,9 +611,6 @@ Localwb::Localwb() :
         foubeziers[3]->innerLineWidth = innw;
     }
 
-//   oneellipse->radiusInImageSpace = true;
-//   oneellipse->radius = 10;//locX->getValue();
-//    oneellipse->filled = false;
 
     EditSubscriber::mouseOverGeometry.push_back(locXLine[0]);
     EditSubscriber::mouseOverGeometry.push_back(locXLine[1]);
@@ -709,13 +666,14 @@ void Localwb::enableToggled(MyExpander *expander)
 
         rtengine::ProcEvent event = NUMOFEVENTS;
 
-        if (expander == expwb) {
-            event = EvLocrgbenawb ;
+        /*
+                if (expander == expwb) {
+                    event = EvLocrgbenawb ;
 
-        } else {
-            return;
-        }
-
+                } else {
+                    return;
+                }
+        */
         if (expander->get_inconsistent()) {
             listener->panelChanged(event, M("GENERAL_UNCHANGED"));
         } else if (expander->getEnabled()) {
@@ -727,99 +685,11 @@ void Localwb::enableToggled(MyExpander *expander)
     }
 }
 
-void Localwb::temptintChanged(double ctemp, double ctint, double cequal, int meth)
-{
-    nexttemp = ctemp;
-    nexttint = ctint;
-    nextequal = cequal;
-    nextmeth = meth;
-    const auto func = [](gpointer data) -> gboolean {
-        GThreadLock lock; // All GUI access from idle_add callbacks or separate thread HAVE to be protected
-        static_cast<Localwb*>(data)->temptintComputed_();
-
-        return FALSE;
-    };
-
-    idle_register.add(func, this);
-}
-
-bool Localwb::temptintComputed_()
-{
-
-    disableListener();
-    enableListener();
-    updateLabel();
-    //  wbMethod->set_active (0);
-//   wbMethodChanged ();
-
-    return false;
-
-}
-
-void Localwb::updateLabel()
-{
-    /*
-    if (!batchMode) {
-        float nX, nY, nZ;
-        int nM;
-        nX = nexttemp;
-        nY = nexttint;
-        nZ = nextequal;
-        nM = nextmeth;
-        Glib::ustring meta;
-
-        if (nM == 2) {
-            meta = "Last auto:" + M("TP_LOCALRGBWB_AUT");
-        }
-
-        if (nM == 3) {
-            meta = "Last auto:" + M("TP_LOCALRGBWB_AUTEDG");
-        }
-
-        if (nM == 4) {
-            meta = "Last auto:" + M("TP_LOCALRGBWB_AUTOLD");
-        }
-
-        if (nM == 5) {
-            meta = "Last auto:" + M("TP_LOCALRGBWB_AUTOROBUST");
-        }
-
-        if (nM == 6) {
-            meta = "Last auto:" + M("TP_LOCALRGBWB_AUTOSDW");
-        }
-
-        if (nM == 7) {
-            meta = "Last auto:" + M("TP_LOCALRGBWB_AUTEDGROB");
-        }
-
-        if (nM == 8) {
-            meta = "Last auto:" + M("TP_LOCALRGBWB_AUTEDGSDW");
-        }
-
-        if (nM == 9) {
-            meta = "Last auto:" + M("TP_LOCALRGBWB_AUTITC");
-        }
-
-        {
-            ttLabels->set_text(
-                Glib::ustring::compose(M("TP_LOCALRGB_TTLABEL"),
-                                       Glib::ustring::format(std::fixed, std::setprecision(0), nX),
-                                       Glib::ustring::format(std::fixed, std::setprecision(2), nY),
-                                       Glib::ustring::format(std::fixed, std::setprecision(2), nZ))
-            );
-            metLabels->set_text(meta);
-        }
-
-        nextmeth = 0;
-    }
-    */
-}
 
 void Localwb::foldAllButMe(GdkEventButton* event, MyExpander *expander)
 {
     if (event->button == 3) {
         expsettings->set_expanded(expsettings == expander);
-        expwb->set_expanded(expwb == expander);
     }
 }
 
@@ -827,14 +697,12 @@ void Localwb::foldAllButMe(GdkEventButton* event, MyExpander *expander)
 void Localwb::writeOptions(std::vector<int> &tpOpen)
 {
     tpOpen.push_back(expsettings->get_expanded());
-    tpOpen.push_back(expwb->get_expanded());
 }
 
 void Localwb::updateToolState(std::vector<int> &tpOpen)
 {
-    if (tpOpen.size() >= 2) {
+    if (tpOpen.size() >= 1) {
         expsettings->set_expanded(tpOpen.at(0));
-        expwb->set_expanded(tpOpen.at(1));
 
     }
 }
@@ -1048,7 +916,6 @@ void Localwb::read(const ProcParams* pp, const ParamsEdited* pedited)
     if (pedited) {
         set_inconsistent(multiImage && !pedited->localwb.enabled);
         degree->setEditedState(pedited->localwb.degree ? Edited : UnEdited);
-        gamma->set_inconsistent(!pedited->localwb.gamma);
         locY->setEditedState(pedited->localwb.locY ? Edited : UnEdited);
         locX->setEditedState(pedited->localwb.locX ? Edited : UnEdited);
         locYT->setEditedState(pedited->localwb.locYT ? Edited : UnEdited);
@@ -1059,16 +926,12 @@ void Localwb::read(const ProcParams* pp, const ParamsEdited* pedited)
         thres->setEditedState(pedited->localwb.thres ? Edited : UnEdited);
         proxi->setEditedState(pedited->localwb.proxi ? Edited : UnEdited);
         sensi->setEditedState(pedited->localwb.sensi ? Edited : UnEdited);
-        nbspot->setEditedState(pedited->localwb.nbspot ? Edited : UnEdited);
-        anbspot->setEditedState(pedited->localwb.anbspot ? Edited : UnEdited);
-        retrab->setEditedState(pedited->localwb.retrab ? Edited : UnEdited);
-        hueref->setEditedState(pedited->localwb.hueref ? Edited : UnEdited);
-        chromaref->setEditedState(pedited->localwb.chromaref ? Edited : UnEdited);
-        lumaref->setEditedState(pedited->localwb.lumaref ? Edited : UnEdited);
+//        hueref->setEditedState(pedited->localwb.hueref ? Edited : UnEdited);
+//        chromaref->setEditedState(pedited->localwb.chromaref ? Edited : UnEdited);
+//        lumaref->setEditedState(pedited->localwb.lumaref ? Edited : UnEdited);
         transit->setEditedState(pedited->localwb.transit ? Edited : UnEdited);
         cat02->setEditedState(pedited->localwb.cat02 ? Edited : UnEdited);
         cat02->setAutoInconsistent(multiImage && !pedited->localwb.autocat02);
-        expwb->set_inconsistent(!pedited->localwb.expwb);
         ytint->setEditedState(pedited->localwb.ytint ? Edited : UnEdited);
         ytint->setAutoInconsistent(multiImage && !pedited->localwb.autoytint);
 
@@ -1085,21 +948,12 @@ void Localwb::read(const ProcParams* pp, const ParamsEdited* pedited)
             Smethod->set_active_text(M("GENERAL_UNCHANGED"));
         }
 
-        if (!pedited->localwb.qualityMethod) {
-            qualityMethod->set_active_text(M("GENERAL_UNCHANGED"));
-        }
 
         if (!pedited->localwb.wbshaMethod) {
             wbshaMethod->set_active_text(M("GENERAL_UNCHANGED"));
         }
 
-        if (!pedited->localwb.wbMethod) {
-            wbMethod->set_active_text(M("GENERAL_UNCHANGED"));
-        }
 
-        if (!pedited->localwb.wbcamMethod) {
-            wbcamMethod->set_active_text(M("GENERAL_UNCHANGED"));
-        }
     }
 
     setEnabled(pp->localwb.enabled);
@@ -1109,16 +963,9 @@ void Localwb::read(const ProcParams* pp, const ParamsEdited* pedited)
     lastAutocat02 = pp->localwb.autocat02;
     lastAutoytint = pp->localwb.autoytint;
 
-    gammaconn.block(true);
-    gamma->set_active(pp->localwb.gamma);
-    gammaconn.block(false);
-    lastgamma = pp->localwb.gamma;
 
     Smethodconn.block(true);
-    qualityMethodConn.block(true);
     wbshaMethodConn.block(true);
-    wbcamMethodConn.block(true);
-    wbMethodConn.block(true);
 
     degree->setValue(pp->localwb.degree);
     locY->setValue(pp->localwb.locY);
@@ -1135,16 +982,11 @@ void Localwb::read(const ProcParams* pp, const ParamsEdited* pedited)
     cat02->setAutoValue(pp->localwb.autocat02);
     ytint->setValue(pp->localwb.ytint);
     ytint->setAutoValue(pp->localwb.autoytint);
-    nbspot->setValue(pp->localwb.nbspot);
-    anbspot->setValue(pp->localwb.anbspot);
-    retrab->setValue(pp->localwb.retrab);
-    hueref->setValue(pp->localwb.hueref);
-    chromaref->setValue(pp->localwb.chromaref);
-    lumaref->setValue(pp->localwb.lumaref);
+//   hueref->setValue(pp->localwb.hueref);
+//   chromaref->setValue(pp->localwb.chromaref);
+//   lumaref->setValue(pp->localwb.lumaref);
     sensi->setValue(pp->localwb.sensi);
 
-//   expwb->setEnabled (pp->localwb.expwb);
-    expwb->setEnabled(true);
 
     temp->setValue(pp->localwb.temp);
     temp->setAutoValue(pp->localwb.autotemp);
@@ -1170,16 +1012,6 @@ void Localwb::read(const ProcParams* pp, const ParamsEdited* pedited)
     SmethodChanged();
     Smethodconn.block(false);
 
-    if (pp->localwb.qualityMethod == "std") {
-        qualityMethod->set_active(0);
-    } else if (pp->localwb.qualityMethod == "enh") {
-        qualityMethod->set_active(1);
-    } else if (pp->localwb.qualityMethod == "enhden") {
-        qualityMethod->set_active(2);
-    }
-
-    qualityMethodChanged();
-    qualityMethodConn.block(false);
 
 
     if (pp->localwb.wbshaMethod == "eli") {
@@ -1193,27 +1025,10 @@ void Localwb::read(const ProcParams* pp, const ParamsEdited* pedited)
 
     wbshaMethodChanged();
 
-    if (pp->localwb.wbcamMethod == "none") {
-        wbcamMethod->set_active(0);
-    } else if (pp->localwb.wbcamMethod == "gam") {
-        wbcamMethod->set_active(1);
-        /*
-        } else if (pp->localwb.wbcamMethod == "cat") {
-        wbcamMethod->set_active (2);
-        } else if (pp->localwb.wbcamMethod == "gamcat") {
-        wbcamMethod->set_active (3);
-        */
-    }
 
-    wbcamMethodConn.block(false);
-
-    wbcamMethodChanged();
-
-    anbspot->hide();
-    hueref->hide();
-    chromaref->hide();
-    lumaref->hide();
-    retrab->hide();
+    //  hueref->hide();
+    //  chromaref->hide();
+    //  lumaref->hide();
 
     if (pp->localwb.Smethod == "SYM" || pp->localwb.Smethod == "SYMSL") {
         locXL->setValue(locX->getValue());
@@ -1242,31 +1057,6 @@ void Localwb::read(const ProcParams* pp, const ParamsEdited* pedited)
     enableListener();
 }
 
-void Localwb::gamma_toggled()
-{
-
-    if (batchMode) {
-        if (gamma->get_inconsistent()) {
-            gamma->set_inconsistent(false);
-            gammaconn.block(true);
-            gamma->set_active(false);
-            gammaconn.block(false);
-        } else if (lastgamma) {
-            gamma->set_inconsistent(true);
-        }
-
-        lastgamma = gamma->get_active();
-    }
-
-    if (listener) {
-        if (gamma->get_active()) {
-            listener->panelChanged(Evlocalwbgamma, M("GENERAL_ENABLED"));
-        } else {
-            listener->panelChanged(Evlocalwbgamma, M("GENERAL_DISABLED"));
-        }
-    }
-}
-
 
 void Localwb::write(ProcParams* pp, ParamsEdited* pedited)
 {
@@ -1286,13 +1076,9 @@ void Localwb::write(ProcParams* pp, ParamsEdited* pedited)
     pp->localwb.autocat02  = cat02->getAutoValue();
     pp->localwb.ytint = ytint->getValue();
     pp->localwb.autoytint  = ytint->getAutoValue();
-    pp->localwb.nbspot = nbspot->getIntValue();
-    pp->localwb.anbspot = anbspot->getIntValue();
-    pp->localwb.gamma = gamma->get_active();
-    pp->localwb.retrab = retrab->getIntValue();
-    pp->localwb.hueref = hueref->getValue();
-    pp->localwb.chromaref = chromaref->getValue();
-    pp->localwb.lumaref = lumaref->getValue();
+//   pp->localwb.hueref = hueref->getValue();
+//   pp->localwb.chromaref = chromaref->getValue();
+//   pp->localwb.lumaref = lumaref->getValue();
     pp->localwb.temp = temp->getValue();
     pp->localwb.autotemp  = temp->getAutoValue();
 
@@ -1303,16 +1089,12 @@ void Localwb::write(ProcParams* pp, ParamsEdited* pedited)
     pp->localwb.autoequal  = equal->getAutoValue();
 
     pp->localwb.enabled       = getEnabled();
-    pp->localwb.expwb      = expwb->getEnabled();
 
     if (pedited) {
 
         pedited->localwb.degree = degree->getEditedState();
         pedited->localwb.Smethod  = Smethod->get_active_text() != M("GENERAL_UNCHANGED");
-        pedited->localwb.qualityMethod    = qualityMethod->get_active_text() != M("GENERAL_UNCHANGED");
         pedited->localwb.wbshaMethod    = wbshaMethod->get_active_text() != M("GENERAL_UNCHANGED");
-        pedited->localwb.wbcamMethod    = wbcamMethod->get_active_text() != M("GENERAL_UNCHANGED");
-        pedited->localwb.wbMethod    = wbMethod->get_active_text() != M("GENERAL_UNCHANGED");
         pedited->localwb.locY = locY->getEditedState();
         pedited->localwb.locX = locX->getEditedState();
         pedited->localwb.locYT = locYT->getEditedState();
@@ -1328,13 +1110,9 @@ void Localwb::write(ProcParams* pp, ParamsEdited* pedited)
         pedited->localwb.autocat02  = !cat02->getAutoInconsistent();
         pedited->localwb.ytint = ytint->getEditedState();
         pedited->localwb.autoytint  = !ytint->getAutoInconsistent();
-        pedited->localwb.nbspot = nbspot->getEditedState();
-        pedited->localwb.anbspot = anbspot->getEditedState();
-        pedited->localwb.retrab = retrab->getEditedState();
-        pedited->localwb.hueref = hueref->getEditedState();
-        pedited->localwb.chromaref = chromaref->getEditedState();
-        pedited->localwb.lumaref = lumaref->getEditedState();
-        pedited->localwb.gamma    = !gamma->get_inconsistent();
+        //    pedited->localwb.hueref = hueref->getEditedState();
+        //    pedited->localwb.chromaref = chromaref->getEditedState();
+        //    pedited->localwb.lumaref = lumaref->getEditedState();
 
 
         pedited->localwb.temp    = temp->getEditedState();
@@ -1346,21 +1124,11 @@ void Localwb::write(ProcParams* pp, ParamsEdited* pedited)
         pedited->localwb.autoequal  = !equal->getAutoInconsistent();
 
         pedited->localwb.enabled         = !get_inconsistent();
-        pedited->localwb.expwb     = !expwb->get_inconsistent();
 
     }
 
-    //  printf ("Quali=%i \n", qualityMethod->get_active_row_number());
 
-    if (qualityMethod->get_active_row_number() == 0) {
-        pp->localwb.qualityMethod = "std";
-    } else if (qualityMethod->get_active_row_number() == 1) {
-        pp->localwb.qualityMethod = "enh";
-    } else if (qualityMethod->get_active_row_number() == 2) {
-        pp->localwb.qualityMethod = "enhden";
-    }
 
-    //  printf ("WBmeth=%i \n", wbMethod->get_active_row_number());
 
     if (wbshaMethod->get_active_row_number() == 0) {
         pp->localwb.wbshaMethod = "eli";
@@ -1368,17 +1136,6 @@ void Localwb::write(ProcParams* pp, ParamsEdited* pedited)
         pp->localwb.wbshaMethod = "rec";
     }
 
-    /*
-        if (wbcamMethod->get_active_row_number() == 0) {
-            pp->localwb.wbcamMethod = "none";
-        } else if (wbcamMethod->get_active_row_number() == 1) {
-            pp->localwb.wbcamMethod = "gam";
-        } else if (wbcamMethod->get_active_row_number() == 2) {
-            pp->localwb.wbcamMethod = "cat";
-        } else if (wbcamMethod->get_active_row_number() == 3) {
-            pp->localwb.wbcamMethod = "gamcat";
-    */
-//   }
 
     if (Smethod->get_active_row_number() == 0) {
         pp->localwb.Smethod = "IND";
@@ -1463,51 +1220,51 @@ void Localwb::adjusterAutoToggled(Adjuster* a, bool newval)
 
         if (a == temp) {
             if (temp->getAutoInconsistent()) {
-                listener->panelChanged(EvlocalwbAutotemp, M("GENERAL_UNCHANGED"));
+                listener->panelChanged(EvlocalWBAutotemp, M("GENERAL_UNCHANGED"));
             } else if (temp->getAutoValue()) {
-                listener->panelChanged(EvlocalwbAutotemp, M("GENERAL_ENABLED"));
+                listener->panelChanged(EvlocalWBAutotemp, M("GENERAL_ENABLED"));
             } else {
-                listener->panelChanged(EvlocalwbAutotemp, M("GENERAL_DISABLED"));
+                listener->panelChanged(EvlocalWBAutotemp, M("GENERAL_DISABLED"));
             }
         }
 
         if (a == green) {
             if (green->getAutoInconsistent()) {
-                listener->panelChanged(EvlocalwbAutogreen, M("GENERAL_UNCHANGED"));
+                listener->panelChanged(EvlocalWBAutogreen, M("GENERAL_UNCHANGED"));
             } else if (green->getAutoValue()) {
-                listener->panelChanged(EvlocalwbAutogreen, M("GENERAL_ENABLED"));
+                listener->panelChanged(EvlocalWBAutogreen, M("GENERAL_ENABLED"));
             } else {
-                listener->panelChanged(EvlocalwbAutogreen, M("GENERAL_DISABLED"));
+                listener->panelChanged(EvlocalWBAutogreen, M("GENERAL_DISABLED"));
             }
         }
 
         if (a == equal) {
             if (equal->getAutoInconsistent()) {
-                listener->panelChanged(EvlocalwbAutoequal, M("GENERAL_UNCHANGED"));
+                listener->panelChanged(EvlocalWBAutoequal, M("GENERAL_UNCHANGED"));
             } else if (equal->getAutoValue()) {
-                listener->panelChanged(EvlocalwbAutoequal, M("GENERAL_ENABLED"));
+                listener->panelChanged(EvlocalWBAutoequal, M("GENERAL_ENABLED"));
             } else {
-                listener->panelChanged(EvlocalwbAutoequal, M("GENERAL_DISABLED"));
+                listener->panelChanged(EvlocalWBAutoequal, M("GENERAL_DISABLED"));
             }
         }
 
         if (a == cat02) {
             if (cat02->getAutoInconsistent()) {
-                listener->panelChanged(EvlocalwbAutocat02, M("GENERAL_UNCHANGED"));
+                listener->panelChanged(EvlocalWBAutocat02, M("GENERAL_UNCHANGED"));
             } else if (cat02->getAutoValue()) {
-                listener->panelChanged(EvlocalwbAutocat02, M("GENERAL_ENABLED"));
+                listener->panelChanged(EvlocalWBAutocat02, M("GENERAL_ENABLED"));
             } else {
-                listener->panelChanged(EvlocalwbAutocat02, M("GENERAL_DISABLED"));
+                listener->panelChanged(EvlocalWBAutocat02, M("GENERAL_DISABLED"));
             }
         }
 
         if (a == ytint) {
             if (ytint->getAutoInconsistent()) {
-                listener->panelChanged(EvlocalwbAutoytint, M("GENERAL_UNCHANGED"));
+                listener->panelChanged(EvlocalWBAutoytint, M("GENERAL_UNCHANGED"));
             } else if (ytint->getAutoValue()) {
-                listener->panelChanged(EvlocalwbAutoytint, M("GENERAL_ENABLED"));
+                listener->panelChanged(EvlocalWBAutoytint, M("GENERAL_ENABLED"));
             } else {
-                listener->panelChanged(EvlocalwbAutoytint, M("GENERAL_DISABLED"));
+                listener->panelChanged(EvlocalWBAutoytint, M("GENERAL_DISABLED"));
             }
         }
 
@@ -1517,15 +1274,6 @@ void Localwb::adjusterAutoToggled(Adjuster* a, bool newval)
 
 
 
-void Localwb::qualityMethodChanged()
-{
-    if (!batchMode) {
-    }
-
-    if (listener) {
-        listener->panelChanged(EvlocalwbqualityMethod, qualityMethod->get_active_text());
-    }
-}
 
 void Localwb::wbshaMethodChanged()
 {
@@ -1533,82 +1281,11 @@ void Localwb::wbshaMethodChanged()
     }
 
     if (listener) {
-        listener->panelChanged(EvlocalwbwbMethod, wbshaMethod->get_active_text());
+        listener->panelChanged(EvlocalWBMethod, wbshaMethod->get_active_text());
     }
 }
 
-void Localwb::wbMethodChanged()
-{
-    if (!batchMode) {
-    }
 
-}
-
-
-void Localwb::wbcamMethodChanged()
-{
-    if (!batchMode) {
-    }
-
-    if (listener) {
-        listener->panelChanged(EvlocalwbwbcamMethod, wbcamMethod->get_active_text());
-    }
-}
-
-int localwbChangedUI(void* data)
-{
-
-    GThreadLock lock;
-    (static_cast<Localwb*>(data))->localwbComputed_();
-
-    return 0;
-}
-
-bool Localwb::localwbComputed_()
-{
-    disableListener();
-    temp->setValue(next_temp);
-    green->setValue(next_green);
-    // wbMethod->set_active (next_wbauto);//enabled custom after auto
-    // wbMethodChanged ();
-
-    if (anbspot->getValue() == 0) {
-        anbspot->setValue(1);
-
-        if (options.rtSettings.locdelay) {
-            if (anbspot->delay < 100) {
-                anbspot->delay = 100;
-            }
-        }
-
-        adjusterChanged(anbspot, 1);
-
-    } else if (anbspot->getValue() == 1) {
-        anbspot->setValue(0);
-
-        if (options.rtSettings.locdelay) {
-            if (anbspot->delay < 100) {
-                anbspot->delay = 100;
-            }
-        }
-
-        adjusterChanged(anbspot, 0);
-    }
-
-    enableListener();
-
-    if (listener) { //for all sliders
-        listener->panelChanged(Evlocalwbanbspot, ""); //anbspot->getTextValue());
-    }
-
-    /*
-        if (listener) {
-            listener->panelChanged (EvlocalwbwbMethod, wbMethod->get_active_text ());
-        }
-    */
-    return false;
-
-}
 
 void Localwb::cat02catChanged(int cat)
 {
@@ -1763,7 +1440,7 @@ void Localwb::SmethodChanged()
 
     if (listener && getEnabled()) {
         if (Smethod->get_active_row_number() == 1  || Smethod->get_active_row_number() == 3) {
-            listener->panelChanged(EvlocalwbSmet, Smethod->get_active_text());
+            listener->panelChanged(EvlocalWBSmet, Smethod->get_active_text());
             locXL->setValue(locX->getValue());
             locYT->setValue(locY->getValue());
         }
@@ -1776,7 +1453,7 @@ void Localwb::SmethodChanged()
         else
 
         {
-            listener->panelChanged(EvlocalwbSmet, Smethod->get_active_text());
+            listener->panelChanged(EvlocalWBSmet, Smethod->get_active_text());
 
         }
     }
@@ -1803,12 +1480,9 @@ void Localwb::setDefaults(const ProcParams* defParams, const ParamsEdited* pedit
     transit->setDefault(defParams->localwb.transit);
     cat02->setDefault(defParams->localwb.cat02);
     ytint->setDefault(defParams->localwb.ytint);
-    nbspot->setDefault(defParams->localwb.nbspot);
-    anbspot->setDefault(defParams->localwb.anbspot);
-    retrab->setDefault(defParams->localwb.retrab);
-    hueref->setDefault(defParams->localwb.hueref);
-    chromaref->setDefault(defParams->localwb.chromaref);
-    lumaref->setDefault(defParams->localwb.lumaref);
+    //  hueref->setDefault(defParams->localwb.hueref);
+    //  chromaref->setDefault(defParams->localwb.chromaref);
+    //  lumaref->setDefault(defParams->localwb.lumaref);
     temp->setDefault(defParams->localwb.temp);
     green->setDefault(defParams->localwb.green);
     equal->setDefault(defParams->localwb.equal);
@@ -1830,12 +1504,9 @@ void Localwb::setDefaults(const ProcParams* defParams, const ParamsEdited* pedit
         transit->setDefaultEditedState(pedited->localwb.transit ? Edited : UnEdited);
         cat02->setDefaultEditedState(pedited->localwb.cat02 ? Edited : UnEdited);
         ytint->setDefaultEditedState(pedited->localwb.ytint ? Edited : UnEdited);
-        nbspot->setDefaultEditedState(pedited->localwb.nbspot ? Edited : UnEdited);
-        anbspot->setDefaultEditedState(pedited->localwb.anbspot ? Edited : UnEdited);
-        retrab->setDefaultEditedState(pedited->localwb.retrab ? Edited : UnEdited);
-        hueref->setDefaultEditedState(pedited->localwb.hueref ? Edited : UnEdited);
-        chromaref->setDefaultEditedState(pedited->localwb.chromaref ? Edited : UnEdited);
-        lumaref->setDefaultEditedState(pedited->localwb.lumaref ? Edited : UnEdited);
+        //      hueref->setDefaultEditedState(pedited->localwb.hueref ? Edited : UnEdited);
+        //      chromaref->setDefaultEditedState(pedited->localwb.chromaref ? Edited : UnEdited);
+        //      lumaref->setDefaultEditedState(pedited->localwb.lumaref ? Edited : UnEdited);
         temp->setDefaultEditedState(pedited->localwb.temp ? Edited : UnEdited);
         green->setDefaultEditedState(pedited->localwb.green ? Edited : UnEdited);
         equal->setDefaultEditedState(pedited->localwb.equal ? Edited : UnEdited);
@@ -1856,12 +1527,9 @@ void Localwb::setDefaults(const ProcParams* defParams, const ParamsEdited* pedit
         transit->setDefaultEditedState(Irrelevant);
         cat02->setDefaultEditedState(Irrelevant);
         ytint->setDefaultEditedState(Irrelevant);
-        nbspot->setDefaultEditedState(Irrelevant);
-        anbspot->setDefaultEditedState(Irrelevant);
-        retrab->setDefaultEditedState(Irrelevant);
-        hueref->setDefaultEditedState(Irrelevant);
-        chromaref->setDefaultEditedState(Irrelevant);
-        lumaref->setDefaultEditedState(Irrelevant);
+        //      hueref->setDefaultEditedState(Irrelevant);
+        //      chromaref->setDefaultEditedState(Irrelevant);
+        //      lumaref->setDefaultEditedState(Irrelevant);
         temp->setDefaultEditedState(Irrelevant);
         green->setDefaultEditedState(Irrelevant);
         equal->setDefaultEditedState(Irrelevant);
@@ -1873,81 +1541,71 @@ void Localwb::adjusterChanged(Adjuster* a, double newval)
 {
     updateGeometry(int (centerX->getValue()), int (centerY->getValue()), int (circrad->getValue()), (int)locY->getValue(), degree->getValue(), (int)locX->getValue(), (int)locYT->getValue(), (int)locXL->getValue());
 
-    anbspot->hide();
-    retrab->hide();
-    hueref->hide();
-    chromaref->hide();
-    lumaref->hide();
+//   hueref->hide();
+//   chromaref->hide();
+//   lumaref->hide();
 
     if (listener && getEnabled()) {
         if (a == degree) {
-            listener->panelChanged(EvlocalwbDegree, degree->getTextValue());
+            listener->panelChanged(EvlocalWBDegree, degree->getTextValue());
         } else if (a == locY) {
             if (Smethod->get_active_row_number() == 0  || Smethod->get_active_row_number() == 2) { // 0 2
-                listener->panelChanged(EvlocalwblocY, locY->getTextValue());
+                listener->panelChanged(EvlocalWBlocY, locY->getTextValue());
             } else if (Smethod->get_active_row_number() == 1  || Smethod->get_active_row_number() == 3) {
-                listener->panelChanged(EvlocalwblocY, locY->getTextValue());
+                listener->panelChanged(EvlocalWBlocY, locY->getTextValue());
                 locYT->setValue(locY->getValue());
             }
         } else if (a == locX) {
             //listener->panelChanged (EvlocallablocX, locX->getTextValue());
             if (Smethod->get_active_row_number() == 0  || Smethod->get_active_row_number() == 2) {
-                listener->panelChanged(EvlocalwblocX, locX->getTextValue());
+                listener->panelChanged(EvlocalWBlocX, locX->getTextValue());
             } else if (Smethod->get_active_row_number() == 1  || Smethod->get_active_row_number() == 3) {
-                listener->panelChanged(EvlocalwblocX, locX->getTextValue());
+                listener->panelChanged(EvlocalWBlocX, locX->getTextValue());
                 locXL->setValue(locX->getValue());
             }
         } else if (a == locYT) {
             if (Smethod->get_active_row_number() == 0 || Smethod->get_active_row_number() == 2) {
-                listener->panelChanged(EvlocalwblocYT, locYT->getTextValue());
+                listener->panelChanged(EvlocalWBlocYT, locYT->getTextValue());
             } else if (Smethod->get_active_row_number() == 1 || Smethod->get_active_row_number() == 3) {
-                listener->panelChanged(EvlocalwblocYT, locYT->getTextValue());
+                listener->panelChanged(EvlocalWBlocYT, locYT->getTextValue());
                 locYT->setValue(locY->getValue());
             }
         } else if (a == locXL) {
             if (Smethod->get_active_row_number() == 0 || Smethod->get_active_row_number() == 2) {
-                listener->panelChanged(EvlocalwblocXL, locXL->getTextValue());
+                listener->panelChanged(EvlocalWBlocXL, locXL->getTextValue());
             } else if (Smethod->get_active_row_number() == 1  || Smethod->get_active_row_number() == 3) {
-                listener->panelChanged(EvlocalwblocXL, locXL->getTextValue());
+                listener->panelChanged(EvlocalWBlocXL, locXL->getTextValue());
                 locXL->setValue(locX->getValue());
             }
         } else if (a == sensi) {
-            listener->panelChanged(Evlocalwbsensi, sensi->getTextValue());
+            listener->panelChanged(EvlocalWBsensi, sensi->getTextValue());
         } else if (a == transit) {
-            listener->panelChanged(Evlocalwbtransit, transit->getTextValue());
+            listener->panelChanged(EvlocalWBtransit, transit->getTextValue());
         } else if (a == cat02) {
-            listener->panelChanged(Evlocalwbcat02, cat02->getTextValue());
+            listener->panelChanged(EvlocalWBcat02, cat02->getTextValue());
         } else if (a == ytint) {
-            listener->panelChanged(Evlocalwbytint, ytint->getTextValue());
-        } else if (a == nbspot) {
-            listener->panelChanged(Evlocalwbnbspot, nbspot->getTextValue());
-        } else if (a == retrab) {
-            listener->panelChanged(Evlocalwbanbspot, ""); //anbspot->getTextValue());
-        } else if (a == anbspot) {
-            listener->panelChanged(Evlocalwbretrab, ""); //anbspot->getTextValue());
-        } else if (a == hueref) {
-            listener->panelChanged(Evlocalwbhueref, ""); //anbspot->getTextValue());
-        } else if (a == chromaref) {
-            listener->panelChanged(Evlocalwbchromaref, ""); //anbspot->getTextValue());
+            listener->panelChanged(EvlocalWBytint, ytint->getTextValue());
+//        } else if (a == hueref) {
+//            listener->panelChanged(Evlocalwbhueref, "");
+//        } else if (a == chromaref) {
+//            listener->panelChanged(Evlocalwbchromaref, "");
         } else if (a == temp) {
-            listener->panelChanged(Evlocalwbtemp, temp->getTextValue());
+            listener->panelChanged(EvlocalWBtemp, temp->getTextValue());
         } else if (a == green) {
-            listener->panelChanged(Evlocalwbgreen, green->getTextValue());
+            listener->panelChanged(EvlocalWBgreen, green->getTextValue());
 
         } else if (a == equal) {
-            listener->panelChanged(Evlocalwbequal, equal->getTextValue());
-            // wbMethod->set_active (1);
-            // wbMethodChanged ();
-        } else if (a == lumaref) {
-            listener->panelChanged(Evlocalwblumaref, ""); //anbspot->getTextValue());
+            listener->panelChanged(EvlocalWBequal, equal->getTextValue());
+//       } else if (a == lumaref) {
+//           listener->panelChanged(Evlocalwblumaref, "");
         } else if (a == circrad) {
-            listener->panelChanged(Evlocalwbcircrad, circrad->getTextValue());
-        } else if (a == thres) {
-            listener->panelChanged(Evlocalwbthres, thres->getTextValue());
-        } else if (a == proxi) {
-            listener->panelChanged(Evlocalwbproxi, proxi->getTextValue());
+            listener->panelChanged(EvlocalWBcircrad, circrad->getTextValue());
+//        } else if (a == thres) {
+//            listener->panelChanged(Evlocalwbthres, thres->getTextValue());
+//        } else if (a == proxi) {
+//            listener->panelChanged(Evlocalwbproxi, proxi->getTextValue());
         } else if (a == centerX || a == centerY) {
-            listener->panelChanged(EvlocalwbCenter, Glib::ustring::compose("X=%1\nY=%2", centerX->getTextValue(), centerY->getTextValue()));
+            listener->panelChanged(EvlocalWBCenter, Glib::ustring::compose("X=%1\nY=%2", centerX->getTextValue(), centerY->getTextValue()));
         }
     }
 
@@ -1958,11 +1616,11 @@ void Localwb::enabledChanged()
 
     if (listener) {
         if (get_inconsistent()) {
-            listener->panelChanged(EvlocalwbEnabled, M("GENERAL_UNCHANGED"));
+            listener->panelChanged(EvlocalWBEnabled, M("GENERAL_UNCHANGED"));
         } else if (getEnabled()) {
-            listener->panelChanged(EvlocalwbEnabled, M("GENERAL_ENABLED"));
+            listener->panelChanged(EvlocalWBEnabled, M("GENERAL_ENABLED"));
         } else {
-            listener->panelChanged(EvlocalwbEnabled, M("GENERAL_DISABLED"));
+            listener->panelChanged(EvlocalWBEnabled, M("GENERAL_DISABLED"));
         }
     }
 }
@@ -2372,7 +2030,7 @@ bool Localwb::drag1(int modifierKey)
                 updateGeometry(centX, centY, circrad->getValue(), locY->getValue(), degree->getValue(), locX->getValue(), locYT->getValue(), locXL->getValue());
 
                 if (listener) {
-                    listener->panelChanged(EvlocalwblocY, locYT->getTextValue());
+                    listener->panelChanged(EvlocalWBlocY, locYT->getTextValue());
                 }
 
                 return true;
@@ -2415,7 +2073,7 @@ bool Localwb::drag1(int modifierKey)
                 updateGeometry(centX, centY, circrad->getValue(), locY->getValue(), degree->getValue(), locX->getValue(), locYT->getValue(), locXL->getValue());
 
                 if (listener) {
-                    listener->panelChanged(EvlocalwblocY, locY->getTextValue());
+                    listener->panelChanged(EvlocalWBlocY, locY->getTextValue());
                 }
 
                 return true;
@@ -2462,7 +2120,7 @@ bool Localwb::drag1(int modifierKey)
 
                 if (listener) {
                     if (Smethod->get_active_row_number() == 1 || Smethod->get_active_row_number() == 3) {
-                        listener->panelChanged(EvlocalwblocY, locY->getTextValue());
+                        listener->panelChanged(EvlocalWBlocY, locY->getTextValue());
                     }
 
                     //  else listener->panelChanged (EvlocallablocY, locX->getTextValue());
@@ -2513,7 +2171,7 @@ bool Localwb::drag1(int modifierKey)
                 updateGeometry(centX, centY, circrad->getValue(), locY->getValue(), degree->getValue(), locX->getValue(), locYT->getValue(), locXL->getValue());
 
                 if (listener) {
-                    listener->panelChanged(EvlocalwblocX, locX->getTextValue());
+                    listener->panelChanged(EvlocalWBlocX, locX->getTextValue());
                 }
 
                 return true;
@@ -2553,7 +2211,7 @@ bool Localwb::drag1(int modifierKey)
                 updateGeometry(centX, centY, circrad->getValue(), locY->getValue(), degree->getValue(), locX->getValue(), locYT->getValue(), locXL->getValue());
 
                 if (listener) {
-                    listener->panelChanged(EvlocalwblocX, locX->getTextValue());
+                    listener->panelChanged(EvlocalWBlocX, locX->getTextValue());
                 }
 
                 return true;
@@ -2597,7 +2255,7 @@ bool Localwb::drag1(int modifierKey)
                 updateGeometry(centX, centY, circrad->getValue(), locY->getValue(), degree->getValue(), locX->getValue(), locYT->getValue(), locXL->getValue());
 
                 if (listener) {
-                    listener->panelChanged(EvlocalwblocX, locX->getTextValue());
+                    listener->panelChanged(EvlocalWBlocX, locX->getTextValue());
                 }
 
                 return true;
@@ -2696,7 +2354,7 @@ bool Localwb::drag1(int modifierKey)
             updateGeometry(newCenterX, newCenterY, circrad->getValue(), locY->getValue(), degree->getValue(), locX->getValue(), locYT->getValue(), locXL->getValue());
 
             if (listener) {
-                listener->panelChanged(EvlocalwbCenter, Glib::ustring::compose("X=%1\nY=%2", centerX->getTextValue(), centerY->getTextValue()));
+                listener->panelChanged(EvlocalWBCenter, Glib::ustring::compose("X=%1\nY=%2", centerX->getTextValue(), centerY->getTextValue()));
             }
 
             return true;
@@ -2742,12 +2400,9 @@ void Localwb::setBatchMode(bool batchMode)
     cat02->showEditedCB();
     ytint->showEditedCB();
     Smethod->append(M("GENERAL_UNCHANGED"));
-    nbspot->showEditedCB();
-    anbspot->showEditedCB();
-    retrab->showEditedCB();
-    hueref->showEditedCB();
-    chromaref->showEditedCB();
-    lumaref->showEditedCB();
+//   hueref->showEditedCB();
+//   chromaref->showEditedCB();
+//   lumaref->showEditedCB();
     temp->showEditedCB();
     green->showEditedCB();
 
@@ -2769,12 +2424,9 @@ void Localwb::trimValues(rtengine::procparams::ProcParams* pp)
     transit->trimValue(pp->localwb.transit);
     cat02->trimValue(pp->localwb.cat02);
     ytint->trimValue(pp->localwb.ytint);
-    nbspot->trimValue(pp->localwb.nbspot);
-    anbspot->trimValue(pp->localwb.anbspot);
-    retrab->trimValue(pp->localwb.retrab);
-    hueref->trimValue(pp->localwb.hueref);
-    chromaref->trimValue(pp->localwb.chromaref);
-    lumaref->trimValue(pp->localwb.lumaref);
+//    hueref->trimValue(pp->localwb.hueref);
+//    chromaref->trimValue(pp->localwb.chromaref);
+//   lumaref->trimValue(pp->localwb.lumaref);
     temp->trimValue(pp->localwb.temp);
     green->trimValue(pp->localwb.green);
     equal->trimValue(pp->localwb.equal);

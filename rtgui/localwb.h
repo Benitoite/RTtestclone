@@ -37,6 +37,30 @@ class Localwb :
 //protected:
 
 private:
+
+    rtengine::ProcEvent EvlocalWBAutotemp;
+    rtengine::ProcEvent EvlocalWBAutogreen;
+    rtengine::ProcEvent EvlocalWBAutoequal;
+    rtengine::ProcEvent EvlocalWBAutocat02;
+    rtengine::ProcEvent EvlocalWBAutoytint;
+    rtengine::ProcEvent EvlocalWBMethod;
+    rtengine::ProcEvent EvlocalWBSmet;
+    rtengine::ProcEvent EvlocalWBDegree;
+    rtengine::ProcEvent EvlocalWBlocY;
+    rtengine::ProcEvent EvlocalWBlocX;
+    rtengine::ProcEvent EvlocalWBlocYT;
+    rtengine::ProcEvent EvlocalWBlocXL;
+    rtengine::ProcEvent EvlocalWBsensi;
+    rtengine::ProcEvent EvlocalWBtransit;
+    rtengine::ProcEvent EvlocalWBcat02;
+    rtengine::ProcEvent EvlocalWBytint;
+    rtengine::ProcEvent EvlocalWBtemp;
+    rtengine::ProcEvent EvlocalWBgreen;
+    rtengine::ProcEvent EvlocalWBequal;
+    rtengine::ProcEvent EvlocalWBcircrad;
+    rtengine::ProcEvent EvlocalWBCenter;
+    rtengine::ProcEvent EvlocalWBEnabled;
+
     int lastObject;
     void foldAllButMe(GdkEventButton* event, MyExpander *expander);
     void enableToggled(MyExpander *expander);
@@ -47,11 +71,6 @@ private:
     Gtk::ToggleButton* edit;
 
     MyExpander* const expsettings;
-    MyExpander* const expwb;
-
-    Adjuster* nbspot;
-
-    Adjuster* const anbspot;
     Adjuster* const locX;
     Adjuster* const locXL;
     Adjuster* const degree;
@@ -66,17 +85,13 @@ private:
     Adjuster* const transit;
     Adjuster* const cat02;
     Adjuster* const ytint;
-
-    Adjuster* const retrab;
+    /*
     Adjuster* const hueref;
     Adjuster* const chromaref;
     Adjuster* const lumaref;
-
+    */
     MyComboBoxText*   const Smethod;
-    MyComboBoxText*   const qualityMethod;
-    MyComboBoxText*   const wbMethod;
     MyComboBoxText*   const wbshaMethod;
-    MyComboBoxText*   const wbcamMethod;
 
     Gtk::Frame* const shapeFrame;
     Gtk::Frame* const artifFrame;
@@ -85,12 +100,10 @@ private:
 
     Gtk::Label* const labqual;
     Gtk::Label* const labmS;
-    Gtk::Label* const labcam;
     Gtk::Label* const labmeth;
 
     Gtk::HBox* const ctboxS;
     Gtk::HBox* const qualbox;
-    Gtk::HBox* const cambox;
     Gtk::HBox* const ctboxmet;
 
     Adjuster* temp;
@@ -110,14 +123,8 @@ private:
 
 
     sigc::connection  Smethodconn;
-    sigc::connection qualityMethodConn;
     sigc::connection wbshaMethodConn;
-    sigc::connection wbcamMethodConn;
-    sigc::connection wbMethodConn;
 
-    Gtk::CheckButton* gamma;
-    sigc::connection gammaconn;
-    bool lastgamma;
 
     double nexttemp;
     double nexttint;
@@ -125,6 +132,8 @@ private:
     double next_temp;
     double next_green;
     double next_equal;
+    int nextCadap;
+    double nextGree;
 
     int next_wbauto;
     int nextmeth;
@@ -142,8 +151,6 @@ private:
     bool lastAutotemp;
     bool lastAutogreen;
     bool lastAutoequal;
-    int nextCadap;
-    double nextGree;
     bool lastAutocat02;
     bool lastAutoytint;
 
@@ -169,16 +176,9 @@ public:
     void trimValues(rtengine::procparams::ProcParams* pp);
 
     void SmethodChanged();
-    void gamma_toggled();
-    void qualityMethodChanged();
-    void wbMethodChanged();
     void wbshaMethodChanged();
-    void wbcamMethodChanged();
     void setEditProvider(EditDataProvider* provider);
-    bool localwbComputed_();
 
-    void temptintChanged(double ctemp, double ctint, double cequal, int meth);
-    bool temptintComputed_();
     void updateLabel();
     void WBTChanged(double temp);
     bool WBTComputed_();
@@ -191,6 +191,7 @@ public:
 
     void cat02catChanged(int cat);
     bool cat02catComputed_();
+
     void cat02greeChanged(double ytin);
     bool cat02greeComputed_();
 

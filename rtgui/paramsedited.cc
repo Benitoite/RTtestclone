@@ -337,23 +337,15 @@ void ParamsEdited::set(bool v)
     localwb.cat02 = v;
     localwb.ytint = v;
     localwb.proxi = v;
-    localwb.nbspot = v;
-    localwb.anbspot = v;
-    localwb.retrab = v;
-    localwb.hueref = v;
-    localwb.chromaref = v;
-    localwb.lumaref = v;
+//    localwb.hueref = v;
+//    localwb.chromaref = v;
+//    localwb.lumaref = v;
     localwb.Smethod = v;
     localwb.sensi = v;
-    localwb.qualityMethod = v;
-    localwb.wbMethod = v;
     localwb.wbshaMethod = v;
-    localwb.wbcamMethod = v;
-    localwb.expwb = v;
     localwb.temp = v;
     localwb.green = v;
     localwb.equal = v;
-    localwb.gamma = v;
     localwb.autotemp      = v;
     localwb.autogreen      = v;
     localwb.autoequal      = v;
@@ -942,20 +934,12 @@ void ParamsEdited::initFrom(const std::vector<rtengine::procparams::ProcParams>&
         localwb.transit = localwb.transit && p.localwb.transit == other.localwb.transit;
         localwb.cat02 = localwb.cat02 && p.localwb.cat02 == other.localwb.cat02;
         localwb.ytint = localwb.ytint && p.localwb.ytint == other.localwb.ytint;
-        localwb.nbspot = localwb.nbspot && p.localwb.nbspot == other.localwb.nbspot;
-        localwb.anbspot = localwb.anbspot && p.localwb.anbspot == other.localwb.anbspot;
-        localwb.retrab = localwb.retrab && p.localwb.retrab == other.localwb.retrab;
-        localwb.hueref = localwb.hueref && p.localwb.hueref == other.localwb.hueref;
-        localwb.chromaref = localwb.chromaref && p.localwb.chromaref == other.localwb.chromaref;
-        localwb.lumaref = localwb.lumaref && p.localwb.lumaref == other.localwb.lumaref;
-        localwb.qualityMethod = localwb.qualityMethod && p.localwb.qualityMethod == other.localwb.qualityMethod;
-        localwb.expwb = localwb.expwb && p.localwb.expwb == other.localwb.expwb;
+//       localwb.hueref = localwb.hueref && p.localwb.hueref == other.localwb.hueref;
+//       localwb.chromaref = localwb.chromaref && p.localwb.chromaref == other.localwb.chromaref;
+//       localwb.lumaref = localwb.lumaref && p.localwb.lumaref == other.localwb.lumaref;
         localwb.temp = localwb.temp && p.localwb.temp == other.localwb.temp;
         localwb.green = localwb.green && p.localwb.green == other.localwb.green;
-        localwb.wbMethod = localwb.wbMethod && p.localwb.wbMethod == other.localwb.wbMethod;
         localwb.wbshaMethod = localwb.wbshaMethod && p.localwb.wbshaMethod == other.localwb.wbshaMethod;
-        localwb.gamma = localwb.gamma && p.localwb.gamma == other.localwb.gamma;
-        localwb.wbcamMethod = localwb.wbcamMethod && p.localwb.wbcamMethod == other.localwb.wbcamMethod;
         localwb.autotemp = localwb.autotemp && p.localwb.autotemp == other.localwb.autotemp;
         localwb.autogreen = localwb.autogreen && p.localwb.autogreen == other.localwb.autogreen;
         localwb.autoequal = localwb.autoequal && p.localwb.autoequal == other.localwb.autoequal;
@@ -2378,50 +2362,26 @@ void ParamsEdited::combine(rtengine::procparams::ProcParams& toEdit, const rteng
         toEdit.localwb.ytint     = mods.localwb.ytint;
     }
 
-    if (localwb.nbspot) {
-        toEdit.localwb.nbspot   = mods.localwb.nbspot;
-    }
+    /*
+        if (localwb.hueref) {
+            toEdit.localwb.hueref   = mods.localwb.hueref;
+        }
 
-    if (localwb.anbspot) {
-        toEdit.localwb.anbspot   = mods.localwb.anbspot;
-    }
+        if (localwb.chromaref) {
+            toEdit.localwb.chromaref   = mods.localwb.chromaref;
+        }
 
-    if (localwb.retrab) {
-        toEdit.localwb.retrab   = mods.localwb.retrab;
-    }
+        if (localwb.lumaref) {
+            toEdit.localwb.lumaref   = mods.localwb.lumaref;
+        }
+    */
 
-    if (localwb.hueref) {
-        toEdit.localwb.hueref   = mods.localwb.hueref;
-    }
-
-    if (localwb.chromaref) {
-        toEdit.localwb.chromaref   = mods.localwb.chromaref;
-    }
-
-    if (localwb.lumaref) {
-        toEdit.localwb.lumaref   = mods.localwb.lumaref;
-    }
-
-    if (localwb.qualityMethod) {
-        toEdit.localwb.qualityMethod   = mods.localwb.qualityMethod;
-    }
-
-    if (localwb.wbMethod) {
-        toEdit.localwb.wbMethod   = mods.localwb.wbMethod;
-    }
 
     if (localwb.wbshaMethod) {
         toEdit.localwb.wbshaMethod   = mods.localwb.wbshaMethod;
     }
 
-    if (localwb.wbcamMethod) {
-        toEdit.localwb.wbcamMethod   = mods.localwb.wbcamMethod;
-    }
 
-
-    if (localwb.expwb) {
-        toEdit.localwb.expwb      = mods.localwb.expwb;
-    }
 
     if (localwb.temp) {
         toEdit.localwb.temp      = mods.localwb.temp;
@@ -2455,9 +2415,6 @@ void ParamsEdited::combine(rtengine::procparams::ProcParams& toEdit, const rteng
         toEdit.localwb.equal      = mods.localwb.equal;
     }
 
-    if (localwb.gamma) {
-        toEdit.localwb.gamma     = mods.localwb.gamma;
-    }
 
 
     if (pcvignette.enabled) {
