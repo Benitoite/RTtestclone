@@ -43,7 +43,7 @@ Thumbnail::Thumbnail(CacheManager* cm, const Glib::ustring& fname, CacheImageDat
     ref(1),
     enqueueNumber(0),
     tpp(nullptr),
-    subPartsSet(rtengine::ProcParams::eSubPart::NONE),
+    subPartsSet(rtengine::ProcParams::SP_NONE),
     defaultParamsSet(false),
     needsReProcessing(true),
     imageLoading(false),
@@ -77,7 +77,7 @@ Thumbnail::Thumbnail (CacheManager* cm, const Glib::ustring& fname, const std::s
     ref(1),
     enqueueNumber(0),
     tpp(nullptr),
-    subPartsSet(rtengine::ProcParams::eSubPart::NONE),
+    subPartsSet(rtengine::ProcParams::SP_NONE),
     defaultParamsSet(false),
     needsReProcessing(true),
     imageLoading(false),
@@ -387,19 +387,19 @@ rtengine::procparams::ProcParams* Thumbnail::createProcParamsForUpdate(bool retu
 
 bool Thumbnail::hasTagsSet()
 {
-    return subPartsSet & ProcParams::eSubPart::FLAGS;
+    return subPartsSet & ProcParams::SP_FLAGS;
 }
 bool Thumbnail::hasToolParamsSet()
 {
-    return subPartsSet & ProcParams::eSubPart::TOOL;
+    return subPartsSet & ProcParams::SP_TOOL;
 }
 bool Thumbnail::hasExifParamsSet()
 {
-    return subPartsSet & ProcParams::eSubPart::EXIF;
+    return subPartsSet & ProcParams::SP_EXIF;
 }
 bool Thumbnail::hasIptcParamsSet()
 {
-    return subPartsSet & ProcParams::eSubPart::IPTC;
+    return subPartsSet & ProcParams::SP_IPTC;
 }
 
 /*
@@ -416,7 +416,7 @@ void Thumbnail::loadProcParams (Glib::ustring fileName)
 
     bool pparamsValid;
     int ppres;
-    subPartsSet = ProcParams::eSubPart::NONE;
+    subPartsSet = ProcParams::SP_NONE;
     pparams.setDefaults();
     {
     const PartialProfile *defaultPP = ProfileStore::getInstance()->getDefaultPartialProfile(getType() == FT_Raw);
@@ -450,16 +450,16 @@ void Thumbnail::loadProcParams (Glib::ustring fileName)
 
     if (pparamsValid) {
         if (pe.isToolSet()) {
-            subPartsSet |= ProcParams::eSubPart::TOOL;
+            subPartsSet |= ProcParams::SP_TOOL;
         }
         if (pe.isTagsSet()) {
-            subPartsSet |= ProcParams::eSubPart::FLAGS;
+            subPartsSet |= ProcParams::SP_FLAGS;
         }
         if (pe.isExifSet()) {
-            subPartsSet |= ProcParams::eSubPart::EXIF;
+            subPartsSet |= ProcParams::SP_EXIF;
         }
         if (pe.isIptcSet()) {
-            subPartsSet |= ProcParams::eSubPart::IPTC;
+            subPartsSet |= ProcParams::SP_IPTC;
         }
     }
 }
@@ -485,23 +485,23 @@ void Thumbnail::clearProcParams (int subPart, PPChanger whoClearedIt)
         // reset the params to defaults
         pparams.setDefaults(subPart);
 
-        if (subPart & ProcParams::eSubPart::FLAGS) {
-            subPartsSet &= ~ProcParams::eSubPart::FLAGS;
+        if (subPart & ProcParams::SP_FLAGS) {
+            subPartsSet &= ~ProcParams::SP_FLAGS;
         }
 
-        if (subPart & ProcParams::eSubPart::TOOL) {
-            subPartsSet &= ~ProcParams::eSubPart::TOOL;
+        if (subPart & ProcParams::SP_TOOL) {
+            subPartsSet &= ~ProcParams::SP_TOOL;
             defaultParamsSet = false;
             cfs.recentlySaved = false;
             needsReProcessing = true;
         }
 
-        if (subPart & ProcParams::eSubPart::EXIF) {
-            subPartsSet &= ~ProcParams::eSubPart::EXIF;
+        if (subPart & ProcParams::SP_EXIF) {
+            subPartsSet &= ~ProcParams::SP_EXIF;
         }
 
-        if (subPart & ProcParams::eSubPart::IPTC) {
-            subPartsSet &= ~ProcParams::eSubPart::IPTC;
+        if (subPart & ProcParams::SP_IPTC) {
+            subPartsSet &= ~ProcParams::SP_IPTC;
         }
 
         if (subPartsSet) {
@@ -571,17 +571,17 @@ void Thumbnail::setProcParams (const ProcParams& pp, ParamsEdited* pe, PPChanger
         if (pe) {
             pe->combine(pparams, pp, true);
             if (pe->isToolSet()) {
-                subPartsSet |= ProcParams::eSubPart::TOOL;
+                subPartsSet |= ProcParams::SP_TOOL;
             }
             if (pe->isExifSet()) {
-                subPartsSet |= ProcParams::eSubPart::EXIF;
+                subPartsSet |= ProcParams::SP_EXIF;
             }
             if (pe->isIptcSet()) {
-                subPartsSet |= ProcParams::eSubPart::IPTC;
+                subPartsSet |= ProcParams::SP_IPTC;
             }
         } else {
             pparams = pp;
-            subPartsSet |= ProcParams::eSubPart::TOOL|ProcParams::eSubPart::EXIF|ProcParams::eSubPart::IPTC;
+            subPartsSet |= ProcParams::SP_TOOL|ProcParams::SP_EXIF|ProcParams::SP_IPTC;
         }
 
         needsReProcessing = true;
@@ -593,7 +593,7 @@ void Thumbnail::setProcParams (const ProcParams& pp, ParamsEdited* pe, PPChanger
             setStage(inTrash);
         } else {
             // May have been set by combine, so we restore it to default
-            pparams.setDefaults(ProcParams::eSubPart::FLAGS);
+            pparams.setDefaults(ProcParams::SP_FLAGS);
         }
 
         if (updateCacheNow) {
@@ -1069,15 +1069,15 @@ void Thumbnail::updateCache (bool updatePParams, bool updateCacheImageData)
 
     // Now the the minor sub-parts of the ParamsEdited
     if (hasTagsSet() != hasToolParamsSet()) {
-        pe.set(hasTagsSet(), ProcParams::eSubPart::FLAGS);
+        pe.set(hasTagsSet(), ProcParams::SP_FLAGS);
     }
 
     if (hasExifParamsSet() != hasToolParamsSet()) {
-        pe.set(hasExifParamsSet(), ProcParams::eSubPart::EXIF);
+        pe.set(hasExifParamsSet(), ProcParams::SP_EXIF);
     }
 
     if (hasIptcParamsSet() != hasToolParamsSet()) {
-        pe.set(hasIptcParamsSet(), ProcParams::eSubPart::IPTC);
+        pe.set(hasIptcParamsSet(), ProcParams::SP_IPTC);
     }
 
     if (updatePParams) {

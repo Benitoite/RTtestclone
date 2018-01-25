@@ -977,22 +977,22 @@ void FileBrowser::menuItemActivated (Gtk::MenuItem* m)
         partPasteProfile ();
     } else if (m == clearparams) {
         for (size_t i = 0; i < mselected.size(); i++) {
-            mselected[i]->thumbnail->clearProcParams (rtengine::ProcParams::eSubPart::TOOL, PPChanger::FILEBROWSER);
+            mselected[i]->thumbnail->clearProcParams (rtengine::ProcParams::SP_TOOL, PPChanger::FILEBROWSER);
         }
         queue_draw ();
     } else if (m == clearexif) {
         for (size_t i = 0; i < mselected.size(); i++) {
-            mselected[i]->thumbnail->clearProcParams (rtengine::ProcParams::eSubPart::EXIF, PPChanger::FILEBROWSER);
+            mselected[i]->thumbnail->clearProcParams (rtengine::ProcParams::SP_EXIF, PPChanger::FILEBROWSER);
         }
         queue_draw ();
     } else if (m == cleariptc) {
         for (size_t i = 0; i < mselected.size(); i++) {
-            mselected[i]->thumbnail->clearProcParams (rtengine::ProcParams::eSubPart::IPTC, PPChanger::FILEBROWSER);
+            mselected[i]->thumbnail->clearProcParams (rtengine::ProcParams::SP_IPTC, PPChanger::FILEBROWSER);
         }
         queue_draw ();
     } else if (m == clearall) {
         for (size_t i = 0; i < mselected.size(); i++) {
-            mselected[i]->thumbnail->clearProcParams (rtengine::ProcParams::eSubPart::TOOL|rtengine::ProcParams::SubPart::EXIF|rtengine::ProcParams::SubPart::IPTC, PPChanger::FILEBROWSER);
+            mselected[i]->thumbnail->clearProcParams (rtengine::ProcParams::SP_TOOL|rtengine::ProcParams::SP_EXIF|rtengine::ProcParams::SP_IPTC, PPChanger::FILEBROWSER);
         }
         queue_draw ();
     } else if (m == resetdefaultprof) {
@@ -1634,7 +1634,7 @@ void FileBrowser::fromTrashRequested (std::vector<FileBrowserEntry*> tbe)
         if (!newRank && !newColorLabel) {
             // NULL values, we clear the FLAGS part of the procparams !
             // This will call updateCache()
-            currThumb->clearProcParams(rtengine::ProcParams::eSubPart::FLAGS, PPChanger::FILEBROWSER);
+            currThumb->clearProcParams(rtengine::ProcParams::SP_FLAGS, PPChanger::FILEBROWSER);
         }
         else {
             currThumb->updateCache ();
@@ -1673,7 +1673,7 @@ void FileBrowser::rankingRequested (std::vector<FileBrowserEntry*> tbe, int rank
         if (!rank && !newStage && !newColorLabel) {
             // NULL values, we clear the FLAGS part of the procparams !
             // This will call updateCache()
-            currThumb->clearProcParams(rtengine::ProcParams::eSubPart::FLAGS, PPChanger::FILEBROWSER);
+            currThumb->clearProcParams(rtengine::ProcParams::SP_FLAGS, PPChanger::FILEBROWSER);
         }
         else {
             currThumb->updateCache ();
@@ -1714,7 +1714,7 @@ void FileBrowser::colorlabelRequested (std::vector<FileBrowserEntry*> tbe, int c
         if (!newRank && !newStage && !colorlabel) {
             // NULL values, we clear the FLAGS part of the procparams !
             // This will call updateCache()
-            currThumb->clearProcParams(rtengine::ProcParams::eSubPart::FLAGS, PPChanger::FILEBROWSER);
+            currThumb->clearProcParams(rtengine::ProcParams::SP_FLAGS, PPChanger::FILEBROWSER);
         }
         else {
             currThumb->updateCache ();
@@ -1794,7 +1794,7 @@ void FileBrowser::button2Pressed (LWButton* button, int actionCode, void* action
 {
     if (actionCode == 9 && (bstate & Gdk::CONTROL_MASK)) { // clear processing profile
         FileBrowserEntry* entry = static_cast<FileBrowserEntry*>(actionData);
-        entry->thumbnail->clearProcParams(rtengine::ProcParams::eSubPart::TOOL);
+        entry->thumbnail->clearProcParams(rtengine::ProcParams::SP_TOOL);
         entry->hideDelButton();
     }
 }

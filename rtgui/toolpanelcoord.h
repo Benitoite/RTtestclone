@@ -38,8 +38,7 @@
 #include "epd.h"
 #include "sharpening.h"
 #include "labcurve.h"
-#include "exifpanel.h"
-#include "iptcpanel.h"
+#include "metadatapanel.h"
 #include "crop.h"
 #include "icmpanel.h"
 #include "resize.h"
@@ -79,6 +78,7 @@
 #include "filmsimulation.h"
 #include "prsharpening.h"
 #include "fattaltonemap.h"
+#include "localcontrast.h"
 #include "guiutils.h"
 
 class ImageEditorCoordinator;
@@ -120,6 +120,7 @@ protected:
     Crop* crop;
     ToneCurve* toneCurve;
     ShadowsHighlights* shadowshighlights;
+    LocalContrast *localContrast;
     Defringe* defringe;
     ImpulseDenoise* impulsedenoise;
     DirPyrDenoise* dirpyrdenoise;
@@ -147,6 +148,7 @@ protected:
     BayerRAWExposure* bayerrawexposure;
     XTransRAWExposure* xtransrawexposure;
     FattalToneMapping *fattal;
+    MetaDataPanel* metadata;
 
     std::vector<PParamsChangeListener*> paramcListeners;
 
@@ -158,10 +160,7 @@ protected:
     ToolVBox* colorPanel;
     ToolVBox* transformPanel;
     ToolVBox* rawPanel;
-    ToolVBox* waveletPanel;
-    Gtk::Notebook* metadataPanel;
-    ExifPanel* exifpanel;
-    IPTCPanel* iptcpanel;
+    ToolVBox* advancedPanel;
     ToolBar* toolBar;
 
     TextOrIcon* toiE;
@@ -180,7 +179,7 @@ protected:
     Gtk::ScrolledWindow* colorPanelSW;
     Gtk::ScrolledWindow* transformPanelSW;
     Gtk::ScrolledWindow* rawPanelSW;
-    Gtk::ScrolledWindow* waveletPanelSW;
+    Gtk::ScrolledWindow* advancedPanelSW;
 
     std::vector<MyExpander*> expList;
 

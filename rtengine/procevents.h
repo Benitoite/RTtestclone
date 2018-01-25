@@ -26,7 +26,7 @@ namespace rtengine
 
 
 // Aligned so the first entry starts on line 30
-enum ProcEvent {
+enum ProcEventCode {
     EvPhotoLoaded = 0,
     EvProfileLoaded = 1,
     EvProfileChanged = 2,
@@ -511,19 +511,42 @@ enum ProcEvent {
     EvCATgreensc = 481,
     EvCATybscen = 482,
     EvCATAutoyb = 483,
-    // profiled lens correction new events
     EvLensCorrMode = 484,
     EvLensCorrLensfunCamera = 485,
     EvLensCorrLensfunLens = 486,
-    // Fattal tone mapping
     EvTMFattalEnabled = 487,
     EvTMFattalThreshold = 488,
     EvTMFattalAmount = 489,
-    EvProfileCleared = 490,
+    EvWBEnabled = 490,
+    EvRGBEnabled = 491,
+    EvLEnabled = 492,
+    EvPixelShiftOneGreen = 493,
+    EvProfileCleared = 494,
 
     NUMOFEVENTS
 
 };
+
+
+class ProcEvent {
+public:
+    ProcEvent(): code_(0) {}
+    ProcEvent(ProcEventCode code): code_(code) {}
+    explicit ProcEvent(int code): code_(code) {}
+    operator int() { return code_; }
+
+private:
+    int code_;
+};
+
+
+inline bool operator==(ProcEvent a, ProcEvent b) { return int(a) == int(b); }
+inline bool operator==(ProcEvent a, ProcEventCode b) { return int(a) == int(b); }
+inline bool operator==(ProcEventCode a, ProcEvent b) { return int(a) == int(b); }
+inline bool operator!=(ProcEvent a, ProcEvent b) { return int(a) != int(b); }
+inline bool operator!=(ProcEvent a, ProcEventCode b) { return int(a) != int(b); }
+inline bool operator!=(ProcEventCode a, ProcEvent b) { return int(a) != int(b); }
+
 }
 #endif
 

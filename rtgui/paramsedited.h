@@ -56,6 +56,7 @@ public:
     bool expcomp;
     bool hrenabled;
     bool method;
+    bool histmatching;
 
     operator bool () const;
 };
@@ -105,6 +106,7 @@ public:
 class LCurveParamsEdited
 {
 public:
+    bool enabled;
     bool brightness;
     bool contrast;
     bool chromaticity;
@@ -120,16 +122,28 @@ public:
     bool hhcurve;
     bool lccurve;
     bool clcurve;
-    bool enabled;
-    bool method;
 
     operator bool () const;
 };
+
+
+class LocalContrastParamsEdited {
+public:
+    bool enabled;
+    bool radius;
+    bool amount;
+    bool darkness;
+    bool lightness;
+
+    operator bool () const;
+};
+
 
 class RGBCurvesParamsEdited
 {
 
 public:
+    bool enabled;
     bool lumamode;
     bool rcurve;
     bool gcurve;
@@ -168,6 +182,10 @@ public:
     bool satlow;
     bool sathigh;
     bool lumamode;
+    bool labgridALow;
+    bool labgridBLow;
+    bool labgridAHigh;
+    bool labgridBHigh;
 
     operator bool () const;
 };
@@ -238,6 +256,7 @@ class WBParamsEdited
 {
 
 public:
+    bool enabled;
     bool method;
     bool temperature;
     bool green;
@@ -367,6 +386,7 @@ public:
     bool enabled;
     bool threshold;
     bool amount;
+    bool anchor;
 
     operator bool () const;
 };
@@ -382,7 +402,6 @@ public:
     bool htonalwidth;
     bool shadows;
     bool stonalwidth;
-    bool localcontrast;
     bool radius;
 
     operator bool () const;
@@ -506,6 +525,7 @@ class ChannelMixerParamsEdited
 {
 
 public:
+    bool enabled;
     bool red[3];
     bool green[3];
     bool blue[3];
@@ -713,6 +733,7 @@ class HSVEqualizerParamsEdited
 {
 
 public:
+    bool enabled;
     bool hcurve;
     bool scurve;
     bool vcurve;
@@ -774,6 +795,7 @@ public:
         bool pixelShiftSmooth;
         bool pixelShiftExp0;
         bool pixelShiftLmmse;
+        bool pixelShiftOneGreen;
         bool pixelShiftEqualBright;
         bool pixelShiftEqualBrightChannel;
         bool pixelShiftNonGreenCross;
@@ -823,6 +845,15 @@ public:
     operator bool () const;
 };
 
+
+class MetaDataParamsEdited {
+public:
+    bool mode;
+
+    operator bool () const;
+};
+
+
 class ParamsEdited
 {
 
@@ -830,6 +861,7 @@ public:
     GeneralParamsEdited           general;
     ToneCurveParamsEdited         toneCurve;
     LCurveParamsEdited            labCurve;
+    LocalContrastParamsEdited     localContrast;
     RGBCurvesParamsEdited         rgbCurves;
     ColorToningEdited             colorToning;
     RetinexParamsEdited           retinex;
@@ -866,15 +898,16 @@ public:
     WaveletParamsEdited           wavelet;
     HSVEqualizerParamsEdited      hsvequalizer;
     FilmSimulationParamsEdited    filmSimulation;
+    MetaDataParamsEdited          metadata;
     bool                          exif;
     bool                          iptc;
 
     explicit ParamsEdited (bool value = false);
 
-    void set   (bool v, int subPart = rtengine::procparams::ProcParams::eSubPart::FLAGS
-                                     |rtengine::procparams::ProcParams::eSubPart::EXIF
-                                     |rtengine::procparams::ProcParams::eSubPart::IPTC
-                                     |rtengine::procparams::ProcParams::eSubPart::TOOL);
+    void set   (bool v, int subPart = rtengine::procparams::ProcParams::SP_FLAGS
+                                     |rtengine::procparams::ProcParams::SP_EXIF
+                                     |rtengine::procparams::ProcParams::SP_IPTC
+                                     |rtengine::procparams::ProcParams::SP_TOOL);
 
     void initFrom (const std::vector<rtengine::procparams::ProcParams>& src);
     void combine (rtengine::procparams::ProcParams& toEdit, const rtengine::procparams::ProcParams& mods, bool forceSet);

@@ -176,7 +176,7 @@ public:
     {
         if (pparams.rank != rank) {
             pparams.rank = rank;
-            subPartsSet |= rtengine::ProcParams::eSubPart::FLAGS;
+            subPartsSet |= rtengine::ProcParams::SP_FLAGS;
         }
     }
 
@@ -188,7 +188,7 @@ public:
     {
         if (pparams.colorlabel != colorlabel) {
             pparams.colorlabel = colorlabel;
-            subPartsSet |= rtengine::ProcParams::eSubPart::FLAGS;
+            subPartsSet |= rtengine::ProcParams::SP_FLAGS;
         }
     }
 
@@ -200,7 +200,7 @@ public:
     {
         if (pparams.inTrash != stage) {
             pparams.inTrash = stage;
-            subPartsSet |= rtengine::ProcParams::eSubPart::FLAGS;
+            subPartsSet |= rtengine::ProcParams::SP_FLAGS;
         }
     }
 

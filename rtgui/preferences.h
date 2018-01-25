@@ -193,7 +193,6 @@ class Preferences : public Gtk::Dialog, public ProfileStoreListener
     Gtk::Entry* txtSndLngEditProcDone;
     Gtk::SpinButton* spbSndLngEditProcDoneSecs;
 
-    Gtk::CheckButton* ckbTunnelMetaData;
     Gtk::CheckButton* ckbInternalThumbIfUntouched;
 
     Gtk::Entry* txtCustProfBuilderPath;
@@ -209,6 +208,9 @@ class Preferences : public Gtk::Dialog, public ProfileStoreListener
     Gtk::Button* btnSaveTpOpenNow;
 
     DynamicProfilePanel *dynProfilePanel;
+
+    Gtk::ComboBoxText *cropGuides;
+    Gtk::CheckButton *cropAutoFit;
 
     Glib::ustring storedValueRaw;
     Glib::ustring storedValueImg;

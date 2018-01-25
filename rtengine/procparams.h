@@ -280,13 +280,13 @@ struct ToneCurveParams {
     int         shcompr;
     int         hlcompr;        // Highlight Recovery's compression
     int         hlcomprthresh;  // Highlight Recovery's threshold
+    bool histmatching; // histogram matching
 
     ToneCurveParams();
 
     bool operator ==(const ToneCurveParams& other) const;
     bool operator !=(const ToneCurveParams& other) const;
 
-    static bool HLReconstructionNecessary(const LUTu& histRedRaw, const LUTu& histGreenRaw, const LUTu& histBlueRaw);
 };
 
 /**
@@ -341,6 +341,7 @@ struct RetinexParams
   */
 struct LCurveParams
 {
+    bool enabled;
     std::vector<double>   lcurve;
     std::vector<double>   acurve;
     std::vector<double>   bcurve;
@@ -363,10 +364,29 @@ struct LCurveParams
     bool operator !=(const LCurveParams& other) const;
 };
 
+
+/**
+ * Parameters for local contrast
+ */ 
+struct LocalContrastParams {
+    bool enabled;
+    int radius;
+    double amount;
+    double darkness;
+    double lightness;
+
+    LocalContrastParams();
+
+    bool operator==(const LocalContrastParams &other) const;
+    bool operator!=(const LocalContrastParams &other) const;
+};
+
+
 /**
   * Parameters of the RGB curves
   */
 struct RGBCurvesParams {
+    bool enabled;
     bool lumamode;
     std::vector<double>   rcurve;
     std::vector<double>   gcurve;
@@ -404,6 +424,7 @@ struct ColorToningParams {
      *  Lch        :
      *  RGBSliders :
      *  RGBCurves  :
+     *  LabGrid    :
      */
     Glib::ustring method;
 
@@ -426,6 +447,12 @@ struct ColorToningParams {
     double satlow;
     double sathigh;
     bool lumamode;
+
+    double labgridALow;
+    double labgridBLow;
+    double labgridAHigh;
+    double labgridBHigh;
+    static const double LABGRID_CORR_MAX;
 
     ColorToningParams();
 
@@ -538,6 +565,7 @@ struct WBEntry {
 };
 
 struct WBParams {
+    bool enabled;
     Glib::ustring   method;
     int             temperature;
     double          green;
@@ -700,6 +728,7 @@ struct FattalToneMappingParams {
     bool enabled;
     int threshold;
     int amount;
+    int anchor;
 
     FattalToneMappingParams();
 
@@ -717,7 +746,6 @@ struct SHParams {
     int     htonalwidth;
     int     shadows;
     int     stonalwidth;
-    int     localcontrast;
     int     radius;
 
     SHParams();
@@ -895,6 +923,7 @@ struct VignettingParams {
   * Parameters of the color mixer
   */
 struct ChannelMixerParams {
+    bool enabled;
     int red[3];
     int green[3];
     int blue[3];
@@ -1002,6 +1031,25 @@ struct ColorManagementParams {
     bool operator ==(const ColorManagementParams& other) const;
     bool operator !=(const ColorManagementParams& other) const;
 };
+
+
+/**
+  * Parameters for metadata handling
+  */
+struct MetaDataParams {
+    enum Mode {
+        TUNNEL,
+        EDIT,
+        STRIP
+    };
+    Mode mode;
+
+    MetaDataParams();
+
+    bool operator ==(const MetaDataParams &other) const;
+    bool operator !=(const MetaDataParams &other) const;
+};
+
 
 /**
   * Typedef for representing a key/value for the exif metadata information
@@ -1137,6 +1185,7 @@ struct DirPyrEqualizerParams {
  * HSV equalizer params
  */
 struct HSVEqualizerParams {
+    bool enabled;
     std::vector<double> hcurve;
     std::vector<double> scurve;
     std::vector<double> vcurve;
@@ -1239,6 +1288,7 @@ struct RAWParams {
         double pixelShiftSmoothFactor;
         bool pixelShiftExp0;
         bool pixelShiftLmmse;
+        bool pixelShiftOneGreen;
         bool pixelShiftEqualBright;
         bool pixelShiftEqualBrightChannel;
         bool pixelShiftNonGreenCross;
@@ -1335,6 +1385,7 @@ public:
     ToneCurveParams         toneCurve;       ///< Tone curve parameters
     LCurveParams            labCurve;        ///< CIELAB luminance curve parameters
     RetinexParams           retinex;         ///< Retinex parameters
+    LocalContrastParams     localContrast;   ////< Local contrast parameters
     RGBCurvesParams         rgbCurves;       ///< RGB curves parameters
     ColorToningParams       colorToning;     ///< Color Toning parameters
     SharpeningParams        sharpening;      ///< Sharpening parameters
@@ -1376,16 +1427,17 @@ public:
     Glib::ustring           appVersion;      ///< Version of the application that generated the parameters
     int                     ppVersion;       ///< Version of the PP file from which the parameters have been read
 
+    MetaDataParams          metadata;        ///< Metadata parameters
     ExifPairs               exif;            ///< List of modifications appplied on the exif tags of the input image
     IPTCPairs               iptc;            ///< The IPTC tags and values to be saved to the output image
 
-    typedef enum SubPart {
-        NONE  = 0,
-        FLAGS = 1<<0,
-        EXIF  = 1<<1,
-        IPTC  = 1<<2,
-        TOOL  = 1<<3
-    } eSubPart;
+    enum SubPart {
+        SP_NONE  = 0,
+        SP_FLAGS = 1<<0,
+        SP_EXIF  = 1<<1,
+        SP_IPTC  = 1<<2,
+        SP_TOOL  = 1<<3
+    };
 
 
     /**
@@ -1395,7 +1447,7 @@ public:
     /**
       * Sets the hand-wired defaults parameters.
       */
-    void setDefaults(int subPart = eSubPart::FLAGS|eSubPart::EXIF|eSubPart::IPTC|eSubPart::TOOL);
+    void setDefaults(int subPart = SP_FLAGS|SP_EXIF|SP_IPTC|SP_TOOL);
     /**
       * Saves the parameters to possibly two files. This is a performance improvement if a function has to
       * save the same file in two different location, i.e. the cache and the image's directory
@@ -1457,7 +1509,7 @@ public:
     void deleteInstance();
     void clearGeneral();
     int  load(const Glib::ustring& fName);
-    void set(bool v, int subPart = ProcParams::FLAGS|ProcParams::EXIF|ProcParams::IPTC|ProcParams::TOOL);
+    void set(bool v, int subPart = ProcParams::SP_FLAGS|ProcParams::SP_EXIF|ProcParams::SP_IPTC|ProcParams::SP_TOOL);
     void applyTo(ProcParams* destParams) const ;
 
     rtengine::procparams::ProcParams* pparams;
