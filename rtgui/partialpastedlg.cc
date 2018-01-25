@@ -97,6 +97,7 @@ PartialPasteDlg::PartialPasteDlg (const Glib::ustring &title, Gtk::Window* paren
     commonTrans  = Gtk::manage (new Gtk::CheckButton (M("PARTIALPASTE_COMMONTRANSFORMPARAMS")));
 
     // Metadata:
+    metadata = Gtk::manage(new Gtk::CheckButton(M("PARTIALPASTE_METADATA")));
     exifch      = Gtk::manage (new Gtk::CheckButton (M("PARTIALPASTE_EXIFCHANGES")));
     iptc        = Gtk::manage (new Gtk::CheckButton (M("PARTIALPASTE_IPTCINFO")));
 
@@ -202,43 +203,44 @@ PartialPasteDlg::PartialPasteDlg (const Glib::ustring &title, Gtk::Window* paren
     vboxes[5]->pack_start (*colorappearance, Gtk::PACK_SHRINK, 2);
     vboxes[5]->pack_start (*wavelet, Gtk::PACK_SHRINK, 2);
 
-    //RAW
-    vboxes[6]->pack_start (*raw, Gtk::PACK_SHRINK, 2);
-    vboxes[6]->pack_start (*hseps[6], Gtk::PACK_SHRINK, 2);
-    vboxes[6]->pack_start (*raw_method, Gtk::PACK_SHRINK, 2);
-    vboxes[6]->pack_start (*raw_imagenum, Gtk::PACK_SHRINK, 2);
-    vboxes[6]->pack_start (*raw_pixelshift, Gtk::PACK_SHRINK, 2);
-    vboxes[6]->pack_start (*raw_ccSteps, Gtk::PACK_SHRINK, 2);
-    vboxes[6]->pack_start (*raw_dcb_iterations, Gtk::PACK_SHRINK, 2);
-    vboxes[6]->pack_start (*raw_dcb_enhance, Gtk::PACK_SHRINK, 2);
-    vboxes[6]->pack_start (*raw_lmmse_iterations, Gtk::PACK_SHRINK, 2);
-    vboxes[6]->pack_start (*Gtk::manage (new Gtk::HSeparator ()), Gtk::PACK_SHRINK, 0);
-    vboxes[6]->pack_start (*raw_linenoise, Gtk::PACK_SHRINK, 2);
-    vboxes[6]->pack_start (*raw_greenthresh, Gtk::PACK_SHRINK, 2);
-    vboxes[6]->pack_start (*raw_hotpix_filt, Gtk::PACK_SHRINK, 2);
-    vboxes[6]->pack_start (*raw_deadpix_filt, Gtk::PACK_SHRINK, 2);
-    vboxes[6]->pack_start (*Gtk::manage (new Gtk::HSeparator ()), Gtk::PACK_SHRINK, 0);
-    vboxes[6]->pack_start (*raw_expos, Gtk::PACK_SHRINK, 2);
-    vboxes[6]->pack_start (*raw_preser, Gtk::PACK_SHRINK, 2);
-    vboxes[6]->pack_start (*raw_black, Gtk::PACK_SHRINK, 2);
-    vboxes[6]->pack_start (*Gtk::manage (new Gtk::HSeparator ()), Gtk::PACK_SHRINK, 0);
-    vboxes[6]->pack_start (*df_file, Gtk::PACK_SHRINK, 2);
-    vboxes[6]->pack_start (*df_AutoSelect, Gtk::PACK_SHRINK, 2);
-    vboxes[6]->pack_start (*Gtk::manage (new Gtk::HSeparator ()), Gtk::PACK_SHRINK, 0);
-    vboxes[6]->pack_start (*ff_file, Gtk::PACK_SHRINK, 2);
-    vboxes[6]->pack_start (*ff_AutoSelect, Gtk::PACK_SHRINK, 2);
-    vboxes[6]->pack_start (*ff_BlurType, Gtk::PACK_SHRINK, 2);
-    vboxes[6]->pack_start (*ff_BlurRadius, Gtk::PACK_SHRINK, 2);
-    vboxes[6]->pack_start (*ff_ClipControl, Gtk::PACK_SHRINK, 2);
-    vboxes[6]->pack_start (*Gtk::manage (new Gtk::HSeparator ()), Gtk::PACK_SHRINK, 0);
-    vboxes[6]->pack_start (*raw_ca_autocorrect, Gtk::PACK_SHRINK, 2);
-    vboxes[6]->pack_start (*raw_caredblue, Gtk::PACK_SHRINK, 2);
-
     //META
-    vboxes[7]->pack_start (*meta, Gtk::PACK_SHRINK, 2);
+    vboxes[6]->pack_start (*meta, Gtk::PACK_SHRINK, 2);
+    vboxes[6]->pack_start (*hseps[6], Gtk::PACK_SHRINK, 2);
+    vboxes[6]->pack_start(*metadata, Gtk::PACK_SHRINK, 2);
+    vboxes[6]->pack_start (*exifch, Gtk::PACK_SHRINK, 2);
+    vboxes[6]->pack_start (*iptc, Gtk::PACK_SHRINK, 2);
+
+    //RAW
+    vboxes[7]->pack_start (*raw, Gtk::PACK_SHRINK, 2);
     vboxes[7]->pack_start (*hseps[7], Gtk::PACK_SHRINK, 2);
-    vboxes[7]->pack_start (*exifch, Gtk::PACK_SHRINK, 2);
-    vboxes[7]->pack_start (*iptc, Gtk::PACK_SHRINK, 2);
+    vboxes[7]->pack_start (*raw_method, Gtk::PACK_SHRINK, 2);
+    vboxes[7]->pack_start (*raw_imagenum, Gtk::PACK_SHRINK, 2);
+    vboxes[7]->pack_start (*raw_pixelshift, Gtk::PACK_SHRINK, 2);
+    vboxes[7]->pack_start (*raw_ccSteps, Gtk::PACK_SHRINK, 2);
+    vboxes[7]->pack_start (*raw_dcb_iterations, Gtk::PACK_SHRINK, 2);
+    vboxes[7]->pack_start (*raw_dcb_enhance, Gtk::PACK_SHRINK, 2);
+    vboxes[7]->pack_start (*raw_lmmse_iterations, Gtk::PACK_SHRINK, 2);
+    vboxes[7]->pack_start (*Gtk::manage (new Gtk::HSeparator ()), Gtk::PACK_SHRINK, 0);
+    vboxes[7]->pack_start (*raw_linenoise, Gtk::PACK_SHRINK, 2);
+    vboxes[7]->pack_start (*raw_greenthresh, Gtk::PACK_SHRINK, 2);
+    vboxes[7]->pack_start (*raw_hotpix_filt, Gtk::PACK_SHRINK, 2);
+    vboxes[7]->pack_start (*raw_deadpix_filt, Gtk::PACK_SHRINK, 2);
+    vboxes[7]->pack_start (*Gtk::manage (new Gtk::HSeparator ()), Gtk::PACK_SHRINK, 0);
+    vboxes[7]->pack_start (*raw_expos, Gtk::PACK_SHRINK, 2);
+    vboxes[7]->pack_start (*raw_preser, Gtk::PACK_SHRINK, 2);
+    vboxes[7]->pack_start (*raw_black, Gtk::PACK_SHRINK, 2);
+    vboxes[7]->pack_start (*Gtk::manage (new Gtk::HSeparator ()), Gtk::PACK_SHRINK, 0);
+    vboxes[7]->pack_start (*df_file, Gtk::PACK_SHRINK, 2);
+    vboxes[7]->pack_start (*df_AutoSelect, Gtk::PACK_SHRINK, 2);
+    vboxes[7]->pack_start (*Gtk::manage (new Gtk::HSeparator ()), Gtk::PACK_SHRINK, 0);
+    vboxes[7]->pack_start (*ff_file, Gtk::PACK_SHRINK, 2);
+    vboxes[7]->pack_start (*ff_AutoSelect, Gtk::PACK_SHRINK, 2);
+    vboxes[7]->pack_start (*ff_BlurType, Gtk::PACK_SHRINK, 2);
+    vboxes[7]->pack_start (*ff_BlurRadius, Gtk::PACK_SHRINK, 2);
+    vboxes[7]->pack_start (*ff_ClipControl, Gtk::PACK_SHRINK, 2);
+    vboxes[7]->pack_start (*Gtk::manage (new Gtk::HSeparator ()), Gtk::PACK_SHRINK, 0);
+    vboxes[7]->pack_start (*raw_ca_autocorrect, Gtk::PACK_SHRINK, 2);
+    vboxes[7]->pack_start (*raw_caredblue, Gtk::PACK_SHRINK, 2);
 
     Gtk::VBox* vbCol1 = Gtk::manage (new Gtk::VBox ());
     Gtk::VBox* vbCol2 = Gtk::manage (new Gtk::VBox ());
@@ -248,11 +250,11 @@ PartialPasteDlg::PartialPasteDlg (const Glib::ustring &title, Gtk::Window* paren
         vbCol1->pack_start (*vboxes[i], Gtk::PACK_SHRINK, 2);
     }
 
-    for (int i = 3; i < 6; i++) {
+    for (int i = 3; i < 7; i++) {
         vbCol2->pack_start (*vboxes[i], Gtk::PACK_SHRINK, 2);
     }
 
-    for (int i = 6; i < 8; i++) {
+    for (int i = 7; i < 8; i++) {
         vbCol3->pack_start (*vboxes[i], Gtk::PACK_SHRINK, 2);
     }
 
@@ -349,6 +351,7 @@ PartialPasteDlg::PartialPasteDlg (const Glib::ustring &title, Gtk::Window* paren
     commonTransConn = commonTrans->signal_toggled().connect (sigc::bind (sigc::mem_fun(*composition, &Gtk::CheckButton::set_inconsistent), true));
 
     // Metadata:
+    metadataConn = metadata->signal_toggled().connect(sigc::bind (sigc::mem_fun(*meta, &Gtk::CheckButton::set_inconsistent), true));
     exifchConn      = exifch->signal_toggled().connect (sigc::bind (sigc::mem_fun(*meta, &Gtk::CheckButton::set_inconsistent), true));
     iptcConn        = iptc->signal_toggled().connect (sigc::bind (sigc::mem_fun(*meta, &Gtk::CheckButton::set_inconsistent), true));
 
@@ -605,11 +608,13 @@ void PartialPasteDlg::compositionToggled ()
 void PartialPasteDlg::metaToggled ()
 {
 
+    ConnectionBlocker metadataBlocker(metadataConn);
     ConnectionBlocker exifchBlocker(exifchConn);
     ConnectionBlocker iptcBlocker(iptcConn);
 
     meta->set_inconsistent (false);
 
+    metadata->set_active(meta->get_active());
     exifch->set_active (meta->get_active ());
     iptc->set_active (meta->get_active ());
 }
@@ -783,6 +788,10 @@ void PartialPasteDlg::applyPaste (rtengine::procparams::ProcParams* dstPP, Param
 
     if (!commonTrans->get_active ()) {
         filterPE.commonTrans = falsePE.commonTrans;
+    }
+
+    if (!metadata->get_active()) {
+        filterPE.metadata = falsePE.metadata;
     }
 
     if (!exifch->get_active ()) {
