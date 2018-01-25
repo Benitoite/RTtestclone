@@ -106,6 +106,7 @@ set(RTENGINESOURCEFILES
     rawimage.cc
     rawimagesource.cc
     refreshmap.cc
+    rt_algo.cc
     rtthumbnail.cc
     shmap.cc
     simpleprocess.cc
@@ -113,6 +114,7 @@ set(RTENGINESOURCEFILES
     stdimagesource.cc
     utils.cc
     rtlensfun.cc
+    tmo_fattal02.cc
     )
 
 if(LENSFUN_HAS_LOAD_DIRECTORY)

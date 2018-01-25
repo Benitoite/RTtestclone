@@ -514,6 +514,9 @@ int refreshmap[rtengine::NUMOFEVENTS] = {
     DARKFRAME,        // EvLensCorrMode
     DARKFRAME,        // EvLensCorrLensfunCamera
     DARKFRAME,        // EvLensCorrLensfunLens
+    ALLNORAW,         // EvTMFattalEnabled
+    HDR,              // EvTMFattalThreshold
+    HDR,              // EvTMFattalAmount
     ALL               // EvProfileCleared
 
 };

@@ -269,6 +269,10 @@ void ParamsEdited::set (bool v, int subPart)
         epd.edgeStopping        = v;
         epd.scale               = v;
         epd.reweightingIterates = v;
+        fattal.enabled   = v;
+        fattal.threshold = v;
+        fattal.amount    = v;
+        sh.enabled       = v;
         sh.enabled       = v;
         sh.hq            = v;
         sh.highlights    = v;
@@ -424,14 +428,14 @@ void ParamsEdited::set (bool v, int subPart)
         raw.xtranssensor.exBlackRed = v;
         raw.xtranssensor.exBlackGreen = v;
         raw.xtranssensor.exBlackBlue = v;
-        raw.caCorrection = v;
-        raw.caBlue  = v;
-        raw.caRed   = v;
+        raw.ca_autocorrect = v;
+        raw.cablue  = v;
+        raw.cared   = v;
         raw.hotPixelFilter = v;
         raw.deadPixelFilter = v;
-        raw.hotDeadPixelThresh = v;
+        raw.hotdeadpix_thresh = v;
         raw.darkFrame = v;
-        raw.dfAuto = v;
+        raw.df_autoselect = v;
         raw.ff_file = v;
         raw.ff_AutoSelect = v;
         raw.ff_BlurRadius = v;
@@ -809,6 +813,10 @@ void ParamsEdited::initFrom (const std::vector<rtengine::procparams::ProcParams>
         epd.scale = epd.scale && p.epd.scale == other.epd.scale;
         epd.reweightingIterates = epd.reweightingIterates && p.epd.reweightingIterates == other.epd.reweightingIterates;
 
+        fattal.enabled = fattal.enabled && p.fattal.enabled == other.fattal.enabled;
+        fattal.threshold = fattal.threshold && p.fattal.threshold == other.fattal.threshold;
+        fattal.amount = fattal.amount && p.fattal.amount == other.fattal.amount;
+        
         sh.enabled = sh.enabled && p.sh.enabled == other.sh.enabled;
         sh.hq = sh.hq && p.sh.hq == other.sh.hq;
         sh.highlights = sh.highlights && p.sh.highlights == other.sh.highlights;
@@ -963,14 +971,14 @@ void ParamsEdited::initFrom (const std::vector<rtengine::procparams::ProcParams>
         raw.xtranssensor.exBlackRed = raw.xtranssensor.exBlackRed && p.raw.xtranssensor.blackred == other.raw.xtranssensor.blackred;
         raw.xtranssensor.exBlackGreen = raw.xtranssensor.exBlackGreen && p.raw.xtranssensor.blackgreen == other.raw.xtranssensor.blackgreen;
         raw.xtranssensor.exBlackBlue = raw.xtranssensor.exBlackBlue && p.raw.xtranssensor.blackblue == other.raw.xtranssensor.blackblue;
-        raw.caCorrection = raw.caCorrection && p.raw.ca_autocorrect == other.raw.ca_autocorrect;
-        raw.caRed = raw.caRed && p.raw.cared == other.raw.cared;
-        raw.caBlue = raw.caBlue && p.raw.cablue == other.raw.cablue;
+        raw.ca_autocorrect = raw.ca_autocorrect && p.raw.ca_autocorrect == other.raw.ca_autocorrect;
+        raw.cared = raw.cared && p.raw.cared == other.raw.cared;
+        raw.cablue = raw.cablue && p.raw.cablue == other.raw.cablue;
         raw.hotPixelFilter = raw.hotPixelFilter && p.raw.hotPixelFilter == other.raw.hotPixelFilter;
         raw.deadPixelFilter = raw.deadPixelFilter && p.raw.deadPixelFilter == other.raw.deadPixelFilter;
-        raw.hotDeadPixelThresh = raw.hotDeadPixelThresh && p.raw.hotdeadpix_thresh == other.raw.hotdeadpix_thresh;
+        raw.hotdeadpix_thresh = raw.hotdeadpix_thresh && p.raw.hotdeadpix_thresh == other.raw.hotdeadpix_thresh;
         raw.darkFrame = raw.darkFrame && p.raw.dark_frame == other.raw.dark_frame;
-        raw.dfAuto = raw.dfAuto && p.raw.df_autoselect == other.raw.df_autoselect;
+        raw.df_autoselect = raw.df_autoselect && p.raw.df_autoselect == other.raw.df_autoselect;
         raw.ff_file = raw.ff_file && p.raw.ff_file == other.raw.ff_file;
         raw.ff_AutoSelect = raw.ff_AutoSelect && p.raw.ff_AutoSelect == other.raw.ff_AutoSelect;
         raw.ff_BlurRadius = raw.ff_BlurRadius && p.raw.ff_BlurRadius == other.raw.ff_BlurRadius;
@@ -1331,6 +1339,9 @@ void ParamsEdited::combine (rtengine::procparams::ProcParams& toEdit, const rten
     if (epd.edgeStopping) { toEdit.epd.edgeStopping = mods.epd.edgeStopping; }
     if (epd.scale) { toEdit.epd.scale = mods.epd.scale; }
     if (epd.reweightingIterates) { toEdit.epd.reweightingIterates = mods.epd.reweightingIterates; }
+    if (fattal.enabled) { toEdit.fattal.enabled = mods.fattal.enabled; }
+    if (fattal.threshold) { toEdit.fattal.threshold = mods.fattal.threshold; }
+    if (fattal.amount) { toEdit.fattal.amount = mods.fattal.amount; }
     if (sh.enabled) { toEdit.sh.enabled = mods.sh.enabled; }
     if (sh.hq) { toEdit.sh.hq = mods.sh.hq; }
     if (sh.highlights) { toEdit.sh.highlights = dontforceSet && options.baBehav[ADDSET_SH_HIGHLIGHTS] ? toEdit.sh.highlights + mods.sh.highlights : mods.sh.highlights; }
@@ -1478,16 +1489,16 @@ void ParamsEdited::combine (rtengine::procparams::ProcParams& toEdit, const rten
     if (raw.xtranssensor.exBlackRed) { toEdit.raw.xtranssensor.blackred = dontforceSet && options.baBehav[ADDSET_RAWEXPOS_BLACKS] ? toEdit.raw.xtranssensor.blackred + mods.raw.xtranssensor.blackred : mods.raw.xtranssensor.blackred; }
     if (raw.xtranssensor.exBlackGreen) { toEdit.raw.xtranssensor.blackgreen = dontforceSet && options.baBehav[ADDSET_RAWEXPOS_BLACKS] ? toEdit.raw.xtranssensor.blackgreen + mods.raw.xtranssensor.blackgreen : mods.raw.xtranssensor.blackgreen; }
     if (raw.xtranssensor.exBlackBlue) { toEdit.raw.xtranssensor.blackblue = dontforceSet && options.baBehav[ADDSET_RAWEXPOS_BLACKS] ? toEdit.raw.xtranssensor.blackblue + mods.raw.xtranssensor.blackblue : mods.raw.xtranssensor.blackblue; }
-    if (raw.caCorrection) { toEdit.raw.ca_autocorrect = mods.raw.ca_autocorrect; }
-    if (raw.caRed) { toEdit.raw.cared = dontforceSet && options.baBehav[ADDSET_RAWCACORR] ? toEdit.raw.cared + mods.raw.cared : mods.raw.cared; }
-    if (raw.caBlue) { toEdit.raw.cablue = dontforceSet && options.baBehav[ADDSET_RAWCACORR] ? toEdit.raw.cablue + mods.raw.cablue : mods.raw.cablue; }
+    if (raw.ca_autocorrect) { toEdit.raw.ca_autocorrect = mods.raw.ca_autocorrect; }
+    if (raw.cared) { toEdit.raw.cared = dontforceSet && options.baBehav[ADDSET_RAWCACORR] ? toEdit.raw.cared + mods.raw.cared : mods.raw.cared; }
+    if (raw.cablue) { toEdit.raw.cablue = dontforceSet && options.baBehav[ADDSET_RAWCACORR] ? toEdit.raw.cablue + mods.raw.cablue : mods.raw.cablue; }
     if (raw.exPos) { toEdit.raw.expos = dontforceSet && options.baBehav[ADDSET_RAWEXPOS_LINEAR] ? toEdit.raw.expos + mods.raw.expos : mods.raw.expos; }
     if (raw.exPreser) { toEdit.raw.preser = dontforceSet && options.baBehav[ADDSET_RAWEXPOS_PRESER] ? toEdit.raw.preser + mods.raw.preser : mods.raw.preser; }
     if (raw.hotPixelFilter) { toEdit.raw.hotPixelFilter = mods.raw.hotPixelFilter; }
     if (raw.deadPixelFilter) { toEdit.raw.deadPixelFilter = mods.raw.deadPixelFilter; }
-    if (raw.hotDeadPixelThresh) { toEdit.raw.hotdeadpix_thresh = mods.raw.hotdeadpix_thresh; }
+    if (raw.hotdeadpix_thresh) { toEdit.raw.hotdeadpix_thresh = mods.raw.hotdeadpix_thresh; }
     if (raw.darkFrame) { toEdit.raw.dark_frame = mods.raw.dark_frame; }
-    if (raw.dfAuto) { toEdit.raw.df_autoselect = mods.raw.df_autoselect; }
+    if (raw.df_autoselect) { toEdit.raw.df_autoselect = mods.raw.df_autoselect; }
     if (raw.ff_file) { toEdit.raw.ff_file = mods.raw.ff_file; }
     if (raw.ff_AutoSelect) { toEdit.raw.ff_AutoSelect = mods.raw.ff_AutoSelect; }
     if (raw.ff_BlurRadius) { toEdit.raw.ff_BlurRadius = mods.raw.ff_BlurRadius; }
@@ -1627,7 +1638,7 @@ bool ParamsEdited::isToolSet()
     bool retVal = toneCurve|labCurve|rgbCurves|colorToning|retinex
             |sharpening|prsharpening|sharpenEdge|sharpenMicro|vibrance
             |colorappearance|wb|defringe|dirpyrDenoise|epd|impulseDenoise
-            |sh|crop|coarse|commonTrans|rotate|distortion|lensProf
+            |fattal|sh|crop|coarse|commonTrans|rotate|distortion|lensProf
             |perspective|gradient|pcvignette|cacorrection|vignetting
             |chmixer|blackwhite|resize|icm|raw|dirpyrequalizer
             |wavelet|hsvequalizer|filmSimulation;
@@ -1755,6 +1766,10 @@ EPDParamsEdited::operator bool () const
     return enabled && strength && gamma && edgeStopping && scale && reweightingIterates;
 };
 
+FattalToneMappingParamsEdited::operator bool () const
+{
+    return enabled && threshold && amount;
+}
 
 SHParamsEdited::operator bool () const
 {
@@ -1847,7 +1862,7 @@ ColorManagementParamsEdited::operator bool () const
 {
     return input && toneCurve && applyLookTable && applyBaselineExposureOffset && applyHueSatMap
         && dcpIlluminant && working && output && outputIntent && outputBPC && gamma && gampos
-        && slpos && gamfree && freegamma;
+        && slpos && freegamma;
 };
 
 WaveletParamsEdited::operator bool () const
@@ -1904,8 +1919,8 @@ RAWParamsEdited::XTransSensor::operator bool () const
 
 RAWParamsEdited::operator bool () const
 {
-    return  bayersensor && xtranssensor && caCorrection && caRed && caBlue && hotPixelFilter && deadPixelFilter && hotDeadPixelThresh && darkFrame
-            && dfAuto && ff_file && ff_AutoSelect && ff_BlurRadius && ff_BlurType && exPos && exPreser && ff_AutoClipControl && ff_clipControl;
+    return  bayersensor && xtranssensor && ca_autocorrect && cared && cablue && hotPixelFilter && deadPixelFilter && hotdeadpix_thresh && darkFrame
+            && df_autoselect && ff_file && ff_AutoSelect && ff_BlurRadius && ff_BlurType && exPos && exPreser && ff_AutoClipControl && ff_clipControl;
 }
 
 /*

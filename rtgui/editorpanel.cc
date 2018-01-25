@@ -464,6 +464,12 @@ public:
         updateParameters ();
     }
 
+    void updateHistogram()
+    {
+      updateParameters();
+    }
+
+
     void defaultMonitorProfileChanged (const Glib::ustring &profile_name, bool auto_monitor_profile)
     {
         ConnectionBlocker profileBlocker (profileConn);
@@ -623,6 +629,16 @@ EditorPanel::EditorPanel (FilePanel* filePanel) :
     Gtk::VSeparator* vsep1 = Gtk::manage (new Gtk::VSeparator ());
     Gtk::VSeparator* vsep2 = Gtk::manage (new Gtk::VSeparator ());
 
+    // Histogram profile toggle controls
+    toggleHistogramProfile = Gtk::manage (new Gtk::ToggleButton ());
+    Gtk::Image* histProfImg = Gtk::manage (new RTImage ("gamut-hist.png"));
+    toggleHistogramProfile->add (*histProfImg);
+    toggleHistogramProfile->set_relief (Gtk::RELIEF_NONE);
+    toggleHistogramProfile->set_active (options.rtSettings.HistogramWorking);
+    toggleHistogramProfile->set_tooltip_markup ( (M ("PREFERENCES_HISTOGRAM_TOOLTIP")));
+
+    Gtk::VSeparator* vsep3 = Gtk::manage (new Gtk::VSeparator ());
+
     iareapanel = new ImageAreaPanel ();
     tpc->setEditProvider (iareapanel->imageArea);
     tpc->getToolBar()->setLockablePickerToolListener (iareapanel->imageArea);
@@ -647,6 +663,10 @@ EditorPanel::EditorPanel (FilePanel* filePanel) :
 
     toolBarPanel->pack_end   (*tpc->coarse, Gtk::PACK_SHRINK, 2);
     toolBarPanel->pack_end   (*vsepcl, Gtk::PACK_SHRINK, 2);
+    // Histogram profile toggle
+    toolBarPanel->pack_end (*toggleHistogramProfile, Gtk::PACK_SHRINK, 1);
+    toolBarPanel->pack_end (*vsep3, Gtk::PACK_SHRINK, 2);
+
     toolBarPanel->pack_end   (*iareapanel->imageArea->indClippedPanel, Gtk::PACK_SHRINK, 0);
     toolBarPanel->pack_end   (*vsepz, Gtk::PACK_SHRINK, 2);
     toolBarPanel->pack_end   (*iareapanel->imageArea->previewModePanel, Gtk::PACK_SHRINK, 0);
@@ -861,6 +881,7 @@ EditorPanel::EditorPanel (FilePanel* filePanel) :
     saveimgas->signal_pressed().connect ( sigc::mem_fun (*this, &EditorPanel::saveAsPressed) );
     queueimg->signal_pressed().connect ( sigc::mem_fun (*this, &EditorPanel::queueImgPressed) );
     sendtogimp->signal_pressed().connect ( sigc::mem_fun (*this, &EditorPanel::sendToGimpPressed) );
+    toggleHistogramProfile->signal_toggled().connect( sigc::mem_fun (*this, &EditorPanel::histogramProfile_toggled) );
 
     if (navPrev) {
         navPrev->signal_pressed().connect ( sigc::mem_fun (*this, &EditorPanel::openPreviousEditorImage) );
@@ -1829,7 +1850,7 @@ bool EditorPanel::idle_saveImage (ProgressConnector<rtengine::IImage16*> *pc, Gl
             ld->startFunc (sigc::bind (sigc::mem_fun (img, &rtengine::IImage16::saveAsTIFF), fname, sf.tiffBits, sf.tiffUncompressed),
                            sigc::bind (sigc::mem_fun (*this, &EditorPanel::idle_imageSaved), ld, img, fname, sf, pparams));
         else if (sf.format == "png")
-            ld->startFunc (sigc::bind (sigc::mem_fun (img, &rtengine::IImage16::saveAsPNG), fname, sf.pngCompression, sf.pngBits),
+            ld->startFunc (sigc::bind (sigc::mem_fun (img, &rtengine::IImage16::saveAsPNG), fname, sf.pngBits),
                            sigc::bind (sigc::mem_fun (*this, &EditorPanel::idle_imageSaved), ld, img, fname, sf, pparams));
         else if (sf.format == "jpg")
             ld->startFunc (sigc::bind (sigc::mem_fun (img, &rtengine::IImage16::saveAsJPEG), fname, sf.jpegQuality, sf.jpegSubSamp),
@@ -2071,7 +2092,7 @@ bool EditorPanel::saveImmediately (const Glib::ustring &filename, const SaveForm
     if (sf.format == "tif") {
         err = img->saveAsTIFF (filename, sf.tiffBits, sf.tiffUncompressed);
     } else if (sf.format == "png") {
-        err = img->saveAsPNG (filename, sf.pngCompression, sf.pngBits);
+        err = img->saveAsPNG (filename, sf.pngBits);
     } else if (sf.format == "jpg") {
         err = img->saveAsJPEG (filename, sf.jpegQuality, sf.jpegSubSamp);
     } else {
@@ -2102,6 +2123,12 @@ void EditorPanel::syncFileBrowser()   // synchronize filebrowser with image in E
     if (!simpleEditor && fPanel && !fname.empty()) {
         fPanel->fileCatalog->selectImage (fname, false);
     }
+}
+
+void EditorPanel::histogramProfile_toggled()
+{
+    options.rtSettings.HistogramWorking = toggleHistogramProfile->get_active();
+    colorMgmtToolBar->updateHistogram();
 }
 
 bool EditorPanel::idle_sendToGimp ( ProgressConnector<rtengine::IImage16*> *pc, Glib::ustring fname)
@@ -2271,6 +2298,11 @@ void EditorPanel::beforeAfterToggled ()
         beforeIpc = rtengine::StagedImageProcessor::create (beforeImg);
         beforeIpc->setPreviewScale (10);
         beforeIpc->setPreviewImageListener (beforePreviewHandler);
+        Glib::ustring monitorProfile;
+        rtengine::RenderingIntent intent;
+        ipc->getMonitorProfile(monitorProfile, intent);
+        beforeIpc->setMonitorProfile(monitorProfile, intent);
+        
         beforeIarea->imageArea->setPreviewHandler (beforePreviewHandler);
         beforeIarea->imageArea->setImProcCoordinator (beforeIpc);
 

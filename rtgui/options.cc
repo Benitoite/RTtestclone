@@ -310,7 +310,6 @@ void Options::setDefaults ()
     saveFormat.format = "jpg";
     saveFormat.jpegQuality = 92;
     saveFormat.jpegSubSamp = 2;
-    saveFormat.pngCompression = 6;
     saveFormat.pngBits = 8;
     saveFormat.tiffBits = 16;
     saveFormat.tiffUncompressed = true;
@@ -319,7 +318,6 @@ void Options::setDefaults ()
     saveFormatBatch.format = "jpg";
     saveFormatBatch.jpegQuality = 92;
     saveFormatBatch.jpegSubSamp = 2;
-    saveFormatBatch.pngCompression = 6;
     saveFormatBatch.pngBits = 8;
     saveFormatBatch.tiffBits = 16;
     saveFormatBatch.tiffUncompressed = true;
@@ -795,10 +793,6 @@ void Options::readFromFile (Glib::ustring fname)
                     saveFormat.jpegSubSamp = keyFile.get_integer ("Output", "JpegSubSamp");
                 }
 
-                if (keyFile.has_key ("Output", "PngCompression")) {
-                    saveFormat.pngCompression = keyFile.get_integer ("Output", "PngCompression");
-                }
-
                 if (keyFile.has_key ("Output", "PngBps")) {
                     saveFormat.pngBits = keyFile.get_integer ("Output", "PngBps");
                 }
@@ -826,10 +820,6 @@ void Options::readFromFile (Glib::ustring fname)
 
                 if (keyFile.has_key ("Output", "JpegSubSampBatch")) {
                     saveFormatBatch.jpegSubSamp = keyFile.get_integer ("Output", "JpegSubSampBatch");
-                }
-
-                if (keyFile.has_key ("Output", "PngCompressionBatch")) {
-                    saveFormatBatch.pngCompression = keyFile.get_integer ("Output", "PngCompressionBatch");
                 }
 
                 if (keyFile.has_key ("Output", "PngBpsBatch")) {
@@ -1934,7 +1924,6 @@ void Options::saveToFile (Glib::ustring fname)
         keyFile.set_string  ("Output", "Format", saveFormat.format);
         keyFile.set_integer ("Output", "JpegQuality", saveFormat.jpegQuality);
         keyFile.set_integer ("Output", "JpegSubSamp", saveFormat.jpegSubSamp);
-        keyFile.set_integer ("Output", "PngCompression", saveFormat.pngCompression);
         keyFile.set_integer ("Output", "PngBps", saveFormat.pngBits);
         keyFile.set_integer ("Output", "TiffBps", saveFormat.tiffBits);
         keyFile.set_boolean ("Output", "TiffUncompressed", saveFormat.tiffUncompressed);
@@ -1943,7 +1932,6 @@ void Options::saveToFile (Glib::ustring fname)
         keyFile.set_string  ("Output", "FormatBatch", saveFormatBatch.format);
         keyFile.set_integer ("Output", "JpegQualityBatch", saveFormatBatch.jpegQuality);
         keyFile.set_integer ("Output", "JpegSubSampBatch", saveFormatBatch.jpegSubSamp);
-        keyFile.set_integer ("Output", "PngCompressionBatch", saveFormatBatch.pngCompression);
         keyFile.set_integer ("Output", "PngBpsBatch", saveFormatBatch.pngBits);
         keyFile.set_integer ("Output", "TiffBpsBatch", saveFormatBatch.tiffBits);
         keyFile.set_boolean ("Output", "TiffUncompressedBatch", saveFormatBatch.tiffUncompressed);
