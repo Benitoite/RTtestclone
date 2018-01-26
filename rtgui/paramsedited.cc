@@ -282,6 +282,7 @@ void ParamsEdited::set(bool v)
     fattal.enabled   = v;
     fattal.threshold = v;
     fattal.amount    = v;
+    fattal.anchor    = v;
     sh.enabled       = v;
     sh.hq            = v;
     sh.highlights    = v;
@@ -876,6 +877,7 @@ void ParamsEdited::initFrom(const std::vector<rtengine::procparams::ProcParams>&
         fattal.enabled = fattal.enabled && p.fattal.enabled == other.fattal.enabled;
         fattal.threshold = fattal.threshold && p.fattal.threshold == other.fattal.threshold;
         fattal.amount = fattal.amount && p.fattal.amount == other.fattal.amount;
+        fattal.anchor = fattal.anchor && p.fattal.anchor == other.fattal.anchor;
 
         sh.enabled = sh.enabled && p.sh.enabled == other.sh.enabled;
         sh.hq = sh.hq && p.sh.hq == other.sh.hq;
@@ -2146,6 +2148,9 @@ void ParamsEdited::combine(rtengine::procparams::ProcParams& toEdit, const rteng
 
     if (fattal.amount) {
         toEdit.fattal.amount = mods.fattal.amount;
+    }    
+    if (fattal.anchor) {
+        toEdit.fattal.anchor = mods.fattal.anchor;
     }
 
     if (sh.enabled) {
