@@ -350,9 +350,9 @@ void ImProcFunctions::calcrgb_ref(LabImage * original, LabImage * transformed, i
 
 
 
-void ImProcFunctions::WB_Local(ImageSource* imgsrc, int call, int sp, int sx, int sy, int cx, int cy, int oW, int oH,  int fw, int fh, Imagefloat* improv, Imagefloat* imagetransformed, const ColorTemp &ctemploc, int tran, Imagefloat* imageoriginal, const PreviewProps &pp, const ToneCurveParams &hrp, const ColorManagementParams &cmp, const RAWParams &raw, const LocWBParams &wbl, const ColorAppearanceParams &cap, double &ptemp, double &pgreen)
+void ImProcFunctions::WB_Local(ImageSource* imgsrc, int call, int sp, int sx, int sy, int cx, int cy, int oW, int oH,  int fw, int fh, Imagefloat* improv, Imagefloat* imagetransformed, const ColorTemp &ctemploc, int tran, Imagefloat* imageoriginal, const PreviewProps &pp, const ProcParams &params,  double &ptemp, double &pgreen)
 {
-    if (params->localwb.enabled) {
+    if (params.localwb.enabled) {
         // BENCHFUN
 #ifdef _DEBUG
         MyTime t1e, t2e;
@@ -364,7 +364,7 @@ void ImProcFunctions::WB_Local(ImageSource* imgsrc, int call, int sp, int sx, in
 
 
         struct local_params lp;
-        calcLocalParams(oW, oH, params->localwb, lp);
+        calcLocalParams(oW, oH, params.localwb, lp);
 
 
         Imagefloat* bufimage = nullptr;
@@ -398,7 +398,7 @@ void ImProcFunctions::WB_Local(ImageSource* imgsrc, int call, int sp, int sx, in
 
             if (tjvr) {
 
-                imgsrc->getImage_local(begx, begy, yEn, xEn, cx, cy, ctemploc, tran, improv, bufimage, pp, hrp, cmp, raw, wbl, cap);
+                imgsrc->getImage_local(begx, begy, yEn, xEn, cx, cy, ctemploc, tran, improv, bufimage, pp, params);
 
                 Whitebalance_Local(call, sp, bufimage, lp, imageoriginal, imagetransformed, cx, cy);
 

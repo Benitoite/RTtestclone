@@ -953,10 +953,17 @@ static void ciecamcat02loc_float(LabImage* lab, LabImage* dest, int tempa, doubl
 #endif
 }
 
-void RawImageSource::getImage_local(int begx, int begy, int yEn, int xEn, int cx, int cy, const ColorTemp &ctemploc, int tran, Imagefloat* image, Imagefloat* bufimage,  const PreviewProps &pp, const ToneCurveParams &hrp, const ColorManagementParams &cmp, const RAWParams &raw, const LocWBParams &wbl, const ColorAppearanceParams &cap)
+//void RawImageSource::getImage_local(int begx, int begy, int yEn, int xEn, int cx, int cy, const ColorTemp &ctemploc, int tran, Imagefloat* image, Imagefloat* bufimage,  const PreviewProps &pp, const ToneCurveParams &hrp, const ColorManagementParams &cmp, const RAWParams &raw, const LocWBParams &wbl, const ColorAppearanceParams &cap)
+void RawImageSource::getImage_local(int begx, int begy, int yEn, int xEn, int cx, int cy, const ColorTemp &ctemploc, int tran, Imagefloat* image, Imagefloat* bufimage,  const PreviewProps &pp, const ProcParams &params)
 {
     MyMutex::MyLock lock(getImageMutex);
-
+    const ToneCurveParams &hrp = params.toneCurve;
+    const ColorManagementParams &cmp = params.icm;
+    const RAWParams &raw = params.raw;
+  //  const WBParams &wbp = params.wb;
+	const LocWBParams &wbl = params.localwb;
+	const ColorAppearanceParams &cap = params.colorappearance;
+	
     tran = defTransform(tran);
     // compute channel multipliers
     double r, g, b;

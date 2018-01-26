@@ -619,7 +619,7 @@ void ImProcCoordinator::updatePreviewImage(int todo, Crop* cropCall)
                     imagetransformed->b(ir, jr) = imageoriginal->b(ir, jr) = orig_prev->b(ir, jr);
                 }
 
-            ipf.WB_Local(imgsrc, 3, 1, 0, 0, 0, 0, pW, pH, fw, fh, improv, imagetransformed, currWBloc, tr, imageoriginal, pp, params.toneCurve, params.icm, params.raw, params.localwb, params.colorappearance, ptemp, pgreen);
+            ipf.WB_Local(imgsrc, 3, 1, 0, 0, 0, 0, pW, pH, fw, fh, improv, imagetransformed, currWBloc, tr, imageoriginal, pp, params, ptemp, pgreen);
 #ifdef _OPENMP
             #pragma omp parallel for
 #endif

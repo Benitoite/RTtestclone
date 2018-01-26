@@ -702,7 +702,7 @@ void Crop::update(int todo)
                 }
 
             PreviewProps pp(trafx, trafy, trafw * skip, trafh * skip, skip);
-            parent->ipf.WB_Local(parent->imgsrc, 1, 1, trafx / skip, trafy / skip, cropx / skip, cropy / skip, skips(parent->fw, skip), skips(parent->fh, skip), parent->fw, parent->fh, improv, imagetransformed, parent->currWBloc, tr, imageoriginal, pp, params.toneCurve, params.icm, params.raw, params.localwb, params.colorappearance, parent->ptemp, parent->pgreen);
+            parent->ipf.WB_Local(parent->imgsrc, 1, 1, trafx / skip, trafy / skip, cropx / skip, cropy / skip, skips(parent->fw, skip), skips(parent->fh, skip), parent->fw, parent->fh, improv, imagetransformed, parent->currWBloc, tr, imageoriginal, pp, params, parent->ptemp, parent->pgreen);
 #ifdef _OPENMP
             #pragma omp parallel for
 #endif
