@@ -1287,9 +1287,10 @@ void Localwb::wbshaMethodChanged()
 
 
 
-void Localwb::cat02amountChanged(int cat)
+void Localwb::cat02amountChanged(int amount, bool ciecamEnabled)
 {
-    nextCadap = cat;
+    nextCadap = amount;
+    nextciecam = ciecamEnabled;
 
     const auto func = [](gpointer data) -> gboolean {
         static_cast<Localwb*>(data)->cat02amountComputed_();

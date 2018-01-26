@@ -29,6 +29,7 @@
 #include "rawimagesource.h"
 #include "../rtgui/multilangmgr.h"
 #include "mytime.h"
+#include "cat02adaptation.h"
 #undef THREAD_PRIORITY_NORMAL
 
 namespace rtengine
@@ -735,9 +736,9 @@ private:
         Imagefloat *imagetransformed = nullptr;
         Imagefloat *improv = nullptr;
 
-        //  if (params.localwb.enabled && params.localwb.expwb) {
         if (params.localwb.enabled) {
             currWBloc = ColorTemp(params.localwb.temp, params.localwb.green, params.localwb.equal, "Custom");
+            cat02adaptationAutoComputeloc(imgsrc, params);
 
             imageoriginal = new Imagefloat(fw, fh);
             imagetransformed = new Imagefloat(fw, fh);
@@ -791,6 +792,7 @@ private:
             imgsrc->getAutoExpHistogram(aehist, aehistcompr);
             ipf.getAutoExp(aehist, aehistcompr, params.toneCurve.clip, expcomp, bright, contr, black, hlcompr, hlcomprthresh);
         }
+
         if (params.toneCurve.histmatching) {
             imgsrc->getAutoMatchedToneCurve(params.toneCurve.curve);
 
@@ -805,7 +807,7 @@ private:
             params.toneCurve.contrast = 0;
             params.toneCurve.black = 0;
 
-        }        
+        }
 
         // at this stage, we can flush the raw data to free up quite an important amount of memory
         // commented out because it makes the application crash when batch processing...

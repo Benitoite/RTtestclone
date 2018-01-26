@@ -26,9 +26,10 @@
 #include <iostream>
 #include <fstream>
 #include <string>
-//#include "../rtgui/md5helper.h"
 
 #include "iccstore.h"
+#include "cat02adaptation.h"
+
 #ifdef _OPENMP
 #include <omp.h>
 #endif
@@ -167,61 +168,6 @@ struct local_params {
 
 
 };
-/*
-static void calcLocalrgbParams(int oW, int oH, const LocrgbParams& localwb, struct local_params& lp)
-{
-    int w = oW;
-    int h = oH;
-    int circr = localwb.circrad;
-
-    float thre = localwb.thres / 100.f;
-    double local_x = localwb.locX / 2000.0;
-    double local_y = localwb.locY / 2000.0;
-    double local_xL = localwb.locXL / 2000.0;
-    double local_yT = localwb.locYT / 2000.0;
-    double local_center_x = localwb.centerX / 2000.0 + 0.5;
-    double local_center_y = localwb.centerY / 2000.0 + 0.5;
-    double local_dxx = localwb.proxi / 8000.0;//for proxi = 2==> # 1 pixel
-    double local_dyy = localwb.proxi / 8000.0;
-    float iterati = (float) localwb.proxi;
-
-    if (localwb.qualityMethod == "std") {
-        lp.qualmet = 0;
-    } else if (localwb.qualityMethod == "enh") {
-        lp.qualmet = 1;
-    } else if (localwb.qualityMethod == "enhden") {
-        lp.qualmet = 2;
-    }
-
-
-    int local_sensi = localwb.sensi;
-    int local_transit = localwb.transit;
-
-    lp.cir = circr;
-    //  lp.actsp = acti;
-    lp.xc = w * local_center_x;
-    lp.yc = h * local_center_y;
-    lp.lx = w * local_x;
-    lp.ly = h * local_y;
-    lp.lxL = w * local_xL;
-    lp.lyT = h * local_yT;
-    lp.sens = local_sensi;
-
-
-    lp.trans = local_transit;
-    lp.iterat = iterati;
-    lp.dxx = w * local_dxx;
-    lp.dyy = h * local_dyy;
-    lp.thr = thre;
-
-    lp.expwb = localwb.expwb;
-    lp.temp = localwb.temp;
-    lp.green = localwb.green;
-    lp.equal = localwb.equal;
-
-}
-
-*/
 
 // todo: bitmask containing desired actions, taken from changesSinceLast
 // cropCall: calling crop, used to prevent self-updates  ...doesn't seem to be used
@@ -326,38 +272,6 @@ void ImProcCoordinator::updatePreviewImage(int todo, Crop* cropCall)
 
 
         todo |= M_INIT;
-//    if (todo & (M_INIT | M_LINDENOISE)) {
-
-        //   if (params.wb.method == "Auto" || params.localwb.wbMethod == "aut" || params.localwb.wbMethod == "autosdw" || params.localwb.wbMethod == "autitc" || params.localwb.wbMethod == "autedgsdw" || params.localwb.wbMethod == "autedgrob" || params.localwb.wbMethod == "autedg" || params.localwb.wbMethod == "autorobust" ) {
-//       if (params.wb.method == "Auto" ) {
-        /*
-                    //calculate RGB demosaic and with or not gamma sRGB for local area
-                    //         printf ("Auto 1\n");
-                    struct local_params lpall;
-                    calcLocalrgbParams (fw, fh, params.localwb, lpall);
-                    int begy = lpall.yc - lpall.lyT;
-                    int begx = lpall.xc - lpall.lxL;
-                    int yEn = lpall.yc + lpall.ly;
-                    int xEn = lpall.xc + lpall.lx;
-                    int bf_h = lpall.ly + lpall.lyT;
-                    int bf_w = lpall.lx + lpall.lxL;
-
-                    int cx = 0;
-                    int cy = 0;
-                    bool gamma = false;
-                    bool cat02 = false;
-
-                    if (params.localwb.wbcamMethod == "gam"  || params.localwb.wbcamMethod == "gamcat") {
-                        gamma = true;
-                    }
-
-                    if (params.localwb.wbcamMethod == "cat" ||  params.localwb.wbcamMethod == "gamcat") {
-                        cat02 = true;
-                    }
-        */
-        //imgsrc->getrgbloc (gamma, cat02, begx, begy, yEn, xEn, cx, cy, bf_h, bf_w);
-        //   imgsrc->getrgbloc (gamma, cat02, 0, 0, fh, fw, cx, cy, fh, fw);
-        //      printf ("OK getrgb\n");
 
         bool autowb0 = false;
         autowb0 = (params.wb.method == "autold" || params.wb.method == "aut"  || params.wb.method == "autosdw" || params.wb.method == "autedgsdw" || params.wb.method == "autitc"  || params.wb.method == "autedgrob" || params.wb.method == "autedg" || params.wb.method == "autorobust");
@@ -423,18 +337,6 @@ void ImProcCoordinator::updatePreviewImage(int todo, Crop* cropCall)
             params.wb.enabled = true;
         }
 
-        const FramesMetaData* metaDatac = imgsrc->getMetaData();
-        int imgNumc = 0;
-
-        if (imgsrc->isRAW()) {
-            if (imgsrc->getSensorType() == ST_BAYER) {
-                imgNumc = rtengine::LIM<unsigned int>(params.raw.bayersensor.imageNum, 0, metaDatac->getFrameCount() - 1);
-            } else if (imgsrc->getSensorType() == ST_FUJI_XTRANS) {
-                //imgNum = rtengine::LIM<unsigned int>(params.raw.xtranssensor.imageNum, 0, metaData->getFrameCount() - 1);
-            }
-        }
-
-
 
 
         if (!params.wb.enabled) {
@@ -462,8 +364,6 @@ void ImProcCoordinator::updatePreviewImage(int todo, Crop* cropCall)
                     autoWB.useDefaults(params.wb.equal);
                 }
 
-                //double rr,gg,bb;
-                //autoWB.getMultipliers(rr,gg,bb);
             }
 
             currWB = autoWB;
@@ -481,8 +381,6 @@ void ImProcCoordinator::updatePreviewImage(int todo, Crop* cropCall)
         }
 
 
-        //params.cat02adap.cat02
-        //printf("par cat02=%i \n", params.cat02adap.cat02);
         int tr = getCoarseBitMask(params.coarse);
 
         imgsrc->getFullSize(fw, fh, tr);
@@ -522,88 +420,17 @@ void ImProcCoordinator::updatePreviewImage(int todo, Crop* cropCall)
             currWBloc = ColorTemp(params.localwb.temp, params.localwb.green, params.localwb.equal, "Custom");
             wbm = 0;
 
+            cat02adaptationAutoComputeloc(imgsrc, params);
 
-            float fnumc = metaDatac->getFNumber(imgNumc);          // F number
-            float fisoc = metaDatac->getISOSpeed(imgNumc) ;        // ISO
-            float fspeedc = metaDatac->getShutterSpeed(imgNumc) ;  // Speed
-            double fcompc = metaDatac->getExpComp(imgNumc);        // Compensation +/-
-            float ada = 1.f;
-
-            if (fnumc < 0.3f || fisoc < 5.f || fspeedc < 0.00001f) { //if no exif data or wrong
-                ada = 2000.;
-            } else {
-                double E_V = fcompc + log2(double ((fnumc * fnumc) / fspeedc / (fisoc / 100.f)));
-                E_V += params.toneCurve.expcomp;// exposure compensation in tonecurve ==> direct EV
-                E_V += log2(params.raw.expos);  // exposure raw white point ; log2 ==> linear to EV
-                ada = powf(2.f, E_V - 3.f);  // cd / m2
-                // end calculation adaptation scene luminosity
-            }
-
-
-            int catlo0 = 100;
-
-            if (params.localwb.temp < 4000  || params.localwb.temp > 20000) { //20000 arbitrary value - no test enough
-                if (ada < 5.f) {
-                    catlo0 = 1;
-                } else if (ada < 10.f) {
-                    catlo0 = 2;
-                } else if (ada < 15.f) {
-                    catlo0 = 3;
-                } else if (ada < 30.f) {
-                    catlo0 = 5;
-                } else if (ada < 100.f) {
-                    catlo0 = 50;
-                } else if (ada < 300.f) {
-                    catlo0 = 80;
-                } else if (ada < 500.f) {
-                    catlo0 = 90;
-                } else if (ada < 3000.f) {
-                    catlo0 = 95;
+            if (alorgbListener) {
+                if (params.localwb.autoamount) {
+                    alorgbListener->cat02amountChanged(params.localwb.amount, params.colorappearance.enabled);
                 }
-            } else {
-                if (ada < 5.f) {
-                    catlo0 = 30;
-                } else if (ada < 10.f) {
-                    catlo0 = 50;
-                } else if (ada < 30.f) {
-                    catlo0 = 60;
-                } else if (ada < 100.f) {
-                    catlo0 = 70;
-                } else if (ada < 300.f) {
-                    catlo0 = 80;
-                } else if (ada < 500.f) {
-                    catlo0 = 90;
-                } else if (ada < 1000.f) {
-                    catlo0 = 95;
+
+                if (params.localwb.autoluminanceScaling) {
+                    alorgbListener->cat02greenChanged(params.localwb.luminanceScaling);
                 }
             }
-
-            if (alorgbListener  && params.localwb.autoamount) {
-                alorgbListener->cat02amountChanged(catlo0);
-                params.localwb.amount = catlo0;
-            }
-
-
-            double greelo0 = 1.0;
-            float Treflo = (float) params.localwb.temp;
-
-            if (Treflo > 8000.f) {
-                Treflo = 8000.f;
-            }
-
-            if (Treflo < 4000.f) {
-                Treflo = 4000.f;
-            }
-
-            float dTlo = fabs((Treflo - 5000.) / 1000.f);
-            float dGlo = params.localwb.green - 1.;
-            greelo0 = 1.f - 0.00055f * dTlo * dGlo * params.localwb.amount;//empirical formula
-
-            if (alorgbListener  && params.localwb.autoluminanceScaling) {
-                alorgbListener->cat02greenChanged(greelo0);
-                params.localwb.luminanceScaling = greelo0;
-            }
-
 
             imageoriginal = new Imagefloat(pW, pH);
             imagetransformed = new Imagefloat(pW, pH);

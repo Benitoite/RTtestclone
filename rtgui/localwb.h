@@ -134,6 +134,7 @@ private:
     double next_equal;
     int nextCadap;
     double nextGree;
+	bool nextciecam;
 
     int next_wbauto;
     int nextmeth;
@@ -189,7 +190,7 @@ public:
     void WBEChanged(double equal);
     bool WBEComputed_();
 
-    void cat02amountChanged(int cat);
+    void cat02amountChanged(int amount, bool ciecamEnabled);
     bool cat02amountComputed_();
 
     void cat02greenChanged(double ytin);
