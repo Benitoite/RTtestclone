@@ -1491,7 +1491,8 @@ bool EPDParams::operator !=(const EPDParams& other) const
 FattalToneMappingParams::FattalToneMappingParams() :
     enabled(false),
     threshold(0),
-    amount(30)
+    amount(30),
+    anchor(50)
 {
 }
 
@@ -1500,7 +1501,8 @@ bool FattalToneMappingParams::operator ==(const FattalToneMappingParams& other) 
     return
         enabled == other.enabled
         && threshold == other.threshold
-        && amount == other.amount;
+        && amount == other.amount
+        && anchor == other.anchor;
 }
 
 bool FattalToneMappingParams::operator !=(const FattalToneMappingParams& other) const
@@ -3085,6 +3087,7 @@ int ProcParams::save(const Glib::ustring& fname, const Glib::ustring& fname2, bo
         saveToKeyfile(!pedited || pedited->fattal.enabled, "FattalToneMapping", "Enabled", fattal.enabled, keyFile);
         saveToKeyfile(!pedited || pedited->fattal.threshold, "FattalToneMapping", "Threshold", fattal.threshold, keyFile);
         saveToKeyfile(!pedited || pedited->fattal.amount, "FattalToneMapping", "Amount", fattal.amount, keyFile);
+        saveToKeyfile(!pedited || pedited->fattal.anchor, "FattalToneMapping", "Anchor", fattal.anchor, keyFile);
 
 // Shadows & highlights
         saveToKeyfile(!pedited || pedited->sh.enabled, "Shadows & Highlights", "Enabled", sh.enabled, keyFile);
@@ -3991,6 +3994,7 @@ int ProcParams::load(const Glib::ustring& fname, ParamsEdited* pedited)
             assignFromKeyfile(keyFile, "FattalToneMapping", "Enabled", pedited, fattal.enabled, pedited->fattal.enabled);
             assignFromKeyfile(keyFile, "FattalToneMapping", "Threshold", pedited, fattal.threshold, pedited->fattal.threshold);
             assignFromKeyfile(keyFile, "FattalToneMapping", "Amount", pedited, fattal.amount, pedited->fattal.amount);
+            assignFromKeyfile(keyFile, "FattalToneMapping", "Anchor", pedited, fattal.anchor, pedited->fattal.anchor);
         }
 
         if (keyFile.has_group ("Shadows & Highlights")) {
