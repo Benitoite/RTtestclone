@@ -189,7 +189,7 @@ int StdImageSource::load(const Glib::ustring &fname)
     return 0;
 }
 
-void StdImageSource::getImage_local(int begx, int begy, int yEn, int xEn, int cx, int cy, const ColorTemp &ctemp, int tran, Imagefloat* image, Imagefloat* bufimage, const PreviewProps &pp, const ToneCurveParams &hrp, const ColorManagementParams &cmp, const RAWParams &raw, const LocrgbParams &wbl, const ColorAppearanceParams &cap)
+void StdImageSource::getImage_local(int begx, int begy, int yEn, int xEn, int cx, int cy, const ColorTemp &ctemp, int tran, Imagefloat* image, Imagefloat* bufimage, const PreviewProps &pp, const ToneCurveParams &hrp, const ColorManagementParams &cmp, const RAWParams &raw, const LocWBParams &wbl, const ColorAppearanceParams &cap)
 {
     // the code will use OpenMP as of now.
     //TO DO change getStdImage to getStdImage_local
@@ -328,7 +328,7 @@ void StdImageSource::getAutoExpHistogram(LUTu & histogram, int& histcompr)
     }
 }
 
-void StdImageSource::WBauto(array2D<float> &redloc, array2D<float> &greenloc, array2D<float> &blueloc, int bfw, int bfh, double &avg_rm, double &avg_gm, double &avg_bm, const LocrgbParams &localr, const WBParams & wbpar, int begx, int begy, int yEn, int xEn, int cx, int cy, const ColorManagementParams &cmp)
+void StdImageSource::WBauto(array2D<float> &redloc, array2D<float> &greenloc, array2D<float> &blueloc, int bfw, int bfh, double &avg_rm, double &avg_gm, double &avg_bm, const LocWBParams &localr, const WBParams & wbpar, int begx, int begy, int yEn, int xEn, int cx, int cy, const ColorManagementParams &cmp)
 {
 
 }
@@ -336,7 +336,7 @@ void StdImageSource::WBauto(array2D<float> &redloc, array2D<float> &greenloc, ar
 void  StdImageSource::getrgbloc(bool local, bool gamma, bool cat02, int begx, int begy, int yEn, int xEn, int cx, int cy, int bf_h, int bf_w)
 {}
 
-void StdImageSource::getAutoWBMultipliersloc(int begx, int begy, int yEn, int xEn, int cx, int cy, int bf_h, int bf_w, double &rm, double &gm, double &bm, const LocrgbParams &localr, const WBParams & wbpar, const ColorManagementParams &cmp)
+void StdImageSource::getAutoWBMultipliersloc(int begx, int begy, int yEn, int xEn, int cx, int cy, int bf_h, int bf_w, double &rm, double &gm, double &bm, const LocWBParams &localr, const WBParams & wbpar, const ColorManagementParams &cmp)
 {
     if (redAWBMul != -1.) {
         rm = redAWBMul;

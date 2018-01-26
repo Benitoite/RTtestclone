@@ -578,9 +578,9 @@ void ImProcCoordinator::updatePreviewImage(int todo, Crop* cropCall)
                 }
             }
 
-            if (alorgbListener  && params.localwb.autocat02) {
-                alorgbListener->cat02catChanged(catlo0);
-                params.localwb.cat02 = catlo0;
+            if (alorgbListener  && params.localwb.autoamount) {
+                alorgbListener->cat02amountChanged(catlo0);
+                params.localwb.amount = catlo0;
             }
 
 
@@ -597,11 +597,11 @@ void ImProcCoordinator::updatePreviewImage(int todo, Crop* cropCall)
 
             float dTlo = fabs((Treflo - 5000.) / 1000.f);
             float dGlo = params.localwb.green - 1.;
-            greelo0 = 1.f - 0.00055f * dTlo * dGlo * params.localwb.cat02;//empirical formula
+            greelo0 = 1.f - 0.00055f * dTlo * dGlo * params.localwb.amount;//empirical formula
 
-            if (alorgbListener  && params.localwb.autoytint) {
-                alorgbListener->cat02greeChanged(greelo0);
-                params.localwb.ytint = greelo0;
+            if (alorgbListener  && params.localwb.autoluminanceScaling) {
+                alorgbListener->cat02greenChanged(greelo0);
+                params.localwb.luminanceScaling = greelo0;
             }
 
 

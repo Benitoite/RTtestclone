@@ -349,8 +349,8 @@ public :
     virtual void WBTChanged(double temp) {}
     virtual void WBGChanged(double green) {}
     virtual void WBEChanged(double equal) {}
-    virtual void cat02catChanged(int cat) {}
-    virtual void cat02greeChanged(double ytin) {}
+    virtual void cat02amountChanged(int cat) {}
+    virtual void cat02greenChanged(double ytin) {}
 
 
 };

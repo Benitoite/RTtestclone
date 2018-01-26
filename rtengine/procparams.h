@@ -890,7 +890,7 @@ struct GradientParams {
 /**
  * Parameters of the Local rgb
  */
-struct LocrgbParams {
+struct LocWBParams {
 
     bool    enabled;
     double  degree;
@@ -906,8 +906,8 @@ struct LocrgbParams {
     Glib::ustring Smethod;
 
     int     transit;
-    int cat02;
-    double ytint;
+    int amount;
+    double luminanceScaling;
     int sensi;
 //    double  hueref;
 //    double  chromaref;
@@ -919,13 +919,13 @@ struct LocrgbParams {
     bool          autotemp;
     bool          autogreen;
     bool          autoequal;
-    bool          autocat02;
-    bool          autoytint;
+    bool          autoamount;
+    bool          autoluminanceScaling;
 
 
-    LocrgbParams();
-    bool operator ==(const LocrgbParams& other) const;
-    bool operator !=(const LocrgbParams& other) const;
+    LocWBParams();
+    bool operator ==(const LocWBParams& other) const;
+    bool operator !=(const LocWBParams& other) const;
 
 
 };
@@ -1452,7 +1452,7 @@ public:
     LensProfParams          lensProf;        ///< Lens correction profile parameters
     PerspectiveParams       perspective;     ///< Perspective correction parameters
     GradientParams          gradient;        ///< Gradient filter parameters
-    LocrgbParams            localwb;        ///< Local rgb parameters
+    LocWBParams             localwb;        ///< Local rgb parameters
     PCVignetteParams        pcvignette;      ///< Post-crop vignette filter parameters
     CACorrParams            cacorrection;    ///< Lens c/a correction parameters
     VignettingParams        vignetting;      ///< Lens vignetting correction parameters

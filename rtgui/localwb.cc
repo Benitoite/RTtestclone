@@ -143,8 +143,8 @@ Localwb::Localwb() :
     proxi(Gtk::manage(new Adjuster(M("TP_LOCALLAB_PROXI"), 0, 60, 1, 20))),
     sensi(Gtk::manage(new Adjuster(M("TP_LOCALLAB_SENSI"), 0, 100, 1, 19))),
     transit(Gtk::manage(new Adjuster(M("TP_LOCALLAB_TRANSIT"), 5, 95, 1, 60))),
-    cat02(Gtk::manage(new Adjuster(M("TP_CAT02_SLI"), 0, 100, 1, 0))),
-    ytint(Gtk::manage(new Adjuster(M("TP_CAT02_GREE"), 0.9, 1.1, 0.001, 1))),
+    amount(Gtk::manage(new Adjuster(M("TP_CAT02_SLI"), 0, 100, 1, 0))),
+    luminanceScaling(Gtk::manage(new Adjuster(M("TP_CAT02_GREE"), 0.9, 1.1, 0.001, 1))),
     /*
         hueref(Gtk::manage(new Adjuster(M("TP_LOCALLAB_HUEREF"), -3.15, 3.15, 0.01, 0))),
         chromaref(Gtk::manage(new Adjuster(M("TP_LOCALLAB_CHROMAREF"), 0, 200, 0.01, 0))),
@@ -184,8 +184,8 @@ Localwb::Localwb() :
     EvlocalWBAutotemp = m->newEvent(DEMOSAIC, "HISTORY_MSG_LOCAUTOTEMP");
     EvlocalWBAutogreen = m->newEvent(DEMOSAIC, "HISTORY_MSG_LOCAUTOGREEN");
     EvlocalWBAutoequal = m->newEvent(DEMOSAIC, "HISTORY_MSG_LOCAUTOEQUAL");
-    EvlocalWBAutocat02 = m->newEvent(DEMOSAIC, "HISTORY_MSG_LOCAUTOCAT02");
-    EvlocalWBAutoytint = m->newEvent(DEMOSAIC, "HISTORY_MSG_LOCAUTOYTINT");
+    EvlocalWBAutoamount = m->newEvent(DEMOSAIC, "HISTORY_MSG_LOCAUTOAMOUNT");
+    EvlocalWBAutoluminanceScaling = m->newEvent(DEMOSAIC, "HISTORY_MSG_LOCAUTOluminanceScaling");
     EvlocalWBMethod = m->newEvent(DEMOSAIC, "HISTORY_MSG_LOCWBMETH");
     EvlocalWBSmet = m->newEvent(DEMOSAIC, "HISTORY_MSG_LOCWBSMETH");
     EvlocalWBDegree = m->newEvent(DEMOSAIC, "HISTORY_MSG_LOCWBDEG");
@@ -195,8 +195,8 @@ Localwb::Localwb() :
     EvlocalWBlocXL = m->newEvent(DEMOSAIC, "HISTORY_MSG_LOCWBLOCXL");
     EvlocalWBsensi = m->newEvent(DEMOSAIC, "HISTORY_MSG_LOCWBSENSI");
     EvlocalWBtransit = m->newEvent(DEMOSAIC, "HISTORY_MSG_LOCWBTRANSIT");
-    EvlocalWBcat02 = m->newEvent(DEMOSAIC, "HISTORY_MSG_LOCWBAMOUNT");
-    EvlocalWBytint = m->newEvent(DEMOSAIC, "HISTORY_MSG_LOCWBLUMY");
+    EvlocalWBamount = m->newEvent(DEMOSAIC, "HISTORY_MSG_LOCWBAMOUNT");
+    EvlocalWBluminanceScaling = m->newEvent(DEMOSAIC, "HISTORY_MSG_LOCWBLUMY");
     EvlocalWBtemp = m->newEvent(DEMOSAIC, "HISTORY_MSG_LOCWBTEMP");
     EvlocalWBgreen = m->newEvent(DEMOSAIC, "HISTORY_MSG_LOCWBTINT");
     EvlocalWBequal = m->newEvent(DEMOSAIC, "HISTORY_MSG_LOCWBEQUAL");
@@ -256,27 +256,27 @@ Localwb::Localwb() :
     transit->set_tooltip_text(M("TP_LOCALLAB_TRANSIT_TOOLTIP"));
     transit->setAdjusterListener(this);
 
-    if (cat02->delay < options.adjusterMaxDelay) {
-        cat02->delay = options.adjusterMaxDelay;
+    if (amount->delay < options.adjusterMaxDelay) {
+        amount->delay = options.adjusterMaxDelay;
     }
 
-    cat02->throwOnButtonRelease();
-    cat02->addAutoButton(M("TP_CAT02_DEGREE_AUTO_TOOLTIP"));
-    cat02->set_tooltip_markup(M("TP_CAT02_CAT_TOOLTIP"));
+    amount->throwOnButtonRelease();
+    amount->addAutoButton(M("TP_CAT02_DEGREE_AUTO_TOOLTIP"));
+    amount->set_tooltip_markup(M("TP_CAT02_CAT_TOOLTIP"));
 
-    cat02->set_tooltip_text(M("TP_LOCAL_CAT_TOOLTIP"));
-    cat02->setAdjusterListener(this);
+    amount->set_tooltip_text(M("TP_LOCAL_CAT_TOOLTIP"));
+    amount->setAdjusterListener(this);
 
-    if (ytint->delay < options.adjusterMaxDelay) {
-        ytint->delay = options.adjusterMaxDelay;
+    if (luminanceScaling->delay < options.adjusterMaxDelay) {
+        luminanceScaling->delay = options.adjusterMaxDelay;
     }
 
-    ytint->throwOnButtonRelease();
-    ytint->addAutoButton(M("TP_CAT02_DEGREE_AUTO_TOOLTIP"));
-    ytint->set_tooltip_markup(M("TP_CAT02_CAT_TOOLTIP"));
+    luminanceScaling->throwOnButtonRelease();
+    luminanceScaling->addAutoButton(M("TP_CAT02_DEGREE_AUTO_TOOLTIP"));
+    luminanceScaling->set_tooltip_markup(M("TP_CAT02_CAT_TOOLTIP"));
 
-    ytint->set_tooltip_text(M("TP_LOCAL_CATYTINT_TOOLTIP"));
-    ytint->setAdjusterListener(this);
+    luminanceScaling->set_tooltip_text(M("TP_LOCAL_CATluminanceScaling_TOOLTIP"));
+    luminanceScaling->setAdjusterListener(this);
 
 
     ctboxmet->pack_start(*labmeth, Gtk::PACK_SHRINK, 4);
@@ -313,8 +313,8 @@ Localwb::Localwb() :
 
     cat02Frame->set_label_align(0.025, 0.5);
     ToolParamBlock* const catBox = Gtk::manage(new ToolParamBlock());
-    catBox->pack_start(*cat02);
-    catBox->pack_start(*ytint);
+    catBox->pack_start(*amount);
+    catBox->pack_start(*luminanceScaling);
     cat02Frame->add(*catBox);
 //    shapeBox->pack_start(*cat02Frame);
 
@@ -930,10 +930,10 @@ void Localwb::read(const ProcParams* pp, const ParamsEdited* pedited)
 //        chromaref->setEditedState(pedited->localwb.chromaref ? Edited : UnEdited);
 //        lumaref->setEditedState(pedited->localwb.lumaref ? Edited : UnEdited);
         transit->setEditedState(pedited->localwb.transit ? Edited : UnEdited);
-        cat02->setEditedState(pedited->localwb.cat02 ? Edited : UnEdited);
-        cat02->setAutoInconsistent(multiImage && !pedited->localwb.autocat02);
-        ytint->setEditedState(pedited->localwb.ytint ? Edited : UnEdited);
-        ytint->setAutoInconsistent(multiImage && !pedited->localwb.autoytint);
+        amount->setEditedState(pedited->localwb.amount ? Edited : UnEdited);
+        amount->setAutoInconsistent(multiImage && !pedited->localwb.autoamount);
+        luminanceScaling->setEditedState(pedited->localwb.luminanceScaling ? Edited : UnEdited);
+        luminanceScaling->setAutoInconsistent(multiImage && !pedited->localwb.autoluminanceScaling);
 
         temp->setEditedState(pedited->localwb.temp ? Edited : UnEdited);
         temp->setAutoInconsistent(multiImage && !pedited->localwb.autotemp);
@@ -960,8 +960,8 @@ void Localwb::read(const ProcParams* pp, const ParamsEdited* pedited)
     lastAutotemp = pp->localwb.autotemp;
     lastAutogreen = pp->localwb.autogreen;
     lastAutoequal = pp->localwb.autoequal;
-    lastAutocat02 = pp->localwb.autocat02;
-    lastAutoytint = pp->localwb.autoytint;
+    lastAutoamount = pp->localwb.autoamount;
+    lastAutoluminanceScaling = pp->localwb.autoluminanceScaling;
 
 
     Smethodconn.block(true);
@@ -978,10 +978,10 @@ void Localwb::read(const ProcParams* pp, const ParamsEdited* pedited)
     thres->setValue(pp->localwb.thres);
     proxi->setValue(pp->localwb.proxi);
     transit->setValue(pp->localwb.transit);
-    cat02->setValue(pp->localwb.cat02);
-    cat02->setAutoValue(pp->localwb.autocat02);
-    ytint->setValue(pp->localwb.ytint);
-    ytint->setAutoValue(pp->localwb.autoytint);
+    amount->setValue(pp->localwb.amount);
+    amount->setAutoValue(pp->localwb.autoamount);
+    luminanceScaling->setValue(pp->localwb.luminanceScaling);
+    luminanceScaling->setAutoValue(pp->localwb.autoluminanceScaling);
 //   hueref->setValue(pp->localwb.hueref);
 //   chromaref->setValue(pp->localwb.chromaref);
 //   lumaref->setValue(pp->localwb.lumaref);
@@ -1072,10 +1072,10 @@ void Localwb::write(ProcParams* pp, ParamsEdited* pedited)
     pp->localwb.proxi = proxi->getIntValue();
     pp->localwb.thres = thres->getIntValue();
     pp->localwb.transit = transit->getIntValue();
-    pp->localwb.cat02 = cat02->getIntValue();
-    pp->localwb.autocat02  = cat02->getAutoValue();
-    pp->localwb.ytint = ytint->getValue();
-    pp->localwb.autoytint  = ytint->getAutoValue();
+    pp->localwb.amount = amount->getIntValue();
+    pp->localwb.autoamount  = amount->getAutoValue();
+    pp->localwb.luminanceScaling = luminanceScaling->getValue();
+    pp->localwb.autoluminanceScaling  = luminanceScaling->getAutoValue();
 //   pp->localwb.hueref = hueref->getValue();
 //   pp->localwb.chromaref = chromaref->getValue();
 //   pp->localwb.lumaref = lumaref->getValue();
@@ -1106,10 +1106,10 @@ void Localwb::write(ProcParams* pp, ParamsEdited* pedited)
         pedited->localwb.thres = thres->getEditedState();
         pedited->localwb.sensi = sensi->getEditedState();
         pedited->localwb.transit = transit->getEditedState();
-        pedited->localwb.cat02 = cat02->getEditedState();
-        pedited->localwb.autocat02  = !cat02->getAutoInconsistent();
-        pedited->localwb.ytint = ytint->getEditedState();
-        pedited->localwb.autoytint  = !ytint->getAutoInconsistent();
+        pedited->localwb.amount = amount->getEditedState();
+        pedited->localwb.autoamount  = !amount->getAutoInconsistent();
+        pedited->localwb.luminanceScaling = luminanceScaling->getEditedState();
+        pedited->localwb.autoluminanceScaling  = !luminanceScaling->getAutoInconsistent();
         //    pedited->localwb.hueref = hueref->getEditedState();
         //    pedited->localwb.chromaref = chromaref->getEditedState();
         //    pedited->localwb.lumaref = lumaref->getEditedState();
@@ -1196,23 +1196,23 @@ void Localwb::adjusterAutoToggled(Adjuster* a, bool newval)
 
         lastAutoequal = equal->getAutoValue();
 
-        if (cat02->getAutoInconsistent()) {
-            cat02->setAutoInconsistent(false);
-            cat02->setAutoValue(false);
-        } else if (lastAutocat02) {
-            cat02->setAutoInconsistent(true);
+        if (amount->getAutoInconsistent()) {
+            amount->setAutoInconsistent(false);
+            amount->setAutoValue(false);
+        } else if (lastAutoamount) {
+            amount->setAutoInconsistent(true);
         }
 
-        lastAutocat02 = cat02->getAutoValue();
+        lastAutoamount = amount->getAutoValue();
 
-        if (ytint->getAutoInconsistent()) {
-            ytint->setAutoInconsistent(false);
-            ytint->setAutoValue(false);
-        } else if (lastAutoytint) {
-            ytint->setAutoInconsistent(true);
+        if (luminanceScaling->getAutoInconsistent()) {
+            luminanceScaling->setAutoInconsistent(false);
+            luminanceScaling->setAutoValue(false);
+        } else if (lastAutoluminanceScaling) {
+            luminanceScaling->setAutoInconsistent(true);
         }
 
-        lastAutoytint = ytint->getAutoValue();
+        lastAutoluminanceScaling = luminanceScaling->getAutoValue();
 
     }
 
@@ -1248,23 +1248,23 @@ void Localwb::adjusterAutoToggled(Adjuster* a, bool newval)
             }
         }
 
-        if (a == cat02) {
-            if (cat02->getAutoInconsistent()) {
-                listener->panelChanged(EvlocalWBAutocat02, M("GENERAL_UNCHANGED"));
-            } else if (cat02->getAutoValue()) {
-                listener->panelChanged(EvlocalWBAutocat02, M("GENERAL_ENABLED"));
+        if (a == amount) {
+            if (amount->getAutoInconsistent()) {
+                listener->panelChanged(EvlocalWBAutoamount, M("GENERAL_UNCHANGED"));
+            } else if (amount->getAutoValue()) {
+                listener->panelChanged(EvlocalWBAutoamount, M("GENERAL_ENABLED"));
             } else {
-                listener->panelChanged(EvlocalWBAutocat02, M("GENERAL_DISABLED"));
+                listener->panelChanged(EvlocalWBAutoamount, M("GENERAL_DISABLED"));
             }
         }
 
-        if (a == ytint) {
-            if (ytint->getAutoInconsistent()) {
-                listener->panelChanged(EvlocalWBAutoytint, M("GENERAL_UNCHANGED"));
-            } else if (ytint->getAutoValue()) {
-                listener->panelChanged(EvlocalWBAutoytint, M("GENERAL_ENABLED"));
+        if (a == luminanceScaling) {
+            if (luminanceScaling->getAutoInconsistent()) {
+                listener->panelChanged(EvlocalWBAutoluminanceScaling, M("GENERAL_UNCHANGED"));
+            } else if (luminanceScaling->getAutoValue()) {
+                listener->panelChanged(EvlocalWBAutoluminanceScaling, M("GENERAL_ENABLED"));
             } else {
-                listener->panelChanged(EvlocalWBAutoytint, M("GENERAL_DISABLED"));
+                listener->panelChanged(EvlocalWBAutoluminanceScaling, M("GENERAL_DISABLED"));
             }
         }
 
@@ -1287,45 +1287,45 @@ void Localwb::wbshaMethodChanged()
 
 
 
-void Localwb::cat02catChanged(int cat)
+void Localwb::cat02amountChanged(int cat)
 {
     nextCadap = cat;
 
     const auto func = [](gpointer data) -> gboolean {
-        static_cast<Localwb*>(data)->cat02catComputed_();
+        static_cast<Localwb*>(data)->cat02amountComputed_();
         return FALSE;
     };
 
     idle_register.add(func, this);
 }
 
-bool Localwb::cat02catComputed_()
+bool Localwb::cat02amountComputed_()
 {
 
     disableListener();
-    cat02->setValue(nextCadap);
+    amount->setValue(nextCadap);
     enableListener();
 
     return false;
 }
 
-void Localwb::cat02greeChanged(double ytin)
+void Localwb::cat02greenChanged(double ytin)
 {
     nextGree = ytin;
 
     const auto func = [](gpointer data) -> gboolean {
-        static_cast<Localwb*>(data)->cat02greeComputed_();
+        static_cast<Localwb*>(data)->cat02greenComputed_();
         return FALSE;
     };
 
     idle_register.add(func, this);
 }
 
-bool Localwb::cat02greeComputed_()
+bool Localwb::cat02greenComputed_()
 {
 
     disableListener();
-    ytint->setValue(nextGree);
+    luminanceScaling->setValue(nextGree);
     enableListener();
 
     return false;
@@ -1478,8 +1478,8 @@ void Localwb::setDefaults(const ProcParams* defParams, const ParamsEdited* pedit
 
     sensi->setDefault(defParams->localwb.sensi);
     transit->setDefault(defParams->localwb.transit);
-    cat02->setDefault(defParams->localwb.cat02);
-    ytint->setDefault(defParams->localwb.ytint);
+    amount->setDefault(defParams->localwb.amount);
+    luminanceScaling->setDefault(defParams->localwb.luminanceScaling);
     //  hueref->setDefault(defParams->localwb.hueref);
     //  chromaref->setDefault(defParams->localwb.chromaref);
     //  lumaref->setDefault(defParams->localwb.lumaref);
@@ -1502,8 +1502,8 @@ void Localwb::setDefaults(const ProcParams* defParams, const ParamsEdited* pedit
         proxi->setDefaultEditedState(pedited->localwb.proxi ? Edited : UnEdited);
         sensi->setDefaultEditedState(pedited->localwb.sensi ? Edited : UnEdited);
         transit->setDefaultEditedState(pedited->localwb.transit ? Edited : UnEdited);
-        cat02->setDefaultEditedState(pedited->localwb.cat02 ? Edited : UnEdited);
-        ytint->setDefaultEditedState(pedited->localwb.ytint ? Edited : UnEdited);
+        amount->setDefaultEditedState(pedited->localwb.amount ? Edited : UnEdited);
+        luminanceScaling->setDefaultEditedState(pedited->localwb.luminanceScaling ? Edited : UnEdited);
         //      hueref->setDefaultEditedState(pedited->localwb.hueref ? Edited : UnEdited);
         //      chromaref->setDefaultEditedState(pedited->localwb.chromaref ? Edited : UnEdited);
         //      lumaref->setDefaultEditedState(pedited->localwb.lumaref ? Edited : UnEdited);
@@ -1525,8 +1525,8 @@ void Localwb::setDefaults(const ProcParams* defParams, const ParamsEdited* pedit
         proxi->setDefaultEditedState(Irrelevant);
         sensi->setDefaultEditedState(Irrelevant);
         transit->setDefaultEditedState(Irrelevant);
-        cat02->setDefaultEditedState(Irrelevant);
-        ytint->setDefaultEditedState(Irrelevant);
+        amount->setDefaultEditedState(Irrelevant);
+        luminanceScaling->setDefaultEditedState(Irrelevant);
         //      hueref->setDefaultEditedState(Irrelevant);
         //      chromaref->setDefaultEditedState(Irrelevant);
         //      lumaref->setDefaultEditedState(Irrelevant);
@@ -1581,10 +1581,10 @@ void Localwb::adjusterChanged(Adjuster* a, double newval)
             listener->panelChanged(EvlocalWBsensi, sensi->getTextValue());
         } else if (a == transit) {
             listener->panelChanged(EvlocalWBtransit, transit->getTextValue());
-        } else if (a == cat02) {
-            listener->panelChanged(EvlocalWBcat02, cat02->getTextValue());
-        } else if (a == ytint) {
-            listener->panelChanged(EvlocalWBytint, ytint->getTextValue());
+        } else if (a == amount) {
+            listener->panelChanged(EvlocalWBamount, amount->getTextValue());
+        } else if (a == luminanceScaling) {
+            listener->panelChanged(EvlocalWBluminanceScaling, luminanceScaling->getTextValue());
 //        } else if (a == hueref) {
 //            listener->panelChanged(Evlocalwbhueref, "");
 //        } else if (a == chromaref) {
@@ -2397,8 +2397,8 @@ void Localwb::setBatchMode(bool batchMode)
 
     sensi->showEditedCB();
     transit->showEditedCB();
-    cat02->showEditedCB();
-    ytint->showEditedCB();
+    amount->showEditedCB();
+    luminanceScaling->showEditedCB();
     Smethod->append(M("GENERAL_UNCHANGED"));
 //   hueref->showEditedCB();
 //   chromaref->showEditedCB();
@@ -2422,8 +2422,8 @@ void Localwb::trimValues(rtengine::procparams::ProcParams* pp)
     proxi->trimValue(pp->localwb.proxi);
     sensi->trimValue(pp->localwb.sensi);
     transit->trimValue(pp->localwb.transit);
-    cat02->trimValue(pp->localwb.cat02);
-    ytint->trimValue(pp->localwb.ytint);
+    amount->trimValue(pp->localwb.amount);
+    luminanceScaling->trimValue(pp->localwb.luminanceScaling);
 //    hueref->trimValue(pp->localwb.hueref);
 //    chromaref->trimValue(pp->localwb.chromaref);
 //   lumaref->trimValue(pp->localwb.lumaref);

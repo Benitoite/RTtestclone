@@ -453,7 +453,7 @@ public:
     bool amount;
 };
 
-class LocrgbParamsEdited
+class LocWBParamsEdited
 {
 public:
     bool enabled;
@@ -469,8 +469,8 @@ public:
     bool proxi;
     bool Smethod;
     bool transit;
-    bool cat02;
-    bool ytint;
+    bool amount;
+    bool luminanceScaling;
 //    bool hueref;
 //    bool chromaref;
 //   bool lumaref;
@@ -482,8 +482,8 @@ public:
     bool autotemp;
     bool autogreen;
     bool autoequal;
-    bool autocat02;
-    bool autoytint;
+    bool autoamount;
+    bool autoluminanceScaling;
 
 };
 
@@ -886,7 +886,7 @@ public:
     LensProfParamsEdited          lensProf;
     PerspectiveParamsEdited       perspective;
     GradientParamsEdited          gradient;
-    LocrgbParamsEdited            localwb;
+    LocWBParamsEdited            localwb;
     PCVignetteParamsEdited        pcvignette;
     CACorrParamsEdited            cacorrection;
     VignettingParamsEdited        vignetting;

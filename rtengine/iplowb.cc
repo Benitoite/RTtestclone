@@ -152,7 +152,7 @@ void fillCurveArrayVibloc(DiagonalCurve* diagCurve, LUTf &outCurve)
 
 
 
-static void calcLocalParams(int oW, int oH, const LocrgbParams& localwb, struct local_params& lp)
+static void calcLocalParams(int oW, int oH, const LocWBParams& localwb, struct local_params& lp)
 {
     int w = oW;
     int h = oH;
@@ -350,7 +350,7 @@ void ImProcFunctions::calcrgb_ref(LabImage * original, LabImage * transformed, i
 
 
 
-void ImProcFunctions::WB_Local(ImageSource* imgsrc, int call, int sp, int sx, int sy, int cx, int cy, int oW, int oH,  int fw, int fh, Imagefloat* improv, Imagefloat* imagetransformed, const ColorTemp &ctemploc, int tran, Imagefloat* imageoriginal, const PreviewProps &pp, const ToneCurveParams &hrp, const ColorManagementParams &cmp, const RAWParams &raw, const LocrgbParams &wbl, const ColorAppearanceParams &cap, double &ptemp, double &pgreen)
+void ImProcFunctions::WB_Local(ImageSource* imgsrc, int call, int sp, int sx, int sy, int cx, int cy, int oW, int oH,  int fw, int fh, Imagefloat* improv, Imagefloat* imagetransformed, const ColorTemp &ctemploc, int tran, Imagefloat* imageoriginal, const PreviewProps &pp, const ToneCurveParams &hrp, const ColorManagementParams &cmp, const RAWParams &raw, const LocWBParams &wbl, const ColorAppearanceParams &cap, double &ptemp, double &pgreen)
 {
     if (params->localwb.enabled) {
         // BENCHFUN

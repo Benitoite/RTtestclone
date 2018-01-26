@@ -334,8 +334,8 @@ void ParamsEdited::set(bool v)
     localwb.circrad = v;
     localwb.thres = v;
     localwb.transit = v;
-    localwb.cat02 = v;
-    localwb.ytint = v;
+    localwb.amount = v;
+    localwb.luminanceScaling = v;
     localwb.proxi = v;
 //    localwb.hueref = v;
 //    localwb.chromaref = v;
@@ -349,8 +349,8 @@ void ParamsEdited::set(bool v)
     localwb.autotemp      = v;
     localwb.autogreen      = v;
     localwb.autoequal      = v;
-    localwb.autocat02      = v;
-    localwb.autoytint      = v;
+    localwb.autoamount      = v;
+    localwb.autoluminanceScaling      = v;
 
     pcvignette.enabled = v;
     pcvignette.strength = v;
@@ -932,8 +932,8 @@ void ParamsEdited::initFrom(const std::vector<rtengine::procparams::ProcParams>&
         localwb.proxi = localwb.proxi && p.localwb.proxi == other.localwb.proxi;
         localwb.sensi = localwb.sensi && p.localwb.sensi == other.localwb.sensi;
         localwb.transit = localwb.transit && p.localwb.transit == other.localwb.transit;
-        localwb.cat02 = localwb.cat02 && p.localwb.cat02 == other.localwb.cat02;
-        localwb.ytint = localwb.ytint && p.localwb.ytint == other.localwb.ytint;
+        localwb.amount = localwb.amount && p.localwb.amount == other.localwb.amount;
+        localwb.luminanceScaling = localwb.luminanceScaling && p.localwb.luminanceScaling == other.localwb.luminanceScaling;
 //       localwb.hueref = localwb.hueref && p.localwb.hueref == other.localwb.hueref;
 //       localwb.chromaref = localwb.chromaref && p.localwb.chromaref == other.localwb.chromaref;
 //       localwb.lumaref = localwb.lumaref && p.localwb.lumaref == other.localwb.lumaref;
@@ -943,8 +943,8 @@ void ParamsEdited::initFrom(const std::vector<rtengine::procparams::ProcParams>&
         localwb.autotemp = localwb.autotemp && p.localwb.autotemp == other.localwb.autotemp;
         localwb.autogreen = localwb.autogreen && p.localwb.autogreen == other.localwb.autogreen;
         localwb.autoequal = localwb.autoequal && p.localwb.autoequal == other.localwb.autoequal;
-        localwb.autocat02 = localwb.autocat02 && p.localwb.autocat02 == other.localwb.autocat02;
-        localwb.autoytint = localwb.autoytint && p.localwb.autoytint == other.localwb.autoytint;
+        localwb.autoamount = localwb.autoamount && p.localwb.autoamount == other.localwb.autoamount;
+        localwb.autoluminanceScaling = localwb.autoluminanceScaling && p.localwb.autoluminanceScaling == other.localwb.autoluminanceScaling;
 
         pcvignette.enabled = pcvignette.enabled && p.pcvignette.enabled == other.pcvignette.enabled;
         pcvignette.strength = pcvignette.strength && p.pcvignette.strength == other.pcvignette.strength;
@@ -2354,12 +2354,12 @@ void ParamsEdited::combine(rtengine::procparams::ProcParams& toEdit, const rteng
         toEdit.localwb.transit     = mods.localwb.transit;
     }
 
-    if (localwb.cat02) {
-        toEdit.localwb.cat02     = mods.localwb.cat02;
+    if (localwb.amount) {
+        toEdit.localwb.amount     = mods.localwb.amount;
     }
 
-    if (localwb.ytint) {
-        toEdit.localwb.ytint     = mods.localwb.ytint;
+    if (localwb.luminanceScaling) {
+        toEdit.localwb.luminanceScaling     = mods.localwb.luminanceScaling;
     }
 
     /*
@@ -2399,12 +2399,12 @@ void ParamsEdited::combine(rtengine::procparams::ProcParams& toEdit, const rteng
         toEdit.localwb.autoequal   = mods.localwb.autoequal;
     }
 
-    if (localwb.autoytint) {
-        toEdit.localwb.autoytint   = mods.localwb.autoytint;
+    if (localwb.autoluminanceScaling) {
+        toEdit.localwb.autoluminanceScaling   = mods.localwb.autoluminanceScaling;
     }
 
-    if (localwb.autocat02) {
-        toEdit.localwb.autocat02   = mods.localwb.autocat02;
+    if (localwb.autoamount) {
+        toEdit.localwb.autoamount   = mods.localwb.autoamount;
     }
 
     if (localwb.green) {

@@ -41,8 +41,8 @@ private:
     rtengine::ProcEvent EvlocalWBAutotemp;
     rtengine::ProcEvent EvlocalWBAutogreen;
     rtengine::ProcEvent EvlocalWBAutoequal;
-    rtengine::ProcEvent EvlocalWBAutocat02;
-    rtengine::ProcEvent EvlocalWBAutoytint;
+    rtengine::ProcEvent EvlocalWBAutoamount;
+    rtengine::ProcEvent EvlocalWBAutoluminanceScaling;
     rtengine::ProcEvent EvlocalWBMethod;
     rtengine::ProcEvent EvlocalWBSmet;
     rtengine::ProcEvent EvlocalWBDegree;
@@ -52,8 +52,8 @@ private:
     rtengine::ProcEvent EvlocalWBlocXL;
     rtengine::ProcEvent EvlocalWBsensi;
     rtengine::ProcEvent EvlocalWBtransit;
-    rtengine::ProcEvent EvlocalWBcat02;
-    rtengine::ProcEvent EvlocalWBytint;
+    rtengine::ProcEvent EvlocalWBamount;
+    rtengine::ProcEvent EvlocalWBluminanceScaling;
     rtengine::ProcEvent EvlocalWBtemp;
     rtengine::ProcEvent EvlocalWBgreen;
     rtengine::ProcEvent EvlocalWBequal;
@@ -83,8 +83,8 @@ private:
     Adjuster* const proxi;
     Adjuster* const sensi;
     Adjuster* const transit;
-    Adjuster* const cat02;
-    Adjuster* const ytint;
+    Adjuster* const amount;
+    Adjuster* const luminanceScaling;
     /*
     Adjuster* const hueref;
     Adjuster* const chromaref;
@@ -151,8 +151,8 @@ private:
     bool lastAutotemp;
     bool lastAutogreen;
     bool lastAutoequal;
-    bool lastAutocat02;
-    bool lastAutoytint;
+    bool lastAutoamount;
+    bool lastAutoluminanceScaling;
 
 
 public:
@@ -189,11 +189,11 @@ public:
     void WBEChanged(double equal);
     bool WBEComputed_();
 
-    void cat02catChanged(int cat);
-    bool cat02catComputed_();
+    void cat02amountChanged(int cat);
+    bool cat02amountComputed_();
 
-    void cat02greeChanged(double ytin);
-    bool cat02greeComputed_();
+    void cat02greenChanged(double ytin);
+    bool cat02greenComputed_();
 
     CursorShape getCursor(int objectID);
     bool mouseOver(int modifierKey);

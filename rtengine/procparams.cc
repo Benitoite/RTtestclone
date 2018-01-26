@@ -2268,7 +2268,7 @@ void WaveletParams::getCurves(
 
 }
 
-LocrgbParams::LocrgbParams():
+LocWBParams::LocWBParams():
     enabled(false),
     degree(0),
     locY(250),
@@ -2282,8 +2282,8 @@ LocrgbParams::LocrgbParams():
     proxi(20),
     Smethod("IND"),
     transit(60),
-    cat02(0),
-    ytint(1.0),
+    amount(0),
+    luminanceScaling(1.0),
     sensi(19),
 //   hueref(1.),
 //   chromaref(50.),
@@ -2295,13 +2295,13 @@ LocrgbParams::LocrgbParams():
     autotemp(true),
     autogreen(true),
     autoequal(true),
-    autocat02(true),
-    autoytint(true)
+    autoamount(true),
+    autoluminanceScaling(true)
 
 {
 }
 
-bool LocrgbParams::operator ==(const LocrgbParams& other) const
+bool LocWBParams::operator ==(const LocWBParams& other) const
 {
     return
         enabled == other.enabled
@@ -2322,17 +2322,17 @@ bool LocrgbParams::operator ==(const LocrgbParams& other) const
         && autotemp == other.autotemp
         && autogreen == other.autogreen
         && autoequal == other.autoequal
-        && autocat02 == other.autocat02
-        && autoytint == other.autoytint
+        && autoamount == other.autoamount
+        && autoluminanceScaling == other.autoluminanceScaling
         && green == other.green
         && equal == other.equal
         && transit == other.transit
-        && cat02 == other.cat02
-        && ytint == other.ytint;
+        && amount == other.amount
+        && luminanceScaling == other.luminanceScaling;
 
 }
 
-bool LocrgbParams::operator !=(const LocrgbParams& other) const
+bool LocWBParams::operator !=(const LocWBParams& other) const
 {
     return !(*this == other);
 }
@@ -2774,7 +2774,7 @@ void ProcParams::setDefaults()
 
     gradient = GradientParams();
 
-    localwb = LocrgbParams();
+    localwb = LocWBParams();
 
     pcvignette = PCVignetteParams();
 
@@ -3108,8 +3108,8 @@ int ProcParams::save(const Glib::ustring& fname, const Glib::ustring& fname2, bo
         //     saveToKeyfile(!pedited || pedited->localwb.chromaref, "Locrgb", "Chromaref", localwb.chromaref, keyFile);
         //     saveToKeyfile(!pedited || pedited->localwb.lumaref, "Locrgb", "Lumaref", localwb.lumaref, keyFile);
         saveToKeyfile(!pedited || pedited->localwb.transit, "Locrgb", "Transit", localwb.transit, keyFile);
-        saveToKeyfile(!pedited || pedited->localwb.cat02, "Locrgb", "Cat02", localwb.cat02, keyFile);
-        saveToKeyfile(!pedited || pedited->localwb.ytint, "Locrgb", "Ytint", localwb.ytint, keyFile);
+        saveToKeyfile(!pedited || pedited->localwb.amount, "Locrgb", "Amount", localwb.amount, keyFile);
+        saveToKeyfile(!pedited || pedited->localwb.luminanceScaling, "Locrgb", "LuminanceScaling", localwb.luminanceScaling, keyFile);
         saveToKeyfile(!pedited || pedited->localwb.sensi, "Locrgb", "Sensi", localwb.sensi, keyFile);
         saveToKeyfile(!pedited || pedited->localwb.wbshaMethod, "Locrgb", "WbshaMethod", localwb.wbshaMethod, keyFile);
         saveToKeyfile(!pedited || pedited->localwb.temp, "Locrgb", "Temp", localwb.temp, keyFile);
@@ -3118,8 +3118,8 @@ int ProcParams::save(const Glib::ustring& fname, const Glib::ustring& fname2, bo
         saveToKeyfile(!pedited || pedited->localwb.autotemp, "Locrgb", "Autotemp", localwb.autotemp, keyFile);
         saveToKeyfile(!pedited || pedited->localwb.autogreen, "Locrgb", "Autogreen", localwb.autogreen, keyFile);
         saveToKeyfile(!pedited || pedited->localwb.autoequal, "Locrgb", "Autoequal", localwb.autoequal, keyFile);
-        saveToKeyfile(!pedited || pedited->localwb.autocat02, "Locrgb", "Autocat02", localwb.autocat02, keyFile);
-        saveToKeyfile(!pedited || pedited->localwb.autoytint, "Locrgb", "Autoytint", localwb.autoytint, keyFile);
+        saveToKeyfile(!pedited || pedited->localwb.autoamount, "Locrgb", "Autoamount", localwb.autoamount, keyFile);
+        saveToKeyfile(!pedited || pedited->localwb.autoluminanceScaling, "Locrgb", "AutoluminanceScaling", localwb.autoluminanceScaling, keyFile);
 
 
 // Impulse denoise
@@ -4041,8 +4041,8 @@ int ProcParams::load(const Glib::ustring& fname, ParamsEdited* pedited)
             //      assignFromKeyfile(keyFile, "Locrgb", "Chromaref", pedited, localwb.chromaref, pedited->localwb.chromaref);
             //      assignFromKeyfile(keyFile, "Locrgb", "Lumaref", pedited, localwb.lumaref, pedited->localwb.lumaref);
             assignFromKeyfile(keyFile, "Locrgb", "Transit", pedited, localwb.transit, pedited->localwb.transit);
-            assignFromKeyfile(keyFile, "Locrgb", "Cat02", pedited, localwb.cat02, pedited->localwb.cat02);
-            assignFromKeyfile(keyFile, "Locrgb", "Ytint", pedited, localwb.ytint, pedited->localwb.ytint);
+            assignFromKeyfile(keyFile, "Locrgb", "Amount", pedited, localwb.amount, pedited->localwb.amount);
+            assignFromKeyfile(keyFile, "Locrgb", "LuminanceScaling", pedited, localwb.luminanceScaling, pedited->localwb.luminanceScaling);
             assignFromKeyfile(keyFile, "Locrgb", "WbshaMethod", pedited, localwb.wbshaMethod, pedited->localwb.wbshaMethod);
             assignFromKeyfile(keyFile, "Locrgb", "Temp", pedited, localwb.temp, pedited->localwb.temp);
             assignFromKeyfile(keyFile, "Locrgb", "Green", pedited, localwb.green, pedited->localwb.green);
@@ -4050,8 +4050,8 @@ int ProcParams::load(const Glib::ustring& fname, ParamsEdited* pedited)
             assignFromKeyfile(keyFile, "Locrgb", "Autotemp", pedited, localwb.autotemp, pedited->localwb.autotemp);
             assignFromKeyfile(keyFile, "Locrgb", "Autogreen", pedited, localwb.autogreen, pedited->localwb.autogreen);
             assignFromKeyfile(keyFile, "Locrgb", "Autoequal", pedited, localwb.autoequal, pedited->localwb.autoequal);
-            assignFromKeyfile(keyFile, "Locrgb", "Autocat02", pedited, localwb.autocat02, pedited->localwb.autocat02);
-            assignFromKeyfile(keyFile, "Locrgb", "Autoytint", pedited, localwb.autoytint, pedited->localwb.autoytint);
+            assignFromKeyfile(keyFile, "Locrgb", "Autoamount", pedited, localwb.autoamount, pedited->localwb.autoamount);
+            assignFromKeyfile(keyFile, "Locrgb", "AutoluminanceScaling", pedited, localwb.autoluminanceScaling, pedited->localwb.autoluminanceScaling);
 
         }
 

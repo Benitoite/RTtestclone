@@ -953,7 +953,7 @@ static void ciecamcat02loc_float(LabImage* lab, LabImage* dest, int tempa, doubl
 #endif
 }
 
-void RawImageSource::getImage_local(int begx, int begy, int yEn, int xEn, int cx, int cy, const ColorTemp &ctemploc, int tran, Imagefloat* image, Imagefloat* bufimage,  const PreviewProps &pp, const ToneCurveParams &hrp, const ColorManagementParams &cmp, const RAWParams &raw, const LocrgbParams &wbl, const ColorAppearanceParams &cap)
+void RawImageSource::getImage_local(int begx, int begy, int yEn, int xEn, int cx, int cy, const ColorTemp &ctemploc, int tran, Imagefloat* image, Imagefloat* bufimage,  const PreviewProps &pp, const ToneCurveParams &hrp, const ColorManagementParams &cmp, const RAWParams &raw, const LocWBParams &wbl, const ColorAppearanceParams &cap)
 {
     MyMutex::MyLock lock(getImageMutex);
 
@@ -1232,7 +1232,7 @@ void RawImageSource::getImage_local(int begx, int begy, int yEn, int xEn, int cx
 
     }
 
-    if (wbl.cat02 > 1  && !cap.enabled) { // different place from getimage to see if there is differences
+    if (wbl.amount > 1  && !cap.enabled) { // different place from getimage to see if there is differences
 //  printf("catLocal tint=%f \n", wbl.ytint);
         LabImage *bufcat02 = nullptr;
         bufcat02 = new LabImage(image->getWidth(), image->getHeight());
@@ -1284,7 +1284,7 @@ void RawImageSource::getImage_local(int begx, int begy, int yEn, int xEn, int cx
                 bufcat02->b[y][x] = bR;
             }
 
-        ciecamcat02loc_float(bufcat02, bufcat02fin, wbl.temp, wbl.ytint, wbl.cat02, cmp, cap);
+        ciecamcat02loc_float(bufcat02, bufcat02fin, wbl.temp, wbl.luminanceScaling, wbl.amount, cmp, cap);
 #ifdef _OPENMP
         #pragma omp parallel for schedule(dynamic,16)
 #endif
@@ -8782,7 +8782,7 @@ void cat02_to_xyzfloatraw ( float & x, float & y, float & z, float r, float g, f
 */
 
 
-void RawImageSource::WBauto(array2D<float> &redloc, array2D<float> &greenloc, array2D<float> &blueloc, int bfw, int bfh, double & avg_rm, double & avg_gm, double & avg_bm, const LocrgbParams & localr, const WBParams & wbpar, int begx, int begy, int yEn, int xEn, int cx, int cy, const ColorManagementParams &cmp)
+void RawImageSource::WBauto(array2D<float> &redloc, array2D<float> &greenloc, array2D<float> &blueloc, int bfw, int bfh, double & avg_rm, double & avg_gm, double & avg_bm, const LocWBParams & localr, const WBParams & wbpar, int begx, int begy, int yEn, int xEn, int cx, int cy, const ColorManagementParams &cmp)
 {
     BENCHFUN
     //auto white balance
@@ -9087,7 +9087,7 @@ void  RawImageSource::getrgbloc(bool local, bool gamma, bool cat02, int begx, in
 
 }
 
-void RawImageSource::getAutoWBMultipliersloc(int begx, int begy, int yEn, int xEn, int cx, int cy, int bf_h, int bf_w, double & rm, double & gm, double & bm, const LocrgbParams & localr, const WBParams & wbpar, const ColorManagementParams &cmp)
+void RawImageSource::getAutoWBMultipliersloc(int begx, int begy, int yEn, int xEn, int cx, int cy, int bf_h, int bf_w, double & rm, double & gm, double & bm, const LocWBParams & localr, const WBParams & wbpar, const ColorManagementParams &cmp)
 {
     //    BENCHFUN
     constexpr double clipHigh = 64000.0;
