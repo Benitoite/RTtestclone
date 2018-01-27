@@ -723,30 +723,25 @@ HISTORY_MSG_490;HDR TM - Amount
 HISTORY_MSG_491;White Balance
 HISTORY_MSG_492;RGB Curves
 HISTORY_MSG_493;L*a*b* Adjustments
-HISTORY_MSG_495;WB local - top
-HISTORY_MSG_496;WB local - left
-HISTORY_MSG_497;WB local - Shape method
-HISTORY_MSG_510;WB local - temp
-HISTORY_MSG_511;WB local - tint
-HISTORY_MSG_512;WB local - equalizer
-HISTORY_MSG_513;WB local - RT-spot area
-HISTORY_MSG_516;White Balance - Auto - gamma
-HISTORY_MSG_517;White Balance - cat02 adaptation
-HISTORY_MSG_519;WB local - enabled
-HISTORY_MSG_520;WB local - bottom
-HISTORY_MSG_521;WB local - right
-HISTORY_MSG_522;WB local - center
-HISTORY_MSG_524;WB local - transition
-HISTORY_MSG_525;WB local - cat02 level
-HISTORY_MSG_526;WB local - cat02 Y tint
-HISTORY_MSG_527;WB local - auto temp
-HISTORY_MSG_528;WB local - auto tint
-HISTORY_MSG_529;WB local - auto equal
-HISTORY_MSG_530;WB local - auto cat02
-HISTORY_MSG_531;WB local - auto Ytint
-HISTORY_MSG_LOCAUTOTEMP;coucou
-HISTORY_MSG_LOCAUTOGREEN;ttat
-HISTORY_MSG_LOCAUTOEQUAL;eq
+HISTORY_MSG_LOCAUTOTEMP;WB local - auto temp
+HISTORY_MSG_LOCAUTOGREEN;WB local - auto tint
+HISTORY_MSG_LOCAUTOEQUAL;WB local - auto equal
+HISTORY_MSG_LOCAUTOAMOUNT;WB local - cat02 auto amount
+HISTORY_MSG_LOCAUTOluminanceScaling;WB local - cat02 auto luminancescalling
+HISTORY_MSG_LOCWBMETH;WB local - RT-spot area
+HISTORY_MSG_LOCWBSMETH;WB local - Shape method
+HISTORY_MSG_LOCWBLOCY;WB local - bottom
+HISTORY_MSG_LOCWBLOCX;WB local - right
+HISTORY_MSG_LOCWBYT;WB local - top
+HISTORY_MSG_LOCWBLOCXL;WB local - left
+HISTORY_MSG_LOCWBTRANSIT;WB local - transition
+HISTORY_MSG_LOCWBAMOUNT;WB local - cat02 amount
+HISTORY_MSG_LOCWBLUMY;WB local - cat02 luminance scalling
+HISTORY_MSG_LOCWBTEMP;WB local - temp
+HISTORY_MSG_LOCWBTINT;WB local - green
+HISTORY_MSG_LOCWBEQUAL;WB local - equal
+HISTORY_MSG_LOCWBCENTER;WB local - center
+HISTORY_MSG_LOCWBENA;WB local
 HISTORY_MSG_WBGAMMA;WB auto - Gamma
 HISTORY_MSG_WBMETHOD;WB - Method
 HISTORY_MSG_WBTEMP;WB - Temperature
@@ -1338,14 +1333,15 @@ TP_CACORRECTION_BLUE;Blue
 TP_CACORRECTION_LABEL;Chromatic Aberration Correction
 TP_CACORRECTION_RED;Red
 TP_CAT02_LABEL;CAT02 adaptation
-TP_CAT02_SLI;CAT02 adaptation level
-TP_CAT02_GREE;Y Tint (Viewing conditions)
-TP_CAT02_CIECAM_ENA;Ciecam enabled
-TP_CAT02_CIECAM_DISA;Ciecam disabled
-TP_LOC_DEGREE_AUTO_TOOLTIP;If the check-box is checked, Rawtherapee uses WB general parameters:\nTemperature, Tint, Blue/Red equalizer.\nUnchecked the parameters you want to change. 
-TP_CAT02_DEGREE_AUTO_TOOLTIP;If the check-box is checked, RawTherapee calculates an optimum value, which is then used by CAT02\nTo set the value manually, uncheck the check-box first.
-TP_CAT02_CAT_TOOLTIP;Performs a chromatic adaptation, between the chosen temperature and 5000K.\n80% to 100% should satisfy the majority of cases.\nIf the absolute luminance conditions (scene or viewing) are very low, you can lower the value till 1.\nDisabled when Ciecam02 enabled.
-TP_CAT02_GREE_TOOLTIP;Adapts Y tint in function of chromatic adaptation level.\nDisabled when Ciecam02 enabled.
+TP_CAT02ADAPTATION_LABEL;CAT02 Adaptation
+TP_CAT02ADAPTATION_AMOUNT;Amount
+TP_CAT02ADAPTATION_LUMINANCE_SCALING;Luminance Y scaling
+TP_CAT02ADAPTATION_CIECAM_ENABLED;Ciecam enabled
+TP_CAT02ADAPTATION_CIECAM_DISABLED;Ciecam disabled
+TP_CAT02ADAPTATION_AUTO_AMOUNT_TOOLTIP;If the check-box is checked, RawTherapee calculates an optimum value, which is then used by CAT02\nTo set the value manually, uncheck the check-box first.
+TP_CAT02ADAPTATION_AMOUNT_TOOLTIP;Performs a chromatic adaptation, between the chosen temperature and 5000K.\n80% to 100% should satisfy the majority of cases.\nIf the absolute luminance conditions (scene or viewing) are very low, you can lower the value till 1.\nDisabled when Ciecam02 enabled.
+TP_CAT02ADAPTATION_AUTO_LUMINANCE_SCALING_TOOLTIP;Auto computation of the luminance scaling factor in function of chromatic adaptation level.\nDisabled when Ciecam02 enabled.
+TP_CAT02ADAPTATION_LUMINANCE_SCALING_TOOLTIP;Scaling factor for the luminance Y channel (to adapt to the viewing conditions).
 TP_CBDL_AFT;After Black-and-White
 TP_CBDL_BEF;Before Black-and-White
 TP_CBDL_METHOD;Process located
@@ -1733,6 +1729,7 @@ TP_LENSPROFILE_LABEL;Profiled Lens Correction
 TP_LENSPROFILE_USECA;Chromatic aberration correction
 TP_LENSPROFILE_USEDIST;Distortion correction
 TP_LENSPROFILE_USEVIGN;Vignetting correction
+TP_LOC_WB_AUTO_TOOLTIP;If checked settings are those of general White balance.\nUnchecked for manual adjustements
 TP_LOCALRGB_MET;Shape RT-spot area
 TP_LOCAL_CATYTINT_TOOLTIP;Adapts Y tint in function of Cat02 level\nDisabled when Ciecam02 enabled.
 TP_LOCALRGBWB_ELI;Elipse

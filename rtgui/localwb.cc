@@ -143,8 +143,8 @@ Localwb::Localwb() :
     proxi(Gtk::manage(new Adjuster(M("TP_LOCALLAB_PROXI"), 0, 60, 1, 20))),
     sensi(Gtk::manage(new Adjuster(M("TP_LOCALLAB_SENSI"), 0, 100, 1, 19))),
     transit(Gtk::manage(new Adjuster(M("TP_LOCALLAB_TRANSIT"), 5, 95, 1, 60))),
-    amount(Gtk::manage(new Adjuster(M("TP_CAT02_SLI"), 0, 100, 1, 0))),
-    luminanceScaling(Gtk::manage(new Adjuster(M("TP_CAT02_GREE"), 0.9, 1.1, 0.001, 1))),
+    amount(Gtk::manage(new Adjuster(M("TP_CAT02ADAPTATION_AMOUNT"), 0, 100, 1, 0))),
+    luminanceScaling(Gtk::manage(new Adjuster(M("TP_CAT02ADAPTATION_LUMINANCE_SCALING"), 0.9, 1.1, 0.001, 1))),
     /*
         hueref(Gtk::manage(new Adjuster(M("TP_LOCALLAB_HUEREF"), -3.15, 3.15, 0.01, 0))),
         chromaref(Gtk::manage(new Adjuster(M("TP_LOCALLAB_CHROMAREF"), 0, 200, 0.01, 0))),
@@ -191,7 +191,7 @@ Localwb::Localwb() :
     EvlocalWBDegree = m->newEvent(DEMOSAIC, "HISTORY_MSG_LOCWBDEG");
     EvlocalWBlocY  = m->newEvent(DEMOSAIC, "HISTORY_MSG_LOCWBLOCY");
     EvlocalWBlocX = m->newEvent(DEMOSAIC, "HISTORY_MSG_LOCWBLOCX");
-    EvlocalWBlocYT = m->newEvent(DEMOSAIC, "HISTORY_MSG_LOCYT");
+    EvlocalWBlocYT = m->newEvent(DEMOSAIC, "HISTORY_MSG_LOCWBYT");
     EvlocalWBlocXL = m->newEvent(DEMOSAIC, "HISTORY_MSG_LOCWBLOCXL");
     EvlocalWBsensi = m->newEvent(DEMOSAIC, "HISTORY_MSG_LOCWBSENSI");
     EvlocalWBtransit = m->newEvent(DEMOSAIC, "HISTORY_MSG_LOCWBTRANSIT");
@@ -261,8 +261,8 @@ Localwb::Localwb() :
     }
 
     amount->throwOnButtonRelease();
-    amount->addAutoButton(M("TP_CAT02_DEGREE_AUTO_TOOLTIP"));
-    amount->set_tooltip_markup(M("TP_CAT02_CAT_TOOLTIP"));
+    amount->addAutoButton(M("TP_CAT02ADAPTATION_AUTO_AMOUNT_TOOLTIP"));
+    amount->set_tooltip_markup(M("TP_CAT02ADAPTATION_AMOUNT_TOOLTIP"));
 
     amount->set_tooltip_text(M("TP_LOCAL_CAT_TOOLTIP"));
     amount->setAdjusterListener(this);
@@ -272,10 +272,9 @@ Localwb::Localwb() :
     }
 
     luminanceScaling->throwOnButtonRelease();
-    luminanceScaling->addAutoButton(M("TP_CAT02_DEGREE_AUTO_TOOLTIP"));
-    luminanceScaling->set_tooltip_markup(M("TP_CAT02_CAT_TOOLTIP"));
+    luminanceScaling->addAutoButton(M("TP_CAT02ADAPTATION_AUTO_LUMINANCE_SCALING_TOOLTIP"));
+    luminanceScaling->set_tooltip_markup(M("TP_CAT02ADAPTATION_LUMINANCE_SCALING_TOOLTIP"));
 
-    luminanceScaling->set_tooltip_text(M("TP_LOCAL_CATluminanceScaling_TOOLTIP"));
     luminanceScaling->setAdjusterListener(this);
 
 
@@ -367,7 +366,7 @@ Localwb::Localwb() :
     }
 
     temp->throwOnButtonRelease();
-    temp->addAutoButton(M("TP_LOC_DEGREE_AUTO_TOOLTIP"));
+    temp->addAutoButton(M("TP_LOC_WB_AUTO_TOOLTIP"));
 //   temp->set_tooltip_markup(M("TP_CAT02_CAT_TOOLTIP"));
 
     temp->show();
@@ -377,7 +376,7 @@ Localwb::Localwb() :
     }
 
     green->throwOnButtonRelease();
-    green->addAutoButton(M("TP_LOC_DEGREE_AUTO_TOOLTIP"));
+    green->addAutoButton(M("TP_LOC_WB_AUTO_TOOLTIP"));
     //  green->set_tooltip_markup(M("TP_CAT02_CAT_TOOLTIP"));
 
     green->show();
@@ -387,7 +386,7 @@ Localwb::Localwb() :
     }
 
     equal->throwOnButtonRelease();
-    equal->addAutoButton(M("TP_LOC_DEGREE_AUTO_TOOLTIP"));
+    equal->addAutoButton(M("TP_LOC_WB_AUTO_TOOLTIP"));
 //   equal->set_tooltip_markup(M("TP_LOC_CAT_TOOLTIP"));
 
 

@@ -94,7 +94,7 @@ ImProcCoordinator::ImProcCoordinator()
       fw(0), fh(0), tr(0),
       fullw(1), fullh(1),
       pW(-1), pH(-1),
-      plistener(nullptr), imageListener(nullptr), aeListener(nullptr), acListener(nullptr), abwListener(nullptr), alorgbListener(nullptr), awbListener(nullptr), frameCountListener(nullptr), imageTypeListener(nullptr), actListener(nullptr), adnListener(nullptr), awavListener(nullptr), dehaListener(nullptr), hListener(nullptr),
+      plistener(nullptr), imageListener(nullptr), aeListener(nullptr), acListener(nullptr), abwListener(nullptr), alowbListener(nullptr), awbListener(nullptr), frameCountListener(nullptr), imageTypeListener(nullptr), actListener(nullptr), adnListener(nullptr), awavListener(nullptr), dehaListener(nullptr), hListener(nullptr),
       resultValid(false), lastOutputProfile("BADFOOD"), lastOutputIntent(RI__COUNT), lastOutputBPC(false), thread(nullptr), changeSinceLast(0), updaterRunning(false), destroying(false), utili(false), autili(false),
       butili(false), ccutili(false), cclutili(false), clcutili(false), opautili(false), wavcontlutili(false), colourToningSatLimit(0.f),  colourToningSatLimitOpacity(0.f),
       wbm(0), wbauto(0), ptemp(0.), pgreen(0.)
@@ -401,19 +401,19 @@ void ImProcCoordinator::updatePreviewImage(int todo, Crop* cropCall)
 
         //   if (params.localwb.enabled && params.localwb.expwb) {
         if (params.localwb.enabled) {
-            if (alorgbListener && params.localwb.autotemp) {
-                alorgbListener->WBTChanged((double) params.wb.temperature);
+            if (alowbListener && params.localwb.autotemp) {
+                alowbListener->WBTChanged((double) params.wb.temperature);
                 params.localwb.temp = params.wb.temperature;
                 //  params.localwb.equal = params.wb.equal;
             }
 
-            if (alorgbListener && params.localwb.autogreen) {
-                alorgbListener->WBGChanged(params.wb.green);
+            if (alowbListener && params.localwb.autogreen) {
+                alowbListener->WBGChanged(params.wb.green);
                 params.localwb.green = params.wb.green;
             }
 
-            if (alorgbListener && params.localwb.autoequal) {
-                alorgbListener->WBEChanged(params.wb.equal);
+            if (alowbListener && params.localwb.autoequal) {
+                alowbListener->WBEChanged(params.wb.equal);
                 params.localwb.equal = params.wb.equal;
             }
 
@@ -422,13 +422,13 @@ void ImProcCoordinator::updatePreviewImage(int todo, Crop* cropCall)
 
             cat02adaptationAutoComputeloc(imgsrc, params);
 
-            if (alorgbListener) {
+            if (alowbListener) {
                 if (params.localwb.autoamount) {
-                    alorgbListener->cat02amountChanged(params.localwb.amount, params.colorappearance.enabled);
+                    alowbListener->cat02amountChanged(params.localwb.amount, params.colorappearance.enabled);
                 }
 
                 if (params.localwb.autoluminanceScaling) {
-                    alorgbListener->cat02greenChanged(params.localwb.luminanceScaling);
+                    alowbListener->cat02greenChanged(params.localwb.luminanceScaling);
                 }
             }
 

@@ -162,7 +162,7 @@ protected:
     AutoExpListener* aeListener;
     AutoCamListener* acListener;
     AutoBWListener* abwListener;
-    localrgbListener* alorgbListener;
+    localwbListener* alowbListener;
     AutoWBListener* awbListener;
     FrameCountListener *frameCountListener;
     ImageTypeListener *imageTypeListener;
@@ -327,9 +327,9 @@ public:
     {
         abwListener = abw;
     }
-    void setlocalrgbListener(localrgbListener* alorgb)
+    void setlocalwbListener(localwbListener* alowb)
     {
-        alorgbListener = alorgb;
+        alowbListener = alowb;
     }
 
     void setAutoWBListener(AutoWBListener* awb)

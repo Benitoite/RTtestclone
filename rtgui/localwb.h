@@ -29,7 +29,7 @@ class Localwb :
     public ToolParamBlock,
     public AdjusterListener,
     public FoldableToolPanel,
-    public rtengine::localrgbListener,
+    public rtengine::localwbListener,
     public EditSubscriber
 
 {

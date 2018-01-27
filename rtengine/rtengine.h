@@ -342,10 +342,10 @@ public :
 
 };
 
-class localrgbListener
+class localwbListener
 {
 public :
-    virtual ~localrgbListener() {}
+    virtual ~localwbListener() {}
     virtual void WBTChanged(double temp) {}
     virtual void WBGChanged(double green) {}
     virtual void WBEChanged(double equal) {}
@@ -484,7 +484,7 @@ public:
     virtual void        setAutoCamListener(AutoCamListener* l) = 0;
     virtual void        setFrameCountListener(FrameCountListener* l) = 0;
     virtual void        setAutoBWListener(AutoBWListener* l) = 0;
-    virtual void        setlocalrgbListener(localrgbListener* l) = 0;
+    virtual void        setlocalwbListener(localwbListener* l) = 0;
     virtual void        setAutoWBListener(AutoWBListener* l) = 0;
     virtual void        setAutoColorTonListener(AutoColorTonListener* l) = 0;
     virtual void        setAutoChromaListener(AutoChromaListener* l) = 0;
