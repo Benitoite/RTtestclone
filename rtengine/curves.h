@@ -999,7 +999,7 @@ class WeightedStdToneCurve : public ToneCurve
 {
 private:
     float Triangle (float refX, float refY, float X2) const;
-#if defined( __SSE2__ ) && defined( __x86_64__ )
+#ifdef __SSE2__
     vfloat Triangle(vfloat refX, vfloat refY, vfloat X2) const;
 #endif
 public:
@@ -1075,7 +1075,7 @@ inline void StandardToneCurve::BatchApply(
             // If we get to the end before getting to an aligned address, just return.
             // (Or, for non-SSE mode, if we get to the end.)
             return;
-#if defined( __SSE2__ ) && defined( __x86_64__ )
+#ifdef __SSE2__
         } else if (reinterpret_cast<uintptr_t>(&r[i]) % 16 == 0) {
             // Otherwise, we get to the first aligned address; go to the SSE part.
             break;
@@ -1087,7 +1087,7 @@ inline void StandardToneCurve::BatchApply(
         i++;
     }
 
-#if defined( __SSE2__ ) && defined( __x86_64__ )
+#ifdef __SSE2__
     for (; i + 3 < end; i += 4) {
         __m128 r_val = LVF(r[i]);
         __m128 g_val = LVF(g[i]);
@@ -1178,7 +1178,7 @@ inline float WeightedStdToneCurve::Triangle (float a, float a1, float b) const
     return a1;
 }
 
-#if defined( __SSE2__ ) && defined( __x86_64__ )
+#ifdef __SSE2__
 inline vfloat WeightedStdToneCurve::Triangle(vfloat a, vfloat a1, vfloat b) const
 {
         vfloat a2 = a1 - a;
@@ -1232,7 +1232,7 @@ inline void WeightedStdToneCurve::BatchApply(const size_t start, const size_t en
             // If we get to the end before getting to an aligned address, just return.
             // (Or, for non-SSE mode, if we get to the end.)
             return;
-#if defined( __SSE2__ ) && defined( __x86_64__ )
+#ifdef __SSE2__
         } else if (reinterpret_cast<uintptr_t>(&r[i]) % 16 == 0) {
             // Otherwise, we get to the first aligned address; go to the SSE part.
             break;
@@ -1242,7 +1242,7 @@ inline void WeightedStdToneCurve::BatchApply(const size_t start, const size_t en
         i++;
     }
 
-#if defined( __SSE2__ ) && defined( __x86_64__ )
+#ifdef __SSE2__
     const vfloat c65535v = F2V(65535.f);
     const vfloat zd5v = F2V(0.5f);
     const vfloat zd25v = F2V(0.25f);
