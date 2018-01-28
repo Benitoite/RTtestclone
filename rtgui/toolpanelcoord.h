@@ -302,7 +302,10 @@ public:
     void toolSelected(ToolMode tool);
     void editModeSwitchedOff();
 
-    void setEditProvider(EditDataProvider *provider);
+    void setEditProvider (EditDataProvider *provider);
+
+private:
+    IdleRegister idle_register;
 };
 
 #endif
