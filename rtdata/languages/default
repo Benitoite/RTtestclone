@@ -687,8 +687,8 @@ HISTORY_MSG_436;Retinex - M - Radius
 HISTORY_MSG_437;Retinex - M - Method
 HISTORY_MSG_438;Retinex - M - Equalizer
 HISTORY_MSG_439;Retinex - Process
-HISTORY_MSG_440;CbDL - Method
-HISTORY_MSG_441;Retinex - Gain transmission
+HISTORY_MSG_440:Retinex Gain
+HISTORY_MSG_441;Retinex - Scale
 HISTORY_MSG_442;Retinex - Scale
 HISTORY_MSG_443;Output black point compensation
 HISTORY_MSG_444;WB - Temp bias
@@ -725,59 +725,59 @@ HISTORY_MSG_490;HDR TM - Amount
 HISTORY_MSG_491;White Balance
 HISTORY_MSG_492;RGB Curves
 HISTORY_MSG_493;L*a*b* Adjustments
-HISTORY_MSG_495;W - Merge Chroma
-HISTORY_MSG_496;W - Reti - gain
-HISTORY_MSG_497;W - Reti - brightness
-HISTORY_MSG_498;W - Reti - strength
-HISTORY_MSG_499;W - Reti - radius
-HISTORY_MSG_500;W - Reti - contrast
-HISTORY_MSG_501;W - Reti - threshold
-HISTORY_MSG_502;W - Retinex method
-HISTORY_MSG_503;W - Reti - transmission
-HISTORY_MSG_504;W - Reti - chroma
-HISTORY_MSG_505;W - Reti - process
-HISTORY_MSG_506;W - merge - enabled
-HISTORY_MSG_507;W - merge - file
-HISTORY_MSG_508;W - merge - type
-HISTORY_MSG_509;W - merge - preview
-HISTORY_MSG_510;W - merge - H shift
-HISTORY_MSG_511;W - merge - V shift
-HISTORY_MSG_512;W - merge - blend L
-HISTORY_MSG_513;W - merge - blend C
-HISTORY_MSG_514;W - merge - reset
-HISTORY_MSG_515;W - es - sharp method
-HISTORY_MSG_516;W - Reti - enabled
-HISTORY_MSG_517;W - merge - method
-HISTORY_MSG_518;W - Reti - radius
-HISTORY_MSG_519;W - Reti - highlight
-HISTORY_MSG_520;W - Reti - H tonal width
-HISTORY_MSG_521;W - Reti - shadows
-HISTORY_MSG_522;W - Reti - S tonal width
-HISTORY_MSG_523;W - Reti - Scale
-HISTORY_MSG_524;W - merge - gradient luma
-HISTORY_MSG_525;W - merge - merge curve
-HISTORY_MSG_526;W - Reti - gain curve
-HISTORY_MSG_527;CbDL - method
-HISTORY_MSG_528;W - merge - save size
-HISTORY_MSG_529;W - merge - luminance style
-HISTORY_MSG_530;W - merge - chroma
-HISTORY_MSG_531;W - merge - residual style
-HISTORY_MSG_532;W - merge - style targ/prot
-HISTORY_MSG_533;W - merge - shape detection curve hdr
-HISTORY_MSG_534;W - merge - style detection color
-HISTORY_MSG_535;W - merge - dirV
-HISTORY_MSG_536;W - merge - dirH
-HISTORY_MSG_537;W - merge - dirD
-HISTORY_MSG_538;W - merge - SH curve
-HISTORY_MSG_539;W - merge - luma curve++
-HISTORY_MSG_540;W - merge - luminance hdr
-HISTORY_MSG_541;W - merge - residual hdr
-HISTORY_MSG_542;W - merge - position
-HISTORY_MSG_543;W - merge - shape method
-HISTORY_MSG_544;W - merge - Neural index
-HISTORY_MSG_545;W - merge - shape detection curve sty
-HISTORY_MSG_546;W - Unsharp method
-HISTORY_MSG_547;W - Merge luma
+HISTORY_MSG_CBDLMETH;Cbdl method
+HISTORY_MSG_RETICHROM;Reti chroma
+HISTORY_MSG_WAVMERGEC;W - Merge Chroma
+HISTORY_MSG_WAVGAIN;W - Reti - gain
+HISTORY_MSG_WAVOFFS;W - Reti - brightness
+HISTORY_MSG_WAVSTR;W - Reti - strength
+HISTORY_MSG_WAVNEIGH;W - Reti - radius
+HISTORY_MSG_WAVVART;W - Reti - contrast
+HISTORY_MSG_WAVLIMD;W - Reti - threshold
+HISTORY_MSG_WAVRETIMETH;W - Retinex method
+HISTORY_MSG_WAVCTCURV;W - Reti - transmission
+HISTORY_MSG_WAVCHRRT;W - Reti - chroma
+HISTORY_MSG_WAVRETIMETPRO;W - Reti - process
+HISTORY_MSG_WAVENAMERG;W - merge - enabled
+HISTORY_MSG_WAVINPUT;W - merge - file
+HISTORY_MSG_WAVMERVGEMET;W - merge - type
+HISTORY_MSG_WAVMERGMET;W - merge - preview
+HISTORY_MSG_WAVBALANLOW;W - merge - H shift
+HISTORY_MSG_WAVBALANHIGH;W - merge - V shift
+HISTORY_MSG_WAVBLEN;W - merge - blend L
+HISTORY_MSG_WAVBLENC;W - merge - blend C
+HISTORY_MSG_WAVVMFILE;W - merge - reset
+HISTORY_MSG_WAVUSHAMET;W - es - sharp method
+HISTORY_MSG_WAVENARET;W - Reti - enabled
+HISTORY_MSG_WAVMERGEBMET;W - merge - method
+HISTORY_MSG_WAVRADIUS;W - Reti - radius
+HISTORY_MSG_WAVHIGHLIGH;W - Reti - highlight
+HISTORY_MSG_WAVHTONALW;W - Reti - H tonal width
+HISTORY_MSG_WAVSHADOWS;W - Reti - shadows
+HISTORY_MSG_WAVTONALWI;W - Reti - S tonal width
+HISTORY_MSG_WAVSCALE;W - Reti - Scale
+HISTORY_MSG_WAVGRAD;W - merge - gradient luma
+HISTORY_MSG_WAVMERGCURV;W - merge - merge curve
+HISTORY_MSG_WAVCTGAINCURV;W - Reti - gain curve
+HISTORY_MSG_WAVSIZELAB;W - merge - save size
+HISTORY_MSG_WAVBALMER;W - merge - luminance style
+HISTORY_MSG_WAVBALMERCH;W - merge - chroma
+HISTORY_MSG_WAVBALMERRES;W - merge - residual style
+HISTORY_MSG_WAVSHAPDET;W - merge - style targ/prot
+HISTORY_MSG_WAVSTYCURV;W - merge - shape detection curve hdr
+HISTORY_MSG_WAVHUESKIN";W - merge - style detection color
+HISTORY_MSG_WAVDIRV;W - merge - dirV
+HISTORY_MSG_WAVDIRD;W - merge - dirD
+HISTORY_MSG_WAVSHADOWS2;W - merge - SH curve
+HISTORY_MSG_WAVSTYCURV2;W - merge - luma curve++
+HISTORY_MSG_WAVMERG2CURV;W - merge - luminance hdr
+HISTORY_MSG_WAVBAMER2;W - merge - residual hdr
+HISTORY_MSG_WAVBALMERRES2;W - merge - position
+HISTORY_MSG_WAVSHAPMETH;W - merge - shape method
+HISTORY_MSG_WAVSHAPIND;W - merge - Neural index
+HISTORY_MSG_WAVSTY2CURV;W - merge - shape detection curve sty
+HISTORY_MSG_WAVSHARPMET;W - Unsharp method
+HISTORY_MSG_WAVMERGEL;W - Merge luma
 HISTORY_MSG_COLORTONING_LABGRID_VALUE;CT - Color correction
 HISTORY_MSG_HISTMATCHING;Auto-matched Tone Curve
 HISTORY_MSG_LOCALCONTRAST_AMOUNT;Local Contrast - Amount

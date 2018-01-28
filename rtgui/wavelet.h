@@ -120,7 +120,6 @@ private:
     rtengine::ProcEvent EvWavhighlights;// = 518,
     rtengine::ProcEvent EWavh_tonalwidth;// = 519,
     rtengine::ProcEvent EvWavshadows;// = 520,
-
     rtengine::ProcEvent EvWavs_tonalwidth;// = 521,
     rtengine::ProcEvent EvWavscale;// = 522,
     rtengine::ProcEvent EvWavgrad;// = 523,

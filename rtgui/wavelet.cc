@@ -59,7 +59,6 @@ std::vector<GradientMilestone> makeWholeHueRange()
 
 
 Wavelet::Wavelet() :
-//<<<<<<< HEAD
     FoldableToolPanel (this, "wavelet", M ("TP_WAVELET_LABEL"), true, true),
     lastlabFilename (""),
     walistener (NULL),
@@ -282,8 +281,6 @@ Wavelet::Wavelet() :
     EvWavhighlights = m->newEvent(DIRPYREQUALIZER, "HISTORY_MSG_WAVHIGHLIGH");//= 518,
     EWavh_tonalwidth = m->newEvent(DIRPYREQUALIZER, "HISTORY_MSG_WAVHTONALW");//= 519,
     EvWavshadows = m->newEvent(DIRPYREQUALIZER, "HISTORY_MSG_WAVSHADOWS");//= 520,
-
-
     EvWavs_tonalwidth = m->newEvent(DIRPYREQUALIZER, "HISTORY_MSG_WAVTONALWI");// = 521,
     EvWavscale = m->newEvent(DIRPYREQUALIZER, "HISTORY_MSG_WAVSCALE");// = 522,
     EvWavgrad = m->newEvent(DIRPYREQUALIZER, "HISTORY_MSG_WAVGRAD");// = 523,
@@ -298,8 +295,8 @@ Wavelet::Wavelet() :
     EvWavHueskinsty = m->newEvent(DIRPYREQUALIZER, "HISTORY_MSG_WAVHUESKIN");// = 533,
     EvWavdirV = m->newEvent(DIRPYREQUALIZER, "HISTORY_MSG_WAVDIRV");// = 534,
     EvWavdirH = m->newEvent(DIRPYREQUALIZER, "HISTORY_MSG_WAVDIRD");// = 535,
-    EvWavdirD = m->newEvent(DIRPYREQUALIZER, "HISTORY_MSG_WAVSHADOWS");// = 536,
-    EvWavshstyCurve = m->newEvent(DIRPYREQUALIZER, "HISTORY_MSG_WAVSTYCURV");// = 537,
+    EvWavdirD = m->newEvent(DIRPYREQUALIZER, "HISTORY_MSG_WAVSHADOWS2");// = 536,
+    EvWavshstyCurve = m->newEvent(DIRPYREQUALIZER, "HISTORY_MSG_WAVSTYCURV2");// = 537,
     EvWavmerg2Curve = m->newEvent(DIRPYREQUALIZER, "HISTORY_MSG_WAVMERG2CURV");// = 538,
     EvWaveletbalmer2 = m->newEvent(DIRPYREQUALIZER, "HISTORY_MSG_WAVBAMER2");// = 539,
     EvWavbalmerres2 = m->newEvent(DIRPYREQUALIZER, "HISTORY_MSG_WAVBALMERRES2");// = 540,
