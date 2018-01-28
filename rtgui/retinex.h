@@ -20,6 +20,9 @@ class Retinex : public ToolParamBlock, public FoldableToolPanel,  public rtengin
 private:
     IdleRegister idle_register;
 
+    rtengine::ProcEvent EvChrrt;// = 441,
+	
+
 protected:
     CurveEditorGroup* curveEditorGD;
     CurveEditorGroup* curveEditorGDH;

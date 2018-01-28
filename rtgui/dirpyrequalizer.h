@@ -28,6 +28,8 @@
 
 class DirPyrEqualizer : public ToolParamBlock, public ThresholdAdjusterListener, public AdjusterListener, public FoldableToolPanel
 {
+private:
+    rtengine::ProcEvent  EvcbdlMethod;// = 526,
 
 protected:
 

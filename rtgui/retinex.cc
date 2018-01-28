@@ -4,6 +4,7 @@
 #include "retinex.h"
 #include "mycurve.h"
 #include "rtimage.h"
+#include "eventmapper.h"
 
 using namespace rtengine;
 using namespace rtengine::procparams;
@@ -22,6 +23,8 @@ Retinex::Retinex () : FoldableToolPanel (this, "retinex", M ("TP_RETINEX_LABEL")
     nextminT = 0.;
     nextmaxT = 0.;
 
+    auto m = ProcEventMapper::getInstance();
+    EvChrrt = m->newEvent(RETINEX, "HISTORY_MSG_RETICHROM");//441
 
 
 

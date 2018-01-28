@@ -520,62 +520,7 @@ int refreshmap[rtengine::NUMOFEVENTS] = {
     ALLNORAW,         // EvWBEnabled
     RGBCURVE,         // EvRGBEnabled
     LUMINANCECURVE,   // EvLEnabled
-    DEMOSAIC,          // EvPixelShiftOneGreen
-    DIRPYREQUALIZER,  // EvWavmergeL
-    DIRPYREQUALIZER,  // EvWavmergeC
-    DIRPYREQUALIZER,  // EvWavgain
-    DIRPYREQUALIZER,  // EvWavoffs
-    DIRPYREQUALIZER,  // EvWavstr
-    DIRPYREQUALIZER,  // EvWavneigh
-    DIRPYREQUALIZER,  // EvWavvart
-    DIRPYREQUALIZER,  // EvWavlimd
-    DIRPYREQUALIZER,  // EvWavretinexMethod
-    DIRPYREQUALIZER,  // EvWavCTCurve
-    DIRPYREQUALIZER,  // EvWavchrrt
-    DIRPYREQUALIZER,  // EvWavretinexMethodpro
-    DIRPYREQUALIZER,  // EvWavenamerge
-    DIRPYREQUALIZER,  // EvWaveinput
-    DIRPYREQUALIZER,  // EvWavmergevMethod
-    DIRPYREQUALIZER,  // EvWavmergMethod
-    DIRPYREQUALIZER,  // EvWavbalanlow
-    DIRPYREQUALIZER,  // EvWavbalanhigh
-    DIRPYREQUALIZER,  // EvWavblend
-    DIRPYREQUALIZER,  // EvWavblendc
-    DIRPYREQUALIZER,  // EvmFile
-    DIRPYREQUALIZER,  // EvWavushamet
-    DIRPYREQUALIZER,  // EvWavenareti
-    DIRPYREQUALIZER,  // EvWavmergBMethod
-    DIRPYREQUALIZER,  // EvWavradius
-    DIRPYREQUALIZER,  // EvWavhighlights
-    DIRPYREQUALIZER,  // EvWavh_tonalwidth
-    DIRPYREQUALIZER,  // EvWavshadows
-    DIRPYREQUALIZER,  // EvWavs_tonalwidth
-    DIRPYREQUALIZER,  // EvWavscale
-//   DIRPYREQUALIZER,  // EvWavenaTCresi
-//   DIRPYREQUALIZER,  // EvWavenaedge3
-    DIRPYREQUALIZER,  // EvWavgrad
-    DIRPYREQUALIZER,  // EvWavmergCurve
-    DIRPYREQUALIZER,  // EvWavCTgainCurve
-    ALLNORAW,          // EvcbdlMethod
-    DIRPYREQUALIZER,   // EvWavsizelab
-    DIRPYREQUALIZER,     //EvWaveletbalmer
-    DIRPYREQUALIZER,     //EvWavbalmerch
-    DIRPYREQUALIZER,     //EvWavbalmerres
-    DIRPYREQUALIZER,     //EvWavshapedet
-    DIRPYREQUALIZER,     //EvWavstyCurve
-    DIRPYREQUALIZER,     //EvWavHueskinsty
-    DIRPYREQUALIZER,    //EvWavdirV
-    DIRPYREQUALIZER,    //EvWavdirH
-    DIRPYREQUALIZER,    //EvWavdirD
-    DIRPYREQUALIZER,    //EvWavshstyCurve
-    DIRPYREQUALIZER,    //EvWavmerg2Curve
-    DIRPYREQUALIZER,     //EvWaveletbalmer2
-    DIRPYREQUALIZER,    //EvWavbalmerres2
-    DIRPYREQUALIZER,    //EvWavmergMethod2
-    DIRPYREQUALIZER,     //EvWavshapMethod
-    DIRPYREQUALIZER,     //EvWavshapind
-    DIRPYREQUALIZER,     //EvWavsty2Curve
-    DIRPYREQUALIZER  // EvWavusharpmet
+    DEMOSAIC          // EvPixelShiftOneGreen	
 };
 
 

@@ -18,12 +18,17 @@
  */
 
 #include "dirpyrequalizer.h"
+#include "eventmapper.h"
 
 using namespace rtengine;
 using namespace rtengine::procparams;
 
 DirPyrEqualizer::DirPyrEqualizer () : FoldableToolPanel(this, "dirpyrequalizer", M("TP_DIRPYREQUALIZER_LABEL"), true, true)
 {
+
+    auto m = ProcEventMapper::getInstance();
+    EvcbdlMethod = m->newEvent(ALLNORAW, "HISTORY_MSG_CBDLMETH");//526
+
 
     std::vector<GradientMilestone> milestones;
 
