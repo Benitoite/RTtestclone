@@ -83,11 +83,6 @@ public:
     double          artifact_cbdl;
     double          level0_cbdl;
     double          level123_cbdl;
-    int             nspot;
-    bool            locdelay;
-    int             cropsleep;
-    double          reduchigh;
-    double          reduclow;
 	
 
     Glib::ustring   lensfunDbDirectory; ///< The directory containing the lensfun database. If empty, the system defaults will be used (as described in http://lensfun.sourceforge.net/manual/dbsearch.html)
