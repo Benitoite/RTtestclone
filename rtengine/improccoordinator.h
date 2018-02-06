@@ -217,6 +217,7 @@ protected:
     void process();
     float colourToningSatLimit;
     float colourToningSatLimitOpacity;
+    bool highQualityComputed;
     int wbm;
     int wbauto;
 
@@ -275,7 +276,8 @@ public:
     void getCamWB(double& temp, double& green);
     void getSpotWB(int x, int y, int rectSize, double& temp, double& green);
     void getAutoCrop(double ratio, int &x, int &y, int &w, int &h);
-
+    bool getHighQualComputed();
+    void setHighQualComputed();
     void setMonitorProfile(const Glib::ustring& profile, RenderingIntent intent);
     void getMonitorProfile(Glib::ustring& profile, RenderingIntent& intent) const;
     void setSoftProofing(bool softProof, bool gamutCheck);
