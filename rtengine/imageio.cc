@@ -835,7 +835,6 @@ int ImageIO::loadTIFF (Glib::ustring fname)
 
     allocate (width, height);
 
-    float minValue[3] = {0.f, 0.f, 0.f}, maxValue[3] = {0.f, 0.f, 0.f};
     unsigned char* linebuffer = new unsigned char[TIFFScanlineSize(in) * (samplesperpixel == 1 ? 3 : 1)];
 
     for (int row = 0; row < height; row++) {
@@ -861,31 +860,11 @@ int ImageIO::loadTIFF (Glib::ustring fname)
             }
         }
 
-        if (sampleFormat & (IIOSF_LOGLUV24 | IIOSF_LOGLUV32 | IIOSF_FLOAT)) {
-            setScanline (row, linebuffer, bitspersample, minValue, maxValue);
-        } else {
-            setScanline (row, linebuffer, bitspersample, nullptr, nullptr);
-        }
+        setScanline (row, linebuffer, bitspersample, nullptr, nullptr);
 
         if (pl && !(row % 100)) {
             pl->setProgress ((double)(row + 1) / height);
         }
-    }
-
-    if (sampleFormat & (IIOSF_FLOAT | IIOSF_LOGLUV24 | IIOSF_LOGLUV32)) {
-#ifdef _DEBUG
-
-        if (options.rtSettings.verbose)
-            printf("Normalizing \"%s\" image \"%s\" whose mini/maxi values are:\n   Red:   minimum value=%0.5f / maximum value=%0.5f\n   Green: minimum value=%0.5f / maximum value=%0.5f\n   Blue:  minimum value=%0.5f / maximum value=%0.5f\n",
-                   getType(), fname.c_str(),
-                   minValue[0], maxValue[0], minValue[1],
-                   maxValue[1], minValue[2], maxValue[2]
-                  );
-
-#endif
-        float minVal = rtengine::min(minValue[0], minValue[1], minValue[2]);
-        float maxVal = rtengine::max(maxValue[0], maxValue[1], maxValue[2]);
-        normalizeFloat(minVal, maxVal);
     }
 
     TIFFClose(in);
@@ -1438,14 +1417,14 @@ int ImageIO::saveTIFF (Glib::ustring fname, int bps, bool uncompressed)
         }
     }
 
-    if (iptcdata) {
-        rtexif::Tag iptcTag(nullptr, rtexif::lookupAttrib (rtexif::ifdAttribs, "IPTCData"));
-        iptcTag.initLongArray((char*)iptcdata, iptclen);
 #if __BYTE_ORDER__==__ORDER_LITTLE_ENDIAN__
         bool needsReverse = exifRoot && exifRoot->getOrder() == rtexif::MOTOROLA;
 #else
         bool needsReverse = exifRoot && exifRoot->getOrder() == rtexif::INTEL;
 #endif
+    if (iptcdata) {
+        rtexif::Tag iptcTag(nullptr, rtexif::lookupAttrib (rtexif::ifdAttribs, "IPTCData"));
+        iptcTag.initLongArray((char*)iptcdata, iptclen);
         if (needsReverse) {
             unsigned char *ptr = iptcTag.getValue();
             for (int a = 0; a < iptcTag.getCount(); ++a) {
@@ -1471,21 +1450,30 @@ int ImageIO::saveTIFF (Glib::ustring fname, int bps, bool uncompressed)
     TIFFSetField (out, TIFFTAG_ROWSPERSTRIP, height);
     TIFFSetField (out, TIFFTAG_BITSPERSAMPLE, bps);
     TIFFSetField (out, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
-    TIFFSetField (out, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_UINT);
     TIFFSetField (out, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB);
-    TIFFSetField (out, TIFFTAG_COMPRESSION, uncompressed ? COMPRESSION_NONE : COMPRESSION_DEFLATE);
+    TIFFSetField (out, TIFFTAG_COMPRESSION, uncompressed ? COMPRESSION_NONE : COMPRESSION_ADOBE_DEFLATE);
     TIFFSetField (out, TIFFTAG_SAMPLEFORMAT, bps == 32 ? SAMPLEFORMAT_IEEEFP : SAMPLEFORMAT_UINT);
 
     if (!uncompressed) {
         TIFFSetField (out, TIFFTAG_PREDICTOR, bps == 32 ? PREDICTOR_FLOATINGPOINT : PREDICTOR_HORIZONTAL);
     }
-
     if (profileData) {
         TIFFSetField (out, TIFFTAG_ICCPROFILE, profileLength, profileData);
     }
 
     for (int row = 0; row < height; row++) {
         getScanline (row, linebuffer, bps);
+
+        if(needsReverse && !uncompressed && bps == 32) {
+            for(int i = 0; i < lineWidth; i += 4) {
+                char temp = linebuffer[i];
+                linebuffer[i] = linebuffer[i + 3];
+                linebuffer[i + 3] = temp;
+                temp = linebuffer[i + 1];
+                linebuffer[i + 1] = linebuffer[i + 2];
+                linebuffer[i + 2] = temp;
+            }
+        }
 
         if (TIFFWriteScanline (out, linebuffer, row, 0) < 0) {
             TIFFClose (out);
