@@ -2108,7 +2108,7 @@ WaveletParams::WaveletParams() :
     expfinal(false),
     exptoning(false),
     expnoise(false),
-    Lmethod("4_"),
+    Lmethod(4),
     CLmethod("all"),
     Backmethod("grey"),
     Tilesmethod("full"),
@@ -2838,7 +2838,7 @@ int ProcParams::save(const Glib::ustring& fname, const Glib::ustring& fname2, bo
         saveToKeyfile(!pedited || pedited->localContrast.amount, "Local Contrast", "Amount", localContrast.amount, keyFile);
         saveToKeyfile(!pedited || pedited->localContrast.darkness, "Local Contrast", "Darkness", localContrast.darkness, keyFile);
         saveToKeyfile(!pedited || pedited->localContrast.lightness, "Local Contrast", "Lightness", localContrast.lightness, keyFile);
-        
+
 
 // Channel mixer
         saveToKeyfile(!pedited || pedited->chmixer.enabled, "Channel Mixer", "Enabled", chmixer.enabled, keyFile);
@@ -3709,7 +3709,7 @@ int ProcParams::load(const Glib::ustring& fname, ParamsEdited* pedited)
                     pedited->labCurve.enabled = true;
                 }
             }
-            
+
             assignFromKeyfile(keyFile, "Luminance Curve", "Brightness", pedited, labCurve.brightness, pedited->labCurve.brightness);
             assignFromKeyfile(keyFile, "Luminance Curve", "Contrast", pedited, labCurve.contrast, pedited->labCurve.contrast);
 
@@ -4266,7 +4266,15 @@ int ProcParams::load(const Glib::ustring& fname, ParamsEdited* pedited)
             assignFromKeyfile(keyFile, "Wavelet", "Lipst", pedited, wavelet.lipst, pedited->wavelet.lipst);
             assignFromKeyfile(keyFile, "Wavelet", "AvoidColorShift", pedited, wavelet.avoid, pedited->wavelet.avoid);
             assignFromKeyfile(keyFile, "Wavelet", "TMr", pedited, wavelet.tmr, pedited->wavelet.tmr);
-            assignFromKeyfile(keyFile, "Wavelet", "LevMethod", pedited, wavelet.Lmethod, pedited->wavelet.Lmethod);
+            if (ppVersion < 331) { // wavelet.Lmethod was a string before version 331
+                Glib::ustring temp;
+                assignFromKeyfile(keyFile, "Wavelet", "LevMethod", pedited, temp, pedited->wavelet.Lmethod);
+                if (!temp.empty()) {
+                    wavelet.Lmethod = std::stoi(temp);
+                }
+            } else {
+                assignFromKeyfile(keyFile, "Wavelet", "LevMethod", pedited, wavelet.Lmethod, pedited->wavelet.Lmethod);
+            }
             assignFromKeyfile(keyFile, "Wavelet", "ChoiceLevMethod", pedited, wavelet.CLmethod, pedited->wavelet.CLmethod);
             assignFromKeyfile(keyFile, "Wavelet", "BackMethod", pedited, wavelet.Backmethod, pedited->wavelet.Backmethod);
             assignFromKeyfile(keyFile, "Wavelet", "TilesMethod", pedited, wavelet.Tilesmethod, pedited->wavelet.Tilesmethod);
@@ -4641,7 +4649,7 @@ int ProcParams::load(const Glib::ustring& fname, ParamsEdited* pedited)
             assignFromKeyfile(keyFile, "ColorToning", "LabGridALow", pedited, colorToning.labgridALow, pedited->colorToning.labgridALow);
             assignFromKeyfile(keyFile, "ColorToning", "LabGridBLow", pedited, colorToning.labgridBLow, pedited->colorToning.labgridBLow);
             assignFromKeyfile(keyFile, "ColorToning", "LabGridAHigh", pedited, colorToning.labgridAHigh, pedited->colorToning.labgridAHigh);
-            assignFromKeyfile(keyFile, "ColorToning", "LabGridBHigh", pedited, colorToning.labgridBHigh, pedited->colorToning.labgridBHigh);            
+            assignFromKeyfile(keyFile, "ColorToning", "LabGridBHigh", pedited, colorToning.labgridBHigh, pedited->colorToning.labgridBHigh);
         }
 
         if (keyFile.has_group ("RAW")) {
