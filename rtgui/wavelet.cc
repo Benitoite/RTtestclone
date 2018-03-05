@@ -2048,7 +2048,7 @@ void Wavelet::read (const ProcParams* pp, const ParamsEdited* pedited)
         shapMethod->set_active (2);
     }
 
-    int selectedLevel = atoi (pp->wavelet.Lmethod.data()) - 1;
+    int selectedLevel = pp->wavelet.Lmethod - 1;
     Lmethod->set_active (selectedLevel == -1 ? 4 : selectedLevel);
 
     ccshape->setCurve (pp->wavelet.ccwcurve);
@@ -3068,9 +3068,8 @@ void Wavelet::write (ProcParams* pp, ParamsEdited* pedited)
         pp->wavelet.ushamethod = "clari";
     }
 
-    char lMethod[3]; // one additional char to avoid buffer overrun if someone increases number of levels > 9
-    sprintf (lMethod, "%d", Lmethod->get_active_row_number() + 1);
-    pp->wavelet.Lmethod = lMethod;
+    pp->wavelet.Lmethod = Lmethod->get_active_row_number() + 1;
+	
 }
 
 void Wavelet::mergMethod2Changed()

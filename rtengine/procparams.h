@@ -1149,7 +1149,7 @@ struct WaveletParams {
     bool expmerge;
     bool expreti;
 
-    Glib::ustring Lmethod;
+    int Lmethod;
     Glib::ustring CLmethod;
     Glib::ustring mergMethod;
     Glib::ustring mergMethod2;

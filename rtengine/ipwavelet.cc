@@ -1698,7 +1698,7 @@ void ImProcFunctions::Aver ( float *  RESTRICT DataList, int datalen, float &ave
 
     //find absolute mean
     int countP = 0, countN = 0;
-    float averaP = 0.f, averaN = 0.f;
+    double averaP = 0.0, averaN = 0.0; // use double precision for large summations
 
     float thres = 5.f;//different fom zero to take into account only data large enough
     max = 0.f;
@@ -1813,7 +1813,7 @@ void ImProcFunctions::Averneur ( float ***tempneur, int datalen, int lvl, int di
 void ImProcFunctions::Sigma ( float *  RESTRICT DataList, int datalen, float averagePlus, float averageNeg, float &sigmaPlus, float &sigmaNeg)
 {
     int countP = 0, countN = 0;
-    float variP = 0.f, variN = 0.f;
+    double variP = 0.0, variN = 0.0; // use double precision for large summations
     float thres = 5.f;//different fom zero to take into account only data large enough
 
 #ifdef _OPENMP
@@ -2838,7 +2838,7 @@ void ImProcFunctions::WaveletcontAllL (LabImage * labco, float *****stylev, LabI
     float contrast = cp.contrast;
     float multL = (float)contrast * (maxl - 1.f) / 100.f + 1.f;
     float multH = (float) contrast * (maxh - 1.f) / 100.f + 1.f;
-    double avedbl = 0.f; // use double precision for big summations
+    double avedbl = 0.0; // use double precision for large summations
     float max0 = 0.f;
     float min0 = FLT_MAX;
 
@@ -2888,11 +2888,6 @@ void ImProcFunctions::WaveletcontAllL (LabImage * labco, float *****stylev, LabI
 
         }
 
-    }
-
-    if(max0 <= 0.0) {
-        // completely black image => nothing to do
-        return;
     }
 
     //      printf("MAXmax0=%f MINmin0=%f\n",max0,min0);
@@ -2947,7 +2942,7 @@ void ImProcFunctions::WaveletcontAllL (LabImage * labco, float *****stylev, LabI
     #pragma omp parallel num_threads(wavNestedLevels) if(wavNestedLevels>1)
 #endif
     {
-        if (contrast != 0.f  && cp.resena) { // contrast = 0.f means that all will be multiplied by 1.f, so we can skip this step
+        if(contrast != 0.f  && cp.resena && max0 > 0.0) { // contrast = 0.f means that all will be multiplied by 1.f, so we can skip this step
             {
 #ifdef _OPENMP
                 #pragma omp for
@@ -4017,7 +4012,7 @@ void ImProcFunctions::finalContAllL (float ** WavCoeffs_L, float * WavCoeffs_L0,
         }
     }
 
-    int choicelevel = atoi (params->wavelet.Lmethod.data()) - 1;
+    int choicelevel = params->wavelet.Lmethod - 1;
     choicelevel = choicelevel == -1 ? 4 : choicelevel;
 
     int choiceClevel = 0;
@@ -4837,7 +4832,7 @@ void ImProcFunctions::ContAllL (float * koeLi[12], float * maxkoeLi, bool lipsch
     }
 
     // to see each level of wavelet ...level from 0 to 8
-    int choicelevel = atoi (params->wavelet.Lmethod.data()) - 1;
+    int choicelevel = params->wavelet.Lmethod - 1;
     choicelevel = choicelevel == -1 ? 4 : choicelevel;
 }
 
@@ -5097,7 +5092,7 @@ void ImProcFunctions::ContAllAB (LabImage * labco, int maxlvl, float ** varhue, 
     }
 
     // to see each level of wavelet ...level from 0 to 8
-    int choicelevel = atoi (params->wavelet.Lmethod.data()) - 1;
+    int choicelevel = params->wavelet.Lmethod - 1;
     choicelevel = choicelevel == -1 ? 4 : choicelevel;
     int choiceClevel = 0;
 
