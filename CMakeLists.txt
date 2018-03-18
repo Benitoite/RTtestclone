@@ -103,6 +103,9 @@ if(HAVE_X86_SSE_MATH)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -msse2 -mfpmath=sse")
 endif()
 
+# On i386 Linux we can fix unaligned SSE malloc (see GitHub issue #4432)
+include(FindUnalignedMalloc)
+
 if(WIN32)
     # Add additional paths. Look in the MinGW path first, then in the Gtkmm path.
     # If you wish to build some dependent libraries, you have to install them in MinGW to use them:
@@ -334,6 +337,21 @@ if(WITH_MYFILE_MMAP)
 endif()
 
 if(WITH_LTO)
+    # Using LTO with older versions of binutils requires setting extra flags
+    SET(BINUTILS_VERSION_MININUM "2.29")
+    execute_process(COMMAND ar --version OUTPUT_VARIABLE BINUTILS_VERSION_DETECTED)
+    string(REGEX REPLACE ".* ([0-9.]+)\n.*" "\\1" BINUTILS_VERSION_DETECTED "${BINUTILS_VERSION_DETECTED}")
+    if("${BINUTILS_VERSION_DETECTED}" VERSION_LESS "${BINUTILS_VERSION_MININUM}")
+        if(APPLE)
+            SET(CMAKE_AR "/opt/local/bin/ar")
+            SET(CMAKE_RANLIB "/opt/local/bin/ranlib")
+        else()
+            SET(CMAKE_AR "/usr/bin/gcc-ar")
+            SET(CMAKE_RANLIB "/usr/bin/gcc-ranlib")
+        endif()
+        message(STATUS "Binutils version detected as less than " ${BINUTILS_VERSION_MININUM} " - setting CMake parameters to enable LTO linking:\n    CMAKE_AR=\"" ${CMAKE_AR} "\"\n    CMAKE_RANLIB=\"" ${CMAKE_RANLIB} "\"")
+    endif()
+
     SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -flto")
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -flto")
     SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -flto")
