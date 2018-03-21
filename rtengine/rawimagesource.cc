@@ -3007,7 +3007,7 @@ void RawImageSource::processFlatField (const RAWParams &raw, RawImage *riFlatFil
         cfaboxblur (riFlatFile, cfablur, BS, BS);
     }
 
-    if (ri->getSensorType() == ST_BAYER) {
+    if(ri->getSensorType() == ST_BAYER || ri->get_colors() == 1) {
         float refcolor[2][2];
 
         //find centre average values by channel
@@ -3015,8 +3015,8 @@ void RawImageSource::processFlatField (const RAWParams &raw, RawImage *riFlatFil
             for (int n = 0; n < 2; n++) {
                 int row = 2 * (H >> 2) + m;
                 int col = 2 * (W >> 2) + n;
-                int c  = FC (row, col);
-                int c4 = ( c == 1 && ! (row & 1) ) ? 3 : c;
+                int c  = ri->get_colors() != 1 ? FC(row, col) : 0;
+                int c4 = ri->get_colors() != 1 ? (( c == 1 && !(row & 1) ) ? 3 : c) : 0;
                 refcolor[m][n] = max (0.0f, cfablur[row * W + col] - black[c4]);
             }
 
@@ -3028,8 +3028,8 @@ void RawImageSource::processFlatField (const RAWParams &raw, RawImage *riFlatFil
             for (int m = 0; m < 2; m++)
                 for (int n = 0; n < 2; n++) {
                     float maxval = 0.f;
-                    int c  = FC (m, n);
-                    int c4 = ( c == 1 && ! (m & 1) ) ? 3 : c;
+                    int c  = ri->get_colors() != 1 ? FC(m, n) : 0;
+                    int c4 = ri->get_colors() != 1 ? (( c == 1 && !(m & 1) ) ? 3 : c) : 0;
 #ifdef _OPENMP
                     #pragma omp parallel
 #endif
@@ -3078,13 +3078,20 @@ void RawImageSource::processFlatField (const RAWParams &raw, RawImage *riFlatFil
                 refcolor[m][n] *= limitFactor;
             }
 
+        unsigned int c[2][2] {};
+        unsigned int c4[2][2] {};
+        if(ri->get_colors() != 1) {
+            for (int i = 0; i < 2; ++i) {
+                for(int j = 0; j < 2; ++j) {
+                    c[i][j] = FC(i, j);
+                }
+            }
+            c4[0][0] = ( c[0][0] == 1) ? 3 : c[0][0];
+            c4[0][1] = ( c[0][1] == 1) ? 3 : c[0][1];
+            c4[1][0] = c[1][0];
+            c4[1][1] = c[1][1];
+        }
 
-        unsigned int c[2][2]  = {{FC (0, 0), FC (0, 1)}, {FC (1, 0), FC (1, 1)}};
-        unsigned int c4[2][2];
-        c4[0][0] = ( c[0][0] == 1) ? 3 : c[0][0];
-        c4[0][1] = ( c[0][1] == 1) ? 3 : c[0][1];
-        c4[1][0] = c[1][0];
-        c4[1][1] = c[1][1];
 
 #ifdef __SSE2__
         vfloat refcolorv[2] = {_mm_set_ps (refcolor[0][1], refcolor[0][0], refcolor[0][1], refcolor[0][0]),
@@ -3208,13 +3215,20 @@ void RawImageSource::processFlatField (const RAWParams &raw, RawImage *riFlatFil
         cfaboxblur (riFlatFile, cfablur1, 0, 2 * BS); //now do horizontal blur
         cfaboxblur (riFlatFile, cfablur2, 2 * BS, 0); //now do vertical blur
 
-        if (ri->getSensorType() == ST_BAYER) {
-            unsigned int c[2][2]  = {{FC (0, 0), FC (0, 1)}, {FC (1, 0), FC (1, 1)}};
-            unsigned int c4[2][2];
-            c4[0][0] = ( c[0][0] == 1) ? 3 : c[0][0];
-            c4[0][1] = ( c[0][1] == 1) ? 3 : c[0][1];
-            c4[1][0] = c[1][0];
-            c4[1][1] = c[1][1];
+        if(ri->getSensorType() == ST_BAYER || ri->get_colors() == 1) {
+            unsigned int c[2][2] {};
+            unsigned int c4[2][2] {};
+            if(ri->get_colors() != 1) {
+                for (int i = 0; i < 2; ++i) {
+                    for(int j = 0; j < 2; ++j) {
+                        c[i][j] = FC(i, j);
+                    }
+                }
+                c4[0][0] = ( c[0][0] == 1) ? 3 : c[0][0];
+                c4[0][1] = ( c[0][1] == 1) ? 3 : c[0][1];
+                c4[1][0] = c[1][0];
+                c4[1][1] = c[1][1];
+            }
 
 #ifdef __SSE2__
             vfloat blackv[2] = {_mm_set_ps (black[c4[0][1]], black[c4[0][0]], black[c4[0][1]], black[c4[0][0]]),
@@ -3332,6 +3346,9 @@ void RawImageSource::copyOriginalPixels (const RAWParams &raw, RawImage *src, Ra
                 }
             }
         }
+        if (riFlatFile && W == riFlatFile->get_width() && H == riFlatFile->get_height()) {
+            processFlatField(raw, riFlatFile, black);
+        }  // flatfield
     } else {
         // No bayer pattern
         // TODO: Is there a flat field correction possible?

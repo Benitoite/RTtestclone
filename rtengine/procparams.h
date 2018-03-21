@@ -656,7 +656,7 @@ struct ColorAppearanceParams {
 struct DefringeParams {
     bool    enabled;
     double  radius;
-    float   threshold;
+    int     threshold;
     std::vector<double> huecurve;
 
     DefringeParams();

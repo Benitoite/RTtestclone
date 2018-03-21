@@ -201,6 +201,7 @@ void DirPyrEqualizer::read (const ProcParams* pp, const ParamsEdited* pedited)
     */
     gamutlabConn.block (true);
     gamutlab->set_active (pp->dirpyrequalizer.gamutlab);
+    gamutlab->set_sensitive (pp->dirpyrequalizer.skinprotect != 0);
     gamutlabConn.block (false);
     lastgamutlab = pp->dirpyrequalizer.gamutlab;
 
@@ -344,6 +345,7 @@ void DirPyrEqualizer::adjusterChanged (Adjuster* a, double newval)
                                             Glib::ustring::format(std::fixed, std::setprecision(2), threshold->getValue()))
                                    );
         } else if (a == skinprotect) {
+            gamutlab->set_sensitive (skinprotect->getValue() != 0);
             listener->panelChanged (EvDirPyrEqualizerSkin,
                                     Glib::ustring::compose("%1",
                                             Glib::ustring::format(std::fixed, std::setprecision(2), skinprotect->getValue()))
