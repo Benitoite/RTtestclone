@@ -90,6 +90,7 @@ public:
 
 
     virtual eSensorType getSensorType() const = 0;
+    virtual bool        isMono () const = 0;
     // true is ready to provide the AutoWB, i.e. when the image has been demosaiced for RawImageSource
     virtual bool        isWBProviderReady() = 0;
 
