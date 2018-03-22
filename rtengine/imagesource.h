@@ -96,10 +96,10 @@ public:
 
     virtual void        convertColorSpace(Imagefloat* image, const ColorManagementParams &cmp, const ColorTemp &wb) = 0;     // DIRTY HACK: this method is derived in rawimagesource and strimagesource, but (...,RAWParams raw) will be used ONLY for raw images
     virtual void        getAutoWBMultipliers(double &rm, double &gm, double &bm) = 0;
-    virtual void        getAutoWBMultipliersloc(int begx, int begy, int yEn, int xEn, int cx, int cy, int bf_h, int bf_w, double &rm, double &gm, double &bm, const LocWBParams &localr, const WBParams & wbpar, const ColorManagementParams &cmp) = 0;
+    virtual void        getAutoWBMultipliersloc(double &tempitc, int begx, int begy, int yEn, int xEn, int cx, int cy, int bf_h, int bf_w, double &rm, double &gm, double &bm, const LocWBParams &localr, const WBParams & wbpar, const ColorManagementParams &cmp) = 0;
     virtual ColorTemp   getWB() const = 0;
     virtual ColorTemp   getSpotWB(std::vector<Coord2D> &red, std::vector<Coord2D> &green, std::vector<Coord2D> &blue, int tran, double equal) = 0;
-    virtual void        WBauto(array2D<float> &redloc, array2D<float> &greenloc, array2D<float> &blueloc, int bfw, int bfh, double &avg_rm, double &avg_gm, double &avg_bm, const LocWBParams &localr, const WBParams & wbpar, int begx, int begy, int yEn, int xEn, int cx, int cy, const ColorManagementParams &cmp) = 0;
+    virtual void        WBauto(array2D<float> &redloc, array2D<float> &greenloc, array2D<float> &blueloc, int bfw, int bfh, double &avg_rm, double &avg_gm, double &avg_bm, double &tempitc, const LocWBParams &localr, const WBParams & wbpar, int begx, int begy, int yEn, int xEn, int cx, int cy, const ColorManagementParams &cmp) = 0;
     virtual void        getrgbloc(bool local, bool gamma, bool cat02, int begx, int begy, int yEn, int xEn, int cx, int cy, int bf_h, int bf_w) = 0;
 
     virtual double      getDefGain() const

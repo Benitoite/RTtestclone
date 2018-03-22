@@ -328,7 +328,7 @@ void StdImageSource::getAutoExpHistogram(LUTu & histogram, int& histcompr)
     }
 }
 
-void StdImageSource::WBauto(array2D<float> &redloc, array2D<float> &greenloc, array2D<float> &blueloc, int bfw, int bfh, double &avg_rm, double &avg_gm, double &avg_bm, const LocWBParams &localr, const WBParams & wbpar, int begx, int begy, int yEn, int xEn, int cx, int cy, const ColorManagementParams &cmp)
+void StdImageSource::WBauto(array2D<float> &redloc, array2D<float> &greenloc, array2D<float> &blueloc, int bfw, int bfh, double &avg_rm, double &avg_gm, double &avg_bm, double &tempitc, const LocWBParams &localr, const WBParams & wbpar, int begx, int begy, int yEn, int xEn, int cx, int cy, const ColorManagementParams &cmp)
 {
 
 }
@@ -336,7 +336,7 @@ void StdImageSource::WBauto(array2D<float> &redloc, array2D<float> &greenloc, ar
 void  StdImageSource::getrgbloc(bool local, bool gamma, bool cat02, int begx, int begy, int yEn, int xEn, int cx, int cy, int bf_h, int bf_w)
 {}
 
-void StdImageSource::getAutoWBMultipliersloc(int begx, int begy, int yEn, int xEn, int cx, int cy, int bf_h, int bf_w, double &rm, double &gm, double &bm, const LocWBParams &localr, const WBParams & wbpar, const ColorManagementParams &cmp)
+void StdImageSource::getAutoWBMultipliersloc(double &tempitc, int begx, int begy, int yEn, int xEn, int cx, int cy, int bf_h, int bf_w, double &rm, double &gm, double &bm, const LocWBParams &localr, const WBParams & wbpar, const ColorManagementParams &cmp)
 {
     if (redAWBMul != -1.) {
         rm = redAWBMul;
@@ -345,7 +345,7 @@ void StdImageSource::getAutoWBMultipliersloc(int begx, int begy, int yEn, int xE
         return;
     }
 
-    img->getAutoWBMultipliersloc(begx, begy, yEn, xEn, cx, cy, bf_h, bf_w, rm, gm, bm, params->localwb, params->wb, params->icm);
+    img->getAutoWBMultipliersloc(tempitc, begx, begy, yEn, xEn, cx, cy, bf_h, bf_w, rm, gm, bm, params->localwb, params->wb, params->icm);
 
     redAWBMul   = rm;
     greenAWBMul = gm;

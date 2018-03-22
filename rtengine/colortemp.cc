@@ -2018,7 +2018,7 @@ void ColorTemp::tempxy(double &temp, float **Tx, float **Ty, float **TYY, float 
             TY[i][tt] = Y;
             TZ[i][tt] = Z;
 
-
+/*
             if (tt == 42) {
                 //    printf ("temp=%i Nc=%i x=%f y=%f Y=%f L=%2.1f a=%2.1f b=%2.1f\n", (int) tempw, i, Refxyzcat02[i].Xrefcat / som, Refxyzcat02[i].Yrefcat / som,  Refxyzcat02[i].Zrefcat / som, L, a, b );
             }
@@ -2030,7 +2030,7 @@ void ColorTemp::tempxy(double &temp, float **Tx, float **Ty, float **TYY, float 
             if (tt == 90) {
                 //     printf ("temp=%f Nc=%i x=%f y=%f Y=%f\n", tempw, i, Refxyz[i].Xref / som, Refxyz[i].Yref / som,  Refxyz[i].Zref / som );
             }
-
+*/
             Tx[i][tt] = (float) Refxyz[i].Xref / som;
             Ty[i][tt] = (float) Refxyz[i].Yref / som;
             TYY[i][tt] = (float) Refxyz[i].Zref / som;

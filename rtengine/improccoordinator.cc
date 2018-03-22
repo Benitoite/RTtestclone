@@ -96,9 +96,9 @@ ImProcCoordinator::ImProcCoordinator()
       pW(-1), pH(-1),
       plistener(nullptr), imageListener(nullptr), aeListener(nullptr), acListener(nullptr), abwListener(nullptr), alowbListener(nullptr), awbListener(nullptr), frameCountListener(nullptr), imageTypeListener(nullptr), actListener(nullptr), adnListener(nullptr), awavListener(nullptr), dehaListener(nullptr), hListener(nullptr),
       resultValid(false), lastOutputProfile("BADFOOD"), lastOutputIntent(RI__COUNT), lastOutputBPC(false), thread(nullptr), changeSinceLast(0), updaterRunning(false), destroying(false), utili(false), autili(false),
-      butili(false), ccutili(false), cclutili(false), clcutili(false), opautili(false), wavcontlutili(false), colourToningSatLimit(0.f),  colourToningSatLimitOpacity(0.f),highQualityComputed (false),
+      butili(false), ccutili(false), cclutili(false), clcutili(false), opautili(false), wavcontlutili(false), colourToningSatLimit(0.f),  colourToningSatLimitOpacity(0.f), highQualityComputed(false),
       wbm(0), wbauto(0), ptemp(0.), pgreen(0.)
-      
+
 {}
 
 void ImProcCoordinator::assign(ImageSource* imgsrc)
@@ -245,7 +245,7 @@ void ImProcCoordinator::updatePreviewImage(int todo, Crop* cropCall)
     // If high detail (=100%) is newly selected, do a demosaic update, since the last was just with FAST
 
     if (imageTypeListener) {
-        imageTypeListener->imageTypeChanged (imgsrc->isRAW(), imgsrc->getSensorType() == ST_BAYER, imgsrc->getSensorType() == ST_FUJI_XTRANS, imgsrc->isMono());
+        imageTypeListener->imageTypeChanged(imgsrc->isRAW(), imgsrc->getSensorType() == ST_BAYER, imgsrc->getSensorType() == ST_FUJI_XTRANS, imgsrc->isMono());
     }
 
     if ((todo & M_RAW)
@@ -341,11 +341,19 @@ void ImProcCoordinator::updatePreviewImage(int todo, Crop* cropCall)
         } else if (autowb) {
             if (lastAwbEqual != params.wb.equal || lastAwbTempBias != params.wb.tempBias  || lastAwbauto != params.wb.method  || lastwbgamma != params.wb.wbgammaMethod) {
                 double rm, gm, bm;
+                double tempitc = 5000.;
                 // imgsrc->getAutoWBMultipliers (rm, gm, bm);
-                imgsrc->getAutoWBMultipliersloc(0, 0, fh, fw, 0, 0, fh, fw, rm, gm, bm, params.localwb, params.wb, params.icm);
+                imgsrc->getAutoWBMultipliersloc(tempitc, 0, 0, fh, fw, 0, 0, fh, fw, rm, gm, bm, params.localwb, params.wb, params.icm);
+
+                if (params.wb.method == "autitc") {
+                    params.wb.temperature = tempitc;
+                    currWB = ColorTemp(params.wb.temperature, 1., 1., params.wb.method);
+                    currWB.getMultipliers(rm, gm, bm);
+                }
 
                 if (rm != -1.) {
                     autoWB.update(rm, gm, bm, params.wb.equal, params.wb.tempBias);
+
                     lastAwbEqual = params.wb.equal;
                     lastAwbTempBias = params.wb.tempBias;
                     lastAwbauto = params.wb.method;
@@ -1209,7 +1217,8 @@ bool ImProcCoordinator::getAutoWB(double& temp, double& green, double equal, dou
             params.wb.method = "autold";//same result as before muliple Auto WB
 
             //       imgsrc->getAutoWBMultipliers (rm, gm, bm);
-            imgsrc->getAutoWBMultipliersloc(0, 0, fh, fw, 0, 0, fh, fw, rm, gm, bm, params.localwb, params.wb, params.icm);
+            double tempitc = 5000.;
+            imgsrc->getAutoWBMultipliersloc(tempitc, 0, 0, fh, fw, 0, 0, fh, fw, rm, gm, bm, params.localwb, params.wb, params.icm);
 
             if (rm != -1) {
                 autoWB.update(rm, gm, bm, equal, tempBias);
@@ -1366,7 +1375,8 @@ void ImProcCoordinator::saveInputICCReference(const Glib::ustring& fname, bool a
         if (lastAwbEqual != params.wb.equal || lastAwbTempBias != params.wb.tempBias  || lastAwbauto != params.wb.method) {
             double rm, gm, bm;
             // imgsrc->getAutoWBMultipliers (rm, gm, bm);
-            imgsrc->getAutoWBMultipliersloc(0, 0, fh, fw, 0, 0, fh, fw, rm, gm, bm, params.localwb, params.wb, params.icm);
+            double tempitc = 5000.;
+            imgsrc->getAutoWBMultipliersloc(tempitc, 0, 0, fh, fw, 0, 0, fh, fw, rm, gm, bm, params.localwb, params.wb, params.icm);
 
             if (rm != -1.) {
                 autoWB.update(rm, gm, bm, params.wb.equal, params.wb.tempBias);
@@ -1567,25 +1577,28 @@ void ImProcCoordinator::endUpdateParams(int changeFlags)
     startProcessing();
 }
 
-bool ImProcCoordinator::getHighQualComputed() {
+bool ImProcCoordinator::getHighQualComputed()
+{
     // this function may only be called from detail windows
-    if(!highQualityComputed) {
-        if(options.prevdemo == PD_Sidecar) {
+    if (!highQualityComputed) {
+        if (options.prevdemo == PD_Sidecar) {
             // we already have high quality preview
             setHighQualComputed();
         } else {
             for (size_t i = 0; i < crops.size() - 1; ++i) { // -1, because last entry is the freshly created detail window
-                if (crops[i]->get_skip() == 1 ) {  // there is at least one crop with skip == 1 => we already have high quality preview
+                if (crops[i]->get_skip() == 1) {   // there is at least one crop with skip == 1 => we already have high quality preview
                     setHighQualComputed();
                     break;
                 }
             }
         }
     }
+
     return highQualityComputed;
 }
 
-void ImProcCoordinator::setHighQualComputed() {
+void ImProcCoordinator::setHighQualComputed()
+{
     highQualityComputed = true;
 }
 
