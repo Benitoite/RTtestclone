@@ -5602,358 +5602,12 @@ static void SobelWB(array2D<float> &redsobel, array2D<float> &greensobel, array2
     }
 }
 
+static void histoxyY  ( int bfhitc, int bfwitc, array2D<float> & xc, array2D<float> & yc, array2D<float> & Yc, float *xxx,  float * yyy, float * YYY,  int * histxy,  float * area,  int * inter)
 
-
-void RawImageSource::ItcWB(double &tempitc, array2D<float> &redloc, array2D<float> &greenloc, array2D<float> &blueloc, int bfw, int bfh, double &avg_rm, double &avg_gm, double &avg_bm, const ColorManagementParams &cmp)
 {
-    //copyright Jacques Desmis 3 - 2018 jdesmis@gmail.com
-    // this algorithm try to find temperature correlation between about 60 spectral color and about 40 color found in the image
-    //I have create a table temperature with temp and white point with 91 values between 2000K and 12000K we can obviously  change these values, more...with different steps
-    //I have create 61 spectral colors from Colorchecker24, others color and my 468 colors target
-    //first we create datas for each temp, we get xyz and there conversion with cat02
-    //I make an "histogram" (the term is not good) for an image with in output xyz values and input xy (range 0..1)
-    //then we sort this histogram and keep the 40 max values (if they exists)
-    //the we put in 2 arrays x and y for 61 references, and x and y for 40 color to correlate
-    //the we calculate Fisher Student correlation between the 2 populations
-    //I don't use test of Snedecor!
-    //some variables or function are not used, keep in case of
-
-    //this operation is done (actually) 91 times and comapre Student coefficient, and keep the absolute  minimum
-    // the we have found the best temperature where color image and colr ref are correlate
-    //after we pass this value to improccoordinator.
-
-
-    BENCHFUN
-    //  ColorManagementParams cmp;
-    TMatrix wprof = ICCStore::getInstance()->workingSpaceMatrix("sRGB");
-    /*   TMatrix wiprof = ICCStore::getInstance()->workingSpaceInverseMatrix("sRGB");
-       //inverse matrix user select
-       double wip[3][3] = {
-           {wiprof[0][0], wiprof[0][1], wiprof[0][2]},
-           {wiprof[1][0], wiprof[1][1], wiprof[1][2]},
-           {wiprof[2][0], wiprof[2][1], wiprof[2][2]}
-       };
-    */
-    double wp[3][3] = {
-        {wprof[0][0], wprof[0][1], wprof[0][2]},
-        {wprof[1][0], wprof[1][1], wprof[1][2]},
-        {wprof[2][0], wprof[2][1], wprof[2][2]}
-    };
-
-
-    array2D<float> xc;
-    array2D<float> yc;
-    array2D<float> Yc;
-
-
-
-    array2D<float> histcurr;
-
-    array2D<float> xxyycurr;
-    array2D<float> reffxxyy;
-
-
-    int bfwitc = bfw / 10 + 1 ;// 10 arbitrary value  ; perhaps 4 or 5 or 20
-    int bfhitc = bfh / 10 + 1;
-
-
-    xc(bfwitc, bfhitc);
-    yc(bfwitc, bfhitc);
-    Yc(bfwitc, bfhitc);
-
-
-    typedef struct WbTxyz {
-        double Tem;
-        double XX;
-        double ZZ;
-    } WbTxyz;
-
-    WbTxyz Txyz[91] = {//temperature Xwb Zwb 90 values
-        {2001., 1.273842, 0.145295},
-        {2101., 1.244008, 0.167533},
-        {2201., 1.217338, 0.190697},
-        {2301., 1.193444, 0.214632},
-        {2401., 1.171996, 0.239195},
-        {2501., 1.152883, 0.264539},
-        {2605., 1.134846, 0.291032},
-        {2705., 1.119049, 0.316446},
-        {2803., 1.105381, 0.342193},
-        {2856., 1.098258, 0.355599},
-        {2910., 1.091550, 0.369645},
-        {3003., 1.080982, 0.394258},
-        {3103., 1.070277, 0.419815},
-        {3203., 1.060906, 0.446161},
-        {3303., 1.052034, 0.471422},
-        {3400., 1.044547, 0.496719},
-        {3500., 1.037145, 0.521523},
-        {3600., 1.030574, 0.546590},
-        {3699., 1.024834, 0.571722},
-        {3801., 1.019072, 0.596102},
-        {3902., 1.014244, 0.621136},
-        {4002., 0.996153, 0.609518},
-        {4052., 0.993720, 0.620805},
-        {4102., 0.993908, 0.63152},
-        {4152., 0.989179, 0.643262},
-        {4202., 0.989283, 0.653999},
-        {4252., 0.985039, 0.665536},
-        {4302., 0.985067, 0.676288},
-        {4352., 0.981271, 0.687599},
-        {4402., 0.981228, 0.698349},
-        {4452., 0.977843, 0.709425},
-        {4502., 0.977736, 0.720159},
-        {4552., 0.974728, 0.730993},
-        {4602., 0.974562, 0.741698},
-        {4652., 0.971899, 0.752284},
-        {4702., 0.971681, 0.762949},
-        {4752., 0.969335, 0.773285},
-        {4802., 0.969069, 0.783899},
-        {4852., 0.967011, 0.793982},
-        {4902., 0.966702, 0.804537},
-        {4952., 0.964908, 0.814366},
-        {5002., 0.964561, 0.824854},
-        {5052., 0.963008, 0.834429},
-        {5102., 0.962627, 0.844842},
-        {5152., 0.961294, 0.854166},
-        {5202., 0.960883, 0.864497},
-        {5252., 0.959749, 0.873572},
-        {5302., 0.959313, 0.883815},
-        {5352., 0.958361, 0.892644},
-        {5402., 0.957903, 0.902793},
-        {5452., 0.957116, 0.911379},
-        {5502., 0.956639, 0.921431},
-        {5552., 0.956002, 0.929779},
-        {5602., 0.955509, 0.939728},
-        {5652., 0.955008, 0.947842},
-        {5702., 0.954502, 0.957685},
-        {5752., 0.954124, 0.965569},
-        {5802., 0.953608, 0.975303},
-        {5852., 0.953342, 0.982963},
-        {5902., 0.952818, 0.992584},
-        {5952., 0.952652, 1.000025},
-        {6002., 0.952122, 1.009532},
-        {6052., 0.952047, 1.016759},
-        {6102., 0.951514, 1.026149},
-        {6152., 0.951520, 1.033168},
-        {6202., 0.950985, 1.042439},
-        {6252., 0.951064, 1.049256},
-        {6302., 0.950530, 1.058406},
-        {6352., 0.950674, 1.065027},
-        {6402., 0.950143, 1.074055},
-        {6452., 0.950345, 1.080484},
-        {6502., 0.949817, 1.089390},
-        {6602., 0.949952, 1.103094},
-        {6702., 0.949330, 1.119138},
-        {6802., 0.949596, 1.132190},
-        {6902., 0.949033, 1.147691},
-        {7002., 0.949402, 1.160129},
-        {7152., 0.949348, 1.180429},
-        {7301., 0.948896, 1.201432},
-        {7451., 0.949434, 1.219076},
-        {7601., 0.949099, 1.239061},
-        {7751., 0.949729, 1.255559},
-        {7901., 0.949498, 1.274460},
-        {8301., 0.950253, 1.318464},
-        {8601., 0.950941, 1.349261},
-        {9001., 0.951969, 1.387639},
-        {9401., 0.953081, 1.423213},
-        {9901., 0.954537, 1.464134},
-        {10501., 0.956321, 1.508623},
-        {11001., 0.957747, 1.541281},
-        {12001., 0.960440, 1.601019}
-
-    };
-    int N_t = sizeof(Txyz) / sizeof(Txyz[0]);   //number of temperature White point
-
-    double temp = 5000.;
-    int nbt = N_t;
-    float **Tx = nullptr;
-    float **Ty = nullptr;
-    float **TYY = nullptr;
-    float **Ta = nullptr;
-    float **Tb = nullptr;
-    float **TL = nullptr;
-    float **TX = nullptr;
-    float **TY = nullptr;
-    float **TZ = nullptr;
-
-    int Nc = 61;//number of reference spectral colors
-    Tx = new float*[Nc];
-
-    for (int i = 0; i < Nc; i++) {
-        Tx[i] = new float[nbt];
-    }
-
-    Ty = new float*[Nc];
-
-    for (int i = 0; i < Nc; i++) {
-        Ty[i] = new float[nbt];
-    }
-
-    TYY = new float*[Nc];
-
-    for (int i = 0; i < Nc; i++) {
-        TYY[i] = new float[nbt];
-    }
-
-    Ta = new float*[Nc];
-
-    for (int i = 0; i < Nc; i++) {
-        Ta[i] = new float[nbt];
-    }
-
-    Tb = new float*[Nc];
-
-    for (int i = 0; i < Nc; i++) {
-        Tb[i] = new float[nbt];
-    }
-
-    TL = new float*[Nc];
-
-    for (int i = 0; i < Nc; i++) {
-        TL[i] = new float[nbt];
-    }
-
-    TX = new float*[Nc];
-
-    for (int i = 0; i < Nc; i++) {
-        TX[i] = new float[nbt];
-    }
-
-    TY = new float*[Nc];
-
-    for (int i = 0; i < Nc; i++) {
-        TY[i] = new float[nbt];
-    }
-
-    TZ = new float*[Nc];
-
-    for (int i = 0; i < Nc; i++) {
-        TZ[i] = new float[nbt];
-    }
-
-    float *rmm = nullptr;
-    rmm = new float [N_t];
-
-    float *gmm = nullptr;
-    gmm = new float [N_t];
-
-    float *bmm = nullptr;
-    bmm = new float [N_t];
-
-    //calculate R G B multiplier in function illuminant and temperature
-    for (int tt = 0; tt < N_t; tt++) {
-        double r, g, b;
-        float rm, gm, bm;
-        ColorTemp WBiter = ColorTemp(Txyz[tt].Tem, 1.f, 1.f, "Custom");
-        const RAWParams raw ;
-        WBiter.getMultipliers(r, g, b);
-        rm = imatrices.cam_rgb[0][0] * r + imatrices.cam_rgb[0][1] * g + imatrices.cam_rgb[0][2] * b;
-        gm = imatrices.cam_rgb[1][0] * r + imatrices.cam_rgb[1][1] * g + imatrices.cam_rgb[1][2] * b;
-        bm = imatrices.cam_rgb[2][0] * r + imatrices.cam_rgb[2][1] * g + imatrices.cam_rgb[2][2] * b;
-
-        const float new_pre_mul[4] = { ri->get_pre_mul(0) / rm, ri->get_pre_mul(1) / gm, ri->get_pre_mul(2) / bm, ri->get_pre_mul(3) / gm };
-        float new_scale_mul[4];
-        bool isMono = (ri->getSensorType() == ST_FUJI_XTRANS && raw.xtranssensor.method == RAWParams::XTransSensor::getMethodString(RAWParams::XTransSensor::Method::MONO))
-                      || (ri->getSensorType() == ST_BAYER && raw.bayersensor.method == RAWParams::BayerSensor::getMethodString(RAWParams::BayerSensor::Method::MONO));
-        float gain = calculate_scale_mul(new_scale_mul, new_pre_mul, c_white, cblacksom, isMono, ri->get_colors());
-
-        rm = new_scale_mul[0] / scale_mul[0] * gain;
-        gm = new_scale_mul[1] / scale_mul[1] * gain;
-        bm = new_scale_mul[2] / scale_mul[2] * gain;
-        rmm[tt] = rm / gm;
-        gmm[tt] = gm / gm;
-        bmm[tt] = bm / gm;
-    }
-
-    //call tempxy to calaculate for 61 color references Temp and XYZ with cat02
-
-    ColorTemp::tempxy(temp, Tx, Ty, TYY, Ta, Tb, TL, TX, TY, TZ); //calculate chroma xy (xyY) for Z known colors on under 90 illuminants
-
-    reffxxyy(130, 130);
-
-    //fill reffxxyy with xy values
-    for (int tt = 0; tt < N_t; tt++) {
-        for (int j = 0; j < Nc ; j++) {
-            reffxxyy[2 * j][tt] = Tx[j][tt] / (Tx[j][tt] + Ty[j][tt] +  TYY[j][tt]); // x from xyY
-            reffxxyy[2 * j + 1][tt] =  Tx[j][tt] / (Tx[j][tt] + Ty[j][tt] +  TYY[j][tt]); // y from xyY
-        }
-    }
-
-
-
-    //calculate for this image the mean values for each family of color, near histogram x y (number)
-    //xy vary from x 0..0.77  y 0..0.82
-    //neutral values are near x=0.34 0.33 0.315 0.37 y =0.35 0.36 0.34
-    //skin are about x 0.45  0.49 y 0.4 0.47
-    //blue sky x=0.25 y=0.28  and x=0.29 y=0.32
-    // step about 0.02   x 0.32 0.34  y= 0.34 0.36 skin    --  sky x 0.24 0.30 y 0.28 0.32
-    //big step about 0.2
-
-    //calculate x y Y
-    int siza = 167;//size of histogram
-    int sizcurr = 40;//choice of number of correlate colors in image
-    histcurr(N_t, sizcurr);
-    xxyycurr(N_t, 2 * sizcurr);
-    float minstud = 100000.f;
-    int goodref = 1;
-
-//calculate  x y z for each pixel with multiplier rmm gmm bmm
-    for (int tt = 0; tt < N_t; tt++) {
-        for (int y = 0; y < bfh ; y += 10) {
-            for (int x = 0; x < bfw ; x += 10) {
-                int yy = y / 10;
-                int xx = x / 10 ;
-                float x_c = 0.f, y_c = 0.f, Y_c = 0.f;
-                float RR =  rmm[tt] * redloc[y][x];
-                float GG =  gmm[tt] * greenloc[y][x];
-                float BB =  bmm[tt] * blueloc[y][x];
-
-                Color::rgbxyY(RR, GG, BB, x_c, y_c, Y_c, wp);
-                xc[yy][xx] = x_c;
-                yc[yy][xx] = y_c;
-                Yc[yy][xx] = Y_c;
-
-            }
-
-        }
-
-        struct hiss {
-            float histnum;
-            int index;
-            bool operator()(const hiss& lhis, const hiss& rhis)
-            {
-                return lhis.histnum < rhis.histnum;
-            }
-
-        } ;
-
-        int histxy[siza] = {};//number of values for each pair xy
-
-        float area[siza] = {};//multiplier for compensation differences area ==> big areas are rare near limit prophotos or more
-
-        int inter[siza] = {}; //interest for photographie 1 = small (limit gamut) 2 = normal 3 = major (skin, sky, neutral)
-
-
-        int nh = 0;
-
-        float xxx[siza] = {};//for color references calculated ==> max in images "like histogram"
-
-        float yyy[siza] = {};
-
-        float YYY[siza] = {};//not used directly, but necessary to keep good range
-
-        float histY[siza] = {};//#mean Y of xyY : not used directly, but necessary to keep good range
-
-        for (int p = 0; p < siza; p++) {
-            histxy[p] = 0.f;
-            area[p] = 20.f;
-            inter[p] = 1;
-            histY[p] = 1.f;
-        }
-
-        int nc, nc2 = 0;
-
-        //draw an histogram in xy
+	   int nh = 0;
+	   int nc = 0;
+	   int nc2 = 0;
         for (int y = 0; y < bfhitc ; y++) {
             for (int x = 0; x < bfwitc ; x++) {
 
@@ -7454,6 +7108,389 @@ void RawImageSource::ItcWB(double &tempitc, array2D<float> &redloc, array2D<floa
 
             }
         }
+	}
+
+
+void static studentXY (array2D<float> & YYcurr, array2D<float> & reffYY, int sizcurr, int Nc, int tt, float & student)
+{
+        //calculate Student coeff YY
+        float somcurrY = 0.f;
+        float somreffY = 0.f;
+        float somcurr2Y = 0.f;
+        float somreff2Y = 0.f;
+        float somsqueccurrY = 0.f;
+        float somsquecreffY = 0.f;
+        int sizestucurrY = sizcurr;
+        int sizestureffY = Nc;
+        for (int i = 0; i < sizestucurrY; i++) {
+            somcurrY += 100.f * YYcurr[i][tt];
+        }
+
+        for (int i = 0; i < sizestureffY; i++) {
+            somreffY += 100.f * reffYY[i][tt];
+        }
+
+
+        for (int i = 0; i < sizestucurrY; i++) {
+            somcurr2Y += SQR(100.f * YYcurr[i][tt]);
+        }
+
+        for (int i = 0; i < sizestureffY; i++) {
+            somreff2Y += SQR(100.f * reffYY[i][tt]);
+        }
+        somsqueccurrY = somcurr2Y - (SQR(somcurrY)) / sizestucurrY;
+        somsquecreffY = somreff2Y - (SQR(somreffY)) / sizestureffY;
+    //    float studentY = 0.f;
+        float diviY = sqrt(((somsqueccurrY + somsquecreffY) * (1.f / (float)sizestucurrY + 1.f / (float)sizestureffY)) / (sizestucurrY + sizestureffY - 2));
+
+        float numerY = ((float)somcurrY / (float)sizestucurrY) - ((float)somreffY / (float)sizestureffY);
+
+        student = numerY / diviY ;
+}
+
+
+void RawImageSource::ItcWB(const LocWBParams &localr, double &tempitc, array2D<float> &redloc, array2D<float> &greenloc, array2D<float> &blueloc, int bfw, int bfh, double &avg_rm, double &avg_gm, double &avg_bm, const ColorManagementParams &cmp, const RAWParams &raw)
+{
+    //copyright Jacques Desmis 3 - 2018 jdesmis@gmail.com
+    // this algorithm try to find temperature correlation between about 60 spectral color and about 40 color found in the image
+    //I have create a table temperature with temp and white point with 91 values between 2000K and 12000K we can obviously  change these values, more...with different steps
+    //I have create 61 spectral colors from Colorchecker24, others color and my 468 colors target
+    //first we create datas for each temp, we get xyz and there conversion with cat02
+    //I make an "histogram" (the term is not good) for an image with in output xyz values and input xy (range 0..1)
+    //then we sort this histogram and keep the 40 max values (if they exists)
+    //the we put in 2 arrays x and y for 61 references, and x and y for 40 color to correlate
+    //the we calculate Fisher Student correlation between the 2 populations
+    //I don't use test of Snedecor!
+    //some variables or function are not used, keep in case of
+
+    //this operation is done (actually) 91 times and comapre Student coefficient, and keep the absolute  minimum
+    // the we have found the best temperature where color image and colr ref are correlate
+    //after we pass this value to improccoordinator.
+
+
+    BENCHFUN
+    TMatrix wprof = ICCStore::getInstance()->workingSpaceMatrix("sRGB");
+    double wp[3][3] = {
+        {wprof[0][0], wprof[0][1], wprof[0][2]},
+        {wprof[1][0], wprof[1][1], wprof[1][2]},
+        {wprof[2][0], wprof[2][1], wprof[2][2]}
+    };
+
+
+    array2D<float> xc;
+    array2D<float> yc;
+    array2D<float> Yc;
+
+
+
+    array2D<float> histcurr;
+
+    array2D<float> xxyycurr;
+    array2D<float> reffxxyy;
+    array2D<float> YYcurr;
+    array2D<float> reffYY;
+
+
+    int bfwitc = bfw / 10 + 1 ;// 10 arbitrary value  ; perhaps 4 or 5 or 20
+    int bfhitc = bfh / 10 + 1;
+
+
+    xc(bfwitc, bfhitc);
+    yc(bfwitc, bfhitc);
+    Yc(bfwitc, bfhitc);
+
+
+    typedef struct WbTxyz {
+        double Tem;
+        double XX;
+        double ZZ;
+    } WbTxyz;
+
+    WbTxyz Txyz[91] = {//temperature Xwb Zwb 90 values
+        {2001., 1.273842, 0.145295},
+        {2101., 1.244008, 0.167533},
+        {2201., 1.217338, 0.190697},
+        {2301., 1.193444, 0.214632},
+        {2401., 1.171996, 0.239195},
+        {2501., 1.152883, 0.264539},
+        {2605., 1.134846, 0.291032},
+        {2705., 1.119049, 0.316446},
+        {2803., 1.105381, 0.342193},
+        {2856., 1.098258, 0.355599},
+        {2910., 1.091550, 0.369645},
+        {3003., 1.080982, 0.394258},
+        {3103., 1.070277, 0.419815},
+        {3203., 1.060906, 0.446161},
+        {3303., 1.052034, 0.471422},
+        {3400., 1.044547, 0.496719},
+        {3500., 1.037145, 0.521523},
+        {3600., 1.030574, 0.546590},
+        {3699., 1.024834, 0.571722},
+        {3801., 1.019072, 0.596102},
+        {3902., 1.014244, 0.621136},
+        {4002., 0.996153, 0.609518},
+        {4052., 0.993720, 0.620805},
+        {4102., 0.993908, 0.63152},
+        {4152., 0.989179, 0.643262},
+        {4202., 0.989283, 0.653999},
+        {4252., 0.985039, 0.665536},
+        {4302., 0.985067, 0.676288},
+        {4352., 0.981271, 0.687599},
+        {4402., 0.981228, 0.698349},
+        {4452., 0.977843, 0.709425},
+        {4502., 0.977736, 0.720159},
+        {4552., 0.974728, 0.730993},
+        {4602., 0.974562, 0.741698},
+        {4652., 0.971899, 0.752284},
+        {4702., 0.971681, 0.762949},
+        {4752., 0.969335, 0.773285},
+        {4802., 0.969069, 0.783899},
+        {4852., 0.967011, 0.793982},
+        {4902., 0.966702, 0.804537},
+        {4952., 0.964908, 0.814366},
+        {5002., 0.964561, 0.824854},
+        {5052., 0.963008, 0.834429},
+        {5102., 0.962627, 0.844842},
+        {5152., 0.961294, 0.854166},
+        {5202., 0.960883, 0.864497},
+        {5252., 0.959749, 0.873572},
+        {5302., 0.959313, 0.883815},
+        {5352., 0.958361, 0.892644},
+        {5402., 0.957903, 0.902793},
+        {5452., 0.957116, 0.911379},
+        {5502., 0.956639, 0.921431},
+        {5552., 0.956002, 0.929779},
+        {5602., 0.955509, 0.939728},
+        {5652., 0.955008, 0.947842},
+        {5702., 0.954502, 0.957685},
+        {5752., 0.954124, 0.965569},
+        {5802., 0.953608, 0.975303},
+        {5852., 0.953342, 0.982963},
+        {5902., 0.952818, 0.992584},
+        {5952., 0.952652, 1.000025},
+        {6002., 0.952122, 1.009532},
+        {6052., 0.952047, 1.016759},
+        {6102., 0.951514, 1.026149},
+        {6152., 0.951520, 1.033168},
+        {6202., 0.950985, 1.042439},
+        {6252., 0.951064, 1.049256},
+        {6302., 0.950530, 1.058406},
+        {6352., 0.950674, 1.065027},
+        {6402., 0.950143, 1.074055},
+        {6452., 0.950345, 1.080484},
+        {6502., 0.949817, 1.089390},
+        {6602., 0.949952, 1.103094},
+        {6702., 0.949330, 1.119138},
+        {6802., 0.949596, 1.132190},
+        {6902., 0.949033, 1.147691},
+        {7002., 0.949402, 1.160129},
+        {7152., 0.949348, 1.180429},
+        {7301., 0.948896, 1.201432},
+        {7451., 0.949434, 1.219076},
+        {7601., 0.949099, 1.239061},
+        {7751., 0.949729, 1.255559},
+        {7901., 0.949498, 1.274460},
+        {8301., 0.950253, 1.318464},
+        {8601., 0.950941, 1.349261},
+        {9001., 0.951969, 1.387639},
+        {9401., 0.953081, 1.423213},
+        {9901., 0.954537, 1.464134},
+        {10501., 0.956321, 1.508623},
+        {11001., 0.957747, 1.541281},
+        {12001., 0.960440, 1.601019}
+
+    };
+    int N_t = sizeof(Txyz) / sizeof(Txyz[0]);   //number of temperature White point
+
+    double temp = 5000.;
+    int nbt = N_t;
+    float **Tx = nullptr;
+    float **Ty = nullptr;
+    float **TYY = nullptr;
+    float **Ta = nullptr;
+    float **Tb = nullptr;
+    float **TL = nullptr;
+    float **TX = nullptr;
+    float **TY = nullptr;
+    float **TZ = nullptr;
+
+    int Nc = 61;//number of reference spectral colors
+    Tx = new float*[Nc];
+
+    for (int i = 0; i < Nc; i++) {
+        Tx[i] = new float[nbt];
+    }
+
+    Ty = new float*[Nc];
+
+    for (int i = 0; i < Nc; i++) {
+        Ty[i] = new float[nbt];
+    }
+
+    TYY = new float*[Nc];
+
+    for (int i = 0; i < Nc; i++) {
+        TYY[i] = new float[nbt];
+    }
+
+    Ta = new float*[Nc];
+
+    for (int i = 0; i < Nc; i++) {
+        Ta[i] = new float[nbt];
+    }
+
+    Tb = new float*[Nc];
+
+    for (int i = 0; i < Nc; i++) {
+        Tb[i] = new float[nbt];
+    }
+
+    TL = new float*[Nc];
+
+    for (int i = 0; i < Nc; i++) {
+        TL[i] = new float[nbt];
+    }
+
+    TX = new float*[Nc];
+
+    for (int i = 0; i < Nc; i++) {
+        TX[i] = new float[nbt];
+    }
+
+    TY = new float*[Nc];
+
+    for (int i = 0; i < Nc; i++) {
+        TY[i] = new float[nbt];
+    }
+
+    TZ = new float*[Nc];
+
+    for (int i = 0; i < Nc; i++) {
+        TZ[i] = new float[nbt];
+    }
+
+    float *rmm = nullptr;
+    rmm = new float [N_t];
+
+    float *gmm = nullptr;
+    gmm = new float [N_t];
+
+    float *bmm = nullptr;
+    bmm = new float [N_t];
+
+    int siza = 167;//size of histogram
+
+    //calculate R G B multiplier in function illuminant and temperature
+    for (int tt = 0; tt < N_t; tt++) {
+        double r, g, b;
+        float rm, gm, bm;
+        ColorTemp WBiter = ColorTemp(Txyz[tt].Tem, localr.green, 1.f, "Custom");
+        WBiter.getMultipliers(r, g, b);
+        rm = imatrices.cam_rgb[0][0] * r + imatrices.cam_rgb[0][1] * g + imatrices.cam_rgb[0][2] * b;
+        gm = imatrices.cam_rgb[1][0] * r + imatrices.cam_rgb[1][1] * g + imatrices.cam_rgb[1][2] * b;
+        bm = imatrices.cam_rgb[2][0] * r + imatrices.cam_rgb[2][1] * g + imatrices.cam_rgb[2][2] * b;
+
+        const float new_pre_mul[4] = { ri->get_pre_mul(0) / rm, ri->get_pre_mul(1) / gm, ri->get_pre_mul(2) / bm, ri->get_pre_mul(3) / gm };
+        float new_scale_mul[4];
+        bool isMono = (ri->getSensorType() == ST_FUJI_XTRANS && raw.xtranssensor.method == RAWParams::XTransSensor::getMethodString(RAWParams::XTransSensor::Method::MONO))
+                      || (ri->getSensorType() == ST_BAYER && raw.bayersensor.method == RAWParams::BayerSensor::getMethodString(RAWParams::BayerSensor::Method::MONO));
+        float gain = calculate_scale_mul(new_scale_mul, new_pre_mul, c_white, cblacksom, isMono, ri->get_colors());
+
+        rm = new_scale_mul[0] / scale_mul[0] * gain;
+        gm = new_scale_mul[1] / scale_mul[1] * gain;
+        bm = new_scale_mul[2] / scale_mul[2] * gain;
+        rmm[tt] = rm / gm;
+        gmm[tt] = gm / gm;
+        bmm[tt] = bm / gm;
+    }
+	
+    //call tempxy to calculate for 61 color references Temp and XYZ with cat02
+    ColorTemp::tempxy(temp, Tx, Ty, TYY, Ta, Tb, TL, TX, TY, TZ); //calculate chroma xy (xyY) for Z known colors on under 90 illuminants
+
+    reffxxyy(130, 130);
+    reffYY(130, 130);
+
+    //fill reffxxyy with xy values
+    for (int tt = 0; tt < N_t; tt++) {
+        for (int j = 0; j < Nc ; j++) {
+            reffxxyy[2 * j][tt] = Tx[j][tt] / (Tx[j][tt] + Ty[j][tt] +  TYY[j][tt]); // x from xyY
+            reffxxyy[2 * j + 1][tt] =  Tx[j][tt] / (Tx[j][tt] + Ty[j][tt] +  TYY[j][tt]); // y from xyY
+			reffYY[j][tt]=TYY[j][tt];
+        }
+    }
+
+
+    //calculate for this image the mean values for each family of color, near histogram x y (number)
+    //xy vary from x 0..0.77  y 0..0.82
+    //neutral values are near x=0.34 0.33 0.315 0.37 y =0.35 0.36 0.34
+    //skin are about x 0.45  0.49 y 0.4 0.47
+    //blue sky x=0.25 y=0.28  and x=0.29 y=0.32
+    // step about 0.02   x 0.32 0.34  y= 0.34 0.36 skin    --  sky x 0.24 0.30 y 0.28 0.32
+    //big step about 0.2
+
+    //calculate x y Y
+    int sizcurr = 40;//choice of number of correlate colors in image
+    histcurr(N_t, sizcurr);
+    xxyycurr(N_t, 2 * sizcurr);
+    float minstud = 100000.f;
+    int goodref = 1;
+    int goodrefY = 1;
+    float minstudY = 100000.f;
+	
+    YYcurr(N_t, sizcurr);
+//calculate  x y z for each pixel with multiplier rmm gmm bmm
+    for (int tt = 0; tt < N_t; tt++) {
+        for (int y = 0; y < bfh ; y += 10) {
+            for (int x = 0; x < bfw ; x += 10) {
+                int yy = y / 10;
+                int xx = x / 10 ;
+                float x_c = 0.f, y_c = 0.f, Y_c = 0.f;
+                float RR =  rmm[tt] * redloc[y][x];
+                float GG =  gmm[tt] * greenloc[y][x];
+                float BB =  bmm[tt] * blueloc[y][x];
+
+                Color::rgbxyY(RR, GG, BB, x_c, y_c, Y_c, wp);
+                xc[yy][xx] = x_c;
+                yc[yy][xx] = y_c;
+                Yc[yy][xx] = Y_c;
+
+            }
+
+        }
+
+        struct hiss {
+            float histnum;
+            int index;
+            bool operator()(const hiss& lhis, const hiss& rhis)
+            {
+                return lhis.histnum < rhis.histnum;
+            }
+
+        } ;
+
+        int histxy[siza] = {};//number of values for each pair xy
+
+        float area[siza] = {};//multiplier for compensation differences area ==> big areas are rare near limit prophotos or more
+
+        int inter[siza] = {}; //interest for photographie 1 = small (limit gamut) 2 = normal 3 = major (skin, sky, neutral)
+
+        float xxx[siza] = {};//for color references calculated ==> max in images "like histogram"
+
+        float yyy[siza] = {};
+
+        float YYY[siza] = {};//not used directly, but necessary to keep good range
+		
+        int nh = 0;
+		
+	
+        for (int p = 0; p < siza; p++) {
+            histxy[p] = 0;
+            area[p] = 20.f;
+            inter[p] = 1;
+        }
+
+        int nc, nc2 = 0;
+		histoxyY  (bfhitc, bfwitc, xc, yc, Yc, xxx,  yyy, YYY, histxy, area,inter);
 
         hiss Wbhis [siza];
 
@@ -7471,45 +7508,25 @@ void RawImageSource::ItcWB(double &tempitc, array2D<float> &redloc, array2D<floa
             histcurr[i][tt] = Wbhis[siza - (i + 1)].histnum;
             xxyycurr[2 * i][tt] = xxx[Wbhis[siza - (i + 1)].index] / histcurr[i][tt];
             xxyycurr[2 * i + 1][tt] = yyy[Wbhis[siza - (i + 1)].index] / histcurr[i][tt];
+            YYcurr[i][tt] = YYY[Wbhis[siza - (i + 1)].index] / histcurr[i][tt];	
         }
-
-        //calculate Student coeff
-        float somcurr = 0.f;
-        float somreff = 0.f;
-        float somcurr2 = 0.f;
-        float somreff2 = 0.f;
-        float somsqueccurr = 0.f;
-        float somsquecreff = 0.f;
-        int sizestucurr = 2 * sizcurr;
-        int sizestureff = 2 * Nc;
-
-        for (int i = 0; i < sizestucurr; i++) {
-            somcurr += 100.f * xxyycurr[i][tt];
-        }
-
-        for (int i = 0; i < sizestureff; i++) {
-            somreff += 100.f * reffxxyy[i][tt];
-        }
-
-
-        for (int i = 0; i < sizestucurr; i++) {
-            somcurr2 += SQR(100.f * xxyycurr[i][tt]);
-        }
-
-        for (int i = 0; i < sizestureff; i++) {
-            somreff2 += SQR(100.f * reffxxyy[i][tt]);
-        }
-
-        somsqueccurr = somcurr2 - (SQR(somcurr)) / sizestucurr;
-        somsquecreff = somreff2 - (SQR(somreff)) / sizestureff;
+		float studentY = 0.f;
         float student = 0.f;
-        float divi = sqrt(((somsqueccurr + somsquecreff) * (1.f / (float)sizestucurr + 1.f / (float)sizestureff)) / (sizestucurr + sizestureff - 2));
-
-        float numer = ((float)somcurr / (float)sizestucurr) - ((float)somreff / (float)sizestureff);
-
-        student = numer / divi ;
+		
+		studentXY (YYcurr, reffYY, sizcurr, Nc, tt, studentY);//for YY green
         //float snedecor = 1.40f; //for sizestucurr and sizestureff
         // not used
+        float abstudY = fabs(studentY);
+
+        if (abstudY < minstudY) {  // find the minimum Student
+            minstudY = abstudY;
+            goodrefY = tt;
+        }
+		
+		
+		studentXY (xxyycurr, reffxxyy, 2* sizcurr, 2* Nc, tt, student);//for xy
+	//	printf("tt=%i studeY=%f st=%f\n", tt, studentY, student);
+		
         float abstud = fabs(student);
 
         if (abstud < minstud) {  // find the minimum Student
@@ -7520,6 +7537,7 @@ void RawImageSource::ItcWB(double &tempitc, array2D<float> &redloc, array2D<floa
         //  printf("n_t=%i stu=%f \n", tt, student);
 
     }
+    printf("minstuY=%f ref=%i \n",   minstudY, goodrefY);
 
     printf("minstu=%f ref=%i \n",   minstud, goodref);
 
@@ -7569,6 +7587,8 @@ void RawImageSource::ItcWB(double &tempitc, array2D<float> &redloc, array2D<floa
     delete [] gmm;
     delete [] bmm;
 
+	
+	
 
 }
 
@@ -7594,7 +7614,7 @@ void cat02_to_xyzfloatraw ( float & x, float & y, float & z, float r, float g, f
 */
 
 
-void RawImageSource::WBauto(array2D<float> &redloc, array2D<float> &greenloc, array2D<float> &blueloc, int bfw, int bfh, double & avg_rm, double & avg_gm, double & avg_bm, double &tempitc, const LocWBParams & localr, const WBParams & wbpar, int begx, int begy, int yEn, int xEn, int cx, int cy, const ColorManagementParams &cmp)
+void RawImageSource::WBauto(array2D<float> &redloc, array2D<float> &greenloc, array2D<float> &blueloc, int bfw, int bfh, double & avg_rm, double & avg_gm, double & avg_bm, double &tempitc, const LocWBParams & localr, const WBParams & wbpar, int begx, int begy, int yEn, int xEn, int cx, int cy, const ColorManagementParams &cmp, const RAWParams &raw)
 {
     BENCHFUN
     //auto white balance
@@ -7637,6 +7657,7 @@ void RawImageSource::WBauto(array2D<float> &redloc, array2D<float> &greenloc, ar
     if (wbpar.method == "autorobust") {
         //  printf("autorob\n");
         RobustWB(redloc, greenloc, blueloc, bfw, bfh, avg_rm, avg_gm, avg_bm);
+
     }
 
     if (wbpar.method == "autedg") {
@@ -7652,7 +7673,7 @@ void RawImageSource::WBauto(array2D<float> &redloc, array2D<float> &greenloc, ar
         itc = true;
 
         if (itc) {
-            ItcWB(tempitc, redloc, greenloc, blueloc, bfw, bfh, avg_rm, avg_gm, avg_bm, cmp);
+            ItcWB(localr, tempitc, redloc, greenloc, blueloc, bfw, bfh, avg_rm, avg_gm, avg_bm, cmp, raw);
         }
 
     }
@@ -7899,7 +7920,7 @@ void  RawImageSource::getrgbloc(bool local, bool gamma, bool cat02, int begx, in
 
 }
 
-void RawImageSource::getAutoWBMultipliersloc(double &tempitc, int begx, int begy, int yEn, int xEn, int cx, int cy, int bf_h, int bf_w, double & rm, double & gm, double & bm, const LocWBParams & localr, const WBParams & wbpar, const ColorManagementParams &cmp)
+void RawImageSource::getAutoWBMultipliersloc(double &tempitc, int begx, int begy, int yEn, int xEn, int cx, int cy, int bf_h, int bf_w, double & rm, double & gm, double & bm, const LocWBParams & localr, const WBParams & wbpar, const ColorManagementParams &cmp, const RAWParams &raw)
 {
     //    BENCHFUN
     constexpr double clipHigh = 64000.0;
@@ -8125,7 +8146,7 @@ void RawImageSource::getAutoWBMultipliersloc(double &tempitc, int begx, int begy
     if (wbpar.method == "aut"  || wbpar.method == "autosdw" || wbpar.method == "autedgsdw" || wbpar.method == "autitc"  || wbpar.method == "autedgrob" || wbpar.method == "autedg" || wbpar.method == "autorobust") {
         //   printf("appel a \n");
         //double tempitc = 5000.;
-        WBauto(redloc, greenloc, blueloc, bfw, bfh, avg_rm, avg_gm, avg_bm, tempitc, localr, wbpar, begx, begy, yEn,  xEn,  cx,  cy, cmp);
+        WBauto(redloc, greenloc, blueloc, bfw, bfh, avg_rm, avg_gm, avg_bm, tempitc, localr, wbpar, begx, begy, yEn,  xEn,  cx,  cy, cmp, raw);
     }
 
     redloc(0, 0);
@@ -8166,6 +8187,7 @@ void RawImageSource::getAutoWBMultipliersloc(double &tempitc, int begx, int begy
         greenAWBMul = gm = imatrices.rgb_cam[1][0] * reds + imatrices.rgb_cam[1][1] * greens + imatrices.rgb_cam[1][2] * blues;
         blueAWBMul  = bm = imatrices.rgb_cam[2][0] * reds + imatrices.rgb_cam[2][1] * greens + imatrices.rgb_cam[2][2] * blues;
     }
+	
 
 }
 

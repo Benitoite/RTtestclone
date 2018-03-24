@@ -343,7 +343,7 @@ void ImProcCoordinator::updatePreviewImage(int todo, Crop* cropCall)
                 double rm, gm, bm;
                 double tempitc = 5000.;
                 // imgsrc->getAutoWBMultipliers (rm, gm, bm);
-                imgsrc->getAutoWBMultipliersloc(tempitc, 0, 0, fh, fw, 0, 0, fh, fw, rm, gm, bm, params.localwb, params.wb, params.icm);
+                imgsrc->getAutoWBMultipliersloc(tempitc, 0, 0, fh, fw, 0, 0, fh, fw, rm, gm, bm, params.localwb, params.wb, params.icm, params.raw);
 
                 if (params.wb.method == "autitc") {
                     params.wb.temperature = tempitc;
@@ -353,6 +353,9 @@ void ImProcCoordinator::updatePreviewImage(int todo, Crop* cropCall)
 
                 if (rm != -1.) {
                     autoWB.update(rm, gm, bm, params.wb.equal, params.wb.tempBias);
+					double temper = autoWB.getTemp();
+					double gre = autoWB.getGreen();
+					printf("temper=%f gre=%f \n", temper, gre);
 
                     lastAwbEqual = params.wb.equal;
                     lastAwbTempBias = params.wb.tempBias;
@@ -1218,7 +1221,7 @@ bool ImProcCoordinator::getAutoWB(double& temp, double& green, double equal, dou
 
             //       imgsrc->getAutoWBMultipliers (rm, gm, bm);
             double tempitc = 5000.;
-            imgsrc->getAutoWBMultipliersloc(tempitc, 0, 0, fh, fw, 0, 0, fh, fw, rm, gm, bm, params.localwb, params.wb, params.icm);
+            imgsrc->getAutoWBMultipliersloc(tempitc, 0, 0, fh, fw, 0, 0, fh, fw, rm, gm, bm, params.localwb, params.wb, params.icm, params.raw);
 
             if (rm != -1) {
                 autoWB.update(rm, gm, bm, equal, tempBias);
@@ -1376,7 +1379,7 @@ void ImProcCoordinator::saveInputICCReference(const Glib::ustring& fname, bool a
             double rm, gm, bm;
             // imgsrc->getAutoWBMultipliers (rm, gm, bm);
             double tempitc = 5000.;
-            imgsrc->getAutoWBMultipliersloc(tempitc, 0, 0, fh, fw, 0, 0, fh, fw, rm, gm, bm, params.localwb, params.wb, params.icm);
+            imgsrc->getAutoWBMultipliersloc(tempitc, 0, 0, fh, fw, 0, 0, fh, fw, rm, gm, bm, params.localwb, params.wb, params.icm, params.raw);
 
             if (rm != -1.) {
                 autoWB.update(rm, gm, bm, params.wb.equal, params.wb.tempBias);
