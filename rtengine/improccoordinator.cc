@@ -268,7 +268,7 @@ void ImProcCoordinator::updatePreviewImage(int todo, Crop* cropCall)
         todo |= M_INIT;
 
         bool autowb0 = false;
-        autowb0 = (params.wb.method == "autold" || params.wb.method == "aut"  || params.wb.method == "autosdw" || params.wb.method == "autedgsdw" || params.wb.method == "autitc"  || params.wb.method == "autedgrob" || params.wb.method == "autedg" || params.wb.method == "autorobust");
+        autowb0 = (params.wb.method == "autold" || params.wb.method == "aut"  || params.wb.method == "autosdw" || params.wb.method == "autedgsdw" || params.wb.method == "autitc" || params.wb.method == "autitc2" || params.wb.method == "autedgrob" || params.wb.method == "autedg" || params.wb.method == "autorobust");
         bool gamma = false;
 
         if (params.wb.wbgammaMethod == "gam") {
@@ -312,7 +312,7 @@ void ImProcCoordinator::updatePreviewImage(int todo, Crop* cropCall)
     }
 
     bool autowb = false;
-    autowb = (params.wb.method == "autold" || params.wb.method == "aut"  || params.wb.method == "autosdw" || params.wb.method == "autedgsdw" || params.wb.method == "autitc"  || params.wb.method == "autedgrob" || params.wb.method == "autedg" || params.wb.method == "autorobust");
+    autowb = (params.wb.method == "autold" || params.wb.method == "aut"  || params.wb.method == "autosdw" || params.wb.method == "autedgsdw" || params.wb.method == "autitc"  || params.wb.method == "autitc2" || params.wb.method == "autedgrob" || params.wb.method == "autedg" || params.wb.method == "autorobust");
 
 //  Glib::ustring
     if (todo & (M_INIT | M_LINDENOISE | M_HDR)) {
@@ -347,7 +347,7 @@ void ImProcCoordinator::updatePreviewImage(int todo, Crop* cropCall)
                 imgsrc->getAutoWBMultipliersloc(tempitc, greenitc, 0, 0, fh, fw, 0, 0, fh, fw, rm, gm, bm, params.localwb, params.wb, params.icm, params.raw);
                 printf("greitccoo=%f \n", greenitc);
 
-                if (params.wb.method ==  "autitc") {
+                if (params.wb.method ==  "autitc" || params.wb.method ==  "autitc2") {
                     params.wb.temperature = tempitc;
                     params.wb.green = greenitc;
                     currWB = ColorTemp(params.wb.temperature, params.wb.green, 1., params.wb.method);
