@@ -342,20 +342,23 @@ void ImProcCoordinator::updatePreviewImage(int todo, Crop* cropCall)
             if (lastAwbEqual != params.wb.equal || lastAwbTempBias != params.wb.tempBias  || lastAwbauto != params.wb.method  || lastwbgamma != params.wb.wbgammaMethod) {
                 double rm, gm, bm;
                 double tempitc = 5000.;
+                double greenitc = 1.;
                 // imgsrc->getAutoWBMultipliers (rm, gm, bm);
-                imgsrc->getAutoWBMultipliersloc(tempitc, 0, 0, fh, fw, 0, 0, fh, fw, rm, gm, bm, params.localwb, params.wb, params.icm, params.raw);
+                imgsrc->getAutoWBMultipliersloc(tempitc, greenitc, 0, 0, fh, fw, 0, 0, fh, fw, rm, gm, bm, params.localwb, params.wb, params.icm, params.raw);
+                printf("greitccoo=%f \n", greenitc);
 
-                if (params.wb.method == "autitc") {
+                if (params.wb.method ==  "autitc") {
                     params.wb.temperature = tempitc;
-                    currWB = ColorTemp(params.wb.temperature, 1., 1., params.wb.method);
+                    params.wb.green = greenitc;
+                    currWB = ColorTemp(params.wb.temperature, params.wb.green, 1., params.wb.method);
                     currWB.getMultipliers(rm, gm, bm);
                 }
 
                 if (rm != -1.) {
                     autoWB.update(rm, gm, bm, params.wb.equal, params.wb.tempBias);
-					double temper = autoWB.getTemp();
-					double gre = autoWB.getGreen();
-					printf("temper=%f gre=%f \n", temper, gre);
+                    //double temper = autoWB.getTemp();
+                    //double gre = autoWB.getGreen();
+                    //printf("temper=%f gre=%f \n", temper, gre);
 
                     lastAwbEqual = params.wb.equal;
                     lastAwbTempBias = params.wb.tempBias;
@@ -372,6 +375,7 @@ void ImProcCoordinator::updatePreviewImage(int todo, Crop* cropCall)
             }
 
             currWB = autoWB;
+
         }
 
         if (params.wb.enabled) {
@@ -1221,7 +1225,9 @@ bool ImProcCoordinator::getAutoWB(double& temp, double& green, double equal, dou
 
             //       imgsrc->getAutoWBMultipliers (rm, gm, bm);
             double tempitc = 5000.;
-            imgsrc->getAutoWBMultipliersloc(tempitc, 0, 0, fh, fw, 0, 0, fh, fw, rm, gm, bm, params.localwb, params.wb, params.icm, params.raw);
+            double greenitc = 1.;
+
+            imgsrc->getAutoWBMultipliersloc(tempitc, greenitc, 0, 0, fh, fw, 0, 0, fh, fw, rm, gm, bm, params.localwb, params.wb, params.icm, params.raw);
 
             if (rm != -1) {
                 autoWB.update(rm, gm, bm, equal, tempBias);
@@ -1379,7 +1385,9 @@ void ImProcCoordinator::saveInputICCReference(const Glib::ustring& fname, bool a
             double rm, gm, bm;
             // imgsrc->getAutoWBMultipliers (rm, gm, bm);
             double tempitc = 5000.;
-            imgsrc->getAutoWBMultipliersloc(tempitc, 0, 0, fh, fw, 0, 0, fh, fw, rm, gm, bm, params.localwb, params.wb, params.icm, params.raw);
+            double greenitc = 1.;
+
+            imgsrc->getAutoWBMultipliersloc(tempitc, greenitc, 0, 0, fh, fw, 0, 0, fh, fw, rm, gm, bm, params.localwb, params.wb, params.icm, params.raw);
 
             if (rm != -1.) {
                 autoWB.update(rm, gm, bm, params.wb.equal, params.wb.tempBias);

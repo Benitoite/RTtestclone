@@ -100,7 +100,7 @@ public:
     {
         return "unknown";
     }
-    virtual void getAutoWBMultipliersloc(double &tempitc, int begx, int begy, int yEn, int xEn, int cx, int cy, int bf_h, int bf_w, double &rm, double &gm, double &bm, const LocWBParams &localr, const WBParams & wbpar, const ColorManagementParams &cmp, const RAWParams &raw)
+    virtual void getAutoWBMultipliersloc(double &tempitc, double &greenitc, int begx, int begy, int yEn, int xEn, int cx, int cy, int bf_h, int bf_w, double &rm, double &gm, double &bm, const LocWBParams &localr, const WBParams & wbpar, const ColorManagementParams &cmp, const RAWParams &raw)
     {
         rm = gm = bm = 1.0;
     }
