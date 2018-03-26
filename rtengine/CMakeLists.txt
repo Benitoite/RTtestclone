@@ -119,6 +119,8 @@ set(RTENGINESOURCEFILES
     iplocalcontrast.cc
     histmatching.cc
     cat02adaptation.cc
+    pdaflinesfilter.cc
+    gamutwarning.cc
     )
 
 if(LENSFUN_HAS_LOAD_DIRECTORY)
