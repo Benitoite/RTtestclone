@@ -798,7 +798,7 @@ void RawImageSource::getImage(const ColorTemp &ctemp, int tran, Imagefloat* imag
             }
 
             if (d1x) {
-                transLineD1x(line_red, line_grn, line_blue, ix, image, tran, imwidth, imheight, d1xHeightOdd, doClip);
+                transLineD1x (line_red, line_grn, line_blue, ix, image, tran, imwidth, imheight, d1xHeightOdd);				
             } else if (fuji) {
                 transLineFuji(line_red, line_grn, line_blue, ix, image, tran, imheight, fw);
 
