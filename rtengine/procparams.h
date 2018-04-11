@@ -287,6 +287,7 @@ struct ToneCurveParams {
     int         hlcompr;        // Highlight Recovery's compression
     int         hlcomprthresh;  // Highlight Recovery's threshold
     bool histmatching; // histogram matching
+    bool clampOOG; // clamp out of gamut colours
 
     ToneCurveParams();
 
