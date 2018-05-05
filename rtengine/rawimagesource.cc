@@ -156,7 +156,7 @@ void transLineFuji(const float* const red, const float* const green, const float
     }
 }
 
-void transLineD1x (const float* const red, const float* const green, const float* const blue, const int i, rtengine::Imagefloat* const image, const int tran, const int imwidth, const int imheight, const bool oddHeight)
+void transLineD1x (const float* const red, const float* const green, const float* const blue, const int i, rtengine::Imagefloat* const image, const int tran, const int imwidth, const int imheight, const bool oddHeight, const bool clip)
 {
     // Nikon D1X has an uncommon sensor with 4028 x 1324 sensels.
     // Vertical sensel size is 2x horizontal sensel size
@@ -225,6 +225,12 @@ void transLineD1x (const float* const red, const float* const green, const float
                     image->r(row, col) = MAX(0.f, -0.0625f * (red[j] + image->r(row + 3, col)) + 0.5625f * (image->r(row - 1, col) + image->r(row + 1, col)));
                     image->g(row, col) = MAX(0.f, -0.0625f * (green[j] + image->g(row + 3, col)) + 0.5625f * (image->g(row - 1, col) + image->g(row + 1, col)));
                     image->b(row, col) = MAX(0.f, -0.0625f * (blue[j] + image->b(row + 3, col)) + 0.5625f * (image->b(row - 1, col) + image->b(row + 1, col)));
+
+                    if(clip) {
+                        image->r(row, col) = MIN(image->r(row, col), rtengine::MAXVALF);
+                        image->g(row, col) = MIN(image->g(row, col), rtengine::MAXVALF);
+                        image->b(row, col) = MIN(image->b(row, col), rtengine::MAXVALF);
+                    }
                 }
             }
 
@@ -282,6 +288,12 @@ void transLineD1x (const float* const red, const float* const green, const float
                     image->r(j, col) = MAX(0.f, -0.0625f * (red[j] + image->r(j, col + 3)) + 0.5625f * (image->r(j, col - 1) + image->r(j, col + 1)));
                     image->g(j, col) = MAX(0.f, -0.0625f * (green[j] + image->g(j, col + 3)) + 0.5625f * (image->g(j, col - 1) + image->g(j, col + 1)));
                     image->b(j, col) = MAX(0.f, -0.0625f * (blue[j] + image->b(j, col + 3)) + 0.5625f * (image->b(j, col - 1) + image->b(j, col + 1)));
+
+                    if(clip) {
+                        image->r(j, col) = MIN(image->r(j, col), rtengine::MAXVALF);
+                        image->g(j, col) = MIN(image->g(j, col), rtengine::MAXVALF);
+                        image->b(j, col) = MIN(image->b(j, col), rtengine::MAXVALF);
+                    }
                 }
             }
 
@@ -309,6 +321,12 @@ void transLineD1x (const float* const red, const float* const green, const float
                     image->g(row, 2 * i - 3) = MAX(0.f, -0.0625f * (green[j] + image->g(row, 2 * i - 6)) + 0.5625f * (image->g(row, 2 * i - 2) + image->g(row, 2 * i - 4)));
                     image->b(row, 2 * i - 3) = MAX(0.f, -0.0625f * (blue[j] + image->b(row, 2 * i - 6)) + 0.5625f * (image->b(row, 2 * i - 2) + image->b(row, 2 * i - 4)));
 
+                    if(clip) {
+                        image->r(row, 2 * i - 3) = MIN(image->r(row, 2 * i - 3), rtengine::MAXVALF);
+                        image->g(row, 2 * i - 3) = MIN(image->g(row, 2 * i - 3), rtengine::MAXVALF);
+                        image->b(row, 2 * i - 3) = MIN(image->b(row, 2 * i - 3), rtengine::MAXVALF);
+                    }
+
                     image->r(row, 2 * i) = red[j];
                     image->g(row, 2 * i) = green[j];
                     image->b(row, 2 * i) = blue[j];
@@ -320,6 +338,12 @@ void transLineD1x (const float* const red, const float* const green, const float
                     image->r(row, 2 * i - 1) = MAX(0.f, -0.0625f * (red[j] + image->r(row, 2 * i - 4)) + 0.5625f * (image->r(row, 2 * i) + image->r(row, 2 * i - 2)));
                     image->g(row, 2 * i - 1) = MAX(0.f, -0.0625f * (green[j] + image->g(row, 2 * i - 4)) + 0.5625f * (image->g(row, 2 * i) + image->g(row, 2 * i - 2)));
                     image->b(row, 2 * i - 1) = MAX(0.f, -0.0625f * (blue[j] + image->b(row, 2 * i - 4)) + 0.5625f * (image->b(row, 2 * i) + image->b(row, 2 * i - 2)));
+
+                    if(clip) {
+                        image->r(j, 2 * i - 1) = MIN(image->r(j, 2 * i - 1), rtengine::MAXVALF);
+                        image->g(j, 2 * i - 1) = MIN(image->g(j, 2 * i - 1), rtengine::MAXVALF);
+                        image->b(j, 2 * i - 1) = MIN(image->b(j, 2 * i - 1), rtengine::MAXVALF);
+                    }
 
                     image->r(row, 2 * i + 1) = (red[j] + image->r(row, 2 * i - 1)) / 2;
                     image->g(row, 2 * i + 1) = (green[j] + image->g(row, 2 * i - 1)) / 2;
@@ -352,6 +376,12 @@ void transLineD1x (const float* const red, const float* const green, const float
                     image->r(2 * i - 3, j) = MAX(0.f, -0.0625f * (red[j] + image->r(2 * i - 6, j)) + 0.5625f * (image->r(2 * i - 2, j) + image->r(2 * i - 4, j)));
                     image->g(2 * i - 3, j) = MAX(0.f, -0.0625f * (green[j] + image->g(2 * i - 6, j)) + 0.5625f * (image->g(2 * i - 2, j) + image->g(2 * i - 4, j)));
                     image->b(2 * i - 3, j) = MAX(0.f, -0.0625f * (blue[j] + image->b(2 * i - 6, j)) + 0.5625f * (image->b(2 * i - 2, j) + image->b(2 * i - 4, j)));
+
+                    if(clip) {
+                        image->r(2 * i - 3, j) = MIN(image->r(2 * i - 3, j), rtengine::MAXVALF);
+                        image->g(2 * i - 3, j) = MIN(image->g(2 * i - 3, j), rtengine::MAXVALF);
+                        image->b(2 * i - 3, j) = MIN(image->b(2 * i - 3, j), rtengine::MAXVALF);
+                    }
                 }
             }
 
@@ -360,6 +390,12 @@ void transLineD1x (const float* const red, const float* const green, const float
                     image->r(2 * i - 1, j) = MAX(0.f, -0.0625f * (red[j] + image->r(2 * i - 4, j)) + 0.5625f * (image->r(2 * i, j) + image->r(2 * i - 2, j)));
                     image->g(2 * i - 1, j) = MAX(0.f, -0.0625f * (green[j] + image->g(2 * i - 4, j)) + 0.5625f * (image->g(2 * i, j) + image->g(2 * i - 2, j)));
                     image->b(2 * i - 1, j) = MAX(0.f, -0.0625f * (blue[j] + image->b(2 * i - 4, j)) + 0.5625f * (image->b(2 * i, j) + image->b(2 * i - 2, j)));
+
+                    if(clip) {
+                        image->r(2 * i - 1, j) = MIN(image->r(2 * i - 1, j), rtengine::MAXVALF);
+                        image->g(2 * i - 1, j) = MIN(image->g(2 * i - 1, j), rtengine::MAXVALF);
+                        image->b(2 * i - 1, j) = MIN(image->b(2 * i - 1, j), rtengine::MAXVALF);
+                    }
 
                     image->r(2 * i + 1, j) = (red[j] + image->r(2 * i - 1, j)) / 2;
                     image->g(2 * i + 1, j) = (green[j] + image->g(2 * i - 1, j)) / 2;
@@ -845,7 +881,7 @@ void RawImageSource::getImage_local(int begx, int begy, int yEn, int xEn, int cx
             }
 
             if (d1x) {
-                transLineD1x (line_red, line_grn, line_blue, ix, image, tran, imwidth, imheight, d1xHeightOdd);
+                transLineD1x (line_red, line_grn, line_blue, ix, image, tran, imwidth, imheight, d1xHeightOdd, doClip);
             } else if (fuji) {
                 transLineFuji(line_red, line_grn, line_blue, ix, image, tran, imheight, fw);
 
@@ -1077,6 +1113,8 @@ void RawImageSource::getImage(const ColorTemp &ctemp, int tran, Imagefloat* imag
     hlmax[1] = clmax[1] * gm;
     hlmax[2] = clmax[2] * bm;
 
+    const bool doClip = (chmax[0] >= clmax[0] || chmax[1] >= clmax[1] || chmax[2] >= clmax[2]) && !hrp.hrenabled && hrp.clampOOG;
+
     float area = skip * skip;
     rm /= area;
     gm /= area;
@@ -1119,6 +1157,17 @@ void RawImageSource::getImage(const ColorTemp &ctemp, int tran, Imagefloat* imag
                     gtot *= gm;
                     btot *= bm;
 
+                    if (doClip) {
+                        // note: as hlmax[] can be larger than CLIP and we can later apply negative
+                        // exposure this means that we can clip away local highlights which actually
+                        // are not clipped. We have to do that though as we only check pixel by pixel
+                        // and don't know if this will transition into a clipped area, if so we need
+                        // to clip also surrounding to make a good colour transition
+                        rtot = CLIP(rtot);
+                        gtot = CLIP(gtot);
+                        btot = CLIP(btot);
+                    }
+
                     line_red[j] = rtot;
                     line_grn[j] = gtot;
                     line_blue[j] = btot;
@@ -1143,6 +1192,12 @@ void RawImageSource::getImage(const ColorTemp &ctemp, int tran, Imagefloat* imag
                     gtot *= gm;
                     btot *= bm;
 
+                    if (doClip) {
+                        rtot = CLIP(rtot);
+                        gtot = CLIP(gtot);
+                        btot = CLIP(btot);
+                    }
+
                     line_red[j] = rtot;
                     line_grn[j] = gtot;
                     line_blue[j] = btot;
@@ -1156,7 +1211,7 @@ void RawImageSource::getImage(const ColorTemp &ctemp, int tran, Imagefloat* imag
             }
 
             if (d1x) {
-                transLineD1x (line_red, line_grn, line_blue, ix, image, tran, imwidth, imheight, d1xHeightOdd);
+                transLineD1x (line_red, line_grn, line_blue, ix, image, tran, imwidth, imheight, d1xHeightOdd, doClip);
             } else if (fuji) {
                 transLineFuji(line_red, line_grn, line_blue, ix, image, tran, imheight, fw);
 
@@ -3303,6 +3358,7 @@ void RawImageSource::processFlatField(const RAWParams &raw, RawImage *riFlatFile
             c4[1][1] = c[1][1];
         }
 
+        constexpr float minValue = 1.f; // if the pixel value in the flat field is less or equal this value, no correction will be applied.
 
 #ifdef __SSE2__
         vfloat refcolorv[2] = {_mm_set_ps(refcolor[0][1], refcolor[0][0], refcolor[0][1], refcolor[0][0]),
@@ -3312,7 +3368,8 @@ void RawImageSource::processFlatField(const RAWParams &raw, RawImage *riFlatFile
                             _mm_set_ps(black[c4[1][1]], black[c4[1][0]], black[c4[1][1]], black[c4[1][0]])
                            };
 
-        vfloat epsv = F2V(1e-5f);
+        vfloat onev = F2V(1.f);
+        vfloat minValuev = F2V(minValue);
 #endif
 #ifdef _OPENMP
         #pragma omp parallel for schedule(dynamic,16)
@@ -3325,7 +3382,9 @@ void RawImageSource::processFlatField(const RAWParams &raw, RawImage *riFlatFile
             vfloat rowRefcolorv = refcolorv[row & 1];
 
             for (; col < W - 3; col += 4) {
-                vfloat vignettecorrv = rowRefcolorv / vmaxf(epsv, LVFU(cfablur[(row) * W + col]) - rowBlackv);
+                vfloat blurv = LVFU(cfablur[(row) * W + col]) - rowBlackv;
+                vfloat vignettecorrv = rowRefcolorv / blurv;
+                vignettecorrv = vself(vmaskf_le(blurv, minValuev), onev, vignettecorrv);
                 vfloat valv = LVFU(rawData[row][col]);
                 valv -= rowBlackv;
                 STVFU(rawData[row][col], valv * vignettecorrv + rowBlackv);
@@ -3334,7 +3393,8 @@ void RawImageSource::processFlatField(const RAWParams &raw, RawImage *riFlatFile
 #endif
 
             for (; col < W; col ++) {
-                float vignettecorr = refcolor[row & 1][col & 1] / max(1e-5f, cfablur[(row) * W + col] - black[c4[row & 1][col & 1]]);
+                float blur = cfablur[(row) * W + col] - black[c4[row & 1][col & 1]];
+                float vignettecorr = blur <= minValue ? 1.f : refcolor[row & 1][col & 1] / blur;
                 rawData[row][col] = (rawData[row][col] - black[c4[row & 1][col & 1]]) * vignettecorr + black[c4[row & 1][col & 1]];
             }
         }
@@ -3406,6 +3466,8 @@ void RawImageSource::processFlatField(const RAWParams &raw, RawImage *riFlatFile
             refcolor[c] *= limitFactor;
         }
 
+        constexpr float minValue = 1.f; // if the pixel value in the flat field is less or equal this value, no correction will be applied.
+
 #ifdef _OPENMP
         #pragma omp parallel for
 #endif
@@ -3413,7 +3475,8 @@ void RawImageSource::processFlatField(const RAWParams &raw, RawImage *riFlatFile
         for (int row = 0; row < H; row++) {
             for (int col = 0; col < W; col++) {
                 int c  = ri->XTRANSFC(row, col);
-                float vignettecorr = (refcolor[c] / max(1e-5f, cfablur[(row) * W + col] - black[c]));
+                float blur = cfablur[(row) * W + col] - black[c];
+                float vignettecorr = blur <= minValue ? 1.f : refcolor[c] / blur;
                 rawData[row][col] = (rawData[row][col] - black[c]) * vignettecorr + black[c];
             }
         }
