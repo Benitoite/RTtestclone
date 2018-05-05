@@ -120,6 +120,8 @@ set(RTENGINESOURCEFILES
     histmatching.cc
     pdaflinesfilter.cc
     gamutwarning.cc
+    ipshadowshighlights.cc
+    xtrans_demosaic.cc
     )
 
 if(LENSFUN_HAS_LOAD_DIRECTORY)
