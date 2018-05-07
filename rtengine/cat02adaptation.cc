@@ -252,7 +252,7 @@ void ciecamcat02loc_float(LabImage* lab, LabImage* dest, int tempa, double gree,
                     Ciecam02::jch2xyz_ciecam02float(xx, yy, zz,
                                                     J,  C, h,
                                                     xw2, yw2,  zw2,
-                                                    f2,  c2, nc2, gamu, pow1n, nbbj, ncbj, flj, czj, dj, awj);
+                                                    c2, nc2, gamu, pow1n, nbbj, ncbj, flj, czj, dj, awj);
                     float x, y, z;
                     x = xx * 655.35f;
                     y = yy * 655.35f;
