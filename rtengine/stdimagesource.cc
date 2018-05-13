@@ -130,7 +130,9 @@ int StdImageSource::load(const Glib::ustring &fname)
 
         case (IIOSF_LOGLUV24):
         case (IIOSF_LOGLUV32):
-        case (IIOSF_FLOAT): {
+    case (IIOSF_FLOAT16):
+    case (IIOSF_FLOAT24):
+    case (IIOSF_FLOAT32): {
             img = new Imagefloat;
             break;
         }
@@ -247,7 +249,7 @@ void StdImageSource::colorSpaceConversion(Imagefloat* im, const ColorManagementP
         if (embedded) {
             in = embedded;
         } else {
-            if (sampleFormat & (IIOSF_LOGLUV24 | IIOSF_LOGLUV32 | IIOSF_FLOAT)) {
+            if (sampleFormat & (IIOSF_LOGLUV24 | IIOSF_LOGLUV32 | IIOSF_FLOAT16 | IIOSF_FLOAT24 | IIOSF_FLOAT32)) {
                 skipTransform = true;
             } else {
                 in = ICCStore::getInstance()->getsRGBProfile();
@@ -260,7 +262,7 @@ void StdImageSource::colorSpaceConversion(Imagefloat* im, const ColorManagementP
             if (in == nullptr && embedded) {
                 in = embedded;
             } else if (in == nullptr) {
-                if (sampleFormat & (IIOSF_LOGLUV24 | IIOSF_LOGLUV32 | IIOSF_FLOAT)) {
+                if (sampleFormat & (IIOSF_LOGLUV24 | IIOSF_LOGLUV32 | IIOSF_FLOAT16 | IIOSF_FLOAT24 | IIOSF_FLOAT32)) {
                     skipTransform = true;
                 } else {
                     in = ICCStore::getInstance()->getsRGBProfile();

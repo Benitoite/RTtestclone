@@ -389,6 +389,10 @@ WhiteBalance::WhiteBalance() : FoldableToolPanel(this, "whitebalance", M("TP_WBA
     spotsize->signal_changed().connect(sigc::mem_fun(*this, &WhiteBalance::spotSizeChanged));
 }
 
+WhiteBalance::~WhiteBalance()
+{
+    idle_register.destroy();
+}
 
 void WhiteBalance::enabledChanged()
 {
@@ -986,12 +990,28 @@ inline Gtk::TreeRow WhiteBalance::getActiveMethod()
 
 void WhiteBalance::WBChanged(double temperature, double greenVal)
 {
-    GThreadLock lock;
-    disableListener();
-//   setEnabled(true);
-    temp->setValue(temperature);
-    green->setValue(greenVal);
-    temp->setDefault(temperature);
-    green->setDefault(greenVal);
-    enableListener();
+    struct Data {
+        WhiteBalance* self;
+        double temperature;
+        double green_val;
+    };
+
+    const auto func = [](gpointer data) -> gboolean {
+        WhiteBalance* const self = static_cast<WhiteBalance*>(static_cast<Data*>(data)->self);
+        const double temperature = static_cast<Data*>(data)->temperature;
+        const double green_val = static_cast<Data*>(data)->green_val;
+        delete static_cast<Data*>(data);
+
+        self->disableListener();
+        self->setEnabled(true);
+        self->temp->setValue(temperature);
+        self->green->setValue(green_val);
+        self->temp->setDefault(temperature);
+        self->green->setDefault(green_val);
+        self->enableListener();
+
+        return FALSE;
+    };
+
+    idle_register.add(func, new Data{this, temperature, greenVal});
 }
