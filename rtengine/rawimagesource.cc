@@ -36,12 +36,12 @@
 #include "rtlensfun.h"
 #include "cat02adaptation.h"
 #include "pdaflinesfilter.h"
+#include "StopWatch.h"
 
 #ifdef _OPENMP
 #include <omp.h>
 #endif
 #include "opthelper.h"
-#include "StopWatch.h"
 #define clipretinex( val, minv, maxv )    (( val = (val < minv ? minv : val ) ) > maxv ? maxv : val )
 #undef CLIPD
 #define CLIPD(a) ((a)>0.0f?((a)<1.0f?(a):1.0f):0.0f)
@@ -2128,7 +2128,7 @@ int RawImageSource::load (const Glib::ustring &fname, bool firstFrameOnly)
 
 void RawImageSource::preprocess(const RAWParams &raw, const LensProfParams &lensProf, const CoarseTransformParams& coarse, bool prepareDenoise)
 {
-//    BENCHFUN
+    BENCHFUN
     MyTime t1, t2;
     t1.set();
 
@@ -2422,11 +2422,14 @@ void RawImageSource::preprocess(const RAWParams &raw, const LensProfParams &lens
         }
 
         if (numFrames == 4) {
-            for (int i = 0; i < 4; ++i) {
-                CA_correct_RT(raw.ca_autocorrect, raw.cared, raw.cablue, 8.0, *rawDataFrames[i]);
+            double fitParams[64];
+            float *buffer = CA_correct_RT(raw.ca_autocorrect, raw.cared, raw.cablue, 8.0, *rawDataFrames[0], fitParams, false, true, nullptr, false);
+            for(int i = 1; i < 3; ++i) {
+                CA_correct_RT(raw.ca_autocorrect, raw.cared, raw.cablue, 8.0, *rawDataFrames[i], fitParams, true, false, buffer, false);
             }
+            CA_correct_RT(raw.ca_autocorrect, raw.cared, raw.cablue, 8.0, *rawDataFrames[3], fitParams, true, false, buffer, true);
         } else {
-            CA_correct_RT(raw.ca_autocorrect, raw.cared, raw.cablue, 8.0, rawData);
+            CA_correct_RT(raw.ca_autocorrect, raw.cared, raw.cablue, 8.0, rawData, nullptr, false, false, nullptr, true);
         }
     }
 
@@ -3254,7 +3257,7 @@ void RawImageSource::HLRecovery_Global(ToneCurveParams hrp)
 
 void RawImageSource::processFlatField(const RAWParams &raw, RawImage *riFlatFile, unsigned short black[4])
 {
-//    BENCHFUN
+    BENCHFUN
     float *cfablur = (float (*)) malloc(H * W * sizeof * cfablur);
     int BS = raw.ff_BlurRadius;
     BS += BS & 1;
@@ -5053,7 +5056,7 @@ void RawImageSource::hlRecovery(const std::string &method, float* red, float* gr
 
 void RawImageSource::getAutoExpHistogram(LUTu & histogram, int& histcompr)
 {
-//    BENCHFUN
+    BENCHFUN
     histcompr = 3;
 
     histogram(65536 >> histcompr);
@@ -5135,7 +5138,7 @@ void RawImageSource::getAutoExpHistogram(LUTu & histogram, int& histcompr)
 // Histogram MUST be 256 in size; gamma is applied, blackpoint and gain also
 void RawImageSource::getRAWHistogram(LUTu & histRedRaw, LUTu & histGreenRaw, LUTu & histBlueRaw)
 {
-//    BENCHFUN
+    BENCHFUN
     histRedRaw.clear();
     histGreenRaw.clear();
     histBlueRaw.clear();
@@ -8111,7 +8114,7 @@ void  RawImageSource::getrgbloc(bool local, bool gamma, bool cat02, int begx, in
 
 void RawImageSource::getAutoWBMultipliersloc(double &tempitc, double &greenitc,  int begx, int begy, int yEn, int xEn, int cx, int cy, int bf_h, int bf_w, double & rm, double & gm, double & bm, const LocWBParams & localr, const WBParams & wbpar, const ColorManagementParams &cmp, const RAWParams &raw)
 {
-    //    BENCHFUN
+        BENCHFUN
     constexpr double clipHigh = 64000.0;
 //   printf("automulloc\n");
 
