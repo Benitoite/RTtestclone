@@ -1792,7 +1792,7 @@ void Wavelet::neutral_pressed ()
     enableListener();
 
     if (listener && getEnabled()) {
-        listener->panelChanged (EvWavNeutral, M ("ADJUSTER_RESET_TO_DEFAULT"));
+        listener->panelChanged (EvWavNeutral, M("GENERAL_RESET"));
     }
 }
 
