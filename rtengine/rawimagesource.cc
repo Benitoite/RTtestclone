@@ -627,7 +627,7 @@ float calculate_scale_mul(float scale_mul[4], const float pre_mul_[4], const flo
 
 void RawImageSource::getImage(const ColorTemp &ctemp, int tran, Imagefloat* image, const PreviewProps &pp, const ProcParams &params)
 {
-    BENCHFUN
+   // BENCHFUN
 
     MyMutex::MyLock lock(getImageMutex);
 
