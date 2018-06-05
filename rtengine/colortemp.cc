@@ -1226,9 +1226,12 @@ void ColorTemp::cieCAT02(double Xw, double Yw, double Zw, double &CAM02BB00, dou
             }
 
     //adaptation jdc : slightly different from CIECAM02 : Rc=(Yw(D/Rw)+(1-D))*R , but it's work !   true at 0 and 1
-    CAM02[1][1] = (CAM02[1][1] - 1.0) * D + 1.0;
-    CAM02[0][0] = (CAM02[0][0] - 1.0) * D + 1.0;
-    CAM02[2][2] = (CAM02[2][2] - 1.0) * D + 1.0;
+ //   CAM02[1][1] = (CAM02[1][1] - 1.0) * D + 1.0;
+ //   CAM02[0][0] = (CAM02[0][0] - 1.0) * D + 1.0;
+ //   CAM02[2][2] = (CAM02[2][2] - 1.0) * D + 1.0;
+    CAM02[1][1] *= D;
+    CAM02[0][0] *= D;
+    CAM02[2][2] *= D;
     CAM02[0][1] *= D;
     CAM02[0][2] *= D;
     CAM02[1][0] *= D;
@@ -1786,7 +1789,7 @@ void ColorTemp::cat02_to_xyzfloatraw(float & x, float & y, float & z, float r, f
 // we can change step for temperature and increase number  for T > 7500K if necessary
 //these values Temp, x, y are refernces for all calculations and very precise.
 //copyright J.Desmis august 2017
-void ColorTemp::tempxy(double &temp, float **Tx, float **Ty, float **TYY, float **Ta, float **Tb, float **TL, float **TX, float **TY, float **TZ)
+void ColorTemp::tempxy(double &temp, float **Tx, float **Ty, float **Tz, float **Ta, float **Tb, float **TL, float **TX, float **TY, float **TZ)
 {
     const double* spec_colorforxcyc[] = {//color references
         JDC468_BluH10_spect, JDC468_BluF4_spect, JDC468_BluD6_spect, ColorchechCyaF3_spect, Colorblue_spect, JDC468_BluM5_spect, // 0 4
@@ -1983,13 +1986,12 @@ void ColorTemp::tempxy(double &temp, float **Tx, float **Ty, float **TYY, float 
         }
 
 //CAT02
-
-        double CAM02BB00, CAM02BB01, CAM02BB02, CAM02BB10, CAM02BB11, CAM02BB12, CAM02BB20, CAM02BB21, CAM02BB22; //for CIECAT02
+/*
+        double CAM02BB00 = 1.0, CAM02BB01=1.0, CAM02BB02=1.0, CAM02BB10=1.0, CAM02BB11=1.0, CAM02BB12=1.0, CAM02BB20=1.0, CAM02BB21=1.0, CAM02BB22=1.0; //for CIECAT02
         double Xwb = Txyz[tt].XX;
         double Ywb = 1.;
         double Zwb = Txyz[tt].ZZ;
         cieCAT02(Xwb, Ywb, Zwb, CAM02BB00, CAM02BB01, CAM02BB02, CAM02BB10, CAM02BB11, CAM02BB12, CAM02BB20, CAM02BB21, CAM02BB22, 1.0);
-
         for (int i = 0; i < N_c; i++) {
 
             Refxyzcat02[i].Xrefcat = CAM02BB00 * Refxyz[i].Xref + CAM02BB01 * Refxyz[i].Yref + CAM02BB02 * Refxyz[i].Zref ;
@@ -1997,16 +1999,16 @@ void ColorTemp::tempxy(double &temp, float **Tx, float **Ty, float **TYY, float 
             Refxyzcat02[i].Zrefcat = CAM02BB20 * Refxyz[i].Xref + CAM02BB21 * Refxyz[i].Yref + CAM02BB22 * Refxyz[i].Zref;
         }
 
-
+*/
 //end CAT02
 
         for (int i = 0; i < N_c; i++) {
-            float X = 65535.f * Refxyzcat02[i].Xrefcat;
+        /*    float X = 65535.f * Refxyzcat02[i].Xrefcat;
             float Y = 65535.f * Refxyzcat02[i].Yrefcat;
             float Z = 65535.f * Refxyzcat02[i].Zrefcat;
             float L, a, b;
             Color::XYZ2Lab(X, Y, Z, L, a, b);
-
+			
             double som = (Refxyzcat02[i].Xrefcat + Refxyzcat02[i].Yrefcat +  Refxyzcat02[i].Zrefcat);
             L /= 327.68f;
             a /= 327.68f;
@@ -2017,23 +2019,21 @@ void ColorTemp::tempxy(double &temp, float **Tx, float **Ty, float **TYY, float 
             TX[i][tt] = X;
             TY[i][tt] = Y;
             TZ[i][tt] = Z;
+		*/
+			
+			//som = 1.;
+			
+            Tx[i][tt] = (float) Refxyz[i].Xref;
+            Ty[i][tt] = (float) Refxyz[i].Yref;
+            Tz[i][tt] = (float) Refxyz[i].Zref;
+		
 
 /*
-            if (tt == 42) {
-                //    printf ("temp=%i Nc=%i x=%f y=%f Y=%f L=%2.1f a=%2.1f b=%2.1f\n", (int) tempw, i, Refxyzcat02[i].Xrefcat / som, Refxyzcat02[i].Yrefcat / som,  Refxyzcat02[i].Zrefcat / som, L, a, b );
-            }
-
-            if (tt == 65) {
-                //   printf ("temp=%i Nc=%i x=%f y=%f Y=%f L=%2.1f a=%2.1f b=%2.1f\n", (int) tempw, i, Refxyzcat02[i].Xrefcat / som, Refxyzcat02[i].Yrefcat / som,  Refxyzcat02[i].Zrefcat / som, L, a, b );
-            }
-
-            if (tt == 90) {
-                //     printf ("temp=%f Nc=%i x=%f y=%f Y=%f\n", tempw, i, Refxyz[i].Xref / som, Refxyz[i].Yref / som,  Refxyz[i].Zref / som );
-            }
-*/
-            Tx[i][tt] = (float) Refxyz[i].Xref / som;
-            Ty[i][tt] = (float) Refxyz[i].Yref / som;
-            TYY[i][tt] = (float) Refxyz[i].Zref / som;
+            Tx[i][tt] = (float)  Refxyzcat02[i].Xrefcat;
+            Ty[i][tt] = (float) Refxyzcat02[i].Yrefcat;
+            Tz[i][tt] = (float) Refxyzcat02[i].Zrefcat;
+			
+*/			
         }
 
     }

@@ -279,14 +279,14 @@ WhiteBalance::WhiteBalance() : FoldableToolPanel(this, "whitebalance", M("TP_WBA
     wbgammaMethod = Gtk::manage(new MyComboBoxText());
     wbgammaMethod->append(M("TP_LOCALWBCAM_NONE"));
     wbgammaMethod->append(M("TP_LOCALWBCAM_GAM"));
-    wbgammaMethod->set_active(1);
+    wbgammaMethod->set_active(0);
     wbgammaMethodConn = wbgammaMethod->signal_changed().connect(sigc::mem_fun(*this, &WhiteBalance::wbgammaMethodChanged));
     wbgammaMethod->set_tooltip_markup(M("TP_LOCALWBCAM_TOOLTIP"));
     wbgammaMethod->show();
     gammabox->pack_start(*labgamma, Gtk::PACK_SHRINK, 4);
     gammabox->pack_start(*wbgammaMethod);
 
-    pack_start(*gammabox);
+//    pack_start(*gammabox);
 
 
     Gtk::HBox* spotbox = Gtk::manage(new Gtk::HBox());

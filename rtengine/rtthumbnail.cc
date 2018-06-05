@@ -1076,7 +1076,7 @@ IImage8* Thumbnail::processImage (const procparams::ProcParams& params, eSensorT
     // compute WB multipliers
     ColorTemp currWB = ColorTemp(params.wb.temperature, params.wb.green, params.wb.equal, params.wb.method);
     bool autowb0 = false;
-    autowb0 = (params.wb.method == "autold" || params.wb.method == "aut"  || params.wb.method == "autosdw" || params.wb.method == "autedgsdw" || params.wb.method == "autitc"  || params.wb.method == "autedgrob" || params.wb.method == "autedg" || params.wb.method == "autorobust");
+    autowb0 = (params.wb.method == "autold" || params.wb.method == "aut"  || params.wb.method == "autosdw" || params.wb.method == "autedgsdw" || params.wb.method == "autitc"  || params.wb.method == "autitc2" || params.wb.method == "autitcgreen"|| params.wb.method == "autedgrob" || params.wb.method == "autedg" || params.wb.method == "autorobust");
 
     if (!params.wb.enabled) {
         currWB = ColorTemp();

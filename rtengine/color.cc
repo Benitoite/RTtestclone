@@ -951,7 +951,7 @@ void Color::rgbxyY(float r, float g, float b, float &x, float &y, float &Y, cons
     float som = xx + yy + zz;
     x = xx / som;
     y = yy / som;
-    Y = zz / som;
+    Y = yy / 65535.f;
 }
 
 void Color::rgbxyz(float r, float g, float b, float &x, float &y, float &z, const float xyz_rgb[3][3])

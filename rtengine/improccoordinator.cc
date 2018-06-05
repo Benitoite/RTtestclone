@@ -260,7 +260,7 @@ void ImProcCoordinator::updatePreviewImage(int todo, Crop* cropCall)
                 printf("Demosaic X-Trans image with using method: %s\n", rp.xtranssensor.method.c_str());
             }
         }
-
+		
         imgsrc->demosaic(rp);   //enabled demosaic
         // if a demosaic happened we should also call g etimage later, so we need to set the M_INIT flag
 
@@ -268,10 +268,12 @@ void ImProcCoordinator::updatePreviewImage(int todo, Crop* cropCall)
         todo |= M_INIT;
 
         bool autowb0 = false;
-        autowb0 = (params.wb.method == "autold" || params.wb.method == "aut"  || params.wb.method == "autosdw" || params.wb.method == "autedgsdw" || params.wb.method == "autitc" || params.wb.method == "autitc2" || params.wb.method == "autedgrob" || params.wb.method == "autedg" || params.wb.method == "autorobust");
+		bool autogamm = false;
+        autowb0 = (params.wb.method == "autold" || params.wb.method == "aut"  || params.wb.method == "autosdw" || params.wb.method == "autedgsdw" || params.wb.method == "autitc" || params.wb.method == "autitc2" || params.wb.method == "autitcgreen" || params.wb.method == "autedgrob" || params.wb.method == "autedg" || params.wb.method == "autorobust");
+        autogamm = (params.wb.method == "autold" || params.wb.method == "autitc" || params.wb.method == "autitc2" || params.wb.method == "autitcgreen");
         bool gamma = false;
 
-        if (params.wb.wbgammaMethod == "gam") {
+        if (params.wb.wbgammaMethod == "gam"  && !autogamm) {
             gamma = true;
         }
 
@@ -312,7 +314,7 @@ void ImProcCoordinator::updatePreviewImage(int todo, Crop* cropCall)
     }
 
     bool autowb = false;
-    autowb = (params.wb.method == "autold" || params.wb.method == "aut"  || params.wb.method == "autosdw" || params.wb.method == "autedgsdw" || params.wb.method == "autitc"  || params.wb.method == "autitc2" || params.wb.method == "autedgrob" || params.wb.method == "autedg" || params.wb.method == "autorobust");
+    autowb = (params.wb.method == "autold" || params.wb.method == "aut"  || params.wb.method == "autosdw" || params.wb.method == "autedgsdw" || params.wb.method == "autitc"  || params.wb.method == "autitc2" || params.wb.method == "autitcgreen" || params.wb.method == "autedgrob" || params.wb.method == "autedg" || params.wb.method == "autorobust");
 
 //  Glib::ustring
     if (todo & (M_INIT | M_LINDENOISE | M_HDR)) {
@@ -345,9 +347,9 @@ void ImProcCoordinator::updatePreviewImage(int todo, Crop* cropCall)
                 double greenitc = 1.;
                 // imgsrc->getAutoWBMultipliers (rm, gm, bm);
                 imgsrc->getAutoWBMultipliersloc(tempitc, greenitc, 0, 0, fh, fw, 0, 0, fh, fw, rm, gm, bm, params.localwb, params.wb, params.icm, params.raw);
-                printf("greitccoo=%f \n", greenitc);
+				printf("tempitc=%f \n", tempitc);
 
-                if (params.wb.method ==  "autitc" || params.wb.method ==  "autitc2") {
+                if (params.wb.method ==  "autitc" || params.wb.method ==  "autitc2" || params.wb.method ==  "autitcgreen") {
                     params.wb.temperature = tempitc;
                     params.wb.green = greenitc;
                     currWB = ColorTemp(params.wb.temperature, params.wb.green, 1., params.wb.method);
@@ -372,7 +374,7 @@ void ImProcCoordinator::updatePreviewImage(int todo, Crop* cropCall)
                     autoWB.useDefaults(params.wb.equal);
                 }
 
-            }
+           }
 
             currWB = autoWB;
 
@@ -1349,7 +1351,7 @@ void ImProcCoordinator::saveInputICCReference(const Glib::ustring& fname, bool a
     imgsrc->demosaic(ppar.raw);
     ColorTemp currWB = ColorTemp(params.wb.temperature, params.wb.green, params.wb.equal, params.wb.method);
     bool autowb = false;
-    autowb = (params.wb.method == "autold" || params.wb.method == "aut"  || params.wb.method == "autosdw" || params.wb.method == "autedgsdw" || params.wb.method == "autitc"  || params.wb.method == "autedgrob" || params.wb.method == "autedg" || params.wb.method == "autorobust");
+    autowb = (params.wb.method == "autold" || params.wb.method == "aut"  || params.wb.method == "autosdw" || params.wb.method == "autedgsdw" || params.wb.method == "autitc"  || params.wb.method == "autitc2"  || params.wb.method == "autitcgreen" || params.wb.method == "autedgrob" || params.wb.method == "autedg" || params.wb.method == "autorobust");
 
     if (params.wb.method == "Camera") {
         currWB = imgsrc->getWB();
