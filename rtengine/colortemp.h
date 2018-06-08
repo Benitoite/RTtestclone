@@ -24,6 +24,7 @@
 //#include "procparams.h"
 #include <map>
 #include <string>
+#include "procparams.h"
 
 namespace rtengine
 {
@@ -56,7 +57,7 @@ public:
     explicit ColorTemp(double e) : temp(-1.), green(-1.), equal(e), method("Custom") {}
     ColorTemp(double t, double g, double e, const std::string &m);
     ColorTemp(double mulr, double mulg, double mulb, double e);
-    static void tempxy(double &temp, float **Tx, float **Ty, float **Tz, float **Ta, float **Tb, float **TL, float **TX, float **TY, float **TZ);
+    static void tempxy(double &temp, float **Tx, float **Ty, float **Tz, float **Ta, float **Tb, float **TL, float **TX, float **TY, float **TZ, const procparams::WBParams & wbpar);
     static void xyz_to_cat02floatraw(float & r, float & g, float & b, float x, float y, float z);
     static void cat02_to_xyzfloatraw(float & x, float & y, float & z, float r, float g, float b);
 
@@ -103,6 +104,8 @@ public:
 
     static void cieCAT02(double Xw, double Yw, double Zw, double &CAM02BB00, double &CAM02BB01, double &CAM02BB02, double &CAM02BB10, double &CAM02BB11, double &CAM02BB12, double &CAM02BB20, double &CAM02BB21, double &CAM02BB22, double adap);
     static void icieCAT02(double Xw, double Yw, double Zw, double &iCAM02BB00, double &iCAM02BB01, double &iCAM02BB02, double &iCAM02BB10, double &iCAM02BB11, double &iCAM02BB12, double &iCAM02BB20, double &iCAM02BB21, double &iCAM02BB22, double adap);
+    static void cieCAT02float(float Xw, float Yw, float Zw, float &CAM02BB00, float &CAM02BB01, float &CAM02BB02, float &CAM02BB10, float &CAM02BB11, float &CAM02BB12, float &CAM02BB20, float &CAM02BB21, float &CAM02BB22, float adap);
+    static void icieCAT02float(float Xw, float Yw, float Zw, float &iCAM02BB00, float &iCAM02BB01, float &iCAM02BB02, float &iCAM02BB10, float &iCAM02BB11, float &iCAM02BB12, float &iCAM02BB20, float &iCAM02BB21, float &iCAM02BB22, float adap);
 
     bool operator== (const ColorTemp& other) const
     {

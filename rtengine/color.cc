@@ -943,11 +943,11 @@ void Color::rgbxyz(float r, float g, float b, float &x, float &y, float &z, cons
     z = ((xyz_rgb[2][0] * r + xyz_rgb[2][1] * g + xyz_rgb[2][2] * b)) ;
 }
 
-void Color::rgbxyY(float r, float g, float b, float &x, float &y, float &Y, const double xyz_rgb[3][3])
+void Color::rgbxyY(float r, float g, float b, float &x, float &y, float &Y, float &xx, float &yy, float &zz, const double xyz_rgb[3][3])
 {
-    float xx = ((xyz_rgb[0][0] * r + xyz_rgb[0][1] * g + xyz_rgb[0][2] * b)) ;
-    float yy = ((xyz_rgb[1][0] * r + xyz_rgb[1][1] * g + xyz_rgb[1][2] * b)) ;
-    float zz = ((xyz_rgb[2][0] * r + xyz_rgb[2][1] * g + xyz_rgb[2][2] * b)) ;
+    xx = ((xyz_rgb[0][0] * r + xyz_rgb[0][1] * g + xyz_rgb[0][2] * b)) ;
+    yy = ((xyz_rgb[1][0] * r + xyz_rgb[1][1] * g + xyz_rgb[1][2] * b)) ;
+    zz = ((xyz_rgb[2][0] * r + xyz_rgb[2][1] * g + xyz_rgb[2][2] * b)) ;
     float som = xx + yy + zz;
     x = xx / som;
     y = yy / som;

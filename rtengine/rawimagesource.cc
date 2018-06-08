@@ -37,6 +37,7 @@
 #include "cat02adaptation.h"
 #include "pdaflinesfilter.h"
 #include "StopWatch.h"
+#include "ciecam02.h"
 
 #ifdef _OPENMP
 #include <omp.h>
@@ -7227,7 +7228,9 @@ void static studentXY(array2D<float> & YYcurr, array2D<float> & reffYY, int sizc
 }
 
 
-void RawImageSource::ItcWB(const LocWBParams &localr, double &tempitc, double &greenitc, array2D<float> &redloc, array2D<float> &greenloc, array2D<float> &blueloc, int bfw, int bfh, double &avg_rm, double &avg_gm, double &avg_bm, const ColorManagementParams &cmp, const RAWParams &raw)
+
+
+void RawImageSource::ItcWB(const LocWBParams &localr, double &tempitc, double &greenitc, array2D<float> &redloc, array2D<float> &greenloc, array2D<float> &blueloc, int bfw, int bfh, double &avg_rm, double &avg_gm, double &avg_bm, const ColorManagementParams &cmp, const RAWParams &raw, const WBParams & wbpar)
 {
     //copyright Jacques Desmis 3 - 2018 jdesmis@gmail.com
     // this algorithm try to find temperature correlation between about 60 spectral color and about 40 color found in the image
@@ -7485,7 +7488,7 @@ void RawImageSource::ItcWB(const LocWBParams &localr, double &tempitc, double &g
     }
 
     //call tempxy to calculate for 61 color references Temp and XYZ with cat02
-    ColorTemp::tempxy(temp, Tx, Ty, Tz, Ta, Tb, TL, TX, TY, TZ); //calculate chroma xy (xyY) for Z known colors on under 90 illuminants
+    ColorTemp::tempxy(temp, Tx, Ty, Tz, Ta, Tb, TL, TX, TY, TZ, wbpar); //calculate chroma xy (xyY) for Z known colors on under 90 illuminants
     reffxxyy(130, 130);
     reffYY(130, 130);
 
@@ -7511,6 +7514,7 @@ void RawImageSource::ItcWB(const LocWBParams &localr, double &tempitc, double &g
     int sizcurr = siza;//choice of number of correlate colors in image
     histcurr(N_t, sizcurr);
     xxyycurr(N_t, 2 * sizcurr);
+    
     float minstud = 100000.f;
     int goodref = 1;
 //    int goodrefY = 1;
@@ -7518,23 +7522,22 @@ void RawImageSource::ItcWB(const LocWBParams &localr, double &tempitc, double &g
 //  float somstudY = 0.f;
 
     YYcurr(N_t, sizcurr);
-
 //calculate  x y z for each pixel with multiplier rmm gmm bmm
+
     for (int tt = 0; tt < N_t; tt++) {
         for (int y = 0; y < bfh ; y += 10) {
             for (int x = 0; x < bfw ; x += 10) {
                 int yy = y / 10;
                 int xx = x / 10 ;
                 float x_c = 0.f, y_c = 0.f, Y_c = 0.f;
+                float x_x=0.f, y_y=0.f, z_z=0.f;
                 float RR =  rmm[tt] * redloc[y][x];
                 float GG =  gmm[tt] * greenloc[y][x];
                 float BB =  bmm[tt] * blueloc[y][x];
-
-                Color::rgbxyY(RR, GG, BB, x_c, y_c, Y_c, wp);
+                Color::rgbxyY(RR, GG, BB, x_c, y_c, Y_c, x_x, y_y, z_z, wp);                
                 xc[yy][xx] = x_c;
                 yc[yy][xx] = y_c;
                 Yc[yy][xx] = Y_c;
-
             }
 
         }
@@ -7572,7 +7575,8 @@ void RawImageSource::ItcWB(const LocWBParams &localr, double &tempitc, double &g
 
 //        int nc, nc2 = 0;
         histoxyY(bfhitc, bfwitc, xc, yc, Yc, xxx,  yyy, YYY, histxy, area, inter);
-
+                
+        
         hiss Wbhis [siza];
         int n1 = 0;
         int n4 = 0;
@@ -7600,7 +7604,7 @@ void RawImageSource::ItcWB(const LocWBParams &localr, double &tempitc, double &g
 
         }
 
-        printf("n1=%i n4=%i n15=%i n30=%i nearn=%i\n", n1, n4, n15, n30, nearneutral);
+        //printf("n1=%i n4=%i n15=%i n30=%i nearn=%i\n", n1, n4, n15, n30, nearneutral);
         ntr = n30;
         if(ntr > (siza - 30)) ntr = n15;//if to less elements 30 elements mini
         if(ntr > (siza - 25)) ntr = n4;//if to less elements 25 elements mini
@@ -7634,8 +7638,32 @@ void RawImageSource::ItcWB(const LocWBParams &localr, double &tempitc, double &g
             xxyycurr[2 * j + 1][tt] = yyy[Wbhis[siza - (i + 1)].index] / histcurr[i][tt];
             YYcurr[j][tt] = YYY[Wbhis[siza - (i + 1)].index] / histcurr[i][tt];
         }
-
- //       float studentY = 0.f;
+        /*
+        float nnx, nny, nnz;
+        
+        if(wbpar.wbcat02Method == "icam") {        
+            for(int k=0;k < sizcurr3; k++) {
+                float nnx = xxyycurr[2 * k][tt]*YYcurr[k][tt] / xxyycurr[2 * k + 1][tt];
+                float nny = YYcurr[k][tt];
+                float nnz = (1.f -xxyycurr[2 * k][tt] - xxyycurr[2 * k + 1][tt] )*YYcurr[k][tt]/xxyycurr[2 * k + 1][tt];
+                float CAM02BB00 = 1.0f, CAM02BB01=1.0f, CAM02BB02=1.0f, CAM02BB10=1.0f, CAM02BB11=1.0f, CAM02BB12=1.0f, CAM02BB20=1.0f, CAM02BB21=1.0f, CAM02BB22=1.0f; //for CIECAT02
+                float Xwb = Txyz[20].XX;
+                float Ywb = 1.;
+                float Zwb = Txyz[20].ZZ;
+                float xn, yn, zn;      
+                ColorTemp::cieCAT02float(Xwb, Ywb, Zwb, CAM02BB00, CAM02BB01, CAM02BB02, CAM02BB10, CAM02BB11, CAM02BB12, CAM02BB20, CAM02BB21, CAM02BB22, 1.0f);
+                
+                xn = CAM02BB00 * nnx + CAM02BB01 * nny + CAM02BB02 * nnz ;
+                yn = CAM02BB10 * nnx + CAM02BB11 * nny + CAM02BB12 * nnz ;
+                zn = CAM02BB20 * nnx + CAM02BB21 * nny + CAM02BB22 * nnz;
+                float som = xn + yn + zn;
+                xxyycurr[2 * k][tt] = xn / som;
+                xxyycurr[2 * k + 1][tt] = yn / som;
+                YYcurr[k][tt] = yn;
+            }
+        }
+        */
+        float studentY = 0.f;
         float student = 0.f;
 
 //	studentXY(YYcurr, reffYY, sizcurr2, Nc, tt, studentY); //for YY green not used
@@ -7643,6 +7671,7 @@ void RawImageSource::ItcWB(const LocWBParams &localr, double &tempitc, double &g
 //	somstudY += (studentY);
         //float snedecor = 1.40f; //for sizestucurr and sizestureff
         // not used
+        
 /*
         float abstudY = fabs(studentY);
 
@@ -7653,7 +7682,7 @@ void RawImageSource::ItcWB(const LocWBParams &localr, double &tempitc, double &g
 */
 
         studentXY(xxyycurr, reffxxyy, 2 * sizcurr3, 2 * Nc, tt, student); //for xy
-       // printf("tt=%i studeY=%f st=%f\n", tt, studentY, student);
+//        printf("tt=%i studeY=%f st=%f\n", tt, studentY, student);
 
         float abstud = fabs(student);
 
@@ -7721,27 +7750,6 @@ void RawImageSource::ItcWB(const LocWBParams &localr, double &tempitc, double &g
 
 
 }
-
-
-
-/*
-void xyz_to_cat02floatraw ( float & r, float & g, float & b, float x, float y, float z)
-{
-
-    {
-        r = ( 0.7328f * x) + (0.4296f * y) - (0.1624f * z);
-        g = (-0.7036f * x) + (1.6975f * y) + (0.0061f * z);
-        b = ( 0.0030f * x) + (0.0136f * y) + (0.9834f * z);
-    }
-}
-
-void cat02_to_xyzfloatraw ( float & x, float & y, float & z, float r, float g, float b)
-{
-    x = ( 1.096124f * r) - (0.278869f * g) + (0.182745f * b);
-    y = ( 0.454369f * r) + (0.473533f * g) + (0.072098f * b);
-    z = (-0.009628f * r) - (0.005698f * g) + (1.015326f * b);
-}
-*/
 
 
 void RawImageSource::WBauto(array2D<float> &redloc, array2D<float> &greenloc, array2D<float> &blueloc, int bfw, int bfh, double & avg_rm, double & avg_gm, double & avg_bm, double &tempitc, double & greenitc, bool &twotimes, const LocWBParams & localr, const WBParams & wbpar, int begx, int begy, int yEn, int xEn, int cx, int cy, const ColorManagementParams &cmp, const RAWParams &raw)
@@ -7822,7 +7830,7 @@ void RawImageSource::WBauto(array2D<float> &redloc, array2D<float> &greenloc, ar
         itc = true;
 
         if (itc) {
-            ItcWB(localr, tempitc, greenitc, redloc, greenloc, blueloc, bfw, bfh, avg_rm, avg_gm, avg_bm, cmp, raw);
+            ItcWB(localr, tempitc, greenitc, redloc, greenloc, blueloc, bfw, bfh, avg_rm, avg_gm, avg_bm, cmp, raw, wbpar);
         }
 
         //twotimes = false;
@@ -7879,23 +7887,21 @@ void RawImageSource::WBauto(array2D<float> &redloc, array2D<float> &greenloc, ar
         itc = true;
 
         if (itc) {
-            ItcWB(localr, tempitc, greenitc, redloc, greenloc, blueloc, bfw, bfh, avg_rm, avg_gm, avg_bm, cmp, raw);
+            ItcWB(localr, tempitc, greenitc, redloc, greenloc, blueloc, bfw, bfh, avg_rm, avg_gm, avg_bm, cmp, raw, wbpar);
         }
 
         //twotimes = false;
     }
     if (wbpar.method == "autitcgreen") {
-		greenitc = 1.; //wbpar.green;
-		tempitc = 5000.;
+        greenitc = 1.; //wbpar.green;
+        tempitc = 5000.;
         itc = true;
 
         if (itc) {
-            ItcWB(localr, tempitc, greenitc, redloc, greenloc, blueloc, bfw, bfh, avg_rm, avg_gm, avg_bm, cmp, raw);
+            ItcWB(localr, tempitc, greenitc, redloc, greenloc, blueloc, bfw, bfh, avg_rm, avg_gm, avg_bm, cmp, raw, wbpar);
         }
+    }
 
-		
-	}
-	
     if (wbpar.method == "autedgsdw") {
         SobelWB(redsobel, greensobel, bluesobel, redloc, greenloc, blueloc, bfw, bfh);
         SdwWB(redsobel, greensobel, bluesobel, bfw, bfh, avg_rm, avg_gm, avg_bm);
@@ -8124,18 +8130,24 @@ void  RawImageSource::getrgbloc(bool local, bool gamma, bool cat02, int begx, in
     }
 
     if (cat02) {//CAT02
+/*    
+    //not good threatment, I must wait merge branch cat02wb
         for (int i = 0; i < bfh; i++)
             for (int j = 0; j < bfw; j++) {
                 float X = 0.f, Y = 0.f, Z = 0.f;
                 Color::rgbxyz(redloc[i][j], greenloc[i][j], blueloc[i][j], X, Y, Z, wp);
-                //     double temp;
-                //    double Xr = X / 65535.;
-                //    double Yr = Y / 65535.;
-                //    double Zr = Z / 65535.;
+                     double temp;
+                    double Xr = X / 65535.;
+                    double Yr = Y / 65535.;
+                    double Zr = Z / 65535.;
 
-                //          xyz_to_cat02floatraw ( redloc[i][j], greenloc[i][j], blueloc[i][j], X, Y, Z);
-
+                Ciecam02::xyz_to_cat02float ( redloc[i][j], greenloc[i][j], blueloc[i][j], Xr, Yr, Zr, 1);
+                    redloc[i][j] *= 65535.f;
+                    greenloc[i][j] *= 65535.f;
+                    blueloc[i][j] *= 65535.f;
+                //to do ciecam adaptation
             }
+*/           
     }
 
 }

@@ -30,9 +30,11 @@
 
 namespace rtengine
 {
+using namespace procparams;
 
 class RawImageSource : public ImageSource
 {
+    const ProcParams* params;
 
 private:
     static DiagonalCurve *phaseOneIccCurve;
@@ -112,7 +114,7 @@ protected:
     void hlRecovery(const std::string &method, float* red, float* green, float* blue, int width, float* hlmax);
     void transformRect(const PreviewProps &pp, int tran, int &sx1, int &sy1, int &width, int &height, int &fw);
     void transformPosition(int x, int y, int tran, int& tx, int& ty);
-    void ItcWB(const LocWBParams &localr, double &tempitc, double &greenitc, array2D<float> &redloc, array2D<float> &greenloc, array2D<float> &blueloc, int bfw, int bfh, double &avg_rm, double &avg_gm, double &avg_bm, const ColorManagementParams &cmp, const RAWParams &raw);
+    void ItcWB(const LocWBParams &localr, double &tempitc, double &greenitc, array2D<float> &redloc, array2D<float> &greenloc, array2D<float> &blueloc, int bfw, int bfh, double &avg_rm, double &avg_gm, double &avg_bm, const ColorManagementParams &cmp, const RAWParams &raw, const WBParams & wbpar);
 
     unsigned FC(int row, int col)
     {

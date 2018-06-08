@@ -1226,12 +1226,12 @@ void ColorTemp::cieCAT02(double Xw, double Yw, double Zw, double &CAM02BB00, dou
             }
 
     //adaptation jdc : slightly different from CIECAM02 : Rc=(Yw(D/Rw)+(1-D))*R , but it's work !   true at 0 and 1
- //   CAM02[1][1] = (CAM02[1][1] - 1.0) * D + 1.0;
- //   CAM02[0][0] = (CAM02[0][0] - 1.0) * D + 1.0;
- //   CAM02[2][2] = (CAM02[2][2] - 1.0) * D + 1.0;
-    CAM02[1][1] *= D;
-    CAM02[0][0] *= D;
-    CAM02[2][2] *= D;
+    CAM02[1][1] = (CAM02[1][1] - 1.0) * D + 1.0;
+    CAM02[0][0] = (CAM02[0][0] - 1.0) * D + 1.0;
+   CAM02[2][2] = (CAM02[2][2] - 1.0) * D + 1.0;
+ //   CAM02[1][1] *= D;
+ //   CAM02[0][0] *= D;
+ //   CAM02[2][2] *= D;
     CAM02[0][1] *= D;
     CAM02[0][2] *= D;
     CAM02[1][0] *= D;
@@ -1250,6 +1250,103 @@ void ColorTemp::cieCAT02(double Xw, double Yw, double Zw, double &CAM02BB00, dou
     CAM02BB22 = CAM02[2][2];
 
 }
+
+void ColorTemp::cieCAT02float(float Xw, float Yw, float Zw, float &CAM02BB00, float &CAM02BB01, float &CAM02BB02, float &CAM02BB10, float &CAM02BB11, float &CAM02BB12, float &CAM02BB20, float &CAM02BB21, float &CAM02BB22, float adap)
+{
+
+// CIECAT02  - J.Desmis January 2012 review September 2012
+    const float whiteD50p[3] = {0.9646019585, 1.0, 0.8244507152}; //calculate with these tools
+
+    float cam_dest[3] = {0., 0., 0.};
+    float cam_orig[3] = {0., 0., 0.};
+    const float CAT02[3][3] = {{0.7328,   0.4296,  -0.1624},//CAT02 2002
+        { -0.7036,  1.6975,   0.0061},
+        {0.0030,   0.0136,   0.9834}
+    };
+    const float INVCAT02[3][3] = {{1.09612382083551,      -0.278869000218287,    0.182745179382773},  //Inverse CAT02
+        {0.454369041975359,      0.4735331543070412,   0.0720978037172291},
+        { -0.009627608738442936, -0.00569803121611342,  1.01532563995454}
+    };
+
+    float inv_white_orig[3][3] = {{0.,  0.,  0.},
+        {0.,  0.,  0.},
+        {0.,  0.,  0.}
+    };
+    float intermed[3][3] = {{0.,  0.,  0.},
+        {0.,  0.,  0.},
+        {0.,  0.,  0.}
+    };
+
+    float intermed_2[3][3] = {{0.,  0.,  0.},
+        {0.,  0.,  0.},
+        {0.,  0.,  0.}
+    };
+    float CAM02[3][3] = {{0.,  0.,  0.},
+        {0.,  0.,  0.},
+        {0.,  0.,  0.}
+    };
+    float D = adap;
+
+    //white destination Wd : RT use always D50
+    cam_dest[0] = CAT02[0][0] * whiteD50p[0] + CAT02[0][1] * whiteD50p[1] + CAT02[0][2] * whiteD50p[2]; //Cone response RoD
+    cam_dest[1] = CAT02[1][0] * whiteD50p[0] + CAT02[1][1] * whiteD50p[1] + CAT02[1][2] * whiteD50p[2]; //GaD
+    cam_dest[2] = CAT02[2][0] * whiteD50p[0] + CAT02[2][1] * whiteD50p[1] + CAT02[2][2] * whiteD50p[2]; //BeD
+
+    //origin white Ws : A, D65, custom, etc.
+    cam_orig[0] = CAT02[0][0] * Xw + CAT02[0][1] * Yw + CAT02[0][2] * Zw; //Cone response RoS
+    cam_orig[1] = CAT02[1][0] * Xw + CAT02[1][1] * Yw + CAT02[1][2] * Zw;
+    cam_orig[2] = CAT02[2][0] * Xw + CAT02[2][1] * Yw + CAT02[2][2] * Zw;
+
+    //inverse white
+    inv_white_orig[0][0] = 1. / cam_orig[0]; // 1/RoS
+    inv_white_orig[1][1] = 1. / cam_orig[1]; // 1/GaS
+    inv_white_orig[2][2] = 1. / cam_orig[2]; // 1/BeS
+
+    //intermediates computation
+    for (int i = 0; i < 3; i++)
+        for (int j = 0; j < 3 ; j++) {
+            intermed[i][j] = inv_white_orig[i][i] * CAT02[i][j];
+        }
+
+    for (int i = 0; i < 3; i++)
+        for (int j = 0; j < 3 ; j++) {
+            intermed_2[i][j] = cam_dest[i] * intermed[i][j];
+        }
+
+    //and CAM02
+    for (int i = 0; i < 3; i++)
+        for (int j = 0; j < 3; j++)
+            for (int k = 0; k < 3; k++) {
+                CAM02[i][j] += INVCAT02[i][k] * intermed_2[k][j];
+            }
+
+    //adaptation jdc : slightly different from CIECAM02 : Rc=(Yw(D/Rw)+(1-D))*R , but it's work !   true at 0 and 1
+    CAM02[1][1] = (CAM02[1][1] - 1.0) * D + 1.0;
+    CAM02[0][0] = (CAM02[0][0] - 1.0) * D + 1.0;
+   CAM02[2][2] = (CAM02[2][2] - 1.0) * D + 1.0;
+ //   CAM02[1][1] *= D;
+ //   CAM02[0][0] *= D;
+ //   CAM02[2][2] *= D;
+    CAM02[0][1] *= D;
+    CAM02[0][2] *= D;
+    CAM02[1][0] *= D;
+    CAM02[1][2] *= D;
+    CAM02[2][0] *= D;
+    CAM02[2][1] *= D;
+    //CAT02  matrix with D adaptation
+    CAM02BB00 = CAM02[0][0];
+    CAM02BB01 = CAM02[0][1];
+    CAM02BB02 = CAM02[0][2];
+    CAM02BB10 = CAM02[1][0];
+    CAM02BB11 = CAM02[1][1];
+    CAM02BB12 = CAM02[1][2];
+    CAM02BB20 = CAM02[2][0];
+    CAM02BB21 = CAM02[2][1];
+    CAM02BB22 = CAM02[2][2];
+
+}
+
+
 
 void ColorTemp::icieCAT02(double Xw, double Yw, double Zw, double &iCAM02BB00, double &iCAM02BB01, double &iCAM02BB02, double &iCAM02BB10, double &iCAM02BB11, double &iCAM02BB12, double &iCAM02BB20, double &iCAM02BB21, double &iCAM02BB22, double adap)
 {
@@ -1286,6 +1383,101 @@ void ColorTemp::icieCAT02(double Xw, double Yw, double Zw, double &iCAM02BB00, d
         {0.,  0.,  0.}
     };
     double D = adap / 2.;
+
+    //white destination Wd : RT use always D50
+    cam_dest[0] = INVCAT02[0][0] * whiteD50p[0] + INVCAT02[0][1] * whiteD50p[1] + INVCAT02[0][2] * whiteD50p[2]; //Cone reponse RoD
+    cam_dest[1] = INVCAT02[1][0] * whiteD50p[0] + INVCAT02[1][1] * whiteD50p[1] + INVCAT02[1][2] * whiteD50p[2]; //GaD
+    cam_dest[2] = INVCAT02[2][0] * whiteD50p[0] + INVCAT02[2][1] * whiteD50p[1] + INVCAT02[2][2] * whiteD50p[2]; //BeD
+
+    //origin white Ws : A, D65, custom, etc.
+    cam_orig[0] = INVCAT02[0][0] * Xw + INVCAT02[0][1] * Yw + INVCAT02[0][2] * Zw; //Cone reponse RoS
+    cam_orig[1] = INVCAT02[1][0] * Xw + INVCAT02[1][1] * Yw + INVCAT02[1][2] * Zw;
+    cam_orig[2] = INVCAT02[2][0] * Xw + INVCAT02[2][1] * Yw + INVCAT02[2][2] * Zw;
+//   cam_orig[0] = CAT02[0][0] * Xw + CAT02[0][1] * Yw + CAT02[0][2] * Zw; //Cone reponse RoS
+//   cam_orig[1] = CAT02[1][0] * Xw + CAT02[1][1] * Yw + CAT02[1][2] * Zw;
+    //  cam_orig[2] = CAT02[2][0] * Xw + CAT02[2][1] * Yw + CAT02[2][2] * Zw;
+
+    //inverse white
+    inv_white_orig[0][0] = 1. / cam_orig[0]; // 1/RoS
+    inv_white_orig[1][1] = 1. / cam_orig[1]; // 1/GaS
+    inv_white_orig[2][2] = 1. / cam_orig[2]; // 1/BeS
+
+    //intermediates computation
+    for (int i = 0; i < 3; i++)
+        for (int j = 0; j < 3 ; j++) {
+            // intermed[i][j] = inv_white_orig[i][i] * INVCAT02[i][j];
+            intermed[i][j] = inv_white_orig[i][i] * CAT02[i][j];
+        }
+
+    for (int i = 0; i < 3; i++)
+        for (int j = 0; j < 3 ; j++) {
+            intermed_2[i][j] = cam_dest[i] * intermed[i][j];
+        }
+
+    //and CAM02
+    for (int i = 0; i < 3; i++)
+        for (int j = 0; j < 3; j++)
+            for (int k = 0; k < 3; k++) {
+                INVCAM02[i][j] += INVCAT02[i][k] * intermed_2[k][j];
+            }
+
+    //adaptation jdc : slightly different from CIECAM02 : Rc=(Yw(D/Rw)+(1-D))*R , but it's work !   true at 0 and 1
+    INVCAM02[0][0] = (INVCAM02[0][0] - 1.0) * D + 1.0;
+    INVCAM02[2][2] = (INVCAM02[2][2] - 1.0) * D + 1.0;
+    INVCAM02[0][1] *= D;
+    INVCAM02[0][2] *= D;
+    INVCAM02[1][0] *= D;
+    INVCAM02[1][2] *= D;
+    INVCAM02[2][0] *= D;
+    INVCAM02[2][1] *= D;
+    //CAT02  matrix with D adaptation
+    iCAM02BB00 = INVCAM02[0][0];
+    iCAM02BB01 = INVCAM02[0][1];
+    iCAM02BB02 = INVCAM02[0][2];
+    iCAM02BB10 = INVCAM02[1][0];
+    iCAM02BB11 = INVCAM02[1][1];
+    iCAM02BB12 = INVCAM02[1][2];
+    iCAM02BB20 = INVCAM02[2][0];
+    iCAM02BB21 = INVCAM02[2][1];
+    iCAM02BB22 = INVCAM02[2][2];
+
+}
+
+void ColorTemp::icieCAT02float(float Xw, float Yw, float Zw, float &iCAM02BB00, float &iCAM02BB01, float &iCAM02BB02, float &iCAM02BB10, float &iCAM02BB11, float &iCAM02BB12, float &iCAM02BB20, float &iCAM02BB21, float &iCAM02BB22, float adap)
+{
+
+// CIECAT02  - J.Desmis January 2012 review September 2017
+    const float whiteD50p[3] = {0.9646019585, 1.0, 0.8244507152}; //calculate with these tools
+
+    float cam_dest[3] = {0., 0., 0.};
+    float cam_orig[3] = {0., 0., 0.};
+    const float CAT02[3][3] = {{0.7328,   0.4296,  -0.1624},//CAT02 2002
+        { -0.7036,  1.6975,   0.0061},
+        {0.0030,   0.0136,   0.9834}
+    };
+    const float INVCAT02[3][3] = {{1.09612382083551,      -0.278869000218287,    0.182745179382773},  //Inverse CAT02
+        {0.454369041975359,      0.4735331543070412,   0.0720978037172291},
+        { -0.009627608738442936, -0.00569803121611342,  1.01532563995454}
+    };
+
+    float inv_white_orig[3][3] = {{0.,  0.,  0.},
+        {0.,  0.,  0.},
+        {0.,  0.,  0.}
+    };
+    float intermed[3][3] = {{0.,  0.,  0.},
+        {0.,  0.,  0.},
+        {0.,  0.,  0.}
+    };
+
+    float intermed_2[3][3] = {{0.,  0.,  0.},
+        {0.,  0.,  0.},
+        {0.,  0.,  0.}
+    };
+    float INVCAM02[3][3] = {{0.,  0.,  0.},
+        {0.,  0.,  0.},
+        {0.,  0.,  0.}
+    };
+    float D = adap / 2.;
 
     //white destination Wd : RT use always D50
     cam_dest[0] = INVCAT02[0][0] * whiteD50p[0] + INVCAT02[0][1] * whiteD50p[1] + INVCAT02[0][2] * whiteD50p[2]; //Cone reponse RoD
@@ -1789,7 +1981,7 @@ void ColorTemp::cat02_to_xyzfloatraw(float & x, float & y, float & z, float r, f
 // we can change step for temperature and increase number  for T > 7500K if necessary
 //these values Temp, x, y are refernces for all calculations and very precise.
 //copyright J.Desmis august 2017
-void ColorTemp::tempxy(double &temp, float **Tx, float **Ty, float **Tz, float **Ta, float **Tb, float **TL, float **TX, float **TY, float **TZ)
+void ColorTemp::tempxy(double &temp, float **Tx, float **Ty, float **Tz, float **Ta, float **Tb, float **TL, float **TX, float **TY, float **TZ, const procparams::WBParams & wbpar)
 {
     const double* spec_colorforxcyc[] = {//color references
         JDC468_BluH10_spect, JDC468_BluF4_spect, JDC468_BluD6_spect, ColorchechCyaF3_spect, Colorblue_spect, JDC468_BluM5_spect, // 0 4
@@ -1986,12 +2178,17 @@ void ColorTemp::tempxy(double &temp, float **Tx, float **Ty, float **Tz, float *
         }
 
 //CAT02
-/*
+
         double CAM02BB00 = 1.0, CAM02BB01=1.0, CAM02BB02=1.0, CAM02BB10=1.0, CAM02BB11=1.0, CAM02BB12=1.0, CAM02BB20=1.0, CAM02BB21=1.0, CAM02BB22=1.0; //for CIECAT02
         double Xwb = Txyz[tt].XX;
         double Ywb = 1.;
         double Zwb = Txyz[tt].ZZ;
+        if(wbpar.wbcat02Method == "icam") {
+        icieCAT02(Xwb, Ywb, Zwb, CAM02BB00, CAM02BB01, CAM02BB02, CAM02BB10, CAM02BB11, CAM02BB12, CAM02BB20, CAM02BB21, CAM02BB22, 1.0);
+        }
+        if(wbpar.wbcat02Method == "cam") {
         cieCAT02(Xwb, Ywb, Zwb, CAM02BB00, CAM02BB01, CAM02BB02, CAM02BB10, CAM02BB11, CAM02BB12, CAM02BB20, CAM02BB21, CAM02BB22, 1.0);
+        }
         for (int i = 0; i < N_c; i++) {
 
             Refxyzcat02[i].Xrefcat = CAM02BB00 * Refxyz[i].Xref + CAM02BB01 * Refxyz[i].Yref + CAM02BB02 * Refxyz[i].Zref ;
@@ -1999,7 +2196,7 @@ void ColorTemp::tempxy(double &temp, float **Tx, float **Ty, float **Tz, float *
             Refxyzcat02[i].Zrefcat = CAM02BB20 * Refxyz[i].Xref + CAM02BB21 * Refxyz[i].Yref + CAM02BB22 * Refxyz[i].Zref;
         }
 
-*/
+
 //end CAT02
 
         for (int i = 0; i < N_c; i++) {
@@ -2008,7 +2205,7 @@ void ColorTemp::tempxy(double &temp, float **Tx, float **Ty, float **Tz, float *
             float Z = 65535.f * Refxyzcat02[i].Zrefcat;
             float L, a, b;
             Color::XYZ2Lab(X, Y, Z, L, a, b);
-			
+
             double som = (Refxyzcat02[i].Xrefcat + Refxyzcat02[i].Yrefcat +  Refxyzcat02[i].Zrefcat);
             L /= 327.68f;
             a /= 327.68f;
@@ -2019,23 +2216,19 @@ void ColorTemp::tempxy(double &temp, float **Tx, float **Ty, float **Tz, float *
             TX[i][tt] = X;
             TY[i][tt] = Y;
             TZ[i][tt] = Z;
-		*/
-			
-			//som = 1.;
-			
-            Tx[i][tt] = (float) Refxyz[i].Xref;
-            Ty[i][tt] = (float) Refxyz[i].Yref;
-            Tz[i][tt] = (float) Refxyz[i].Zref;
-		
+            */
+        //som = 1.;
 
-/*
-            Tx[i][tt] = (float)  Refxyzcat02[i].Xrefcat;
-            Ty[i][tt] = (float) Refxyzcat02[i].Yrefcat;
-            Tz[i][tt] = (float) Refxyzcat02[i].Zrefcat;
-			
-*/			
+            if(wbpar.wbcat02Method == "none") {
+                Tx[i][tt] = (float) Refxyz[i].Xref;
+                Ty[i][tt] = (float) Refxyz[i].Yref;
+                Tz[i][tt] = (float) Refxyz[i].Zref;
+            } else {
+                Tx[i][tt] = (float)  Refxyzcat02[i].Xrefcat;
+                Ty[i][tt] = (float) Refxyzcat02[i].Yrefcat;
+                Tz[i][tt] = (float) Refxyzcat02[i].Zrefcat;
+            }
         }
-
     }
 }
 

@@ -43,7 +43,7 @@ class WhiteBalance : public ToolParamBlock, public AdjusterListener, public Fold
     };
 	
 private:
-    rtengine::ProcEvent EvWBgammaMethod;
+    rtengine::ProcEvent EvWBcat02Method;
     rtengine::ProcEvent EvWBMethod;
     rtengine::ProcEvent EvWBTemp;
     rtengine::ProcEvent EvWBGreen;
@@ -66,12 +66,13 @@ protected:
             add(colId);
         }
     };
+    Gtk::HBox* catbox;
 
     static Glib::RefPtr<Gdk::Pixbuf> wbPixbufs[rtengine::toUnderlying(rtengine::procparams::WBEntry::Type::CUSTOM) + 1];
     Glib::RefPtr<Gtk::TreeStore> refTreeModel;
     MethodColumns methodColumns;
     MyComboBox* method;
-    MyComboBoxText*   wbgammaMethod;
+    MyComboBoxText*   wbcat02Method;
 
     MyComboBoxText* spotsize;
     Adjuster* temp;
@@ -85,7 +86,7 @@ protected:
     double nextGreen;
     WBProvider *wbp;  // pointer to a ToolPanelCoordinator object, or its subclass BatchToolPanelCoordinator
     SpotWBListener* wblistener;
-    sigc::connection methconn, wbgammaMethodConn;
+    sigc::connection methconn, wbcat02MethodConn;
     int custom_temp;
     double custom_green;
     double custom_equal;
@@ -96,7 +97,7 @@ protected:
     void cache_customTemp(int temp);                 //cache Temperature only to allow its recall
     void cache_customGreen(double green);            //cache Green only to allow its recall
     void cache_customEqual(double equal);            //cache Equal only to allow its recall
-    void wbgammaMethodChanged();
+    void wbcat02MethodChanged();
 
     int  setActiveMethod(Glib::ustring label);
     int _setActiveMethod(Glib::ustring &label, Gtk::TreeModel::Children &children);

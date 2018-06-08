@@ -27,7 +27,7 @@ namespace rtengine
 
 class Ciecam02
 {
-private:
+public:
     static float d_factorfloat ( float f, float la );
     static float calculate_fl_from_la_ciecam02float ( float la );
     static float achromatic_response_to_whitefloat ( float x, float y, float z, float d, float fl, float nbb, int gamu );

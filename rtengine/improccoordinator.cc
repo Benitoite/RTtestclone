@@ -260,7 +260,7 @@ void ImProcCoordinator::updatePreviewImage(int todo, Crop* cropCall)
                 printf("Demosaic X-Trans image with using method: %s\n", rp.xtranssensor.method.c_str());
             }
         }
-		
+
         imgsrc->demosaic(rp);   //enabled demosaic
         // if a demosaic happened we should also call g etimage later, so we need to set the M_INIT flag
 
@@ -268,19 +268,19 @@ void ImProcCoordinator::updatePreviewImage(int todo, Crop* cropCall)
         todo |= M_INIT;
 
         bool autowb0 = false;
-		bool autogamm = false;
+        bool autoitc = false;
         autowb0 = (params.wb.method == "autold" || params.wb.method == "aut"  || params.wb.method == "autosdw" || params.wb.method == "autedgsdw" || params.wb.method == "autitc" || params.wb.method == "autitc2" || params.wb.method == "autitcgreen" || params.wb.method == "autedgrob" || params.wb.method == "autedg" || params.wb.method == "autorobust");
-        autogamm = (params.wb.method == "autold" || params.wb.method == "autitc" || params.wb.method == "autitc2" || params.wb.method == "autitcgreen");
+        autoitc = (params.wb.method == "autitc" || params.wb.method == "autitc2" || params.wb.method == "autitcgreen");
         bool gamma = false;
-
-        if (params.wb.wbgammaMethod == "gam"  && !autogamm) {
-            gamma = true;
-        }
+        bool cat = false;
+//        if (params.wb.wbcat02Method == "icam" && autoitc) {
+//            cat = true;
+//        }
 
         if (autowb0) {
-            imgsrc->getrgbloc(false, gamma, false, 0, 0, fh, fw, 0, 0, fh, fw);
+            imgsrc->getrgbloc(false, false, false, 0, 0, fh, fw, 0, 0, fh, fw);
         }
-
+printf("OK RGBLOC\n");
 //        }
 //  }
         if (highDetailNeeded) {
@@ -341,13 +341,13 @@ void ImProcCoordinator::updatePreviewImage(int todo, Crop* cropCall)
             currWB = imgsrc->getWB();
             //   } else if (params.wb.method == "Auto") {
         } else if (autowb) {
-            if (lastAwbEqual != params.wb.equal || lastAwbTempBias != params.wb.tempBias  || lastAwbauto != params.wb.method  || lastwbgamma != params.wb.wbgammaMethod) {
+            if (lastAwbEqual != params.wb.equal || lastAwbTempBias != params.wb.tempBias  || lastAwbauto != params.wb.method  || lastwbcat02 != params.wb.wbcat02Method) {
                 double rm, gm, bm;
                 double tempitc = 5000.;
                 double greenitc = 1.;
                 // imgsrc->getAutoWBMultipliers (rm, gm, bm);
                 imgsrc->getAutoWBMultipliersloc(tempitc, greenitc, 0, 0, fh, fw, 0, 0, fh, fw, rm, gm, bm, params.localwb, params.wb, params.icm, params.raw);
-				printf("tempitc=%f \n", tempitc);
+                printf("tempitc=%f \n", tempitc);
 
                 if (params.wb.method ==  "autitc" || params.wb.method ==  "autitc2" || params.wb.method ==  "autitcgreen") {
                     params.wb.temperature = tempitc;
@@ -365,12 +365,12 @@ void ImProcCoordinator::updatePreviewImage(int todo, Crop* cropCall)
                     lastAwbEqual = params.wb.equal;
                     lastAwbTempBias = params.wb.tempBias;
                     lastAwbauto = params.wb.method;
-                    lastwbgamma = params.wb.wbgammaMethod;
+                    lastwbcat02 = params.wb.wbcat02Method;
                 } else {
                     lastAwbEqual = -1.;
                     lastAwbTempBias = 0.0;
                     lastAwbauto = "";
-                    lastwbgamma = "";
+                    lastwbcat02 = "";
                     autoWB.useDefaults(params.wb.equal);
                 }
 
@@ -1193,7 +1193,7 @@ bool ImProcCoordinator::getAutoWB(double& temp, double& green, double equal, dou
 //       autowb =  (params.wb.method == "autold" || params.wb.method == "aut"  || params.wb.method == "autosdw" || params.wb.method == "autedgsdw" || params.wb.method == "autitc"  || params.wb.method == "autedgrob" || params.wb.method == "autedg" || params.wb.method == "autorobust" );
 
 //       if (autowb) {
-        if (lastAwbEqual != equal || lastAwbTempBias != tempBias || lastAwbauto != params.wb.method  || lastwbgamma != params.wb.wbgammaMethod) {
+        if (lastAwbEqual != equal || lastAwbTempBias != tempBias || lastAwbauto != params.wb.method  || lastwbcat02 != params.wb.wbcat02Method) {
 // Issue 2500            MyMutex::MyLock lock(minit);  // Also used in crop window
             double rm, gm, bm;
             params.wb.method = "autold";//same result as before muliple Auto WB
@@ -1209,10 +1209,10 @@ bool ImProcCoordinator::getAutoWB(double& temp, double& green, double equal, dou
                 lastAwbEqual = equal;
                 lastAwbTempBias = tempBias;
                 lastAwbauto = params.wb.method;
-                lastwbgamma = params.wb.wbgammaMethod;
+                lastwbcat02 = params.wb.wbcat02Method;
             } else {
                 lastAwbEqual = -1.;
-                lastwbgamma = "";
+                lastwbcat02 = "";
                 lastAwbauto = "";
                 autoWB.useDefaults(equal);
                 lastAwbTempBias = 0.0;

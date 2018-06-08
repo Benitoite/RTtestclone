@@ -2241,6 +2241,9 @@ TP_WAVELET_TMSTRENGTH;Compression strength
 TP_WAVELET_TMSTRENGTH_TOOLTIP;Control the strength of tone mapping or contrast compression of the residual image. When the value is different from 0, the Strength and Gamma sliders of the Tone Mapping tool in the Exposure tab will become grayed out.
 TP_WAVELET_TMTYPE;Compression method
 TP_WAVELET_TON;Toning
+TP_WBCAM;Cat02 adaptation
+TP_WBCAM_NONE;None
+TP_WBCAM_ICAM;Cat02
 TP_WBALANCE_AUTO;Auto
 TP_WBALANCE_CAMERA;Camera
 TP_WBALANCE_CLOUDY;Cloudy

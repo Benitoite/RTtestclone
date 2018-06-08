@@ -151,7 +151,7 @@ static double wbTemp2Slider(double temp)
 WhiteBalance::WhiteBalance() : FoldableToolPanel(this, "whitebalance", M("TP_WBALANCE_LABEL"), true, true), wbp(nullptr), wblistener(nullptr)
 {
     auto m = ProcEventMapper::getInstance();
-    EvWBgammaMethod = m->newEvent(DEMOSAIC, "HISTORY_MSG_WBGAMMA");
+    EvWBcat02Method = m->newEvent(DEMOSAIC, "HISTORY_MSG_WBGAMMA");
     EvWBMethod = m->newEvent(DEMOSAIC, "HISTORY_MSG_WBMETHOD");
     EvWBTemp = m->newEvent(DEMOSAIC, "HISTORY_MSG_WBTEMP");
     EvWBGreen = m->newEvent(DEMOSAIC, "HISTORY_MSG_WBGREEN");
@@ -188,7 +188,7 @@ WhiteBalance::WhiteBalance() : FoldableToolPanel(this, "whitebalance", M("TP_WBA
             }
 
             if (currType == WBEntry::Type::AUTO) {
-                // Creating the under water subcategory header
+                // Creating the auto category
                 row = *(refTreeModel->append());
                 row[methodColumns.colIcon] = wbPixbufs[toUnderlying(currType)];
                 row[methodColumns.colLabel] = M("TP_WBALANCE_AUTO_HEADER");
@@ -246,7 +246,6 @@ WhiteBalance::WhiteBalance() : FoldableToolPanel(this, "whitebalance", M("TP_WBA
             row[methodColumns.colLabel] = WBParams::getWbEntries()[i].GUILabel;
             row[methodColumns.colId] = i;
         }
-
         oldType = currType;
 
         custom_green = 1.0;
@@ -270,23 +269,25 @@ WhiteBalance::WhiteBalance() : FoldableToolPanel(this, "whitebalance", M("TP_WBA
     pack_start(*hbox, Gtk::PACK_SHRINK, 0);
     opt = 0;
 
-    Gtk::HBox* gammabox = Gtk::manage(new Gtk::HBox());
-    gammabox->set_spacing(4);
-    gammabox->show();
+   // Gtk::HBox* 
+    catbox = Gtk::manage(new Gtk::HBox());
+    catbox->set_spacing(4);
+    catbox->show();
 
-    Gtk::Label* labgamma = Gtk::manage(new Gtk::Label(M("TP_LOCALRGB_CAM") + ":"));
-    labgamma->show();
-    wbgammaMethod = Gtk::manage(new MyComboBoxText());
-    wbgammaMethod->append(M("TP_LOCALWBCAM_NONE"));
-    wbgammaMethod->append(M("TP_LOCALWBCAM_GAM"));
-    wbgammaMethod->set_active(0);
-    wbgammaMethodConn = wbgammaMethod->signal_changed().connect(sigc::mem_fun(*this, &WhiteBalance::wbgammaMethodChanged));
-    wbgammaMethod->set_tooltip_markup(M("TP_LOCALWBCAM_TOOLTIP"));
-    wbgammaMethod->show();
-    gammabox->pack_start(*labgamma, Gtk::PACK_SHRINK, 4);
-    gammabox->pack_start(*wbgammaMethod);
+    Gtk::Label* labcat = Gtk::manage(new Gtk::Label(M("TP_WBCAM") + ":"));
+    labcat->show();
+    wbcat02Method = Gtk::manage(new MyComboBoxText());
+    wbcat02Method->append(M("TP_WBCAM_NONE"));
+    //wbcat02Method->append(M("TP_WBCAM_CAM"));
+    wbcat02Method->append(M("TP_WBCAM_ICAM"));
+    wbcat02Method->set_active(0);
+    wbcat02MethodConn = wbcat02Method->signal_changed().connect(sigc::mem_fun(*this, &WhiteBalance::wbcat02MethodChanged));
+    //wbcat02Method->set_tooltip_markup(M("TP_WBCAM_TOOLTIP"));
+    wbcat02Method->show();
+    catbox->pack_start(*labcat, Gtk::PACK_SHRINK, 4);
+    catbox->pack_start(*wbcat02Method);
 
-//    pack_start(*gammabox);
+    pack_start(*catbox);
 
 
     Gtk::HBox* spotbox = Gtk::manage(new Gtk::HBox());
@@ -439,8 +440,8 @@ void WhiteBalance::adjusterChanged(Adjuster* a, double newval)
         methconn.block(true);
         opt = setActiveMethod(wbCustom.second.GUILabel);
         tempBias->set_sensitive(false);
-        wbgammaMethod->set_sensitive(false);
-
+       // wbcat02Method->set_sensitive(false);
+        catbox->set_sensitive(false);
         cache_customWB(tVal, gVal);
 
         if (a != equal) {
@@ -504,7 +505,9 @@ void WhiteBalance::optChanged()
             const WBEntry& currMethod = WBParams::getWbEntries()[methodId];
 
             tempBias->set_sensitive(currMethod.type == WBEntry::Type::AUTO);
-            wbgammaMethod->set_sensitive(currMethod.type == WBEntry::Type::AUTO);
+            bool autit = (currMethod.ppLabel == "autitcgreen") || (currMethod.ppLabel=="autitc2") || (currMethod.ppLabel =="autitc");
+            catbox->set_sensitive(autit);
+
 
 
             switch (currMethod.type) {
@@ -622,8 +625,8 @@ void WhiteBalance::read(const ProcParams* pp, const ParamsEdited* pedited)
         tempBias->setEditedState(pedited->wb.tempBias ? Edited : UnEdited);
         set_inconsistent(multiImage && !pedited->wb.enabled);
 
-        if (!pedited->wb.wbgammaMethod) {
-            wbgammaMethod->set_active_text(M("GENERAL_UNCHANGED"));
+        if (!pedited->wb.wbcat02Method) {
+            wbcat02Method->set_active_text(M("GENERAL_UNCHANGED"));
         }
 
     }
@@ -736,21 +739,24 @@ void WhiteBalance::read(const ProcParams* pp, const ParamsEdited* pedited)
         }
 
         tempBias->set_sensitive(wbValues.type == WBEntry::Type::AUTO);
-        wbgammaMethod->set_sensitive(wbValues.type == WBEntry::Type::AUTO);
+        bool autit = (wbValues.ppLabel == "autitcgreen") || (wbValues.ppLabel=="autitc2") || (wbValues.ppLabel =="autitc");
+        catbox->set_sensitive(autit);
 
     }
 
-    wbgammaMethodConn.block(true);
+    wbcat02MethodConn.block(true);
 
-    if (pp->wb.wbgammaMethod == "none") {
-        wbgammaMethod->set_active(0);
-    } else if (pp->wb.wbgammaMethod == "gam") {
-        wbgammaMethod->set_active(1);
+    if (pp->wb.wbcat02Method == "none") {
+        wbcat02Method->set_active(0);
+//    } else if (pp->wb.wbcat02Method == "cam") {
+//        wbcat02Method->set_active(1);
+    } else if (pp->wb.wbcat02Method == "icam") {
+        wbcat02Method->set_active(1);
     }
 
-    wbgammaMethodConn.block(false);
+    wbcat02MethodConn.block(false);
 
-    wbgammaMethodChanged();
+    wbcat02MethodChanged();
     setEnabled(pp->wb.enabled);
 
     if (pedited) {
@@ -772,7 +778,7 @@ void WhiteBalance::write(ProcParams* pp, ParamsEdited* pedited)
         pedited->wb.equal = equal->getEditedState();
         pedited->wb.tempBias = tempBias->getEditedState();
         pedited->wb.method = row[methodColumns.colLabel] != M("GENERAL_UNCHANGED");
-        pedited->wb.wbgammaMethod    = wbgammaMethod->get_active_text() != M("GENERAL_UNCHANGED");
+        pedited->wb.wbcat02Method    = wbcat02Method->get_active_text() != M("GENERAL_UNCHANGED");
         pedited->wb.enabled = !get_inconsistent();
 
     }
@@ -790,22 +796,24 @@ void WhiteBalance::write(ProcParams* pp, ParamsEdited* pedited)
     pp->wb.equal = equal->getValue();
     pp->wb.tempBias = tempBias->getValue();
 
-    if (wbgammaMethod->get_active_row_number() == 0) {
-        pp->wb.wbgammaMethod = "none";
-    } else if (wbgammaMethod->get_active_row_number() == 1) {
-        pp->wb.wbgammaMethod = "gam";
+    if (wbcat02Method->get_active_row_number() == 0) {
+        pp->wb.wbcat02Method = "none";
+//    } else if (wbcat02Method->get_active_row_number() == 1) {
+//        pp->wb.wbcat02Method = "cam";
+    } else if (wbcat02Method->get_active_row_number() == 1) {
+        pp->wb.wbcat02Method = "icam";
     }
 
 
 }
 
-void WhiteBalance::wbgammaMethodChanged()
+void WhiteBalance::wbcat02MethodChanged()
 {
     if (!batchMode) {
     }
-
+    
     if (listener) {
-        listener->panelChanged(EvWBgammaMethod, wbgammaMethod->get_active_text());
+        listener->panelChanged(EvWBcat02Method, wbcat02Method->get_active_text());
     }
 }
 

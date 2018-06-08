@@ -255,7 +255,7 @@ public:
     bool green;
     bool equal;
     bool tempBias;
-    bool wbgammaMethod;
+    bool wbcat02Method;
 
 };
 

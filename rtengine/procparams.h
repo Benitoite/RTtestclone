@@ -572,7 +572,7 @@ struct WBParams {
     double          green;
     double          equal;
     double          tempBias;
-    Glib::ustring   wbgammaMethod;
+    Glib::ustring   wbcat02Method;
 
     WBParams();
 
