@@ -7275,7 +7275,6 @@ void RawImageSource::ItcWB(const LocWBParams &localr, double &tempitc, double &g
     int bfwitc = bfw / 10 + 1 ;// 10 arbitrary value  ; perhaps 4 or 5 or 20
     int bfhitc = bfh / 10 + 1;
 
-
     xc(bfwitc, bfhitc);
     yc(bfwitc, bfhitc);
     Yc(bfwitc, bfhitc);
@@ -7395,7 +7394,7 @@ void RawImageSource::ItcWB(const LocWBParams &localr, double &tempitc, double &g
     float **TY = nullptr;
     float **TZ = nullptr;
 
-    int Nc = 61;//number of reference spectral colors
+    int Nc = 54;//number of reference spectral colors
     Tx = new float*[Nc];
 
     for (int i = 0; i < Nc; i++) {
@@ -7450,8 +7449,7 @@ void RawImageSource::ItcWB(const LocWBParams &localr, double &tempitc, double &g
         TZ[i] = new float[nbt];
     }
 
-	
-	
+
     float *rmm = nullptr;
     rmm = new float [N_t];
 
@@ -7498,6 +7496,7 @@ void RawImageSource::ItcWB(const LocWBParams &localr, double &tempitc, double &g
             reffxxyy[2 * j][tt] = Tx[j][tt] / (Tx[j][tt] + Ty[j][tt] +  Tz[j][tt]); // x from xyY
             reffxxyy[2 * j + 1][tt] =  Ty[j][tt] / (Tx[j][tt] + Ty[j][tt] +  Tz[j][tt]); // y from xyY
             reffYY[j][tt] = Ty[j][tt];//Y 
+          //  printf("refx=%f refY=%f\n",reffxxyy[2 * j][40], reffYY[j][40]);
         }
     }
 
@@ -7541,7 +7540,7 @@ void RawImageSource::ItcWB(const LocWBParams &localr, double &tempitc, double &g
             }
 
         }
-
+      //  printf("xc=%f yc=%f\n", xc[40][40],yc[60][60]);
         struct hiss {
             int histnum;
             int index;
@@ -7663,7 +7662,7 @@ void RawImageSource::ItcWB(const LocWBParams &localr, double &tempitc, double &g
             }
         }
         */
-        float studentY = 0.f;
+   //     float studentY = 0.f;
         float student = 0.f;
 
 //	studentXY(YYcurr, reffYY, sizcurr2, Nc, tt, studentY); //for YY green not used
@@ -7682,7 +7681,7 @@ void RawImageSource::ItcWB(const LocWBParams &localr, double &tempitc, double &g
 */
 
         studentXY(xxyycurr, reffxxyy, 2 * sizcurr3, 2 * Nc, tt, student); //for xy
-//        printf("tt=%i studeY=%f st=%f\n", tt, studentY, student);
+   //     printf("tt=%i studeY=%f st=%f\n", tt, studentY, student);
 
         float abstud = fabs(student);
 
@@ -8024,9 +8023,7 @@ void  RawImageSource::getrgbloc(bool local, bool gamma, bool cat02, int begx, in
 
     //  printf ("bfh=%i bfw=%i H=%i W=%i \n", bf_h, bf_w, H, W);
     ColorManagementParams cmp;
-	TMatrix wprof = ICCStore::getInstance()->workingSpaceMatrix(cmp.working);
-	//  TMatrix wprof = ICCStore::getInstance()->workingSpaceMatrix(cmp.workingProfile);
-	
+    //TMatrix wprof = ICCStore::getInstance()->workingSpaceMatrix(cmp.working);
     //  TMatrix wiprof = ICCStore::getInstance()->workingSpaceInverseMatrix (cmp.working);
     /*
         float toxyz[3][3] = {
@@ -8045,13 +8042,13 @@ void  RawImageSource::getrgbloc(bool local, bool gamma, bool cat02, int begx, in
             }
         };
     */
-
+/*
     double wp[3][3] = {
         {wprof[0][0], wprof[0][1], wprof[0][2]},
         {wprof[1][0], wprof[1][1], wprof[1][2]},
         {wprof[2][0], wprof[2][1], wprof[2][2]}
     };
-
+*/
 //  printf("wp00=%f wp02=%f\n", wp[0][0], wp[0][2]);
     if (! greenloc) {
         greenloc(bfw, bfh);
@@ -8111,7 +8108,7 @@ void  RawImageSource::getrgbloc(bool local, bool gamma, bool cat02, int begx, in
 
     sig = sqrt(vari / mm);
     float multip = 60000.f / (avgL + 2.f * sig);
-
+  //  printf("multip=%f \n", multip);
     for (int i = 0; i < bfh; i++)
         for (int j = 0; j < bfw; j++) {
             redloc[i][j] *= multip;
@@ -8377,7 +8374,6 @@ void RawImageSource::getAutoWBMultipliersloc(double &tempitc, double &greenitc, 
     //  if (localr.wbMethod == "aut"  || localr.wbMethod == "autosdw" || localr.wbMethod == "autedgsdw" || localr.wbMethod == "autitc"  || localr.wbMethod == "autedgrob" || localr.wbMethod == "autedg" || localr.wbMethod == "autorobust" ) {
     if (wbpar.method == "aut"  || wbpar.method == "autosdw" || wbpar.method == "autedgsdw" || wbpar.method == "autitc"  || wbpar.method == "autitc2" || wbpar.method == "autitcgreen" || wbpar.method == "autedgrob" || wbpar.method == "autedg" || wbpar.method == "autorobust") {
         bool twotimes = false;
-
         WBauto(redloc, greenloc, blueloc, bfw, bfh, avg_rm, avg_gm, avg_bm, tempitc, greenitc, twotimes, localr, wbpar, begx, begy, yEn,  xEn,  cx,  cy, cmp, raw);
 
     }

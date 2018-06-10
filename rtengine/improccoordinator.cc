@@ -278,9 +278,8 @@ void ImProcCoordinator::updatePreviewImage(int todo, Crop* cropCall)
 //        }
 
         if (autowb0) {
-            imgsrc->getrgbloc(false, false, false, 0, 0, fh, fw, 0, 0, fh, fw);
+            imgsrc->getrgbloc(false, false, false, 0, 0, fh, fw, 0, 0, fh, fw);            
         }
-printf("OK RGBLOC\n");
 //        }
 //  }
         if (highDetailNeeded) {
@@ -347,7 +346,7 @@ printf("OK RGBLOC\n");
                 double greenitc = 1.;
                 // imgsrc->getAutoWBMultipliers (rm, gm, bm);
                 imgsrc->getAutoWBMultipliersloc(tempitc, greenitc, 0, 0, fh, fw, 0, 0, fh, fw, rm, gm, bm, params.localwb, params.wb, params.icm, params.raw);
-                printf("tempitc=%f \n", tempitc);
+               // printf("tempitc=%f \n", tempitc);
 
                 if (params.wb.method ==  "autitc" || params.wb.method ==  "autitc2" || params.wb.method ==  "autitcgreen") {
                     params.wb.temperature = tempitc;

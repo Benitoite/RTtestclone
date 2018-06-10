@@ -644,9 +644,9 @@ const double ColorTemp::JDC468_YelN10_spect[97] = {
 //n10   348 0.0531  0.0504  0.0518  0.0628  0.0699  0.0716  0.0735  0.0775  0.0825  0.0969  0.1563  0.3096  0.5177  0.6637  0.7251  0.7458  0.7507  0.7414  0.7301  0.7347  0.7438  0.7500  0.7515  0.7538  0.7563  0.7607  0.7686  0.7791  0.7872  0.7935  0.7979  0.8021  0.8058  0.8090  0.8143  0.8259
 const double ColorTemp::JDC468_GreN7_spect[97] = {
     0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-    0.0112, 0.0102,  0.0094, 0.096,  0.0099, 0.0100,  0.0100, 0.0100,  0.0100, 0.099,  0.0099, 0.099,  0.0099, 0.099,  0.0099, 0.0100,  0.0100, 0.0103,  0.0107, 0.0129,  0.0151, 0.0312,  0.0462, 0.1015,  0.1571, 0.2270,  0.2977,
+    0.0112, 0.0102,  0.0094, 0.0096,  0.0099, 0.0100,  0.0100, 0.0100,  0.0100, 0.0099,  0.0099, 0.0099,  0.0099, 0.0099,  0.0099, 0.0100,  0.0100, 0.0103,  0.0107, 0.0129,  0.0151, 0.0312,  0.0462, 0.1015,  0.1571, 0.2270,  0.2977,
     0.3558, 0.3441,  0.3321, 0.3020,  0.2710, 0.2312,  0.1954, 0.1602,  0.1251, 0.1003,  0.0794, 0.0672,  0.0563, 0.0513,  0.0452,  0.0418, 0.0378, 0.0356,  0.0337, 0.0336,  0.0335, 0.0345,  0.0358, 0.0383,  0.0405, 0.0445,  0.0497,
-    0.0612, 0.0647,  0.0670, 0.0660,  0.0644, 0.0620,  0.0574, 0.0525,  0.0483, 00460,  0.0436, 0.0484,  0.0532, 0.0690,  0.0870,
+    0.0612, 0.0647,  0.0670, 0.0660,  0.0644, 0.0620,  0.0574, 0.0525,  0.0483, 0.0460,  0.0436, 0.0484,  0.0532, 0.0690,  0.0870,
     0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
 };
 
@@ -1995,9 +1995,9 @@ void ColorTemp::tempxy(double &temp, float **Tx, float **Ty, float **Tz, float *
         ColorchechSkiB166_18_18_spect, ColabSkin70_7_32_spect, ColorchechSGSkiF763_14_26_spect,
         ColorchechSkiA138_13_14_spect, ColabSkin57_22_18_spect, JDC468_YelN10_spect,
         ColabSkin35_15_17_spect, ColabSkin40_17_17_spect, ColorRedkurttu_spect, ColorYellowkeltano_spect,  ColorchechYelD3_spect, JDC468_OraO18_spect,
-        JDC468_GreN7_spect, JDC468_RedG21va_spect, ColorRedpetunia_spect, ColorchechOraA2_spect, JDC468_OraD17_spect,
-        ColorchechredC3_spect, JDC468_RedI9_spect,
-        ColabSkin87_8_8_spect, ColabSkin89_8_21_spect, ColabSkin75_8_4_spect, ColabSkin75_10_33_spect,
+        /*JDC468_GreN7_spect, JDC468_RedG21va_spect, JDC468_OraD17_spect,
+        ColorchechredC3_spect, JDC468_RedI9_spect, ColorRedpetunia_spect, ColorchechOraA2_spect,*/ //These spectral contains bads datas ...difficult to find
+        ColabSkin87_8_8_spect, ColabSkin89_8_21_spect,ColabSkin75_8_4_spect, ColabSkin75_10_33_spect,
         ColabSkin65_33_11_spect, ColabSkin65_7_24_spect, ColabSkin57_19_6_spect, ColabSkin57_4_19_spect, ColabSkin57_10_28_spect, ColabSkin40_17_6_spect,
         ColabSkin26_18_18_spect, ColabSkin90_m1_20_spect
     };
@@ -2134,13 +2134,20 @@ void ColorTemp::tempxy(double &temp, float **Tx, float **Ty, float **Tz, float *
         double Zref;
     } XYZref;
     XYZref Refxyz[N_c];
-
     typedef struct XYZrefcat02 {
         double Xrefcat;
         double Yrefcat;
         double Zrefcat;
     } XYZrefcat02;
     XYZrefcat02 Refxyzcat02[N_c];
+    for(int i = 0; i < N_c; i++){ 
+        Refxyz[i].Xref =0.f;
+        Refxyz[i].Yref = 0.f;
+        Refxyz[i].Zref = 0.f;
+        Refxyzcat02[i].Xrefcat = 0.f;
+        Refxyzcat02[i].Yrefcat = 0.f;
+        Refxyzcat02[i].Zrefcat = 0.f;  
+    }
 
     double tempw = 5000.;
 
@@ -2150,8 +2157,12 @@ void ColorTemp::tempxy(double &temp, float **Tx, float **Ty, float **Tz, float *
         if (tempw <= INITIALBLACKBODY) {
 
             for (int i = 0; i < N_c; i++) {
+                //printf("Nc=%i BBtempw=%f ", i, tempw); 
                 spectrum_to_color_xyz_blackbody(spec_colorforxcyc[i], tempw, Refxyz[i].Xref, Refxyz[i].Yref, Refxyz[i].Zref);
-
+/*                if(Refxyz[i].Xref > 1.5) printf("x=%f Nc=%i", Refxyz[i].Xref, i);
+                if(Refxyz[i].Yref > 1.5) printf("y=%f Nc=%i", Refxyz[i].Yref, i);
+                if(Refxyz[i].Zref > 1.5) printf("z=%f Nc=%i", Refxyz[i].Zref, i);
+*/                
             }
 
         } else {
@@ -2171,31 +2182,36 @@ void ColorTemp::tempxy(double &temp, float **Tx, float **Ty, float **Tz, float *
             m22 = (0.03 - 31.4424 * x_DD + 30.0717 * y_DD) / interm2;
 
             for (int i = 0; i < N_c; i++) {
+                //printf("Nc=%i DLtempw=%f ", i, tempw); 
+                
                 spectrum_to_color_xyz_daylight(spec_colorforxcyc[i], m11, m22, Refxyz[i].Xref, Refxyz[i].Yref, Refxyz[i].Zref);
-
+/*                if(Refxyz[i].Xref >= 1.5) printf("x=%f Nc=%i", Refxyz[i].Xref, i);
+                if(Refxyz[i].Yref > 1.5) printf("x=%f Nc=%i", Refxyz[i].Yref, i);
+                if(Refxyz[i].Zref > 1.5) printf("x=%f Nc=%i", Refxyz[i].Zref, i);
+*/
             }
 
         }
 
 //CAT02
 
-        double CAM02BB00 = 1.0, CAM02BB01=1.0, CAM02BB02=1.0, CAM02BB10=1.0, CAM02BB11=1.0, CAM02BB12=1.0, CAM02BB20=1.0, CAM02BB21=1.0, CAM02BB22=1.0; //for CIECAT02
-        double Xwb = Txyz[tt].XX;
-        double Ywb = 1.;
-        double Zwb = Txyz[tt].ZZ;
+        float CAM02BB00 = 1.0, CAM02BB01=1.0, CAM02BB02=1.0, CAM02BB10=1.0, CAM02BB11=1.0, CAM02BB12=1.0, CAM02BB20=1.0, CAM02BB21=1.0, CAM02BB22=1.0; //for CIECAT02
+        float Xwb = Txyz[tt].XX;
+        float Ywb = 1.;
+        float Zwb = Txyz[tt].ZZ;
         if(wbpar.wbcat02Method == "icam") {
-        icieCAT02(Xwb, Ywb, Zwb, CAM02BB00, CAM02BB01, CAM02BB02, CAM02BB10, CAM02BB11, CAM02BB12, CAM02BB20, CAM02BB21, CAM02BB22, 1.0);
+        icieCAT02float(Xwb, Ywb, Zwb, CAM02BB00, CAM02BB01, CAM02BB02, CAM02BB10, CAM02BB11, CAM02BB12, CAM02BB20, CAM02BB21, CAM02BB22, 1.0);
         }
-        if(wbpar.wbcat02Method == "cam") {
-        cieCAT02(Xwb, Ywb, Zwb, CAM02BB00, CAM02BB01, CAM02BB02, CAM02BB10, CAM02BB11, CAM02BB12, CAM02BB20, CAM02BB21, CAM02BB22, 1.0);
+        if(wbpar.wbcat02Method == "cam") {//not used
+        cieCAT02float(Xwb, Ywb, Zwb, CAM02BB00, CAM02BB01, CAM02BB02, CAM02BB10, CAM02BB11, CAM02BB12, CAM02BB20, CAM02BB21, CAM02BB22, 1.0);
         }
-        for (int i = 0; i < N_c; i++) {
-
-            Refxyzcat02[i].Xrefcat = CAM02BB00 * Refxyz[i].Xref + CAM02BB01 * Refxyz[i].Yref + CAM02BB02 * Refxyz[i].Zref ;
-            Refxyzcat02[i].Yrefcat = CAM02BB10 * Refxyz[i].Xref + CAM02BB11 * Refxyz[i].Yref + CAM02BB12 * Refxyz[i].Zref ;
-            Refxyzcat02[i].Zrefcat = CAM02BB20 * Refxyz[i].Xref + CAM02BB21 * Refxyz[i].Yref + CAM02BB22 * Refxyz[i].Zref;
+        if(wbpar.wbcat02Method != "none") {
+            for (int i = 0; i < N_c; i++) {
+                Refxyzcat02[i].Xrefcat = CAM02BB00 * Refxyz[i].Xref + CAM02BB01 * Refxyz[i].Yref + CAM02BB02 * Refxyz[i].Zref ;
+                Refxyzcat02[i].Yrefcat = CAM02BB10 * Refxyz[i].Xref + CAM02BB11 * Refxyz[i].Yref + CAM02BB12 * Refxyz[i].Zref ;
+                Refxyzcat02[i].Zrefcat = CAM02BB20 * Refxyz[i].Xref + CAM02BB21 * Refxyz[i].Yref + CAM02BB22 * Refxyz[i].Zref;
+            }
         }
-
 
 //end CAT02
 
@@ -2224,7 +2240,7 @@ void ColorTemp::tempxy(double &temp, float **Tx, float **Ty, float **Tz, float *
                 Ty[i][tt] = (float) Refxyz[i].Yref;
                 Tz[i][tt] = (float) Refxyz[i].Zref;
             } else {
-                Tx[i][tt] = (float)  Refxyzcat02[i].Xrefcat;
+                Tx[i][tt] = (float) Refxyzcat02[i].Xrefcat;
                 Ty[i][tt] = (float) Refxyzcat02[i].Yrefcat;
                 Tz[i][tt] = (float) Refxyzcat02[i].Zrefcat;
             }
@@ -2367,6 +2383,7 @@ void ColorTemp::spectrum_to_color_xyz_daylight(const double* spec_color, double 
 {
     int i;
     double lambda, X = 0, Y = 0, Z = 0, Yo = 0;
+    double epsi = 0.000001;
 
     for (i = 0, lambda = 350; lambda < 830.1; i++, lambda += 5) {
 
@@ -2388,9 +2405,9 @@ void ColorTemp::spectrum_to_color_xyz_daylight(const double* spec_color, double 
         Yo += cie_colour_match_jd[i][1] * Ms;
     }
 
-    xx = X / Yo;
-    yy = Y / Yo;
-    zz = Z / Yo;
+    xx = X / (Yo + epsi);
+    yy = Y / (Yo + epsi);
+    zz = Z / (Yo + epsi);
 }
 
 //calculate XYZ from spectrum data (color) and illuminant : J.Desmis december 2011
@@ -2398,7 +2415,7 @@ void ColorTemp::spectrum_to_color_xyz_blackbody(const double* spec_color, double
 {
     int i;
     double lambda, X = 0, Y = 0, Z = 0, Yo = 0;
-
+    double epsi = 0.000001;
     for (i = 0, lambda = 350; lambda < 830.1; i++, lambda += 5) {
 
         double Me;
@@ -2418,10 +2435,10 @@ void ColorTemp::spectrum_to_color_xyz_blackbody(const double* spec_color, double
         Ms = blackbody_spect(lambda, _temp);
         Yo += cie_colour_match_jd[i][1] * Ms;
     }
-
-    xx = X / Yo;
-    yy = Y / Yo;
-    zz = Z / Yo;
+ 
+    xx = X / (Yo + epsi);
+    yy = Y / (Yo + epsi);
+    zz = Z / (Yo + epsi);
 }
 
 double ColorTemp::daylight_spect(double wavelength, double m1, double m2)
