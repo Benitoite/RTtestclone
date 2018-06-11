@@ -280,7 +280,7 @@ WhiteBalance::WhiteBalance() : FoldableToolPanel(this, "whitebalance", M("TP_WBA
     wbcat02Method->append(M("TP_WBCAM_NONE"));
     //wbcat02Method->append(M("TP_WBCAM_CAM"));
     wbcat02Method->append(M("TP_WBCAM_ICAM"));
-    wbcat02Method->set_active(0);
+    wbcat02Method->set_active(1);
     wbcat02MethodConn = wbcat02Method->signal_changed().connect(sigc::mem_fun(*this, &WhiteBalance::wbcat02MethodChanged));
     //wbcat02Method->set_tooltip_markup(M("TP_WBCAM_TOOLTIP"));
     wbcat02Method->show();

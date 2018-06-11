@@ -1138,7 +1138,7 @@ WBParams::WBParams() :
     green(1.0),
     equal(1.0),
     tempBias(0.0),
-    wbcat02Method("none")
+    wbcat02Method("icam")
 {
 }
 

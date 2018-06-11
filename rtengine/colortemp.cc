@@ -414,7 +414,7 @@ const double ColorTemp::ColorGreenM25_spect[97] = {
     0.1758, 0.1673, 0.1606, 0.1505, 0.1384, 0.1317, 0.1230, 0.1149, 0.1081, 0.0992, 0.0882, 0.0785, 0.0709, 0.0629, 0.0550, 0.0502, 0.0486, 0.0474, 0.0445, 0.0434, 0.0429, 0.0423, 0.0411, 0.0405, 0.0397, 0.0387, 0.0399, 0.0398, 0.0398, 0.0407, 0.0408, 0.0426, 0.0445, 0.0443, 0.0468,
     0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
 };
-
+//0 658 45 0 0 131 98 84 123 104 131 112 121 121 139 128 148 199 296 389 476 689 945 1132 1326 1490 1674 1741 1775 1868 1914 1928 1961 1972 1992 2045 2064 2053 2048 2072 2086 2081 2069 2056 2073 2096 2114 2067 2089 2100 2061 2019 1983 1971 1961 2016 1956 1946 1922 1983 1991
 const double ColorTemp::ColorYellowkeltano_spect[97] = {
     0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
     0.0, 0.0658, 0.0045,  0.0,  0.0, 0.0131,  0.0098,  0.0084, 0.0123, 0.0104, 0.0131, 0.0112, 0.0121, 0.0121, 0.0139,
@@ -432,7 +432,8 @@ const double ColorTemp::ColorGreenalsi_spect[97] = {
     0.0424,  0.0417,  0.0389,  0.0380,  0.0378,  0.0371,  0.0350,  0.0333,  0.0350,  0.0394,  0.0379,  0.0446,  0.0491,  0.0575,  0.0734,  0.0953,
     0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
 };
-
+//1890 1097 855 899 987 881 807 804 787 691 643 549 465 404 385 302 244 195 165 159 123 129 108 111 114 126 126 134 162 170 213 248 279 351 412 566 752 909 1069 1270 1526 
+//1707 1858 1999 2112 2293 2422 2471 2611 2718 2710 2778 2807 2825 2856 2909 2901 2974 3042 3044 3075
 const double ColorTemp::ColorRedpetunia_spect[97] = {
     0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
     0.1890, 0.1097,  0.0855,  0.0899,  0.0987,  0.0881,  0.0807,  0.0804,  0.0787,  0.0691,  0.0643,  0.0549,  0.0465,  0.0404,  0.0385,
@@ -2159,10 +2160,10 @@ void ColorTemp::tempxy(double &temp, float **Tx, float **Ty, float **Tz, float *
             for (int i = 0; i < N_c; i++) {
                 //printf("Nc=%i BBtempw=%f ", i, tempw); 
                 spectrum_to_color_xyz_blackbody(spec_colorforxcyc[i], tempw, Refxyz[i].Xref, Refxyz[i].Yref, Refxyz[i].Zref);
-/*                if(Refxyz[i].Xref > 1.5) printf("x=%f Nc=%i", Refxyz[i].Xref, i);
+                if(Refxyz[i].Xref > 1.5) printf("x=%f Nc=%i", Refxyz[i].Xref, i);
                 if(Refxyz[i].Yref > 1.5) printf("y=%f Nc=%i", Refxyz[i].Yref, i);
                 if(Refxyz[i].Zref > 1.5) printf("z=%f Nc=%i", Refxyz[i].Zref, i);
-*/                
+                
             }
 
         } else {
@@ -2185,10 +2186,10 @@ void ColorTemp::tempxy(double &temp, float **Tx, float **Ty, float **Tz, float *
                 //printf("Nc=%i DLtempw=%f ", i, tempw); 
                 
                 spectrum_to_color_xyz_daylight(spec_colorforxcyc[i], m11, m22, Refxyz[i].Xref, Refxyz[i].Yref, Refxyz[i].Zref);
-/*                if(Refxyz[i].Xref >= 1.5) printf("x=%f Nc=%i", Refxyz[i].Xref, i);
+                if(Refxyz[i].Xref >= 1.5) printf("x=%f Nc=%i", Refxyz[i].Xref, i);
                 if(Refxyz[i].Yref > 1.5) printf("x=%f Nc=%i", Refxyz[i].Yref, i);
                 if(Refxyz[i].Zref > 1.5) printf("x=%f Nc=%i", Refxyz[i].Zref, i);
-*/
+
             }
 
         }

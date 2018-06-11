@@ -5688,9 +5688,9 @@ static void histoxyY(int bfhitc, int bfwitc, array2D<float> & xc, array2D<float>
     for (int y = 0; y < bfhitc ; y++) {
         for (int x = 0; x < bfwitc ; x++) {
 
-            if (xc[y][x] < 0.12f) { // near Prophoto
+            if (xc[y][x] < 0.12f && xc[y][x] > 0.03f) { // near Prophoto
 
-                if (yc[y][x] < 0.2f) {
+                if (yc[y][x] < 0.2f && yc[y][x] > 0.1f) {
                     nh = 0;
                     histxy[nh]++;
                     area[nh] = 50.f;
@@ -5759,7 +5759,7 @@ static void histoxyY(int bfhitc, int bfwitc, array2D<float> & xc, array2D<float>
 
                 }
             } else if (xc[y][x] < 0.24f) {
-                if (yc[y][x] < 0.2f) {
+                if (yc[y][x] < 0.2f && yc[y][x] > 0.05f) {
                     nh = 6;
                     histxy[nh]++;
                     area[nh] = 230.f;
@@ -5823,7 +5823,7 @@ static void histoxyY(int bfhitc, int bfwitc, array2D<float> & xc, array2D<float>
                 }
 
             } else if (xc[y][x] < 0.28f) {//blue sky and other
-                if (yc[y][x] < 0.2f) {
+                if (yc[y][x] < 0.2f && yc[y][x] > 0.1f) {
                     nh = 12;
                     histxy[nh]++;
                     area[nh] = 80.f;
@@ -5915,7 +5915,7 @@ static void histoxyY(int bfhitc, int bfwitc, array2D<float> & xc, array2D<float>
 
                 }
             } else if (xc[y][x] < 0.31f) {//near neutral others
-                if (yc[y][x] < 0.2f) {
+                if (yc[y][x] < 0.2f  &&  yc[y][x] > 0.1f) {
                     nh = 22;
                     histxy[nh]++;
                     area[nh] = 50.f;
@@ -5991,7 +5991,7 @@ static void histoxyY(int bfhitc, int bfwitc, array2D<float> & xc, array2D<float>
 
                 }
             } else if (xc[y][x] < 0.325f) {//neutral  34
-                if (yc[y][x] < 0.2f) {
+                if (yc[y][x] < 0.2f  &&  yc[y][x] > 0.1f) {
                     nh = 30;
                     histxy[nh]++;
                     area[nh] = 25.f;
@@ -6093,7 +6093,7 @@ static void histoxyY(int bfhitc, int bfwitc, array2D<float> & xc, array2D<float>
                 }
 
             } else if (xc[y][x] < 0.335f) {//neutral
-                if (yc[y][x] < 0.2f) {
+                if (yc[y][x] < 0.2f  &&  yc[y][x] > 0.1f) {
                     nh = 41;
                     histxy[nh]++;
                     area[nh] = 15.f;
@@ -6227,7 +6227,7 @@ static void histoxyY(int bfhitc, int bfwitc, array2D<float> & xc, array2D<float>
                 }
 
             } else if (xc[y][x] < 0.345f) {//neutral  37
-                if (yc[y][x] < 0.2f) {
+                if (yc[y][x] < 0.2f  &&  yc[y][x] > 0.1f) {
                     nh = 54;
                     histxy[nh]++;
                     area[nh] = 20.f;
@@ -6386,7 +6386,7 @@ static void histoxyY(int bfhitc, int bfwitc, array2D<float> & xc, array2D<float>
                 }
 
             } else if (xc[y][x] < 0.355f) {//neutral  37
-                if (yc[y][x] < 0.2f) {
+                if (yc[y][x] < 0.2f  &&  yc[y][x] > 0.1f) {
                     nh = 72;
                     histxy[nh]++;
                     area[nh] = 20.f;
@@ -6545,7 +6545,7 @@ static void histoxyY(int bfhitc, int bfwitc, array2D<float> & xc, array2D<float>
                 }
 
             } else if (xc[y][x] < 0.365f) {  //0.4
-                if (yc[y][x] < 0.2f) {
+                if (yc[y][x] < 0.2f  &&  yc[y][x] > 0.15f) {
                     nh = 89;
                     histxy[nh]++;
                     area[nh] = 20.f;
@@ -6689,7 +6689,7 @@ static void histoxyY(int bfhitc, int bfwitc, array2D<float> & xc, array2D<float>
                 }
 
             } else if (xc[y][x] < 0.405f) {//45
-                if (yc[y][x] < 0.2f) {
+                if (yc[y][x] < 0.2f  &&  yc[y][x] > 0.15f) {
                     nh = 105;
                     histxy[nh]++;
                     area[nh] = 40.f;
@@ -6792,7 +6792,7 @@ static void histoxyY(int bfhitc, int bfwitc, array2D<float> & xc, array2D<float>
                 }
 
             } else if (xc[y][x] < 0.445f) {//45
-                if (yc[y][x] < 0.2f) {
+                if (yc[y][x] < 0.2f  &&  yc[y][x] > 0.15f) {
                     nh = 116;
                     histxy[nh]++;
                     area[nh] = 40.f;
@@ -6895,7 +6895,7 @@ static void histoxyY(int bfhitc, int bfwitc, array2D<float> & xc, array2D<float>
                 }
 
             } else if (xc[y][x] < 0.495f) {
-                if (yc[y][x] < 0.2f) {
+                if (yc[y][x] < 0.2f  &&  yc[y][x] > 0.15f) {
                     nh = 127;
                     histxy[nh]++;
                     area[nh] = 40.f;
@@ -6987,7 +6987,7 @@ static void histoxyY(int bfhitc, int bfwitc, array2D<float> & xc, array2D<float>
 
                 }
             } else if (xc[y][x] < 0.545f) {
-                if (yc[y][x] < 0.2f) {
+                if (yc[y][x] < 0.2f  &&  yc[y][x] > 0.15f) {
                     nh = 137;
                     histxy[nh]++;
                     area[nh] = 25.f;
@@ -7073,7 +7073,7 @@ static void histoxyY(int bfhitc, int bfwitc, array2D<float> & xc, array2D<float>
                 }
 
             } else if (xc[y][x] < 0.595f) {
-                if (yc[y][x] < 0.2f) {
+                if (yc[y][x] < 0.22f  &&  yc[y][x] > 0.15f) {
                     nh = 146;
                     histxy[nh]++;
                     area[nh] = 15.f;
@@ -7131,7 +7131,7 @@ static void histoxyY(int bfhitc, int bfwitc, array2D<float> & xc, array2D<float>
                 }
 
             } else if (xc[y][x] < 0.65f) {
-                if (yc[y][x] < 0.25f) {
+                if (yc[y][x] < 0.25f  &&  yc[y][x] > 0.12f) {
                     nh = 162;
                     histxy[nh]++;
                     area[nh] = 15.f;
@@ -7171,7 +7171,7 @@ static void histoxyY(int bfhitc, int bfwitc, array2D<float> & xc, array2D<float>
 
                 }
 
-            } else if (xc[y][x] < 0.75f) {
+            } else if (xc[y][x] < 0.75f  &&  yc[y][x] > 0.1f) {
                 nh = 166;
                 histxy[nh]++;
                 area[nh] = 25.f;
@@ -7265,6 +7265,7 @@ void RawImageSource::ItcWB(const LocWBParams &localr, double &tempitc, double &g
 
 
     array2D<float> histcurr;
+    array2D<float> minmax;
 
     array2D<float> xxyycurr;
     array2D<float> reffxxyy;
@@ -7496,10 +7497,10 @@ void RawImageSource::ItcWB(const LocWBParams &localr, double &tempitc, double &g
             reffxxyy[2 * j][tt] = Tx[j][tt] / (Tx[j][tt] + Ty[j][tt] +  Tz[j][tt]); // x from xyY
             reffxxyy[2 * j + 1][tt] =  Ty[j][tt] / (Tx[j][tt] + Ty[j][tt] +  Tz[j][tt]); // y from xyY
             reffYY[j][tt] = Ty[j][tt];//Y 
-          //  printf("refx=%f refY=%f\n",reffxxyy[2 * j][40], reffYY[j][40]);
+         //   if(tt==40) printf("Nc=%i refx=%f refy=%f\n",j, reffxxyy[2 * j][40],reffxxyy[2 * j +1][40]);
         }
     }
-
+ 
 
     //calculate for this image the mean values for each family of color, near histogram x y (number)
     //xy vary from x 0..0.77  y 0..0.82
@@ -7513,12 +7514,8 @@ void RawImageSource::ItcWB(const LocWBParams &localr, double &tempitc, double &g
     int sizcurr = siza;//choice of number of correlate colors in image
     histcurr(N_t, sizcurr);
     xxyycurr(N_t, 2 * sizcurr);
-    
     float minstud = 100000.f;
     int goodref = 1;
-//    int goodrefY = 1;
-//    float minstudY = 100000.f;
-//  float somstudY = 0.f;
 
     YYcurr(N_t, sizcurr);
 //calculate  x y z for each pixel with multiplier rmm gmm bmm
@@ -7552,6 +7549,7 @@ void RawImageSource::ItcWB(const LocWBParams &localr, double &tempitc, double &g
 
         } ;
 
+        
         int histxy[siza] = {};//number of values for each pair xy
 
         float area[siza] = {};//multiplier for compensation differences area ==> big areas are rare near limit prophotos or more
@@ -7591,10 +7589,10 @@ void RawImageSource::ItcWB(const LocWBParams &localr, double &tempitc, double &g
         //sort in ascending order
         std::sort(Wbhis, Wbhis + siza, Wbhis[0]);
         for (int nh = 0; nh < siza; nh++) {
-            if(Wbhis[nh].histnum < 1) n1++;	//keep only existing color but avoid to small 
-            if(Wbhis[nh].histnum < 4) n4++;	//keep only existing color but avoid to small 
-            if(Wbhis[nh].histnum < 15) n15++;	//keep only existing color but avoid to small 
-            if(Wbhis[nh].histnum < 30) n30++;	//keep only existing color but avoid to small 
+            if(Wbhis[nh].histnum < 1) n1++;//keep only existing color but avoid to small 
+            if(Wbhis[nh].histnum < 4) n4++;//keep only existing color but avoid to small 
+            if(Wbhis[nh].histnum < 15) n15++;//keep only existing color but avoid to small 
+            if(Wbhis[nh].histnum < 30) n30++;//keep only existing color but avoid to small 
 
         }
         
@@ -7615,6 +7613,8 @@ void RawImageSource::ItcWB(const LocWBParams &localr, double &tempitc, double &g
         //we can perhaps improve with area, etc.
         int countneutral = 0;
         int countn = 0;
+        int countmm = 0;
+        int maxk = 0;
         int sizcurr3 = sizcurr2;
         
         for (int i = 0; i < sizcurr2; i++) { //take the max values
@@ -7631,13 +7631,26 @@ void RawImageSource::ItcWB(const LocWBParams &localr, double &tempitc, double &g
                 }
             }
             j = i - countn;
-
-            histcurr[i][tt] = (float) Wbhis[siza - (i + 1)].histnum;
-            xxyycurr[2 * j][tt] = xxx[Wbhis[siza - (i + 1)].index] / histcurr[i][tt];
-            xxyycurr[2 * j + 1][tt] = yyy[Wbhis[siza - (i + 1)].index] / histcurr[i][tt];
-            YYcurr[j][tt] = YYY[Wbhis[siza - (i + 1)].index] / histcurr[i][tt];
+            int k = j;
+            bool conti = true;
+                histcurr[j][tt] = (float) Wbhis[siza - (j + 1)].histnum;
+                xxyycurr[2 * j][tt] = xxx[Wbhis[siza - (j + 1)].index] / histcurr[j][tt];
+                xxyycurr[2 * j + 1][tt] = yyy[Wbhis[siza - (j + 1)].index] / histcurr[j][tt];
+                if((xxyycurr[2 * j][tt] < 0.1f) || (xxyycurr[2 * j +1][tt] < 0.1f)){
+                countmm++;
+                sizcurr3 -= 1;
+                k = j - countmm;;
+                conti = false;
+            }
+            if(conti){        
+                histcurr[k][tt] = (float) Wbhis[siza - (k + 1)].histnum;
+                xxyycurr[2 * k][tt] = xxx[Wbhis[siza - (k + 1)].index] / histcurr[k][tt];
+                xxyycurr[2 * k + 1][tt] = yyy[Wbhis[siza - (k + 1)].index] / histcurr[k][tt];
+                YYcurr[k][tt] = YYY[Wbhis[siza - (k + 1)].index] / histcurr[k][tt];
+                maxk = k;
+            }
         }
-        /*
+/*        
         float nnx, nny, nnz;
         
         if(wbpar.wbcat02Method == "icam") {        
@@ -7650,7 +7663,7 @@ void RawImageSource::ItcWB(const LocWBParams &localr, double &tempitc, double &g
                 float Ywb = 1.;
                 float Zwb = Txyz[20].ZZ;
                 float xn, yn, zn;      
-                ColorTemp::cieCAT02float(Xwb, Ywb, Zwb, CAM02BB00, CAM02BB01, CAM02BB02, CAM02BB10, CAM02BB11, CAM02BB12, CAM02BB20, CAM02BB21, CAM02BB22, 1.0f);
+                ColorTemp::icieCAT02float(Xwb, Ywb, Zwb, CAM02BB00, CAM02BB01, CAM02BB02, CAM02BB10, CAM02BB11, CAM02BB12, CAM02BB20, CAM02BB21, CAM02BB22, 1.0f);
                 
                 xn = CAM02BB00 * nnx + CAM02BB01 * nny + CAM02BB02 * nnz ;
                 yn = CAM02BB10 * nnx + CAM02BB11 * nny + CAM02BB12 * nnz ;
@@ -7661,13 +7674,15 @@ void RawImageSource::ItcWB(const LocWBParams &localr, double &tempitc, double &g
                 YYcurr[k][tt] = yn;
             }
         }
-        */
-   //     float studentY = 0.f;
+*/        
+//        float studentY = 0.f;
+ //   for (int tt = 0; tt < N_t; tt++) {
+
         float student = 0.f;
 
-//	studentXY(YYcurr, reffYY, sizcurr2, Nc, tt, studentY); //for YY green not used
+//studentXY(YYcurr, reffYY, sizcurr2, Nc, tt, studentY); //for YY green not used
     //    printf("tt=%i studeY=%f \n", tt, studentY);
-//	somstudY += (studentY);
+//somstudY += (studentY);
         //float snedecor = 1.40f; //for sizestucurr and sizestureff
         // not used
         
@@ -7680,8 +7695,8 @@ void RawImageSource::ItcWB(const LocWBParams &localr, double &tempitc, double &g
         }
 */
 
-        studentXY(xxyycurr, reffxxyy, 2 * sizcurr3, 2 * Nc, tt, student); //for xy
-   //     printf("tt=%i studeY=%f st=%f\n", tt, studentY, student);
+        studentXY(xxyycurr, reffxxyy, 2 * maxk, 2 * Nc, tt, student); //for xy
+       // printf("tt=%i  st=%f\n", tt,  student);
 
         float abstud = fabs(student);
 
@@ -7693,10 +7708,6 @@ void RawImageSource::ItcWB(const LocWBParams &localr, double &tempitc, double &g
         //  printf("n_t=%i stu=%f \n", tt, student);
 
     }
-// printf("somstudY=%f \n", somstudY);
-//   printf("minstuY=%f ref=%i \n",   minstudY, goodrefY);
-
-//   printf("minstu=%f ref=%i \n",   minstud, goodref);
 
     histcurr(0, 0);
     xxyycurr(0, 0);
