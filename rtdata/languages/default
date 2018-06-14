@@ -2265,7 +2265,7 @@ TP_WBALANCE_AUTOEDGESW;Auto Edge + Standard deviation
 TP_WBALANCE_AUTOEDGEROB;Auto Edge + Robust
 TP_WBALANCE_AUTOITC;Auto iterate temperature correlation G = Stdv
 TP_WBALANCE_AUTOITC2;Auto iterate temperature correlation G = edge
-TP_WBALANCE_AUTOITCGREEN;Auto iterate temperature correlation G = 1
+TP_WBALANCE_AUTOITCGREEN;Auto iterate temperature correlation G = camera
 TP_WBALANCE_FLUO1;F1 - Daylight
 TP_WBALANCE_FLUO2;F2 - Cool White
 TP_WBALANCE_FLUO3;F3 - White

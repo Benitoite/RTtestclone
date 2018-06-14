@@ -114,7 +114,7 @@ protected:
     void hlRecovery(const std::string &method, float* red, float* green, float* blue, int width, float* hlmax);
     void transformRect(const PreviewProps &pp, int tran, int &sx1, int &sy1, int &width, int &height, int &fw);
     void transformPosition(int x, int y, int tran, int& tx, int& ty);
-    void ItcWB(const LocWBParams &localr, double &tempitc, double &greenitc, array2D<float> &redloc, array2D<float> &greenloc, array2D<float> &blueloc, int bfw, int bfh, double &avg_rm, double &avg_gm, double &avg_bm, const ColorManagementParams &cmp, const RAWParams &raw, const WBParams & wbpar);
+    void ItcWB(double &tempref, double &greenref, const LocWBParams &localr, double &tempitc, double &greenitc, array2D<float> &redloc, array2D<float> &greenloc, array2D<float> &blueloc, int bfw, int bfh, double &avg_rm, double &avg_gm, double &avg_bm, const ColorManagementParams &cmp, const RAWParams &raw, const WBParams & wbpar);
 
     unsigned FC(int row, int col)
     {
@@ -128,7 +128,10 @@ public:
     RawImageSource();
     ~RawImageSource();
 
-    int load(const Glib::ustring &fname) { return load(fname, false); }
+    int load(const Glib::ustring &fname)
+    {
+        return load(fname, false);
+    }
     int load(const Glib::ustring &fname, bool firstFrameOnly);
     void        preprocess(const RAWParams &raw, const LensProfParams &lensProf, const CoarseTransformParams& coarse, bool prepareDenoise = true);
     void        demosaic(const RAWParams &raw);
@@ -154,10 +157,10 @@ public:
     void        getImage_local(int begx, int begy, int yEn, int xEn, int cx, int cy, const ColorTemp &ctemp, int tran, Imagefloat* image, Imagefloat* bufimage, const PreviewProps &pp, const ProcParams &params);
 
 //   void        getImage_local(int begx, int begy, int yEn, int xEn, int cx, int cy, const ColorTemp &ctemp, int tran, Imagefloat* image, Imagefloat* bufimage, const PreviewProps &pp, const ToneCurveParams &hrp, const ColorManagementParams &cmp, const RAWParams &raw, const LocWBParams &wbl, const ColorAppearanceParams &cap);
-    void        WBauto(array2D<float> &redloc, array2D<float> &greenloc, array2D<float> &blueloc, int bfw, int bfh, double &avg_rm, double &avg_gm, double &avg_bm, double &tempitc, double &greenitc, bool &twotimes, const LocWBParams &localr, const WBParams & wbpar, int begx, int begy, int yEn, int xEn, int cx, int cy, const ColorManagementParams &cmp, const RAWParams &raw);
+    void        WBauto(double &tempref, double &greenref, array2D<float> &redloc, array2D<float> &greenloc, array2D<float> &blueloc, int bfw, int bfh, double &avg_rm, double &avg_gm, double &avg_bm, double &tempitc, double &greenitc, bool &twotimes, const LocWBParams &localr, const WBParams & wbpar, int begx, int begy, int yEn, int xEn, int cx, int cy, const ColorManagementParams &cmp, const RAWParams &raw);
     void        getrgbloc(bool local, bool gamma, bool cat02, int begx, int begy, int yEn, int xEn, int cx, int cy, int bf_h, int bf_w);
 
-    void        getAutoWBMultipliersloc(double &tempitc, double &greenitc, int begx, int begy, int yEn, int xEn, int cx, int cy, int bf_h, int bf_w, double &rm, double &gm, double &bm, const LocWBParams &localr, const WBParams & wbpar, const ColorManagementParams &cmp, const RAWParams &raw);
+    void        getAutoWBMultipliersloc(double &tempref, double &greenref, double &tempitc, double &greenitc, int begx, int begy, int yEn, int xEn, int cx, int cy, int bf_h, int bf_w, double &rm, double &gm, double &bm, const LocWBParams &localr, const WBParams & wbpar, const ColorManagementParams &cmp, const RAWParams &raw);
 
     void        getImage(const ColorTemp &ctemp, int tran, Imagefloat* image, const PreviewProps &pp, const ToneCurveParams &hrp, const RAWParams &raw);
     eSensorType getSensorType() const
@@ -240,21 +243,29 @@ public:
         return numFrames;
     }
 
-    class GreenEqulibrateThreshold {
+    class GreenEqulibrateThreshold
+    {
     public:
         explicit GreenEqulibrateThreshold(float thresh): thresh_(thresh) {}
         virtual ~GreenEqulibrateThreshold() {}
-        virtual float operator()(int row, int column) const { return thresh_; }
+        virtual float operator()(int row, int column) const
+        {
+            return thresh_;
+        }
     protected:
         const float thresh_;
     };
 
-    class CFALineDenoiseRowBlender {
+    class CFALineDenoiseRowBlender
+    {
     public:
         virtual ~CFALineDenoiseRowBlender() {}
-        virtual float operator()(int row) const { return 1.f; }
+        virtual float operator()(int row) const
+        {
+            return 1.f;
+        }
     };
-    
+
 protected:
     typedef unsigned short ushort;
     void processFalseColorCorrection(Imagefloat* i, const int steps);
@@ -267,7 +278,7 @@ protected:
     inline  void interpolate_row_rb(float* ar, float* ab, float* pg, float* cg, float* ng, int i);
     inline  void interpolate_row_rb_mul_pp(float* ar, float* ab, float* pg, float* cg, float* ng, int i, float r_mul, float g_mul, float b_mul, int x1, int width, int skip);
 
-    float* CA_correct_RT  (const bool autoCA, const double cared, const double cablue, const double caautostrength, array2D<float> &rawData, double *fitParamsTransfer, bool fitParamsIn, bool fitParamsOut, float * buffer, bool freeBuffer);
+    float* CA_correct_RT(const bool autoCA, const double cared, const double cablue, const double caautostrength, array2D<float> &rawData, double *fitParamsTransfer, bool fitParamsIn, bool fitParamsOut, float * buffer, bool freeBuffer);
     void ddct8x8s(int isgn, float a[8][8]);
     void processRawWhitepoint(float expos, float preser, array2D<float> &rawData);   // exposure before interpolation
 
@@ -276,10 +287,10 @@ protected:
     int  interpolateBadPixelsXtrans(PixelsMap &bitmapBads);
     int  findHotDeadPixels(PixelsMap &bpMap, float thresh, bool findHotPixels, bool findDeadPixels);
 
-    void cfa_linedn (float linenoiselevel, bool horizontal, bool vertical, const CFALineDenoiseRowBlender &rowblender);//Emil's line denoise
+    void cfa_linedn(float linenoiselevel, bool horizontal, bool vertical, const CFALineDenoiseRowBlender &rowblender); //Emil's line denoise
 
     void green_equilibrate_global(array2D<float> &rawData);
-    void green_equilibrate (const GreenEqulibrateThreshold &greenthresh, array2D<float> &rawData);//Emil's green equilibration
+    void green_equilibrate(const GreenEqulibrateThreshold &greenthresh, array2D<float> &rawData); //Emil's green equilibration
 
     void nodemosaic(bool bw);
     void eahd_demosaic();

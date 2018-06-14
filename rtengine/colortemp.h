@@ -57,7 +57,7 @@ public:
     explicit ColorTemp(double e) : temp(-1.), green(-1.), equal(e), method("Custom") {}
     ColorTemp(double t, double g, double e, const std::string &m);
     ColorTemp(double mulr, double mulg, double mulb, double e);
-    static void tempxy(double &temp, float **Tx, float **Ty, float **Tz, float **Ta, float **Tb, float **TL, float **TX, float **TY, float **TZ, const procparams::WBParams & wbpar);
+    static void tempxy(bool separated, int &repref, float **Tx, float **Ty, float **Tz, float **Ta, float **Tb, float **TL, double *TX, double *TY, double *TZ, const procparams::WBParams & wbpar);
     static void xyz_to_cat02floatraw(float & r, float & g, float & b, float x, float y, float z);
     static void cat02_to_xyzfloatraw(float & x, float & y, float & z, float r, float g, float b);
 
