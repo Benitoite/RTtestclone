@@ -7264,11 +7264,14 @@ void RawImageSource::ItcWB(double &tempref, double &greenref, const LocWBParams 
     //copyright Jacques Desmis 3 - 2018 jdesmis@gmail.com
     // this algorithm try to find temperature correlation between about 60 spectral color and about 40 color found in the image
     //I have create a table temperature with temp and white point with 91 values between 2000K and 12000K we can obviously  change these values, more...with different steps
-    //I have create 61 spectral colors from Colorchecker24, others color and my 468 colors target
+    //I have create 54 (61) spectral colors from Colorchecker24, others color and my 468 colors target
     //first we create datas for each temp, we get xyz and there conversion with cat02
+    //in first step we must found the spectral datas which are "near" of rgb datas - I choice as default temperature = camera.
+    //with this value , I make a corresponadnce between histograù dats for this temp and spectral datas , I used deltaE for xy values
+    //the we begin the main program
     //I make an "histogram" (the term is not good) for an image with in output xyz values and input xy (range 0..1)
-    //then we sort this histogram and keep the 40 max values (if they exists)
-    //the we put in 2 arrays x and y for 61 references, and x and y for 40 color to correlate
+    //then we sort this histogram and keep the qq max values (if they exists)
+    //the we put in 2 arrays x and y for 61 references, and x and y for qq color to correlate and we substract white points for each temp
     //the we calculate Fisher Student correlation between the 2 populations
     //I don't use test of Snedecor!
     //some variables or function are not used, keep in case of
@@ -7515,7 +7518,6 @@ void RawImageSource::ItcWB(double &tempref, double &greenref, const LocWBParams 
         }
     }
 
-    //  printf("Tempcalc=%f repref=%i\n", tempcalc, repref);
 
     //calculate R G B multiplier in function illuminant and temperature
     for (int tt = 0; tt < N_t; tt++) {
@@ -7668,7 +7670,6 @@ void RawImageSource::ItcWB(double &tempref, double &greenref, const LocWBParams 
 
         }
 
-        //printf("n1=%i n4=%i n15=%i n30=%i nearn=%i\n", n1, n4, n15, n30, nearneutral);
         ntr = n30;
 
         if (ntr > (siza - 30)) {
@@ -7717,7 +7718,6 @@ void RawImageSource::ItcWB(double &tempref, double &greenref, const LocWBParams 
         }
 
         //calculate deltaE xx to find best values of spectrals datas
-        printf("W ref=%i\n", w);
 
         for (int i = 0; i < w; i++) {
             float mindeltaE = 100000.f;
@@ -7743,7 +7743,6 @@ void RawImageSource::ItcWB(double &tempref, double &greenref, const LocWBParams 
             };
         }
 
-//        printf("Ncreal=%i\n",Ncreal);
     }
 
 
@@ -7868,7 +7867,6 @@ void RawImageSource::ItcWB(double &tempref, double &greenref, const LocWBParams 
 
         }
 
-        //printf("n1=%i n4=%i n15=%i n30=%i nearn=%i\n", n1, n4, n15, n30, nearneutral);
         ntr = n30;
 
         if (ntr > (siza - 30)) {
@@ -7918,12 +7916,10 @@ void RawImageSource::ItcWB(double &tempref, double &greenref, const LocWBParams 
 
         }
 
-        //  printf("w curr=%i \n", w);
-
         /*
                 float nnx, nny, nnz;
 
-                if(wbpar.wbcat02Method == "icam") {
+                if(wbpar.wbcat02Method == "icam") {//code no update...
                     for(int k=0;k < sizcurr3; k++) {
                         float nnx = xxyycurr[2 * k][tt]*YYcurr[k][tt] / xxyycurr[2 * k + 1][tt];
                         float nny = YYcurr[k][tt];
@@ -7994,9 +7990,8 @@ void RawImageSource::ItcWB(double &tempref, double &greenref, const LocWBParams 
     avg_rm = 10000.f * rmm[goodref];
     avg_gm = 10000.* gmm[goodref];
     avg_bm = 10000.f * bmm[goodref];
-//   printf("ITCWB ar%f ag=%f ab=%f\n", avg_rm, avg_gm, avg_bm);
     tempitc = Txyz[goodref].Tem;
-    printf("ITCWB tempitc=%f gritc=%f\n", tempitc, greenitc);
+   // printf("ITCWB tempitc=%f gritc=%f\n", tempitc, greenitc);
 
 
     xc(0, 0);
@@ -8012,10 +8007,6 @@ void RawImageSource::ItcWB(double &tempref, double &greenref, const LocWBParams 
         delete [] Ta[i];
         delete [] Tb[i];
         delete [] TL[i];
-//        delete [] TX[i];
-//       delete [] TY[i];
-//       delete [] TZ[i];
-
 
     }
 

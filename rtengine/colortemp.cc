@@ -2158,10 +2158,7 @@ void ColorTemp::tempxy(bool separated, int &repref, float **Tx, float **Ty, floa
             m22 = (0.03 - 31.4424 * x_DD + 30.0717 * y_DD) / interm2;
 
             for (int i = 0; i < N_c; i++) {
-                //printf("Nc=%i DLtempw=%f ", i, tempw);
-
                 spectrum_to_color_xyz_daylight(spec_colorforxcyc[i], m11, m22, TX[i], TY[i], TZ[i]);
-
             }
 
         }
@@ -2174,7 +2171,6 @@ void ColorTemp::tempxy(bool separated, int &repref, float **Tx, float **Ty, floa
             if (tempw <= INITIALBLACKBODY) {
 
                 for (int i = 0; i < N_c; i++) {
-                    //printf("Nc=%i BBtempw=%f ", i, tempw);
                     spectrum_to_color_xyz_blackbody(spec_colorforxcyc[i], tempw, Refxyz[i].Xref, Refxyz[i].Yref, Refxyz[i].Zref);
                 }
 
@@ -2195,11 +2191,8 @@ void ColorTemp::tempxy(bool separated, int &repref, float **Tx, float **Ty, floa
                 m22 = (0.03 - 31.4424 * x_DD + 30.0717 * y_DD) / interm2;
 
                 for (int i = 0; i < N_c; i++) {
-                    //printf("Nc=%i DLtempw=%f ", i, tempw);
-
                     spectrum_to_color_xyz_daylight(spec_colorforxcyc[i], m11, m22, Refxyz[i].Xref, Refxyz[i].Yref, Refxyz[i].Zref);
                 }
-
             }
 
 //CAT02
@@ -2209,11 +2202,11 @@ void ColorTemp::tempxy(bool separated, int &repref, float **Tx, float **Ty, floa
             float Ywb = 1.;
             float Zwb = Txyz[tt].ZZ;
 
-            if (wbpar.wbcat02Method == "cam") {
+            if (wbpar.wbcat02Method == "cam") {//not used
                 icieCAT02float(Xwb, Ywb, Zwb, CAM02BB00, CAM02BB01, CAM02BB02, CAM02BB10, CAM02BB11, CAM02BB12, CAM02BB20, CAM02BB21, CAM02BB22, 1.0);
             }
 
-            if (wbpar.wbcat02Method == "icam") { //not used
+            if (wbpar.wbcat02Method == "icam") {
                 cieCAT02float(Xwb, Ywb, Zwb, CAM02BB00, CAM02BB01, CAM02BB02, CAM02BB10, CAM02BB11, CAM02BB12, CAM02BB20, CAM02BB21, CAM02BB22, 1.0);
             }
 
