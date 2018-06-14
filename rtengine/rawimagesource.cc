@@ -37,6 +37,7 @@
 #include "cat02adaptation.h"
 #include "pdaflinesfilter.h"
 #include "StopWatch.h"
+#include "camconst.h"
 #include "ciecam02.h"
 
 #ifdef _OPENMP
@@ -2355,8 +2356,19 @@ void RawImageSource::preprocess(const RAWParams &raw, const LensProfParams &lens
         }
     }
 
-    // check if it is an olympus E camera or green equilibration is enabled. If yes, compute G channel pre-compensation factors
-    if (ri->getSensorType() == ST_BAYER && (raw.bayersensor.greenthresh || (((idata->getMake().size() >= 7 && idata->getMake().substr(0, 7) == "OLYMPUS" && idata->getModel()[0] == 'E') || (idata->getMake().size() >= 9 && idata->getMake().substr(0, 9) == "Panasonic")) && raw.bayersensor.method != RAWParams::BayerSensor::getMethodString(RAWParams::BayerSensor::Method::VNG4)))) {
+    // check if green equilibration is needed. If yes, compute G channel pre-compensation factors
+    const auto globalGreenEq =
+        [&]() -> bool
+        {
+            CameraConstantsStore *ccs = CameraConstantsStore::getInstance();
+            CameraConst *cc = ccs->get(ri->get_maker().c_str(), ri->get_model().c_str());
+            return cc && cc->get_globalGreenEquilibration();
+        };
+    
+    if ( ri->getSensorType() == ST_BAYER && (raw.bayersensor.greenthresh || (globalGreenEq() && raw.bayersensor.method != RAWParams::BayerSensor::getMethodString( RAWParams::BayerSensor::Method::VNG4))) ) {
+        if (settings->verbose) {
+            printf("Performing global green equilibration...\n");
+        }
         // global correction
         if (numFrames == 4) {
             for (int i = 0; i < 4; ++i) {
@@ -2482,11 +2494,13 @@ void RawImageSource::demosaic(const RAWParams &raw)
         if (raw.bayersensor.method == RAWParams::BayerSensor::getMethodString(RAWParams::BayerSensor::Method::HPHD)) {
             hphd_demosaic();
         } else if (raw.bayersensor.method == RAWParams::BayerSensor::getMethodString(RAWParams::BayerSensor::Method::VNG4)) {
-            vng4_demosaic();
+            vng4_demosaic (rawData, red, green, blue);
         } else if (raw.bayersensor.method == RAWParams::BayerSensor::getMethodString(RAWParams::BayerSensor::Method::AHD)) {
             ahd_demosaic();
         } else if (raw.bayersensor.method == RAWParams::BayerSensor::getMethodString(RAWParams::BayerSensor::Method::AMAZE)) {
             amaze_demosaic_RT(0, 0, W, H, rawData, red, green, blue);
+        } else if (raw.bayersensor.method == RAWParams::BayerSensor::getMethodString(RAWParams::BayerSensor::Method::AMAZEVNG4) ) {
+            amaze_vng4_demosaic_RT (W, H, rawData, red, green, blue, raw.bayersensor.dualDemosaicContrast);
         } else if (raw.bayersensor.method == RAWParams::BayerSensor::getMethodString(RAWParams::BayerSensor::Method::PIXELSHIFT)) {
             pixelshift(0, 0, W, H, raw.bayersensor, currFrame, ri->get_maker(), ri->get_model(), raw.expos);
         } else if (raw.bayersensor.method == RAWParams::BayerSensor::getMethodString(RAWParams::BayerSensor::Method::DCB)) {
@@ -2511,11 +2525,13 @@ void RawImageSource::demosaic(const RAWParams &raw)
 
     } else if (ri->getSensorType() == ST_FUJI_XTRANS) {
         if (raw.xtranssensor.method == RAWParams::XTransSensor::getMethodString(RAWParams::XTransSensor::Method::FAST)) {
-            fast_xtrans_interpolate();
+            fast_xtrans_interpolate(rawData, red, green, blue);
         } else if (raw.xtranssensor.method == RAWParams::XTransSensor::getMethodString(RAWParams::XTransSensor::Method::ONE_PASS)) {
             xtrans_interpolate(1, false);
         } else if (raw.xtranssensor.method == RAWParams::XTransSensor::getMethodString(RAWParams::XTransSensor::Method::THREE_PASS)) {
             xtrans_interpolate(3, true);
+        } else if (raw.xtranssensor.method == RAWParams::XTransSensor::getMethodString(RAWParams::XTransSensor::Method::FOUR_PASS)) {
+            xtrans_4pass_demosaic_RT(3, true, raw.xtranssensor.dualDemosaicContrast);
         } else if (raw.xtranssensor.method == RAWParams::XTransSensor::getMethodString(RAWParams::XTransSensor::Method::MONO)) {
             nodemosaic(true);
         } else {
@@ -8967,7 +8983,7 @@ ColorTemp RawImageSource::getSpotWB(std::vector<Coord2D> &red, std::vector<Coord
                 gloc /= gnbrs;
                 bloc /= bnbrs;
 
-                if (rloc * initialGain < 64000. && gloc * initialGain < 64000. && bloc * initialGain < 64000.) {
+                if (rloc < clmax[0] && gloc < clmax[1] && bloc < clmax[2]) {
                     reds += rloc;
                     greens += gloc;
                     blues += bloc;
@@ -9040,7 +9056,7 @@ ColorTemp RawImageSource::getSpotWB(std::vector<Coord2D> &red, std::vector<Coord
             gloc /= std::max(1, gnbrs);
             bloc /= std::max(1, bnbrs);
 
-            if (rloc * initialGain < 64000. && gloc * initialGain < 64000. && bloc * initialGain < 64000.) {
+            if (rloc < clmax[0] && gloc < clmax[1] && bloc < clmax[2]) {
                 reds += rloc;
                 greens += gloc;
                 blues += bloc;
@@ -9076,7 +9092,7 @@ ColorTemp RawImageSource::getSpotWB(std::vector<Coord2D> &red, std::vector<Coord
             gloc /= std::max(gnbrs, 1);
             bloc /= std::max(bnbrs, 1);
 
-            if (rloc * initialGain < 64000. && gloc * initialGain < 64000. && bloc * initialGain < 64000.) {
+            if (rloc < clmax[0] && gloc < clmax[1] && bloc < clmax[2]) {
                 reds += rloc;
                 greens += gloc;
                 blues += bloc;
@@ -9112,7 +9128,7 @@ ColorTemp RawImageSource::getSpotWB(std::vector<Coord2D> &red, std::vector<Coord
             gloc /= std::max(gnbrs, 1);
             bloc /= std::max(bnbrs, 1);
 
-            if (rloc * initialGain < 64000. && gloc * initialGain < 64000. && bloc * initialGain < 64000.) {
+            if (rloc < clmax[0] && gloc < clmax[1] && bloc < clmax[2]) {
                 reds += rloc;
                 greens += gloc;
                 blues += bloc;

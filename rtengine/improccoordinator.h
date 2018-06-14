@@ -81,6 +81,7 @@ protected:
     RenderingIntent monitorIntent;
     bool softProof;
     bool gamutCheck;
+    bool sharpMask;
 
     int scale;
     bool highDetailPreprocessComputed;
@@ -281,7 +282,7 @@ public:
     void getMonitorProfile(Glib::ustring& profile, RenderingIntent& intent) const;
     void setSoftProofing(bool softProof, bool gamutCheck);
     void getSoftProofing(bool &softProof, bool &gamutCheck);
-
+    void setSharpMask      (bool sharpMask);
     bool updateTryLock()
     {
         return updaterThreadStart.trylock();
