@@ -1288,24 +1288,31 @@ struct RAWParams {
     struct BayerSensor {
         enum class Method {
             AMAZE,
-            IGV,
+            AMAZEVNG4,
+            RCD,
+            DCB,
             LMMSE,
+            IGV,
+            AHD,
             EAHD,
             HPHD,
             VNG4,
-            DCB,
-            AHD,
-            RCD,
             FAST,
             MONO,
-            NONE,
-            PIXELSHIFT
+            PIXELSHIFT,
+            NONE
         };
 
         enum class PSMotionCorrectionMethod {
             OFF,
             AUTO,
             CUSTOM
+        };
+
+        enum class PSDemosaicMethod {
+            AMAZE,
+            AMAZEVNG4,
+            LMMSE
         };
 
         Glib::ustring method;
@@ -1327,6 +1334,7 @@ struct RAWParams {
         int greenthresh;
         int dcb_iterations;
         int lmmse_iterations;
+        double dualDemosaicContrast;
         PSMotionCorrectionMethod pixelShiftMotionCorrectionMethod;
         double pixelShiftEperIso;
         double pixelShiftSigma;
@@ -1337,10 +1345,10 @@ struct RAWParams {
         bool pixelShiftGreen;
         bool pixelShiftBlur;
         double pixelShiftSmoothFactor;
-        bool pixelShiftLmmse;
         bool pixelShiftEqualBright;
         bool pixelShiftEqualBrightChannel;
         bool pixelShiftNonGreenCross;
+        Glib::ustring pixelShiftDemosaicMethod;
         bool dcb_enhance;
         bool pdafLinesFilter;
 
@@ -1353,6 +1361,9 @@ struct RAWParams {
 
         static const std::vector<const char*>& getMethodStrings();
         static Glib::ustring getMethodString(Method method);
+
+        static const std::vector<const char*>& getPSDemosaicMethodStrings();
+        static Glib::ustring getPSDemosaicMethodString(PSDemosaicMethod method);
     };
 
     /**
@@ -1360,6 +1371,7 @@ struct RAWParams {
      */
     struct XTransSensor {
         enum class Method {
+            FOUR_PASS,
             THREE_PASS,
             ONE_PASS,
             FAST,
@@ -1368,6 +1380,7 @@ struct RAWParams {
         };
 
         Glib::ustring method;
+        double dualDemosaicContrast;
         int ccSteps;
         double blackred;
         double blackgreen;

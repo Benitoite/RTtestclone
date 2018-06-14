@@ -783,6 +783,7 @@ public:
         bool dcbIterations;
         bool dcbEnhance;
         bool lmmseIterations;
+        bool dualDemosaicContrast;
         bool pixelShiftMotionCorrectionMethod;
         bool pixelShiftEperIso;
         bool pixelShiftSigma;
@@ -793,10 +794,10 @@ public:
         bool pixelShiftGreen;
         bool pixelShiftBlur;
         bool pixelShiftSmooth;
-        bool pixelShiftLmmse;
         bool pixelShiftEqualBright;
         bool pixelShiftEqualBrightChannel;
         bool pixelShiftNonGreenCross;
+        bool pixelShiftDemosaicMethod;
 
         //bool allEnhance;
         bool greenEq;
@@ -812,6 +813,7 @@ public:
 
     public:
         bool method;
+        bool dualDemosaicContrast;
         bool ccSteps;
         bool exBlackRed;
         bool exBlackGreen;
