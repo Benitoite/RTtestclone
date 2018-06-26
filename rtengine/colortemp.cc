@@ -1985,21 +1985,21 @@ void ColorTemp::cat02_to_xyzfloatraw(float & x, float & y, float & z, float r, f
 void ColorTemp::tempxy(bool separated, int &repref, float **Tx, float **Ty, float **Tz, float **Ta, float **Tb, float **TL, double *TX, double *TY, double *TZ, const procparams::WBParams & wbpar)
 {
     const double* spec_colorforxcyc[] = {//color references
-        JDC468_BluH10_spect, JDC468_BluF4_spect, JDC468_BluD6_spect, ColorchechCyaF3_spect, Colorblue_spect, JDC468_BluM5_spect, // 0 4
-        ColorGreenM25_spect,   JDC468_GreK7_spect, ColabSky42_0_m24_spect, ColabSky60_0_m31_spect,  ColorchechBluC150_m5_m22_spect,
-        JDC468_GreQ7_spect, ColorchechDCBluN881_m7_m14_spect, ColorchechGreB3_spect, ColorchechPurD2_spect,  //9 11
-        ColorchechSGBlaN3_6_spect, ColorchechGraC4_67_spect, JDC468_K15_87greyspect,
-        JDC468_GraK14_44_spect, ColorGreenalsi_spect, Fictif_61greyspect, ColorchechGreD1_spect,
-        ColorchechWhiA496_spect, JDC468_GreA10_spect, JDC468_GreI8_spect,
-        ColabSkin91_4_14_spect, JDC468_PurE24_spect, //22
-        ColorchechSGSkiK285_11_17_spect,  ColorchechGreE2_spect, ColorchechMagE3_spect, //25
-        ColorchechSkiB166_18_18_spect, ColabSkin70_7_32_spect, ColorchechSGSkiF763_14_26_spect,
-        ColorchechSkiA138_13_14_spect, ColabSkin57_22_18_spect, JDC468_YelN10_spect,
-        ColabSkin35_15_17_spect, ColabSkin40_17_17_spect, ColorRedkurttu_spect, ColorYellowkeltano_spect,  ColorchechYelD3_spect, JDC468_OraO18_spect,
-        /* JDC468_GreN7_spect, JDC468_RedG21va_spect, JDC468_OraD17_spect,
-         ColorchechredC3_spect, JDC468_RedI9_spect, ColorRedpetunia_spect, ColorchechOraA2_spect,*////These spectral contains bads datas ...difficult to find
-        ColabSkin87_8_8_spect, ColabSkin89_8_21_spect, ColabSkin75_8_4_spect, ColabSkin75_10_33_spect,
-        ColabSkin65_33_11_spect, ColabSkin65_7_24_spect, ColabSkin57_19_6_spect, ColabSkin57_4_19_spect, ColabSkin57_10_28_spect, ColabSkin40_17_6_spect,
+        JDC468_BluH10_spect, JDC468_BluF4_spect, JDC468_BluD6_spect, ColorchechCyaF3_spect, Colorblue_spect, JDC468_BluM5_spect, // 0 5
+        ColorGreenM25_spect,   JDC468_GreK7_spect, ColabSky42_0_m24_spect, ColabSky60_0_m31_spect,  ColorchechBluC150_m5_m22_spect,//10
+        JDC468_GreQ7_spect, ColorchechDCBluN881_m7_m14_spect, ColorchechGreB3_spect, ColorchechPurD2_spect,  //14
+        ColorchechSGBlaN3_6_spect, ColorchechGraC4_67_spect, JDC468_K15_87greyspect,//17
+        JDC468_GraK14_44_spect, ColorGreenalsi_spect, Fictif_61greyspect, ColorchechGreD1_spect,//21
+        ColorchechWhiA496_spect, JDC468_GreA10_spect, JDC468_GreI8_spect,//24
+        ColabSkin91_4_14_spect, JDC468_PurE24_spect, //26
+        ColorchechSGSkiK285_11_17_spect,  ColorchechGreE2_spect, ColorchechMagE3_spect, //29
+        ColorchechSkiB166_18_18_spect, ColabSkin70_7_32_spect, ColorchechSGSkiF763_14_26_spect,//32
+        ColorchechSkiA138_13_14_spect, ColabSkin57_22_18_spect, JDC468_YelN10_spect,//35
+        ColabSkin35_15_17_spect, ColabSkin40_17_17_spect, ColorRedkurttu_spect, ColorYellowkeltano_spect,  ColorchechYelD3_spect, JDC468_OraO18_spect,//41
+         JDC468_GreN7_spect, JDC468_RedG21va_spect, JDC468_OraD17_spect,
+         ColorchechredC3_spect, JDC468_RedI9_spect, ColorRedpetunia_spect, ColorchechOraA2_spect,///These spectral contains bads datas ...difficult to find
+        ColabSkin87_8_8_spect, ColabSkin89_8_21_spect, ColabSkin75_8_4_spect, ColabSkin75_10_33_spect,//45
+        ColabSkin65_33_11_spect, ColabSkin65_7_24_spect, ColabSkin57_19_6_spect, ColabSkin57_4_19_spect, ColabSkin57_10_28_spect, ColabSkin40_17_6_spect,//51
         ColabSkin26_18_18_spect, ColabSkin90_m1_20_spect
     };
 
@@ -2202,11 +2202,11 @@ void ColorTemp::tempxy(bool separated, int &repref, float **Tx, float **Ty, floa
             float Ywb = 1.;
             float Zwb = Txyz[tt].ZZ;
 
-            if (wbpar.wbcat02Method == "cam") {//not used
+            if (wbpar.wbcat02Method == "icam") {//not used
                 icieCAT02float(Xwb, Ywb, Zwb, CAM02BB00, CAM02BB01, CAM02BB02, CAM02BB10, CAM02BB11, CAM02BB12, CAM02BB20, CAM02BB21, CAM02BB22, 1.0);
             }
 
-            if (wbpar.wbcat02Method == "icam") {
+            if (wbpar.wbcat02Method == "cam") {
                 cieCAT02float(Xwb, Ywb, Zwb, CAM02BB00, CAM02BB01, CAM02BB02, CAM02BB10, CAM02BB11, CAM02BB12, CAM02BB20, CAM02BB21, CAM02BB22, 1.0);
             }
 

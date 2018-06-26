@@ -278,9 +278,9 @@ WhiteBalance::WhiteBalance() : FoldableToolPanel(this, "whitebalance", M("TP_WBA
     labcat->show();
     wbcat02Method = Gtk::manage(new MyComboBoxText());
     wbcat02Method->append(M("TP_WBCAM_NONE"));
-    //wbcat02Method->append(M("TP_WBCAM_CAM"));
-    wbcat02Method->append(M("TP_WBCAM_ICAM"));
-    wbcat02Method->set_active(0);
+    //wbcat02Method->append(M("TP_WBCAM_ICAM"));
+    wbcat02Method->append(M("TP_WBCAM_CAM"));
+    wbcat02Method->set_active(1);
     wbcat02MethodConn = wbcat02Method->signal_changed().connect(sigc::mem_fun(*this, &WhiteBalance::wbcat02MethodChanged));
     //wbcat02Method->set_tooltip_markup(M("TP_WBCAM_TOOLTIP"));
     wbcat02Method->show();
@@ -748,10 +748,10 @@ void WhiteBalance::read(const ProcParams* pp, const ParamsEdited* pedited)
 
     if (pp->wb.wbcat02Method == "none") {
         wbcat02Method->set_active(0);
-//    } else if (pp->wb.wbcat02Method == "cam") {
-//        wbcat02Method->set_active(1);
-    } else if (pp->wb.wbcat02Method == "icam") {
+    } else if (pp->wb.wbcat02Method == "cam") {
         wbcat02Method->set_active(1);
+//    } else if (pp->wb.wbcat02Method == "icam") {
+//        wbcat02Method->set_active(2);
     }
 
     wbcat02MethodConn.block(false);
@@ -798,10 +798,10 @@ void WhiteBalance::write(ProcParams* pp, ParamsEdited* pedited)
 
     if (wbcat02Method->get_active_row_number() == 0) {
         pp->wb.wbcat02Method = "none";
-//    } else if (wbcat02Method->get_active_row_number() == 1) {
-//        pp->wb.wbcat02Method = "cam";
     } else if (wbcat02Method->get_active_row_number() == 1) {
-        pp->wb.wbcat02Method = "icam";
+        pp->wb.wbcat02Method = "cam";
+//    } else if (wbcat02Method->get_active_row_number() == 2) {
+//        pp->wb.wbcat02Method = "icam";
     }
 
 

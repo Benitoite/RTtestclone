@@ -273,7 +273,7 @@ void ImProcCoordinator::updatePreviewImage(int todo, Crop* cropCall)
         autoitc = (params.wb.method == "autitc" || params.wb.method == "autitc2" || params.wb.method == "autitcgreen");
         bool gamma = false;
         bool cat = false;
-//        if (params.wb.wbcat02Method == "icam" && autoitc) {
+//        if (params.wb.wbcat02Method == "cam" && autoitc) {
 //            cat = true;
 //        }
 

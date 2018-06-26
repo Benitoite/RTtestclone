@@ -2358,17 +2358,17 @@ void RawImageSource::preprocess(const RAWParams &raw, const LensProfParams &lens
 
     // check if green equilibration is needed. If yes, compute G channel pre-compensation factors
     const auto globalGreenEq =
-        [&]() -> bool
-        {
-            CameraConstantsStore *ccs = CameraConstantsStore::getInstance();
-            CameraConst *cc = ccs->get(ri->get_maker().c_str(), ri->get_model().c_str());
-            return cc && cc->get_globalGreenEquilibration();
-        };
-    
-    if ( ri->getSensorType() == ST_BAYER && (raw.bayersensor.greenthresh || (globalGreenEq() && raw.bayersensor.method != RAWParams::BayerSensor::getMethodString( RAWParams::BayerSensor::Method::VNG4))) ) {
+    [&]() -> bool {
+        CameraConstantsStore *ccs = CameraConstantsStore::getInstance();
+        CameraConst *cc = ccs->get(ri->get_maker().c_str(), ri->get_model().c_str());
+        return cc && cc->get_globalGreenEquilibration();
+    };
+
+    if (ri->getSensorType() == ST_BAYER && (raw.bayersensor.greenthresh || (globalGreenEq() && raw.bayersensor.method != RAWParams::BayerSensor::getMethodString(RAWParams::BayerSensor::Method::VNG4)))) {
         if (settings->verbose) {
             printf("Performing global green equilibration...\n");
         }
+
         // global correction
         if (numFrames == 4) {
             for (int i = 0; i < 4; ++i) {
@@ -2494,13 +2494,13 @@ void RawImageSource::demosaic(const RAWParams &raw)
         if (raw.bayersensor.method == RAWParams::BayerSensor::getMethodString(RAWParams::BayerSensor::Method::HPHD)) {
             hphd_demosaic();
         } else if (raw.bayersensor.method == RAWParams::BayerSensor::getMethodString(RAWParams::BayerSensor::Method::VNG4)) {
-            vng4_demosaic (rawData, red, green, blue);
+            vng4_demosaic(rawData, red, green, blue);
         } else if (raw.bayersensor.method == RAWParams::BayerSensor::getMethodString(RAWParams::BayerSensor::Method::AHD)) {
             ahd_demosaic();
         } else if (raw.bayersensor.method == RAWParams::BayerSensor::getMethodString(RAWParams::BayerSensor::Method::AMAZE)) {
             amaze_demosaic_RT(0, 0, W, H, rawData, red, green, blue);
-        } else if (raw.bayersensor.method == RAWParams::BayerSensor::getMethodString(RAWParams::BayerSensor::Method::AMAZEVNG4) ) {
-            amaze_vng4_demosaic_RT (W, H, rawData, red, green, blue, raw.bayersensor.dualDemosaicContrast);
+        } else if (raw.bayersensor.method == RAWParams::BayerSensor::getMethodString(RAWParams::BayerSensor::Method::AMAZEVNG4)) {
+            amaze_vng4_demosaic_RT(W, H, rawData, red, green, blue, raw.bayersensor.dualDemosaicContrast);
         } else if (raw.bayersensor.method == RAWParams::BayerSensor::getMethodString(RAWParams::BayerSensor::Method::PIXELSHIFT)) {
             pixelshift(0, 0, W, H, raw.bayersensor, currFrame, ri->get_maker(), ri->get_model(), raw.expos);
         } else if (raw.bayersensor.method == RAWParams::BayerSensor::getMethodString(RAWParams::BayerSensor::Method::DCB)) {
@@ -7252,6 +7252,7 @@ void static studentXY(array2D<float> & YYcurr, array2D<float> & reffYY,  int siz
     float diviY = sqrt(((somsqueccurrY + somsquecreffY) * (1.f / (float)sizestucurrY + 1.f / (float)sizestureffY)) / (sizestucurrY + sizestureffY - 2));
 
     float numerY = ((float)somcurrY / (float)sizestucurrY) - ((float)somreffY / (float)sizestureffY);
+//   printf("num=%f divY=%f \n", numerY, diviY);
 
     student = numerY / diviY ;
 }
@@ -7289,6 +7290,13 @@ void RawImageSource::ItcWB(double &tempref, double &greenref, const LocWBParams 
         {wprof[2][0], wprof[2][1], wprof[2][2]}
     };
 
+    TMatrix wiprof = ICCStore::getInstance()->workingSpaceInverseMatrix("sRGB");
+    //inverse matrix user select
+    double wip[3][3] = {
+        {wiprof[0][0], wiprof[0][1], wiprof[0][2]},
+        {wiprof[1][0], wiprof[1][1], wiprof[1][2]},
+        {wiprof[2][0], wiprof[2][1], wiprof[2][2]}
+    };
 
     array2D<float> xc;
     array2D<float> yc;
@@ -7304,11 +7312,17 @@ void RawImageSource::ItcWB(double &tempref, double &greenref, const LocWBParams 
     array2D<float> xxyycurr_reduc;
     array2D<float> xx_curref;
     array2D<float> yy_curref;
+    array2D<float> YY_curref;
     array2D<float> xx_curref_reduc;
     array2D<float> yy_curref_reduc;
+    array2D<float> R_curref_reduc;
+    array2D<float> G_curref_reduc;
+    array2D<float> B_curref_reduc;
+
     array2D<float> reffxxyy;
     array2D<float> reffxxyy_prov;
     array2D<float> YYcurr;
+    array2D<float> YY_curref_reduc;
     array2D<float> YYcurr_reduc;
     array2D<float> reffYY;
     array2D<float> reffYY_prov;
@@ -7439,7 +7453,7 @@ void RawImageSource::ItcWB(double &tempref, double &greenref, const LocWBParams 
     double *TZ = nullptr;
     int *good_spectral = nullptr;
 
-    int Nc = 54;//61 number of reference spectral colors
+    int Nc = 61;//61 number of reference spectral colors
     Tx = new float*[Nc];
 
     for (int i = 0; i < Nc; i++) {
@@ -7501,6 +7515,7 @@ void RawImageSource::ItcWB(double &tempref, double &greenref, const LocWBParams 
 
     int siza = 167;//size of histogram
     float tempcalc = 5000.f;
+    int maxval = 25;
 
     //tempref and greenref are camera wb values.
     // I used them by default to select good spectral values !!
@@ -7554,7 +7569,20 @@ void RawImageSource::ItcWB(double &tempref, double &greenref, const LocWBParams 
         }
 
     } ;
+    //intermediate structure
+    struct chrom {
+        float chroxy;
+        float chrox;
+        float chroy;
+        float Y;
+        int index;
+        int interest;
+        bool operator()(const chrom& lchro, const chrom& rchro)
+        {
+            return lchro.chroxy < rchro.chroxy;
+        }
 
+    } ;
 
     int histxy[siza] = {};//number of values for each pair xy
 
@@ -7577,6 +7605,7 @@ void RawImageSource::ItcWB(double &tempref, double &greenref, const LocWBParams 
     int Ncreal = 0;
 
     bool separated = true;
+    int w = -1;
 
     //here we select the good spectral color inside the 61 values
     if (separated) {
@@ -7621,8 +7650,13 @@ void RawImageSource::ItcWB(double &tempref, double &greenref, const LocWBParams 
         histcurrref(N_t, sizcurrref);
         xx_curref(N_t, sizcurrref);
         yy_curref(N_t, sizcurrref);
+        YY_curref(N_t, sizcurrref);
         xx_curref_reduc(N_t, sizcurrref);
         yy_curref_reduc(N_t, sizcurrref);
+        YY_curref_reduc(N_t, sizcurrref);
+        R_curref_reduc(N_t, sizcurrref);
+        G_curref_reduc(N_t, sizcurrref);
+        B_curref_reduc(N_t, sizcurrref);
 
         float minstudref = 100000.f;
         int goodrefref = 1;
@@ -7672,11 +7706,11 @@ void RawImageSource::ItcWB(double &tempref, double &greenref, const LocWBParams 
 
         ntr = n30;
 
-        if (ntr > (siza - 30)) {
-            ntr = n15;    //if to less elements 30 elements mini
+        if (ntr > (siza - 25)) {
+            ntr = n15;    //if to less elements 25 elements mini
         }
 
-        if (ntr > (siza - 25)) {
+        if (ntr > (siza - 23)) {
             ntr = n4;    //if to less elements 25 elements mini
         }
 
@@ -7685,7 +7719,41 @@ void RawImageSource::ItcWB(double &tempref, double &greenref, const LocWBParams 
         }
 
         int sizcurr2ref = sizcurrref - ntr;
-        int maxval = 25;// we can chnage this value..20...30.. 35 + nearneutral / 2;
+        int sizcu3 = sizcurrref - n30;
+        int sizcu4 = sizcurrref - n4;
+
+        printf("sizcur30=%i siecu4=%i \n", sizcu3, sizcu4);
+        sizcu4 = sizcu3;
+        chrom wbchro[sizcu4];
+        double swpr  = (Txyz[repref].XX + Txyz[repref].ZZ + 1.);
+        double xwpr = Txyz[repref].XX / swpr;//white point for tt in xy coordiantes
+        double ywpr = 1. / swpr;
+
+
+        for (int i = 0; i < sizcu4; i++) { //take the max values
+            int j = i;
+            histcurrref[j][repref] = (float) Wbhis[siza - (j + 1)].histnum;
+            xx_curref[j][repref] = xxx[Wbhis[siza - (j + 1)].index] / histcurrref[j][repref];
+            yy_curref[j][repref] = yyy[Wbhis[siza - (j + 1)].index] / histcurrref[j][repref];
+            YY_curref[j][repref] = YYY[Wbhis[siza - (j + 1)].index] / histcurrref[j][repref];
+
+        }
+
+        for (int nh = 0; nh < sizcu4; nh++) {
+            wbchro[nh].chroxy = SQR(xx_curref[nh][repref] - xwpr) + SQR(yy_curref[nh][repref] - ywpr);
+            wbchro[nh].chrox = xx_curref[nh][repref];
+            wbchro[nh].chroy = yy_curref[nh][repref];
+            wbchro[nh].Y = YY_curref[nh][repref];
+            wbchro[nh].index = nh;
+        }
+
+//       std::sort(wbchro, wbchro + sizcu4, wbchro[0]);
+
+        for (int nh = 0; nh < sizcu4; nh++) {
+            printf("nh=%i xy=%f chrox=%f chroy=%f\n", nh, wbchro[nh].chroxy, wbchro[nh].chrox, wbchro[nh].chroy);
+        }
+
+        maxval = 26 ;//+ nearneutral / 2;// we can chnage this value..20...30.. 35 + nearneutral / 2;
 
         if (sizcurr2ref > maxval) {
             sizcurr2ref = maxval;    //keep about the 40 biggest values,
@@ -7697,23 +7765,16 @@ void RawImageSource::ItcWB(double &tempref, double &greenref, const LocWBParams 
         int countmm = 0;
         int maxk = 0;
         int sizcurr3ref = sizcurr2ref;
-        int w = -1;
-
-        // xx_curref and yy_curref are xy values representative of image at this temperature
-        for (int i = 0; i < sizcurr2ref; i++) { //take the max values
-            int j = i;
-            histcurrref[j][repref] = (float) Wbhis[siza - (j + 1)].histnum;
-            xx_curref[j][repref] = xxx[Wbhis[siza - (j + 1)].index] / histcurrref[j][repref];
-            yy_curref[j][repref] = yyy[Wbhis[siza - (j + 1)].index] / histcurrref[j][repref];
-        }
+        // int w = -1;
 
 
         for (int i = 0; i < sizcurr2ref; i++) {
-            if ((xx_curref[i][repref] > 0.1f) && (yy_curref[i][repref] > 0.1f)) { //suppress value too far from reference spectral
+            if (((wbchro[sizcu4 - (i + 1)].chrox  > 0.1f) && (wbchro[sizcu4 - (i + 1)].chroy > 0.1f)) || wbchro[sizcu4 - (i + 1)].chroxy  > 0.0005f) { //suppress value too far from reference spectral
                 w++;
-                xx_curref_reduc[w][repref] = xx_curref[i][repref];
-                yy_curref_reduc[w][repref] = yy_curref[i][repref];
-
+                xx_curref_reduc[w][repref] = wbchro[sizcu4 - (i + 1)].chrox;
+                yy_curref_reduc[w][repref] = wbchro[sizcu4 - (i + 1)].chroy;
+                YY_curref_reduc[w][repref] = wbchro[sizcu4 - (i + 1)].Y;
+                printf("xx_cu=%f yy_cu=%f Y=%f\n", xx_curref_reduc[w][repref], yy_curref_reduc[w][repref], YY_curref_reduc[w][repref]);
             }
         }
 
@@ -7737,13 +7798,32 @@ void RawImageSource::ItcWB(double &tempref, double &greenref, const LocWBParams 
             good_spectral[kN] = 1;//good spectral are spectral color that match color histogram xy
         }
 
+//reconvert to RGB
+        for (int i = 0; i < w; i++) {
+            float X = 65535.f * xx_curref_reduc[w][repref] * YY_curref_reduc[w][repref] / yy_curref_reduc[w][repref];
+            float Y = 65535.f * YY_curref_reduc[w][repref];
+            float Z = 65535.f * (1.f - xx_curref_reduc[w][repref]  - yy_curref_reduc[w][repref]) * YY_curref_reduc[w][repref] / yy_curref_reduc[w][repref];
+            float r, g, b;
+            Color::xyz2rgb(X, Y, Z, r, g, b, wip);
+            r /= rmm[repref];
+            g /= gmm[repref];
+            b /= bmm[repref];
+            R_curref_reduc[w][repref] = r;
+            G_curref_reduc[w][repref] = g;
+            B_curref_reduc[w][repref] = b;
+
+        }
+
         for (int i = 0; i < Nc; i++) {
             if (good_spectral[i] == 1) {
+                // printf("N=%i gs=%i\n", i, good_spectral[i]);
                 Ncreal += 1;
             };
         }
 
     }
+
+//end first part
 
 
 
@@ -7777,7 +7857,6 @@ void RawImageSource::ItcWB(double &tempref, double &greenref, const LocWBParams 
         }
     }
 
-
     //calculate for this image the mean values for each family of color, near histogram x y (number)
     //xy vary from x 0..0.77  y 0..0.82
     //neutral values are near x=0.34 0.33 0.315 0.37 y =0.35 0.36 0.34
@@ -7804,122 +7883,28 @@ void RawImageSource::ItcWB(double &tempref, double &greenref, const LocWBParams 
         double xwp = Txyz[tt].XX / swp;
         double ywp = 1. / swp;
 
-        for (int y = 0; y < bfh ; y += 10) {
-            for (int x = 0; x < bfw ; x += 10) {
-                int yy = y / 10;
-                int xx = x / 10 ;
-                float x_c = 0.f, y_c = 0.f, Y_c = 0.f;
-                float x_x = 0.f, y_y = 0.f, z_z = 0.f;
-                float RR =  rmm[tt] * redloc[y][x];
-                float GG =  gmm[tt] * greenloc[y][x];
-                float BB =  bmm[tt] * blueloc[y][x];
-                Color::rgbxyY(RR, GG, BB, x_c, y_c, Y_c, x_x, y_y, z_z, wp);
-                xc[yy][xx] = x_c;
-                yc[yy][xx] = y_c;
-                Yc[yy][xx] = Y_c;
-            }
 
-        }
+        for (int i = 0; i < w; i++) {
+            float xx, yy, zz;
+            float x_c = 0.f, y_c = 0.f, Y_c = 0.f;
+            float x_x = 0.f, y_y = 0.f, z_z = 0.f;
 
-        histoxyY(bfhitc, bfwitc, xc, yc, Yc, xxx,  yyy, YYY, histxy, area, inter);
-
-
-        hiss Wbhis [siza];
-        int n1 = 0;
-        int n4 = 0;
-        int n15 = 0;
-        int n30 = 0;
-        int ntr = 0;
-        int nearneutral = 0;
-
-        for (int nh = 0; nh < siza; nh++) {
-            Wbhis[nh].histnum =  histxy[nh];
-            Wbhis[nh].index = nh;
-            Wbhis[nh].interest = inter[nh];
-        }
-
-        //sort in ascending order
-        std::sort(Wbhis, Wbhis + siza, Wbhis[0]);
-
-        for (int nh = 0; nh < siza; nh++) {
-            if (Wbhis[nh].histnum < 1) {
-                n1++;    //keep only existing color but avoid to small
-            }
-
-            if (Wbhis[nh].histnum < 4) {
-                n4++;    //keep only existing color but avoid to small
-            }
-
-            if (Wbhis[nh].histnum < 15) {
-                n15++;    //keep only existing color but avoid to small
-            }
-
-            if (Wbhis[nh].histnum < 30) {
-                n30++;    //keep only existing color but avoid to small
-            }
-
-        }
-
-        for (int nh = siza - 20; nh < siza; nh++) {
-            if (Wbhis[nh].interest == 5) {
-                nearneutral++;    //show near neutral values in the max values
-            }
-
-        }
-
-        ntr = n30;
-
-        if (ntr > (siza - 30)) {
-            ntr = n15;    //if to less elements 30 elements mini
-        }
-
-        if (ntr > (siza - 25)) {
-            ntr = n4;    //if to less elements 25 elements mini
-        }
-
-        if (ntr > (siza - 20)) {
-            ntr = n1;    //if to less elements 20 elements mini - normally never be used !
-        }
-
-        int sizcurr2 = sizcurr - ntr;
-        int maxval = 20;// we can change this value...20...30..35 + nearneutral / 2;
-
-        if (sizcurr2 > maxval) {
-            sizcurr2 = maxval;    //keep about the 40 biggest values,
-        }
-
-        //we can perhaps improve with area, etc.
-        int countneutral = 0;
-        int countn = 0;
-        int countmm = 0;
-        int maxk = 0;
-        int sizcurr3 = sizcurr2;
-
-        for (int j = 0; j < sizcurr2; j++) { //take the max values
-            histcurr[j][tt] = (float) Wbhis[siza - (j + 1)].histnum;
-            xxyycurr[2 * j][tt] = xxx[Wbhis[siza - (j + 1)].index] / histcurr[j][tt];
-            xxyycurr[2 * j + 1][tt] = yyy[Wbhis[siza - (j + 1)].index] / histcurr[j][tt];
-            YYcurr[j][tt] = YYY[Wbhis[siza - (j + 1)].index] / histcurr[j][tt];
-        }
-
-        int w = -1;
-
-        for (int j = 0; j < sizcurr2; j++) {
-            if ((xxyycurr[2 * j][tt] > 0.1f) && (xxyycurr[2 * j + 1][tt] > 0.1f)) { //suppress value too far from reference spectral
-                w++;
-                //absolute chroma for each color of histogram
-                xxyycurr_reduc[2 * w][tt] = fabs(xxyycurr[2 * j][tt] - xwp);
-                xxyycurr_reduc[2 * w + 1][tt] = fabs(xxyycurr[2 * j + 1][tt] - ywp);
-                YYcurr_reduc[w][tt] = YYcurr[j][tt];
-
-            }
+            float RR =  rmm[tt] * R_curref_reduc[w][repref];
+            float GG =  gmm[tt] * G_curref_reduc[w][repref];
+            float BB =  bmm[tt] * B_curref_reduc[w][repref];
+            Color::rgbxyY(RR, GG, BB, x_c, y_c, Y_c, x_x, y_y, z_z, wp);
+            //xx_curref_reduc[w][repref] = x_c;
+            //yy_curref_reduc[w][repref] = y_c;
+            //   YYcurref_reduc[w][repref] = Y_c;
+            xxyycurr_reduc[2 * w][tt] = x_c;
+            xxyycurr_reduc[2 * w + 1][tt] = y_c;
 
         }
 
         /*
                 float nnx, nny, nnz;
 
-                if(wbpar.wbcat02Method == "icam") {//code no update...
+                if(wbpar.wbcat02Method == "cam") {//code no update...
                     for(int k=0;k < sizcurr3; k++) {
                         float nnx = xxyycurr[2 * k][tt]*YYcurr[k][tt] / xxyycurr[2 * k + 1][tt];
                         float nny = YYcurr[k][tt];
@@ -7941,29 +7926,13 @@ void RawImageSource::ItcWB(double &tempref, double &greenref, const LocWBParams 
                     }
                 }
         */
-//        float studentY = 0.f;
-//   for (int tt = 0; tt < N_t; tt++) {
 
         float student = 0.f;
 
-//studentXY(YYcurr, reffYY, sizcurr2, Nc, tt, studentY); //for YY green not used
-        //    printf("tt=%i studeY=%f \n", tt, studentY);
-//somstudY += (studentY);
-        //float snedecor = 1.40f; //for sizestucurr and sizestureff
-        // not used
-
-        /*
-                float abstudY = fabs(studentY);
-
-                if (abstudY < minstudY) {  // find the minimum Student
-                    minstudY = abstudY;
-                    goodrefY = tt;
-                }
-        */
 
         studentXY(xxyycurr_reduc, reffxxyy, 2 * w, 2 * kk, tt, student); //for xy
-        //   printf("tt=%i  st=%f\n", tt,  student);
-
+        printf("tt=%i  st=%f\n", tt,  student);
+        //    if(signbit(student)) {goodref = tt;break;}//printf("stud=%f\n", student);
         float abstud = fabs(student);
 
         if (abstud < minstud) {  // find the minimum Student
@@ -7979,19 +7948,26 @@ void RawImageSource::ItcWB(double &tempref, double &greenref, const LocWBParams 
     xxyycurr_reduc(0, 0);
     xx_curref(0, 0);
     yy_curref(0, 0);
+    YY_curref(0, 0);
 
     reffxxyy(0, 0);
     YYcurr(0, 0);
     YYcurr_reduc(0, 0);
     reff_yy(0, 0);
     reff_xx(0, 0);
+    xx_curref_reduc(0, 0);
+    yy_curref_reduc(0, 0);
+    YY_curref_reduc(0, 0);
 
+    R_curref_reduc(0, 0);
+    G_curref_reduc(0, 0);
+    B_curref_reduc(0, 0);
 
     avg_rm = 10000.f * rmm[goodref];
     avg_gm = 10000.* gmm[goodref];
     avg_bm = 10000.f * bmm[goodref];
     tempitc = Txyz[goodref].Tem;
-   // printf("ITCWB tempitc=%f gritc=%f\n", tempitc, greenitc);
+    // printf("ITCWB tempitc=%f gritc=%f\n", tempitc, greenitc);
 
 
     xc(0, 0);
