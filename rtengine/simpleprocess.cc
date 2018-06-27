@@ -204,8 +204,8 @@ private:
         if (pl) {
             pl->setProgress(0.20);
         }
-
-        imgsrc->demosaic(params.raw);
+        double contrastThresholdDummy;
+        imgsrc->demosaic (params.raw, false, contrastThresholdDummy);
 
         if (pl) {
             pl->setProgress(0.30);

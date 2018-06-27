@@ -34,7 +34,6 @@ set(RTENGINESOURCEFILES
     PF_correct_RT.cc
     amaze_demosaic_RT.cc
     cat02adaptation.cc
-    amaze_vng4_demosaic_RT.cc
     cJSON.c
     calc_distort.cc
     camconst.cc
@@ -54,6 +53,7 @@ set(RTENGINESOURCEFILES
     dfmanager.cc
     diagonalcurves.cc
     dirpyr_equalizer.cc
+    dual_demosaic_RT.cc
     dynamicprofile.cc
     expo_before_b.cc
     fast_demo.cc

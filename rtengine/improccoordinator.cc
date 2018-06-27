@@ -260,8 +260,10 @@ void ImProcCoordinator::updatePreviewImage(int todo, Crop* cropCall)
                 printf("Demosaic X-Trans image with using method: %s\n", rp.xtranssensor.method.c_str());
             }
         }
+        bool autoContrast = false;
+        double contrastThreshold = 0.f;
+        imgsrc->demosaic (rp, autoContrast, contrastThreshold); //enabled demosaic
 
-        imgsrc->demosaic(rp);   //enabled demosaic
         // if a demosaic happened we should also call g etimage later, so we need to set the M_INIT flag
 
 
@@ -1358,7 +1360,8 @@ void ImProcCoordinator::saveInputICCReference(const Glib::ustring& fname, bool a
     ppar.icm.input = "(none)";
     Imagefloat* im = new Imagefloat(fW, fH);
     imgsrc->preprocess(ppar.raw, ppar.lensProf, ppar.coarse);
-    imgsrc->demosaic(ppar.raw);
+    double dummy = 0.0;
+    imgsrc->demosaic (ppar.raw, false, dummy);
     ColorTemp currWB = ColorTemp(params.wb.temperature, params.wb.green, params.wb.equal, params.wb.method);
     bool autowb = false;
     autowb = (params.wb.method == "autold" || params.wb.method == "aut"  || params.wb.method == "autosdw" || params.wb.method == "autedgsdw" || params.wb.method == "autitc"  || params.wb.method == "autitc2"  || params.wb.method == "autitcgreen" || params.wb.method == "autedgrob" || params.wb.method == "autedg" || params.wb.method == "autorobust");
