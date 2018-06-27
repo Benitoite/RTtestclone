@@ -7724,6 +7724,11 @@ void RawImageSource::ItcWB(double &tempref, double &greenref, const LocWBParams 
 
         printf("sizcur30=%i siecu4=%i \n", sizcu3, sizcu4);
         sizcu4 = sizcu3;
+
+        if (sizcu4 > 40) {
+            sizcu4 = 40;
+        }
+
         chrom wbchro[sizcu4];
         double swpr  = (Txyz[repref].XX + Txyz[repref].ZZ + 1.);
         double xwpr = Txyz[repref].XX / swpr;//white point for tt in xy coordiantes
@@ -7747,10 +7752,10 @@ void RawImageSource::ItcWB(double &tempref, double &greenref, const LocWBParams 
             wbchro[nh].index = nh;
         }
 
-//       std::sort(wbchro, wbchro + sizcu4, wbchro[0]);
+        // std::sort(wbchro, wbchro + sizcu4, wbchro[0]);
 
         for (int nh = 0; nh < sizcu4; nh++) {
-            printf("nh=%i xy=%f chrox=%f chroy=%f\n", nh, wbchro[nh].chroxy, wbchro[nh].chrox, wbchro[nh].chroy);
+            //      printf("nh=%i xy=%f chrox=%f chroy=%f\n", nh, wbchro[nh].chroxy, wbchro[nh].chrox, wbchro[nh].chroy);
         }
 
         maxval = 26 ;//+ nearneutral / 2;// we can chnage this value..20...30.. 35 + nearneutral / 2;
@@ -7769,12 +7774,12 @@ void RawImageSource::ItcWB(double &tempref, double &greenref, const LocWBParams 
 
 
         for (int i = 0; i < sizcurr2ref; i++) {
-            if (((wbchro[sizcu4 - (i + 1)].chrox  > 0.1f) && (wbchro[sizcu4 - (i + 1)].chroy > 0.1f)) || wbchro[sizcu4 - (i + 1)].chroxy  > 0.0005f) { //suppress value too far from reference spectral
+            if (((wbchro[sizcu4 - (i + 1)].chrox  > 0.1f) && (wbchro[sizcu4 - (i + 1)].chroy > 0.1f)) && wbchro[sizcu4 - (i + 1)].chroxy  > 0.00005f) { //suppress value too far from reference spectral
                 w++;
                 xx_curref_reduc[w][repref] = wbchro[sizcu4 - (i + 1)].chrox;
                 yy_curref_reduc[w][repref] = wbchro[sizcu4 - (i + 1)].chroy;
                 YY_curref_reduc[w][repref] = wbchro[sizcu4 - (i + 1)].Y;
-                printf("xx_cu=%f yy_cu=%f Y=%f\n", xx_curref_reduc[w][repref], yy_curref_reduc[w][repref], YY_curref_reduc[w][repref]);
+                //     printf("xx_cu=%f yy_cu=%f Y=%f chro=%f\n", xx_curref_reduc[w][repref], yy_curref_reduc[w][repref], YY_curref_reduc[w][repref],sqrt(wbchro[sizcu4 - (i + 1)].chroxy));
             }
         }
 
@@ -7800,17 +7805,17 @@ void RawImageSource::ItcWB(double &tempref, double &greenref, const LocWBParams 
 
 //reconvert to RGB
         for (int i = 0; i < w; i++) {
-            float X = 65535.f * xx_curref_reduc[w][repref] * YY_curref_reduc[w][repref] / yy_curref_reduc[w][repref];
-            float Y = 65535.f * YY_curref_reduc[w][repref];
-            float Z = 65535.f * (1.f - xx_curref_reduc[w][repref]  - yy_curref_reduc[w][repref]) * YY_curref_reduc[w][repref] / yy_curref_reduc[w][repref];
+            float X = 65535.f * xx_curref_reduc[i][repref] * YY_curref_reduc[i][repref] / yy_curref_reduc[i][repref];
+            float Y = 65535.f * YY_curref_reduc[i][repref];
+            float Z = 65535.f * (1.f - xx_curref_reduc[i][repref]  - yy_curref_reduc[i][repref]) * YY_curref_reduc[i][repref] / yy_curref_reduc[i][repref];
             float r, g, b;
             Color::xyz2rgb(X, Y, Z, r, g, b, wip);
             r /= rmm[repref];
             g /= gmm[repref];
             b /= bmm[repref];
-            R_curref_reduc[w][repref] = r;
-            G_curref_reduc[w][repref] = g;
-            B_curref_reduc[w][repref] = b;
+            R_curref_reduc[i][repref] = r;
+            G_curref_reduc[i][repref] = g;
+            B_curref_reduc[i][repref] = b;
 
         }
 
@@ -7832,31 +7837,6 @@ void RawImageSource::ItcWB(double &tempref, double &greenref, const LocWBParams 
     ColorTemp::tempxy(separated, repref, Tx, Ty, Tz, Ta, Tb, TL, TX, TY, TZ, wbpar); //calculate chroma xy (xyY) for Z known colors on under 90 illuminants
 
     int kk = -1;
-
-    for (int tt = 0; tt < N_t; tt++) {
-        double swp  = (Txyz[tt].XX + Txyz[tt].ZZ + 1.);
-        double xwp = Txyz[tt].XX / swp;//white point for tt in xy coordiantes
-        double ywp = 1. / swp;
-
-        for (int j = 0; j < Nc ; j++) {
-            reffxxyy_prov[2 * j][tt] = Tx[j][tt] / (Tx[j][tt] + Ty[j][tt] +  Tz[j][tt]); // x from xyY
-            reffxxyy_prov[2 * j + 1][tt] =  Ty[j][tt] / (Tx[j][tt] + Ty[j][tt] +  Tz[j][tt]); // y from xyY
-            reffYY_prov[j][tt] = Ty[j][tt];//Y
-        }
-
-        kk = -1;
-
-        for (int i = 0; i < Nc ; i++) {
-            if (good_spectral[i] == 1) {
-                kk++;
-                //we calculate now absolute chroma for each spectral color
-                reffxxyy[2 * kk][tt]  = fabs(reffxxyy_prov[2 * i][tt] - xwp);
-                reffxxyy[2 * kk + 1][tt] = fabs(reffxxyy_prov[2 * i + 1][tt] - ywp);
-                reffYY[kk][tt] = reffYY_prov[i][tt];
-            }
-        }
-    }
-
     //calculate for this image the mean values for each family of color, near histogram x y (number)
     //xy vary from x 0..0.77  y 0..0.82
     //neutral values are near x=0.34 0.33 0.315 0.37 y =0.35 0.36 0.34
@@ -7877,8 +7857,9 @@ void RawImageSource::ItcWB(double &tempref, double &greenref, const LocWBParams 
     YYcurr_reduc(N_t, sizcurr);
 
 //calculate  x y z for each pixel with multiplier rmm gmm bmm
+    kk = -1;
 
-    for (int tt = 0; tt < N_t; tt++) {
+    for (int tt = 0; tt < N_t; tt++) {//N_t
         double swp  = (Txyz[tt].XX + Txyz[tt].ZZ + 1.);
         double xwp = Txyz[tt].XX / swp;
         double ywp = 1. / swp;
@@ -7889,17 +7870,42 @@ void RawImageSource::ItcWB(double &tempref, double &greenref, const LocWBParams 
             float x_c = 0.f, y_c = 0.f, Y_c = 0.f;
             float x_x = 0.f, y_y = 0.f, z_z = 0.f;
 
-            float RR =  rmm[tt] * R_curref_reduc[w][repref];
-            float GG =  gmm[tt] * G_curref_reduc[w][repref];
-            float BB =  bmm[tt] * B_curref_reduc[w][repref];
+            float RR =  rmm[tt] * R_curref_reduc[i][repref];
+            float GG =  gmm[tt] * G_curref_reduc[i][repref];
+            float BB =  bmm[tt] * B_curref_reduc[i][repref];
             Color::rgbxyY(RR, GG, BB, x_c, y_c, Y_c, x_x, y_y, z_z, wp);
-            //xx_curref_reduc[w][repref] = x_c;
-            //yy_curref_reduc[w][repref] = y_c;
-            //   YYcurref_reduc[w][repref] = Y_c;
-            xxyycurr_reduc[2 * w][tt] = x_c;
-            xxyycurr_reduc[2 * w + 1][tt] = y_c;
+            //   xxyycurr_reduc[2 * i][tt] = fabs(x_c - xwp);
+            //   xxyycurr_reduc[2 * i + 1][tt] = fabs(y_c - ywp);
+            xxyycurr_reduc[2 * i][tt] = fabs(x_c);
+            xxyycurr_reduc[2 * i + 1][tt] = fabs(y_c);
+            //        printf("w=%i tt=%i xx=%f yy=%f\n",i, tt, xxyycurr_reduc[2 * i][tt], xxyycurr_reduc[2 * i +1][tt]);
 
         }
+
+        for (int j = 0; j < Nc ; j++) {
+            reffxxyy_prov[2 * j][tt] = Tx[j][tt] / (Tx[j][tt] + Ty[j][tt] +  Tz[j][tt]); // x from xyY
+            reffxxyy_prov[2 * j + 1][tt] =  Ty[j][tt] / (Tx[j][tt] + Ty[j][tt] +  Tz[j][tt]); // y from xyY
+            reffYY_prov[j][tt] = Ty[j][tt];//Y
+            //   printf("w=%i tt=%i xx=%f yy=%f\n",j, tt,reffxxyy_prov[2 * kk][tt] ,reffxxyy_prov[2 * kk + 1][tt]);
+
+        }
+
+        kk = -1;
+
+        for (int i = 0; i < Nc ; i++) {
+            if (good_spectral[i] == 1) {
+                kk++;
+                //we calculate now absolute chroma for each spectral color
+                //         reffxxyy[2 * kk][tt]  = fabs(reffxxyy_prov[2 * i][tt] - xwp);
+                //         reffxxyy[2 * kk + 1][tt] = fabs(reffxxyy_prov[2 * i + 1][tt] - ywp);
+                reffxxyy[2 * kk][tt]  = fabs(reffxxyy_prov[2 * i][tt]);
+                reffxxyy[2 * kk + 1][tt] = fabs(reffxxyy_prov[2 * i + 1][tt]);
+                // printf("w=%i tt=%i xx=%f yy=%f\n",i, tt,reffxxyy[2 * kk][tt] ,reffxxyy[2 * kk + 1][tt]);
+
+                reffYY[kk][tt] = reffYY_prov[i][tt];
+            }
+        }
+
 
         /*
                 float nnx, nny, nnz;
@@ -7931,7 +7937,7 @@ void RawImageSource::ItcWB(double &tempref, double &greenref, const LocWBParams 
 
 
         studentXY(xxyycurr_reduc, reffxxyy, 2 * w, 2 * kk, tt, student); //for xy
-        printf("tt=%i  st=%f\n", tt,  student);
+        //  printf("tt=%i  st=%f\n", tt,  student);
         //    if(signbit(student)) {goodref = tt;break;}//printf("stud=%f\n", student);
         float abstud = fabs(student);
 
