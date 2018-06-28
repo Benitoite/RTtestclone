@@ -7462,7 +7462,7 @@ void RawImageSource::ItcWB(double &tempref, double &greenref, const LocWBParams 
     double *TZ = nullptr;
     int *good_spectral = nullptr;
 
-    int Nc = 77;//67;//61 number of reference spectral colors
+    int Nc = 81;//67;//61 number of reference spectral colors
     Tx = new float*[Nc];
 
     for (int i = 0; i < Nc; i++) {

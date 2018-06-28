@@ -203,6 +203,10 @@ public:
     static const double ColorGreennuotisammal_spect[97];
     static const double ColorGreenleskenlehti_spect[97];
     static const double ColorGreenlinnunkaali_spect[97];
+    static const double ColorGreenpelto_spect[97];
+    static const double ColorGreenrodvoikukka[97];
+    static const double ColorGreenlehmus[97];
+    static const double ColorGreenlinden[97];
     static const double Colorblue_spect[97];
 
     static const double JDC468_OraO18_spect[97]; //468 O18
