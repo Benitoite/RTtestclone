@@ -2504,9 +2504,9 @@ void RawImageSource::demosaic(const RAWParams &raw, bool autoContrast, double &c
                    || raw.bayersensor.method == RAWParams::BayerSensor::getMethodString(RAWParams::BayerSensor::Method::RCDVNG4)) {
             if (!autoContrast) {
                 double threshold = raw.bayersensor.dualDemosaicContrast;
-                dual_demosaic_RT (true, raw, W, H, rawData, red, green, blue, threshold, false);
+                dual_demosaic_RT(true, raw, W, H, rawData, red, green, blue, threshold, false);
             } else {
-                dual_demosaic_RT (true, raw, W, H, rawData, red, green, blue, contrastThreshold, true, 0, 0);
+                dual_demosaic_RT(true, raw, W, H, rawData, red, green, blue, contrastThreshold, true, 0, 0);
             }
         } else if (raw.bayersensor.method == RAWParams::BayerSensor::getMethodString(RAWParams::BayerSensor::Method::PIXELSHIFT)) {
             pixelshift(0, 0, W, H, raw, currFrame, ri->get_maker(), ri->get_model(), raw.expos);
@@ -2537,9 +2537,9 @@ void RawImageSource::demosaic(const RAWParams &raw, bool autoContrast, double &c
         } else if (raw.xtranssensor.method == RAWParams::XTransSensor::getMethodString(RAWParams::XTransSensor::Method::FOUR_PASS) || raw.xtranssensor.method == RAWParams::XTransSensor::getMethodString(RAWParams::XTransSensor::Method::TWO_PASS)) {
             if (!autoContrast) {
                 double threshold = raw.xtranssensor.dualDemosaicContrast;
-                dual_demosaic_RT (false, raw, W, H, rawData, red, green, blue, threshold, false);
+                dual_demosaic_RT(false, raw, W, H, rawData, red, green, blue, threshold, false);
             } else {
-                dual_demosaic_RT (false, raw, W, H, rawData, red, green, blue, contrastThreshold, true, 0, 0);
+                dual_demosaic_RT(false, raw, W, H, rawData, red, green, blue, contrastThreshold, true, 0, 0);
             }
         } else if (raw.xtranssensor.method == RAWParams::XTransSensor::getMethodString(RAWParams::XTransSensor::Method::MONO)) {
             nodemosaic(true);
@@ -7462,7 +7462,7 @@ void RawImageSource::ItcWB(double &tempref, double &greenref, const LocWBParams 
     double *TZ = nullptr;
     int *good_spectral = nullptr;
 
-    int Nc = 61;//61 number of reference spectral colors
+    int Nc = 77;//67;//61 number of reference spectral colors
     Tx = new float*[Nc];
 
     for (int i = 0; i < Nc; i++) {
@@ -7619,13 +7619,13 @@ void RawImageSource::ItcWB(double &tempref, double &greenref, const LocWBParams 
     //here we select the good spectral color inside the 61 values
     if (separated) {
         ColorTemp::tempxy(separated, repref, Tx, Ty, Tz, Ta, Tb, TL, TX, TY, TZ, wbpar); //calculate chroma xy (xyY) for Z known colors on under 90 illuminants
-        reffxxyy(130, 130);
-        reffxxyy_prov(130, 130);
-        reff_yy(130, 130);
-        reff_xx(130, 130);
+        reffxxyy(200, 200);
+        reffxxyy_prov(200, 200);
+        reff_yy(200, 200);
+        reff_xx(200, 200);
 
-        reffYY(130, 130);
-        reffYY_prov(130, 130);
+        reffYY(200, 200);
+        reffYY_prov(200, 200);
 
         //find the good spectral values
         //calculate xy reference spectral for tempref

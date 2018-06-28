@@ -187,6 +187,22 @@ public:
     static const double ColorGreenalsi_spect[97];
     static const double ColorRedpetunia_spect[97];
     static const double ColorRedkurttu_spect[97];
+    static const double ColorRedlupiini_spect[97];
+    static const double ColorRedhevosminttu_spect[97];
+    static const double ColorRedneilikka_spect[97];
+    static const double ColorRedpelagornia_spect[97];
+    static const double ColorRedtalvio_spect[97];
+    static const double ColorBrownpoimulehti_spect[97];
+    static const double ColorOrangetuntematon_spect[97];
+    static const double ColorOrangetlehmus_spect[97];
+    static const double ColorOrangvaahtera_spect[97];
+    static const double ColorBrownlehmus_spect[97];
+    static const double ColorBrownuotiosammal_spect[97];
+    static const double ColorBlacksoil_spect[97];
+    static const double ColorGraynahjajaekaelae_spect[97];
+    static const double ColorGreennuotisammal_spect[97];
+    static const double ColorGreenleskenlehti_spect[97];
+    static const double ColorGreenlinnunkaali_spect[97];
     static const double Colorblue_spect[97];
 
     static const double JDC468_OraO18_spect[97]; //468 O18
