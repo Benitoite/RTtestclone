@@ -7367,7 +7367,7 @@ void RawImageSource::ItcWB(double &tempref, double &greenref, const LocWBParams 
         double ZZ;
     } WbTxyz;
     //we can change step to increase precision if need  - also in Colortemp.cc with same changes
-    WbTxyz Txyz[91] = {//temperature Xwb Zwb 90 values  x wb and y wb are calculated after
+    WbTxyz Txyz[98] = {//temperature Xwb Zwb 97 values  x wb and y wb are calculated after
         {2001., 1.273842, 0.145295},
         {2101., 1.244008, 0.167533},
         {2201., 1.217338, 0.190697},
@@ -7439,9 +7439,12 @@ void RawImageSource::ItcWB(double &tempref, double &greenref, const LocWBParams 
         {6352., 0.950674, 1.065027},
         {6402., 0.950143, 1.074055},
         {6452., 0.950345, 1.080484},
-        {6502., 0.949817, 1.089390},
+        {6502., 0.950201, 1.088097},
+        {6552., 0.950070, 1.095633},
         {6602., 0.949952, 1.103094},
-        {6702., 0.949330, 1.119138},
+        {6652., 0.949846, 1.110479},
+        {6702., 0.949752, 1.119138},
+        {6752., 0.949668, 1.125027},
         {6802., 0.949596, 1.132190},
         {6902., 0.949033, 1.147691},
         {7002., 0.949402, 1.160129},
@@ -7451,9 +7454,13 @@ void RawImageSource::ItcWB(double &tempref, double &greenref, const LocWBParams 
         {7601., 0.949099, 1.239061},
         {7751., 0.949729, 1.255559},
         {7901., 0.949498, 1.274460},
+        {8151., 0.950361, 1.300912},
         {8301., 0.950253, 1.318464},
+        {8451., 0.950966, 1.332651},
         {8601., 0.950941, 1.349261},
+        {8801., 0.951772, 1.367421},
         {9001., 0.951969, 1.387639},
+        {9201., 0.952784, 1.404422},
         {9401., 0.953081, 1.423213},
         {9901., 0.954537, 1.464134},
         {10501., 0.956321, 1.508623},
@@ -7697,6 +7704,7 @@ void RawImageSource::ItcWB(double &tempref, double &greenref, const LocWBParams 
         int n4 = 0;
         int n15 = 0;
         int n30 = 0;
+        int n100 = 0;
         int ntr = 0;
         int nearneutral = 0;
 
@@ -7726,6 +7734,8 @@ void RawImageSource::ItcWB(double &tempref, double &greenref, const LocWBParams 
             if (Wbhis[nh].histnum < 30) {
                 n30++;    //keep only existing color but avoid to small
             }
+
+
         }
 
 
@@ -7744,11 +7754,11 @@ void RawImageSource::ItcWB(double &tempref, double &greenref, const LocWBParams 
         }
 
         int sizcurr2ref = sizcurrref - ntr;
-        int sizcu3 = sizcurrref - n30;
+        int sizcu30 = sizcurrref - n30;
         int sizcu4 = sizcurrref - n4;
 
-        printf("sizcur30=%i siecu4=%i \n", sizcu3, sizcu4);
-        sizcu4 = sizcu3;
+        printf("sizcurr2ref=%i sizcur_30=%i siecur_4=%i \n",sizcurr2ref, sizcu30, sizcu4);
+        sizcu4 = sizcu30;//arbitrary mini size if 30 result, ==> in full image 3000 pixels
 
         if (sizcu4 > 40) {
             sizcu4 = 40;
@@ -7789,6 +7799,14 @@ void RawImageSource::ItcWB(double &tempref, double &greenref, const LocWBParams 
                 }
         */
         maxval = settings->itcwb_thres;//max values of color to find correllation
+
+        if (maxval < 10) {
+            maxval = 10;
+        }
+
+        if (maxval > 40) {
+            maxval = 40;
+        }
 
         if (sizcurr2ref > maxval) {
             sizcurr2ref = maxval;    //keep about the biggest values,
