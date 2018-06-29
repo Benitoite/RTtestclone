@@ -287,7 +287,7 @@ WhiteBalance::WhiteBalance() : FoldableToolPanel(this, "whitebalance", M("TP_WBA
     catbox->pack_start(*labcat, Gtk::PACK_SHRINK, 4);
     catbox->pack_start(*wbcat02Method);
 
-    pack_start(*catbox);
+    //pack_start(*catbox);
 
 
     Gtk::HBox* spotbox = Gtk::manage(new Gtk::HBox());

@@ -7272,16 +7272,16 @@ void static studentXY(array2D<float> & YYcurr, array2D<float> & reffYY,  int siz
 void RawImageSource::ItcWB(double &tempref, double &greenref, const LocWBParams &localr, double &tempitc, double &greenitc, array2D<float> &redloc, array2D<float> &greenloc, array2D<float> &blueloc, int bfw, int bfh, double &avg_rm, double &avg_gm, double &avg_bm, const ColorManagementParams &cmp, const RAWParams &raw, const WBParams & wbpar)
 {
     //copyright Jacques Desmis 3 - 2018 jdesmis@gmail.com
-    // this algorithm try to find temperature correlation between about 60 spectral color and about 40 color found in the image
+    // this algorithm try to find temperature correlation between about 98 spectral color and about 20 to 40 color found in the image
     //I have create a table temperature with temp and white point with 91 values between 2000K and 12000K we can obviously  change these values, more...with different steps
-    //I have create 54 (61) spectral colors from Colorchecker24, others color and my 468 colors target
-    //first we create datas for each temp, we get xyz and there conversion with cat02
+    //I have create or recuparate and trnasformed 98 spectral colors from Colorchecker24, others color and my 468 colors target, or from web flowers, etc.
+    //first we create datas for each temp, we get xyz
     //in first step we must found the spectral datas which are "near" of rgb datas - I choice as default temperature = camera.
-    //with this value , I make a corresponadnce between histograù dats for this temp and spectral datas , I used deltaE for xy values
+    //with this value , I make a corresponadnce between histogram datas for this temp and spectral datas , I used deltaE for xy values
     //the we begin the main program
     //I make an "histogram" (the term is not good) for an image with in output xyz values and input xy (range 0..1)
     //then we sort this histogram and keep the qq max values (if they exists)
-    //the we put in 2 arrays x and y for 61 references, and x and y for qq color to correlate and we substract white points for each temp
+    //the we put in 2 arrays x and y for 89 references, and x and y for qq color to correlate
     //the we calculate Fisher Student correlation between the 2 populations
     //I don't use test of Snedecor!
     //some variables or function are not used, keep in case of
@@ -7462,7 +7462,7 @@ void RawImageSource::ItcWB(double &tempref, double &greenref, const LocWBParams 
     double *TZ = nullptr;
     int *good_spectral = nullptr;
 
-    int Nc = 89;//67;//61 number of reference spectral colors
+    int Nc = 98;//89 number of reference spectral colors
     Tx = new float*[Nc];
 
     for (int i = 0; i < Nc; i++) {
@@ -7653,6 +7653,14 @@ void RawImageSource::ItcWB(double &tempref, double &greenref, const LocWBParams 
         }
 
         //histogram xy
+        //calculate for this image the mean values for each family of color, near histogram x y (number)
+        //xy vary from x 0..0.77  y 0..0.82
+        //neutral values are near x=0.34 0.33 0.315 0.37 y =0.35 0.36 0.34
+        //skin are about x 0.45  0.49 y 0.4 0.47
+        //blue sky x=0.25 y=0.28  and x=0.29 y=0.32
+        // step about 0.02   x 0.32 0.34  y= 0.34 0.36 skin    --  sky x 0.24 0.30 y 0.28 0.32
+        //big step about 0.2
+
         histoxyY(bfhitc, bfwitc, xc, yc, Yc, xxx,  yyy, YYY, histxy, area, inter);
         //calculate x y Y
         int sizcurrref = siza;//choice of number of correlate colors in image
@@ -7761,13 +7769,17 @@ void RawImageSource::ItcWB(double &tempref, double &greenref, const LocWBParams 
             wbchro[nh].index = nh;
         }
 
-        // std::sort(wbchro, wbchro + sizcu4, wbchro[0]);
+        /*
+         if(wbpar.wbcat02Method == "cam"){
 
+            std::sort(wbchro, wbchro + sizcu4, wbchro[0]);
+         }
+         */
         for (int nh = 0; nh < sizcu4; nh++) {
             //      printf("nh=%i xy=%f chrox=%f chroy=%f\n", nh, wbchro[nh].chroxy, wbchro[nh].chrox, wbchro[nh].chroy);
         }
 
-        maxval = 26 ;//+ nearneutral / 2;// we can chnage this value..20...30.. 35 + nearneutral / 2;
+        maxval = 20 ;//+ nearneutral / 2;// we can chnage this value..20...30.. 35 + nearneutral / 2;
 
         if (sizcurr2ref > maxval) {
             sizcurr2ref = maxval;    //keep about the 40 biggest values,
@@ -7846,13 +7858,6 @@ void RawImageSource::ItcWB(double &tempref, double &greenref, const LocWBParams 
     ColorTemp::tempxy(separated, repref, Tx, Ty, Tz, Ta, Tb, TL, TX, TY, TZ, wbpar); //calculate chroma xy (xyY) for Z known colors on under 90 illuminants
 
     int kk = -1;
-    //calculate for this image the mean values for each family of color, near histogram x y (number)
-    //xy vary from x 0..0.77  y 0..0.82
-    //neutral values are near x=0.34 0.33 0.315 0.37 y =0.35 0.36 0.34
-    //skin are about x 0.45  0.49 y 0.4 0.47
-    //blue sky x=0.25 y=0.28  and x=0.29 y=0.32
-    // step about 0.02   x 0.32 0.34  y= 0.34 0.36 skin    --  sky x 0.24 0.30 y 0.28 0.32
-    //big step about 0.2
 
     //calculate x y Y
     int sizcurr = siza;//choice of number of correlate colors in image
@@ -7883,10 +7888,14 @@ void RawImageSource::ItcWB(double &tempref, double &greenref, const LocWBParams 
             float GG =  gmm[tt] * G_curref_reduc[i][repref];
             float BB =  bmm[tt] * B_curref_reduc[i][repref];
             Color::rgbxyY(RR, GG, BB, x_c, y_c, Y_c, x_x, y_y, z_z, wp);
-            //   xxyycurr_reduc[2 * i][tt] = fabs(x_c - xwp);
-            //   xxyycurr_reduc[2 * i + 1][tt] = fabs(y_c - ywp);
-            xxyycurr_reduc[2 * i][tt] = fabs(x_c);
-            xxyycurr_reduc[2 * i + 1][tt] = fabs(y_c);
+            //     if(wbpar.wbcat02Method == "cam"){
+            //        xxyycurr_reduc[2 * i][tt] = fabs(x_c - xwp);
+            //        xxyycurr_reduc[2 * i + 1][tt] = fabs(y_c - ywp);
+            //     }
+            //    else {
+            xxyycurr_reduc[2 * i][tt] = x_c;
+            xxyycurr_reduc[2 * i + 1][tt] = y_c;
+            //     }
             //        printf("w=%i tt=%i xx=%f yy=%f\n",i, tt, xxyycurr_reduc[2 * i][tt], xxyycurr_reduc[2 * i +1][tt]);
 
         }
@@ -7905,12 +7914,14 @@ void RawImageSource::ItcWB(double &tempref, double &greenref, const LocWBParams 
             if (good_spectral[i] == 1) {
                 kk++;
                 //we calculate now absolute chroma for each spectral color
-                //         reffxxyy[2 * kk][tt]  = fabs(reffxxyy_prov[2 * i][tt] - xwp);
-                //         reffxxyy[2 * kk + 1][tt] = fabs(reffxxyy_prov[2 * i + 1][tt] - ywp);
-                reffxxyy[2 * kk][tt]  = fabs(reffxxyy_prov[2 * i][tt]);
-                reffxxyy[2 * kk + 1][tt] = fabs(reffxxyy_prov[2 * i + 1][tt]);
+                //          if(wbpar.wbcat02Method == "cam"){
+                //                  reffxxyy[2 * kk][tt]  = fabs(reffxxyy_prov[2 * i][tt] - xwp);
+                //                  reffxxyy[2 * kk + 1][tt] = fabs(reffxxyy_prov[2 * i + 1][tt] - ywp);
+                //     } else {
+                reffxxyy[2 * kk][tt]  = reffxxyy_prov[2 * i][tt];
+                reffxxyy[2 * kk + 1][tt] = reffxxyy_prov[2 * i + 1][tt];
                 // printf("w=%i tt=%i xx=%f yy=%f\n",i, tt,reffxxyy[2 * kk][tt] ,reffxxyy[2 * kk + 1][tt]);
-
+                //    }
                 reffYY[kk][tt] = reffYY_prov[i][tt];
             }
         }

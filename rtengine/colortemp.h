@@ -215,6 +215,18 @@ public:
     static const double ColorBluekurkkuyrtti[97];
     static const double ColorPinksiankaersaemoe[97];
     static const double ColorVioletharakankello[97];
+    static const double ColorVioletalsikeapila[97];
+    static const double ColorVioletakilleija[97];
+    static const double ColorOrangekehaekukka[97];
+    static const double ColorRedpihlaja[97];
+    static const double ColorVioletpetunia[97];
+    static const double ColorVioletorvokki[97];
+    static const double ColorBluesinisievikki[97];
+    static const double ColorBlueiisoppi[97];
+    static const double ColorBluelobelia[97];
+
+
+
     static const double Colorblue_spect[97];
 
     static const double JDC468_OraO18_spect[97]; //468 O18
