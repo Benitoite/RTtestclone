@@ -7272,7 +7272,7 @@ void static studentXY(array2D<float> & YYcurr, array2D<float> & reffYY,  int siz
 void RawImageSource::ItcWB(double &tempref, double &greenref, const LocWBParams &localr, double &tempitc, double &greenitc, array2D<float> &redloc, array2D<float> &greenloc, array2D<float> &blueloc, int bfw, int bfh, double &avg_rm, double &avg_gm, double &avg_bm, const ColorManagementParams &cmp, const RAWParams &raw, const WBParams & wbpar)
 {
     /*
-    copyright Jacques Desmis 3 - 2018 jdesmis@gmail.com
+    copyright Jacques Desmis 6 - 2018 jdesmis@gmail.com
 
     This algorithm try to find temperature correlation between 20 to 40 color between 98 spectral color and about 20 to 40 color found in the image, I just found the idea in the web "correlate with chroma" instead of RGB grey point,but I don't use any algo found on the web.
 
@@ -7290,7 +7290,7 @@ void RawImageSource::ItcWB(double &tempref, double &greenref, const LocWBParams 
     6) I sort this result in ascending order
     7) in option we can sort in another maner to take into account chroma : chromax = x - white point x, chromay = y - white point y
     8) then I compare this result, with spectral datas found above in 3) with deltaE (limited to chroma)
-    9) at this point we have xyY values thats match Camera temp, and spectral datas associated
+    9) at this point we have xyY values that match Camera temp, and spectral datas associated
     10) then I recalculate RGB values from xyY histogram
     11) after, I vary temp, between 2000K to 12000K
     12) RGB values are recalcualted from 10) with RGB multipliers, and then xyY are calcualted for each temp
@@ -7836,7 +7836,8 @@ void RawImageSource::ItcWB(double &tempref, double &greenref, const LocWBParams 
 
 
         for (int i = 0; i < sizcurr2ref; i++) {
-            if (((wbchro[sizcu4 - (i + 1)].chrox  > 0.1f) && (wbchro[sizcu4 - (i + 1)].chroy > 0.1f)) && wbchro[sizcu4 - (i + 1)].chroxy  > 0.00005f) { //suppress value too far from reference spectral
+            //is condition chroxy necessary ?
+            if (((wbchro[sizcu4 - (i + 1)].chrox  > 0.1f) && (wbchro[sizcu4 - (i + 1)].chroy > 0.1f)) && wbchro[sizcu4 - (i + 1)].chroxy  > 0.005f) { //suppress value too far from reference spectral
                 w++;
                 xx_curref_reduc[w][repref] = wbchro[sizcu4 - (i + 1)].chrox;
                 yy_curref_reduc[w][repref] = wbchro[sizcu4 - (i + 1)].chroy;
