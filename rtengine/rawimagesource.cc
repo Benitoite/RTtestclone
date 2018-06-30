@@ -7367,31 +7367,44 @@ void RawImageSource::ItcWB(double &tempref, double &greenref, const LocWBParams 
         double ZZ;
     } WbTxyz;
     //we can change step to increase precision if need  - also in Colortemp.cc with same changes
-    WbTxyz Txyz[98] = {//temperature Xwb Zwb 97 values  x wb and y wb are calculated after
+
+    WbTxyz Txyz[110] = {//temperature Xwb Zwb 110 values  x wb and y wb are calculated after
         {2001., 1.273842, 0.145295},
         {2101., 1.244008, 0.167533},
         {2201., 1.217338, 0.190697},
         {2301., 1.193444, 0.214632},
         {2401., 1.171996, 0.239195},
         {2501., 1.152883, 0.264539},
-        {2605., 1.134846, 0.291032},
+        {2605., 1.134667, 0.290722},
+        {2655., 1.126659, 0.303556},
         {2705., 1.119049, 0.316446},
+        {2755., 1.111814, 0.329381},
         {2803., 1.105381, 0.342193},
         {2856., 1.098258, 0.355599},
         {2910., 1.091550, 0.369645},
+        {2960., 1.085649, 0.382655},
         {3003., 1.080982, 0.394258},
+        {3050., 1.075727, 0.406057},
         {3103., 1.070277, 0.419815},
+        {3153., 1.065384, 0.432769},
         {3203., 1.060906, 0.446161},
+        {3250., 1.056535, 0.457806},
         {3303., 1.052034, 0.471422},
+        {3353., 1.047990, 0.484218},
         {3400., 1.044547, 0.496719},
+        {3450., 1.040667, 0.508891},
         {3500., 1.037145, 0.521523},
+        {3550., 1.033783, 0.534090},
         {3600., 1.030574, 0.546590},
+        {3650., 1.027510, 0.559020},
         {3699., 1.024834, 0.571722},
         {3801., 1.019072, 0.596102},
+        {3851., 1.016527, 0.608221},
         {3902., 1.014244, 0.621136},
+        {3952., 1.011729, 0.632447},
         {4002., 0.996153, 0.609518},
         {4052., 0.993720, 0.620805},
-        {4102., 0.993908, 0.63152},
+        {4102., 0.993908, 0.631520},
         {4152., 0.989179, 0.643262},
         {4202., 0.989283, 0.653999},
         {4252., 0.985039, 0.665536},
@@ -7466,7 +7479,6 @@ void RawImageSource::ItcWB(double &tempref, double &greenref, const LocWBParams 
         {10501., 0.956321, 1.508623},
         {11001., 0.957747, 1.541281},
         {12001., 0.960440, 1.601019}
-
     };
     int N_t = sizeof(Txyz) / sizeof(Txyz[0]);   //number of temperature White point
 
@@ -7696,17 +7708,17 @@ void RawImageSource::ItcWB(double &tempref, double &greenref, const LocWBParams 
         G_curref_reduc(N_t, sizcurrref);
         B_curref_reduc(N_t, sizcurrref);
 
-        float minstudref = 100000.f;
-        int goodrefref = 1;
+        //      float minstudref = 100000.f;
+        //      int goodrefref = 1;
 
         hiss Wbhis [siza];
         int n1 = 0;
         int n4 = 0;
         int n15 = 0;
         int n30 = 0;
-        int n100 = 0;
+//       int n100 = 0;
         int ntr = 0;
-        int nearneutral = 0;
+//       int nearneutral = 0;
 
         for (int nh = 0; nh < siza; nh++) {
             Wbhis[nh].histnum =  histxy[nh];
@@ -7757,7 +7769,7 @@ void RawImageSource::ItcWB(double &tempref, double &greenref, const LocWBParams 
         int sizcu30 = sizcurrref - n30;
         int sizcu4 = sizcurrref - n4;
 
-        printf("sizcurr2ref=%i sizcur_30=%i siecur_4=%i \n",sizcurr2ref, sizcu30, sizcu4);
+        printf("sizcurr2ref=%i sizcur_30=%i siecur_4=%i \n", sizcurr2ref, sizcu30, sizcu4);
         sizcu4 = sizcu30;//arbitrary mini size if 30 result, ==> in full image 3000 pixels
 
         if (sizcu4 > 40) {
@@ -7813,12 +7825,13 @@ void RawImageSource::ItcWB(double &tempref, double &greenref, const LocWBParams 
         }
 
         //we can perhaps improve with area, etc.
+        /*
         int countneutral = 0;
         int countn = 0;
         int countmm = 0;
         int maxk = 0;
         int sizcurr3ref = sizcurr2ref;
-
+        */
 
         for (int i = 0; i < sizcurr2ref; i++) {
             if (((wbchro[sizcu4 - (i + 1)].chrox  > 0.1f) && (wbchro[sizcu4 - (i + 1)].chroy > 0.1f)) && wbchro[sizcu4 - (i + 1)].chroxy  > 0.00005f) { //suppress value too far from reference spectral
@@ -7906,7 +7919,7 @@ void RawImageSource::ItcWB(double &tempref, double &greenref, const LocWBParams 
 
 
         for (int i = 0; i < w; i++) {
-            float xx, yy, zz;
+            //  float xx, yy, zz;
             float x_c = 0.f, y_c = 0.f, Y_c = 0.f;
             float x_x = 0.f, y_y = 0.f, z_z = 0.f;
 
@@ -7914,14 +7927,10 @@ void RawImageSource::ItcWB(double &tempref, double &greenref, const LocWBParams 
             float GG =  gmm[tt] * G_curref_reduc[i][repref];
             float BB =  bmm[tt] * B_curref_reduc[i][repref];
             Color::rgbxyY(RR, GG, BB, x_c, y_c, Y_c, x_x, y_y, z_z, wp);
-            //     if(wbpar.wbcat02Method == "cam"){
             //        xxyycurr_reduc[2 * i][tt] = fabs(x_c - xwp);
             //        xxyycurr_reduc[2 * i + 1][tt] = fabs(y_c - ywp);
-            //     }
-            //    else {
             xxyycurr_reduc[2 * i][tt] = x_c;
             xxyycurr_reduc[2 * i + 1][tt] = y_c;
-            //     }
             //        printf("w=%i tt=%i xx=%f yy=%f\n",i, tt, xxyycurr_reduc[2 * i][tt], xxyycurr_reduc[2 * i +1][tt]);
 
         }
@@ -7940,14 +7949,11 @@ void RawImageSource::ItcWB(double &tempref, double &greenref, const LocWBParams 
             if (good_spectral[i] == 1) {
                 kk++;
                 //we calculate now absolute chroma for each spectral color
-                //          if(wbpar.wbcat02Method == "cam"){
                 //                  reffxxyy[2 * kk][tt]  = fabs(reffxxyy_prov[2 * i][tt] - xwp);
                 //                  reffxxyy[2 * kk + 1][tt] = fabs(reffxxyy_prov[2 * i + 1][tt] - ywp);
-                //     } else {
                 reffxxyy[2 * kk][tt]  = reffxxyy_prov[2 * i][tt];
                 reffxxyy[2 * kk + 1][tt] = reffxxyy_prov[2 * i + 1][tt];
                 // printf("w=%i tt=%i xx=%f yy=%f\n",i, tt,reffxxyy[2 * kk][tt] ,reffxxyy[2 * kk + 1][tt]);
-                //    }
                 reffYY[kk][tt] = reffYY_prov[i][tt];
             }
         }
