@@ -2366,7 +2366,7 @@ void ColorTemp::cat02_to_xyzfloatraw(float & x, float & y, float & z, float r, f
 //tempxy : return x and y of xyY for 40 or more refreence color, and for T temperature from 2000K to 12000K
 // we can change step for temperature and increase number  for T > 7500K if necessary
 //these values Temp, x, y are refernces for all calculations and very precise.
-//copyright J.Desmis august  2017 june 2018
+//copyright J.Desmis august  2017 and june 2018
 void ColorTemp::tempxy(bool separated, int &repref, float **Tx, float **Ty, float **Tz, float **Ta, float **Tb, float **TL, double *TX, double *TY, double *TZ, const procparams::WBParams & wbpar)
 {
     const double* spec_colorforxcyc[] = {//color references
@@ -2402,7 +2402,7 @@ void ColorTemp::tempxy(bool separated, int &repref, float **Tx, float **Ty, floa
         double XX;
         double ZZ;
     } WbTxyz;
-
+    //probbaly can be "passed" with rawimagesource.cc but I don't know how to do.
     WbTxyz Txyz[110] = {//temperature Xwb Zwb 110 values  x wb and y wb are calculated after
         {2001., 1.273842, 0.145295},
         {2101., 1.244008, 0.167533},
@@ -2515,6 +2515,7 @@ void ColorTemp::tempxy(bool separated, int &repref, float **Tx, float **Ty, floa
         {11001., 0.957747, 1.541281},
         {12001., 0.960440, 1.601019}
     };
+
     int N_c = sizeof(spec_colorforxcyc) / sizeof(spec_colorforxcyc[0]);   //number of color
     int N_t = sizeof(Txyz) / sizeof(Txyz[0]);   //number of temperature White point
     typedef struct XYZref {

@@ -7271,40 +7271,49 @@ void static studentXY(array2D<float> & YYcurr, array2D<float> & reffYY,  int siz
 
 void RawImageSource::ItcWB(double &tempref, double &greenref, const LocWBParams &localr, double &tempitc, double &greenitc, array2D<float> &redloc, array2D<float> &greenloc, array2D<float> &blueloc, int bfw, int bfh, double &avg_rm, double &avg_gm, double &avg_bm, const ColorManagementParams &cmp, const RAWParams &raw, const WBParams & wbpar)
 {
-    //copyright Jacques Desmis 3 - 2018 jdesmis@gmail.com
-    //update june 2018
-    // this algorithm try to find temperature correlation between about 98 spectral color and about 20 to 40 color found in the image, I just found the idea in the web "correlate with chroma" instead of RGB grey point
-    //I have test many many algo to find the first one that work :)
-    //probably there are improvment to do...
-    //I have create a table temperature with temp and white point with 91 values between 2000K and 12000K we can obviously  change these values, more...with different steps
-    //I have create or recuparate and transformed 98 spectral colors from Colorchecker24, others color and my 468 colors target, or from web flowers, etc.
-    //first we create datas for each temp, we get xyz
-    //also for this file we create a table for each temp of RGB multipliers
-    //in first step we must found the spectral datas which are "near" of rgb datas - I choice as default temperature = camera.
-    //with this value , I make a corresponadnce between histogram datas for this temp and spectral datas , I used "deltaE" for xy values
-    //I make an "histogram" (the term is not good) for an image with in output xyz values and input xy (range 0..1)
-    //then we sort this histogram and keep the qq max values (if they exists)
-    //the we put in 2 arrays x and y for 98 references, and x and y for qq color to correlate
-    //we have found the "good" RGB and xy values and also the same number of REF color.
-    //after we can retrieve RGB initial "equivalent" values, they chnage with temp and RGB multipier
-    //in the same way, xy REF chnages with temp and spectral matricial calculation
-    //the we calculate Fisher Student correlation between the 2 populations
-    //I don't use test of Snedecor!
-    //some variables or function are not used, keep in case of
-    //this operation is done (actually) 91 times and compare Student coefficient, and keep the absolute  minimum
-    //we can probably optimize....
-    //but actually the goal is to find the good algorithm !
-    // the we have found the best temperature where color image and colr ref are correlate
-    //after we pass this value to improccoordinator
+    /*
+    copyright Jacques Desmis 3 - 2018 jdesmis@gmail.com
 
-    //I think, this algo is very good :)
-    //you can used it in images :flowers, landscape, skin, where illuminants are "normal" (daylight, blackbody)
-    // you must avoid when illuminant is non standard and also, when the subject is lost in the image (some target to generate profils).
+    This algorithm try to find temperature correlation between 20 to 40 color between 98 spectral color and about 20 to 40 color found in the image, I just found the idea in the web "correlate with chroma" instead of RGB grey point,but I don't use any algo found on the web.
 
-    //you can change 2 parameters in option.cc
-    // Itcwb_thres 20 by default ==> number of color used in final algorithm - between 10 and max 40
-    // Itcwb_sort - false by default, can improve algo if true, ==> sort value in chroma order, instead of histogram number
+    I have test many many algo to find the first one that work :)
+    Probably (sure) there are improvment to do...
 
+    I have create a table temperature with temp and white point with 100 values between 2000K and 12000K we can obviously  change these values, more...with different steps
+    I have create or recuparate and transformed 98 spectral colors from Colorchecker24, others color and my 468 colors target, or from web flowers, etc. with a step of 5nm, I think it is largey enough.
+
+    1) for the cuurent raw file we create a table for each temp of RGB multipliers
+    2) then, I choose the "camera temp" to initialize calculation (why not)
+    3) for this temp, I calculated XYZ values for the 98 spectrals datas
+    4) then I create for the image an "histogram", but for xyY (Cie 1931 color space)
+    5) for each pixel (in fact to accelerate only 1/10 for and 1/10 for y), I determine for each couple xy, the number of occurences
+    6) I sort this result in ascending order
+    7) in option we can sort in another maner to take into account chroma : chromax = x - white point x, chromay = y - white point y
+    8) then I compare this result, with spectral datas found above in 3) with deltaE (limited to chroma)
+    9) at this point we have xyY values thats match Camera temp, and spectral datas associated
+    10) then I recalculate RGB values from xyY histogram
+    11) after, I vary temp, between 2000K to 12000K
+    12) RGB values are recalcualted from 10) with RGB multipliers, and then xyY are calcualted for each temp
+    13) spectral datas choose are recalculated with temp betwen 2000K to 12000K with matrix spectral calculation, that leeds to xyY values
+    14) I calculated for each couple xy, Student correlation (without Snedecor test)
+    15) the good result, is the best correlation
+    16) we have found the best temperature where color image and color refences are correlate
+    17) after we pass this value to improccoordinator
+
+    Some variables or function are not used, keep in case of
+    I have test with cat02 but result are not stable enough ! why ??, therefore cat02 neutralized
+    This operation is done (actually) 100 times and compare Student coefficient, and keep the absolute  minimum, We can probably optimize....
+    But actually the goal is to find the good algorithm !
+
+    I think, this algo is very good in most cases :) ...to verify of course.
+    You can used it in images :flowers, landscape, portrait, skin, where illuminants are "normal" (daylight, blackbody)
+    You must avoid when illuminant is non standard (fluorescent, LED...) and also, when the subject is lost in the image (some target to generate profiles).
+
+    You can change 2 parameters in option.cc
+    Itcwb_thres : 20 by default ==> number of color used in final algorithm - between 10 and max 40
+    Itcwb_sort : false by default, can improve algo if true, ==> sort value in something near chroma order, instead of histogram number
+
+    */
     BENCHFUN
     TMatrix wprof = ICCStore::getInstance()->workingSpaceMatrix("sRGB");
     double wp[3][3] = {
@@ -7367,7 +7376,7 @@ void RawImageSource::ItcWB(double &tempref, double &greenref, const LocWBParams 
         double ZZ;
     } WbTxyz;
     //we can change step to increase precision if need  - also in Colortemp.cc with same changes
-
+    //I don't know how to pass this structure to Colortemp !
     WbTxyz Txyz[110] = {//temperature Xwb Zwb 110 values  x wb and y wb are calculated after
         {2001., 1.273842, 0.145295},
         {2101., 1.244008, 0.167533},
@@ -7613,6 +7622,7 @@ void RawImageSource::ItcWB(double &tempref, double &greenref, const LocWBParams 
     } ;
     //intermediate structure
     struct chrom {
+        float chroxy_number;
         float chroxy;
         float chrox;
         float chroy;
@@ -7621,7 +7631,7 @@ void RawImageSource::ItcWB(double &tempref, double &greenref, const LocWBParams 
         int interest;
         bool operator()(const chrom& lchro, const chrom& rchro)
         {
-            return lchro.chroxy < rchro.chroxy;
+            return lchro.chroxy_number < rchro.chroxy_number;
         }
 
     } ;
@@ -7716,9 +7726,7 @@ void RawImageSource::ItcWB(double &tempref, double &greenref, const LocWBParams 
         int n4 = 0;
         int n15 = 0;
         int n30 = 0;
-//       int n100 = 0;
         int ntr = 0;
-//       int nearneutral = 0;
 
         for (int nh = 0; nh < siza; nh++) {
             Wbhis[nh].histnum =  histxy[nh];
@@ -7792,7 +7800,9 @@ void RawImageSource::ItcWB(double &tempref, double &greenref, const LocWBParams 
         }
 
         for (int nh = 0; nh < sizcu4; nh++) {
-            wbchro[nh].chroxy = SQR(xx_curref[nh][repref] - xwpr) + SQR(yy_curref[nh][repref] - ywpr);
+            float chxy = sqrt(SQR(xx_curref[nh][repref] - xwpr) + SQR(yy_curref[nh][repref] - ywpr));
+            wbchro[nh].chroxy_number = chxy * sqrt(histcurrref[nh][repref]);
+            wbchro[nh].chroxy = sqrt(chxy);
             wbchro[nh].chrox = xx_curref[nh][repref];
             wbchro[nh].chroy = yy_curref[nh][repref];
             wbchro[nh].Y = YY_curref[nh][repref];
@@ -7824,14 +7834,6 @@ void RawImageSource::ItcWB(double &tempref, double &greenref, const LocWBParams 
             sizcurr2ref = maxval;    //keep about the biggest values,
         }
 
-        //we can perhaps improve with area, etc.
-        /*
-        int countneutral = 0;
-        int countn = 0;
-        int countmm = 0;
-        int maxk = 0;
-        int sizcurr3ref = sizcurr2ref;
-        */
 
         for (int i = 0; i < sizcurr2ref; i++) {
             if (((wbchro[sizcu4 - (i + 1)].chrox  > 0.1f) && (wbchro[sizcu4 - (i + 1)].chroy > 0.1f)) && wbchro[sizcu4 - (i + 1)].chroxy  > 0.00005f) { //suppress value too far from reference spectral
