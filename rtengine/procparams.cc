@@ -1173,7 +1173,7 @@ const std::vector<WBEntry>& WBParams::getWbEntries()
         {"autedgsdw",            WBEntry::Type::AUTO,        M("TP_WBALANCE_AUTOEDGESW"),     0, 1.f,    1.f,    0.f},
         {"autedgrob",            WBEntry::Type::AUTO,        M("TP_WBALANCE_AUTOEDGEROB"),    0, 1.f,    1.f,    0.f},
         {"autitcgreen",       	 WBEntry::Type::AUTO,        M("TP_WBALANCE_AUTOITCGREEN"),   0, 1.f,    1.f,    0.f},
-//        {"autitc",          	 WBEntry::Type::AUTO,        M("TP_WBALANCE_AUTOITC"),  	  0, 1.f,    1.f,    0.f},
+        {"autitc",          	 WBEntry::Type::AUTO,        M("TP_WBALANCE_AUTOITC"),  	  0, 1.f,    1.f,    0.f},
 //        {"autitc2",          	 WBEntry::Type::AUTO,        M("TP_WBALANCE_AUTOITC2"),  	  0, 1.f,    1.f,    0.f},
 
         {"Daylight",             WBEntry::Type::DAYLIGHT,    M("TP_WBALANCE_DAYLIGHT"),    5300, 1.f,   1.f,   0.f},
