@@ -8212,7 +8212,12 @@ void RawImageSource::WBauto(double &tempref, double &greenref, array2D<float> &r
     }
 
     if (wbpar.method == "autitcgreen") {
-        greenitc = greenref;
+        if (greenref > 0.83 && greenref < 1.20) {
+            greenitc = greenref;
+        } else {
+            greenitc = 1.;
+        }
+
         tempitc = 5000.;
         itc = true;
 
