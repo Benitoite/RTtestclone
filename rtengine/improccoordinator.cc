@@ -352,8 +352,9 @@ void ImProcCoordinator::updatePreviewImage(int todo, Crop* cropCall)
                 currWBitc = imgsrc->getWB();
                 double tempref = currWBitc.getTemp();
                 double greenref = currWBitc.getGreen();
+//greenref = params.wb.green;               
                 printf("tempref=%f greref=%f\n", tempref, greenref);
-
+                    
                 imgsrc->getAutoWBMultipliersloc(tempref, greenref, tempitc, greenitc, 0, 0, fh, fw, 0, 0, fh, fw, rm, gm, bm, params.localwb, params.wb, params.icm, params.raw);
 
                 if (params.wb.method ==  "autitc" || params.wb.method ==  "autitc2" || params.wb.method ==  "autitcgreen") {

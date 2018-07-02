@@ -547,8 +547,9 @@ void Options::setDefaults ()
     rtSettings.amchroma = 40;//between 20 and 140   low values increase effect..and also artifacts, high values reduces
     rtSettings.level0_cbdl = 0;
     rtSettings.level123_cbdl = 30;
-    rtSettings.itcwb_thres = 20;
+    rtSettings.itcwb_thres = 20;//between 10 to 40
     rtSettings.itcwb_sort = false;
+    rtSettings.itcwb_greenrange = 0;//between 0 to 2
 
     rtSettings.protectred = 60;
     rtSettings.protectredh = 0.3;
@@ -1430,6 +1431,9 @@ void Options::readFromFile (Glib::ustring fname)
                     rtSettings.itcwb_sort = keyFile.get_boolean ("Color Management", "Itcwb_sort");
                 }
 
+                if (keyFile.has_key ("Color Management", "Itcwb_greenrange")) {
+                    rtSettings.itcwb_greenrange = keyFile.get_integer ("Color Management", "Itcwb_greenrange");
+                }
                 
                 //if (keyFile.has_key ("Color Management", "Colortoningab")) rtSettings.colortoningab = keyFile.get_double("Color Management", "Colortoningab");
                 //if (keyFile.has_key ("Color Management", "Decaction")) rtSettings.decaction = keyFile.get_double("Color Management", "Decaction");
@@ -2010,6 +2014,7 @@ void Options::saveToFile (Glib::ustring fname)
         keyFile.set_double  ("Color Management", "CBDLlevel123", rtSettings.level123_cbdl);
         keyFile.set_integer  ("Color Management", "Itcwb_thres", rtSettings.itcwb_thres);
         keyFile.set_boolean  ("Color Management", "Itcwb_sort", rtSettings.itcwb_sort);
+        keyFile.set_integer  ("Color Management", "Itcwb_greenrange", rtSettings.itcwb_greenrange);
         //keyFile.set_double  ("Color Management", "Colortoningab", rtSettings.colortoningab);
         //keyFile.set_double  ("Color Management", "Decaction", rtSettings.decaction);
         keyFile.set_string  ("Color Management", "ClutsDirectory", clutsDir);

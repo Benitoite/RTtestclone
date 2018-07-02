@@ -7240,36 +7240,47 @@ void static studentXY(array2D<float> & YYcurr, array2D<float> & reffYY,  int siz
 
     for (int i = 0; i < sizestucurrY; i++) {
         somcurrY += 100.f * YYcurr[i][tt];
+        //sum observations first group
     }
 
     for (int i = 0; i < sizestureffY; i++) {
         somreffY += 100.f * reffYY[i][tt];
+        //sum observations second group
+
     }
 
 
     for (int i = 0; i < sizestucurrY; i++) {
         somcurr2Y += SQR(100.f * YYcurr[i][tt]);
+        //sum sqr observations first group
+
     }
 
     for (int i = 0; i < sizestureffY; i++) {
         somreff2Y += SQR(100.f * reffYY[i][tt]);
+        //sum sqr observations second group
+
     }
 
     somsqueccurrY = somcurr2Y - (SQR(somcurrY)) / sizestucurrY;
+    //sum sqr differences  first
     somsquecreffY = somreff2Y - (SQR(somreffY)) / sizestureffY;
-    //    float studentY = 0.f;
-    float diviY = sqrt(((somsqueccurrY + somsquecreffY) * (1.f / (float)sizestucurrY + 1.f / (float)sizestureffY)) / (sizestucurrY + sizestureffY - 2));
+    //sum sqr differences  second
 
+    float diviY = sqrt(((somsqueccurrY + somsquecreffY) * (1.f / (float)sizestucurrY + 1.f / (float)sizestureffY)) / (sizestucurrY + sizestureffY - 2));
+    //divisor student
     float numerY = ((float)somcurrY / (float)sizestucurrY) - ((float)somreffY / (float)sizestureffY);
+    //numerator student
 //   printf("num=%f divY=%f \n", numerY, diviY);
 
     student = numerY / diviY ;
+    //student coeeficient
 }
 
 
 
 
-void RawImageSource::ItcWB(double &tempref, double &greenref, const LocWBParams &localr, double &tempitc, double &greenitc, array2D<float> &redloc, array2D<float> &greenloc, array2D<float> &blueloc, int bfw, int bfh, double &avg_rm, double &avg_gm, double &avg_bm, const ColorManagementParams &cmp, const RAWParams &raw, const WBParams & wbpar)
+void RawImageSource::ItcWB(bool extra, double &tempref, double &greenref, const LocWBParams &localr, double &tempitc, double &greenitc, array2D<float> &redloc, array2D<float> &greenloc, array2D<float> &blueloc, int bfw, int bfh, double &avg_rm, double &avg_gm, double &avg_bm, const ColorManagementParams &cmp, const RAWParams &raw, const WBParams & wbpar)
 {
     /*
     copyright Jacques Desmis 6 - 2018 jdesmis@gmail.com
@@ -7369,6 +7380,158 @@ void RawImageSource::ItcWB(double &tempref, double &greenref, const LocWBParams 
     xc(bfwitc, bfhitc);
     yc(bfwitc, bfhitc);
     Yc(bfwitc, bfhitc);
+
+    typedef struct WbGreen {
+        double green;
+        float snedecor;//1. actually but put in case of intervalle de confiance
+    } WbGreen;
+
+    WbGreen gree[107] = {
+        {0.300, 1.f},
+        {0.350, 1.f},
+        {0.400, 1.f},
+        {0.433, 1.f},
+        {0.466, 1.f},
+        {0.500, 1.f},
+        {0.533, 1.f},
+        {0.566, 1.f},
+        {0.600, 1.f},
+        {0.633, 1.f},
+        {0.666, 1.f},
+        {0.700, 1.f},
+        {0.733, 1.f},
+        {0.766, 1.f},
+        {0.800, 1.f},
+        {0.825, 1.f},
+        {0.850, 1.f},
+        {0.875, 1.f},
+        {0.900, 1.f},
+        {0.910, 1.f},
+        {0.920, 1.f},
+        {0.930, 1.f},
+        {0.940, 1.f},
+        {0.950, 1.f},
+        {0.960, 1.f},
+        {0.970, 1.f},
+        {0.980, 1.f},
+        {0.990, 1.f},
+        {1.000, 1.f},
+        {1.010, 1.f},
+        {1.020, 1.f},
+        {1.030, 1.f},
+        {1.040, 1.f},
+        {1.050, 1.f},
+        {1.060, 1.f},
+        {1.070, 1.f},
+        {1.080, 1.f},
+        {1.090, 1.f},
+        {1.100, 1.f},
+        {1.110, 1.f},
+        {1.120, 1.f},
+        {1.130, 1.f},
+        {1.140, 1.f},
+        {1.150, 1.f},
+        {1.160, 1.f},
+        {1.170, 1.f},
+        {1.180, 1.f},
+        {1.190, 1.f},
+        {1.200, 1.f},
+        {1.210, 1.f},
+        {1.220, 1.f},
+        {1.230, 1.f},
+        {1.240, 1.f},
+        {1.250, 1.f},
+        {1.275, 1.f},
+        {1.300, 1.f},
+        {1.325, 1.f},
+        {1.350, 1.f},
+        {1.375, 1.f},
+        {1.400, 1.f},
+        {1.425, 1.f},
+        {1.450, 1.f},
+        {1.475, 1.f},
+        {1.500, 1.f},
+        {1.525, 1.f},
+        {1.550, 1.f},
+        {1.575, 1.f},
+        {1.600, 1.f},
+        {1.633, 1.f},
+        {1.666, 1.f},
+        {1.700, 1.f},
+        {1.733, 1.f},
+        {1.766, 1.f},
+        {1.800, 1.f},
+        {1.833, 1.f},
+        {1.866, 1.f},
+        {1.900, 1.f},
+        {1.933, 1.f},
+        {1.966, 1.f},
+        {2.000, 1.f},
+        {2.033, 1.f},
+        {2.066, 1.f},
+        {2.100, 1.f},
+        {2.133, 1.f},
+        {2.166, 1.f},
+        {2.200, 1.f},
+        {2.250, 1.f},
+        {2.300, 1.f},
+        {2.350, 1.f},
+        {2.400, 1.f},
+        {2.450, 1.f},
+        {2.500, 1.f},
+        {2.550, 1.f},
+        {2.600, 1.f},
+        {2.650, 1.f},
+        {2.700, 1.f},
+        {2.750, 1.f},
+        {2.800, 1.f},
+        {2.850, 1.f},
+        {2.900, 1.f},
+        {2.950, 1.f},
+        {3.000, 1.f},
+        {3.200, 1.f},
+        {3.400, 1.f},
+        {3.600, 1.f},
+        {3.800, 1.f},
+        {4.00, 1.f}
+    };
+
+    typedef struct RangeGreen {
+        int begin;
+        int end;
+        int ng;
+    } RangeGreen;
+
+    RangeGreen Rangestandard;
+    Rangestandard.begin =  14;
+    Rangestandard.end =  55;
+    Rangestandard.ng =  41;
+
+    RangeGreen Rangeextand;
+    Rangeextand.begin =  8;
+    Rangeextand.end =  70;
+    Rangeextand.ng =  62;
+
+    RangeGreen Rangemax;
+    Rangemax.begin =  0;
+    Rangemax.end =  106;
+    Rangemax.ng =  106;
+
+    RangeGreen Rangegreenused;
+
+    if (settings->itcwb_greenrange == 0) {
+        Rangegreenused = Rangestandard;
+    }
+
+    else if (settings->itcwb_greenrange == 1) {
+        Rangegreenused = Rangeextand;
+    } else {
+        Rangegreenused = Rangemax;
+    }
+
+    // printf("rangemin=%i rangmax=%i\n",  Rangegreenused.begin, Rangegreenused.end);
+
+
 
     typedef struct WbTxyz {
         double Tem;
@@ -7658,6 +7821,7 @@ void RawImageSource::ItcWB(double &tempref, double &greenref, const LocWBParams 
 
     bool separated = true;
     int w = -1;
+    printf("greenrefraw=%f\n", greenref);
 
     //here we select the good spectral color inside the 61 values
     if (separated) {
@@ -7992,14 +8156,157 @@ void RawImageSource::ItcWB(double &tempref, double &greenref, const LocWBParams 
 
 
         studentXY(xxyycurr_reduc, reffxxyy, 2 * w, 2 * kk, tt, student); //for xy
-        //  printf("tt=%i  st=%f\n", tt,  student);
-        //    if(signbit(student)) {goodref = tt;break;}//printf("stud=%f\n", student);
+        //printf("tt=%i  st=%f\n", tt,  student);
         float abstud = fabs(student);
 
         if (abstud < minstud) {  // find the minimum Student
             minstud = abstud;
             goodref = tt;
         }
+
+    }
+
+    if (extra) {
+//I do not use always this algoritms because in some cases, differences between Student are so small that result is not always good
+// I use it when camara groen wb is out of limits "habitual"
+//now we have found the first good value with result for temp = goodref and for green = greenitc (either greenitc = camera, or greenitc = 1.
+//we must vary greenitc to find the best student coefficient correlation and then adjust temp
+// create a structure where we can store greenitc, goodref, student but for student I will take the absolute sum of goodref -2 to goodref +2 if exist
+//another loop where greenitc vary form intial value to
+//call another time to find RGB multipliers, but while limiting temp to goodref -10 to goodref + 10 if exist rmm, gmm, bmm[tt]
+//then as after 7929
+        struct Tempgreen {
+            float student;
+            float five_student;
+            int tempref;
+            int greenref;
+            bool operator()(const Tempgreen& ltg, const Tempgreen& rtg)
+            {
+                return ltg.student < rtg.student;
+            }
+        };
+        Tempgreen  Tgstud[107];
+
+        for (int i = 0; i < 107; i++) {
+            Tgstud[i].student = 1000.f;
+            Tgstud[i].five_student = 1000.f;
+            Tgstud[i].tempref = 53;
+            Tgstud[i].greenref = 28;
+
+        }
+
+        int scantempbeg = goodref - 10;
+
+        if (scantempbeg < 1) {
+            scantempbeg = 1;
+        }
+
+        int scantempend = goodref + 10;
+
+        if (scantempend > N_t - 1) {
+            scantempend = N_t - 1;
+        }
+
+        int kkg = -1;
+
+        for (int gr = Rangegreenused.begin; gr < Rangegreenused.end; gr++) {
+            float minstudgr = 100000.f;
+            int goodrefgr = 1;
+
+            for (int tt = scantempbeg; tt < scantempend; tt++) {
+                double r, g, b;
+                float rm, gm, bm;
+                ColorTemp WBiter = ColorTemp(Txyz[tt].Tem, gree[gr].green, 1.f, "Custom");
+                WBiter.getMultipliers(r, g, b);
+                rm = imatrices.cam_rgb[0][0] * r + imatrices.cam_rgb[0][1] * g + imatrices.cam_rgb[0][2] * b;
+                gm = imatrices.cam_rgb[1][0] * r + imatrices.cam_rgb[1][1] * g + imatrices.cam_rgb[1][2] * b;
+                bm = imatrices.cam_rgb[2][0] * r + imatrices.cam_rgb[2][1] * g + imatrices.cam_rgb[2][2] * b;
+
+                const float new_pre_mul[4] = { ri->get_pre_mul(0) / rm, ri->get_pre_mul(1) / gm, ri->get_pre_mul(2) / bm, ri->get_pre_mul(3) / gm };
+                float new_scale_mul[4];
+                bool isMono = (ri->getSensorType() == ST_FUJI_XTRANS && raw.xtranssensor.method == RAWParams::XTransSensor::getMethodString(RAWParams::XTransSensor::Method::MONO))
+                              || (ri->getSensorType() == ST_BAYER && raw.bayersensor.method == RAWParams::BayerSensor::getMethodString(RAWParams::BayerSensor::Method::MONO));
+                float gain = calculate_scale_mul(new_scale_mul, new_pre_mul, c_white, cblacksom, isMono, ri->get_colors());
+
+                rm = new_scale_mul[0] / scale_mul[0] * gain;
+                gm = new_scale_mul[1] / scale_mul[1] * gain;
+                bm = new_scale_mul[2] / scale_mul[2] * gain;
+                rmm[tt] = rm / gm;
+                gmm[tt] = gm / gm;
+                bmm[tt] = bm / gm;
+            }
+
+            //float studentgreen[scantempend - scantempbeg] = {};
+            float studentgreen[107] = {};
+
+            for (int tt = scantempbeg; tt < scantempend; tt++) {//N_t
+                double swp  = (Txyz[tt].XX + Txyz[tt].ZZ + 1.);
+                double xwp = Txyz[tt].XX / swp;
+                double ywp = 1. / swp;
+
+
+                for (int i = 0; i < w; i++) {
+                    float x_c = 0.f, y_c = 0.f, Y_c = 0.f;
+                    float x_x = 0.f, y_y = 0.f, z_z = 0.f;
+
+                    float RR =  rmm[tt] * R_curref_reduc[i][repref];
+                    float GG =  gmm[tt] * G_curref_reduc[i][repref];
+                    float BB =  bmm[tt] * B_curref_reduc[i][repref];
+                    Color::rgbxyY(RR, GG, BB, x_c, y_c, Y_c, x_x, y_y, z_z, wp);
+                    xxyycurr_reduc[2 * i][tt] = x_c;
+                    xxyycurr_reduc[2 * i + 1][tt] = y_c;
+                    //        printf("w=%i tt=%i xx=%f yy=%f\n",i, tt, xxyycurr_reduc[2 * i][tt], xxyycurr_reduc[2 * i +1][tt]);
+
+                }
+
+                for (int j = 0; j < Nc ; j++) {
+                    reffxxyy_prov[2 * j][tt] = Tx[j][tt] / (Tx[j][tt] + Ty[j][tt] +  Tz[j][tt]); // x from xyY
+                    reffxxyy_prov[2 * j + 1][tt] =  Ty[j][tt] / (Tx[j][tt] + Ty[j][tt] +  Tz[j][tt]); // y from xyY
+                    reffYY_prov[j][tt] = Ty[j][tt];//Y
+                    //   printf("w=%i tt=%i xx=%f yy=%f\n",j, tt,reffxxyy_prov[2 * kk][tt] ,reffxxyy_prov[2 * kk + 1][tt]);
+
+                }
+
+                kkg = -1;
+
+                for (int i = 0; i < Nc ; i++) {
+                    if (good_spectral[i] == 1) {
+                        kkg++;
+                        reffxxyy[2 * kkg][tt]  = reffxxyy_prov[2 * i][tt];
+                        reffxxyy[2 * kkg + 1][tt] = reffxxyy_prov[2 * i + 1][tt];
+                        reffYY[kkg][tt] = reffYY_prov[i][tt];
+                    }
+                }
+
+                float studentgr = 0.f;
+
+                studentXY(xxyycurr_reduc, reffxxyy, 2 * w, 2 * kkg, tt, studentgr); //for xy
+                float abstudgr = fabs(studentgr);
+
+                if (abstudgr < minstudgr) {  // find the minimum Student
+                    minstudgr = abstudgr;
+                    goodrefgr = tt;
+                }
+
+                studentgreen[tt] = fabs(studentgr);
+                Tgstud[gr].tempref = goodrefgr;
+                Tgstud[gr].greenref = gr;
+                Tgstud[gr].student = minstudgr;
+
+            }
+
+        }
+
+        std::sort(Tgstud, Tgstud + 107, Tgstud[0]);
+        /*
+                for (int j = 0; j < 30; j++) {
+                    printf("reftemp=%i refgreen=%i stud=%f \n", Tgstud[j].tempref, Tgstud[j].greenref, Tgstud[j].student);
+                }
+        */
+        goodref =  Tgstud[0].tempref;
+        int greengood = Tgstud[0].greenref;
+        tempitc = Txyz[goodref].Tem;
+        greenitc = gree[greengood].green;
 
     }
 
@@ -8027,8 +8334,14 @@ void RawImageSource::ItcWB(double &tempref, double &greenref, const LocWBParams 
     avg_rm = 10000.f * rmm[goodref];
     avg_gm = 10000.* gmm[goodref];
     avg_bm = 10000.f * bmm[goodref];
-    tempitc = Txyz[goodref].Tem;
-    // printf("ITCWB tempitc=%f gritc=%f\n", tempitc, greenitc);
+
+    if (!extra) {
+        tempitc = Txyz[goodref].Tem;
+    }
+
+    //  greenitc = gree[greengood].green;
+
+    printf("ITCWB tempitc=%f gritc=%f\n", tempitc, greenitc);
 
 
     xc(0, 0);
@@ -8069,7 +8382,7 @@ void RawImageSource::ItcWB(double &tempref, double &greenref, const LocWBParams 
 }
 
 
-void RawImageSource::WBauto(double &tempref, double &greenref, array2D<float> &redloc, array2D<float> &greenloc, array2D<float> &blueloc, int bfw, int bfh, double & avg_rm, double & avg_gm, double & avg_bm, double &tempitc, double & greenitc, bool &twotimes, const LocWBParams & localr, const WBParams & wbpar, int begx, int begy, int yEn, int xEn, int cx, int cy, const ColorManagementParams &cmp, const RAWParams &raw)
+void RawImageSource::WBauto(double & tempref, double & greenref, array2D<float> &redloc, array2D<float> &greenloc, array2D<float> &blueloc, int bfw, int bfh, double & avg_rm, double & avg_gm, double & avg_bm, double & tempitc, double & greenitc, bool & twotimes, const LocWBParams & localr, const WBParams & wbpar, int begx, int begy, int yEn, int xEn, int cx, int cy, const ColorManagementParams & cmp, const RAWParams & raw)
 {
     BENCHFUN
     //auto white balance
@@ -8147,7 +8460,7 @@ void RawImageSource::WBauto(double &tempref, double &greenref, array2D<float> &r
         itc = true;
 
         if (itc) {
-            ItcWB(tempref, greenref, localr, tempitc, greenitc, redloc, greenloc, blueloc, bfw, bfh, avg_rm, avg_gm, avg_bm, cmp, raw, wbpar);
+            ItcWB(false, tempref, greenref, localr, tempitc, greenitc, redloc, greenloc, blueloc, bfw, bfh, avg_rm, avg_gm, avg_bm, cmp, raw, wbpar);
         }
 
         //twotimes = false;
@@ -8205,24 +8518,31 @@ void RawImageSource::WBauto(double &tempref, double &greenref, array2D<float> &r
         itc = true;
 
         if (itc) {
-            ItcWB(tempref, greenref, localr, tempitc, greenitc, redloc, greenloc, blueloc, bfw, bfh, avg_rm, avg_gm, avg_bm, cmp, raw, wbpar);
+            ItcWB(false, tempref, greenref, localr, tempitc, greenitc, redloc, greenloc, blueloc, bfw, bfh, avg_rm, avg_gm, avg_bm, cmp, raw, wbpar);
         }
 
         //twotimes = false;
     }
 
     if (wbpar.method == "autitcgreen") {
+        bool extra = false;
+
         if (greenref > 0.8 && greenref < 1.30) {
             greenitc = greenref;
+            extra = false;
         } else {
             greenitc = 1.;
+            extra = true;
         }
 
+        //    greenref = wbpar.green;
+//       printf("gree=%f\n", greenref);
         tempitc = 5000.;
+//       greenitc = greenref;
         itc = true;
 
         if (itc) {
-            ItcWB(tempref, greenref, localr, tempitc, greenitc, redloc, greenloc, blueloc, bfw, bfh, avg_rm, avg_gm, avg_bm, cmp, raw, wbpar);
+            ItcWB(extra, tempref, greenref, localr, tempitc, greenitc, redloc, greenloc, blueloc, bfw, bfh, avg_rm, avg_gm, avg_bm, cmp, raw, wbpar);
         }
     }
 
@@ -8477,7 +8797,7 @@ void  RawImageSource::getrgbloc(bool local, bool gamma, bool cat02, int begx, in
 
 }
 
-void RawImageSource::getAutoWBMultipliersloc(double &tempref, double &greenref, double &tempitc, double &greenitc,  int begx, int begy, int yEn, int xEn, int cx, int cy, int bf_h, int bf_w, double & rm, double & gm, double & bm, const LocWBParams & localr, const WBParams & wbpar, const ColorManagementParams &cmp, const RAWParams &raw)
+void RawImageSource::getAutoWBMultipliersloc(double & tempref, double & greenref, double & tempitc, double & greenitc,  int begx, int begy, int yEn, int xEn, int cx, int cy, int bf_h, int bf_w, double & rm, double & gm, double & bm, const LocWBParams & localr, const WBParams & wbpar, const ColorManagementParams & cmp, const RAWParams & raw)
 {
     BENCHFUN
     constexpr double clipHigh = 64000.0;
