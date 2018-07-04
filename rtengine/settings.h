@@ -84,6 +84,8 @@ public:
     int             itcwb_thres;
     bool            itcwb_sort;
     int             itcwb_greenrange;
+    int             itcwb_greendeltatemp;
+    bool            itcwb_forceextra;
 
     Glib::ustring   lensfunDbDirectory; ///< The directory containing the lensfun database. If empty, the system defaults will be used (as described in http://lensfun.sourceforge.net/manual/dbsearch.html)
 

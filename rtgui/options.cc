@@ -550,7 +550,9 @@ void Options::setDefaults ()
     rtSettings.itcwb_thres = 20;//between 10 to 40
     rtSettings.itcwb_sort = false;
     rtSettings.itcwb_greenrange = 0;//between 0 to 2
-
+    rtSettings.itcwb_greendeltatemp = 1;//between 0 and 4
+    rtSettings.itcwb_forceextra = false;
+    
     rtSettings.protectred = 60;
     rtSettings.protectredh = 0.3;
     rtSettings.CRI_color = 0;
@@ -1431,8 +1433,16 @@ void Options::readFromFile (Glib::ustring fname)
                     rtSettings.itcwb_sort = keyFile.get_boolean ("Color Management", "Itcwb_sort");
                 }
 
+                if (keyFile.has_key ("Color Management", "Itcwb_forceextra")) {
+                    rtSettings.itcwb_forceextra = keyFile.get_boolean ("Color Management", "Itcwb_forceextra");
+                }
+                
                 if (keyFile.has_key ("Color Management", "Itcwb_greenrange")) {
                     rtSettings.itcwb_greenrange = keyFile.get_integer ("Color Management", "Itcwb_greenrange");
+                }
+
+                if (keyFile.has_key ("Color Management", "Itcwb_greendeltatemp")) {
+                    rtSettings.itcwb_greendeltatemp = keyFile.get_integer ("Color Management", "Itcwb_greendeltatemp");
                 }
                 
                 //if (keyFile.has_key ("Color Management", "Colortoningab")) rtSettings.colortoningab = keyFile.get_double("Color Management", "Colortoningab");
@@ -2015,6 +2025,9 @@ void Options::saveToFile (Glib::ustring fname)
         keyFile.set_integer  ("Color Management", "Itcwb_thres", rtSettings.itcwb_thres);
         keyFile.set_boolean  ("Color Management", "Itcwb_sort", rtSettings.itcwb_sort);
         keyFile.set_integer  ("Color Management", "Itcwb_greenrange", rtSettings.itcwb_greenrange);
+        keyFile.set_integer  ("Color Management", "Itcwb_greendeltatemp", rtSettings.itcwb_greendeltatemp);
+        keyFile.set_boolean  ("Color Management", "Itcwb_forceextra", rtSettings.itcwb_forceextra);
+
         //keyFile.set_double  ("Color Management", "Colortoningab", rtSettings.colortoningab);
         //keyFile.set_double  ("Color Management", "Decaction", rtSettings.decaction);
         keyFile.set_string  ("Color Management", "ClutsDirectory", clutsDir);

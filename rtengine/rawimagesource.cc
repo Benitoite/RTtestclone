@@ -7415,7 +7415,7 @@ void RawImageSource::ItcWB(bool extra, double &tempref, double &greenref, const 
         {0.970, 1.f},
         {0.980, 1.f},
         {0.990, 1.f},
-        {1.000, 1.f},
+        {1.000, 1.f},//28
         {1.010, 1.f},
         {1.020, 1.f},
         {1.030, 1.f},
@@ -7504,8 +7504,8 @@ void RawImageSource::ItcWB(bool extra, double &tempref, double &greenref, const 
 
     RangeGreen Rangestandard;
     Rangestandard.begin =  14;
-    Rangestandard.end =  55;
-    Rangestandard.ng =  41;
+    Rangestandard.end =  59;
+    Rangestandard.ng =  45;
 
     RangeGreen Rangeextand;
     Rangeextand.begin =  8;
@@ -7818,6 +7818,7 @@ void RawImageSource::ItcWB(bool extra, double &tempref, double &greenref, const 
     }
 
     int Ncreal = 0;
+    float estimchrom = 0.f;
 
     bool separated = true;
     int w = -1;
@@ -7963,6 +7964,8 @@ void RawImageSource::ItcWB(bool extra, double &tempref, double &greenref, const 
 
         }
 
+        estimchrom = 0.f;
+
         for (int nh = 0; nh < sizcu4; nh++) {
             float chxy = sqrt(SQR(xx_curref[nh][repref] - xwpr) + SQR(yy_curref[nh][repref] - ywpr));
             wbchro[nh].chroxy_number = chxy * sqrt(histcurrref[nh][repref]);
@@ -7971,8 +7974,11 @@ void RawImageSource::ItcWB(bool extra, double &tempref, double &greenref, const 
             wbchro[nh].chroy = yy_curref[nh][repref];
             wbchro[nh].Y = YY_curref[nh][repref];
             wbchro[nh].index = nh;
+            estimchrom += chxy;
         }
 
+        estimchrom /= sizcu4;
+        printf("estimchrom=%f \n", estimchrom);
 
         if (settings->itcwb_sort) { //sort in ascending with chroma values
 
@@ -8001,7 +8007,7 @@ void RawImageSource::ItcWB(bool extra, double &tempref, double &greenref, const 
 
         for (int i = 0; i < sizcurr2ref; i++) {
             //is condition chroxy necessary ?
-            if (((wbchro[sizcu4 - (i + 1)].chrox  > 0.1f) && (wbchro[sizcu4 - (i + 1)].chroy > 0.1f)) && wbchro[sizcu4 - (i + 1)].chroxy  > 0.005f) { //suppress value too far from reference spectral
+            if (((wbchro[sizcu4 - (i + 1)].chrox  > 0.1f) && (wbchro[sizcu4 - (i + 1)].chroy > 0.1f)) && wbchro[sizcu4 - (i + 1)].chroxy  > 0.0f) { //suppress value too far from reference spectral
                 w++;
                 xx_curref_reduc[w][repref] = wbchro[sizcu4 - (i + 1)].chrox;
                 yy_curref_reduc[w][repref] = wbchro[sizcu4 - (i + 1)].chroy;
@@ -8116,11 +8122,11 @@ void RawImageSource::ItcWB(bool extra, double &tempref, double &greenref, const 
             if (good_spectral[i] == 1) {
                 kk++;
                 //we calculate now absolute chroma for each spectral color
-                //                  reffxxyy[2 * kk][tt]  = fabs(reffxxyy_prov[2 * i][tt] - xwp);
-                //                  reffxxyy[2 * kk + 1][tt] = fabs(reffxxyy_prov[2 * i + 1][tt] - ywp);
+                //                   reffxxyy[2 * kk][tt]  = fabs(reffxxyy_prov[2 * i][tt] - xwp);
+                //                   reffxxyy[2 * kk + 1][tt] = fabs(reffxxyy_prov[2 * i + 1][tt] - ywp);
                 reffxxyy[2 * kk][tt]  = reffxxyy_prov[2 * i][tt];
                 reffxxyy[2 * kk + 1][tt] = reffxxyy_prov[2 * i + 1][tt];
-                // printf("w=%i tt=%i xx=%f yy=%f\n",i, tt,reffxxyy[2 * kk][tt] ,reffxxyy[2 * kk + 1][tt]);
+                //printf("w=%i tt=%i xx=%f yy=%f\n",i, tt,reffxxyy[2 * kk][tt] ,reffxxyy[2 * kk + 1][tt]);
                 reffYY[kk][tt] = reffYY_prov[i][tt];
             }
         }
@@ -8195,13 +8201,19 @@ void RawImageSource::ItcWB(bool extra, double &tempref, double &greenref, const 
 
         }
 
-        int scantempbeg = goodref - 10;
+        int dgoodref = settings->itcwb_greendeltatemp;
+
+        if (dgoodref > 4) {
+            dgoodref = 4;
+        }
+
+        int scantempbeg = goodref - (dgoodref + 1);
 
         if (scantempbeg < 1) {
             scantempbeg = 1;
         }
 
-        int scantempend = goodref + 10;
+        int scantempend = goodref + dgoodref;
 
         if (scantempend > N_t - 1) {
             scantempend = N_t - 1;
@@ -8269,6 +8281,24 @@ void RawImageSource::ItcWB(bool extra, double &tempref, double &greenref, const 
 
                 kkg = -1;
 
+                //degrade correllation with color high chroma, but not too much...seems not good, but ??
+                if (estimchrom < 0.045f) {
+
+                    good_spectral[0] = 1;//blue
+                    //good_spectral[1] = 1;//blue
+                    //  good_spectral[97] = 1;//blue
+                    // good_spectral[93] = 1;//purple
+                    // good_spectral[7] = 1;//green
+                    good_spectral[11] = 1;//green
+                    //good_spectral[42] = 1;//green
+                    // good_spectral[75] = 1;//green
+                    // good_spectral[46] = 1;//red
+                    good_spectral[62] = 1;//red
+                    // good_spectral[63] = 1;//red
+                    // good_spectral[91] = 1;//ora
+
+                }
+
                 for (int i = 0; i < Nc ; i++) {
                     if (good_spectral[i] == 1) {
                         kkg++;
@@ -8298,11 +8328,11 @@ void RawImageSource::ItcWB(bool extra, double &tempref, double &greenref, const 
         }
 
         std::sort(Tgstud, Tgstud + 107, Tgstud[0]);
-        /*
-                for (int j = 0; j < 30; j++) {
-                    printf("reftemp=%i refgreen=%i stud=%f \n", Tgstud[j].tempref, Tgstud[j].greenref, Tgstud[j].student);
-                }
-        */
+
+        for (int j = 0; j < 20; j++) {
+            printf("reftemp=%i refgreen=%i stud=%f \n", Tgstud[j].tempref, Tgstud[j].greenref, Tgstud[j].student);
+        }
+
         goodref =  Tgstud[0].tempref;
         int greengood = Tgstud[0].greenref;
         tempitc = Txyz[goodref].Tem;
@@ -8527,9 +8557,13 @@ void RawImageSource::WBauto(double & tempref, double & greenref, array2D<float> 
     if (wbpar.method == "autitcgreen") {
         bool extra = false;
 
-        if (greenref > 0.8 && greenref < 1.30) {
+        if (greenref > 0.8 && greenref < 1.40) {
             greenitc = greenref;
             extra = false;
+
+            if (settings->itcwb_forceextra) {
+                extra = true;
+            }
         } else {
             greenitc = 1.;
             extra = true;
