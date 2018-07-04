@@ -7320,9 +7320,12 @@ void RawImageSource::ItcWB(bool extra, double &tempref, double &greenref, const 
     You can used it in images :flowers, landscape, portrait, skin, where illuminants are "normal" (daylight, blackbody)
     You must avoid when illuminant is non standard (fluorescent, LED...) and also, when the subject is lost in the image (some target to generate profiles).
 
-    You can change 2 parameters in option.cc
+    You can change 4 parameters in option.cc
     Itcwb_thres : 20 by default ==> number of color used in final algorithm - between 10 and max 40
     Itcwb_sort : false by default, can improve algo if true, ==> sort value in something near chroma order, instead of histogram number
+    Itcwb_greenrange : 0 amplitude of green variation - between 0 to 2  
+    Itcwb_greendeltatemp : 1 - delta temp in green iterate loop for "extra" - between 0 to 4
+    Itcwb_forceextra : false - if true force algorithm "extra" ("extra" is used when cmaera wbsettings are wrong) to all images
 
     */
     BENCHFUN
@@ -7348,7 +7351,6 @@ void RawImageSource::ItcWB(bool extra, double &tempref, double &greenref, const 
 
 
     array2D<float> histcurr;
-    array2D<float> minmax;
     array2D<float> histcurrref;
 
     array2D<float> xxyycurr;
@@ -8360,6 +8362,11 @@ void RawImageSource::ItcWB(bool extra, double &tempref, double &greenref, const 
     R_curref_reduc(0, 0);
     G_curref_reduc(0, 0);
     B_curref_reduc(0, 0);
+        
+    reffxxyy_prov(0, 0);
+
+    reffYY(0, 0);
+    reffYY_prov(0, 0);
 
     avg_rm = 10000.f * rmm[goodref];
     avg_gm = 10000.* gmm[goodref];
@@ -8369,7 +8376,6 @@ void RawImageSource::ItcWB(bool extra, double &tempref, double &greenref, const 
         tempitc = Txyz[goodref].Tem;
     }
 
-    //  greenitc = gree[greengood].green;
 
     printf("ITCWB tempitc=%f gritc=%f\n", tempitc, greenitc);
 
