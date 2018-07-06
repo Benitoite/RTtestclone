@@ -3205,7 +3205,8 @@ void ImProcFunctions::rgbProc(Imagefloat* working, LabImage* lab, PipetteBuffer 
                     }
                 }
 
-
+                softLight(rtemp, gtemp, btemp, istart, jstart, tW, tH, TS);
+                
                 if (!blackwhite) {
                     if (editImgFloat || editWhatever) {
                         for (int i = istart, ti = 0; i < tH; i++, ti++) {
