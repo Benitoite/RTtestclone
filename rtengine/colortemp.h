@@ -224,8 +224,8 @@ public:
     static const double ColorBluesinisievikki[97];
     static const double ColorBlueiisoppi[97];
     static const double ColorBluelobelia[97];
-
-
+    static const double ColorWhiteojaka[97];
+    static const double ColorWhitepetunia[97];
 
     static const double Colorblue_spect[97];
 

@@ -7311,6 +7311,15 @@ void RawImageSource::ItcWB(bool extra, double &tempref, double &greenref, const 
     16) we have found the best temperature where color image and color refences are correlate
     17) after we pass this value to improccoordinator
 
+    18) in a second part if camera green is out, I used an "extra" algorithm
+    19) we make vary green between 2 limits (settings in option)
+    20) betwen these green limits, we make slightly vary temp (settings in options) and recalculated RGB multipliers
+    21) with this multipliers for the RGB color find in histogram we recalculate xyY
+    22) we re-adjust references color for these xyY from 20)
+    23) we add if chroma image is very low, k colors to degrad correlation
+    24) then find all Student correlation for each couple green / temp
+    25) sort these Student values, and choose the minimum
+
     Some variables or function are not used, keep in case of
     I have test with cat02 but result are not stable enough ! why ??, therefore cat02 neutralized
     This operation is done (actually) 100 times and compare Student coefficient, and keep the absolute  minimum, We can probably optimize....
@@ -7323,7 +7332,7 @@ void RawImageSource::ItcWB(bool extra, double &tempref, double &greenref, const 
     You can change 4 parameters in option.cc
     Itcwb_thres : 20 by default ==> number of color used in final algorithm - between 10 and max 40
     Itcwb_sort : false by default, can improve algo if true, ==> sort value in something near chroma order, instead of histogram number
-    Itcwb_greenrange : 0 amplitude of green variation - between 0 to 2  
+    Itcwb_greenrange : 0 amplitude of green variation - between 0 to 2
     Itcwb_greendeltatemp : 1 - delta temp in green iterate loop for "extra" - between 0 to 4
     Itcwb_forceextra : false - if true force algorithm "extra" ("extra" is used when cmaera wbsettings are wrong) to all images
 
@@ -7497,6 +7506,7 @@ void RawImageSource::ItcWB(bool extra, double &tempref, double &greenref, const 
         {3.800, 1.f},
         {4.00, 1.f}
     };
+    int N_g = sizeof(gree) / sizeof(gree[0]);   //number of green
 
     typedef struct RangeGreen {
         int begin;
@@ -7516,8 +7526,8 @@ void RawImageSource::ItcWB(bool extra, double &tempref, double &greenref, const 
 
     RangeGreen Rangemax;
     Rangemax.begin =  0;
-    Rangemax.end =  106;
-    Rangemax.ng =  106;
+    Rangemax.end =  N_g;
+    Rangemax.ng =  N_g;
 
     RangeGreen Rangegreenused;
 
@@ -7669,7 +7679,7 @@ void RawImageSource::ItcWB(bool extra, double &tempref, double &greenref, const 
     double *TZ = nullptr;
     int *good_spectral = nullptr;
 
-    int Nc = 98;//98 number of reference spectral colors, I think it is enough to retriev good values
+    int Nc = 100;//100 number of reference spectral colors, I think it is enough to retriev good values
     Tx = new float*[Nc];
 
     for (int i = 0; i < Nc; i++) {
@@ -7825,17 +7835,17 @@ void RawImageSource::ItcWB(bool extra, double &tempref, double &greenref, const 
     bool separated = true;
     int w = -1;
     printf("greenrefraw=%f\n", greenref);
+    reffxxyy(N_t, 2 * Nc); //change if ref color spectral increase
+    reffxxyy_prov(N_t, 2 * Nc);
+    reff_yy(N_t, 2 * Nc);
+    reff_xx(N_t, 2 * Nc);
 
-    //here we select the good spectral color inside the 61 values
+    reffYY(N_t, 2 * Nc);
+    reffYY_prov(N_t, 2 * Nc);
+
+    //here we select the good spectral color inside the 99 values
     if (separated) {
         ColorTemp::tempxy(separated, repref, Tx, Ty, Tz, Ta, Tb, TL, TX, TY, TZ, wbpar); //calculate chroma xy (xyY) for Z known colors on under 90 illuminants
-        reffxxyy(200, 200);//change if ref color spectral increase
-        reffxxyy_prov(200, 200);
-        reff_yy(200, 200);
-        reff_xx(200, 200);
-
-        reffYY(200, 200);
-        reffYY_prov(200, 200);
 
         //find the good spectral values
         //calculate xy reference spectral for tempref
@@ -8193,9 +8203,9 @@ void RawImageSource::ItcWB(bool extra, double &tempref, double &greenref, const 
                 return ltg.student < rtg.student;
             }
         };
-        Tempgreen  Tgstud[107];
+        Tempgreen  Tgstud[N_g];
 
-        for (int i = 0; i < 107; i++) {
+        for (int i = 0; i < N_g; i++) {
             Tgstud[i].student = 1000.f;
             Tgstud[i].five_student = 1000.f;
             Tgstud[i].tempref = 53;
@@ -8251,7 +8261,7 @@ void RawImageSource::ItcWB(bool extra, double &tempref, double &greenref, const 
             }
 
             //float studentgreen[scantempend - scantempbeg] = {};
-            float studentgreen[107] = {};
+            float studentgreen[N_g] = {};
 
             for (int tt = scantempbeg; tt < scantempend; tt++) {//N_t
                 double swp  = (Txyz[tt].XX + Txyz[tt].ZZ + 1.);
@@ -8329,7 +8339,7 @@ void RawImageSource::ItcWB(bool extra, double &tempref, double &greenref, const 
 
         }
 
-        std::sort(Tgstud, Tgstud + 107, Tgstud[0]);
+        std::sort(Tgstud, Tgstud + N_g, Tgstud[0]);
 
         for (int j = 0; j < 20; j++) {
             printf("reftemp=%i refgreen=%i stud=%f \n", Tgstud[j].tempref, Tgstud[j].greenref, Tgstud[j].student);
@@ -8362,7 +8372,7 @@ void RawImageSource::ItcWB(bool extra, double &tempref, double &greenref, const 
     R_curref_reduc(0, 0);
     G_curref_reduc(0, 0);
     B_curref_reduc(0, 0);
-        
+
     reffxxyy_prov(0, 0);
 
     reffYY(0, 0);
