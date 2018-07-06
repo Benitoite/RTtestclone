@@ -160,6 +160,13 @@ private:
         imgsrc = ii->getImageSource ();
 
         tr = getCoarseBitMask (params.coarse);
+        if(imgsrc->getSensorType() == ST_BAYER) {
+            if(params.raw.bayersensor.method!= RAWParams::BayerSensor::getMethodString(RAWParams::BayerSensor::Method::PIXELSHIFT)) {
+                imgsrc->setBorder(params.raw.bayersensor.border);
+            } else {
+                imgsrc->setBorder(std::max(params.raw.bayersensor.border, 2));
+            }
+        }
         imgsrc->getFullSize (fw, fh, tr);
 
         // check the crop params
@@ -197,19 +204,20 @@ private:
         ipf_p.reset (new ImProcFunctions (&params, true));
         ImProcFunctions &ipf = * (ipf_p.get());
 
-        pp = PreviewProps (0, 0, fw, fh, 1);
         imgsrc->setCurrentFrame (params.raw.bayersensor.imageNum);
         imgsrc->preprocess ( params.raw, params.lensProf, params.coarse, params.dirpyrDenoise.enabled);
 
         if (pl) {
             pl->setProgress (0.20);
         }
+        double contrastThresholdDummy;
+        imgsrc->demosaic (params.raw, false, contrastThresholdDummy);
 
-        imgsrc->demosaic ( params.raw);
 
         if (pl) {
             pl->setProgress (0.30);
         }
+        pp = PreviewProps (0, 0, fw, fh, 1);
 
         if (params.retinex.enabled) { //enabled Retinex
             LUTf cdcurve (65536, 0);
@@ -1192,7 +1200,8 @@ private:
         }
 
         if (labResize) { // resize lab data
-            if(labView->W != imw || labView->H != imh) {
+            if ((labView->W != imw || labView->H != imh) &&
+                (params.resize.allowUpscaling || (labView->W >= imw && labView->H >= imh))) {
                 // resize image
                 tmplab = new LabImage (imw, imh);
                 ipf.Lanczos (labView, tmplab, tmpScale);
@@ -1265,7 +1274,8 @@ private:
             pl->setProgress (0.70);
         }
 
-        if (tmpScale != 1.0 && params.resize.method == "Nearest") { // resize rgb data (gamma applied)
+        if (tmpScale != 1.0 && params.resize.method == "Nearest" &&
+            (params.resize.allowUpscaling || (readyImg->getWidth() >= imw && readyImg->getHeight() >= imh))) { // resize rgb data (gamma applied)
             Imagefloat* tempImage = new Imagefloat (imw, imh);
             ipf.resize (readyImg, tempImage, tmpScale);
             delete readyImg;
@@ -1383,7 +1393,7 @@ private:
         assert (params.resize.enabled);
 
         // resize image
-        {
+        if (params.resize.allowUpscaling || (imw <= fw && imh <= fh)) {
             std::unique_ptr<LabImage> resized (new LabImage (imw, imh));
             ipf.Lanczos (tmplab.get(), resized.get(), scale_factor);
             tmplab = std::move (resized);

@@ -154,7 +154,8 @@ set(NONCLISOURCEFILES
     eventmapper.cc
     metadatapanel.cc
     labgrid.cc
-	cat02adap.cc
+    cat02adap.cc
+    softlight.cc
     )
 
 include_directories(BEFORE "${CMAKE_CURRENT_BINARY_DIR}")
