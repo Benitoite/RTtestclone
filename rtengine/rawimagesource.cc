@@ -7370,16 +7370,16 @@ void RawImageSource::ItcWB(bool extra, double &tempref, double &greenref, const 
     array2D<float> G_curref_reduc;
     array2D<float> B_curref_reduc;
 
-    array2D<float> reffxxyy;
-    array2D<float> reffxxyy_prov;
+    array2D<float> reff_spect_xxyy;
+    array2D<float> reff_spect_xxyy_prov;
     array2D<float> YYcurr;
     array2D<float> YY_curref_reduc;
     array2D<float> YYcurr_reduc;
-    array2D<float> reffYY;
-    array2D<float> reffYY_prov;
+    //  array2D<float> reffYY;
+    // array2D<float> reffYY_prov;
 
-    array2D<float> reff_yy;
-    array2D<float> reff_xx;
+    array2D<float> reff_spect_yy_camera;
+    array2D<float> reff_spect_xx_camera;
 
 
     int bfwitc = bfw / 10 + 1 ;// 10 arbitrary value  ; perhaps 4 or 5 or 20
@@ -7663,7 +7663,6 @@ void RawImageSource::ItcWB(bool extra, double &tempref, double &greenref, const 
     };
     int N_t = sizeof(Txyz) / sizeof(Txyz[0]);   //number of temperature White point
 
-    double temp = 5000.;
     int nbt = N_t;
     float **Tx = nullptr;
     float **Ty = nullptr;
@@ -7737,7 +7736,6 @@ void RawImageSource::ItcWB(bool extra, double &tempref, double &greenref, const 
     bmm = new float [N_t];
 
     int siza = 167;//size of histogram
-    float tempcalc = 5000.f;
     int maxval = 25;
 
     //tempref and greenref are camera wb values.
@@ -7751,7 +7749,6 @@ void RawImageSource::ItcWB(bool extra, double &tempref, double &greenref, const 
     for (int tt = 0; tt < N_t; tt++) {
         if (Txyz[tt].Tem > tempref) {
             repref = tt;//show the select temp
-            tempcalc = Txyz[tt].Tem;
             break;
         }
     }
@@ -7826,19 +7823,18 @@ void RawImageSource::ItcWB(bool extra, double &tempref, double &greenref, const 
         inter[p] = 1;
     }
 
-    int Ncreal = 0;
     float estimchrom = 0.f;
 
     bool separated = true;
     int w = -1;
     printf("greenrefraw=%f\n", greenref);
-    reffxxyy(N_t, 2 * Nc); //change if ref color spectral increase
-    reffxxyy_prov(N_t, 2 * Nc);
-    reff_yy(N_t, 2 * Nc);
-    reff_xx(N_t, 2 * Nc);
+    reff_spect_xxyy(N_t, 2 * Nc);
+    reff_spect_xxyy_prov(N_t, 2 * Nc);
+    reff_spect_yy_camera(N_t, 2 * Nc);
+    reff_spect_xx_camera(N_t, 2 * Nc);
 
-    reffYY(N_t, 2 * Nc);
-    reffYY_prov(N_t, 2 * Nc);
+    // reffYY(N_t, 2 * Nc);//in case of
+    //reffYY_prov(N_t, 2 * Nc);
 
     //here we select the good spectral color inside the 99 values
     if (separated) {
@@ -7847,8 +7843,8 @@ void RawImageSource::ItcWB(bool extra, double &tempref, double &greenref, const 
         //find the good spectral values
         //calculate xy reference spectral for tempref
         for (int j = 0; j < Nc ; j++) {
-            reff_xx[j][repref] = TX[j] / (TX[j] + TY[j] +  TZ[j]); // x from xyY
-            reff_yy[j][repref] = TY[j] / (TX[j] + TY[j] +  TZ[j]); // y from xyY
+            reff_spect_xx_camera[j][repref] = TX[j] / (TX[j] + TY[j] +  TZ[j]); // x from xyY
+            reff_spect_yy_camera[j][repref] = TY[j] / (TX[j] + TY[j] +  TZ[j]); // y from xyY
         }
 
         //initialize calculation of xy current for tempref
@@ -7892,8 +7888,6 @@ void RawImageSource::ItcWB(bool extra, double &tempref, double &greenref, const 
         G_curref_reduc(N_t, sizcurrref);
         B_curref_reduc(N_t, sizcurrref);
 
-        //      float minstudref = 100000.f;
-        //      int goodrefref = 1;
 
         hiss Wbhis [siza];
         int n1 = 0;
@@ -7987,7 +7981,7 @@ void RawImageSource::ItcWB(bool extra, double &tempref, double &greenref, const 
         }
 
         estimchrom /= sizcu4;
-        printf("estimchrom=%f \n", estimchrom);
+        //printf("estimchrom=%f \n", estimchrom);
 
         if (settings->itcwb_sort) { //sort in ascending with chroma values
 
@@ -8033,7 +8027,7 @@ void RawImageSource::ItcWB(bool extra, double &tempref, double &greenref, const 
 
             for (int j = 0; j < Nc ; j++) {
                 if (good_spectral[j] == 0) {
-                    float deltaE = SQR(xx_curref_reduc[i][repref] -  reff_xx[j][repref]) + SQR(yy_curref_reduc[i][repref] -  reff_yy[j][repref]);
+                    float deltaE = SQR(xx_curref_reduc[i][repref] -  reff_spect_xx_camera[j][repref]) + SQR(yy_curref_reduc[i][repref] -  reff_spect_yy_camera[j][repref]);
 
                     if (deltaE < mindeltaE) {
                         mindeltaE = deltaE;
@@ -8059,13 +8053,6 @@ void RawImageSource::ItcWB(bool extra, double &tempref, double &greenref, const 
             G_curref_reduc[i][repref] = g;
             B_curref_reduc[i][repref] = b;
 
-        }
-
-        for (int i = 0; i < Nc; i++) {
-            if (good_spectral[i] == 1) {
-                // printf("N=%i gs=%i\n", i, good_spectral[i]);
-                Ncreal += 1;
-            };
         }
 
     }
@@ -8095,13 +8082,12 @@ void RawImageSource::ItcWB(bool extra, double &tempref, double &greenref, const 
     kk = -1;
 
     for (int tt = 0; tt < N_t; tt++) {//N_t
-        double swp  = (Txyz[tt].XX + Txyz[tt].ZZ + 1.);
-        double xwp = Txyz[tt].XX / swp;
-        double ywp = 1. / swp;
+        //   double swp  = (Txyz[tt].XX + Txyz[tt].ZZ + 1.);
+        //   double xwp = Txyz[tt].XX / swp;
+        //   double ywp = 1. / swp;
 
 
         for (int i = 0; i < w; i++) {
-            //  float xx, yy, zz;
             float x_c = 0.f, y_c = 0.f, Y_c = 0.f;
             float x_x = 0.f, y_y = 0.f, z_z = 0.f;
 
@@ -8118,9 +8104,9 @@ void RawImageSource::ItcWB(bool extra, double &tempref, double &greenref, const 
         }
 
         for (int j = 0; j < Nc ; j++) {
-            reffxxyy_prov[2 * j][tt] = Tx[j][tt] / (Tx[j][tt] + Ty[j][tt] +  Tz[j][tt]); // x from xyY
-            reffxxyy_prov[2 * j + 1][tt] =  Ty[j][tt] / (Tx[j][tt] + Ty[j][tt] +  Tz[j][tt]); // y from xyY
-            reffYY_prov[j][tt] = Ty[j][tt];//Y
+            reff_spect_xxyy_prov[2 * j][tt] = Tx[j][tt] / (Tx[j][tt] + Ty[j][tt] +  Tz[j][tt]); // x from xyY
+            reff_spect_xxyy_prov[2 * j + 1][tt] =  Ty[j][tt] / (Tx[j][tt] + Ty[j][tt] +  Tz[j][tt]); // y from xyY
+            //reffYY_prov[j][tt] = Ty[j][tt];//Y
             //   printf("w=%i tt=%i xx=%f yy=%f\n",j, tt,reffxxyy_prov[2 * kk][tt] ,reffxxyy_prov[2 * kk + 1][tt]);
 
         }
@@ -8133,10 +8119,10 @@ void RawImageSource::ItcWB(bool extra, double &tempref, double &greenref, const 
                 //we calculate now absolute chroma for each spectral color
                 //                   reffxxyy[2 * kk][tt]  = fabs(reffxxyy_prov[2 * i][tt] - xwp);
                 //                   reffxxyy[2 * kk + 1][tt] = fabs(reffxxyy_prov[2 * i + 1][tt] - ywp);
-                reffxxyy[2 * kk][tt]  = reffxxyy_prov[2 * i][tt];
-                reffxxyy[2 * kk + 1][tt] = reffxxyy_prov[2 * i + 1][tt];
+                reff_spect_xxyy[2 * kk][tt]  = reff_spect_xxyy_prov[2 * i][tt];
+                reff_spect_xxyy[2 * kk + 1][tt] = reff_spect_xxyy_prov[2 * i + 1][tt];
                 //printf("w=%i tt=%i xx=%f yy=%f\n",i, tt,reffxxyy[2 * kk][tt] ,reffxxyy[2 * kk + 1][tt]);
-                reffYY[kk][tt] = reffYY_prov[i][tt];
+                // reffYY[kk][tt] = reffYY_prov[i][tt];
             }
         }
 
@@ -8170,7 +8156,7 @@ void RawImageSource::ItcWB(bool extra, double &tempref, double &greenref, const 
         float student = 0.f;
 
 
-        studentXY(xxyycurr_reduc, reffxxyy, 2 * w, 2 * kk, tt, student); //for xy
+        studentXY(xxyycurr_reduc, reff_spect_xxyy, 2 * w, 2 * kk, tt, student); //for xy
         //printf("tt=%i  st=%f\n", tt,  student);
         float abstud = fabs(student);
 
@@ -8257,13 +8243,12 @@ void RawImageSource::ItcWB(bool extra, double &tempref, double &greenref, const 
                 bmm[tt] = bm / gm;
             }
 
-            //float studentgreen[scantempend - scantempbeg] = {};
             float studentgreen[N_g] = {};
 
             for (int tt = scantempbeg; tt < scantempend; tt++) {//N_t
-                double swp  = (Txyz[tt].XX + Txyz[tt].ZZ + 1.);
-                double xwp = Txyz[tt].XX / swp;
-                double ywp = 1. / swp;
+                //   double swp  = (Txyz[tt].XX + Txyz[tt].ZZ + 1.);
+                //   double xwp = Txyz[tt].XX / swp;
+                //   double ywp = 1. / swp;
 
 
                 for (int i = 0; i < w; i++) {
@@ -8281,9 +8266,9 @@ void RawImageSource::ItcWB(bool extra, double &tempref, double &greenref, const 
                 }
 
                 for (int j = 0; j < Nc ; j++) {
-                    reffxxyy_prov[2 * j][tt] = Tx[j][tt] / (Tx[j][tt] + Ty[j][tt] +  Tz[j][tt]); // x from xyY
-                    reffxxyy_prov[2 * j + 1][tt] =  Ty[j][tt] / (Tx[j][tt] + Ty[j][tt] +  Tz[j][tt]); // y from xyY
-                    reffYY_prov[j][tt] = Ty[j][tt];//Y
+                    reff_spect_xxyy_prov[2 * j][tt] = Tx[j][tt] / (Tx[j][tt] + Ty[j][tt] +  Tz[j][tt]); // x from xyY
+                    reff_spect_xxyy_prov[2 * j + 1][tt] =  Ty[j][tt] / (Tx[j][tt] + Ty[j][tt] +  Tz[j][tt]); // y from xyY
+                    // reffYY_prov[j][tt] = Ty[j][tt];//Y
                     //   printf("w=%i tt=%i xx=%f yy=%f\n",j, tt,reffxxyy_prov[2 * kk][tt] ,reffxxyy_prov[2 * kk + 1][tt]);
 
                 }
@@ -8311,15 +8296,15 @@ void RawImageSource::ItcWB(bool extra, double &tempref, double &greenref, const 
                 for (int i = 0; i < Nc ; i++) {
                     if (good_spectral[i] == 1) {
                         kkg++;
-                        reffxxyy[2 * kkg][tt]  = reffxxyy_prov[2 * i][tt];
-                        reffxxyy[2 * kkg + 1][tt] = reffxxyy_prov[2 * i + 1][tt];
-                        reffYY[kkg][tt] = reffYY_prov[i][tt];
+                        reff_spect_xxyy[2 * kkg][tt]  = reff_spect_xxyy_prov[2 * i][tt];
+                        reff_spect_xxyy[2 * kkg + 1][tt] = reff_spect_xxyy_prov[2 * i + 1][tt];
+                        //   reffYY[kkg][tt] = reffYY_prov[i][tt];
                     }
                 }
 
                 float studentgr = 0.f;
 
-                studentXY(xxyycurr_reduc, reffxxyy, 2 * w, 2 * kkg, tt, studentgr); //for xy
+                studentXY(xxyycurr_reduc, reff_spect_xxyy, 2 * w, 2 * kkg, tt, studentgr); //for xy
                 float abstudgr = fabs(studentgr);
 
                 if (abstudgr < minstudgr) {  // find the minimum Student
@@ -8357,11 +8342,11 @@ void RawImageSource::ItcWB(bool extra, double &tempref, double &greenref, const 
     yy_curref(0, 0);
     YY_curref(0, 0);
 
-    reffxxyy(0, 0);
+    reff_spect_xxyy(0, 0);
     YYcurr(0, 0);
     YYcurr_reduc(0, 0);
-    reff_yy(0, 0);
-    reff_xx(0, 0);
+    reff_spect_yy_camera(0, 0);
+    reff_spect_xx_camera(0, 0);
     xx_curref_reduc(0, 0);
     yy_curref_reduc(0, 0);
     YY_curref_reduc(0, 0);
@@ -8370,10 +8355,10 @@ void RawImageSource::ItcWB(bool extra, double &tempref, double &greenref, const 
     G_curref_reduc(0, 0);
     B_curref_reduc(0, 0);
 
-    reffxxyy_prov(0, 0);
+    reff_spect_xxyy_prov(0, 0);
 
-    reffYY(0, 0);
-    reffYY_prov(0, 0);
+//   reffYY(0, 0);
+//   reffYY_prov(0, 0);
 
     avg_rm = 10000.f * rmm[goodref];
     avg_gm = 10000.* gmm[goodref];
