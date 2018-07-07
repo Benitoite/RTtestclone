@@ -461,6 +461,7 @@ struct ColorToningParams {
     double labgridAHigh;
     double labgridBHigh;
     static const double LABGRID_CORR_MAX;
+    static const double LABGRID_CORR_SCALE;
 
     ColorToningParams();
 
@@ -1006,6 +1007,7 @@ struct ResizeParams {
     int dataspec;
     int width;
     int height;
+    bool allowUpscaling;
 
     ResizeParams();
 
@@ -1278,6 +1280,17 @@ struct FilmSimulationParams {
 };
 
 
+struct SoftLightParams {
+    bool enabled;
+    int strength;
+
+    SoftLightParams();
+
+    bool operator==(const SoftLightParams &other) const;
+    bool operator!=(const SoftLightParams &other) const;
+};
+
+
 /**
   * Parameters for RAW demosaicing, common to all sensor type
   */
@@ -1290,7 +1303,9 @@ struct RAWParams {
             AMAZE,
             AMAZEVNG4,
             RCD,
+            RCDVNG4,
             DCB,
+            DCBVNG4,
             LMMSE,
             IGV,
             AHD,
@@ -1316,6 +1331,7 @@ struct RAWParams {
         };
 
         Glib::ustring method;
+        int border;
         int imageNum;
         int ccSteps;
         double black0;
@@ -1373,6 +1389,7 @@ struct RAWParams {
         enum class Method {
             FOUR_PASS,
             THREE_PASS,
+            TWO_PASS,
             ONE_PASS,
             FAST,
             MONO,
@@ -1482,6 +1499,7 @@ public:
     DirPyrEqualizerParams   dirpyrequalizer; ///< directional pyramid wavelet parameters
     HSVEqualizerParams      hsvequalizer;    ///< hsv wavelet parameters
     FilmSimulationParams    filmSimulation;  ///< film simulation parameters
+    SoftLightParams         softlight;       ///< softlight parameters
     int                     rank;            ///< Custom image quality ranking
     int                     colorlabel;      ///< Custom color label
     bool                    inTrash;         ///< Marks deleted image

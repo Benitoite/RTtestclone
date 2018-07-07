@@ -570,6 +570,7 @@ public:
     bool width;
     bool height;
     bool enabled;
+    bool allowUpscaling;
 };
 
 class ColorManagementParamsEdited
@@ -764,6 +765,13 @@ public:
     bool strength;
 };
 
+class SoftLightParamsEdited
+{
+public:
+    bool enabled;
+    bool strength;
+};
+
 class RAWParamsEdited
 {
 
@@ -773,6 +781,7 @@ public:
 
     public:
         bool method;
+        bool border;
         bool imageNum;
         bool ccSteps;
         bool exBlack0;
@@ -900,6 +909,7 @@ public:
     WaveletParamsEdited             wavelet;
     HSVEqualizerParamsEdited      hsvequalizer;
     FilmSimulationParamsEdited    filmSimulation;
+    SoftLightParamsEdited         softlight;
     MetaDataParamsEdited          metadata;
     bool                          exif;
     bool                          iptc;

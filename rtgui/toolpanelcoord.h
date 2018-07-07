@@ -79,6 +79,7 @@
 #include "prsharpening.h"
 #include "fattaltonemap.h"
 #include "localcontrast.h"
+#include "softlight.h"
 #include "guiutils.h"
 
 class ImageEditorCoordinator;
@@ -135,6 +136,7 @@ protected:
     Wavelet * wavelet;
     DirPyrEqualizer* dirpyrequalizer;
     HSVEqualizer* hsvequalizer;
+    SoftLight *softlight;
     FilmSimulation *filmSimulation;
     SensorBayer * sensorbayer;
     SensorXTrans * sensorxtrans;
