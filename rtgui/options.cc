@@ -550,8 +550,8 @@ void Options::setDefaults ()
     rtSettings.itcwb_thres = 20;//between 10 to 40
     rtSettings.itcwb_sort = false;
     rtSettings.itcwb_greenrange = 0;//between 0 to 2
-    rtSettings.itcwb_greendeltatemp = 1;//between 0 and 4
-    rtSettings.itcwb_forceextra = false;
+    rtSettings.itcwb_greendeltatemp = 2;//between 0 and 4
+    rtSettings.itcwb_forceextra = true;
     
     rtSettings.protectred = 60;
     rtSettings.protectredh = 0.3;

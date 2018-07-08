@@ -7675,7 +7675,7 @@ void RawImageSource::ItcWB(bool extra, double &tempref, double &greenref, const 
     double *TZ = nullptr;
     int *good_spectral = nullptr;
 
-    int Nc = 100;//100 number of reference spectral colors, I think it is enough to retriev good values
+    int Nc = 102 + 1;//100 number of reference spectral colors, I think it is enough to retriev good values
     Tx = new float*[Nc];
 
     for (int i = 0; i < Nc; i++) {
@@ -8276,7 +8276,7 @@ void RawImageSource::ItcWB(bool extra, double &tempref, double &greenref, const 
                 kkg = -1;
 
                 //degrade correllation with color high chroma, but not too much...seems not good, but ??
-                if (estimchrom < 0.045f) {
+                if (estimchrom < 0.025f) {
 
                     good_spectral[0] = 1;//blue
                     //good_spectral[1] = 1;//blue
@@ -8327,8 +8327,35 @@ void RawImageSource::ItcWB(bool extra, double &tempref, double &greenref, const 
             printf("reftemp=%i refgreen=%i stud=%f \n", Tgstud[j].tempref, Tgstud[j].greenref, Tgstud[j].student);
         }
 
-        goodref =  Tgstud[0].tempref;
-        int greengood = Tgstud[0].greenref;
+        //now search the value of green the nearest of 1 with a good student value
+        // I take the 3 first values
+        int greengood;
+        int greengoodprov;
+        int goodrefprov;
+        int goodref0 =  Tgstud[0].tempref;
+        int greengood0 = Tgstud[0].greenref - 28;//28 green = 1
+        int goodref1 =  Tgstud[1].tempref;
+        int greengood1 = Tgstud[1].greenref - 28;
+        int goodref2 =  Tgstud[2].tempref;
+        int greengood2 = Tgstud[2].greenref - 28;
+
+        if (fabs(greengood2) < fabs(greengood1)) {
+            greengoodprov = greengood2;
+            goodrefprov = goodref2;
+        } else {
+            greengoodprov = greengood1;
+            goodrefprov = goodref1;
+
+        }
+
+        if (fabs(greengoodprov) < fabs(greengood0)) {
+            goodref = goodrefprov;
+            greengood = greengoodprov + 28;
+        } else {
+            goodref = goodref0;
+            greengood = greengood0 + 28;
+        }
+
         tempitc = Txyz[goodref].Tem;
         greenitc = gree[greengood].green;
 

@@ -226,7 +226,9 @@ public:
     static const double ColorBluelobelia[97];
     static const double ColorWhiteojaka[97];
     static const double ColorWhitepetunia[97];
-
+    static const double ColorWhitepelargonia[97];
+    static const double ColorWhitepaeivaen[97];
+    static const double JDC468_B14_75greyspect[97];
     static const double Colorblue_spect[97];
 
     static const double JDC468_OraO18_spect[97]; //468 O18
