@@ -7523,9 +7523,9 @@ void RawImageSource::ItcWB(bool extra, double &tempref, double &greenref, const 
     } RangeGreen;
 
     RangeGreen Rangestandard;
-    Rangestandard.begin =  9;
+    Rangestandard.begin =  8;
     Rangestandard.end =  70;
-    Rangestandard.ng =  61;
+    Rangestandard.ng =  62;
 
     RangeGreen Rangeextand;
     Rangeextand.begin =  4;
@@ -7848,7 +7848,7 @@ void RawImageSource::ItcWB(bool extra, double &tempref, double &greenref, const 
     //reffYY_prov(N_t, 2 * Nc);
 
     //here we select the good spectral color inside the 113 values
-    //call tempxy to calculate for 113 color references Temp and XYZ with cat02
+    //call tempxy to calculate for 114 color references Temp and XYZ with cat02
 
     if (separated) {
         ColorTemp::tempxy(separated, repref, Tx, Ty, Tz, Ta, Tb, TL, TX, TY, TZ, wbpar); //calculate chroma xy (xyY) for Z known colors on under 90 illuminants
@@ -7878,7 +7878,7 @@ void RawImageSource::ItcWB(bool extra, double &tempref, double &greenref, const 
 
         }
 
-        //histogram xy depend of temp...but in middle cases..
+        //histogram xy depend of temp...but in most cases D45 ..D65..
         //calculate for this image the mean values for each family of color, near histogram x y (number)
         //xy vary from x 0..0.77  y 0..0.82
         //neutral values are near x=0.34 0.33 0.315 0.37 y =0.35 0.36 0.34
@@ -8141,6 +8141,7 @@ void RawImageSource::ItcWB(bool extra, double &tempref, double &greenref, const 
 
 
         /*
+        //cat02 not need and does not work well
                 float nnx, nny, nnz;
 
                 if(wbpar.wbcat02Method == "cam") {//code no update...
@@ -8193,7 +8194,7 @@ void RawImageSource::ItcWB(bool extra, double &tempref, double &greenref, const 
         Tempgreen  Tgstud[N_g];
 
         for (int i = 0; i < N_g; i++) {//init variables with
-            Tgstud[i].student = 1000.f;
+            Tgstud[i].student = 1000.f;//max value to initialize
             Tgstud[i].tempref = 53;
             Tgstud[i].greenref = 39;
 
@@ -8278,7 +8279,7 @@ void RawImageSource::ItcWB(bool extra, double &tempref, double &greenref, const 
                 kkg = -1;
 
                 //degrade correllation with color high chroma, but not too much...seems not good, but keep in case of??
-                if (estimchrom < 0.025f) {
+                if (estimchrom < 0.025f) {//very smal value of chroma for image
 
                     good_spectral[0] = 1;//blue
                     //good_spectral[1] = 1;//blue
@@ -8331,7 +8332,7 @@ void RawImageSource::ItcWB(bool extra, double &tempref, double &greenref, const 
         //now search the value of green the nearest of 1 with a good student value
         // I take the 3 first values
         //I admit a symetrie in green coefiicient for rgb multiplier...probably not excatly true
-        //perhaps we can used a Snedecor test ?
+        //perhaps we can used a Snedecor test ? but why...at least we have confidence interval > 90%
         int greengood;
         int greengoodprov;
         int goodrefprov;

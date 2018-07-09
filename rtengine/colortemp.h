@@ -228,7 +228,7 @@ public:
     static const double ColorWhitepetunia[97];
     static const double ColorWhitepelargonia[97];
     static const double ColorWhitepaeivaen[97];
-    static const double JDC468_B14_75yelspect[97];
+    static const double JDC468_B14_75Redspect[97];
     static const double Colorblue_spect[97];
     static const double ColorGreenkoriste[97];
     static const double ColorGreenpoimulehti[97];

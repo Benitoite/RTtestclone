@@ -443,7 +443,7 @@ const double ColorTemp::ColorRedpetunia_spect[97] = {
     0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
 };
 
-const double ColorTemp::JDC468_B14_75yelspect[97] = {
+const double ColorTemp::JDC468_B14_75Redspect[97] = {
     0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
     0.1588, 0.1780, 0.1980, 0.2310, 0.2789, 0.3213, 0.4585, 0.5324, 0.6059, 0.6334, 0.6609, 0.6630, 0.6674, 0.6640, 0.6599, 0.6600, 0.6551, 0.6532, 0.6472, 0.6450,
     0.6423, 0.6467, 0.6485, 0.6500, 0.6515, 0.6456, 0.6379, 0.6285, 0.6193, 0.6150, 0.6121, 0.6056, 0.6026, 0.5812, 0.5678, 0.5490, 0.5310, 0.5307, 0.5245, 0.5300,
@@ -2576,10 +2576,10 @@ void ColorTemp::tempxy(bool separated, int &repref, float **Tx, float **Ty, floa
         ColorYellowpensashanhikki1, ColorYellowpensashanhikki2,  ColorBluehiidenvirna,  ColorBluekurkkuyrtti, //86
         ColorPinksiankaersaemoe, ColorVioletharakankello, ColorVioletalsikeapila, ColorVioletakilleija, ColorOrangekehaekukka,//91
         ColorRedpihlaja, ColorVioletpetunia, ColorVioletorvokki, ColorBluesinisievikki, ColorBlueiisoppi,  ColorBluelobelia, //97
-        ColorWhiteojaka, ColorWhitepetunia, ColorWhitepelargonia, ColorWhitepaeivaen, JDC468_B14_75yelspect,//102
+        ColorWhiteojaka, ColorWhitepetunia, ColorWhitepelargonia, ColorWhitepaeivaen, JDC468_B14_75Redspect,//102
         ColorGreenkoriste, ColorGreenpoimulehti, ColorGreenhopeapaju, //105
         ColorReduuden, ColorRedpajuan, ColorRedjaloan, ColorBlueukon, ColorBlueorvokki, ColorBluemalvikki, //111
-        ColorBlackmaito, ColorOrangpihlaja, ColorBlackpihlaja //113
+        ColorBlackmaito, ColorOrangpihlaja, ColorBlackpihlaja //114
     };
 
 
@@ -2756,14 +2756,14 @@ void ColorTemp::tempxy(bool separated, int &repref, float **Tx, float **Ty, floa
 
             for (int i = 0; i < N_c; i++) {
                 spectrum_to_color_xyz_daylight(spec_colorforxcyc[i], m11, m22, TX[i], TY[i], TZ[i]);
-/*
-                float XX = TX[i] * 65535.f;
-                float YY = TY[i] * 65535.f;
-                float ZZ = TZ[i] * 65535.f;
-                float L, a, b;
-                Color::XYZ2Lab(XX, YY, ZZ, L, a, b);//only to see Lab values in console
-                printf("N=%i L=%f a=%f b=%f\n", i, L / 327.68f, a / 327.68f, b / 327.68f);
-*/
+                /*
+                                float XX = TX[i] * 65535.f;
+                                float YY = TY[i] * 65535.f;
+                                float ZZ = TZ[i] * 65535.f;
+                                float L, a, b;
+                                Color::XYZ2Lab(XX, YY, ZZ, L, a, b);//only to see Lab values in console
+                                printf("N=%i L=%f a=%f b=%f\n", i, L / 327.68f, a / 327.68f, b / 327.68f);
+                */
             }
 
         }
