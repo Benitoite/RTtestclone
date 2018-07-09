@@ -7391,39 +7391,50 @@ void RawImageSource::ItcWB(bool extra, double &tempref, double &greenref, const 
 
     typedef struct WbGreen {
         double green;
-        float snedecor;//1. actually but put in case of intervalle de confiance
+        float snedecor;//1. actually but put in case of confiance interval
     } WbGreen;
 
-    WbGreen gree[107] = {
-        {0.300, 1.f},
-        {0.350, 1.f},
+    WbGreen gree[118] = {//symetric coefficient between 0.717 and 1.40
         {0.400, 1.f},
-        {0.433, 1.f},
-        {0.466, 1.f},
         {0.500, 1.f},
-        {0.533, 1.f},
-        {0.566, 1.f},
+        {0.550, 1.f},
         {0.600, 1.f},
-        {0.633, 1.f},
-        {0.666, 1.f},
+        {0.625, 1.f},
+        {0.650, 1.f},
+        {0.675, 1.f},
         {0.700, 1.f},
-        {0.733, 1.f},
-        {0.766, 1.f},
+        {0.714, 1.f},
+        {0.727, 1.f},
+        {0.741, 1.f},
+        {0.755, 1.f},
+        {0.769, 1.f},
+        {0.784, 1.f},
         {0.800, 1.f},
-        {0.825, 1.f},
-        {0.850, 1.f},
-        {0.875, 1.f},
-        {0.900, 1.f},
-        {0.910, 1.f},
-        {0.920, 1.f},
-        {0.930, 1.f},
-        {0.940, 1.f},
-        {0.950, 1.f},
-        {0.960, 1.f},
-        {0.970, 1.f},
+        {0.806, 1.f},
+        {0.813, 1.f},
+        {0.820, 1.f},
+        {0.826, 1.f},
+        {0.833, 1.f},
+        {0.840, 1.f},
+        {0.847, 1.f},
+        {0.855, 1.f},
+        {0.862, 1.f},
+        {0.870, 1.f},
+        {0.877, 1.f},
+        {0.885, 1.f},
+        {0.893, 1.f},
+        {0.901, 1.f},
+        {0.909, 1.f},
+        {0.917, 1.f},
+        {0.926, 1.f},
+        {0.935, 1.f},
+        {0.943, 1.f},
+        {0.952, 1.f},
+        {0.962, 1.f},
+        {0.971, 1.f},
         {0.980, 1.f},
         {0.990, 1.f},
-        {1.000, 1.f},//28
+        {1.000, 1.f},//39
         {1.010, 1.f},
         {1.020, 1.f},
         {1.030, 1.f},
@@ -7501,7 +7512,7 @@ void RawImageSource::ItcWB(bool extra, double &tempref, double &greenref, const 
         {3.400, 1.f},
         {3.600, 1.f},
         {3.800, 1.f},
-        {4.00, 1.f}
+        {4.000, 1.f}
     };
     int N_g = sizeof(gree) / sizeof(gree[0]);   //number of green
 
@@ -7512,14 +7523,14 @@ void RawImageSource::ItcWB(bool extra, double &tempref, double &greenref, const 
     } RangeGreen;
 
     RangeGreen Rangestandard;
-    Rangestandard.begin =  14;
-    Rangestandard.end =  59;
-    Rangestandard.ng =  45;
+    Rangestandard.begin =  9;
+    Rangestandard.end =  70;
+    Rangestandard.ng =  61;
 
     RangeGreen Rangeextand;
-    Rangeextand.begin =  8;
-    Rangeextand.end =  70;
-    Rangeextand.ng =  62;
+    Rangeextand.begin =  4;
+    Rangeextand.end =  77;
+    Rangeextand.ng =  73;
 
     RangeGreen Rangemax;
     Rangemax.begin =  0;
@@ -7675,7 +7686,7 @@ void RawImageSource::ItcWB(bool extra, double &tempref, double &greenref, const 
     double *TZ = nullptr;
     int *good_spectral = nullptr;
 
-    int Nc = 102 + 1;//100 number of reference spectral colors, I think it is enough to retriev good values
+    int Nc = 113 + 1;//113 number of reference spectral colors, I think it is enough to retrieve good values
     Tx = new float*[Nc];
 
     for (int i = 0; i < Nc; i++) {
@@ -7778,7 +7789,6 @@ void RawImageSource::ItcWB(bool extra, double &tempref, double &greenref, const 
         bmm[tt] = bm / gm;
     }
 
-    //call tempxy to calculate for 98 color references Temp and XYZ with cat02
     struct hiss {
         int histnum;
         int index;
@@ -7789,6 +7799,7 @@ void RawImageSource::ItcWB(bool extra, double &tempref, double &greenref, const 
         }
 
     } ;
+
     //intermediate structure
     struct chrom {
         float chroxy_number;
@@ -7836,7 +7847,9 @@ void RawImageSource::ItcWB(bool extra, double &tempref, double &greenref, const 
     // reffYY(N_t, 2 * Nc);//in case of
     //reffYY_prov(N_t, 2 * Nc);
 
-    //here we select the good spectral color inside the 99 values
+    //here we select the good spectral color inside the 113 values
+    //call tempxy to calculate for 113 color references Temp and XYZ with cat02
+
     if (separated) {
         ColorTemp::tempxy(separated, repref, Tx, Ty, Tz, Ta, Tb, TL, TX, TY, TZ, wbpar); //calculate chroma xy (xyY) for Z known colors on under 90 illuminants
 
@@ -7865,7 +7878,7 @@ void RawImageSource::ItcWB(bool extra, double &tempref, double &greenref, const 
 
         }
 
-        //histogram xy
+        //histogram xy depend of temp...but in middle cases..
         //calculate for this image the mean values for each family of color, near histogram x y (number)
         //xy vary from x 0..0.77  y 0..0.82
         //neutral values are near x=0.34 0.33 0.315 0.37 y =0.35 0.36 0.34
@@ -8039,7 +8052,7 @@ void RawImageSource::ItcWB(bool extra, double &tempref, double &greenref, const 
             good_spectral[kN] = 1;//good spectral are spectral color that match color histogram xy
         }
 
-//reconvert to RGB
+//reconvert to RGB for "reduction"
         for (int i = 0; i < w; i++) {
             float X = 65535.f * xx_curref_reduc[i][repref] * YY_curref_reduc[i][repref] / yy_curref_reduc[i][repref];
             float Y = 65535.f * YY_curref_reduc[i][repref];
@@ -8168,17 +8181,8 @@ void RawImageSource::ItcWB(bool extra, double &tempref, double &greenref, const 
     }
 
     if (extra) {
-//I do not use always this algoritms because in some cases, differences between Student are so small that result is not always good
-// I use it when camara groen wb is out of limits "habitual"
-//now we have found the first good value with result for temp = goodref and for green = greenitc (either greenitc = camera, or greenitc = 1.
-//we must vary greenitc to find the best student coefficient correlation and then adjust temp
-// create a structure where we can store greenitc, goodref, student but for student I will take the absolute sum of goodref -2 to goodref +2 if exist
-//another loop where greenitc vary form intial value to
-//call another time to find RGB multipliers, but while limiting temp to goodref -10 to goodref + 10 if exist rmm, gmm, bmm[tt]
-//then as after 7929
         struct Tempgreen {
             float student;
-            float five_student;
             int tempref;
             int greenref;
             bool operator()(const Tempgreen& ltg, const Tempgreen& rtg)
@@ -8188,11 +8192,10 @@ void RawImageSource::ItcWB(bool extra, double &tempref, double &greenref, const 
         };
         Tempgreen  Tgstud[N_g];
 
-        for (int i = 0; i < N_g; i++) {
+        for (int i = 0; i < N_g; i++) {//init variables with
             Tgstud[i].student = 1000.f;
-            Tgstud[i].five_student = 1000.f;
             Tgstud[i].tempref = 53;
-            Tgstud[i].greenref = 28;
+            Tgstud[i].greenref = 39;
 
         }
 
@@ -8243,7 +8246,6 @@ void RawImageSource::ItcWB(bool extra, double &tempref, double &greenref, const 
                 bmm[tt] = bm / gm;
             }
 
-            float studentgreen[N_g] = {};
 
             for (int tt = scantempbeg; tt < scantempend; tt++) {//N_t
                 //   double swp  = (Txyz[tt].XX + Txyz[tt].ZZ + 1.);
@@ -8275,7 +8277,7 @@ void RawImageSource::ItcWB(bool extra, double &tempref, double &greenref, const 
 
                 kkg = -1;
 
-                //degrade correllation with color high chroma, but not too much...seems not good, but ??
+                //degrade correllation with color high chroma, but not too much...seems not good, but keep in case of??
                 if (estimchrom < 0.025f) {
 
                     good_spectral[0] = 1;//blue
@@ -8312,7 +8314,6 @@ void RawImageSource::ItcWB(bool extra, double &tempref, double &greenref, const 
                     goodrefgr = tt;
                 }
 
-                studentgreen[tt] = fabs(studentgr);
                 Tgstud[gr].tempref = goodrefgr;
                 Tgstud[gr].greenref = gr;
                 Tgstud[gr].student = minstudgr;
@@ -8329,15 +8330,17 @@ void RawImageSource::ItcWB(bool extra, double &tempref, double &greenref, const 
 
         //now search the value of green the nearest of 1 with a good student value
         // I take the 3 first values
+        //I admit a symetrie in green coefiicient for rgb multiplier...probably not excatly true
+        //perhaps we can used a Snedecor test ?
         int greengood;
         int greengoodprov;
         int goodrefprov;
         int goodref0 =  Tgstud[0].tempref;
-        int greengood0 = Tgstud[0].greenref - 28;//28 green = 1
+        int greengood0 = Tgstud[0].greenref - 39;//39 green = 1
         int goodref1 =  Tgstud[1].tempref;
-        int greengood1 = Tgstud[1].greenref - 28;
+        int greengood1 = Tgstud[1].greenref - 39;
         int goodref2 =  Tgstud[2].tempref;
-        int greengood2 = Tgstud[2].greenref - 28;
+        int greengood2 = Tgstud[2].greenref - 39;
 
         if (fabs(greengood2) < fabs(greengood1)) {
             greengoodprov = greengood2;
@@ -8350,10 +8353,10 @@ void RawImageSource::ItcWB(bool extra, double &tempref, double &greenref, const 
 
         if (fabs(greengoodprov) < fabs(greengood0)) {
             goodref = goodrefprov;
-            greengood = greengoodprov + 28;
+            greengood = greengoodprov + 39;
         } else {
             goodref = goodref0;
-            greengood = greengood0 + 28;
+            greengood = greengood0 + 39;
         }
 
         tempitc = Txyz[goodref].Tem;
@@ -8582,7 +8585,7 @@ void RawImageSource::WBauto(double & tempref, double & greenref, array2D<float> 
     if (wbpar.method == "autitcgreen") {
         bool extra = false;
 
-        if (greenref > 0.8 && greenref < 1.40) {
+        if (greenref > 0.77 && greenref < 1.3) {
             greenitc = greenref;
             extra = false;
 

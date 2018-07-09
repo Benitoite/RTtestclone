@@ -230,6 +230,17 @@ public:
     static const double ColorWhitepaeivaen[97];
     static const double JDC468_B14_75greyspect[97];
     static const double Colorblue_spect[97];
+    static const double ColorGreenkoriste[97];
+    static const double ColorGreenpoimulehti[97];
+    static const double ColorGreenhopeapaju[97];
+    static const double ColorReduuden[97];
+    static const double ColorRedpajuan[97];
+    static const double ColorRedjaloan[97];
+    static const double ColorBlueukon[97];
+    static const double ColorBlueorvokki[97];
+    static const double ColorBluemalvikki[97];
+    static const double ColorBlackmaito[97];
+    static const double ColorOrangpihlaja[97];
 
     static const double JDC468_OraO18_spect[97]; //468 O18
     static const double JDC468_OraD17_spect[97]; //468 D17
