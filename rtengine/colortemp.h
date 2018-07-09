@@ -228,7 +228,7 @@ public:
     static const double ColorWhitepetunia[97];
     static const double ColorWhitepelargonia[97];
     static const double ColorWhitepaeivaen[97];
-    static const double JDC468_B14_75greyspect[97];
+    static const double JDC468_B14_75yelspect[97];
     static const double Colorblue_spect[97];
     static const double ColorGreenkoriste[97];
     static const double ColorGreenpoimulehti[97];
@@ -241,6 +241,7 @@ public:
     static const double ColorBluemalvikki[97];
     static const double ColorBlackmaito[97];
     static const double ColorOrangpihlaja[97];
+    static const double ColorBlackpihlaja[97];
 
     static const double JDC468_OraO18_spect[97]; //468 O18
     static const double JDC468_OraD17_spect[97]; //468 D17
