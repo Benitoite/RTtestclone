@@ -242,6 +242,25 @@ public:
     static const double ColorBlackmaito[97];
     static const double ColorOrangpihlaja[97];
     static const double ColorBlackpihlaja[97];
+    static const double ColorViolA1_spect[97];
+    static const double ColorViolA4_spect[97];
+    static const double ColorViolA6_spect[97];
+    static const double ColorBlueSkyK3_spect[97];
+    static const double ColorBlueSkyK9_spect[97];
+    static const double ColorBlueSkyC4_spect[97];
+    static const double ColorBlueSkyC14_spect[97];
+    static const double ColorBlueSkyE4_spect[97];
+    static const double ColorBlueSkyM1_spect[97];
+    static const double ColorBlueSky2B1_spect[97];
+    static const double ColorBlueSkyT7_spect[97];
+    static const double ColorBlueSkyU19_spect[97];
+    static const double ColorBlueSkyU2_spect[97];
+    static const double ColorBlueSkyT17_spect[97];
+    static const double ColorBlackM8_spect[97];
+    static const double ColorBlackM12_spect[97];
+    static const double ColorBlackM13_spect[97];
+    static const double ColorWhite2B12_spect[97];
+    static const double ColorWhite2B14_spect[97];
 
     static const double JDC468_OraO18_spect[97]; //468 O18
     static const double JDC468_OraD17_spect[97]; //468 D17
