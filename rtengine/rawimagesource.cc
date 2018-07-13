@@ -7686,7 +7686,7 @@ void RawImageSource::ItcWB(bool extra, double &tempref, double &greenref, const 
     double *TZ = nullptr;
     int *good_spectral = nullptr;
 
-    int Nc = 133 + 1;//133 number of reference spectral colors, I think it is enough to retrieve good values
+    int Nc = 143 + 1;//133 number of reference spectral colors, I think it is enough to retrieve good values
     Tx = new float*[Nc];
 
     for (int i = 0; i < Nc; i++) {

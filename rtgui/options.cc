@@ -547,7 +547,7 @@ void Options::setDefaults ()
     rtSettings.amchroma = 40;//between 20 and 140   low values increase effect..and also artifacts, high values reduces
     rtSettings.level0_cbdl = 0;
     rtSettings.level123_cbdl = 30;
-    rtSettings.itcwb_thres = 20;//between 10 to 40
+    rtSettings.itcwb_thres = 30;//between 10 to 40
     rtSettings.itcwb_sort = false;
     rtSettings.itcwb_greenrange = 0;//between 0 to 2
     rtSettings.itcwb_greendeltatemp = 2;//between 0 and 4
