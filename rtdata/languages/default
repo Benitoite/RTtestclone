@@ -2266,8 +2266,8 @@ TP_WBCAM;Cat02 adaptation
 TP_WBCAM_NONE;None
 TP_WBCAM_CAM;Cat02
 TP_WBALANCE_AUTO;Auto
+TP_WBALANCE_STUDLABEL_TOOLTIP;Display calculated Student correlation\nThe lower the student value, the better the correlation\nValues below 0.05 lead to good results
 TP_WBALANCE_STUDLABEL;Student Itcwb: %1
-TP_WBALANCE_STUDLABEL_TOOLTIP;Display choosen Student\n With 30 colors selected 95% confidence interval, lead to a student coefficient about 0.00272\n If value display is inferior to 0.00272, confidence interval is superior to 95% 
 TP_WBALANCE_CAMERA;Camera
 TP_WBALANCE_CLOUDY;Cloudy
 TP_WBALANCE_CUSTOM;Custom
