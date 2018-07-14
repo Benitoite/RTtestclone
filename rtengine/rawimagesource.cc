@@ -7277,7 +7277,7 @@ void static studentXY(array2D<float> & YYcurr, array2D<float> & reffYY,  int siz
 
 
 
-void RawImageSource::ItcWB(bool extra, double &tempref, double &greenref, const LocWBParams &localr, double &tempitc, double &greenitc, array2D<float> &redloc, array2D<float> &greenloc, array2D<float> &blueloc, int bfw, int bfh, double &avg_rm, double &avg_gm, double &avg_bm, const ColorManagementParams &cmp, const RAWParams &raw, const WBParams & wbpar)
+void RawImageSource::ItcWB(bool extra, double &tempref, double &greenref, const LocWBParams &localr, double &tempitc, double &greenitc, float &studgood, array2D<float> &redloc, array2D<float> &greenloc, array2D<float> &blueloc, int bfw, int bfh, double &avg_rm, double &avg_gm, double &avg_bm, const ColorManagementParams &cmp, const RAWParams &raw, const WBParams & wbpar)
 {
     /*
     copyright Jacques Desmis 6 - 2018 jdesmis@gmail.com
@@ -7685,6 +7685,7 @@ void RawImageSource::ItcWB(bool extra, double &tempref, double &greenref, const 
     double *TY = nullptr;
     double *TZ = nullptr;
     int *good_spectral = nullptr;
+    // float studgood = 1000.f;
 
     int Nc = 155 + 1;//155 number of reference spectral colors, I think it is enough to retrieve good values
     Tx = new float*[Nc];
@@ -8336,28 +8337,37 @@ void RawImageSource::ItcWB(bool extra, double &tempref, double &greenref, const 
         int greengood;
         int greengoodprov;
         int goodrefprov;
+        float studprov;
         int goodref0 =  Tgstud[0].tempref;
         int greengood0 = Tgstud[0].greenref - 39;//39 green = 1
+        float stud0 = Tgstud[0].student;
         int goodref1 =  Tgstud[1].tempref;
+        float stud1 = Tgstud[1].student;
         int greengood1 = Tgstud[1].greenref - 39;
         int goodref2 =  Tgstud[2].tempref;
         int greengood2 = Tgstud[2].greenref - 39;
+        float stud2 = Tgstud[2].student;
 
         if (fabs(greengood2) < fabs(greengood1)) {
             greengoodprov = greengood2;
             goodrefprov = goodref2;
+            studprov = stud2;
         } else {
             greengoodprov = greengood1;
             goodrefprov = goodref1;
+            studprov = stud1;
 
         }
 
         if (fabs(greengoodprov) < fabs(greengood0)) {
             goodref = goodrefprov;
             greengood = greengoodprov + 39;
+            studgood = studprov;
+
         } else {
             goodref = goodref0;
             greengood = greengood0 + 39;
+            studgood = stud0;
         }
 
         tempitc = Txyz[goodref].Tem;
@@ -8400,7 +8410,7 @@ void RawImageSource::ItcWB(bool extra, double &tempref, double &greenref, const 
     }
 
 
-    printf("ITCWB tempitc=%f gritc=%f\n", tempitc, greenitc);
+    printf("ITCWB tempitc=%f gritc=%f stud=%f \n", tempitc, greenitc, studgood);
 
 
     xc(0, 0);
@@ -8441,7 +8451,7 @@ void RawImageSource::ItcWB(bool extra, double &tempref, double &greenref, const 
 }
 
 
-void RawImageSource::WBauto(double & tempref, double & greenref, array2D<float> &redloc, array2D<float> &greenloc, array2D<float> &blueloc, int bfw, int bfh, double & avg_rm, double & avg_gm, double & avg_bm, double & tempitc, double & greenitc, bool & twotimes, const LocWBParams & localr, const WBParams & wbpar, int begx, int begy, int yEn, int xEn, int cx, int cy, const ColorManagementParams & cmp, const RAWParams & raw)
+void RawImageSource::WBauto(double & tempref, double & greenref, array2D<float> &redloc, array2D<float> &greenloc, array2D<float> &blueloc, int bfw, int bfh, double & avg_rm, double & avg_gm, double & avg_bm, double & tempitc, double & greenitc, float & studgood, bool & twotimes, const LocWBParams & localr, const WBParams & wbpar, int begx, int begy, int yEn, int xEn, int cx, int cy, const ColorManagementParams & cmp, const RAWParams & raw)
 {
     BENCHFUN
     //auto white balance
@@ -8519,7 +8529,7 @@ void RawImageSource::WBauto(double & tempref, double & greenref, array2D<float> 
         itc = true;
 
         if (itc) {
-            ItcWB(false, tempref, greenref, localr, tempitc, greenitc, redloc, greenloc, blueloc, bfw, bfh, avg_rm, avg_gm, avg_bm, cmp, raw, wbpar);
+            ItcWB(false, tempref, greenref, localr, tempitc, greenitc, studgood, redloc, greenloc, blueloc, bfw, bfh, avg_rm, avg_gm, avg_bm, cmp, raw, wbpar);
         }
 
         //twotimes = false;
@@ -8577,7 +8587,7 @@ void RawImageSource::WBauto(double & tempref, double & greenref, array2D<float> 
         itc = true;
 
         if (itc) {
-            ItcWB(false, tempref, greenref, localr, tempitc, greenitc, redloc, greenloc, blueloc, bfw, bfh, avg_rm, avg_gm, avg_bm, cmp, raw, wbpar);
+            ItcWB(false, tempref, greenref, localr, tempitc, greenitc, studgood, redloc, greenloc, blueloc, bfw, bfh, avg_rm, avg_gm, avg_bm, cmp, raw, wbpar);
         }
 
         //twotimes = false;
@@ -8605,7 +8615,7 @@ void RawImageSource::WBauto(double & tempref, double & greenref, array2D<float> 
         itc = true;
 
         if (itc) {
-            ItcWB(extra, tempref, greenref, localr, tempitc, greenitc, redloc, greenloc, blueloc, bfw, bfh, avg_rm, avg_gm, avg_bm, cmp, raw, wbpar);
+            ItcWB(extra, tempref, greenref, localr, tempitc, greenitc, studgood, redloc, greenloc, blueloc, bfw, bfh, avg_rm, avg_gm, avg_bm, cmp, raw, wbpar);
         }
     }
 
@@ -8860,7 +8870,7 @@ void  RawImageSource::getrgbloc(bool local, bool gamma, bool cat02, int begx, in
 
 }
 
-void RawImageSource::getAutoWBMultipliersloc(double & tempref, double & greenref, double & tempitc, double & greenitc,  int begx, int begy, int yEn, int xEn, int cx, int cy, int bf_h, int bf_w, double & rm, double & gm, double & bm, const LocWBParams & localr, const WBParams & wbpar, const ColorManagementParams & cmp, const RAWParams & raw)
+void RawImageSource::getAutoWBMultipliersloc(double & tempref, double & greenref, double & tempitc, double & greenitc, float &studgood,  int begx, int begy, int yEn, int xEn, int cx, int cy, int bf_h, int bf_w, double & rm, double & gm, double & bm, const LocWBParams & localr, const WBParams & wbpar, const ColorManagementParams & cmp, const RAWParams & raw)
 {
     BENCHFUN
     constexpr double clipHigh = 64000.0;
@@ -9085,7 +9095,7 @@ void RawImageSource::getAutoWBMultipliersloc(double & tempref, double & greenref
     //  if (localr.wbMethod == "aut"  || localr.wbMethod == "autosdw" || localr.wbMethod == "autedgsdw" || localr.wbMethod == "autitc"  || localr.wbMethod == "autedgrob" || localr.wbMethod == "autedg" || localr.wbMethod == "autorobust" ) {
     if (wbpar.method == "aut"  || wbpar.method == "autosdw" || wbpar.method == "autedgsdw" || wbpar.method == "autitc"  || wbpar.method == "autitc2" || wbpar.method == "autitcgreen" || wbpar.method == "autedgrob" || wbpar.method == "autedg" || wbpar.method == "autorobust") {
         bool twotimes = false;
-        WBauto(tempref, greenref, redloc, greenloc, blueloc, bfw, bfh, avg_rm, avg_gm, avg_bm, tempitc, greenitc, twotimes, localr, wbpar, begx, begy, yEn,  xEn,  cx,  cy, cmp, raw);
+        WBauto(tempref, greenref, redloc, greenloc, blueloc, bfw, bfh, avg_rm, avg_gm, avg_bm, tempitc, greenitc, studgood, twotimes, localr, wbpar, begx, begy, yEn,  xEn,  cx,  cy, cmp, raw);
 
     }
 

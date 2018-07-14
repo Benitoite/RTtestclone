@@ -41,7 +41,7 @@ class WhiteBalance : public ToolParamBlock, public AdjusterListener, public Fold
         WBLT_GUI,
         WBLT_PP
     };
-	
+
 private:
     rtengine::ProcEvent EvWBcat02Method;
     rtengine::ProcEvent EvWBMethod;
@@ -50,8 +50,9 @@ private:
     rtengine::ProcEvent EvWBequal;
     rtengine::ProcEvent EvWBtempBias;
     rtengine::ProcEvent EvWBEnabled;
+    Gtk::Label*  StudLabel;
 
-	
+
 protected:
     class MethodColumns : public Gtk::TreeModel::ColumnRecord
     {
@@ -67,7 +68,6 @@ protected:
         }
     };
     Gtk::HBox* catbox;
-
     static Glib::RefPtr<Gdk::Pixbuf> wbPixbufs[rtengine::toUnderlying(rtengine::procparams::WBEntry::Type::CUSTOM) + 1];
     Glib::RefPtr<Gtk::TreeStore> refTreeModel;
     MethodColumns methodColumns;
@@ -109,7 +109,7 @@ protected:
 public:
 
     WhiteBalance();
-    ~WhiteBalance ();
+    ~WhiteBalance();
 
     static void init();
     static void cleanup();
@@ -132,7 +132,7 @@ public:
         wblistener = l;
     }
     void setWB(int temp, double green);
-    void WBChanged(double temp, double green);
+    void WBChanged(double temp, double green, float studgood);
 
     void setAdjusterBehavior(bool tempadd, bool greenadd, bool equaladd, bool tempbiasadd);
     void trimValues(rtengine::procparams::ProcParams* pp);

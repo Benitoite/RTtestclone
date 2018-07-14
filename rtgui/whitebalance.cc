@@ -246,6 +246,7 @@ WhiteBalance::WhiteBalance() : FoldableToolPanel(this, "whitebalance", M("TP_WBA
             row[methodColumns.colLabel] = WBParams::getWbEntries()[i].GUILabel;
             row[methodColumns.colId] = i;
         }
+
         oldType = currType;
 
         custom_green = 1.0;
@@ -269,7 +270,7 @@ WhiteBalance::WhiteBalance() : FoldableToolPanel(this, "whitebalance", M("TP_WBA
     pack_start(*hbox, Gtk::PACK_SHRINK, 0);
     opt = 0;
 
-   // Gtk::HBox* 
+    // Gtk::HBox*
     catbox = Gtk::manage(new Gtk::HBox());
     catbox->set_spacing(4);
     catbox->show();
@@ -351,6 +352,8 @@ WhiteBalance::WhiteBalance() : FoldableToolPanel(this, "whitebalance", M("TP_WBA
     Gtk::Image* iblueredR = Gtk::manage(new RTImage("ajd-wb-bluered2.png"));
     Gtk::Image* itempbiasL =  Gtk::manage(new RTImage("ajd-wb-temp1.png"));
     Gtk::Image* itempbiasR =  Gtk::manage(new RTImage("ajd-wb-temp2.png"));
+    StudLabel = Gtk::manage(new Gtk::Label("---", Gtk::ALIGN_CENTER));
+    StudLabel->set_tooltip_text(M("TP_WBALANCE_STUDLABEL_TOOLTIP"));
 
     temp = Gtk::manage(new Adjuster(M("TP_WBALANCE_TEMPERATURE"), MINTEMP, MAXTEMP, 5, CENTERTEMP, itempL, itempR, &wbSlider2Temp, &wbTemp2Slider));
     green = Gtk::manage(new Adjuster(M("TP_WBALANCE_GREEN"), MINGREEN, MAXGREEN, 0.001, 1.0, igreenL, igreenR));
@@ -373,6 +376,7 @@ WhiteBalance::WhiteBalance() : FoldableToolPanel(this, "whitebalance", M("TP_WBA
     boxgreen->pack_start(*igreenL);
     boxgreen->pack_start(*green);
     boxgreen->pack_start(*igreenR);*/
+    pack_start(*StudLabel);
 
     pack_start(*temp);
     //pack_start (*boxgreen);
@@ -440,7 +444,7 @@ void WhiteBalance::adjusterChanged(Adjuster* a, double newval)
         methconn.block(true);
         opt = setActiveMethod(wbCustom.second.GUILabel);
         tempBias->set_sensitive(false);
-       // wbcat02Method->set_sensitive(false);
+        // wbcat02Method->set_sensitive(false);
         catbox->set_sensitive(false);
         cache_customWB(tVal, gVal);
 
@@ -505,8 +509,14 @@ void WhiteBalance::optChanged()
             const WBEntry& currMethod = WBParams::getWbEntries()[methodId];
 
             tempBias->set_sensitive(currMethod.type == WBEntry::Type::AUTO);
-            bool autit = (currMethod.ppLabel == "autitcgreen") || (currMethod.ppLabel=="autitc2") || (currMethod.ppLabel =="autitc");
+            bool autit = (currMethod.ppLabel == "autitcgreen") || (currMethod.ppLabel == "autitc2") || (currMethod.ppLabel == "autitc");
             catbox->set_sensitive(autit);
+
+            if (autit) {
+                StudLabel->show();
+            } else {
+                StudLabel->hide();
+            }
 
 
 
@@ -739,8 +749,14 @@ void WhiteBalance::read(const ProcParams* pp, const ParamsEdited* pedited)
         }
 
         tempBias->set_sensitive(wbValues.type == WBEntry::Type::AUTO);
-        bool autit = (wbValues.ppLabel == "autitcgreen") || (wbValues.ppLabel=="autitc2") || (wbValues.ppLabel =="autitc");
+        bool autit = (wbValues.ppLabel == "autitcgreen") || (wbValues.ppLabel == "autitc2") || (wbValues.ppLabel == "autitc");
         catbox->set_sensitive(autit);
+
+        if (autit) {
+            StudLabel->show();
+        } else {
+            StudLabel->hide();
+        }
 
     }
 
@@ -811,7 +827,7 @@ void WhiteBalance::wbcat02MethodChanged()
 {
     if (!batchMode) {
     }
-    
+
     if (listener) {
         listener->panelChanged(EvWBcat02Method, wbcat02Method->get_active_text());
     }
@@ -996,24 +1012,31 @@ inline Gtk::TreeRow WhiteBalance::getActiveMethod()
     return * (method->get_active());
 }
 
-void WhiteBalance::WBChanged(double temperature, double greenVal)
+void WhiteBalance::WBChanged(double temperature, double greenVal, float studgood)
 {
     struct Data {
         WhiteBalance* self;
         double temperature;
         double green_val;
+        float stud_good;
     };
 
     const auto func = [](gpointer data) -> gboolean {
         WhiteBalance* const self = static_cast<WhiteBalance*>(static_cast<Data*>(data)->self);
         const double temperature = static_cast<Data*>(data)->temperature;
         const double green_val = static_cast<Data*>(data)->green_val;
+        const float stud_good = static_cast<Data*>(data)->stud_good;
         delete static_cast<Data*>(data);
 
         self->disableListener();
         self->setEnabled(true);
         self->temp->setValue(temperature);
         self->green->setValue(green_val);
+        self->StudLabel->set_text(
+            Glib::ustring::compose(M("TP_WBALANCE_STUDLABEL"),
+                                   Glib::ustring::format(std::fixed, std::setprecision(4), stud_good))
+        );
+
         self->temp->setDefault(temperature);
         self->green->setDefault(green_val);
         self->enableListener();
@@ -1021,5 +1044,5 @@ void WhiteBalance::WBChanged(double temperature, double greenVal)
         return FALSE;
     };
 
-    idle_register.add(func, new Data{this, temperature, greenVal});
+    idle_register.add(func, new Data{this, temperature, greenVal, studgood});
 }

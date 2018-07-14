@@ -41,7 +41,7 @@ extern const Settings* settings;
 ImProcCoordinator::ImProcCoordinator()
     : orig_prev(nullptr), oprevi(nullptr), oprevl(nullptr), nprevl(nullptr), fattal_11_dcrop_cache(nullptr), previmg(nullptr), workimg(nullptr),
       ncie(nullptr), imgsrc(nullptr), lastAwbEqual(0.), lastAwbTempBias(0.0), ipf(&params, true), monitorIntent(RI_RELATIVE),
-      softProof (false), gamutCheck (false), sharpMask(false), scale (10), highDetailPreprocessComputed (false), highDetailRawComputed (false),
+      softProof(false), gamutCheck(false), sharpMask(false), scale(10), highDetailPreprocessComputed(false), highDetailRawComputed(false),
       allocated(false), bwAutoR(-9000.f), bwAutoG(-9000.f), bwAutoB(-9000.f), CAMMean(NAN),
 
       hltonecurve(65536),
@@ -260,16 +260,18 @@ void ImProcCoordinator::updatePreviewImage(int todo, Crop* cropCall)
                 printf("Demosaic X-Trans image with using method: %s\n", rp.xtranssensor.method.c_str());
             }
         }
-        if(imgsrc->getSensorType() == ST_BAYER) {
-            if(params.raw.bayersensor.method != RAWParams::BayerSensor::getMethodString(RAWParams::BayerSensor::Method::PIXELSHIFT)) {
+
+        if (imgsrc->getSensorType() == ST_BAYER) {
+            if (params.raw.bayersensor.method != RAWParams::BayerSensor::getMethodString(RAWParams::BayerSensor::Method::PIXELSHIFT)) {
                 imgsrc->setBorder(params.raw.bayersensor.border);
             } else {
                 imgsrc->setBorder(std::max(params.raw.bayersensor.border, 2));
             }
         }
+
         bool autoContrast = false;
         double contrastThreshold = 0.f;
-        imgsrc->demosaic (rp, autoContrast, contrastThreshold); //enabled demosaic
+        imgsrc->demosaic(rp, autoContrast, contrastThreshold);  //enabled demosaic
 
         // if a demosaic happened we should also call g etimage later, so we need to set the M_INIT flag
 
@@ -343,6 +345,7 @@ void ImProcCoordinator::updatePreviewImage(int todo, Crop* cropCall)
         }
 
 
+        float studgood = 1000.f;
 
         if (!params.wb.enabled) {
             currWB = ColorTemp();
@@ -359,10 +362,11 @@ void ImProcCoordinator::updatePreviewImage(int todo, Crop* cropCall)
                 currWBitc = imgsrc->getWB();
                 double tempref = currWBitc.getTemp();
                 double greenref = currWBitc.getGreen();
-//greenref = params.wb.green;               
+//greenref = params.wb.green;
                 printf("tempref=%f greref=%f\n", tempref, greenref);
-                    
-                imgsrc->getAutoWBMultipliersloc(tempref, greenref, tempitc, greenitc, 0, 0, fh, fw, 0, 0, fh, fw, rm, gm, bm, params.localwb, params.wb, params.icm, params.raw);
+
+                imgsrc->getAutoWBMultipliersloc(tempref, greenref, tempitc, greenitc, studgood, 0, 0, fh, fw, 0, 0, fh, fw, rm, gm, bm, params.localwb, params.wb, params.icm, params.raw);
+                printf("studgoodimproc=%f \n", studgood);
 
                 if (params.wb.method ==  "autitc" || params.wb.method ==  "autitc2" || params.wb.method ==  "autitcgreen") {
                     params.wb.temperature = tempitc;
@@ -403,7 +407,7 @@ void ImProcCoordinator::updatePreviewImage(int todo, Crop* cropCall)
         //    if (params.wb.method == "Auto" && awbListener) {
         if (autowb && awbListener) {
 
-            awbListener->WBChanged(params.wb.temperature, params.wb.green);
+            awbListener->WBChanged(params.wb.temperature, params.wb.green, studgood);
         }
 
 
@@ -1216,8 +1220,9 @@ bool ImProcCoordinator::getAutoWB(double& temp, double& green, double equal, dou
             //       imgsrc->getAutoWBMultipliers (rm, gm, bm);
             double tempitc = 5000.;
             double greenitc = 1.;
+            float studgood = 1000.f;
             double tempref, greenref;
-            imgsrc->getAutoWBMultipliersloc(tempref, greenref, tempitc, greenitc, 0, 0, fh, fw, 0, 0, fh, fw, rm, gm, bm, params.localwb, params.wb, params.icm, params.raw);
+            imgsrc->getAutoWBMultipliersloc(tempref, greenref, tempitc, greenitc, studgood,  0, 0, fh, fw, 0, 0, fh, fw, rm, gm, bm, params.localwb, params.wb, params.icm, params.raw);
 
             if (rm != -1) {
                 autoWB.update(rm, gm, bm, equal, tempBias);
@@ -1347,7 +1352,7 @@ void ImProcCoordinator::getSoftProofing(bool &softProof, bool &gamutCheck)
     gamutCheck = this->gamutCheck;
 }
 
-void ImProcCoordinator::setSharpMask (bool sharpMask)
+void ImProcCoordinator::setSharpMask(bool sharpMask)
 {
     this->sharpMask = sharpMask;
 }
@@ -1369,7 +1374,7 @@ void ImProcCoordinator::saveInputICCReference(const Glib::ustring& fname, bool a
     Imagefloat* im = new Imagefloat(fW, fH);
     imgsrc->preprocess(ppar.raw, ppar.lensProf, ppar.coarse);
     double dummy = 0.0;
-    imgsrc->demosaic (ppar.raw, false, dummy);
+    imgsrc->demosaic(ppar.raw, false, dummy);
     ColorTemp currWB = ColorTemp(params.wb.temperature, params.wb.green, params.wb.equal, params.wb.method);
     bool autowb = false;
     autowb = (params.wb.method == "autold" || params.wb.method == "aut"  || params.wb.method == "autosdw" || params.wb.method == "autedgsdw" || params.wb.method == "autitc"  || params.wb.method == "autitc2"  || params.wb.method == "autitcgreen" || params.wb.method == "autedgrob" || params.wb.method == "autedg" || params.wb.method == "autorobust");
@@ -1382,8 +1387,9 @@ void ImProcCoordinator::saveInputICCReference(const Glib::ustring& fname, bool a
             // imgsrc->getAutoWBMultipliers (rm, gm, bm);
             double tempitc = 5000.;
             double greenitc = 1.;
+            float studgood = 1000.f;
             double tempref, greenref;
-            imgsrc->getAutoWBMultipliersloc(tempref, greenref, tempitc, greenitc, 0, 0, fh, fw, 0, 0, fh, fw, rm, gm, bm, params.localwb, params.wb, params.icm, params.raw);
+            imgsrc->getAutoWBMultipliersloc(tempref, greenref, tempitc, greenitc, studgood, 0, 0, fh, fw, 0, 0, fh, fw, rm, gm, bm, params.localwb, params.wb, params.icm, params.raw);
 
             if (rm != -1.) {
                 autoWB.update(rm, gm, bm, params.wb.equal, params.wb.tempBias);
