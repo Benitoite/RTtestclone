@@ -271,6 +271,19 @@ public:
     static const double JDC468_Blackvio101_spect[97];
     static const double JDC468_Whitebl92_spect[97];
     static const double JDC468_Greyredbl94_spect[97];
+    static const double JDC468_Blue32_spect[97];
+    static const double JDC468_Blue236_spect[97];
+    static const double JDC468_Gre300_spect[97];
+    static const double JDC468_Blue340_spect[97];
+    static const double JDC468_Gree110_spect[97];
+    static const double JDC468_Gree457_spect[97];
+    static const double JDC468_Yel241_spect[97];
+    static const double JDC468_Ora321_spect[97];
+    static const double JDC468_Yellow353_spect[97];
+    static const double JDC468_Mag465_spect[97];
+    static const double JDC468_Mag333_spect[97];
+    static const double JDC468_Mag203_spect[97];
+
 
     static const double JDC468_OraO18_spect[97]; //468 O18
     static const double JDC468_OraD17_spect[97]; //468 D17
