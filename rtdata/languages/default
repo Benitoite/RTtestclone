@@ -2266,7 +2266,7 @@ TP_WBCAM;Cat02 adaptation
 TP_WBCAM_NONE;None
 TP_WBCAM_CAM;Cat02
 TP_WBALANCE_AUTO;Auto
-TP_WBALANCE_STUDLABEL_TOOLTIP;Display calculated Student correlation\nThe lower the student value, the better the correlation\nValues below 0.05 lead to good results
+TP_WBALANCE_STUDLABEL_TOOLTIP;Display calculated Student correlation\nThe lower the student value, the better the correlation\nValues below 0.002 are excellent\nValues below 0.005 are very good\nValues below 0.01 are good\nValues below 0.05 are good enough\nValues above 0.5 are poor\nVery good Student test results does not mean that the WB is good, if the illuminant is non-standard the results are erratic.
 TP_WBALANCE_STUDLABEL;Student Itcwb: %1
 TP_WBALANCE_CAMERA;Camera
 TP_WBALANCE_CLOUDY;Cloudy

@@ -8051,6 +8051,7 @@ void RawImageSource::ItcWB(bool extra, double &tempref, double &greenref, const 
             }
 
             good_spectral[kN] = 1;//good spectral are spectral color that match color histogram xy
+            //printf("k=%i ", kN);
         }
 
 //reconvert to RGB for "reduction"
