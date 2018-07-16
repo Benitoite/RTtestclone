@@ -7288,8 +7288,10 @@ void RawImageSource::ItcWB(bool extra, double &tempref, double &greenref, const 
     Probably (sure) there are improvment to do...
 
     I have create a table temperature with temp and white point with 100 values between 2000K and 12000K we can obviously  change these values, more...with different steps
-    I have create or recuparate and transformed 98 spectral colors from Colorchecker24, others color and my 468 colors target, or from web flowers, etc. with a step of 5nm, I think it is largey enough.
-
+    I have create or recuparate and transformed 155 spectral colors from Colorchecker24, others color and my 468 colors target, or from web flowers, etc. with a step of 5nm, I think it is largey enough.
+    I think this value of 155 is now complete: I tested correlation with 60, 90, 100, 120, 155...better student increase with number of color, but now it seems stabilized
+    Of course we can increase this number :)
+    
     1) for the cuurent raw file we create a table for each temp of RGB multipliers
     2) then, I choose the "camera temp" to initialize calculation (why not)
     3) for this temp, I calculated XYZ values for the 98 spectrals datas
@@ -7316,6 +7318,7 @@ void RawImageSource::ItcWB(bool extra, double &tempref, double &greenref, const 
     23) we add if chroma image is very low, k colors to degrad correlation
     24) then find all Student correlation for each couple green / temp
     25) sort these Student values, and choose the minimum
+    26) then for the 3 better couple "temp / green" choose the one wher grren is neraest from 1. 
 
     Some variables or function are not used, keep in case of
     I have test with cat02 but result are not stable enough ! why ??, therefore cat02 neutralized
@@ -7839,7 +7842,7 @@ void RawImageSource::ItcWB(bool extra, double &tempref, double &greenref, const 
 
     bool separated = true;
     int w = -1;
-    printf("greenrefraw=%f\n", greenref);
+    //printf("greenrefraw=%f\n", greenref);
     reff_spect_xxyy(N_t, 2 * Nc);
     reff_spect_xxyy_prov(N_t, 2 * Nc);
     reff_spect_yy_camera(N_t, 2 * Nc);

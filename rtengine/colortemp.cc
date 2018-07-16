@@ -2951,9 +2951,9 @@ void ColorTemp::cat02_to_xyzfloatraw(float & x, float & y, float & z, float r, f
 
 
 
-//tempxy : return x and y of xyY for 40 or more refreence color, and for T temperature from 2000K to 12000K
+//tempxy : return x and y of xyY for 155 or more refreence color, and for T temperature from 2000K to 12000K
 // we can change step for temperature and increase number  for T > 7500K if necessary
-//these values Temp, x, y are refernces for all calculations and very precise.
+//these values Temp, x, y are references for all calculations and very precise.
 //copyright J.Desmis august  2017 and june 2018
 void ColorTemp::tempxy(bool separated, int &repref, float **Tx, float **Ty, float **Tz, float **Ta, float **Tb, float **TL, double *TX, double *TY, double *TZ, const procparams::WBParams & wbpar)
 {
@@ -3446,7 +3446,7 @@ void ColorTemp::spectrum_to_color_xyz_blackbody(const double* spec_color, double
 {
     int i;
     double lambda, X = 0, Y = 0, Z = 0, Yo = 0;
-    double epsi = 0.000001;
+    double epsi = 0.00000001;
 
     for (i = 0, lambda = 350; lambda < 830.1; i++, lambda += 5) {
 

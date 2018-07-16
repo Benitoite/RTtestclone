@@ -362,11 +362,10 @@ void ImProcCoordinator::updatePreviewImage(int todo, Crop* cropCall)
                 currWBitc = imgsrc->getWB();
                 double tempref = currWBitc.getTemp();
                 double greenref = currWBitc.getGreen();
-//greenref = params.wb.green;
-                printf("tempref=%f greref=%f\n", tempref, greenref);
+               // printf("tempref=%f greref=%f\n", tempref, greenref);
 
                 imgsrc->getAutoWBMultipliersloc(tempref, greenref, tempitc, greenitc, studgood, 0, 0, fh, fw, 0, 0, fh, fw, rm, gm, bm, params.localwb, params.wb, params.icm, params.raw);
-                printf("studgoodimproc=%f \n", studgood);
+               // printf("studgoodimproc=%f \n", studgood);
 
                 if (params.wb.method ==  "autitcgreen") {
                     params.wb.temperature = tempitc;
