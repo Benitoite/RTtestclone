@@ -509,7 +509,7 @@ void WhiteBalance::optChanged()
             const WBEntry& currMethod = WBParams::getWbEntries()[methodId];
 
             tempBias->set_sensitive(currMethod.type == WBEntry::Type::AUTO);
-            bool autit = (currMethod.ppLabel == "autitcgreen") || (currMethod.ppLabel == "autitc2") || (currMethod.ppLabel == "autitc");
+            bool autit = (currMethod.ppLabel == "autitcgreen");
             catbox->set_sensitive(autit);
 
             if (autit) {
@@ -749,7 +749,7 @@ void WhiteBalance::read(const ProcParams* pp, const ParamsEdited* pedited)
         }
 
         tempBias->set_sensitive(wbValues.type == WBEntry::Type::AUTO);
-        bool autit = (wbValues.ppLabel == "autitcgreen") || (wbValues.ppLabel == "autitc2") || (wbValues.ppLabel == "autitc");
+        bool autit = (wbValues.ppLabel == "autitcgreen");
         catbox->set_sensitive(autit);
 
         if (autit) {

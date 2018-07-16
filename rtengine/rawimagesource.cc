@@ -8507,92 +8507,7 @@ void RawImageSource::WBauto(double & tempref, double & greenref, array2D<float> 
         greyn = true;
     }
 
-    if (wbpar.method == "autitc") {
-        SdwWB(redloc, greenloc, blueloc, bfw, bfh, avg_rm, avg_gm, avg_bm);
 
-
-        float reds   = avg_rm * refwb_red;
-        float greens = avg_gm * refwb_green;
-        float blues  = avg_bm * refwb_blue;
-
-
-
-        double rm = imatrices.rgb_cam[0][0] * reds + imatrices.rgb_cam[0][1] * greens + imatrices.rgb_cam[0][2] * blues;
-        double gm = imatrices.rgb_cam[1][0] * reds + imatrices.rgb_cam[1][1] * greens + imatrices.rgb_cam[1][2] * blues;
-        double bm = imatrices.rgb_cam[2][0] * reds + imatrices.rgb_cam[2][1] * greens + imatrices.rgb_cam[2][2] * blues;
-
-        //double tempitc, greenitc;
-        ColorTemp ctemp;
-        ctemp.mul2temp(rm, gm, bm, 1, tempitc, greenitc);
-//  printf("temper2=%f green2=%f \n", tempitc, greenitc);
-
-
-        itc = true;
-
-        if (itc) {
-            ItcWB(false, tempref, greenref, localr, tempitc, greenitc, studgood, redloc, greenloc, blueloc, bfw, bfh, avg_rm, avg_gm, avg_bm, cmp, raw, wbpar);
-        }
-
-        //twotimes = false;
-    }
-
-    if (wbpar.method == "autitc2") {
-
-        SobelWB(redsobel, greensobel, bluesobel, redloc, greenloc, blueloc, bfw, bfh);
-#ifdef _OPENMP
-        #pragma omp parallel for reduction(+:avg_r, avg_g, avg_b, rn, gn, bn)
-#endif
-
-        for (int y = 0; y < bfh ; y++) {
-            for (int x = 0; x < bfw ; x++) {
-                if (redsobel[y][x] < clipHigh && redsobel[y][x] > clipLow) {
-                    avg_r += redsobel[y][x];
-                    rn++;
-                }
-
-                if (greensobel[y][x] < clipHigh && greensobel[y][x] > clipLow) {
-                    avg_g += greensobel[y][x];
-                    gn++;
-                }
-
-                if (bluesobel[y][x] < clipHigh && bluesobel[y][x] > clipLow) {
-                    avg_b += bluesobel[y][x];
-                    bn++;
-                }
-            }
-        }
-
-        avg_rm = avg_r / rn;
-        avg_gm = avg_g / gn;
-        avg_bm = avg_b / bn;
-
-
-
-        float reds   = avg_rm * refwb_red;
-        float greens = avg_gm * refwb_green;
-        float blues  = avg_bm * refwb_blue;
-
-
-
-        double rm = imatrices.rgb_cam[0][0] * reds + imatrices.rgb_cam[0][1] * greens + imatrices.rgb_cam[0][2] * blues;
-        double gm = imatrices.rgb_cam[1][0] * reds + imatrices.rgb_cam[1][1] * greens + imatrices.rgb_cam[1][2] * blues;
-        double bm = imatrices.rgb_cam[2][0] * reds + imatrices.rgb_cam[2][1] * greens + imatrices.rgb_cam[2][2] * blues;
-
-        //double tempitc, greenitc;
-        ColorTemp ctemp;
-        ctemp.mul2temp(rm, gm, bm, 1, tempitc, greenitc);
-//  printf("temper2=%f green2=%f \n", tempitc, greenitc);
-
-//greenitc = wbpar.green;
-//printf("greenitc=%f\n", greenitc);
-        itc = true;
-
-        if (itc) {
-            ItcWB(false, tempref, greenref, localr, tempitc, greenitc, studgood, redloc, greenloc, blueloc, bfw, bfh, avg_rm, avg_gm, avg_bm, cmp, raw, wbpar);
-        }
-
-        //twotimes = false;
-    }
 
     if (wbpar.method == "autitcgreen") {
         bool extra = false;
@@ -9093,8 +9008,8 @@ void RawImageSource::getAutoWBMultipliersloc(double & tempref, double & greenref
         }
     }
 
-    //  if (localr.wbMethod == "aut"  || localr.wbMethod == "autosdw" || localr.wbMethod == "autedgsdw" || localr.wbMethod == "autitc"  || localr.wbMethod == "autedgrob" || localr.wbMethod == "autedg" || localr.wbMethod == "autorobust" ) {
-    if (wbpar.method == "aut"  || wbpar.method == "autosdw" || wbpar.method == "autedgsdw" || wbpar.method == "autitc"  || wbpar.method == "autitc2" || wbpar.method == "autitcgreen" || wbpar.method == "autedgrob" || wbpar.method == "autedg" || wbpar.method == "autorobust") {
+    //  if (localr.wbMethod == "aut"  || localr.wbMethod == "autosdw" || localr.wbMethod == "autedgsdw || localr.wbMethod == "autedgrob" || localr.wbMethod == "autedg" || localr.wbMethod == "autorobust" ) {
+    if (wbpar.method == "aut"  || wbpar.method == "autosdw" || wbpar.method == "autedgsdw" || wbpar.method == "autitcgreen" || wbpar.method == "autedgrob" || wbpar.method == "autedg" || wbpar.method == "autorobust") {
         bool twotimes = false;
         WBauto(tempref, greenref, redloc, greenloc, blueloc, bfw, bfh, avg_rm, avg_gm, avg_bm, tempitc, greenitc, studgood, twotimes, localr, wbpar, begx, begy, yEn,  xEn,  cx,  cy, cmp, raw);
 
@@ -9128,7 +9043,7 @@ void RawImageSource::getAutoWBMultipliersloc(double & tempref, double & greenref
 
     }
 
-    if (wbpar.method == "autitc"  || wbpar.method == "autitc2"  || wbpar.method == "autitcgreen") {
+    if (wbpar.method == "autitcgreen") {
         //not used
         redAWBMul   = rm = avg_rm * refwb_red;
         greenAWBMul = gm = avg_gm * refwb_green;

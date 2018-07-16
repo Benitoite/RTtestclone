@@ -279,11 +279,11 @@ void ImProcCoordinator::updatePreviewImage(int todo, Crop* cropCall)
         todo |= M_INIT;
 
         bool autowb0 = false;
-        bool autoitc = false;
-        autowb0 = (params.wb.method == "autold" || params.wb.method == "aut"  || params.wb.method == "autosdw" || params.wb.method == "autedgsdw" || params.wb.method == "autitc" || params.wb.method == "autitc2" || params.wb.method == "autitcgreen" || params.wb.method == "autedgrob" || params.wb.method == "autedg" || params.wb.method == "autorobust");
-        autoitc = (params.wb.method == "autitc" || params.wb.method == "autitc2" || params.wb.method == "autitcgreen");
-        bool gamma = false;
-        bool cat = false;
+      //  bool autoitc = false;
+        autowb0 = (params.wb.method == "autold" || params.wb.method == "aut"  || params.wb.method == "autosdw" || params.wb.method == "autedgsdw" || params.wb.method == "autitcgreen" || params.wb.method == "autedgrob" || params.wb.method == "autedg" || params.wb.method == "autorobust");
+      //  autoitc = (params.wb.method == "autitcgreen");
+      //  bool gamma = false;
+      //  bool cat = false;
 //        if (params.wb.wbcat02Method == "cam" && autoitc) {
 //            cat = true;
 //        }
@@ -325,7 +325,7 @@ void ImProcCoordinator::updatePreviewImage(int todo, Crop* cropCall)
     }
 
     bool autowb = false;
-    autowb = (params.wb.method == "autold" || params.wb.method == "aut"  || params.wb.method == "autosdw" || params.wb.method == "autedgsdw" || params.wb.method == "autitc"  || params.wb.method == "autitc2" || params.wb.method == "autitcgreen" || params.wb.method == "autedgrob" || params.wb.method == "autedg" || params.wb.method == "autorobust");
+    autowb = (params.wb.method == "autold" || params.wb.method == "aut"  || params.wb.method == "autosdw" || params.wb.method == "autedgsdw" || params.wb.method == "autitcgreen" || params.wb.method == "autedgrob" || params.wb.method == "autedg" || params.wb.method == "autorobust");
 
 //  Glib::ustring
     if (todo & (M_INIT | M_LINDENOISE | M_HDR)) {
@@ -368,7 +368,7 @@ void ImProcCoordinator::updatePreviewImage(int todo, Crop* cropCall)
                 imgsrc->getAutoWBMultipliersloc(tempref, greenref, tempitc, greenitc, studgood, 0, 0, fh, fw, 0, 0, fh, fw, rm, gm, bm, params.localwb, params.wb, params.icm, params.raw);
                 printf("studgoodimproc=%f \n", studgood);
 
-                if (params.wb.method ==  "autitc" || params.wb.method ==  "autitc2" || params.wb.method ==  "autitcgreen") {
+                if (params.wb.method ==  "autitcgreen") {
                     params.wb.temperature = tempitc;
                     params.wb.green = greenitc;
                     currWB = ColorTemp(params.wb.temperature, params.wb.green, 1., params.wb.method);
@@ -1377,7 +1377,7 @@ void ImProcCoordinator::saveInputICCReference(const Glib::ustring& fname, bool a
     imgsrc->demosaic(ppar.raw, false, dummy);
     ColorTemp currWB = ColorTemp(params.wb.temperature, params.wb.green, params.wb.equal, params.wb.method);
     bool autowb = false;
-    autowb = (params.wb.method == "autold" || params.wb.method == "aut"  || params.wb.method == "autosdw" || params.wb.method == "autedgsdw" || params.wb.method == "autitc"  || params.wb.method == "autitc2"  || params.wb.method == "autitcgreen" || params.wb.method == "autedgrob" || params.wb.method == "autedg" || params.wb.method == "autorobust");
+    autowb = (params.wb.method == "autold" || params.wb.method == "aut"  || params.wb.method == "autosdw" || params.wb.method == "autedgsdw" || params.wb.method == "autitcgreen" || params.wb.method == "autedgrob" || params.wb.method == "autedg" || params.wb.method == "autorobust");
 
     if (params.wb.method == "Camera") {
         currWB = imgsrc->getWB();
