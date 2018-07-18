@@ -152,7 +152,7 @@ constexpr std::uint8_t uint16ToUint8Rounded(std::uint16_t i)
 }
 
 template <typename T>
-constexpr bool OOG(const T &val, const T &high=T(MAXVAL))
+constexpr bool OOG(const T &val, const T &high = T(MAXVAL))
 {
     return (val < T(0)) || (val > high);
 }
@@ -219,6 +219,7 @@ std::array<T, 3> dotProduct(const std::array<std::array<T, 3>, 3> &a, const std:
 
     for (int i = 0; i < 3; ++i) {
         res[i] = 0;
+
         for (int k = 0; k < 3; ++k) {
             res[i] += a[i][k] * b[k];
         }
