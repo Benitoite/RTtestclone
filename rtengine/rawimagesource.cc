@@ -36,6 +36,8 @@
 #include "rtlensfun.h"
 #include "cat02adaptation.h"
 #include "pdaflinesfilter.h"
+#define BENCHMARK
+
 #include "StopWatch.h"
 #include "camconst.h"
 #include "ciecam02.h"

@@ -3186,6 +3186,8 @@ void ColorTemp::tempxy(bool separated, int &repref, float **Tx, float **Ty, floa
     }
 
     if (!separated) {
+        std::string wbcat02Method = wbpar.wbcat02Method;
+        
         for (int tt = 0; tt < N_t; tt++) {
             tempw = Txyz[tt].Tem;
 
@@ -3223,15 +3225,20 @@ void ColorTemp::tempxy(bool separated, int &repref, float **Tx, float **Ty, floa
             float Ywb = 1.;
             float Zwb = Txyz[tt].ZZ;
 
-            if (wbpar.wbcat02Method == "icam") {//not used
+ //           if (wbpar.wbcat02Method == "icam") {//not used
+            if (wbcat02Method == "icam") {//not used
                 icieCAT02float(Xwb, Ywb, Zwb, CAM02BB00, CAM02BB01, CAM02BB02, CAM02BB10, CAM02BB11, CAM02BB12, CAM02BB20, CAM02BB21, CAM02BB22, 1.0);
             }
 
-            if (wbpar.wbcat02Method == "cam") {
+ //           if (wbpar.wbcat02Method == "cam") {
+            if (wbcat02Method == "cam") {
+                
                 cieCAT02float(Xwb, Ywb, Zwb, CAM02BB00, CAM02BB01, CAM02BB02, CAM02BB10, CAM02BB11, CAM02BB12, CAM02BB20, CAM02BB21, CAM02BB22, 1.0);
             }
 
-            if (wbpar.wbcat02Method != "none") {
+ //           if (wbpar.wbcat02Method != "none") {
+                if (wbcat02Method == "none") {
+                
                 for (int i = 0; i < N_c; i++) {
                     Refxyzcat02[i].Xrefcat = CAM02BB00 * Refxyz[i].Xref + CAM02BB01 * Refxyz[i].Yref + CAM02BB02 * Refxyz[i].Zref ;
                     Refxyzcat02[i].Yrefcat = CAM02BB10 * Refxyz[i].Xref + CAM02BB11 * Refxyz[i].Yref + CAM02BB12 * Refxyz[i].Zref ;
@@ -3264,7 +3271,9 @@ void ColorTemp::tempxy(bool separated, int &repref, float **Tx, float **Ty, floa
 //                    Ty[i][tt] = (float) Refxyz[i].Yref;
 //                    Tz[i][tt] = (float) Refxyz[i].Zref;
 
-                if (wbpar.wbcat02Method == "none") {
+//                if (wbpar.wbcat02Method == "none") {
+                if (wbcat02Method == "none") {
+                    
                     Tx[i][tt] = (float) Refxyz[i].Xref;
                     Ty[i][tt] = (float) Refxyz[i].Yref;
                     Tz[i][tt] = (float) Refxyz[i].Zref;
@@ -3287,8 +3296,10 @@ void ColorTemp::tempxy(bool separated, int &repref, float **Tx, float **Ty, floa
 double ColorTemp::blackbody_spect(double wavelength, double temperature)
 {
     double wlm = wavelength * 1e-9;   /* Wavelength in meters */
-    return (3.7417715247e-16 / pow(wlm, 5)) /              //3.7417..= c1 = 2*Pi*h*c2  where h=Planck constant, c=velocity of light
-           (xexp(1.438786e-2 / (wlm * temperature)) - 1.0);  //1.4387..= c2 = h*c/k  where k=Boltzmann constant
+  //  return (3.7417715247e-16 / pow(wlm, 5)) /              //3.7417..= c1 = 2*Pi*h*c2  where h=Planck constant, c=velocity of light
+  return (3.7417715247e-16 / rtengine::pow5(wlm)) /              //3.7417..= c1 = 2*Pi*h*c2  where h=Planck constant, c=velocity of light
+
+    (xexp(1.438786e-2 / (wlm * temperature)) - 1.0);  //1.4387..= c2 = h*c/k  where k=Boltzmann constant
 }
 
 /*
@@ -3423,11 +3434,13 @@ void ColorTemp::spectrum_to_color_xyz_daylight(const double* spec_color, double 
 
         Me = get_spectral_color(lambda, spec_color);
         Mc = daylight_spect(lambda, _m1, _m2);
+        Yo += cie_colour_match_jd[i][1] * Mc;
+        
         X += Mc * cie_colour_match_jd[i][0] * Me;
         Y += Mc * cie_colour_match_jd[i][1] * Me;
         Z += Mc * cie_colour_match_jd[i][2] * Me;
     }
-
+/*
     for (i = 0, lambda = 350; lambda < 830.1; i++, lambda += 5) {
 
         double Ms;
@@ -3435,7 +3448,7 @@ void ColorTemp::spectrum_to_color_xyz_daylight(const double* spec_color, double 
         Ms = daylight_spect(lambda, _m1, _m2);
         Yo += cie_colour_match_jd[i][1] * Ms;
     }
-
+*/
     xx = X / (Yo + epsi);
     yy = Y / (Yo + epsi);
     zz = Z / (Yo + epsi);
@@ -3455,11 +3468,13 @@ void ColorTemp::spectrum_to_color_xyz_blackbody(const double* spec_color, double
 
         Me = get_spectral_color(lambda, spec_color);
         Mc = blackbody_spect(lambda, _temp);
+        Yo += cie_colour_match_jd[i][1] * Mc;
+        
         X += Mc * cie_colour_match_jd[i][0] * Me;
         Y += Mc * cie_colour_match_jd[i][1] * Me;
         Z += Mc * cie_colour_match_jd[i][2] * Me;
     }
-
+/*
     for (i = 0, lambda = 350; lambda < 830.1; i++, lambda += 5) {
 
         double Ms;
@@ -3467,7 +3482,7 @@ void ColorTemp::spectrum_to_color_xyz_blackbody(const double* spec_color, double
         Ms = blackbody_spect(lambda, _temp);
         Yo += cie_colour_match_jd[i][1] * Ms;
     }
-
+*/
     xx = X / (Yo + epsi);
     yy = Y / (Yo + epsi);
     zz = Z / (Yo + epsi);

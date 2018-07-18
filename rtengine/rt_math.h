@@ -45,6 +45,13 @@ constexpr T pow4(T x)
 }
 
 template<typename T>
+constexpr T pow5(T x)
+{
+    return x * pow4(x);
+}
+
+
+template<typename T>
 constexpr const T& min(const T& a)
 {
     return a;
