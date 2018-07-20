@@ -44,19 +44,19 @@ Glib::RefPtr<Gdk::Pixbuf> WhiteBalance::wbCameraPB, WhiteBalance::wbAutoPB, Whit
 
 void WhiteBalance::init()
 {
-    wbPixbufs[toUnderlying(WBEntry::Type::CAMERA)]      = RTImage::createFromFile("wb-camera.png");
-    wbPixbufs[toUnderlying(WBEntry::Type::AUTO)]        = RTImage::createFromFile("wb-auto.png");
-    wbPixbufs[toUnderlying(WBEntry::Type::DAYLIGHT)]    = RTImage::createFromFile("wb-sun.png");
-    wbPixbufs[toUnderlying(WBEntry::Type::CLOUDY)]      = RTImage::createFromFile("wb-cloudy.png");
-    wbPixbufs[toUnderlying(WBEntry::Type::SHADE)]       = RTImage::createFromFile("wb-shade.png");
-    wbPixbufs[toUnderlying(WBEntry::Type::WATER)]       = RTImage::createFromFile("wb-water.png");
-//    wbPixbufs[WBEntry::Type::WATER2]       = RTImage::createFromFile ("wb-water.png");
-    wbPixbufs[toUnderlying(WBEntry::Type::TUNGSTEN)]    = RTImage::createFromFile("wb-tungsten.png");
-    wbPixbufs[toUnderlying(WBEntry::Type::FLUORESCENT)] = RTImage::createFromFile("wb-fluorescent.png");
-    wbPixbufs[toUnderlying(WBEntry::Type::LAMP)]        = RTImage::createFromFile("wb-lamp.png");
-    wbPixbufs[toUnderlying(WBEntry::Type::FLASH)]       = RTImage::createFromFile("wb-flash.png");
-    wbPixbufs[toUnderlying(WBEntry::Type::LED)]         = RTImage::createFromFile("wb-led.png");
-    wbPixbufs[toUnderlying(WBEntry::Type::CUSTOM)]      = RTImage::createFromFile("wb-custom.png");
+    wbPixbufs[toUnderlying(WBEntry::Type::CAMERA)]      = RTImage::createFromFile ("wb-camera-small.png");
+    wbPixbufs[toUnderlying(WBEntry::Type::AUTO)]        = RTImage::createFromFile ("wb-auto-small.png");
+    wbPixbufs[toUnderlying(WBEntry::Type::DAYLIGHT)]    = RTImage::createFromFile ("wb-sun-small.png");
+    wbPixbufs[toUnderlying(WBEntry::Type::CLOUDY)]      = RTImage::createFromFile ("wb-cloudy-small.png");
+    wbPixbufs[toUnderlying(WBEntry::Type::SHADE)]       = RTImage::createFromFile ("wb-shade-small.png");
+    wbPixbufs[toUnderlying(WBEntry::Type::WATER)]       = RTImage::createFromFile ("wb-water-small.png");
+  //wbPixbufs[WBEntry::Type::WATER2]                    = RTImage::createFromFile ("wb-water-small.png");
+    wbPixbufs[toUnderlying(WBEntry::Type::TUNGSTEN)]    = RTImage::createFromFile ("wb-tungsten-small.png");
+    wbPixbufs[toUnderlying(WBEntry::Type::FLUORESCENT)] = RTImage::createFromFile ("wb-fluorescent-small.png");
+    wbPixbufs[toUnderlying(WBEntry::Type::LAMP)]        = RTImage::createFromFile ("wb-lamp-small.png");
+    wbPixbufs[toUnderlying(WBEntry::Type::FLASH)]       = RTImage::createFromFile ("wb-flash-small.png");
+    wbPixbufs[toUnderlying(WBEntry::Type::LED)]         = RTImage::createFromFile ("wb-led-small.png");
+    wbPixbufs[toUnderlying(WBEntry::Type::CUSTOM)]      = RTImage::createFromFile ("wb-custom-small.png");
 }
 
 void WhiteBalance::cleanup()
@@ -296,8 +296,9 @@ WhiteBalance::WhiteBalance() : FoldableToolPanel(this, "whitebalance", M("TP_WBA
     spotbox->show();
 
     spotbutton = Gtk::manage(new Gtk::Button());
+    spotbutton->get_style_context()->add_class("independent");
     spotbutton->set_tooltip_text(M("TP_WBALANCE_SPOTWB"));
-    Gtk::Image* spotimg = Gtk::manage(new RTImage("gtk-color-picker-small.png"));
+    Gtk::Image* spotimg = Gtk::manage (new RTImage ("color-picker.png"));
     spotimg->show();
     spotbutton->set_image(*spotimg);
     spotbutton->show();
@@ -344,14 +345,15 @@ WhiteBalance::WhiteBalance() : FoldableToolPanel(this, "whitebalance", M("TP_WBA
 
     pack_start(*spotbox, Gtk::PACK_SHRINK, 0);
 
-    Gtk::Image* itempL =  Gtk::manage(new RTImage("ajd-wb-temp1.png"));
-    Gtk::Image* itempR =  Gtk::manage(new RTImage("ajd-wb-temp2.png"));
-    Gtk::Image* igreenL = Gtk::manage(new RTImage("ajd-wb-green1.png"));
-    Gtk::Image* igreenR = Gtk::manage(new RTImage("ajd-wb-green2.png"));
-    Gtk::Image* iblueredL = Gtk::manage(new RTImage("ajd-wb-bluered1.png"));
-    Gtk::Image* iblueredR = Gtk::manage(new RTImage("ajd-wb-bluered2.png"));
-    Gtk::Image* itempbiasL =  Gtk::manage(new RTImage("ajd-wb-temp1.png"));
-    Gtk::Image* itempbiasR =  Gtk::manage(new RTImage("ajd-wb-temp2.png"));
+    Gtk::Image* itempL =  Gtk::manage (new RTImage ("circle-blue-small.png"));
+    Gtk::Image* itempR =  Gtk::manage (new RTImage ("circle-yellow-small.png"));
+    Gtk::Image* igreenL = Gtk::manage (new RTImage ("circle-magenta-small.png"));
+    Gtk::Image* igreenR = Gtk::manage (new RTImage ("circle-green-small.png"));
+    Gtk::Image* iblueredL = Gtk::manage (new RTImage ("circle-blue-small.png"));
+    Gtk::Image* iblueredR = Gtk::manage (new RTImage ("circle-red-small.png"));
+    Gtk::Image* itempbiasL =  Gtk::manage (new RTImage ("circle-blue-small.png"));
+    Gtk::Image* itempbiasR =  Gtk::manage (new RTImage ("circle-yellow-small.png"));
+
     StudLabel = Gtk::manage(new Gtk::Label("---", Gtk::ALIGN_CENTER));
     StudLabel->set_tooltip_text(M("TP_WBALANCE_STUDLABEL_TOOLTIP"));
 

@@ -802,7 +802,9 @@ private:
         }
 
         if (params.toneCurve.histmatching) {
-            imgsrc->getAutoMatchedToneCurve(params.icm, params.toneCurve.curve);
+            if (!params.toneCurve.fromHistMatching) {
+                imgsrc->getAutoMatchedToneCurve(params.icm, params.toneCurve.curve);
+            }
 
             if (params.toneCurve.autoexp) {
                 params.toneCurve.expcomp = 0.0;
@@ -814,7 +816,6 @@ private:
             params.toneCurve.brightness = 0;
             params.toneCurve.contrast = 0;
             params.toneCurve.black = 0;
-
         }
 
         // at this stage, we can flush the raw data to free up quite an important amount of memory

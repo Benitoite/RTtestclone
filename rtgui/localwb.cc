@@ -206,7 +206,7 @@ Localwb::Localwb() :
 
     editHBox = Gtk::manage(new Gtk::HBox());
     edit = Gtk::manage(new Gtk::ToggleButton());
-    edit->add(*Gtk::manage(new RTImage("editmodehand.png")));
+    edit->add(*Gtk::manage(new RTImage("hand-open.png")));
     edit->set_tooltip_text(M("EDIT_OBJECT_TOOLTIP"));
     editConn = edit->signal_toggled().connect(sigc::mem_fun(*this, &Localwb::editToggled));
     editHBox->pack_start(*edit, Gtk::PACK_SHRINK, 0);
@@ -339,12 +339,12 @@ Localwb::Localwb() :
     cat02Box->pack_start(*cat02Frame);
     pack_start(*cat02Box);
 
-    Gtk::Image* itempL =  Gtk::manage(new RTImage("ajd-wb-temp1.png"));
-    Gtk::Image* itempR =  Gtk::manage(new RTImage("ajd-wb-temp2.png"));
-    Gtk::Image* igreenL = Gtk::manage(new RTImage("ajd-wb-green1.png"));
-    Gtk::Image* igreenR = Gtk::manage(new RTImage("ajd-wb-green2.png"));
-    Gtk::Image* iblueredL = Gtk::manage(new RTImage("ajd-wb-bluered1.png"));
-    Gtk::Image* iblueredR = Gtk::manage(new RTImage("ajd-wb-bluered2.png"));
+    Gtk::Image* itempL =  Gtk::manage(new RTImage("circle-blue-small.png"));
+    Gtk::Image* itempR =  Gtk::manage(new RTImage("circle-yellow-small.png"));
+    Gtk::Image* igreenL = Gtk::manage(new RTImage("circle-magenta-small.png"));
+    Gtk::Image* igreenR = Gtk::manage(new RTImage("circle-green-small.png"));
+    Gtk::Image* iblueredL = Gtk::manage(new RTImage("circle-blue-small.png"));
+    Gtk::Image* iblueredR = Gtk::manage(new RTImage("circle-red-small.png"));
 
     ttLabels = Gtk::manage(new Gtk::Label("---"));
     setExpandAlignProperties(ttLabels, true, false, Gtk::ALIGN_CENTER, Gtk::ALIGN_START);
