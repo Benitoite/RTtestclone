@@ -441,7 +441,9 @@ void ImProcCoordinator::updatePreviewImage (int todo, Crop* cropCall)
                                             params.toneCurve.black, params.toneCurve.hlcompr, params.toneCurve.hlcomprthresh, params.toneCurve.hrenabled);
         }
         if (params.toneCurve.histmatching) {
-            imgsrc->getAutoMatchedToneCurve(params.icm, params.toneCurve.curve);
+            if (!params.toneCurve.fromHistMatching) {
+                imgsrc->getAutoMatchedToneCurve(params.icm, params.toneCurve.curve);
+            }
 
             if (params.toneCurve.autoexp) {
                 params.toneCurve.expcomp = 0.0;
@@ -453,6 +455,7 @@ void ImProcCoordinator::updatePreviewImage (int todo, Crop* cropCall)
             params.toneCurve.brightness = 0;
             params.toneCurve.contrast = 0;
             params.toneCurve.black = 0;
+            params.toneCurve.fromHistMatching = true;
 
             if (aeListener) {
                 aeListener->autoMatchedToneCurveChanged(params.toneCurve.curveMode, params.toneCurve.curve);

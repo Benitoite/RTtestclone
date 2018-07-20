@@ -1045,20 +1045,20 @@ Wavelet::Wavelet() :
     cbenabConn = cbenab->signal_toggled().connect ( sigc::mem_fun (*this, &Wavelet::cbenabToggled) );
     cbenab->set_tooltip_text (M ("TP_WAVELET_CB_TOOLTIP"));
 
-    Gtk::Image* const iblueR   = Gtk::manage (new RTImage ("ajd-wb-temp1.png"));
-    Gtk::Image* const iyelL    = Gtk::manage (new RTImage ("ajd-wb-temp2.png"));
-    Gtk::Image* const imagL    = Gtk::manage (new RTImage ("ajd-wb-green1.png"));
-    Gtk::Image* const igreenR  = Gtk::manage (new RTImage ("ajd-wb-green2.png"));
+    Gtk::Image* const iblueR   = Gtk::manage (new RTImage ("circle-blue-small.png"));
+    Gtk::Image* const iyelL    = Gtk::manage (new RTImage ("circle-yellow-small.png"));
+    Gtk::Image* const imagL    = Gtk::manage (new RTImage ("circle-magenta-small.png"));
+    Gtk::Image* const igreenR  = Gtk::manage (new RTImage ("circle-green-small.png"));
 
-    Gtk::Image* const  iblueRm  = Gtk::manage (new RTImage ("ajd-wb-temp1.png"));
-    Gtk::Image* const  iyelLm   = Gtk::manage (new RTImage ("ajd-wb-temp2.png"));
-    Gtk::Image* const  imagLm   = Gtk::manage (new RTImage ("ajd-wb-green1.png"));
-    Gtk::Image* const  igreenRm = Gtk::manage (new RTImage ("ajd-wb-green2.png"));
+    Gtk::Image* const  iblueRm  = Gtk::manage (new RTImage ("circle-blue-small.png"));
+    Gtk::Image* const  iyelLm   = Gtk::manage (new RTImage ("circle-yellow-small.png"));
+    Gtk::Image* const  imagLm   = Gtk::manage (new RTImage ("circle-magenta-small.png"));
+    Gtk::Image* const  igreenRm = Gtk::manage (new RTImage ("circle-green-small.png"));
 
-    Gtk::Image* const iblueRh  = Gtk::manage (new RTImage ("ajd-wb-temp1.png"));
-    Gtk::Image* const iyelLh   = Gtk::manage (new RTImage ("ajd-wb-temp2.png"));
-    Gtk::Image* const imagLh   = Gtk::manage (new RTImage ("ajd-wb-green1.png"));
-    Gtk::Image* const igreenRh = Gtk::manage (new RTImage ("ajd-wb-green2.png"));
+    Gtk::Image* const iblueRh  = Gtk::manage (new RTImage ("circle-blue-small.png"));
+    Gtk::Image* const iyelLh   = Gtk::manage (new RTImage ("circle-yellow-small.png"));
+    Gtk::Image* const imagLh   = Gtk::manage (new RTImage ("circle-magenta-small.png"));
+    Gtk::Image* const igreenRh = Gtk::manage (new RTImage ("circle-green-small.png"));
 
     greenhigh = Gtk::manage (new Adjuster ("", -100., 100., 1., 0., igreenRh, imagLh));
     bluehigh = Gtk::manage (new Adjuster ("", -100., 100., 1., 0., iblueRh, iyelLh));
@@ -1093,7 +1093,7 @@ Wavelet::Wavelet() :
     resBox->pack_start (*chanMixerShadowsFrame, Gtk::PACK_SHRINK);
 
 
-    //RTImage *resetImg = Gtk::manage (new RTImage ("gtk-undo-ltr-small.png", "gtk-undo-rtl-small.png"));
+    //RTImage *resetImg = Gtk::manage (new RTImage ("undo-small.png", "redo-small.png"));
     //neutral->set_image(*resetImg);
     Gtk::Button* const neutral = Gtk::manage (new Gtk::Button (M ("TP_COLORTONING_NEUTRAL")));
     neutral->set_tooltip_text (M ("TP_COLORTONING_NEUTRAL_TIP"));
@@ -1145,7 +1145,7 @@ Wavelet::Wavelet() :
 
     bindCurrentFolder (*inputeFile, options.lastmergeDir);
     mFileReset = Gtk::manage (new Gtk::Button());
-    mFileReset->set_image (*Gtk::manage (new RTImage ("gtk-cancel.png")));
+    mFileReset->set_image (*Gtk::manage (new RTImage ("cancel-small.png")));
 
     hbin->pack_start (*inLabel, Gtk::PACK_SHRINK, 0);
     hbin->pack_start (*inputeFile);
@@ -1417,7 +1417,7 @@ Wavelet::Wavelet() :
     mgVBox->pack_start (*balMFrame);
 
     savelab = Gtk::manage (new Gtk::Button (M ("TP_WAVELET_SAVELAB")));
-    savelab->set_image (*Gtk::manage (new RTImage ("gtk-save-large.png")));
+    savelab->set_image (*Gtk::manage (new RTImage ("save.png")));
     savelab->set_tooltip_markup (M ("TP_WAVELET_SAVELAB_TOOLTIP"));
     mergeBox->pack_start (*savelab);
 //   ipc = ipDialog->signal_selection_changed().connect( sigc::mem_fun(*this, &Wavelet::ipSelectionChanged) );
@@ -1434,7 +1434,7 @@ Wavelet::Wavelet() :
     neutrHBox2->set_border_width (2);
 
     // neutral2 = Gtk::manage (new Gtk::Button (M ("TP_WAVELET_NEUTRAL2")));
-    RTImage *resetImg2 = Gtk::manage (new RTImage ("gtk-undo-ltr-small.png", "gtk-undo-rtl-small.png"));
+    RTImage *resetImg2 = Gtk::manage (new RTImage ("undo-small.png", "redo-small.png"));
     neutral2->set_image (*resetImg2);
     //neutral2->set_tooltip_text (M("TP_WAVELET_NEUTRAL_TIP"));
     neutral2conn = neutral2->signal_pressed().connect ( sigc::mem_fun (*this, &Wavelet::neutral2_pressed) );
