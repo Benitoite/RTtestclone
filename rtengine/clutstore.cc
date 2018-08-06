@@ -50,7 +50,8 @@ bool loadFile(
         const PreviewProps pp(0, 0, fw, fh, 1);
 
         rtengine::ProcParams pparams;
-        pparams.icm.working = working_color_space;
+        rtengine::procparams::ColorManagementParams icm;
+        icm.workingProfile = working_color_space;
 
         img_src.getImage(curr_wb, TR_NONE, img_float.get(), pp, pparams);
 
