@@ -177,7 +177,7 @@ void ImProcFunctions::ip_wavelet (LabImage * lab, LabImage * dst, float *****sty
     // init variables to display Munsell corrections
     MunsellDebugInfo* MunsDebugInfo = new MunsellDebugInfo();
 #endif
-    TMatrix wiprof = ICCStore::getInstance()->workingSpaceInverseMatrix (params->icm.working);
+    TMatrix wiprof = ICCStore::getInstance()->workingSpaceInverseMatrix (params->icm.workingProfile);
     const double wip[3][3] = {
         {wiprof[0][0], wiprof[0][1], wiprof[0][2]},
         {wiprof[1][0], wiprof[1][1], wiprof[1][2]},
@@ -2157,9 +2157,7 @@ float *ImProcFunctions::CompressDR (float *Source, int skip, struct cont_params 
     }
 
 #endif
-
-    float *ucr = ContrastDR (Source, skip, cp, W_L, H_L, Compression, DetailBoost, max0, min0, ave, ah, bh, al, bl, factorx);
-
+    float *ucr = ContrastDR (Source, skip, cp, W_L, H_L, Compression, DetailBoost, max0, min0, ave, ah, bh, al, bl, factorx, Compressed);
     if (Compressed == nullptr) {
         Compressed = ucr;
     }
