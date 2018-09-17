@@ -276,6 +276,7 @@ void ToolPanelCoordinator::imageTypeChanged (bool isRaw, bool isBayer, bool isXt
                 self->sensorbayer->FoldableToolPanel::show();
                 self->preprocess->FoldableToolPanel::show();
                 self->flatfield->FoldableToolPanel::show();
+                self->retinex->FoldableToolPanel::setGrayedOut(false);
 
                 return FALSE;
             };
@@ -290,6 +291,7 @@ void ToolPanelCoordinator::imageTypeChanged (bool isRaw, bool isBayer, bool isXt
                 self->sensorbayer->FoldableToolPanel::hide();
                 self->preprocess->FoldableToolPanel::show();
                 self->flatfield->FoldableToolPanel::show();
+                self->retinex->FoldableToolPanel::setGrayedOut(false);
 
                 return FALSE;
             };
@@ -304,6 +306,7 @@ void ToolPanelCoordinator::imageTypeChanged (bool isRaw, bool isBayer, bool isXt
                 self->sensorxtrans->FoldableToolPanel::hide();
                 self->preprocess->FoldableToolPanel::hide();
                 self->flatfield->FoldableToolPanel::show();
+                self->retinex->FoldableToolPanel::setGrayedOut(false);
 
                 return FALSE;
             };
@@ -317,6 +320,7 @@ void ToolPanelCoordinator::imageTypeChanged (bool isRaw, bool isBayer, bool isXt
                 self->sensorxtrans->FoldableToolPanel::hide();
                 self->preprocess->FoldableToolPanel::hide();
                 self->flatfield->FoldableToolPanel::hide();
+                self->retinex->FoldableToolPanel::setGrayedOut(false);
 
                 return FALSE;
             };
@@ -327,6 +331,7 @@ void ToolPanelCoordinator::imageTypeChanged (bool isRaw, bool isBayer, bool isXt
             ToolPanelCoordinator* const self = static_cast<ToolPanelCoordinator*>(data);
 
             self->rawPanelSW->set_sensitive (false);
+            self->retinex->FoldableToolPanel::setGrayedOut(true);
 
             return FALSE;
         };

@@ -630,7 +630,10 @@ EditorPanel::EditorPanel (FilePanel* filePanel)
     beforeAfterBox->set_name ("BeforeAfterContainer");
     beforeAfterBox->pack_start (*afterBox);
 
-    editbox->pack_start (*toolBarPanel, Gtk::PACK_SHRINK, 2);
+    MyScrolledToolbar *stb1 = Gtk::manage(new MyScrolledToolbar());
+    stb1->set_name("EditorToolbarTop");
+    stb1->add(*toolBarPanel);
+    editbox->pack_start (*stb1, Gtk::PACK_SHRINK, 2);
     editbox->pack_start (*beforeAfterBox);
 
     // build right side panel
@@ -763,7 +766,11 @@ EditorPanel::EditorPanel (FilePanel* filePanel)
     iops->attach_next_to (*tbShowHideSidePanels, Gtk::POS_RIGHT, 1, 1);
     iops->attach_next_to (*tbRightPanel_1, Gtk::POS_RIGHT, 1, 1);
 
-    editbox->pack_start (*iops, Gtk::PACK_SHRINK, 0);
+    MyScrolledToolbar *stb2 = Gtk::manage(new MyScrolledToolbar());
+    stb2->set_name("EditorToolbarBottom");
+    stb2->add(*iops);
+
+    editbox->pack_start (*stb2, Gtk::PACK_SHRINK, 0);
     editbox->show_all ();
 
     // build screen
@@ -1776,7 +1783,7 @@ bool EditorPanel::idle_saveImage (ProgressConnector<rtengine::IImagefloat*> *pc,
         img->setSaveProgressListener (parent->getProgressListener());
 
         if (sf.format == "tif")
-            ld->startFunc (sigc::bind (sigc::mem_fun (img, &rtengine::IImagefloat::saveAsTIFF), fname, sf.tiffBits, sf.tiffUncompressed),
+            ld->startFunc (sigc::bind (sigc::mem_fun (img, &rtengine::IImagefloat::saveAsTIFF), fname, sf.tiffBits, sf.tiffFloat, sf.tiffUncompressed),
                            sigc::bind (sigc::mem_fun (*this, &EditorPanel::idle_imageSaved), ld, img, fname, sf, pparams));
         else if (sf.format == "png")
             ld->startFunc (sigc::bind (sigc::mem_fun (img, &rtengine::IImagefloat::saveAsPNG), fname, sf.pngBits),
@@ -1993,9 +2000,9 @@ bool EditorPanel::saveImmediately (const Glib::ustring &filename, const SaveForm
     int err = 0;
 
     if (gimpPlugin) {
-        err = img->saveAsTIFF (filename, 32, true);
+        err = img->saveAsTIFF (filename, 32, true, true);
     } else if (sf.format == "tif") {
-        err = img->saveAsTIFF (filename, sf.tiffBits, sf.tiffUncompressed);
+        err = img->saveAsTIFF (filename, sf.tiffBits, sf.tiffFloat, sf.tiffUncompressed);
     } else if (sf.format == "png") {
         err = img->saveAsPNG (filename, sf.pngBits);
     } else if (sf.format == "jpg") {
@@ -2051,6 +2058,7 @@ bool EditorPanel::idle_sendToGimp ( ProgressConnector<rtengine::IImagefloat*> *p
         SaveFormat sf;
         sf.format = "tif";
         sf.tiffBits = 16;
+        sf.tiffFloat = false;
         sf.tiffUncompressed = true;
         sf.saveParams = true;
 
@@ -2071,7 +2079,7 @@ bool EditorPanel::idle_sendToGimp ( ProgressConnector<rtengine::IImagefloat*> *p
 
         ProgressConnector<int> *ld = new ProgressConnector<int>();
         img->setSaveProgressListener (parent->getProgressListener());
-        ld->startFunc (sigc::bind (sigc::mem_fun (img, &rtengine::IImagefloat::saveAsTIFF), fileName, sf.tiffBits, sf.tiffUncompressed),
+        ld->startFunc (sigc::bind (sigc::mem_fun (img, &rtengine::IImagefloat::saveAsTIFF), fileName, sf.tiffBits, sf.tiffFloat, sf.tiffUncompressed),
                        sigc::bind (sigc::mem_fun (*this, &EditorPanel::idle_sentToGimp), ld, img, fileName));
     } else {
         Glib::ustring msg_ = Glib::ustring ("<b> Error during image processing\n</b>");
@@ -2241,7 +2249,7 @@ void EditorPanel::histogramChanged (LUTu & histRed, LUTu & histGreen, LUTu & his
 {
 
     if (histogramPanel) {
-        histogramPanel->histogramChanged (histRed, histGreen, histBlue, histLuma, histRedRaw, histGreenRaw, histBlueRaw, histChroma);
+        histogramPanel->histogramChanged (histRed, histGreen, histBlue, histLuma, histChroma, histRedRaw, histGreenRaw, histBlueRaw);
     }
 
     tpc->updateCurveBackgroundHistogram (histToneCurve, histLCurve, histCCurve,/*histCLurve,  histLLCurve,*/ histLCAM, histCCAM, histRed, histGreen, histBlue, histLuma, histLRETI);

@@ -1432,6 +1432,8 @@ struct RAWParams {
     int ff_clipControl;
 
     bool ca_autocorrect;
+    bool ca_avoidcolourshift;
+    int caautoiterations;
     double cared;
     double cablue;
 
