@@ -799,6 +799,8 @@ public:
     XTransSensor xtranssensor;
 
     bool ca_autocorrect;
+    bool ca_avoidcolourshift;
+    bool caautoiterations;
     bool cared;
     bool cablue;
     bool hotPixelFilter;
