@@ -2102,84 +2102,10 @@ void ImProcFunctions::Eval2 (float ** WavCoeffs_L,  int level, const struct cont
     MaxN[level] = maxLN;
 }
 
-float *ImProcFunctions::ContrastDR (float *Source, int skip, struct cont_params &cp, int W_L, int H_L, float Compression, float DetailBoost, float max0, float min0, float ave, float ah, float bh, float al, float bl, float factorx, float *Contrast)
+void ImProcFunctions::CompressDR(float *Source, int W_L, int H_L, float Compression, float DetailBoost)
 {
     const int n = W_L * H_L;
 
-//<<<<<<< HEAD
-    if (Contrast == nullptr) {
-        Contrast = new float[n];
-    }
-
-    memcpy (Contrast, Source, n * sizeof (float));
-#ifdef _OPENMP
-    #pragma omp parallel for
-#endif
-
-    for (int i = 0; i < W_L * H_L; i++) { //contrast
-        Contrast[i] = Source[i] ;
-    }
-
-    return Contrast;
-}
-
-float *ImProcFunctions::CompressDR (float *Source, int skip, struct cont_params &cp, int W_L, int H_L, float Compression, float DetailBoost, float max0, float min0, float ave, float ah, float bh, float al, float bl, float factorx, float *Compressed)
-{
-
-    const float eps = 0.000001f;
-    int n = W_L * H_L;
-
-#ifdef __SSE2__
-#ifdef _OPENMP
-    #pragma omp parallel
-#endif
-    {
-        __m128 epsv = _mm_set1_ps ( eps );
-#ifdef _OPENMP
-        #pragma omp for
-#endif
-
-        for (int ii = 0; ii < n - 3; ii += 4) {
-            _mm_storeu_ps ( &Source[ii], xlogf (LVFU (Source[ii]) + epsv));
-        }
-    }
-
-    for (int ii = n - (n % 4); ii < n; ii++) {
-        Source[ii] = xlogf (Source[ii] + eps);
-    }
-
-#else
-#ifdef _OPENMP
-    #pragma omp parallel for
-#endif
-
-    for (int ii = 0; ii < n; ii++) {
-        Source[ii] = xlogf (Source[ii] + eps);
-    }
-
-#endif
-    float *ucr = ContrastDR (Source, skip, cp, W_L, H_L, Compression, DetailBoost, max0, min0, ave, ah, bh, al, bl, factorx, Compressed);
-    if (Compressed == nullptr) {
-        Compressed = ucr;
-    }
-
-    float temp;
-
-    if (DetailBoost > 0.f && DetailBoost < 0.05f ) {
-        float betemp = expf (- (2.f - DetailBoost + 0.694f)) - 1.f; //0.694 = log(2)
-        temp = 1.2f * xlogf ( -betemp);
-        temp /= 20.f;
-    } else if (DetailBoost >= 0.05f && DetailBoost < 0.25f ) {
-        float betemp = expf (- (2.f - DetailBoost + 0.694f)) - 1.f; //0.694 = log(2)
-        temp = 1.2f * xlogf ( -betemp);
-        temp /= (-75.f * DetailBoost + 23.75f);
-    } else if (DetailBoost >= 0.25f) {
-        float betemp = expf (- (2.f - DetailBoost + 0.694f)) - 1.f; //0.694 = log(2)
-        temp = 1.2f * xlogf ( -betemp);
-        temp /= (-2.f * DetailBoost + 5.5f);
-    }  
-/*    
-=======
     float exponent;
 
     if(DetailBoost > 0.f && DetailBoost < 0.05f ) {
@@ -2196,46 +2122,21 @@ float *ImProcFunctions::CompressDR (float *Source, int skip, struct cont_params 
         exponent /= (-2.f * DetailBoost + 5.5f);
     } else {
         exponent = (Compression - 1.0f) / 20.f;
->>>>>>> dev
     }
 
     exponent += 1.f;
-*/
+
     // now calculate Source = pow(Source, exponent)
 #ifdef __SSE2__
 #ifdef _OPENMP
     #pragma omp parallel
 #endif
     {
-//<<<<<<< HEAD
-        __m128 cev, uev, sourcev;
-        __m128 epsv = _mm_set1_ps ( eps );
-        __m128 DetailBoostv = _mm_set1_ps ( DetailBoost );
-        __m128 tempv = _mm_set1_ps ( temp );
-//=======
-//        vfloat exponentv = F2V(exponent);
-//>>>>>>> dev
+        vfloat exponentv = F2V(exponent);
 #ifdef _OPENMP
         #pragma omp for
 #endif
 
-//<<<<<<< HEAD
-        for (int i = 0; i < n - 3; i += 4) {
-            cev = xexpf (LVFU (Source[i]) + LVFU (ucr[i]) * (tempv)) - epsv;
-            uev = xexpf (LVFU (ucr[i])) - epsv;
-            sourcev = xexpf (LVFU (Source[i])) - epsv;
-            _mm_storeu_ps ( &Source[i], sourcev);
-            _mm_storeu_ps ( &Compressed[i], cev + DetailBoostv * (sourcev - uev) );
-        }
-    }
-
-    for (int i = n - (n % 4); i < n; i++) {
-        float ce = xexpf (Source[i] + ucr[i] * (temp)) - eps;
-        float ue = xexpf (ucr[i]) - eps;
-        Source[i] = xexpf (Source[i]) - eps;
-        Compressed[i] = ce + DetailBoost * (Source[i] - ue);
-        /*
-=======
         for(int i = 0; i < n - 3; i += 4) {
             STVFU(Source[i], xexpf(xlogf(LVFU(Source[i])) * exponentv));
         }
@@ -2243,8 +2144,6 @@ float *ImProcFunctions::CompressDR (float *Source, int skip, struct cont_params 
 
     for(int i = n - (n % 4); i < n; i++) {
         Source[i] = xexpf(xlogf(Source[i]) * exponent);
->>>>>>> dev
-*/
     }
 
 #else
@@ -2252,42 +2151,21 @@ float *ImProcFunctions::CompressDR (float *Source, int skip, struct cont_params 
     #pragma omp parallel for
 #endif
 
-//<<<<<<< HEAD
-    for (int i = 0; i < n; i++) {
-        float ce = xexpf (Source[i] + ucr[i] * (temp)) - eps;
-        float ue = xexpf (ucr[i]) - eps;
-        Source[i] = xexpf (Source[i]) - eps;
-        Compressed[i] = ce + DetailBoost * (Source[i] - ue);
-        /*
-=======
     for(int i = 0; i < n; i++) {
         Source[i] = xexpf(xlogf(Source[i]) * exponent);
->>>>>>> dev
-*/
     }
 
 #endif
 
-//<<<<<<< HEAD
-    if (Compressed != ucr) {
-        delete[] ucr;
-    }
-
-    return Compressed;
-
-/*
-=======
->>>>>>> dev
-*/
 }
 
-void ImProcFunctions::ContrastResid (float * WavCoeffs_L0,  unsigned int Iterates, int skip, struct cont_params &cp, int W_L, int H_L, float max0, float min0, float ave, float ah, float bh, float al, float bl, float factorx)
+void ImProcFunctions::ContrastResid(float * WavCoeffs_L0, struct cont_params &cp, int W_L, int H_L, float max0, float min0)
 {
     float stren = cp.tmstrength;
     float gamm = params->wavelet.gamma;
     cp.TMmeth = 2; //default after testing
 
-    if (cp.TMmeth == 1) {
+    if(cp.TMmeth == 1) {
         min0 = 0.0f;
         max0 = 32768.f;
     } else if (cp.TMmeth == 2) {
@@ -2298,34 +2176,31 @@ void ImProcFunctions::ContrastResid (float * WavCoeffs_L0,  unsigned int Iterate
     #pragma omp parallel for
 #endif
 
-    for (int i = 0; i < W_L * H_L; i++) {
+    for(int i = 0; i < W_L * H_L; i++) {
         WavCoeffs_L0[i] = (WavCoeffs_L0[i] - min0) / max0;
         WavCoeffs_L0[i] *= gamm;
     }
 
-    float Compression = expf (-stren);      //This modification turns numbers symmetric around 0 into exponents.
+    float Compression = expf(-stren);       //This modification turns numbers symmetric around 0 into exponents.
     float DetailBoost = stren;
 
-    if (stren < 0.0f) {
+    if(stren < 0.0f) {
         DetailBoost = 0.0f;    //Go with effect of exponent only if uncompressing.
     }
 
 
-//<<<<<<< HEAD
-    CompressDR (WavCoeffs_L0, skip, cp, W_L, H_L, Compression, DetailBoost, max0, min0, ave, ah, bh, al, bl, factorx, WavCoeffs_L0);
-//=======
-//    CompressDR(WavCoeffs_L0, W_L, H_L, Compression, DetailBoost);
-//>>>>>>> dev
+    CompressDR(WavCoeffs_L0, W_L, H_L, Compression, DetailBoost);
 
 
 #ifdef _OPENMP
     #pragma omp parallel for            // removed schedule(dynamic,10)
 #endif
 
-    for (int ii = 0; ii < W_L * H_L; ii++) {
+    for(int ii = 0; ii < W_L * H_L; ii++) {
         WavCoeffs_L0[ii] = WavCoeffs_L0[ii] * max0 * (1.f / gamm) + min0;
     }
 }
+
 
 
 
@@ -3025,7 +2900,8 @@ void ImProcFunctions::WaveletcontAllL (LabImage * labco, float *****stylev, LabI
 #ifdef _OPENMP
             #pragma omp single
 #endif
-            ContrastResid (WavCoeffs_L0, 5, skip, cp, W_L, H_L, maxp, minp, ave, ah, bh, al, bl, factorx );
+         //   ContrastResid (WavCoeffs_L0, 5, skip, cp, W_L, H_L, maxp, minp, ave, ah, bh, al, bl, factorx );
+            ContrastResid(WavCoeffs_L0, cp, W_L, H_L, maxp, minp);
         }
 
 #ifdef _OPENMP
