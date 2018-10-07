@@ -1673,7 +1673,9 @@ bool LensProfParams::operator ==(const LensProfParams& other) const
         && useCA == other.useCA
         && lfCameraMake == other.lfCameraMake
         && lfCameraModel == other.lfCameraModel
-        && lfLens == other.lfLens;
+        && lfLens == other.lfLens
+        && useDist == other.useDist
+        && useVign == other.useVign;
 }
 
 bool LensProfParams::operator !=(const LensProfParams& other) const
