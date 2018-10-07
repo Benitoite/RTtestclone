@@ -2104,8 +2104,9 @@ void ImProcFunctions::Eval2 (float ** WavCoeffs_L,  int level, const struct cont
 
 float *ImProcFunctions::ContrastDR (float *Source, int skip, struct cont_params &cp, int W_L, int H_L, float Compression, float DetailBoost, float max0, float min0, float ave, float ah, float bh, float al, float bl, float factorx, float *Contrast)
 {
-    int n = W_L * H_L;
+    const int n = W_L * H_L;
 
+//<<<<<<< HEAD
     if (Contrast == nullptr) {
         Contrast = new float[n];
     }
@@ -2176,25 +2177,49 @@ float *ImProcFunctions::CompressDR (float *Source, int skip, struct cont_params 
         float betemp = expf (- (2.f - DetailBoost + 0.694f)) - 1.f; //0.694 = log(2)
         temp = 1.2f * xlogf ( -betemp);
         temp /= (-2.f * DetailBoost + 5.5f);
+    }  
+/*    
+=======
+    float exponent;
+
+    if(DetailBoost > 0.f && DetailBoost < 0.05f ) {
+        float betemp = expf(-(2.f - DetailBoost + 0.694f)) - 1.f; //0.694 = log(2)
+        exponent = 1.2f * xlogf( -betemp);
+        exponent /= 20.f;
+    } else if(DetailBoost >= 0.05f && DetailBoost < 0.25f ) {
+        float betemp = expf(-(2.f - DetailBoost + 0.694f)) - 1.f; //0.694 = log(2)
+        exponent = 1.2f * xlogf( -betemp);
+        exponent /= (-75.f * DetailBoost + 23.75f);
+    } else if(DetailBoost >= 0.25f) {
+        float betemp = expf(-(2.f - DetailBoost + 0.694f)) - 1.f; //0.694 = log(2)
+        exponent = 1.2f * xlogf( -betemp);
+        exponent /= (-2.f * DetailBoost + 5.5f);
+    } else {
+        exponent = (Compression - 1.0f) / 20.f;
+>>>>>>> dev
     }
 
-    else {
-        temp = (Compression - 1.0f) / 20.f;
-    }
-
+    exponent += 1.f;
+*/
+    // now calculate Source = pow(Source, exponent)
 #ifdef __SSE2__
 #ifdef _OPENMP
     #pragma omp parallel
 #endif
     {
+//<<<<<<< HEAD
         __m128 cev, uev, sourcev;
         __m128 epsv = _mm_set1_ps ( eps );
         __m128 DetailBoostv = _mm_set1_ps ( DetailBoost );
         __m128 tempv = _mm_set1_ps ( temp );
+//=======
+//        vfloat exponentv = F2V(exponent);
+//>>>>>>> dev
 #ifdef _OPENMP
         #pragma omp for
 #endif
 
+//<<<<<<< HEAD
         for (int i = 0; i < n - 3; i += 4) {
             cev = xexpf (LVFU (Source[i]) + LVFU (ucr[i]) * (tempv)) - epsv;
             uev = xexpf (LVFU (ucr[i])) - epsv;
@@ -2209,6 +2234,17 @@ float *ImProcFunctions::CompressDR (float *Source, int skip, struct cont_params 
         float ue = xexpf (ucr[i]) - eps;
         Source[i] = xexpf (Source[i]) - eps;
         Compressed[i] = ce + DetailBoost * (Source[i] - ue);
+        /*
+=======
+        for(int i = 0; i < n - 3; i += 4) {
+            STVFU(Source[i], xexpf(xlogf(LVFU(Source[i])) * exponentv));
+        }
+    }
+
+    for(int i = n - (n % 4); i < n; i++) {
+        Source[i] = xexpf(xlogf(Source[i]) * exponent);
+>>>>>>> dev
+*/
     }
 
 #else
@@ -2216,22 +2252,33 @@ float *ImProcFunctions::CompressDR (float *Source, int skip, struct cont_params 
     #pragma omp parallel for
 #endif
 
+//<<<<<<< HEAD
     for (int i = 0; i < n; i++) {
         float ce = xexpf (Source[i] + ucr[i] * (temp)) - eps;
         float ue = xexpf (ucr[i]) - eps;
         Source[i] = xexpf (Source[i]) - eps;
         Compressed[i] = ce + DetailBoost * (Source[i] - ue);
+        /*
+=======
+    for(int i = 0; i < n; i++) {
+        Source[i] = xexpf(xlogf(Source[i]) * exponent);
+>>>>>>> dev
+*/
     }
 
 #endif
 
+//<<<<<<< HEAD
     if (Compressed != ucr) {
         delete[] ucr;
     }
 
     return Compressed;
 
-
+/*
+=======
+>>>>>>> dev
+*/
 }
 
 void ImProcFunctions::ContrastResid (float * WavCoeffs_L0,  unsigned int Iterates, int skip, struct cont_params &cp, int W_L, int H_L, float max0, float min0, float ave, float ah, float bh, float al, float bl, float factorx)
@@ -2264,7 +2311,11 @@ void ImProcFunctions::ContrastResid (float * WavCoeffs_L0,  unsigned int Iterate
     }
 
 
+//<<<<<<< HEAD
     CompressDR (WavCoeffs_L0, skip, cp, W_L, H_L, Compression, DetailBoost, max0, min0, ave, ah, bh, al, bl, factorx, WavCoeffs_L0);
+//=======
+//    CompressDR(WavCoeffs_L0, W_L, H_L, Compression, DetailBoost);
+//>>>>>>> dev
 
 
 #ifdef _OPENMP
