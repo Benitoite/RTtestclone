@@ -2119,48 +2119,6 @@ void Options::saveToFile(Glib::ustring fname)
         keyFile.set_boolean("Fast Export", "fastexport_bypass_raw_bayer_dcb_iterations", fastexport_bypass_raw_bayer_dcb_iterations);
         keyFile.set_boolean("Fast Export", "fastexport_bypass_raw_bayer_dcb_enhance", fastexport_bypass_raw_bayer_dcb_enhance);
         keyFile.set_boolean("Fast Export", "fastexport_bypass_raw_bayer_lmmse_iterations", fastexport_bypass_raw_bayer_lmmse_iterations);
-/*
-		<<<<<<< HEAD
-        keyFile.set_boolean ("Fast Export", "fastexport_bypass_raw_bayer_linenoise", fastexport_bypass_raw_bayer_linenoise       );
-        keyFile.set_boolean ("Fast Export", "fastexport_bypass_raw_bayer_greenthresh", fastexport_bypass_raw_bayer_greenthresh     );
-        keyFile.set_string  ("Fast Export", "fastexport_raw_xtrans_method", fastexport_raw_xtrans_method        );
-        keyFile.set_boolean ("Fast Export", "fastexport_bypass_raw_ccSteps", fastexport_bypass_raw_ccSteps       );
-        keyFile.set_boolean ("Fast Export", "fastexport_bypass_raw_ca", fastexport_bypass_raw_ca            );
-        keyFile.set_boolean ("Fast Export", "fastexport_bypass_raw_df", fastexport_bypass_raw_df            );
-        keyFile.set_boolean ("Fast Export", "fastexport_bypass_raw_ff", fastexport_bypass_raw_ff            );
-        keyFile.set_string  ("Fast Export", "fastexport_icm_input", fastexport_icm_input                );
-        keyFile.set_string  ("Fast Export", "fastexport_icm_working", fastexport_icm_working              );
-        keyFile.set_string  ("Fast Export", "fastexport_icm_output", fastexport_icm_output               );
-        keyFile.set_integer ("Fast Export", "fastexport_icm_output_intent", fastexport_icm_outputIntent         );
-        keyFile.set_boolean ("Fast Export", "fastexport_icm_output_bpc", fastexport_icm_outputBPC            );
-        keyFile.set_string  ("Fast Export", "fastexport_icm_gamma", fastexport_icm_gamma                );
-        keyFile.set_boolean ("Fast Export", "fastexport_resize_enabled", fastexport_resize_enabled           );
-        keyFile.set_double  ("Fast Export", "fastexport_resize_scale", fastexport_resize_scale             );
-        keyFile.set_string  ("Fast Export", "fastexport_resize_appliesTo", fastexport_resize_appliesTo         );
-        keyFile.set_string  ("Fast Export", "fastexport_resize_method", fastexport_resize_method            );
-        keyFile.set_integer ("Fast Export", "fastexport_resize_dataspec", fastexport_resize_dataspec          );
-        keyFile.set_integer ("Fast Export", "fastexport_resize_width", fastexport_resize_width             );
-        keyFile.set_integer ("Fast Export", "fastexport_resize_height", fastexport_resize_height            );
-        keyFile.set_integer ("Fast Export", "fastexport_use_fast_pipeline", fastexport_use_fast_pipeline    );
-
-        keyFile.set_string ("Dialogs", "LastIccDir", lastIccDir);
-        keyFile.set_string ("Dialogs", "LastDarkframeDir", lastDarkframeDir);
-        keyFile.set_string ("Dialogs", "LastFlatfieldDir", lastFlatfieldDir);
-        keyFile.set_string ("Dialogs", "LastmergeDir", lastmergeDir);
-        keyFile.set_string ("Dialogs", "LastRgbCurvesDir", lastRgbCurvesDir);
-        keyFile.set_string ("Dialogs", "LastLabCurvesDir", lastLabCurvesDir);
-        keyFile.set_string ("Dialogs", "LastRetinexDir", lastRetinexDir);
-        keyFile.set_string ("Dialogs", "LastDenoiseCurvesDir", lastDenoiseCurvesDir);
-        keyFile.set_string ("Dialogs", "LastWaveletCurvesDir", lastWaveletCurvesDir);
-        keyFile.set_string ("Dialogs", "LastPFCurvesDir", lastPFCurvesDir);
-        keyFile.set_string ("Dialogs", "LastHsvCurvesDir", lastHsvCurvesDir);
-        keyFile.set_string ("Dialogs", "LastBWCurvesDir", lastBWCurvesDir);
-        keyFile.set_string ("Dialogs", "LastToneCurvesDir", lastToneCurvesDir);
-        keyFile.set_string ("Dialogs", "LastVibranceCurvesDir", lastVibranceCurvesDir);
-        keyFile.set_string ("Dialogs", "LastProfilingReferenceDir", lastProfilingReferenceDir);
-        keyFile.set_string ("Dialogs", "LastLensProfileDir", lastLensProfileDir);
-=======
-*/
         keyFile.set_boolean("Fast Export", "fastexport_bypass_raw_bayer_linenoise", fastexport_bypass_raw_bayer_linenoise);
         keyFile.set_boolean("Fast Export", "fastexport_bypass_raw_bayer_greenthresh", fastexport_bypass_raw_bayer_greenthresh);
         keyFile.set_string("Fast Export", "fastexport_raw_xtrans_method", fastexport_raw_xtrans_method);

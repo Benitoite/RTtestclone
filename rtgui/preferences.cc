@@ -411,11 +411,11 @@ Gtk::Widget* Preferences::getBatchProcPanel ()
     mi = behModel->append ();
     mi->set_value (behavColumns.label, M ("TP_FLATFIELD_LABEL"));
     appendBehavList (mi, M ("TP_FLATFIELD_CLIPCONTROL"), ADDSET_RAWFFCLIPCONTROL, true);
-
+/*
     mi = behModel->append ();
     mi->set_value (behavColumns.label, M ("TP_MERGE_LABEL"));
-    appendBehavList (mi, M ("TP_MERGE_CLIPCONTROL"), ADDSET_RAWFFCLIPCONTROL, true);
-
+    appendBehavList (mi, M ("TP_MERGE_CLIPCONTROL"), ADDSET_RAWMERGECONTROL, true);
+*/
     mi = behModel->append ();
     mi->set_value (behavColumns.label, M ("TP_CHROMATABERR_LABEL"));
     appendBehavList (mi, M ("TP_RAWCACORR_CARED") + ", " + M ("TP_RAWCACORR_CABLUE"), ADDSET_RAWCACORR, true);
@@ -862,50 +862,10 @@ Gtk::Widget* Preferences::getColorManPanel ()
     fprinter->add (*gprinter);
 
     vbColorMan->pack_start (*fprinter, Gtk::PACK_SHRINK);
-/*
-<<<<<<< HEAD
-    //-------------------------  CIECAM ----------------------
-
-    Gtk::Label* viewlab = Gtk::manage (new Gtk::Label (M ("PREFERENCES_VIEW") + ":", Gtk::ALIGN_START));
-    setExpandAlignProperties (viewlab, false, false, Gtk::ALIGN_START, Gtk::ALIGN_CENTER);
+    
     swColorMan->add(*vbColorMan);
     return swColorMan;
-
-    view = Gtk::manage (new Gtk::ComboBoxText ());
-    setExpandAlignProperties (view, true, false, Gtk::ALIGN_FILL, Gtk::ALIGN_CENTER);
-    view->append (M ("PREFERENCES_D50"));
-    view->append (M ("PREFERENCES_D55"));
-    view->append (M ("PREFERENCES_D60"));
-    view->append (M ("PREFERENCES_D65"));
-    view->append (M ("PREFERENCES_BLACKBODY"));
-    view->append (M ("PREFERENCES_FLUOF2"));
-    view->append (M ("PREFERENCES_FLUOF7"));
-    view->append (M ("PREFERENCES_FLUOF11"));
-
-    Gtk::Label* greylab = Gtk::manage (new Gtk::Label (M ("PREFERENCES_GREY") + ":", Gtk::ALIGN_START));
-    setExpandAlignProperties (greylab, false, false, Gtk::ALIGN_START, Gtk::ALIGN_CENTER);
-    grey = Gtk::manage (new Gtk::ComboBoxText ());
-    setExpandAlignProperties (grey, true, false, Gtk::ALIGN_FILL, Gtk::ALIGN_CENTER);
-    grey->append (M ("PREFERENCES_GREY05"));
-    grey->append (M ("PREFERENCES_GREY10"));
-    grey->append (M ("PREFERENCES_GREY15"));
-    grey->append (M ("PREFERENCES_GREY18"));
-    grey->append (M ("PREFERENCES_GREY23"));
-    grey->append (M ("PREFERENCES_GREY30"));
-    grey->append (M ("PREFERENCES_GREY40"));
-=======
-*/
-/*
-	<<<<<<< HEAD
-    colo->attach (*lreloadneeded1, 0, 0, 2, 1);
-    colo->attach (*viewlab, 0, 1, 1, 1);
-    colo->attach (*view, 1, 1, 1, 1);
-    colo->attach (*greylab, 0, 2, 1, 1);
-    colo->attach (*grey, 1, 2, 1, 1);
-    colo->attach (*greySclab, 0, 3, 1, 1);
-    colo->attach (*greySc, 1, 3, 1, 1);
-=======
-*/
+    
 }
 
 Gtk::Widget* Preferences::getGeneralPanel ()
@@ -1809,7 +1769,7 @@ void Preferences::fillPreferences ()
     sconn.block (true);
     dfconn.block (true);
     ffconn.block (true);
-    mgconn.block (true);
+ //   mgconn.block (true);
     rpconn.block (true);
     ipconn.block (true);
     bpconn.block (true);
@@ -2025,7 +1985,7 @@ void Preferences::fillPreferences ()
     sconn.block (false);
     dfconn.block (false);
     ffconn.block (false);
-    mgconn.block (false);
+//    mgconn.block (false);
     rpconn.block (true);
     ipconn.block (true);
     bpconn.block (false);

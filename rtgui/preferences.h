@@ -212,7 +212,7 @@ class Preferences : public Gtk::Dialog, public ProfileStoreListener
 
     Options moptions;
 //    sigc::connection tconn, sconn, fconn, usethcon, addc, setc, dfconn, ffconn, mgconn, bpconn, rpconn, ipconn;
-    sigc::connection tconn, sconn, fconn, cpfconn, addc, setc, dfconn, ffconn, bpconn, rpconn, ipconn, usethcon, mgconn;
+    sigc::connection tconn, sconn, fconn, cpfconn, addc, setc, dfconn, ffconn, bpconn, rpconn, ipconn, usethcon; //, mgconn;
     sigc::connection autoMonProfileConn, sndEnableConn, langAutoDetectConn, autocielabConn;
     Glib::ustring initialTheme;
     Glib::ustring initialFontFamily;
