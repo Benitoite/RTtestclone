@@ -302,13 +302,28 @@ void DirPyrEqualizer::setDefaults (const ProcParams* defParams, const ParamsEdit
     }
 }
 
-void DirPyrEqualizer::adjusterChanged (ThresholdAdjuster* a, int newBottomLeft, int newTopLeft, int newBottomRight, int newTopRight)
+void DirPyrEqualizer::adjusterChanged(ThresholdAdjuster* a, double newBottom, double newTop)
+{
+}
+
+void DirPyrEqualizer::adjusterChanged(ThresholdAdjuster* a, double newBottomLeft, double newTopLeft, double newBottomRight, double newTopRight)
+{
+}
+
+void DirPyrEqualizer::adjusterChanged(ThresholdAdjuster* a, int newBottom, int newTop)
+{
+}
+
+void DirPyrEqualizer::adjusterChanged(ThresholdAdjuster* a, int newBottomLeft, int newTopLeft, int newBottomRight, int newTopRight)
 {
     if (listener && (multiImage || getEnabled()) ) {
         listener->panelChanged (EvDirPyrEqualizerHueskin, hueskin->getHistoryString());
     }
 }
 
+void DirPyrEqualizer::adjusterChanged2(ThresholdAdjuster* a, int newBottomL, int newTopL, int newBottomR, int newTopR)
+{
+}
 
 void DirPyrEqualizer::setBatchMode (bool batchMode)
 {
@@ -335,9 +350,8 @@ void DirPyrEqualizer::cbdlMethodChanged()
 
 
 
-void DirPyrEqualizer::adjusterChanged (Adjuster* a, double newval)
+void DirPyrEqualizer::adjusterChanged(Adjuster* a, double newval)
 {
-
     if (listener && getEnabled()) {
         if (a == threshold) {
             listener->panelChanged (EvDirPyrEqualizerThreshold,
@@ -362,6 +376,10 @@ void DirPyrEqualizer::adjusterChanged (Adjuster* a, double newval)
                                    );
         }
     }
+}
+
+void DirPyrEqualizer::adjusterAutoToggled(Adjuster* a, bool newval)
+{
 }
 
 void DirPyrEqualizer::enabledChanged ()

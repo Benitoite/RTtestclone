@@ -403,12 +403,12 @@ class SHParamsEdited
 
 public:
     bool enabled;
-    bool hq;
     bool highlights;
     bool htonalwidth;
     bool shadows;
     bool stonalwidth;
     bool radius;
+    bool lab;
 };
 
 class CropParamsEdited

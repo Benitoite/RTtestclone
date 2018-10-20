@@ -3770,7 +3770,8 @@ void Wavelet::setDefaults (const ProcParams* defParams, const ParamsEdited* pedi
 
     }
 }
-void Wavelet::adjusterChanged (ThresholdAdjuster* a, double newBottom, double newTop)
+
+void Wavelet::adjusterChanged(ThresholdAdjuster* a, double newBottom, double newTop)
 {
     if (listener && (multiImage || getEnabled()) ) {
         if (a == level0noise) {
@@ -3790,8 +3791,19 @@ void Wavelet::adjusterChanged (ThresholdAdjuster* a, double newBottom, double ne
     }
 }
 
+void Wavelet::adjusterChanged(ThresholdAdjuster* a, double newBottomLeft, double newTopLeft, double newBottomRight, double newTopRight)
+{
+}
 
-void Wavelet::adjusterChanged2 (ThresholdAdjuster* a, int newBottomL, int newTopL, int newBottomR, int newTopR)
+void Wavelet::adjusterChanged(ThresholdAdjuster* a, int newBottom, int newTop)
+{
+}
+
+void Wavelet::adjusterChanged(ThresholdAdjuster* a, int newBottomLeft, int newTopLeft, int newBottomRight, int newTopRight)
+{
+}
+
+void Wavelet::adjusterChanged2(ThresholdAdjuster* a, int newBottomL, int newTopL, int newBottomR, int newTopR)
 {
     if (listener && (multiImage || getEnabled()) ) {
         if (a == hueskin) {
@@ -4439,7 +4451,7 @@ void Wavelet::adjusterUpdateUI (Adjuster* a)
     */
 }
 
-void Wavelet::adjusterChanged (Adjuster* a, double newval)
+void Wavelet::adjusterChanged(Adjuster* a, double newval)
 {
     if (listener && (multiImage || getEnabled()) ) {
         if (a == edgthresh) {
@@ -4691,6 +4703,10 @@ void Wavelet::adjusterChanged (Adjuster* a, double newval)
 
 
     }
+}
+
+void Wavelet::adjusterAutoToggled(Adjuster* a, bool newval)
+{
 }
 
 void Wavelet::enabledUpdateUI ()
