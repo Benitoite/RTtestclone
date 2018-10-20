@@ -149,6 +149,27 @@ void CAT02Adaptation::adjusterChanged(Adjuster* a, double newval)
     }
 }
 
+void CAT02Adaptation::adjusterChanged(ThresholdAdjuster* a, double newBottom, double newTop)
+{
+}
+
+void CAT02Adaptation::adjusterChanged(ThresholdAdjuster* a, double newBottomLeft, double newTopLeft, double newBottomRight, double newTopRight)
+{
+}
+
+void CAT02Adaptation::adjusterChanged(ThresholdAdjuster* a, int newBottom, int newTop)
+{
+}
+
+void CAT02Adaptation::adjusterChanged(ThresholdAdjuster* a, int newBottomLeft, int newTopLeft, int newBottomRight, int newTopRight)
+{
+}
+
+void CAT02Adaptation::adjusterChanged2(ThresholdAdjuster* a, int newBottomL, int newTopL, int newBottomR, int newTopR)
+{
+}
+
+
 void CAT02Adaptation::adjusterAutoToggled(Adjuster* a, bool newval)
 {
 

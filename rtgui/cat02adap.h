@@ -22,6 +22,7 @@
 #include <gtkmm.h>
 #include "adjuster.h"
 #include "toolpanel.h"
+#include "thresholdadjuster.h"
 
 class CAT02Adaptation: public ToolParamBlock, public AdjusterListener, public rtengine::AutoCAT02Listener, public FoldableToolPanel {
 private:
@@ -52,6 +53,12 @@ public:
 
     void adjusterChanged(Adjuster* a, double newval);
     void adjusterAutoToggled(Adjuster* a, bool newval);
+
+    void adjusterChanged(ThresholdAdjuster* a, double newBottom, double newTop);
+    void adjusterChanged(ThresholdAdjuster* a, double newBottomLeft, double newTopLeft, double newBottomRight, double newTopRight);
+    void adjusterChanged(ThresholdAdjuster* a, int newBottom, int newTop);
+    void adjusterChanged(ThresholdAdjuster* a, int newBottomLeft, int newTopLeft, int newBottomRight, int newTopRight);
+    void adjusterChanged2(ThresholdAdjuster* a, int newBottomL, int newTopL, int newBottomR, int newTopR);
 
     void enabledChanged();
     void cat02AmountChanged(int amount, bool ciecamEnabled);
