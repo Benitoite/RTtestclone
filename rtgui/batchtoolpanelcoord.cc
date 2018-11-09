@@ -202,6 +202,7 @@ void BatchToolPanelCoordinator::initSession ()
             colortoning->setAdjusterBehavior (options.baBehav[ADDSET_COLORTONING_SPLIT], options.baBehav[ADDSET_COLORTONING_SATTHRESHOLD], options.baBehav[ADDSET_COLORTONING_SATOPACITY], options.baBehav[ADDSET_COLORTONING_STRENGTH], options.baBehav[ADDSET_COLORTONING_BALANCE]);
             filmSimulation->setAdjusterBehavior(options.baBehav[ADDSET_FILMSIMULATION_STRENGTH]);
             softlight->setAdjusterBehavior(options.baBehav[ADDSET_SOFTLIGHT_STRENGTH]);
+            dehaze->setAdjusterBehavior(options.baBehav[ADDSET_DEHAZE_STRENGTH]);
             retinex->setAdjusterBehavior (options.baBehav[ADDSET_RETI_STR], options.baBehav[ADDSET_RETI_NEIGH], options.baBehav[ADDSET_RETI_LIMD], options.baBehav[ADDSET_RETI_OFFS], options.baBehav[ADDSET_RETI_VART], options.baBehav[ADDSET_RETI_GAM], options.baBehav[ADDSET_RETI_SLO]);
 
             chmixer->setAdjusterBehavior (options.baBehav[ADDSET_CHMIXER] );
@@ -292,6 +293,7 @@ void BatchToolPanelCoordinator::initSession ()
             if (options.baBehav[ADDSET_COLORTONING_STRENGTH]) { pparams.colorToning.strength = 0; }
             if (options.baBehav[ADDSET_FILMSIMULATION_STRENGTH]) { pparams.filmSimulation.strength = 0; }
             if (options.baBehav[ADDSET_SOFTLIGHT_STRENGTH]) { pparams.softlight.strength = 0; }
+            if (options.baBehav[ADDSET_DEHAZE_STRENGTH]) { pparams.dehaze.strength = 0; }
             if (options.baBehav[ADDSET_ROTATE_DEGREE]) { pparams.rotate.degree = 0; }
             if (options.baBehav[ADDSET_RESIZE_SCALE]) { pparams.resize.scale = 0; }
             if (options.baBehav[ADDSET_DIST_AMOUNT]) { pparams.distortion.amount = 0; }
@@ -383,9 +385,8 @@ void BatchToolPanelCoordinator::initSession ()
     }
 }
 
-void BatchToolPanelCoordinator::panelChanged (rtengine::ProcEvent event, const Glib::ustring& descr)
+void BatchToolPanelCoordinator::panelChanged(const rtengine::ProcEvent& event, const Glib::ustring& descr)
 {
-
     if (selected.empty()) {
         return;
     }
@@ -611,9 +612,14 @@ void BatchToolPanelCoordinator::endBatchPParamsChange()
  *          Using a Profile panel in the batch tool panel editor is actually
  *          not supported by BatchToolPanelCoordinator::profileChange!
  */
-void BatchToolPanelCoordinator::profileChange  (const rtengine::procparams::PartialProfile* nparams, rtengine::ProcEvent event, const Glib::ustring& descr, const ParamsEdited* paramsEdited)
+void BatchToolPanelCoordinator::profileChange(
+    const PartialProfile* nparams,
+    const rtengine::ProcEvent& event,
+    const Glib::ustring& descr,
+    const ParamsEdited* paramsEdited,
+    bool fromLastSave
+)
 {
-
     if (event == rtengine::EvProfileChanged) {
         // a profile has been selected in a hypothetical Profile panel
         // -> ACTUALLY NOT SUPPORTED

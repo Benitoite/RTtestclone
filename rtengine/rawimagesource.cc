@@ -2082,7 +2082,7 @@ void RawImageSource::demosaic(const RAWParams &raw, bool autoContrast, double &c
                 double threshold = raw.bayersensor.dualDemosaicContrast;
                 dual_demosaic_RT (true, raw, W, H, rawData, red, green, blue, threshold, false);
             } else {
-                dual_demosaic_RT (true, raw, W, H, rawData, red, green, blue, contrastThreshold, true, 0, 0);
+                dual_demosaic_RT (true, raw, W, H, rawData, red, green, blue, contrastThreshold, true);
             }
         } else if (raw.bayersensor.method == RAWParams::BayerSensor::getMethodString(RAWParams::BayerSensor::Method::PIXELSHIFT) ) {
             pixelshift(0, 0, W, H, raw, currFrame, ri->get_maker(), ri->get_model(), raw.expos);
@@ -2115,7 +2115,7 @@ void RawImageSource::demosaic(const RAWParams &raw, bool autoContrast, double &c
                 double threshold = raw.xtranssensor.dualDemosaicContrast;
                 dual_demosaic_RT (false, raw, W, H, rawData, red, green, blue, threshold, false);
             } else {
-                dual_demosaic_RT (false, raw, W, H, rawData, red, green, blue, contrastThreshold, true, 0, 0);
+                dual_demosaic_RT (false, raw, W, H, rawData, red, green, blue, contrastThreshold, true);
             }
         } else if(raw.xtranssensor.method == RAWParams::XTransSensor::getMethodString(RAWParams::XTransSensor::Method::MONO) ) {
             nodemosaic (true);
@@ -3063,8 +3063,6 @@ void RawImageSource::processFlatField (const RAWParams &raw, RawImage *riFlatFil
         float limitFactor = 1.f;
 
         if (raw.ff_AutoClipControl) {
-//            int clipControlGui = 0;
-
             for (int m = 0; m < 2; m++)
                 for (int n = 0; n < 2; n++) {
                     float maxval = 0.f;
@@ -3108,7 +3106,7 @@ void RawImageSource::processFlatField (const RAWParams &raw, RawImage *riFlatFil
                     }
                 }
 
-//            clipControlGui = (1.f - limitFactor) * 100.f;           // this value can be used to set the clip control slider in gui
+            flatFieldAutoClipValue = (1.f - limitFactor) * 100.f;           // this value can be used to set the clip control slider in gui
         } else {
             limitFactor = max ((float) (100 - raw.ff_clipControl) / 100.f, 0.01f);
         }
@@ -3194,7 +3192,6 @@ void RawImageSource::processFlatField (const RAWParams &raw, RawImage *riFlatFil
 
         if (raw.ff_AutoClipControl) {
             // determine maximum calculated value to avoid clipping
-//            int clipControlGui = 0;
             float maxval = 0.f;
             // xtrans files have only one black level actually, so we can simplify the code a bit
 #ifdef _OPENMP
@@ -3229,7 +3226,7 @@ void RawImageSource::processFlatField (const RAWParams &raw, RawImage *riFlatFil
             // there's only one white level for xtrans
             if (maxval + black[0] > ri->get_white (0)) {
                 limitFactor = ri->get_white (0) / (maxval + black[0]);
-//                clipControlGui = (1.f - limitFactor) * 100.f;           // this value can be used to set the clip control slider in gui
+                flatFieldAutoClipValue = (1.f - limitFactor) * 100.f;           // this value can be used to set the clip control slider in gui
             }
         } else {
             limitFactor = max ((float) (100 - raw.ff_clipControl) / 100.f, 0.01f);
@@ -3295,8 +3292,8 @@ void RawImageSource::processFlatField (const RAWParams &raw, RawImage *riFlatFil
                 vfloat rowBlackv = blackv[row & 1];
 
                 for (; col < W - 3; col += 4) {
-                    vfloat linecorrv = SQRV (vmaxf (epsv, LVFU (cfablur[row * W + col]) - rowBlackv)) /
-                                       (vmaxf (epsv, LVFU (cfablur1[row * W + col]) - rowBlackv) * vmaxf (epsv, LVFU (cfablur2[row * W + col]) - rowBlackv));
+                    vfloat linecorrv = SQRV(vmaxf(LVFU(cfablur[row * W + col]) - rowBlackv, epsv)) /
+                                       (vmaxf(LVFU(cfablur1[row * W + col]) - rowBlackv, epsv) * vmaxf(LVFU(cfablur2[row * W + col]) - rowBlackv, epsv));
                     vfloat valv = LVFU (rawData[row][col]);
                     valv -= rowBlackv;
                     STVFU (rawData[row][col], valv * linecorrv + rowBlackv);

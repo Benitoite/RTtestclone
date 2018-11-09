@@ -93,7 +93,7 @@ ImProcCoordinator::ImProcCoordinator()
       fw(0), fh(0), tr(0),
       fullw(1), fullh(1),
       pW(-1), pH(-1),
-      plistener(nullptr), imageListener(nullptr), aeListener(nullptr), acListener(nullptr), abwListener(nullptr), awbListener(nullptr), frameCountListener(nullptr), imageTypeListener(nullptr), actListener(nullptr), adnListener(nullptr), awavListener(nullptr), dehaListener(nullptr), hListener(nullptr),
+      plistener(nullptr), imageListener(nullptr), aeListener(nullptr), acListener(nullptr), abwListener(nullptr), awbListener(nullptr), flatFieldAutoClipListener(nullptr), bayerAutoContrastListener(nullptr), xtransAutoContrastListener(nullptr), frameCountListener(nullptr), imageTypeListener(nullptr), actListener(nullptr), adnListener(nullptr), awavListener(nullptr), dehaListener(nullptr), hListener(nullptr),
       resultValid(false), lastOutputProfile("BADFOOD"), lastOutputIntent(RI__COUNT), lastOutputBPC(false), thread(nullptr), changeSinceLast(0), updaterRunning(false), destroying(false), utili(false), autili(false),
       butili(false), ccutili(false), cclutili(false), clcutili(false), opautili(false), wavcontlutili(false), colourToningSatLimit(0.f), colourToningSatLimitOpacity(0.f), highQualityComputed(false)
 {}
@@ -199,6 +199,9 @@ void ImProcCoordinator::updatePreviewImage(int todo, bool panningRelatedChange)
             imgsrc->setCurrentFrame(params.raw.bayersensor.imageNum);
 
             imgsrc->preprocess(rp, params.lensProf, params.coarse);
+            if (flatFieldAutoClipListener && rp.ff_AutoClipControl) {
+                flatFieldAutoClipListener->flatFieldAutoClipValueChanged(imgsrc->getFlatFieldAutoClipValue());
+            }
             imgsrc->getRAWHistogram(histRedRaw, histGreenRaw, histBlueRaw);
 
             highDetailPreprocessComputed = highDetailNeeded;
@@ -239,9 +242,16 @@ void ImProcCoordinator::updatePreviewImage(int todo, bool panningRelatedChange)
                     imgsrc->setBorder(std::max(params.raw.bayersensor.border, 2));
                 }
             }
-            bool autoContrast = false;
-            double contrastThreshold = 0.f;
+            bool autoContrast = imgsrc->getSensorType() == ST_BAYER ? params.raw.bayersensor.dualDemosaicAutoContrast : params.raw.xtranssensor.dualDemosaicAutoContrast;
+            double contrastThreshold = imgsrc->getSensorType() == ST_BAYER ? params.raw.bayersensor.dualDemosaicContrast : params.raw.xtranssensor.dualDemosaicContrast;
             imgsrc->demosaic(rp, autoContrast, contrastThreshold); //enabled demosaic
+
+            if (imgsrc->getSensorType() == ST_BAYER && bayerAutoContrastListener && autoContrast) {
+                bayerAutoContrastListener->autoContrastChanged(autoContrast ? contrastThreshold : -1.0);
+            }
+            if (imgsrc->getSensorType() == ST_FUJI_XTRANS && xtransAutoContrastListener && autoContrast) {
+                xtransAutoContrastListener->autoContrastChanged(autoContrast ? contrastThreshold : -1.0);
+            }
 
             // if a demosaic happened we should also call getimage later, so we need to set the M_INIT flag
             todo |= M_INIT;
@@ -409,12 +419,13 @@ void ImProcCoordinator::updatePreviewImage(int todo, bool panningRelatedChange)
 
         readyphase++;
 
-        if ((todo & M_HDR) && params.fattal.enabled) {
+        if ((todo & M_HDR) && (params.fattal.enabled || params.dehaze.enabled)) {
             if (fattal_11_dcrop_cache) {
                 delete fattal_11_dcrop_cache;
                 fattal_11_dcrop_cache = nullptr;
             }
 
+            ipf.dehaze(orig_prev);
             ipf.ToneMapFattal02(orig_prev);
 
             if (oprevi != orig_prev) {
@@ -707,6 +718,7 @@ void ImProcCoordinator::updatePreviewImage(int todo, bool panningRelatedChange)
             histLCurve.clear();
             ipf.chromiLuminanceCurve(nullptr, pW, nprevl, nprevl, chroma_acurve, chroma_bcurve, satcurve, lhskcurve, clcurve, lumacurve, utili, autili, butili, ccutili, cclutili, clcutili, histCCurve, histLCurve);
             ipf.vibrance(nprevl);
+            ipf.labColorCorrectionRegions(nprevl);
 
             if ((params.colorappearance.enabled && !params.colorappearance.tonecie) || (!params.colorappearance.enabled)) {
                 ipf.EPDToneMap(nprevl, 5, scale);
@@ -1216,7 +1228,8 @@ void ImProcCoordinator::updatePreviewImage(int todo, bool panningRelatedChange)
             }
             }
 
-
+        ipf.softLight(nprevl);
+        
             if (params.colorappearance.enabled) {
                 //L histo  and Chroma histo for ciecam
                 // histogram well be for Lab (Lch) values, because very difficult to do with J,Q, M, s, C
@@ -1330,7 +1343,7 @@ void ImProcCoordinator::updatePreviewImage(int todo, bool panningRelatedChange)
 
     // process crop, if needed
     for (size_t i = 0; i < crops.size(); i++)
-        if (crops[i]->hasListener() && (panningRelatedChange || (todo & (M_MONITOR | M_RGBCURVE | M_LUMACURVE)) || crops[i]->get_skip() == 1)) {
+        if (crops[i]->hasListener() && (panningRelatedChange || (highDetailNeeded && options.prevdemo != PD_Sidecar) || (todo & (M_MONITOR | M_RGBCURVE | M_LUMACURVE)) || crops[i]->get_skip() == 1)) {
             crops[i]->update(todo);     // may call ourselves
         }
 
@@ -1902,7 +1915,8 @@ void ImProcCoordinator::process()
             || params.raw != nextParams.raw
             || params.retinex != nextParams.retinex
             || params.wavelet != nextParams.wavelet
-            || params.dirpyrequalizer != nextParams.dirpyrequalizer;
+            || params.dirpyrequalizer != nextParams.dirpyrequalizer
+            || params.dehaze != nextParams.dehaze;
 
         params = nextParams;
         int change = changeSinceLast;

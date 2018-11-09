@@ -27,7 +27,7 @@
 
 #define MIN_RESET_BUTTON_HEIGHT 17
 
-static double one2one (double val)
+static double one2one(double val)
 {
     return val;
 }
@@ -239,10 +239,12 @@ void Adjuster::autoToggled ()
             // Disable the slider and spin button
             spin->set_sensitive (false);
             slider->set_sensitive (false);
+            reset->set_sensitive(false);
         } else {
             // Enable the slider and spin button
             spin->set_sensitive (true);
             slider->set_sensitive (true);
+            reset->set_sensitive(true);
         }
     }
 
@@ -471,10 +473,12 @@ void Adjuster::setAutoValue (bool a)
                 // Disable the slider and spin button
                 spin->set_sensitive (false);
                 slider->set_sensitive (false);
+                reset->set_sensitive(false);
             } else {
                 // Enable the slider and spin button
                 spin->set_sensitive (true);
                 slider->set_sensitive (true);
+                reset->set_sensitive(true);
             }
         }
     }

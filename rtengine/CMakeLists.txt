@@ -128,6 +128,8 @@ set(RTENGINESOURCEFILES
     vng4_demosaic_RT.cc
     ipsoftlight.cc
     guidedfilter.cc
+    ipdehaze.cc
+    iplabregions.cc
     )
 
 if(LENSFUN_HAS_LOAD_DIRECTORY)

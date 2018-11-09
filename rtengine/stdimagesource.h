@@ -69,10 +69,6 @@ public:
     void        getFullSize (int& w, int& h, int tr = TR_NONE);
     void        getSize     (const PreviewProps &pp, int& w, int& h);
 
-    FrameData*  getImageData (unsigned int frameNum)
-    {
-        return idata->getFrameData (frameNum);
-    }
     ImageIO*    getImageIO   ()
     {
         return img;
@@ -100,6 +96,7 @@ public:
     }
     void setCurrentFrame(unsigned int frameNum) {}
     int getFrameCount() {return 1;}
+    int getFlatFieldAutoClipValue() {return 0;}
 
 
     void getRawValues(int x, int y, int rotate, int &R, int &G, int &B) { R = G = B = 0;}

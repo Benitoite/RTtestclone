@@ -179,6 +179,8 @@ public:
     bool labgridBLow;
     bool labgridAHigh;
     bool labgridBHigh;
+    bool labregions;
+    bool labregionsShowMask;
 };
 
 class SharpenEdgeParamsEdited
@@ -776,6 +778,16 @@ public:
     bool strength;
 };
 
+class DehazeParamsEdited
+{
+public:
+    bool enabled;
+    bool strength;
+    bool showDepthMap;
+    bool depth;
+};
+
+
 class RAWParamsEdited
 {
 
@@ -796,6 +808,7 @@ public:
         bool dcbIterations;
         bool dcbEnhance;
         bool lmmseIterations;
+        bool dualDemosaicAutoContrast;
         bool dualDemosaicContrast;
         bool pixelShiftMotionCorrectionMethod;
         bool pixelShiftEperIso;
@@ -826,6 +839,7 @@ public:
 
     public:
         bool method;
+        bool dualDemosaicAutoContrast;
         bool dualDemosaicContrast;
         bool ccSteps;
         bool exBlackRed;
@@ -917,6 +931,7 @@ public:
     HSVEqualizerParamsEdited      hsvequalizer;
     FilmSimulationParamsEdited    filmSimulation;
     SoftLightParamsEdited         softlight;
+    DehazeParamsEdited            dehaze;
     MetaDataParamsEdited          metadata;
     bool                          exif;
     bool                          iptc;
