@@ -141,6 +141,8 @@ void ParamsEdited::set(bool v)
     colorToning.labgridBLow = v;
     colorToning.labgridAHigh = v;
     colorToning.labgridBHigh = v;
+    colorToning.labregions = v;
+    colorToning.labregionsShowMask = v;
 
     sharpening.enabled            = v;
     sharpening.contrast           = v;
@@ -413,6 +415,7 @@ void ParamsEdited::set(bool v)
     raw.bayersensor.dcbEnhance = v;
     //raw.bayersensor.allEnhance = v;
     raw.bayersensor.lmmseIterations = v;
+    raw.bayersensor.dualDemosaicAutoContrast = v;
     raw.bayersensor.dualDemosaicContrast = v;
     raw.bayersensor.pixelShiftMotionCorrectionMethod = v;
     raw.bayersensor.pixelShiftEperIso = v;
@@ -433,6 +436,7 @@ void ParamsEdited::set(bool v)
     raw.bayersensor.linenoiseDirection = v;
     raw.bayersensor.pdafLinesFilter = v;
     raw.xtranssensor.method = v;
+    raw.xtranssensor.dualDemosaicAutoContrast = v;
     raw.xtranssensor.dualDemosaicContrast = v;
     raw.xtranssensor.ccSteps = v;
     raw.xtranssensor.exBlackRed = v;
@@ -573,6 +577,10 @@ void ParamsEdited::set(bool v)
     filmSimulation.strength = v;
     softlight.enabled = v;
     softlight.strength = v;
+    dehaze.enabled = v;
+    dehaze.strength = v;
+    dehaze.showDepthMap = v;
+    dehaze.depth = v;
     metadata.mode = v;
 
     exif = v;
@@ -704,6 +712,8 @@ void ParamsEdited::initFrom(const std::vector<rtengine::procparams::ProcParams>&
         colorToning.labgridBLow = colorToning.labgridBLow && p.colorToning.labgridBLow == other.colorToning.labgridBLow;
         colorToning.labgridAHigh = colorToning.labgridAHigh && p.colorToning.labgridAHigh == other.colorToning.labgridAHigh;
         colorToning.labgridBHigh = colorToning.labgridBHigh && p.colorToning.labgridBHigh == other.colorToning.labgridBHigh;
+        colorToning.labregions = colorToning.labregions && p.colorToning.labregions == other.colorToning.labregions;
+        colorToning.labregionsShowMask = colorToning.labregionsShowMask && p.colorToning.labregionsShowMask == other.colorToning.labregionsShowMask;
         sharpenEdge.enabled = sharpenEdge.enabled && p.sharpenEdge.enabled == other.sharpenEdge.enabled;
         sharpenEdge.passes = sharpenEdge.passes && p.sharpenEdge.passes == other.sharpenEdge.passes;
         sharpenEdge.amount = sharpenEdge.amount && p.sharpenEdge.amount == other.sharpenEdge.amount;
@@ -978,6 +988,7 @@ void ParamsEdited::initFrom(const std::vector<rtengine::procparams::ProcParams>&
         raw.bayersensor.dcbEnhance = raw.bayersensor.dcbEnhance && p.raw.bayersensor.dcb_enhance == other.raw.bayersensor.dcb_enhance;
         //raw.bayersensor.allEnhance = raw.bayersensor.allEnhance && p.raw.bayersensor.all_enhance == other.raw.bayersensor.all_enhance;
         raw.bayersensor.lmmseIterations = raw.bayersensor.lmmseIterations && p.raw.bayersensor.lmmse_iterations == other.raw.bayersensor.lmmse_iterations;
+        raw.bayersensor.dualDemosaicAutoContrast = raw.bayersensor.dualDemosaicAutoContrast && p.raw.bayersensor.dualDemosaicAutoContrast == other.raw.bayersensor.dualDemosaicAutoContrast;
         raw.bayersensor.dualDemosaicContrast = raw.bayersensor.dualDemosaicContrast && p.raw.bayersensor.dualDemosaicContrast == other.raw.bayersensor.dualDemosaicContrast;
         raw.bayersensor.pixelShiftMotionCorrectionMethod = raw.bayersensor.pixelShiftMotionCorrectionMethod && p.raw.bayersensor.pixelShiftMotionCorrectionMethod == other.raw.bayersensor.pixelShiftMotionCorrectionMethod;
         raw.bayersensor.pixelShiftEperIso = raw.bayersensor.pixelShiftEperIso && p.raw.bayersensor.pixelShiftEperIso == other.raw.bayersensor.pixelShiftEperIso;
@@ -998,6 +1009,7 @@ void ParamsEdited::initFrom(const std::vector<rtengine::procparams::ProcParams>&
         raw.bayersensor.linenoiseDirection = raw.bayersensor.linenoiseDirection && p.raw.bayersensor.linenoiseDirection == other.raw.bayersensor.linenoiseDirection;
         raw.bayersensor.pdafLinesFilter = raw.bayersensor.pdafLinesFilter && p.raw.bayersensor.pdafLinesFilter == other.raw.bayersensor.pdafLinesFilter;
         raw.xtranssensor.method = raw.xtranssensor.method && p.raw.xtranssensor.method == other.raw.xtranssensor.method;
+        raw.xtranssensor.dualDemosaicAutoContrast = raw.xtranssensor.dualDemosaicAutoContrast && p.raw.xtranssensor.dualDemosaicAutoContrast == other.raw.xtranssensor.dualDemosaicAutoContrast;
         raw.xtranssensor.dualDemosaicContrast = raw.xtranssensor.dualDemosaicContrast && p.raw.xtranssensor.dualDemosaicContrast == other.raw.xtranssensor.dualDemosaicContrast;
         raw.xtranssensor.ccSteps = raw.xtranssensor.ccSteps && p.raw.xtranssensor.ccSteps == other.raw.xtranssensor.ccSteps;
         raw.xtranssensor.exBlackRed = raw.xtranssensor.exBlackRed && p.raw.xtranssensor.blackred == other.raw.xtranssensor.blackred;
@@ -1133,6 +1145,10 @@ void ParamsEdited::initFrom(const std::vector<rtengine::procparams::ProcParams>&
         filmSimulation.strength = filmSimulation.strength && p.filmSimulation.strength == other.filmSimulation.strength;
         softlight.enabled = softlight.enabled && p.softlight.enabled == other.softlight.enabled;
         softlight.strength = softlight.strength && p.softlight.strength == other.softlight.strength;
+        dehaze.enabled = dehaze.enabled && p.dehaze.enabled == other.dehaze.enabled;
+        dehaze.strength = dehaze.strength && p.dehaze.strength == other.dehaze.strength;
+        dehaze.showDepthMap = dehaze.showDepthMap && p.dehaze.showDepthMap == other.dehaze.showDepthMap;
+        dehaze.depth = dehaze.depth && p.dehaze.depth == other.dehaze.depth;
         metadata.mode = metadata.mode && p.metadata.mode == other.metadata.mode;
 
 //      How the hell can we handle that???
@@ -1581,6 +1597,14 @@ void ParamsEdited::combine(rtengine::procparams::ProcParams& toEdit, const rteng
         toEdit.colorToning.labgridBHigh = mods.colorToning.labgridBHigh;
     }
 
+    if (colorToning.labregions) {
+        toEdit.colorToning.labregions = mods.colorToning.labregions;
+    }
+
+    if (colorToning.labregionsShowMask) {
+        toEdit.colorToning.labregionsShowMask = mods.colorToning.labregionsShowMask;
+    }
+    
     if (sharpenEdge.enabled) {
         toEdit.sharpenEdge.enabled    = mods.sharpenEdge.enabled;
     }
@@ -2567,6 +2591,10 @@ void ParamsEdited::combine(rtengine::procparams::ProcParams& toEdit, const rteng
         toEdit.raw.bayersensor.lmmse_iterations = mods.raw.bayersensor.lmmse_iterations;
     }
 
+    if (raw.bayersensor.dualDemosaicAutoContrast) {
+        toEdit.raw.bayersensor.dualDemosaicAutoContrast = mods.raw.bayersensor.dualDemosaicAutoContrast;
+    }
+
     if (raw.bayersensor.dualDemosaicContrast) {
         toEdit.raw.bayersensor.dualDemosaicContrast = mods.raw.bayersensor.dualDemosaicContrast;
     }
@@ -2645,6 +2673,10 @@ void ParamsEdited::combine(rtengine::procparams::ProcParams& toEdit, const rteng
 
     if (raw.xtranssensor.method) {
         toEdit.raw.xtranssensor.method          = mods.raw.xtranssensor.method;
+    }
+
+    if (raw.xtranssensor.dualDemosaicAutoContrast) {
+        toEdit.raw.xtranssensor.dualDemosaicAutoContrast          = mods.raw.xtranssensor.dualDemosaicAutoContrast;
     }
 
     if (raw.xtranssensor.dualDemosaicContrast) {
@@ -3147,7 +3179,23 @@ void ParamsEdited::combine(rtengine::procparams::ProcParams& toEdit, const rteng
     if (softlight.strength) {
         toEdit.softlight.strength        = dontforceSet && options.baBehav[ADDSET_SOFTLIGHT_STRENGTH] ? toEdit.softlight.strength + mods.softlight.strength : mods.softlight.strength;
     }
+
+    if (dehaze.enabled) {
+        toEdit.dehaze.enabled     = mods.dehaze.enabled;
+    }
+
+    if (dehaze.strength) {
+        toEdit.dehaze.strength        = dontforceSet && options.baBehav[ADDSET_DEHAZE_STRENGTH] ? toEdit.dehaze.strength + mods.dehaze.strength : mods.dehaze.strength;
+    }
     
+    if (dehaze.depth) {
+        toEdit.dehaze.depth     = mods.dehaze.depth;
+    }
+
+    if (dehaze.showDepthMap) {
+        toEdit.dehaze.showDepthMap     = mods.dehaze.showDepthMap;
+    }
+
     if (metadata.mode) {
         toEdit.metadata.mode     = mods.metadata.mode;
     }
@@ -3167,7 +3215,7 @@ void ParamsEdited::combine(rtengine::procparams::ProcParams& toEdit, const rteng
 
 bool RAWParamsEdited::BayerSensor::isUnchanged() const
 {
-    return  method && border && imageNum && dcbIterations && dcbEnhance && lmmseIterations && dualDemosaicContrast /*&& allEnhance*/ &&  greenEq
+    return  method && border && imageNum && dcbIterations && dcbEnhance && lmmseIterations && dualDemosaicAutoContrast && dualDemosaicContrast /*&& allEnhance*/ &&  greenEq
             && pixelShiftMotionCorrectionMethod && pixelShiftEperIso && pixelShiftSigma && pixelShiftShowMotion && pixelShiftShowMotionMaskOnly
             && pixelShiftHoleFill && pixelShiftMedian && pixelShiftNonGreenCross && pixelShiftDemosaicMethod && pixelShiftGreen && pixelShiftBlur && pixelShiftSmooth && pixelShiftEqualBright && pixelShiftEqualBrightChannel
             && linenoise && linenoiseDirection && pdafLinesFilter && exBlack0 && exBlack1 && exBlack2 && exBlack3 && exTwoGreen;
@@ -3175,7 +3223,7 @@ bool RAWParamsEdited::BayerSensor::isUnchanged() const
 
 bool RAWParamsEdited::XTransSensor::isUnchanged() const
 {
-    return method && exBlackRed && exBlackGreen && exBlackBlue;
+    return method && exBlackRed && exBlackGreen && exBlackBlue && dualDemosaicAutoContrast && dualDemosaicContrast;
 }
 
 bool RAWParamsEdited::isUnchanged() const

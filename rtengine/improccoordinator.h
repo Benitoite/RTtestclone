@@ -159,6 +159,9 @@ protected:
     AutoCAT02Listener* acatListener;
     AutoBWListener* abwListener;
     AutoWBListener* awbListener;
+    FlatFieldAutoClipListener *flatFieldAutoClipListener;
+    AutoContrastListener *bayerAutoContrastListener;
+    AutoContrastListener *xtransAutoContrastListener;
     FrameCountListener *frameCountListener;
     ImageTypeListener *imageTypeListener;
 
@@ -347,6 +350,20 @@ public:
     void setFrameCountListener  (FrameCountListener* fcl)
     {
         frameCountListener = fcl;
+    }
+
+    void setFlatFieldAutoClipListener  (FlatFieldAutoClipListener* ffacl)
+    {
+        flatFieldAutoClipListener = ffacl;
+    }
+    void setBayerAutoContrastListener  (AutoContrastListener* acl)
+    {
+        bayerAutoContrastListener = acl;
+    }
+
+    void setXtransAutoContrastListener  (AutoContrastListener* acl)
+    {
+        xtransAutoContrastListener = acl;
     }
 
     void setImageTypeListener  (ImageTypeListener* itl)

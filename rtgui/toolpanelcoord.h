@@ -81,6 +81,7 @@
 #include "fattaltonemap.h"
 #include "localcontrast.h"
 #include "softlight.h"
+#include "dehaze.h"
 #include "guiutils.h"
 
 class ImageEditorCoordinator;
@@ -137,6 +138,7 @@ protected:
     DirPyrEqualizer* dirpyrequalizer;
     HSVEqualizer* hsvequalizer;
     SoftLight *softlight;
+    Dehaze *dehaze;
     FilmSimulation *filmSimulation;
     SensorBayer * sensorbayer;
     SensorXTrans * sensorxtrans;
@@ -231,6 +233,7 @@ public:
 
     void imageTypeChanged (bool isRaw, bool isBayer, bool isXtrans, bool isMono = false);
 
+//    void autoContrastChanged (double autoContrast);
     // profilechangelistener interface
     void profileChange(
         const rtengine::procparams::PartialProfile* nparams,
