@@ -1105,10 +1105,6 @@ void Crop::update(int todo)
 void Crop::freeAll()
 {
 
-    if (settings->verbose) {
-        printf("freeallcrop starts %d\n", (int)cropAllocated);
-    }
-
     if (cropAllocated) {
         if (origCrop) {
             delete    origCrop;
@@ -1167,10 +1163,6 @@ bool check_need_larger_crop_for_lcp_distortion(int fw, int fh, int x, int y, int
  */
 bool Crop::setCropSizes(int rcx, int rcy, int rcw, int rch, int skip, bool internal)
 {
-
-    if (settings->verbose) {
-        printf("setcropsizes before lock\n");
-    }
 
     if (!internal) {
         cropMutex.lock();
@@ -1263,10 +1255,6 @@ bool Crop::setCropSizes(int rcx, int rcy, int rcw, int rch, int skip, bool inter
     int cw = skips(bw, skip);
     int ch = skips(bh, skip);
 
-    if (settings->verbose) {
-        printf("setsizes starts (%d, %d, %d, %d, %d, %d)\n", orW, orH, trafw, trafh, cw, ch);
-    }
-
     EditType editType = ET_PIPETTE;
 
     if (const auto editProvider = PipetteBuffer::getDataProvider()) {
@@ -1330,10 +1318,6 @@ bool Crop::setCropSizes(int rcx, int rcy, int rcw, int rch, int skip, bool inter
 
     cropx = bx1;
     cropy = by1;
-
-    if (settings->verbose) {
-        printf("setsizes ends\n");
-    }
 
     if (!internal) {
         cropMutex.unlock();
