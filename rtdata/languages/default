@@ -788,13 +788,18 @@ HISTORY_MSG_WAVSHARPMET;W - Unsharp method
 HISTORY_MSG_WAVMERGEL;W - Merge luma
 HISTORY_MSG_COLORTONING_LABGRID_VALUE;CT - Color correction
 HISTORY_MSG_COLORTONING_LABREGION_AB;CT - Color correction
-HISTORY_MSG_COLORTONING_LABREGION_CHROMATICITYMASK;CT - C mask
+HISTORY_MSG_COLORTONING_LABREGION_CHANNEL;CT - Channel
+HISTORY_MSG_COLORTONING_LABREGION_CHROMATICITYMASK;CT - region C mask
 HISTORY_MSG_COLORTONING_LABREGION_HUEMASK;CT - H mask
 HISTORY_MSG_COLORTONING_LABREGION_LIGHTNESS;CT - Lightness
 HISTORY_MSG_COLORTONING_LABREGION_LIGHTNESSMASK;CT - L mask
 HISTORY_MSG_COLORTONING_LABREGION_LIST;CT - List
+HISTORY_MSG_COLORTONING_LABREGION_MASKBLUR;CT - region mask blur
+HISTORY_MSG_COLORTONING_LABREGION_OFFSET;CT - region offset
+HISTORY_MSG_COLORTONING_LABREGION_POWER;CT - region power
 HISTORY_MSG_COLORTONING_LABREGION_SATURATION;CT - Saturation
-HISTORY_MSG_COLORTONING_LABREGION_SHOWMASK;CT - Show mask
+HISTORY_MSG_COLORTONING_LABREGION_SHOWMASK;CT - region show mask
+HISTORY_MSG_COLORTONING_LABREGION_SLOPE;CT - region slope
 HISTORY_MSG_DEHAZE_DEPTH;Dehaze - Depth
 HISTORY_MSG_DEHAZE_ENABLED;Haze Removal
 HISTORY_MSG_DEHAZE_SHOW_DEPTH_MAP;Dehaze - Show depth map
@@ -985,7 +990,7 @@ MAIN_TOOLTIP_PREVIEWFOCUSMASK;Preview the <b>focus mask</b>.\nShortcut: <b>Shift
 MAIN_TOOLTIP_PREVIEWG;Preview the <b>green channel</b>.\nShortcut: <b>g</b>
 MAIN_TOOLTIP_PREVIEWL;Preview the <b>luminosity</b>.\nShortcut: <b>v</b>\n\n0.299*R + 0.587*G + 0.114*B
 MAIN_TOOLTIP_PREVIEWR;Preview the <b>red channel</b>.\nShortcut: <b>r</b>
-MAIN_TOOLTIP_PREVIEWSHARPMASK;Preview the <b>sharpening contrast mask</b>.\nShortcut: <b>None</b>\n\nOnly works when sharpening is enabled and zoom >= 100%.
+MAIN_TOOLTIP_PREVIEWSHARPMASK;Preview the <b>sharpening contrast mask</b>.\nShortcut: <b>p</b>\n\nOnly works when sharpening is enabled and zoom >= 100%.
 MAIN_TOOLTIP_QINFO;Quick info on the image.\nShortcut: <b>i</b>
 MAIN_TOOLTIP_SHOWHIDELP1;Show/Hide the left panel.\nShortcut: <b>l</b>
 MAIN_TOOLTIP_SHOWHIDERP1;Show/Hide the right panel.\nShortcut: <b>Alt-l</b>
@@ -1438,7 +1443,6 @@ TP_COARSETRAF_TOOLTIP_ROTLEFT;Rotate left.\n\nShortcuts:\n<b>[</b> - Multiple Ed
 TP_COARSETRAF_TOOLTIP_ROTRIGHT;Rotate right.\n\nShortcuts:\n<b>]</b> - Multiple Editor Tabs Mode,\n<b>Alt-]</b> - Single Editor Tab Mode.
 TP_COARSETRAF_TOOLTIP_VFLIP;Flip vertically.
 TP_COLORAPP_ABSOLUTELUMINANCE;Absolute luminance
-TP_COLORAPP_MEANLUMINANCE;Mean luminance (Yb%)
 TP_COLORAPP_ALGO;Algorithm
 TP_COLORAPP_ALGO_ALL;All
 TP_COLORAPP_ALGO_JC;Lightness + Chroma (JC)
@@ -1480,6 +1484,7 @@ TP_COLORAPP_LABEL_SCENE;Scene Conditions
 TP_COLORAPP_LABEL_VIEWING;Viewing Conditions
 TP_COLORAPP_LIGHT;Lightness (J)
 TP_COLORAPP_LIGHT_TOOLTIP;Lightness in CIECAM02 differs from L*a*b* and RGB lightness.
+TP_COLORAPP_MEANLUMINANCE;Mean luminance (Yb%)
 TP_COLORAPP_MODEL;WP Model
 TP_COLORAPP_MODEL_TOOLTIP;White-Point Model.\n\n<b>WB [RT] + [output]</b>: RT's white balance is used for the scene, CIECAM02 is set to D50, and the output device's white balance is set in Viewing Conditions.\n\n<b>WB [RT+CAT02] + [output]</b>: RT's white balance settings are used by CAT02 and the output device's white balance is set in Viewing Conditions.\n\n<b>Free temp+green + CAT02 + [output]:</b> temp and green are selected by the user, the output device's white balance is set in Viewing Conditions.
 TP_COLORAPP_NEUTRAL;Reset
@@ -1521,16 +1526,25 @@ TP_COLORTONING_LAB;L*a*b* blending
 TP_COLORTONING_LABEL;Color Toning
 TP_COLORTONING_LABGRID;L*a*b* color correction grid
 TP_COLORTONING_LABGRID_VALUES;HL: a=%1 b=%2\nS: a=%3 b=%4
-TP_COLORTONING_LABREGIONS;L*a*b* correction regions
+TP_COLORTONING_LABREGIONS;Color correction regions
 TP_COLORTONING_LABREGION_ABVALUES;a=%1 b=%2
+TP_COLORTONING_LABREGION_CHANNEL;Channel
+TP_COLORTONING_LABREGION_CHANNEL_ALL;All
+TP_COLORTONING_LABREGION_CHANNEL_B;Blue
+TP_COLORTONING_LABREGION_CHANNEL_G;Green
+TP_COLORTONING_LABREGION_CHANNEL_R;Red
 TP_COLORTONING_LABREGION_CHROMATICITYMASK;C
 TP_COLORTONING_LABREGION_HUEMASK;H
 TP_COLORTONING_LABREGION_LIGHTNESS;Lightness
 TP_COLORTONING_LABREGION_LIGHTNESSMASK;L
 TP_COLORTONING_LABREGION_LIST_TITLE;Correction
 TP_COLORTONING_LABREGION_MASK;Mask
+TP_COLORTONING_LABREGION_MASKBLUR;Mask Blur
+TP_COLORTONING_LABREGION_OFFSET;Offset
+TP_COLORTONING_LABREGION_POWER;Power
 TP_COLORTONING_LABREGION_SATURATION;Saturation
 TP_COLORTONING_LABREGION_SHOWMASK;Show mask
+TP_COLORTONING_LABREGION_SLOPE;Slope
 TP_COLORTONING_LUMA;Luminance
 TP_COLORTONING_LUMAMODE;Preserve luminance
 TP_COLORTONING_LUMAMODE_TOOLTIP;If enabled, when you change color (red, green, cyan, blue, etc.) the luminance of each pixel is preserved.
@@ -1570,10 +1584,11 @@ TP_CROP_GUIDETYPE;Guide type:
 TP_CROP_H;Height
 TP_CROP_LABEL;Crop
 TP_CROP_PPI;PPI=
-TP_CROP_SELECTCROP;Select Crop
+TP_CROP_RESETCROP;Reset
+TP_CROP_SELECTCROP;Select
 TP_CROP_W;Width
-TP_CROP_X;X
-TP_CROP_Y;Y
+TP_CROP_X;Left
+TP_CROP_Y;Top
 TP_DARKFRAME_AUTOSELECT;Auto-selection
 TP_DARKFRAME_LABEL;Dark-Frame
 TP_DEFRINGE_LABEL;Defringe
@@ -1822,9 +1837,9 @@ TP_LENSPROFILE_CORRECTION_MANUAL;Manually
 TP_LENSPROFILE_LABEL;Profiled Lens Correction
 TP_LENSPROFILE_LENS_WARNING;Warning: the crop factor used for lens profiling is larger than the crop factor of the camera, the results might be wrong.
 TP_LENSPROFILE_MODE_HEADER;Select the lens profile:
-TP_LENSPROFILE_USE_HEADER;Select distortions to correct:
 TP_LENSPROFILE_USE_CA;Chromatic aberration
 TP_LENSPROFILE_USE_GEOMETRIC;Geometric
+TP_LENSPROFILE_USE_HEADER;Select distortions to correct:
 TP_LENSPROFILE_USE_VIGNETTING;Vignetting
 TP_LOCALCONTRAST_AMOUNT;Amount
 TP_LOCALCONTRAST_DARKNESS;Darkness level
@@ -1970,12 +1985,12 @@ TP_RESIZE_SCALE;Scale
 TP_RESIZE_SPECIFY;Specify:
 TP_RESIZE_W;Width:
 TP_RESIZE_WIDTH;Width
-TP_RETINEX_CONTEDIT_MAP;Equalizer
 TP_RETINEX_CONTEDIT_HSL;HSL histogram
 TP_RETINEX_CHRRT;Chroma
 TP_RETINEX_CHROMA_TOOLTIP;Percentage % of Strength
 TP_RETINEX_CONTEDIT_LAB;L*a*b* histogram
 TP_RETINEX_CONTEDIT_LH;Hue
+TP_RETINEX_CONTEDIT_MAP;Equalizer
 TP_RETINEX_CURVEEDITOR_CD;L=f(L)
 TP_RETINEX_CURVEEDITOR_CD_TOOLTIP;Luminance according to luminance L=f(L)\nCorrect raw data to reduce halos and artifacts.
 TP_RETINEX_CURVEEDITOR_LH;Strength=f(H)

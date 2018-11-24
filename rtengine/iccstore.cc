@@ -622,7 +622,7 @@ private:
     struct PMatrix {
         double matrix[3][3];
         PMatrix(): matrix{} {}
-        PMatrix(const CMatrix &m)
+        explicit PMatrix(const CMatrix &m)
         {
             set(m);
         }
