@@ -104,11 +104,11 @@ void ciecamcat02loc_float(LabImage* lab, LabImage* dest, int tempa, double gree,
     zw2 = zwd;
 
     float cz, wh, pfl;
-    Ciecam02::initcam1float(gamu, yb, pilot, f, la, xw, yw, zw, n, d, nbb, ncb, cz, aw, wh, pfl, fl, c);
+    Ciecam02::initcam1float(yb, pilot, f, la, xw, yw, zw, n, d, nbb, ncb, cz, aw, wh, pfl, fl, c);
 //   const float chr = 0.f;
     const float pow1 = pow_F(1.64f - pow_F(0.29f, n), 0.73f);
     float nj, nbbj, ncbj, czj, awj, flj;
-    Ciecam02::initcam2float(gamu, yb2, pilotout, f2,  la2,  xw2,  yw2,  zw2, nj, dj, nbbj, ncbj, czj, awj, flj);
+    Ciecam02::initcam2float(yb2, pilotout, f2,  la2,  xw2,  yw2,  zw2, nj, dj, nbbj, ncbj, czj, awj, flj);
     const float reccmcz = 1.f / (c2 * czj);
     const float pow1n = pow_F(1.64f - pow_F(0.29f, nj), 0.73f);
 //    const float QproFactor = (0.4f / c) * (aw + 4.0f) ;
@@ -177,7 +177,7 @@ void ciecamcat02loc_float(LabImage* lab, LabImage* dest, int tempa, double gree,
                                                    Q,  M,  s, aw, fl, wh,
                                                    x,  y,  z,
                                                    xw1, yw1,  zw1,
-                                                   c,  nc, gamu, pow1, nbb, ncb, pfl, cz, d);
+                                                   c,  nc, pow1, nbb, ncb, pfl, cz, d);
                 Jbuffer[k] = J;
                 Cbuffer[k] = C;
                 hbuffer[k] = h;
@@ -215,7 +215,7 @@ void ciecamcat02loc_float(LabImage* lab, LabImage* dest, int tempa, double gree,
                                                    Q,  M,  s, aw, fl, wh,
                                                    x,  y,  z,
                                                    xw1, yw1,  zw1,
-                                                   c,  nc, gamu, pow1, nbb, ncb, pfl, cz, d);
+                                                   c,  nc,  pow1, nbb, ncb, pfl, cz, d);
 #endif
                 float Jpro, Cpro, hpro, Qpro, Mpro, spro;
                 Jpro = J;
