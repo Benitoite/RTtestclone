@@ -90,7 +90,7 @@ void ciecamcat02loc_float(LabImage* lab, LabImage* dest, int tempa, double gree,
     float yb = 18.f;
     float d, dj;
 
-    const int gamu = 0; //(params->colorappearance.gamut) ? 1 : 0;
+//    const int gamu = 0; //(params->colorappearance.gamut) ? 1 : 0;
     xw = 100.0f * Xw;
     yw = 100.0f * Yw;
     zw = 100.0f * Zw;
@@ -252,7 +252,7 @@ void ciecamcat02loc_float(LabImage* lab, LabImage* dest, int tempa, double gree,
                     Ciecam02::jch2xyz_ciecam02float(xx, yy, zz,
                                                     J,  C, h,
                                                     xw2, yw2,  zw2,
-                                                    c2, nc2, gamu, pow1n, nbbj, ncbj, flj, czj, dj, awj);
+                                                    c2, nc2, pow1n, nbbj, ncbj, flj, czj, dj, awj);
                     float x, y, z;
                     x = xx * 655.35f;
                     y = yy * 655.35f;
@@ -386,14 +386,19 @@ void cat02adaptationAutoCompute(ImageSource *imgsrc, ProcParams &params)
             cat0 = 50;
         } else if (ada < 30.f) {
             cat0 = 60;
-        } else if (ada < 100.f) {
+        } else if (ada < 60.f) {
             cat0 = 70;
-        } else if (ada < 300.f) {
+        } else if (ada < 80.f) {
             cat0 = 80;
-        } else if (ada < 500.f) {
+        } else if (ada < 100.f) {
+            cat0 = 85;
+        } else if (ada < 250.f) {
             cat0 = 90;
-        } else if (ada < 1000.f) {
+        } else if (ada < 400.f) {
             cat0 = 95;
+        } else if (ada < 500.f) {
+            cat0 = 99;
+            
         }
     }
 
