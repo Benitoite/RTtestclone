@@ -3429,6 +3429,7 @@ void Wavelet::retinexMethodproChanged()
 {
     if (retinexMethodpro->get_active_row_number() == 0) {
         labretifin->set_sensitive (false);
+        expresid->setEnabled (true);
     } else if (retinexMethodpro->get_active_row_number() == 1 /*&& retinexMethod->get_active_row_number() != 0*/) {
         labretifin->set_sensitive (true);
 
