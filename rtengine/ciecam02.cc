@@ -606,7 +606,7 @@ void Ciecam02::xyz2jch_ciecam02float ( float &J, float &C, float &h, float aw, f
 //    }
 
 #ifdef __SSE2__
-    vfloat pv = _mm_setr_ps(rp, gp, bp, 1.f);
+    vfloat pv = f2vr(rp, gp, bp, 1.f);
     vfloat fv = f2v(fl);
     vfloat outv = nonlinear_adaptationfloat(pv, fv);
     rpa = outv[0];
@@ -660,8 +660,8 @@ void Ciecam02::jch2xyz_ciecam02float ( float &x, float &y, float &z, float J, fl
     e = ((961.53846f) * nc * ncb) * (xcosf(h * rtengine::RT_PI_F_180 + 2.0f) + 3.8f);
 
 #ifdef __SSE2__
-    vfloat powinv1 = _mm_setr_ps(J / 100.0f, 10.f * C / (sqrtf(J) * pow1), 1.f, 1.f);
-    vfloat powinv2 = _mm_setr_ps(1.0f / (c * cz), 1.1111111f, 1.f, 1.f);
+    vfloat powinv1 = f2vr(J / 100.0f, 10.f * C / (sqrtf(J) * pow1), 1.f, 1.f);
+    vfloat powinv2 = f2vr(1.0f / (c * cz), 1.1111111f, 1.f, 1.f);
     vfloat powoutv = xpowf(powinv1, powinv2);
     a = powoutv[0] * aw;
     t = powoutv[1];
@@ -674,7 +674,7 @@ void Ciecam02::jch2xyz_ciecam02float ( float &x, float &y, float &z, float J, fl
     Aab_to_rgbfloat(rpa, gpa, bpa, a, ca, cb, nbb);
 
 #ifdef __SSE2__
-    vfloat pav = _mm_setr_ps(rpa, gpa, bpa, 1.f);
+    vfloat pav = f2vr(rpa, gpa, bpa, 1.f);
     vfloat fv = f2v(fl);
     vfloat outv = inverse_nonlinear_adaptationfloat(pav, fv);
     rp = outv[0];

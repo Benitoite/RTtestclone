@@ -1440,9 +1440,9 @@ static INLINE vfloat vceilf(vfloat x) {
 #else
 
 static INLINE vfloat vceilf(vfloat x) {
-    __m128i zerov = _mm_setzero_si128();
-    zerov = _mm_cmpeq_epi32(zerov, zerov);
-    const vfloat onev = (vfloat)_mm_slli_epi32(_mm_srli_epi32(zerov, 25), 23); //create vector 1.0f
+    vint izerov = _mm_setzero_si128();
+    izerov = _mm_cmpeq_epi32(izerov, izerov);
+    const vfloat onev = (vfloat)_mm_slli_epi32(_mm_srli_epi32(izerov, 25), 23); //create vector 1.0f
     const vfloat xi = _mm_cvtepi32_ps(_mm_cvttps_epi32(x));
     return xi + _mm_and_ps(_mm_cmplt_ps(xi, x), onev);
 }

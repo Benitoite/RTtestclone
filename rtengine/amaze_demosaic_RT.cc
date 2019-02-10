@@ -367,9 +367,9 @@ void RawImageSource::amaze_demosaic_RT(int winx, int winy, int winw, int winh, c
                 vfloat sgnv;
 
                 if( !(FC(4, 4) & 1) ) {
-                    sgnv = _mm_set_ps( 1.f, -1.f, 1.f, -1.f );
+                    sgnv = f2v( 1.f, -1.f, 1.f, -1.f );
                 } else {
-                    sgnv = _mm_set_ps( -1.f, 1.f, -1.f, 1.f );
+                    sgnv = f2v( -1.f, 1.f, -1.f, 1.f );
                 }
 
                 vfloat zd5v = f2v( 0.5f );
@@ -526,9 +526,9 @@ void RawImageSource::amaze_demosaic_RT(int winx, int winy, int winw, int winh, c
                 vfloat  sgn3v;
 
                 if( !(FC(4, 4) & 1) ) {
-                    sgnv = _mm_set_ps( 1.f, -1.f, 1.f, -1.f );
+                    sgnv = f2v( 1.f, -1.f, 1.f, -1.f );
                 } else {
-                    sgnv = _mm_set_ps( -1.f, 1.f, -1.f, 1.f );
+                    sgnv = f2v( -1.f, 1.f, -1.f, 1.f );
                 }
 
                 sgn3v = sgnv + sgnv + sgnv;

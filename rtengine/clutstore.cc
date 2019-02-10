@@ -224,7 +224,7 @@ void rtengine::HaldCLUT::getRGB(
         out_rgbx[1] = intp<float>(strength, out_rgbx[1], *g);
         out_rgbx[2] = intp<float>(strength, out_rgbx[2], *b);
 #else
-        const vfloat v_in = _mm_set_ps(0.0f, *b, *g, *r);
+        const vfloat v_in = f2v(0.0f, *b, *g, *r);
         const vfloat v_tmp = v_in * f2v(flevel_minus_one);
         const vfloat v_rgb = v_tmp - _mm_cvtepi32_ps(_mm_cvttps_epi32(vminf(v_tmp, f2v(flevel_minus_two))));
 

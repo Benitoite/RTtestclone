@@ -340,25 +340,25 @@ template<class T> void gaussHorizontalSse (T** src, T** dst, const int W, const 
 #endif
 
     for (int i = 0; i < H - 3; i += 4) {
-        Tv = _mm_set_ps(src[i][0], src[i + 1][0], src[i + 2][0], src[i + 3][0]);
+        Tv = f2v(src[i][0], src[i + 1][0], src[i + 2][0], src[i + 3][0]);
         Tm3v = Tv * (Bv + b1v + b2v + b3v);
         stvf( tmp[0][0], Tm3v );
 
-        Tm2v = _mm_set_ps(src[i][1], src[i + 1][1], src[i + 2][1], src[i + 3][1]) * Bv + Tm3v * b1v + Tv * (b2v + b3v);
+        Tm2v = f2v(src[i][1], src[i + 1][1], src[i + 2][1], src[i + 3][1]) * Bv + Tm3v * b1v + Tv * (b2v + b3v);
         stvf( tmp[1][0], Tm2v );
 
-        Rv = _mm_set_ps(src[i][2], src[i + 1][2], src[i + 2][2], src[i + 3][2]) * Bv + Tm2v * b1v + Tm3v * b2v + Tv * b3v;
+        Rv = f2v(src[i][2], src[i + 1][2], src[i + 2][2], src[i + 3][2]) * Bv + Tm2v * b1v + Tm3v * b2v + Tv * b3v;
         stvf( tmp[2][0], Rv );
 
         for (int j = 3; j < W; j++) {
             Tv = Rv;
-            Rv = _mm_set_ps(src[i][j], src[i + 1][j], src[i + 2][j], src[i + 3][j]) * Bv + Tv * b1v + Tm2v * b2v + Tm3v * b3v;
+            Rv = f2v(src[i][j], src[i + 1][j], src[i + 2][j], src[i + 3][j]) * Bv + Tv * b1v + Tm2v * b2v + Tm3v * b3v;
             stvf( tmp[j][0], Rv );
             Tm3v = Tm2v;
             Tm2v = Tv;
         }
 
-        Tv = _mm_set_ps(src[i][W - 1], src[i + 1][W - 1], src[i + 2][W - 1], src[i + 3][W - 1]);
+        Tv = f2v(src[i][W - 1], src[i + 1][W - 1], src[i + 2][W - 1], src[i + 3][W - 1]);
 
         temp2Wp1 = Tv + f2v(M[2][0]) * (Rv - Tv) + f2v(M[2][1]) * ( Tm2v - Tv ) +  f2v(M[2][2]) * (Tm3v - Tv);
         temp2W = Tv + f2v(M[1][0]) * (Rv - Tv) + f2v(M[1][1]) * (Tm2v - Tv) + f2v(M[1][2]) * (Tm3v - Tv);

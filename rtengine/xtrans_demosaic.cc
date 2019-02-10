@@ -735,7 +735,6 @@ void RawImageSource::xtrans_interpolate (const int passes, const bool useCieLab)
                 /* Build homogeneity maps from the derivatives:         */
 #ifdef __SSE2__
                 vfloat eightv = f2v(8.f);
-                vfloat zerov = f2v(0.f);
                 vfloat onev = f2v(1.f);
 #endif
 
@@ -767,7 +766,7 @@ void RawImageSource::xtrans_interpolate (const int passes, const bool useCieLab)
                                 }
                             }
 
-                            _mm_storeu_si128((__m128i*)&tempstore, _mm_cvtps_epi32(tempv));
+                            _mm_storeu_si128((vint*)&tempstore, _mm_cvtps_epi32(tempv));
                             homo[d][row][col] = tempstore[0];
                             homo[d][row][col + 1] = tempstore[4];
                             homo[d][row][col + 2] = tempstore[8];

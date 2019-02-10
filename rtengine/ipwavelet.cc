@@ -728,8 +728,8 @@ void ImProcFunctions::ip_wavelet(LabImage * lab, LabImage * dst, int kall, const
                     int i1 = i - tiletop;
                     int j;
 #ifdef __SSE2__
-                    __m128 c327d68v = _mm_set1_ps(327.68f);
-                    __m128 av, bv, huev, chrov;
+                    vfloat c327d68v = f2v(327.68f);
+                    vfloat av, bv, huev, chrov;
 
                     for (j = tileleft; j < tileright - 3; j += 4) {
                         int j1 = j - tileleft;
@@ -737,13 +737,13 @@ void ImProcFunctions::ip_wavelet(LabImage * lab, LabImage * dst, int kall, const
                         bv = lvfu(lab->b[i][j]);
                         huev = xatan2f(bv, av);
                         chrov = vsqrtf(SQRV(av) + SQRV(bv)) / c327d68v;
-                        _mm_storeu_ps(&varhue[i1][j1], huev);
-                        _mm_storeu_ps(&varchro[i1][j1], chrov);
+                        stvfu(varhue[i1][j1], huev);
+                        stvfu(varchro[i1][j1], chrov);
 
                         if(labco != lab) {
-                            _mm_storeu_ps(&(labco->L[i1][j1]), lvfu(lab->L[i][j]));
-                            _mm_storeu_ps(&(labco->a[i1][j1]), av);
-                            _mm_storeu_ps(&(labco->b[i1][j1]), bv);
+                            stvfu((labco->L[i1][j1]), lvfu(lab->L[i][j]));
+                            stvfu((labco->a[i1][j1]), av);
+                            stvfu((labco->b[i1][j1]), bv);
                         }
                     }
 
@@ -1092,11 +1092,10 @@ void ImProcFunctions::ip_wavelet(LabImage * lab, LabImage * dst, int kall, const
 
                         if(cp.avoi) {
                             int col;
-                            __m128 av, bv;
-                            __m128 cv, yv, xv;
-                            __m128 zerov = _mm_setzero_ps();
-                            __m128 onev = _mm_set1_ps(1.f);
-                            __m128 c327d68v = _mm_set1_ps(327.68f);
+                            vfloat av, bv;
+                            vfloat cv, yv, xv;
+                            vfloat onev = f2v(1.f);
+                            vfloat c327d68v = f2v(327.68f);
                             vmask xyMask;
 
                             for(col = 0; col < rowWidth - 3; col += 4) {
@@ -1109,7 +1108,7 @@ void ImProcFunctions::ip_wavelet(LabImage * lab, LabImage * dst, int kall, const
                                 xv = bv / cv;
                                 xyMask = vmaskf_eq(zerov, cv);
                                 yv = vself(xyMask, onev, yv);
-                                xv = vself(xyMask, zerov, xv);
+                                xv = vselfnotzero(xyMask, xv);
                                 stvf(yBuffer[col], yv);
                                 stvf(xBuffer[col], xv);
                                 stvf(chprovBuffer[col], cv / c327d68v);
@@ -1989,10 +1988,10 @@ void ImProcFunctions::WaveletAandBAllAB(wavelet_decomposition &WaveletCoeffs_a, 
                 int k;
 
                 for (k = 0; k < W_L - 3; k += 4) {
-                    __m128 av = lvfu(WavCoeffs_a0[i * W_L + k]);
-                    __m128 bv = lvfu(WavCoeffs_b0[i * W_L + k]);
-                    __m128 huev = xatan2f(bv, av);
-                    __m128 chrv = vsqrtf(SQRV(av) + SQRV(bv));
+                    vfloat av = lvfu(WavCoeffs_a0[i * W_L + k]);
+                    vfloat bv = lvfu(WavCoeffs_b0[i * W_L + k]);
+                    vfloat huev = xatan2f(bv, av);
+                    vfloat chrv = vsqrtf(SQRV(av) + SQRV(bv));
                     stvf(huebuffer[k], huev);
                     stvf(chrbuffer[k], chrv);
                 }

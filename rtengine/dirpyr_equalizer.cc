@@ -151,7 +151,7 @@ void ImProcFunctions :: dirpyr_equalizer(float ** src, float ** dst, int srcwidt
             int j;
 
             for(j = 0; j < srcwidth - 3; j += 4) {
-                _mm_storeu_ps(&tmpHue[i][j], xatan2f(lvfu(l_b[i][j]), lvfu(l_a[i][j])));
+                stvfu(tmpHue[i][j], xatan2f(lvfu(l_b[i][j]), lvfu(l_a[i][j])));
             }
 
             for(; j < srcwidth; j++) {
@@ -182,7 +182,7 @@ void ImProcFunctions :: dirpyr_equalizer(float ** src, float ** dst, int srcwidt
         #pragma omp parallel
 #endif
         {
-            __m128 div = _mm_set1_ps(327.68f);
+            vfloat div = f2v(327.68f);
 #ifdef _OPENMP
             #pragma omp for
 #endif
@@ -191,7 +191,7 @@ void ImProcFunctions :: dirpyr_equalizer(float ** src, float ** dst, int srcwidt
                 int j;
 
                 for(j = 0; j < srcwidth - 3; j += 4) {
-                    _mm_storeu_ps(&tmpChr[i][j], vsqrtf(SQRV(lvfu(l_b[i][j])) + SQRV(lvfu(l_a[i][j]))) / div);
+                    stvfu(tmpChr[i][j], vsqrtf(SQRV(lvfu(l_b[i][j])) + SQRV(lvfu(l_a[i][j]))) / div);
                 }
 
                 for(; j < srcwidth; j++) {
@@ -400,8 +400,8 @@ void ImProcFunctions::dirpyr_channel(float ** data_fine, float ** data_coarse, i
 #endif
         {
 #ifdef __SSE2__
-            __m128 thousandv = _mm_set1_ps( 1000.0f );
-            __m128 dirwtv, valv, normv, dftemp1v, dftemp2v;
+            vfloat thousandv = f2v( 1000.0f );
+            vfloat dirwtv, valv, normv, dftemp1v, dftemp2v;
 //  multiplied each value of domkerv by 1000 to avoid multiplication by 1000 inside the loop
             float domkerv[5][5][4] ALIGNED16 = {{{1000, 1000, 1000, 1000}, {1000, 1000, 1000, 1000}, {1000, 1000, 1000, 1000}, {1000, 1000, 1000, 1000}, {1000, 1000, 1000, 1000}}, {{1000, 1000, 1000, 1000}, {2000, 2000, 2000, 2000}, {2000, 2000, 2000, 2000}, {2000, 2000, 2000, 2000}, {1000, 1000, 1000, 1000}}, {{1000, 1000, 1000, 1000}, {2000, 2000, 2000, 2000}, {2000, 2000, 2000, 2000}, {2000, 2000, 2000, 2000}, {1000, 1000, 1000, 1000}}, {{1000, 1000, 1000, 1000}, {2000, 2000, 2000, 2000}, {2000, 2000, 2000, 2000}, {2000, 2000, 2000, 2000}, {1000, 1000, 1000, 1000}}, {{1000, 1000, 1000, 1000}, {1000, 1000, 1000, 1000}, {1000, 1000, 1000, 1000}, {1000, 1000, 1000, 1000}, {1000, 1000, 1000, 1000}}};
 #endif // __SSE2__
@@ -434,8 +434,8 @@ void ImProcFunctions::dirpyr_channel(float ** data_fine, float ** data_coarse, i
 #ifdef __SSE2__
 
                 for(; j < width - scalewin - 3; j += 4) {
-                    valv = _mm_setzero_ps();
-                    normv = _mm_setzero_ps();
+                    valv = zerov;
+                    normv = zerov;
                     dftemp1v = lvfu(data_fine[i][j]);
 
                     for(int inbr = MAX(0, i - scalewin); inbr <= MIN(height - 1, i + scalewin); inbr += scale) {
@@ -449,7 +449,7 @@ void ImProcFunctions::dirpyr_channel(float ** data_fine, float ** data_coarse, i
                         }
                     }
 
-                    _mm_storeu_ps( &data_coarse[i][j], valv / normv); //low pass filter
+                    stvfu(data_coarse[i][j], valv / normv); //low pass filter
                 }
 
                 for(; j < width - scalewin; j++) {
@@ -509,8 +509,8 @@ void ImProcFunctions::dirpyr_channel(float ** data_fine, float ** data_coarse, i
 #endif
         {
 #ifdef __SSE2__
-            __m128 thousandv = _mm_set1_ps( 1000.0f );
-            __m128 dirwtv, valv, normv, dftemp1v, dftemp2v;
+            vfloat thousandv = f2v( 1000.0f );
+            vfloat dirwtv, valv, normv, dftemp1v, dftemp2v;
 #endif // __SSE2__
             int j;
 #ifdef _OPENMP
@@ -539,8 +539,8 @@ void ImProcFunctions::dirpyr_channel(float ** data_fine, float ** data_coarse, i
 #ifdef __SSE2__
 
                 for(; j < width - scale - 3; j += 4) {
-                    valv = _mm_setzero_ps();
-                    normv = _mm_setzero_ps();
+                    valv = zerov;
+                    normv = zerov;
                     dftemp1v = lvfu(data_fine[i][j]);
 
                     for(int inbr = MAX(0, i - scale); inbr <= MIN(height - 1, i + scale); inbr += scale) {
@@ -552,7 +552,7 @@ void ImProcFunctions::dirpyr_channel(float ** data_fine, float ** data_coarse, i
                         }
                     }
 
-                    _mm_storeu_ps( &data_coarse[i][j], valv / normv); //low pass filter
+                    stvfu(data_coarse[i][j], valv / normv); //low pass filter
                 }
 
                 for(; j < width - scale; j++) {

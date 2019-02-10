@@ -2951,11 +2951,11 @@ void RawImageSource::processFlatField(const RAWParams &raw, RawImage *riFlatFile
         constexpr float minValue = 1.f; // if the pixel value in the flat field is less or equal this value, no correction will be applied.
 
 #ifdef __SSE2__
-        vfloat refcolorv[2] = {_mm_set_ps(refcolor[0][1], refcolor[0][0], refcolor[0][1], refcolor[0][0]),
-                               _mm_set_ps(refcolor[1][1], refcolor[1][0], refcolor[1][1], refcolor[1][0])
+        vfloat refcolorv[2] = {f2v(refcolor[0][1], refcolor[0][0], refcolor[0][1], refcolor[0][0]),
+                               f2v(refcolor[1][1], refcolor[1][0], refcolor[1][1], refcolor[1][0])
                               };
-        vfloat blackv[2] = {_mm_set_ps(black[c4[0][1]], black[c4[0][0]], black[c4[0][1]], black[c4[0][0]]),
-                            _mm_set_ps(black[c4[1][1]], black[c4[1][0]], black[c4[1][1]], black[c4[1][0]])
+        vfloat blackv[2] = {f2v(black[c4[0][1]], black[c4[0][0]], black[c4[0][1]], black[c4[0][0]]),
+                            f2v(black[c4[1][1]], black[c4[1][0]], black[c4[1][1]], black[c4[1][0]])
                            };
 
         vfloat onev = f2v(1.f);
@@ -3094,8 +3094,8 @@ void RawImageSource::processFlatField(const RAWParams &raw, RawImage *riFlatFile
             }
 
 #ifdef __SSE2__
-            vfloat blackv[2] = {_mm_set_ps(black[c4[0][1]], black[c4[0][0]], black[c4[0][1]], black[c4[0][0]]),
-                                _mm_set_ps(black[c4[1][1]], black[c4[1][0]], black[c4[1][1]], black[c4[1][0]])
+            vfloat blackv[2] = {f2v(black[c4[0][1]], black[c4[0][0]], black[c4[0][1]], black[c4[0][0]]),
+                                f2v(black[c4[1][1]], black[c4[1][0]], black[c4[1][1]], black[c4[1][0]])
                                };
 
             vfloat epsv = f2v(1e-5f);
@@ -3742,8 +3742,8 @@ void RawImageSource::processFalseColorCorrectionThread  (Imagefloat* im, array2D
         convert_row_to_YIQ (im->r(i + 1), im->g(i + 1), im->b(i + 1), rbconv_Y[nx], rbconv_I[nx], rbconv_Q[nx], W);
 
 #ifdef __SSE2__
-        pre1[0] = _mm_setr_ps(rbconv_I[px][0], rbconv_Q[px][0], 0, 0) , pre1[1] = _mm_setr_ps(rbconv_I[cx][0], rbconv_Q[cx][0], 0, 0), pre1[2] = _mm_setr_ps(rbconv_I[nx][0], rbconv_Q[nx][0], 0, 0);
-        pre2[0] = _mm_setr_ps(rbconv_I[px][1], rbconv_Q[px][1], 0, 0) , pre2[1] = _mm_setr_ps(rbconv_I[cx][1], rbconv_Q[cx][1], 0, 0), pre2[2] = _mm_setr_ps(rbconv_I[nx][1], rbconv_Q[nx][1], 0, 0);
+        pre1[0] = f2vr(rbconv_I[px][0], rbconv_Q[px][0], 0, 0) , pre1[1] = f2vr(rbconv_I[cx][0], rbconv_Q[cx][0], 0, 0), pre1[2] = f2vr(rbconv_I[nx][0], rbconv_Q[nx][0], 0, 0);
+        pre2[0] = f2vr(rbconv_I[px][1], rbconv_Q[px][1], 0, 0) , pre2[1] = f2vr(rbconv_I[cx][1], rbconv_Q[cx][1], 0, 0), pre2[2] = f2vr(rbconv_I[nx][1], rbconv_Q[nx][1], 0, 0);
 
         // fill first element in rbout_I and rbout_Q
         rbout_I[cx][0] = rbconv_I[cx][0];
@@ -3751,12 +3751,12 @@ void RawImageSource::processFalseColorCorrectionThread  (Imagefloat* im, array2D
 
         // median I channel
         for (int j = 1; j < W - 2; j += 2) {
-            post1[0] = _mm_setr_ps(rbconv_I[px][j + 1], rbconv_Q[px][j + 1], 0, 0), post1[1] = _mm_setr_ps(rbconv_I[cx][j + 1], rbconv_Q[cx][j + 1], 0, 0), post1[2] = _mm_setr_ps(rbconv_I[nx][j + 1], rbconv_Q[nx][j + 1], 0, 0);
+            post1[0] = f2vr(rbconv_I[px][j + 1], rbconv_Q[px][j + 1], 0, 0), post1[1] = f2vr(rbconv_I[cx][j + 1], rbconv_Q[cx][j + 1], 0, 0), post1[2] = f2vr(rbconv_I[nx][j + 1], rbconv_Q[nx][j + 1], 0, 0);
             const auto middle = middle4of6(pre2[0], pre2[1], pre2[2], post1[0], post1[1], post1[2]);
             vfloat medianval = median(pre1[0], pre1[1], pre1[2], middle[0], middle[1], middle[2], middle[3]);
             rbout_I[cx][j] = medianval[0];
             rbout_Q[cx][j] = medianval[1];
-            post2[0] = _mm_setr_ps(rbconv_I[px][j + 2], rbconv_Q[px][j + 2], 0, 0), post2[1] = _mm_setr_ps(rbconv_I[cx][j + 2], rbconv_Q[cx][j + 2], 0, 0), post2[2] = _mm_setr_ps(rbconv_I[nx][j + 2], rbconv_Q[nx][j + 2], 0, 0);
+            post2[0] = f2vr(rbconv_I[px][j + 2], rbconv_Q[px][j + 2], 0, 0), post2[1] = f2vr(rbconv_I[cx][j + 2], rbconv_Q[cx][j + 2], 0, 0), post2[2] = f2vr(rbconv_I[nx][j + 2], rbconv_Q[nx][j + 2], 0, 0);
             medianval = median(post2[0], post2[1], post2[2], middle[0], middle[1], middle[2], middle[3]);
             rbout_I[cx][j + 1] = medianval[0];
             rbout_Q[cx][j + 1] = medianval[1];

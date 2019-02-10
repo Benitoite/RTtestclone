@@ -4434,8 +4434,8 @@ void ImProcFunctions::chromiLuminanceCurve (PipetteBuffer *pipetteBuffer, int pW
 
             // precalculate some values using SSE
             if (bwToning || (!autili && !butili)) {
-                __m128 c327d68v = _mm_set1_ps (327.68f);
-                __m128 av, bv;
+                vfloat c327d68v = f2v(327.68f);
+                vfloat av, bv;
                 int k;
 
                 for (k = 0; k < W - 3; k += 4) {

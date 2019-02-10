@@ -100,8 +100,7 @@ void dcdamping (float** aI, float** aO, float damping, int W, int H)
     const float dampingFac = -2.0 / (damping * damping);
 
 #ifdef __SSE2__
-    vfloat Iv, Ov, Uv, zerov, onev, fourv, fivev, dampingFacv, Tv, Wv, Lv;
-    zerov = _mm_setzero_ps();
+    vfloat Iv, Ov, Uv, onev, fourv, fivev, dampingFacv, Tv, Wv, Lv;
     onev = f2v(1.f);
     fourv = f2v(4.f);
     fivev = f2v(5.f);

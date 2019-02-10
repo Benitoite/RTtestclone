@@ -300,14 +300,14 @@ void MultiDiagonalSymmetricMatrix::VectorProduct(float* RESTRICT Product, float*
 #ifdef __SSE2__
 
         for(int j = srm; j < lm - 3; j += 4) {
-            __m128 prodv = lvfu(Diagonals[0][j]) * lvfu(x[j]);
+            vfloat prodv = lvfu(Diagonals[0][j]) * lvfu(x[j]);
 
             for(int i = m - 1; i > 0; i--) {
                 int s = StartRows[i];
                 prodv += (lvfu(Diagonals[i][j - s]) * lvfu(x[j - s])) + (lvfu(Diagonals[i][j]) * lvfu(x[j + s]));
             }
 
-            _mm_storeu_ps(&Product[j], prodv);
+            stvfu(Product[j], prodv);
         }
 
 #else
@@ -714,11 +714,11 @@ float *EdgePreservingDecomposition::CreateBlur(float *Source, float Scale, float
     {
 #ifdef __SSE2__
         int x;
-        __m128 gxv, gyv;
-        __m128 Scalev = _mm_set1_ps( Scale );
-        __m128 sqrepsv = _mm_set1_ps( sqreps );
-        __m128 EdgeStoppingv = _mm_set1_ps( -EdgeStopping );
-        __m128 zd5v = _mm_set1_ps( 0.5f );
+        vfloat gxv, gyv;
+        vfloat Scalev = f2v( Scale );
+        vfloat sqrepsv = f2v( sqreps );
+        vfloat EdgeStoppingv = f2v( -EdgeStopping );
+        vfloat zd5v = f2v( 0.5f );
 #endif
 #ifdef _OPENMP
         #pragma omp for
@@ -733,7 +733,7 @@ float *EdgePreservingDecomposition::CreateBlur(float *Source, float Scale, float
                 gxv = (lvfu(rg[x + 1]) -  lvfu(rg[x])) + (lvfu(rg[x + w + 1]) - lvfu(rg[x + w]));
                 gyv = (lvfu(rg[x + w]) -  lvfu(rg[x])) + (lvfu(rg[x + w + 1]) - lvfu(rg[x + 1]));
                 //Apply power to the magnitude of the gradient to get the edge stopping function.
-                _mm_storeu_ps( &a[x + w * y], Scalev * xpowf((zd5v * vsqrtf(gxv * gxv + gyv * gyv + sqrepsv)), EdgeStoppingv) );
+                stvfu(a[x + w * y], Scalev * xpowf((zd5v * vsqrtf(gxv * gxv + gyv * gyv + sqrepsv)), EdgeStoppingv) );
             }
 
             for(; x < w1; x++) {
@@ -888,13 +888,13 @@ void EdgePreservingDecomposition::CompressDynamicRange(float *Source, float Scal
     #pragma omp parallel
 #endif
     {
-        __m128 epsv = _mm_set1_ps( eps );
+        vfloat epsv = f2v( eps );
 #ifdef _OPENMP
         #pragma omp for
 #endif
 
         for(int ii = 0; ii < n - 3; ii += 4) {
-            _mm_storeu_ps( &Source[ii], xlogf(vmaxf(lvfu(Source[ii]), zerov) + epsv));
+            stvfu(Source[ii], xlogf(vmaxf(lvfu(Source[ii]), zerov) + epsv));
         }
     }
 
@@ -931,10 +931,10 @@ void EdgePreservingDecomposition::CompressDynamicRange(float *Source, float Scal
     #pragma omp parallel
 #endif
     {
-        __m128 cev, uev, sourcev;
-        __m128 epsv = _mm_set1_ps( eps );
-        __m128 DetailBoostv = _mm_set1_ps( DetailBoost );
-        __m128 tempv = _mm_set1_ps( temp );
+        vfloat cev, uev, sourcev;
+        vfloat epsv = f2v( eps );
+        vfloat DetailBoostv = f2v( DetailBoost );
+        vfloat tempv = f2v( temp );
 #ifdef _OPENMP
         #pragma omp for
 #endif
@@ -943,7 +943,7 @@ void EdgePreservingDecomposition::CompressDynamicRange(float *Source, float Scal
             cev = xexpf(lvfu(Source[i]) + lvfu(u[i]) * (tempv)) - epsv;
             uev = xexpf(lvfu(u[i])) - epsv;
             sourcev = xexpf(lvfu(Source[i])) - epsv;
-            _mm_storeu_ps( &Source[i], cev + DetailBoostv * (sourcev - uev) );
+            stvfu(Source[i], cev + DetailBoostv * (sourcev - uev) );
         }
     }
 

@@ -10418,13 +10418,13 @@ static void expandFloats(Bytef * dst, int tileWidth, int bytesps) {
     float* const dst32 = reinterpret_cast<float*>(dst);
     int index = tileWidth - 8;
     for (; index >= 0; index -= 8) {
-        __m128i halfFloatv = _mm_loadu_si128((__m128i*)&dst16[index]);
+        vint halfFloatv = _mm_loadu_si128((vint*)&dst16[index]);
         stvfu(dst32[index], _mm_cvtph_ps(halfFloatv));
         stvfu(dst32[index + 4], _mm_cvtph_ps(_mm_shuffle_epi32(halfFloatv, _MM_SHUFFLE(0,0,3,2))));
     }
     index += 4;
     if(index >= 0) {
-        __m128i halfFloatv = _mm_loadu_si128((__m128i*)&dst16[index]);
+        vint halfFloatv = _mm_loadu_si128((vint*)&dst16[index]);
         stvfu(dst32[index], _mm_cvtph_ps(halfFloatv));
         index--;
     } else {

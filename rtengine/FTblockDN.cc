@@ -2073,13 +2073,13 @@ void ImProcFunctions::RGBtile_denoise(float * fLblox, int hblproc, float noiseva
     boxabsblur(fLblox + blkstart, nbrwt, 3, 3, TS, TS, blurbuffer); //blur neighbor weights for more robust estimation //for DCT
 
 #ifdef __SSE2__
-    __m128  tempv;
-    __m128  noisevar_Ldetailv = _mm_set1_ps(noisevar_Ldetail);
-    __m128  onev = _mm_set1_ps(1.0f);
+    vfloat  tempv;
+    vfloat  noisevar_Ldetailv = f2v(noisevar_Ldetail);
+    vfloat  onev = f2v(1.0f);
 
     for (int n = 0; n < TS * TS; n += 4) { //for DCT
         tempv  = onev - xexpf(-SQRV(lvf(nbrwt[n])) / noisevar_Ldetailv);
-        _mm_storeu_ps(&fLblox[blkstart + n], lvfu(fLblox[blkstart + n]) * tempv);
+        stvfu(fLblox[blkstart + n], lvfu(fLblox[blkstart + n]) * tempv);
     }//output neighbor averaged result
 
 #else
@@ -2334,17 +2334,17 @@ bool ImProcFunctions::WaveletDenoiseAll_BiShrinkL(wavelet_decomposition &Wavelet
 
                         float levelFactor = mad_Lr * 5.f / (lvl + 1);
 #ifdef __SSE2__
-                        __m128 mad_Lv;
-                        __m128 ninev = _mm_set1_ps(9.0f);
-                        __m128 epsv = _mm_set1_ps(eps);
-                        __m128 mag_Lv;
-                        __m128 levelFactorv = _mm_set1_ps(levelFactor);
+                        vfloat mad_Lv;
+                        vfloat ninev = f2v(9.0f);
+                        vfloat epsv = f2v(eps);
+                        vfloat mag_Lv;
+                        vfloat levelFactorv = f2v(levelFactor);
                         int coeffloc_L;
 
                         for (coeffloc_L = 0; coeffloc_L < Hlvl_L * Wlvl_L - 3; coeffloc_L += 4) {
                             mad_Lv = lvfu(noisevarlum[coeffloc_L]) * levelFactorv;
                             mag_Lv = SQRV(lvfu(WavCoeffs_L[dir][coeffloc_L]));
-                            _mm_storeu_ps(&sfave[coeffloc_L], mag_Lv / (mag_Lv + mad_Lv * xexpf(-mag_Lv / (mad_Lv * ninev)) + epsv));
+                            stvfu(sfave[coeffloc_L], mag_Lv / (mag_Lv + mad_Lv * xexpf(-mag_Lv / (mad_Lv * ninev)) + epsv));
                         }
 
                         for (; coeffloc_L < Hlvl_L * Wlvl_L; ++coeffloc_L) {
@@ -2366,13 +2366,13 @@ bool ImProcFunctions::WaveletDenoiseAll_BiShrinkL(wavelet_decomposition &Wavelet
 #endif
                         boxblur(sfave, sfaved, blurBuffer, lvl + 2, lvl + 2, Wlvl_L, Hlvl_L); //increase smoothness by locally averaging shrinkage
 #ifdef __SSE2__
-                        __m128 sfavev;
-                        __m128 sf_Lv;
+                        vfloat sfavev;
+                        vfloat sf_Lv;
 
                         for (coeffloc_L = 0; coeffloc_L < Hlvl_L * Wlvl_L - 3; coeffloc_L += 4) {
                             sfavev = lvfu(sfaved[coeffloc_L]);
                             sf_Lv = lvfu(sfave[coeffloc_L]);
-                            _mm_storeu_ps(&WavCoeffs_L[dir][coeffloc_L], lvfu(WavCoeffs_L[dir][coeffloc_L]) * (SQRV(sfavev) + SQRV(sf_Lv)) / (sfavev + sf_Lv + epsv));
+                            stvfu(WavCoeffs_L[dir][coeffloc_L], lvfu(WavCoeffs_L[dir][coeffloc_L]) * (SQRV(sfavev) + SQRV(sf_Lv)) / (sfavev + sf_Lv + epsv));
                             //use smoothed shrinkage unless local shrinkage is much less
                         }
 
@@ -2492,12 +2492,12 @@ bool ImProcFunctions::WaveletDenoiseAll_BiShrinkAB(wavelet_decomposition &Wavele
                         if (noisevar_ab > 0.001f) {
 
 #ifdef __SSE2__
-                            __m128 onev = _mm_set1_ps(1.f);
-                            __m128 mad_abrv = _mm_set1_ps(mad_abr);
-                            __m128 rmad_Lm9v = onev / _mm_set1_ps(mad_Lr * 9.f);
-                            __m128 mad_abv;
-                            __m128 mag_Lv, mag_abv;
-                            __m128 tempabv;
+                            vfloat onev = f2v(1.f);
+                            vfloat mad_abrv = f2v(mad_abr);
+                            vfloat rmad_Lm9v = onev / f2v(mad_Lr * 9.f);
+                            vfloat mad_abv;
+                            vfloat mag_Lv, mag_abv;
+                            vfloat tempabv;
                             int coeffloc_ab;
 
                             for (coeffloc_ab = 0; coeffloc_ab < Hlvl_ab * Wlvl_ab - 3; coeffloc_ab += 4) {
@@ -2507,7 +2507,7 @@ bool ImProcFunctions::WaveletDenoiseAll_BiShrinkAB(wavelet_decomposition &Wavele
                                 mag_Lv = lvfu(WavCoeffs_L[dir][coeffloc_ab]);
                                 mag_abv = SQRV(tempabv);
                                 mag_Lv = SQRV(mag_Lv) * rmad_Lm9v;
-                                _mm_storeu_ps(&WavCoeffs_ab[dir][coeffloc_ab], tempabv * SQRV((onev - xexpf(-(mag_abv / mad_abv) - (mag_Lv)))));
+                                stvfu(WavCoeffs_ab[dir][coeffloc_ab], tempabv * SQRV((onev - xexpf(-(mag_abv / mad_abv) - (mag_Lv)))));
                             }
 
                             // few remaining pixels
@@ -2694,17 +2694,17 @@ void ImProcFunctions::ShrinkAllL(wavelet_decomposition &WaveletCoeffs_L, float *
 
     float levelFactor = mad_L * 5.f / static_cast<float>(level + 1);
 #ifdef __SSE2__
-    __m128  magv;
-    __m128 levelFactorv = _mm_set1_ps(levelFactor);
-    __m128  mad_Lv;
-    __m128  ninev = _mm_set1_ps(9.0f);
-    __m128  epsv = _mm_set1_ps(eps);
+    vfloat  magv;
+    vfloat levelFactorv = f2v(levelFactor);
+    vfloat  mad_Lv;
+    vfloat  ninev = f2v(9.0f);
+    vfloat  epsv = f2v(eps);
     int i;
 
     for (i = 0; i < W_L * H_L - 3; i += 4) {
         mad_Lv = lvfu(noisevarlum[i]) * levelFactorv;
         magv = SQRV(lvfu(WavCoeffs_L[dir][i]));
-        _mm_storeu_ps(&sfave[i], magv / (magv + mad_Lv * xexpf(-magv / (ninev * mad_Lv)) + epsv));
+        stvfu(sfave[i], magv / (magv + mad_Lv * xexpf(-magv / (ninev * mad_Lv)) + epsv));
     }
 
     // few remaining pixels
@@ -2726,12 +2726,12 @@ void ImProcFunctions::ShrinkAllL(wavelet_decomposition &WaveletCoeffs_L, float *
     boxblur(sfave, sfaved, blurBuffer, level + 2, level + 2, W_L, H_L); //increase smoothness by locally averaging shrinkage
 
 #ifdef __SSE2__
-    __m128  sfv;
+    vfloat  sfv;
 
     for (i = 0; i < W_L * H_L - 3; i += 4) {
         sfv = lvfu(sfave[i]);
         //use smoothed shrinkage unless local shrinkage is much less
-        _mm_storeu_ps(&WavCoeffs_L[dir][i], _mm_loadu_ps(&WavCoeffs_L[dir][i]) * (SQRV(lvfu(sfaved[i])) + SQRV(sfv)) / (lvfu(sfaved[i]) + sfv + epsv));
+        stvfu(WavCoeffs_L[dir][i], lvfu(WavCoeffs_L[dir][i]) * (SQRV(lvfu(sfaved[i])) + SQRV(sfv)) / (lvfu(sfaved[i]) + sfv + epsv));
     }
 
     // few remaining pixels
@@ -2794,12 +2794,12 @@ void ImProcFunctions::ShrinkAllAB(wavelet_decomposition &WaveletCoeffs_L, wavele
     if (noisevar_ab > 0.001f) {
         madab = useNoiseCCurve ? madab : madab * noisevar_ab;
 #ifdef __SSE2__
-        __m128 onev = _mm_set1_ps(1.f);
-        __m128 mad_abrv = _mm_set1_ps(madab);
+        vfloat onev = f2v(1.f);
+        vfloat mad_abrv = f2v(madab);
 
-        __m128 rmadLm9v = onev / _mm_set1_ps(mad_L * 9.f);
-        __m128 mad_abv ;
-        __m128 mag_Lv, mag_abv;
+        vfloat rmadLm9v = onev / f2v(mad_L * 9.f);
+        vfloat mad_abv ;
+        vfloat mag_Lv, mag_abv;
         int coeffloc_ab;
 
         for (coeffloc_ab = 0; coeffloc_ab < H_ab * W_ab - 3; coeffloc_ab += 4) {
@@ -2808,7 +2808,7 @@ void ImProcFunctions::ShrinkAllAB(wavelet_decomposition &WaveletCoeffs_L, wavele
             mag_Lv = lvfu(WavCoeffs_L[dir][coeffloc_ab]);
             mag_abv = SQRV(lvfu(WavCoeffs_ab[dir][coeffloc_ab]));
             mag_Lv = (SQRV(mag_Lv)) * rmadLm9v;
-            _mm_storeu_ps(&sfaveab[coeffloc_ab], (onev - xexpf(-(mag_abv / mad_abv) - (mag_Lv))));
+            stvfu(sfaveab[coeffloc_ab], (onev - xexpf(-(mag_abv / mad_abv) - (mag_Lv))));
         }
 
         // few remaining pixels
@@ -2833,16 +2833,16 @@ void ImProcFunctions::ShrinkAllAB(wavelet_decomposition &WaveletCoeffs_L, wavele
 
         boxblur(sfaveab, sfaveabd, blurBuffer, level + 2, level + 2, W_ab, H_ab); //increase smoothness by locally averaging shrinkage
 #ifdef __SSE2__
-        __m128 epsv = _mm_set1_ps(eps);
-        __m128 sfabv;
-        __m128 sfaveabv;
+        vfloat epsv = f2v(eps);
+        vfloat sfabv;
+        vfloat sfaveabv;
 
         for (coeffloc_ab = 0; coeffloc_ab < H_ab * W_ab - 3; coeffloc_ab += 4) {
             sfabv = lvfu(sfaveab[coeffloc_ab]);
             sfaveabv = lvfu(sfaveabd[coeffloc_ab]);
 
             //use smoothed shrinkage unless local shrinkage is much less
-            _mm_storeu_ps(&WavCoeffs_ab[dir][coeffloc_ab], lvfu(WavCoeffs_ab[dir][coeffloc_ab]) * (SQRV(sfaveabv) + SQRV(sfabv)) / (sfaveabv + sfabv + epsv));
+            stvfu(WavCoeffs_ab[dir][coeffloc_ab], lvfu(WavCoeffs_ab[dir][coeffloc_ab]) * (SQRV(sfaveabv) + SQRV(sfabv)) / (sfaveabv + sfabv + epsv));
         }
 
         // few remaining pixels
@@ -3345,16 +3345,16 @@ void ImProcFunctions::RGB_denoise_info(Imagefloat * src, Imagefloat * provicalc,
                 for (int i = tiletop; i < tilebottom; i += 2) {
                     int i1 = i - tiletop;
 #ifdef __SSE2__
-                    __m128 aNv, bNv;
-                    __m128 c100v = _mm_set1_ps(100.f);
+                    vfloat aNv, bNv;
+                    vfloat c100v = f2v(100.f);
                     int j;
 
                     for (j = tileleft; j < tileright - 7; j += 8) {
                         int j1 = j - tileleft;
                         aNv = lvfu(acalc[i >> 1][j >> 1]);
                         bNv = lvfu(bcalc[i >> 1][j >> 1]);
-                        _mm_storeu_ps(&noisevarhue[i1 >> 1][j1 >> 1], xatan2f(bNv, aNv));
-                        _mm_storeu_ps(&noisevarchrom[i1 >> 1][j1 >> 1], vmaxf(vsqrtf(SQRV(aNv) + SQRV(bNv)),c100v));
+                        stvfu(noisevarhue[i1 >> 1][j1 >> 1], xatan2f(bNv, aNv));
+                        stvfu(noisevarchrom[i1 >> 1][j1 >> 1], vmaxf(vsqrtf(SQRV(aNv) + SQRV(bNv)),c100v));
                     }
 
                     for (; j < tileright; j += 2) {

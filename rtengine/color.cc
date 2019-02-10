@@ -1006,8 +1006,8 @@ void Color::xyz2rgb (vfloat x, vfloat y, vfloat z, vfloat &r, vfloat &g, vfloat 
 void Color::trcGammaBW (float &r, float &g, float &b, float gammabwr, float gammabwg, float gammabwb)
 {
     // correct gamma for black and white image : pseudo TRC curve of ICC profile
-    vfloat rgbv = _mm_set_ps(0.f, r, r, r); // input channel is always r
-    vfloat gammabwv = _mm_set_ps(0.f, gammabwb, gammabwg, gammabwr);
+    vfloat rgbv = f2v(0.f, r, r, r); // input channel is always r
+    vfloat gammabwv = f2v(0.f, gammabwb, gammabwg, gammabwr);
     vfloat c65535v = f2v(65535.f);
     rgbv /= c65535v;
     rgbv = vmaxf(rgbv, zerov);
@@ -1028,7 +1028,7 @@ void Color::trcGammaBWRow (float *r, float *g, float *b, int width, float gammab
     vfloat gammabwbv = f2v(gammabwb);
     int i = 0;
     for(; i < width - 3; i += 4 ) {
-        vfloat inv = _mm_loadu_ps(&r[i]); // input channel is always r
+        vfloat inv = lvfu(r[i]); // input channel is always r
         inv /= c65535v;
         inv = vmaxf(inv, zerov);
         vfloat rv = xpowf(inv, gammabwrv);
@@ -1037,9 +1037,9 @@ void Color::trcGammaBWRow (float *r, float *g, float *b, int width, float gammab
         rv *= c65535v;
         gv *= c65535v;
         bv *= c65535v;
-        _mm_storeu_ps(&r[i], rv);
-        _mm_storeu_ps(&g[i], gv);
-        _mm_storeu_ps(&b[i], bv);
+        stvfu(r[i], rv);
+        stvfu(g[i], gv);
+        stvfu(b[i], bv);
     }
     for(; i < width; i++) {
         trcGammaBW(r[i], g[i], b[i], gammabwr, gammabwg, gammabwb);
@@ -1628,7 +1628,7 @@ void Color::gammaf2lut (LUTf &gammacurve, float gamma, float start, float slope,
 {
 #ifdef __SSE2__
     // SSE2 version is more than 6 times faster than scalar version
-    vfloat iv = _mm_set_ps(3.f, 2.f, 1.f, 0.f);
+    vfloat iv = f2v(3.f, 2.f, 1.f, 0.f);
     vfloat fourv = f2v(4.f);
     vfloat gammav = f2v(1.f / gamma);
     vfloat slopev = f2v((slope / divisor) * factor);
@@ -1672,7 +1672,7 @@ void Color::gammanf2lut (LUTf &gammacurve, float gamma, float divisor, float fac
 {
 #ifdef __SSE2__
     // SSE2 version is more than 6 times faster than scalar version
-    vfloat iv = _mm_set_ps(3.f, 2.f, 1.f, 0.f);
+    vfloat iv = f2v(3.f, 2.f, 1.f, 0.f);
     vfloat fourv = f2v(4.f);
     vfloat gammav = f2v(1.f / gamma);
     vfloat divisorv = f2v(xlogf(divisor));
@@ -2871,15 +2871,15 @@ void Color::LabGamutMunsell(float *labL, float *laba, float *labb, const int N, 
     // precalculate H and C using SSE
     float HHBuffer[N];
     float CCBuffer[N];
-    __m128 c327d68v = _mm_set1_ps(327.68f);
-    __m128 av, bv;
+    vfloat c327d68v = f2v(327.68f);
+    vfloat av, bv;
     int k;
 
     for (k = 0; k < N - 3; k += 4) {
         av = lvfu(laba[k]);
         bv = lvfu(labb[k]);
-        _mm_storeu_ps(&HHBuffer[k], xatan2f(bv, av));
-        _mm_storeu_ps(&CCBuffer[k], vsqrtf(SQRV(av) + SQRV(bv)) / c327d68v);
+        stvfu(HHBuffer[k], xatan2f(bv, av));
+        stvfu(CCBuffer[k], vsqrtf(SQRV(av) + SQRV(bv)) / c327d68v);
     }
 
     for(; k < N; k++) {

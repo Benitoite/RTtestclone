@@ -406,8 +406,8 @@ void SHMap::dirpyr_shmap(float ** data_fine, float ** data_coarse, int width, in
                 int inbrMin = max(i - scalewin, i % scale);
 
                 for(; j < (width - scalewin) - 3; j += 4) {
-                    valv = _mm_setzero_ps();
-                    normv = _mm_setzero_ps();
+                    valv = zerov;
+                    normv = zerov;
                     dftemp1v = lvfu(data_fine[i][j]);
 
                     for(int inbr = inbrMin; inbr <= min(i + scalewin, height - 1); inbr += scale) {
@@ -419,7 +419,7 @@ void SHMap::dirpyr_shmap(float ** data_fine, float ** data_coarse, int width, in
                         }
                     }
 
-                    _mm_storeu_ps( &data_coarse[i][j], valv / normv);
+                    stvfu(data_coarse[i][j], valv / normv);
                 }
 
                 for(; j < width - scalewin; j++) {
@@ -513,8 +513,8 @@ void SHMap::dirpyr_shmap(float ** data_fine, float ** data_coarse, int width, in
 #ifdef __SSE2__
 
                 for(; j < width - scalewin - 3; j += 4) {
-                    valv = _mm_setzero_ps();
-                    normv = _mm_setzero_ps();
+                    valv = zerov;
+                    normv = zerov;
                     dftemp1v = lvfu(data_fine[i][j]);
 
                     for(int inbr = max(i - scalewin, i % scale); inbr <= MIN(i + scalewin, height - 1); inbr += scale) {
@@ -528,7 +528,7 @@ void SHMap::dirpyr_shmap(float ** data_fine, float ** data_coarse, int width, in
                         }
                     }
 
-                    _mm_storeu_ps( &data_coarse[i][j], valv / normv);
+                    stvfu(data_coarse[i][j], valv / normv);
                 }
 
                 for(; j < width - scalewin; j++) {

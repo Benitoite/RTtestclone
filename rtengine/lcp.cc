@@ -1145,7 +1145,6 @@ void rtengine::LCPMapper::processVignetteLine(int width, int y, float* line) con
     int x = 0;
 #ifdef __SSE2__
     const vfloat fourv = f2v(4.f);
-    const vfloat zerov = f2v(0.f);
     const vfloat ydv = f2v(yd);
     const vfloat p0 = f2v(mc.vign_param[0]);
     const vfloat p1 = f2v(mc.vign_param[1]);
@@ -1154,7 +1153,7 @@ void rtengine::LCPMapper::processVignetteLine(int width, int y, float* line) con
     const vfloat x0v = f2v(mc.x0);
     const vfloat rfxv = f2v(mc.rfx);
 
-    vfloat xv = _mm_setr_ps(0.f, 1.f, 2.f, 3.f);
+    vfloat xv = f2vr(0.f, 1.f, 2.f, 3.f);
     for (; x < width-3; x+=4) {
         const vfloat xdv = (xv - x0v) * rfxv;
         const vfloat rsqr = xdv * xdv + ydv;

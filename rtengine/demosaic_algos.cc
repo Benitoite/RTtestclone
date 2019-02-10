@@ -708,9 +708,9 @@ void RawImageSource::lmmse_interpolate_omp(int winw, int winh, array2D<float> &r
         for (int rr = 4; rr < rr1 - 4; rr++) {
             int cc = 4 + (FC(rr, 4) & 1);
 #ifdef __SSE2__
-            __m128 p1v, p2v, p3v, p4v, p5v, p6v, p7v, p8v, p9v, muv, vxv, vnv, xhv, vhv, xvv, vvv;
-            __m128 epsv = _mm_set1_ps(1e-7);
-            __m128 ninev = _mm_set1_ps(9.f);
+            vfloat p1v, p2v, p3v, p4v, p5v, p6v, p7v, p8v, p9v, muv, vxv, vnv, xhv, vhv, xvv, vvv;
+            vfloat epsv = f2v(1e-7);
+            vfloat ninev = f2v(9.f);
 
             for (; cc < cc1 - 10; cc += 8) {
                 rix[0] = qix[0] + rr * cc1 + cc;
@@ -956,7 +956,7 @@ void RawImageSource::lmmse_interpolate_omp(int winw, int winh, array2D<float> &r
                         lvfu(rix[c][ w1]) - lvfu(rix[1][ w1]),
                         lvfu(rix[c][ w1 + 1]) - lvfu(rix[1][ w1 + 1])
                     };
-                    _mm_storeu_ps(&rix[d][0], median(p));
+                    stvfu(rix[d][0], median(p));
                 }
 
 #endif
@@ -1162,26 +1162,25 @@ void RawImageSource::igv_interpolate(int winw, int winh)
     #pragma omp parallel default(none) shared(rgb,vdif,hdif,chr)
 #endif
     {
-        __m128 ngv, egv, wgv, sgv, nvv, evv, wvv, svv, nwgv, negv, swgv, segv, nwvv, nevv, swvv, sevv, tempv, temp1v, temp2v, temp3v, temp4v, temp5v, temp6v, temp7v, temp8v;
-        __m128 epsv = _mm_set1_ps( eps );
-        __m128 epssqv = _mm_set1_ps( epssq );
-        __m128 c65535v = _mm_set1_ps( 65535.f );
-        __m128 c23v = _mm_set1_ps( 23.f );
-        __m128 c40v = _mm_set1_ps( 40.f );
-        __m128 c51v = _mm_set1_ps( 51.f );
-        __m128 c32v = _mm_set1_ps( 32.f );
-        __m128 c8v = _mm_set1_ps( 8.f );
-        __m128 c7v = _mm_set1_ps( 7.f );
-        __m128 c6v = _mm_set1_ps( 6.f );
-        __m128 c10v = _mm_set1_ps( 10.f );
-        __m128 c21v = _mm_set1_ps( 21.f );
-        __m128 c78v = _mm_set1_ps( 78.f );
-        __m128 c69v = _mm_set1_ps( 69.f );
-        __m128 c3145680v = _mm_set1_ps( 3145680.f );
-        __m128 onev = _mm_set1_ps ( 1.f );
-        __m128 zerov = _mm_set1_ps ( 0.f );
-        __m128 d725v = _mm_set1_ps ( 0.725f );
-        __m128 d1375v = _mm_set1_ps ( 0.1375f );
+        vfloat ngv, egv, wgv, sgv, nvv, evv, wvv, svv, nwgv, negv, swgv, segv, nwvv, nevv, swvv, sevv, tempv, temp1v, temp2v, temp3v, temp4v, temp5v, temp6v, temp7v, temp8v;
+        vfloat epsv = f2v( eps );
+        vfloat epssqv = f2v( epssq );
+        vfloat c65535v = f2v( 65535.f );
+        vfloat c23v = f2v( 23.f );
+        vfloat c40v = f2v( 40.f );
+        vfloat c51v = f2v( 51.f );
+        vfloat c32v = f2v( 32.f );
+        vfloat c8v = f2v( 8.f );
+        vfloat c7v = f2v( 7.f );
+        vfloat c6v = f2v( 6.f );
+        vfloat c10v = f2v( 10.f );
+        vfloat c21v = f2v( 21.f );
+        vfloat c78v = f2v( 78.f );
+        vfloat c69v = f2v( 69.f );
+        vfloat c3145680v = f2v( 3145680.f );
+        vfloat onev = f2v ( 1.f );
+        vfloat d725v = f2v ( 0.725f );
+        vfloat d1375v = f2v ( 0.1375f );
 
         float *dest1, *dest2;
         float ng, eg, wg, sg, nv, ev, wv, sv, nwg, neg, swg, seg, nwv, nev, swv, sev;
@@ -1200,9 +1199,9 @@ void RawImageSource::igv_interpolate(int winw, int winh)
                 temp2v = lvfu( rawData[row][col + 4] );
                 temp2v = CLIPV( temp2v );
                 tempv = _mm_shuffle_ps( temp1v, temp2v, _MM_SHUFFLE( 2, 0, 2, 0 ) );
-                _mm_storeu_ps( &dest1[indx >> 1], tempv );
+                stvfu(dest1[indx >> 1], tempv );
                 tempv = _mm_shuffle_ps( temp1v, temp2v, _MM_SHUFFLE( 3, 1, 3, 1 ) );
-                _mm_storeu_ps( &dest2[indx >> 1], tempv );
+                stvfu(dest2[indx >> 1], tempv );
             }
 
             for (; col < width; col++, indx += 2) {
@@ -1245,8 +1244,8 @@ void RawImageSource::igv_interpolate(int winw, int winh)
                 svv = vclampf(((c23v * lvfu(rgb[1][(indx + v1) >> 1]) + c23v * lvfu(rgb[1][(indx + v3) >> 1]) + lvfu(rgb[1][(indx + v5) >> 1]) + lvfu(rgb[1][(indx - v1) >> 1]) + tempv - c32v * lvfu(rgb[0][(indx1 + v1)]) - c8v * lvfu(rgb[0][(indx1 + v2)]))) / c3145680v, zerov, onev);
                 //Horizontal and vertical color differences
                 tempv = lvfu( rgb[0][indx1] ) / c65535v;
-                _mm_storeu_ps( &vdif[indx1], (sgv * nvv + ngv * svv) / (ngv + sgv) - tempv );
-                _mm_storeu_ps( &hdif[indx1], (wgv * evv + egv * wvv) / (egv + wgv) - tempv );
+                stvfu(vdif[indx1], (sgv * nvv + ngv * svv) / (ngv + sgv) - tempv );
+                stvfu(hdif[indx1], (wgv * evv + egv * wvv) / (egv + wgv) - tempv );
             }
 
             // borders without SSE
@@ -1296,10 +1295,10 @@ void RawImageSource::igv_interpolate(int winw, int winh)
                 evv = median(d725v * lvfu(hdif[indx1]) + d1375v * lvfu(hdif[indx1 - h1]) + d1375v * lvfu(hdif[indx1 + h1]), lvfu(hdif[indx1 - h1]), lvfu(hdif[indx1 + h1]));
                 //Chrominance estimation
                 tempv = (egv * nvv + ngv * evv) / (ngv + egv);
-                _mm_storeu_ps(&(chr[d][indx1]), tempv);
+                stvfu((chr[d][indx1]), tempv);
                 //Green channel population
                 temp1v = c65535v * tempv + lvfu(rgb[0][indx1]);
-                _mm_storeu_ps( &(rgb[0][indx1]), temp1v );
+                stvfu((rgb[0][indx1]), temp1v );
             }
 
             for (; col < width - 7; col += 2, indx1++) {
@@ -1347,7 +1346,7 @@ void RawImageSource::igv_interpolate(int winw, int winh)
                 sevv = median(lvfu(chr[c][(indx + v1 + h1) >> 1]), lvfu(chr[c][(indx + v3 + h1) >> 1]), lvfu(chr[c][(indx + v1 + h3) >> 1]));
                 //Interpolate chrominance: R@B and B@R
                 tempv = (nwgv * nwvv + negv * nevv + swgv * swvv + segv * sevv) / (nwgv + negv + swgv + segv);
-                _mm_storeu_ps( &(chr[c][indx >> 1]), tempv);
+                stvfu((chr[c][indx >> 1]), tempv);
             }
 
             for (; col < width - 7; col += 2, indx += 2) {
@@ -1389,7 +1388,7 @@ void RawImageSource::igv_interpolate(int winw, int winh)
                 sgv = onev / (epsv + vabsf(lvfu(chr[0][(indx + v1) >> 1]) - lvfu(chr[0][(indx + v3) >> 1])) + vabsf(lvfu(chr[0][(indx - v1) >> 1]) - lvfu(chr[0][(indx + v3) >> 1])));
                 //Interpolate chrominance: R@G and B@G
                 tempv = ((ngv * lvfu(chr[0][(indx - v1) >> 1]) + egv * lvfu(chr[0][(indx + h1) >> 1]) + wgv * lvfu(chr[0][(indx - h1) >> 1]) + sgv * lvfu(chr[0][(indx + v1) >> 1])) / (ngv + egv + wgv + sgv));
-                _mm_storeu_ps( &chr[0 + 2][indx >> 1], tempv);
+                stvfu(chr[0 + 2][indx >> 1], tempv);
             }
 
             for (; col < width - 7; col += 2, indx += 2) {
@@ -1426,7 +1425,7 @@ void RawImageSource::igv_interpolate(int winw, int winh)
                 sgv = onev / (epsv + vabsf(lvfu(chr[1][(indx + v1) >> 1]) - lvfu(chr[1][(indx + v3) >> 1])) + vabsf(lvfu(chr[1][(indx - v1) >> 1]) - lvfu(chr[1][(indx + v3) >> 1])));
                 //Interpolate chrominance: R@G and B@G
                 tempv = ((ngv * lvfu(chr[1][(indx - v1) >> 1]) + egv * lvfu(chr[1][(indx + h1) >> 1]) + wgv * lvfu(chr[1][(indx - h1) >> 1]) + sgv * lvfu(chr[1][(indx + v1) >> 1])) / (ngv + egv + wgv + sgv));
-                _mm_storeu_ps( &chr[1 + 2][indx >> 1], tempv);
+                stvfu(chr[1 + 2][indx >> 1], tempv);
             }
 
             for (; col < width - 7; col += 2, indx += 2) {
@@ -1468,32 +1467,32 @@ void RawImageSource::igv_interpolate(int winw, int winh)
                 temp2v = lvfu( src2[(indx + 1) >> 1] );
                 tempv = _mm_shuffle_ps( temp1v, temp2v, _MM_SHUFFLE( 1, 0, 1, 0 ) );
                 tempv = _mm_shuffle_ps( tempv, tempv, _MM_SHUFFLE( 3, 1, 2, 0 ) );
-                _mm_storeu_ps( &green[row][col], CLIPV( tempv ));
+                stvfu(green[row][col], CLIPV( tempv ));
                 temp5v = lvfu(redsrc0[indx >> 1]);
                 temp6v = lvfu(redsrc1[(indx + 1) >> 1]);
                 temp3v = _mm_shuffle_ps( temp5v, temp6v, _MM_SHUFFLE( 1, 0, 1, 0 ) );
                 temp3v = _mm_shuffle_ps( temp3v, temp3v, _MM_SHUFFLE( 3, 1, 2, 0 ) );
                 temp3v = CLIPV( tempv - c65535v * temp3v );
-                _mm_storeu_ps( &red[row][col], temp3v);
+                stvfu(red[row][col], temp3v);
                 temp7v = lvfu(bluesrc0[indx >> 1]);
                 temp8v = lvfu(bluesrc1[(indx + 1) >> 1]);
                 temp4v = _mm_shuffle_ps( temp7v, temp8v, _MM_SHUFFLE( 1, 0, 1, 0 ) );
                 temp4v = _mm_shuffle_ps( temp4v, temp4v, _MM_SHUFFLE( 3, 1, 2, 0 ) );
                 temp4v = CLIPV( tempv - c65535v * temp4v );
-                _mm_storeu_ps( &blue[row][col], temp4v);
+                stvfu(blue[row][col], temp4v);
 
                 tempv = _mm_shuffle_ps( temp1v, temp2v, _MM_SHUFFLE( 3, 2, 3, 2 ) );
                 tempv = _mm_shuffle_ps( tempv, tempv, _MM_SHUFFLE( 3, 1, 2, 0 ) );
-                _mm_storeu_ps( &green[row][col + 4], CLIPV( tempv ));
+                stvfu(green[row][col + 4], CLIPV( tempv ));
 
                 temp3v = _mm_shuffle_ps( temp5v, temp6v, _MM_SHUFFLE( 3, 2, 3, 2 ) );
                 temp3v = _mm_shuffle_ps( temp3v, temp3v, _MM_SHUFFLE( 3, 1, 2, 0 ) );
                 temp3v = CLIPV( tempv - c65535v * temp3v );
-                _mm_storeu_ps( &red[row][col + 4], temp3v);
+                stvfu(red[row][col + 4], temp3v);
                 temp4v = _mm_shuffle_ps( temp7v, temp8v, _MM_SHUFFLE( 3, 2, 3, 2 ) );
                 temp4v = _mm_shuffle_ps( temp4v, temp4v, _MM_SHUFFLE( 3, 1, 2, 0 ) );
                 temp4v = CLIPV( tempv - c65535v * temp4v );
-                _mm_storeu_ps( &blue[row][col + 4], temp4v);
+                stvfu(blue[row][col + 4], temp4v);
             }
 
             for(; col < width - 7; col++, indx += 2) {
@@ -1885,10 +1884,10 @@ void RawImageSource::refinement(int PassCount)
                 int col = 2 + (FC(row, 2) & 1);
                 int c = FC(row, col);
 #ifdef __SSE2__
-                __m128 dLv, dRv, dUv, dDv, v0v;
-                __m128 onev = _mm_set1_ps(1.f);
-                __m128 zd5v = _mm_set1_ps(0.5f);
-                __m128 c65535v = _mm_set1_ps(65535.f);
+                vfloat dLv, dRv, dUv, dDv, v0v;
+                vfloat onev = f2v(1.f);
+                vfloat zd5v = f2v(0.5f);
+                vfloat c65535v = f2v(65535.f);
 
                 for (; col < width - 8; col += 8) {
                     int indx = row * width + col;
@@ -1926,10 +1925,10 @@ void RawImageSource::refinement(int PassCount)
                 int col = 2 + (FC(row, 3) & 1);
                 int c = FC(row, col + 1);
 #ifdef __SSE2__
-                __m128 dLv, dRv, dUv, dDv, v0v;
-                __m128 onev = _mm_set1_ps(1.f);
-                __m128 zd5v = _mm_set1_ps(0.5f);
-                __m128 c65535v = _mm_set1_ps(65535.f);
+                vfloat dLv, dRv, dUv, dDv, v0v;
+                vfloat onev = f2v(1.f);
+                vfloat zd5v = f2v(0.5f);
+                vfloat c65535v = f2v(65535.f);
 
                 for (; col < width - 8; col += 8) {
                     int indx = row * width + col;
@@ -1973,10 +1972,10 @@ void RawImageSource::refinement(int PassCount)
                 int col = 2 + (FC(row, 2) & 1);
                 int c = 2 - FC(row, col);
 #ifdef __SSE2__
-                __m128 dLv, dRv, dUv, dDv, v0v;
-                __m128 onev = _mm_set1_ps(1.f);
-                __m128 zd5v = _mm_set1_ps(0.5f);
-                __m128 c65535v = _mm_set1_ps(65535.f);
+                vfloat dLv, dRv, dUv, dDv, v0v;
+                vfloat onev = f2v(1.f);
+                vfloat zd5v = f2v(0.5f);
+                vfloat c65535v = f2v(65535.f);
 
                 for (; col < width - 8; col += 8) {
                     int indx = row * width + col;

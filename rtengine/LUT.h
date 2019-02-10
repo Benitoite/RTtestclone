@@ -323,7 +323,7 @@ public:
         vfloat clampedIndexes = vclampf(indexv, zerov, maxsv); // this automagically uses zerov in case indexv is NaN
         vint indexes = _mm_cvttps_epi32(clampedIndexes);
         int indexArray[4];
-        _mm_storeu_si128(reinterpret_cast<__m128i*>(&indexArray[0]), indexes);
+        _mm_storeu_si128(reinterpret_cast<vint*>(&indexArray[0]), indexes);
 
         // Load data from the table. This reads more than necessary, but there don't seem
         // to exist more granular operations (though we could try non-SSE).
@@ -335,8 +335,8 @@ public:
 
         // Partial 4x4 transpose operation. We want two new vectors, the first consisting
         // of [values[0][0] ... values[3][0]] and the second [values[0][1] ... values[3][1]].
-        __m128i temp0 = _mm_unpacklo_epi32(values[0], values[1]);
-        __m128i temp1 = _mm_unpacklo_epi32(values[2], values[3]);
+        vint temp0 = _mm_unpacklo_epi32(values[0], values[1]);
+        vint temp1 = _mm_unpacklo_epi32(values[2], values[3]);
         vfloat lower = _mm_castsi128_ps(_mm_unpacklo_epi64(temp0, temp1));
         vfloat upper = _mm_castsi128_ps(_mm_unpackhi_epi64(temp0, temp1));
 
@@ -355,7 +355,7 @@ public:
         vfloat clampedIndexes = vclampf(indexv, zerov, maxsv); // this automagically uses zerov in case indexv is NaN
         vint indexes = _mm_cvttps_epi32(clampedIndexes);
         int indexArray[4];
-        _mm_storeu_si128(reinterpret_cast<__m128i*>(&indexArray[0]), indexes);
+        _mm_storeu_si128(reinterpret_cast<vint*>(&indexArray[0]), indexes);
 
         // Load data from the table. This reads more than necessary, but there don't seem
         // to exist more granular operations (though we could try non-SSE).
@@ -367,8 +367,8 @@ public:
 
         // Partial 4x4 transpose operation. We want two new vectors, the first consisting
         // of [values[0][0] ... values[3][0]] and the second [values[0][1] ... values[3][1]].
-        __m128i temp0 = _mm_unpacklo_epi32(values[0], values[1]);
-        __m128i temp1 = _mm_unpacklo_epi32(values[2], values[3]);
+        vint temp0 = _mm_unpacklo_epi32(values[0], values[1]);
+        vint temp1 = _mm_unpacklo_epi32(values[2], values[3]);
         vfloat lower = _mm_castsi128_ps(_mm_unpacklo_epi64(temp0, temp1));
         vfloat upper = _mm_castsi128_ps(_mm_unpackhi_epi64(temp0, temp1));
 
@@ -386,7 +386,7 @@ public:
         vfloat clampedIndexes = vclampf(indexv, zerov, maxsv); // this automagically uses zerov in case indexv is NaN
         vint indexes = _mm_cvttps_epi32(clampedIndexes);
         int indexArray[4];
-        _mm_storeu_si128(reinterpret_cast<__m128i*>(&indexArray[0]), indexes);
+        _mm_storeu_si128(reinterpret_cast<vint*>(&indexArray[0]), indexes);
 
         // Load data from the table. This reads more than necessary, but there don't seem
         // to exist more granular operations (though we could try non-SSE).
@@ -398,8 +398,8 @@ public:
 
         // Partial 4x4 transpose operation. We want two new vectors, the first consisting
         // of [values[0][0] ... values[3][0]] and the second [values[0][1] ... values[3][1]].
-        __m128i temp0 = _mm_unpacklo_epi32(values[0], values[1]);
-        __m128i temp1 = _mm_unpacklo_epi32(values[2], values[3]);
+        vint temp0 = _mm_unpacklo_epi32(values[0], values[1]);
+        vint temp1 = _mm_unpacklo_epi32(values[2], values[3]);
         vfloat lower = _mm_castsi128_ps(_mm_unpacklo_epi64(temp0, temp1));
         vfloat upper = _mm_castsi128_ps(_mm_unpackhi_epi64(temp0, temp1));
 
@@ -414,7 +414,7 @@ public:
     {
         idxv = _mm_max_epi32( _mm_setzero_si128(), _mm_min_epi32(idxv, sizeiv));
         // access the LUT 4 times. Trust the compiler. It generates good code here, better than hand written SSE code
-        return _mm_setr_ps(data[_mm_extract_epi32(idxv,0)], data[_mm_extract_epi32(idxv,1)], data[_mm_extract_epi32(idxv,2)], data[_mm_extract_epi32(idxv,3)]);
+        return f2vr(data[_mm_extract_epi32(idxv,0)], data[_mm_extract_epi32(idxv,1)], data[_mm_extract_epi32(idxv,2)], data[_mm_extract_epi32(idxv,3)]);
     }
 #else
     template<typename U = T, typename = typename std::enable_if<std::is_same<U, float>::value>::type>
@@ -424,7 +424,7 @@ public:
         vfloat tempv = vclampf(_mm_cvtepi32_ps(idxv), zerov, sizev); // this automagically uses zerov in case idxv is NaN (which will never happen because it is a vector of int)
         idxv = _mm_cvttps_epi32(tempv);
         // access the LUT 4 times. Trust the compiler. It generates good code here, better than hand written SSE code
-        return _mm_setr_ps(data[_mm_cvtsi128_si32(idxv)],
+        return f2vr(data[_mm_cvtsi128_si32(idxv)],
                            data[_mm_cvtsi128_si32(_mm_shuffle_epi32(idxv, _MM_SHUFFLE(1, 1, 1, 1)))],
                            data[_mm_cvtsi128_si32(_mm_shuffle_epi32(idxv, _MM_SHUFFLE(2, 2, 2, 2)))],
                            data[_mm_cvtsi128_si32(_mm_shuffle_epi32(idxv, _MM_SHUFFLE(3, 3, 3, 3)))]);
@@ -587,13 +587,13 @@ public:
         avg = 0.f;
         int i = 0;
 #ifdef __SSE2__
-        vfloat iv = _mm_set_ps(3.f, 2.f, 1.f, 0.f);
+        vfloat iv = f2v(3.f, 2.f, 1.f, 0.f);
         vfloat fourv = f2v(4.f);
         vint sumv = (vint)zerov;
         vfloat avgv = zerov;
 
         for(; i < static_cast<int>(size) - 3; i += 4) {
-            vint datav = _mm_loadu_si128((__m128i*)&data[i]);
+            vint datav = _mm_loadu_si128((vint*)&data[i]);
             sumv += datav;
             avgv += iv * _mm_cvtepi32_ps(datav);
             iv += fourv;

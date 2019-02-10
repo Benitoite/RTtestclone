@@ -113,6 +113,16 @@ INLINE vfloat f2v(float a)
     return _mm_set1_ps(a);
 }
 
+INLINE vfloat f2v(float a, float b, float c, float d)
+{
+    return _mm_set_ps(a, b, c, d);
+}
+
+INLINE vfloat f2vr(float a, float b, float c, float d)
+{
+    return _mm_setr_ps(a, b, c, d);
+}
+
 INLINE vint vrint_vi_vd(vdouble vd)
 {
     return _mm_cvtpd_epi32(vd);

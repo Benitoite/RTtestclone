@@ -269,16 +269,16 @@ void ImProcFunctions::Lanczos (const LabImage* src, LabImage* dst, float scale)
             // Do vertical interpolation. Store results.
 #ifdef __SSE2__
             int j;
-            __m128 Lv, av, bv, wkv;
+            vfloat Lv, av, bv, wkv;
 
             for (j = 0; j < src->W - 3; j += 4) {
-                Lv = _mm_setzero_ps();
-                av = _mm_setzero_ps();
-                bv = _mm_setzero_ps();
+                Lv = zerov;
+                av = zerov;
+                bv = zerov;
 
                 for (int ii = ii0; ii < ii1; ii++) {
                     int k = ii - ii0;
-                    wkv = _mm_set1_ps (w[k]);
+                    wkv = f2v(w[k]);
                     Lv += wkv * lvfu (src->L[ii][j]);
                     av += wkv * lvfu (src->a[ii][j]);
                     bv += wkv * lvfu (src->b[ii][j]);
