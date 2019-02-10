@@ -609,7 +609,7 @@ void CurveFactory::complexCurve (double ecomp, double black, double hlcompr, dou
             vdouble resultv = xlog(onev + Rv * exp_scalev) / Rv;
             vfloat resultfv = _mm_cvtpd_ps(resultv);
             _mm_store_ss(&hlCurve[i], resultfv);
-            resultfv = PERMUTEPS(resultfv, _MM_SHUFFLE(1, 1, 1, 1));
+            resultfv = PERMUTEPS<1, 1, 1, 1>(resultfv);
             _mm_store_ss(&hlCurve[i + 1], resultfv);
             Rv += incrementv;
         }
@@ -1870,7 +1870,7 @@ void PerceptualToneCurve::BatchApply(const size_t start, const size_t end, float
         if (oog_r && oog_g && oog_b) {
             continue;
         }
-        
+
         float r = CLIP(rc[i]);
         float g = CLIP(gc[i]);
         float b = CLIP(bc[i]);

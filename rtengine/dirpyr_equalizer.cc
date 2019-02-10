@@ -443,7 +443,7 @@ void ImProcFunctions::dirpyr_channel(float ** data_fine, float ** data_coarse, i
 
                         for (int jnbr = j - scalewin, indexjhlp = 0; jnbr <= j + scalewin; jnbr += scale, indexjhlp++) {
                             dftemp2v = LVFU(data_fine[inbr][jnbr]);
-                            dirwtv = LVF(domkerv[indexihlp][indexjhlp]) / (vabsf(dftemp1v - dftemp2v) + thousandv);
+                            dirwtv = LVF(*domkerv[indexihlp][indexjhlp]) / (vabsf(dftemp1v - dftemp2v) + thousandv);
                             valv += dirwtv * dftemp2v;
                             normv += dirwtv;
                         }

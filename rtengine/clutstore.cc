@@ -230,7 +230,7 @@ void rtengine::HaldCLUT::getRGB(
 
         size_t index = color * 4;
 
-        const vfloat v_r = PERMUTEPS(v_rgb, _MM_SHUFFLE(0, 0, 0, 0));
+        const vfloat v_r = PERMUTEPS<0, 0, 0, 0>(v_rgb);
 
         vfloat2 v_clut_values = getClutValues(clut_image, index);
         vfloat v_tmp1 = vintpf(v_r, v_clut_values.y, v_clut_values.x);
@@ -240,7 +240,7 @@ void rtengine::HaldCLUT::getRGB(
         v_clut_values = getClutValues(clut_image, index);
         vfloat v_tmp2 = vintpf(v_r, v_clut_values.y, v_clut_values.x);
 
-        const vfloat v_g = PERMUTEPS(v_rgb, _MM_SHUFFLE(1, 1, 1, 1));
+        const vfloat v_g = PERMUTEPS<1, 1, 1, 1>(v_rgb);
 
         vfloat v_out = vintpf(v_g, v_tmp2, v_tmp1);
 
@@ -256,7 +256,7 @@ void rtengine::HaldCLUT::getRGB(
 
         v_tmp1 = vintpf(v_g, v_tmp2, v_tmp1);
 
-        const vfloat v_b = PERMUTEPS(v_rgb, _MM_SHUFFLE(2, 2, 2, 2));
+        const vfloat v_b = PERMUTEPS<2, 2, 2, 2>(v_rgb);
 
         v_out = vintpf(v_b, v_tmp1, v_out);
 

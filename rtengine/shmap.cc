@@ -522,7 +522,7 @@ void SHMap::dirpyr_shmap(float ** data_fine, float ** data_coarse, int width, in
 
                         for (int jnbr = j - scalewin, indexjhlp = 0; jnbr <= j + scalewin; jnbr += scale, indexjhlp++) {
                             dftemp2v = LVFU(data_fine[inbr][jnbr]);
-                            dirwtv = ( LVF(domkerv[indexihlp][indexjhlp]) * rangefn[_mm_cvttps_epi32(vabsf(dftemp2v - dftemp1v))] );
+                            dirwtv = ( LVF(*domkerv[indexihlp][indexjhlp]) * rangefn[_mm_cvttps_epi32(vabsf(dftemp2v - dftemp1v))] );
                             valv += dirwtv * dftemp2v;
                             normv += dirwtv;
                         }
