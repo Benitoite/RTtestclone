@@ -4205,9 +4205,9 @@ void RawImageSource::colorSpaceConversion_ (Imagefloat* im, const ColorManagemen
                             // We will revert this curve after we've made the color transform. However when we revert the curve, we'll notice that
                             // highlight rendering suffers due to that the LUT transform don't expand well, therefore we do a less compressed
                             // conversion too and mix them, this gives us the highest quality and most flexible result.
-                            hl_buffer.data[3 * w + 0] = pow_F(r, 1.0 / 1.8);
-                            hl_buffer.data[3 * w + 1] = pow_F(g, 1.0 / 1.8);
-                            hl_buffer.data[3 * w + 2] = pow_F(b, 1.0 / 1.8);
+                            hl_buffer.data[3 * w + 0] = xpowf(r, 1.0 / 1.8);
+                            hl_buffer.data[3 * w + 1] = xpowf(g, 1.0 / 1.8);
+                            hl_buffer.data[3 * w + 2] = xpowf(b, 1.0 / 1.8);
                             r = phaseOneIccCurveInv->getVal(r);
                             g = phaseOneIccCurveInv->getVal(g);
                             b = phaseOneIccCurveInv->getVal(b);
@@ -4218,9 +4218,9 @@ void RawImageSource::colorSpaceConversion_ (Imagefloat* im, const ColorManagemen
                             float newr = leaf_prophoto_mat[0][0] * r + leaf_prophoto_mat[0][1] * g + leaf_prophoto_mat[0][2] * b;
                             float newg = leaf_prophoto_mat[1][0] * r + leaf_prophoto_mat[1][1] * g + leaf_prophoto_mat[1][2] * b;
                             float newb = leaf_prophoto_mat[2][0] * r + leaf_prophoto_mat[2][1] * g + leaf_prophoto_mat[2][2] * b;
-                            hl_buffer.data[3 * w + 0] = pow_F(newr, 1.0 / 1.8);
-                            hl_buffer.data[3 * w + 1] = pow_F(newg, 1.0 / 1.8);
-                            hl_buffer.data[3 * w + 2] = pow_F(newb, 1.0 / 1.8);
+                            hl_buffer.data[3 * w + 0] = xpowf(newr, 1.0 / 1.8);
+                            hl_buffer.data[3 * w + 1] = xpowf(newg, 1.0 / 1.8);
+                            hl_buffer.data[3 * w + 2] = xpowf(newb, 1.0 / 1.8);
                             r = phaseOneIccCurveInv->getVal(newr);
                             g = phaseOneIccCurveInv->getVal(newg);
                             b = phaseOneIccCurveInv->getVal(newb);
@@ -4286,9 +4286,9 @@ void RawImageSource::colorSpaceConversion_ (Imagefloat* im, const ColorManagemen
                         case CAMERA_ICC_TYPE_PHASE_ONE:
                         case CAMERA_ICC_TYPE_LEAF: {
                             // note the 1/1.8 gamma, it's the gamma that the profile has applied, which we must revert before we can revert the curve
-                            r = phaseOneIccCurve->getVal(pow_F(r, 1.0 / 1.8));
-                            g = phaseOneIccCurve->getVal(pow_F(g, 1.0 / 1.8));
-                            b = phaseOneIccCurve->getVal(pow_F(b, 1.0 / 1.8));
+                            r = phaseOneIccCurve->getVal(xpowf(r, 1.0 / 1.8));
+                            g = phaseOneIccCurve->getVal(xpowf(g, 1.0 / 1.8));
+                            b = phaseOneIccCurve->getVal(xpowf(b, 1.0 / 1.8));
                             const float mix = 0.25; // may seem a low number, but remember this is linear space, mixing starts 2 stops from clipping
                             const float maxc = max(r, g, b);
 

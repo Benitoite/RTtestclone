@@ -942,20 +942,20 @@ void ImProcFunctions::ciecam_02float (CieImage* ncie, float adap, int pW, int pw
         Ciecam02::initcam1float (yb, pilot, f, la, xw, yw, zw, n, d, nbb, ncb, cz, aw, wh, pfl, fl, c);
         //printf ("wh=%f \n", wh);
 
-        const float pow1 = pow_F ( 1.64f - pow_F ( 0.29f, n ), 0.73f );
+        const float pow1 = xpowf ( 1.64f - xpowf ( 0.29f, n ), 0.73f );
         float nj, nbbj, ncbj, czj, awj, flj;
         Ciecam02::initcam2float (yb2, pilotout, f2,  la2,  xw2,  yw2,  zw2, nj, dj, nbbj, ncbj, czj, awj, flj);
 #ifdef __SSE2__
         const float reccmcz = 1.f / (c2 * czj);
 #endif
-        const float pow1n = pow_F ( 1.64f - pow_F ( 0.29f, nj ), 0.73f );
+        const float pow1n = xpowf ( 1.64f - xpowf ( 0.29f, nj ), 0.73f );
 
         const float epsil = 0.0001f;
         const float coefQ = 32767.f / wh;
         const float a_w = aw;
         const float c_ = c;
         const float f_l = fl;
-        const float coe = pow_F (fl, 0.25f);
+        const float coe = xpowf (fl, 0.25f);
         const float QproFactor = ( 0.4f / c ) * ( aw + 4.0f ) ;
         const bool LabPassOne = ! ((params->colorappearance.tonecie && (epdEnabled)) || (params->sharpening.enabled && settings->autocielab && execsharp)
                                    || (params->dirpyrequalizer.enabled && settings->autocielab) || (params->defringe.enabled && settings->autocielab)  || (params->sharpenMicro.enabled && settings->autocielab)
@@ -1737,7 +1737,7 @@ void ImProcFunctions::ciecam_02float (CieImage* ncie, float adap, int pW, int pw
                 }
 
                 const float Qredi = ( 4.0f / c_)  * ( a_w + 4.0f );
-                const float co_e = (pow_F (f_l, 0.25f));
+                const float co_e = (xpowf (f_l, 0.25f));
 
 
 #ifndef _DEBUG
@@ -1779,7 +1779,7 @@ void ImProcFunctions::ciecam_02float (CieImage* ncie, float adap, int pW, int pw
 
 
             constexpr float eps = 0.0001f;
-            const float co_e = (pow_F (f_l, 0.25f)) + eps;
+            const float co_e = (xpowf (f_l, 0.25f)) + eps;
 
 #ifndef _DEBUG
 #ifdef _OPENMP
@@ -2788,7 +2788,7 @@ void ImProcFunctions::rgbProc (Imagefloat* working, LabImage* lab, PipetteBuffer
                         const float krh = rh / (rh + gh + bh);
                         const float kgh = gh / (rh + gh + bh);
                         const float kbh = bh / (rh + gh + bh);
-                        strProtect = pow_F(strProtect, 0.4f);
+                        strProtect = xpowf(strProtect, 0.4f);
                         constexpr int mode = 0;
                         for (int i = istart, ti = 0; i < tH; i++, ti++) {
                             for (int j = jstart, tj = 0; j < tW; j++, tj++) {
@@ -2801,7 +2801,7 @@ void ImProcFunctions::rgbProc (Imagefloat* working, LabImage* lab, PipetteBuffer
                     else if (params->colorToning.method == "Splitco") {
                         constexpr float reducac = 0.3f;
                         constexpr int mode = 0;
-                        strProtect = pow_F(strProtect, 0.4f);
+                        strProtect = xpowf(strProtect, 0.4f);
                         for (int i = istart, ti = 0; i < tH; i++, ti++) {
                             for (int j = jstart, tj = 0; j < tW; j++, tj++) {
                                 const float r = rtemp[ti * TS + tj];
@@ -3478,7 +3478,7 @@ void ImProcFunctions::rgbProc (Imagefloat* working, LabImage* lab, PipetteBuffer
                 const float krh = rh / (rh + gh + bh);
                 const float kgh = gh / (rh + gh + bh);
                 const float kbh = bh / (rh + gh + bh);
-                strProtect = pow_F(strProtect, 0.4f);
+                strProtect = xpowf(strProtect, 0.4f);
                 constexpr int mode = 1;
 #ifdef _OPENMP
                 #pragma omp parallel for schedule(dynamic, 5)
@@ -3993,7 +3993,7 @@ void ImProcFunctions::toning2col (float r, float g, float b, float &ro, float &g
         const float kmgb = min(r, g, b);
         if (kmgb < 20000.f) {
             //I have tested ...0.85 compromise...
-            kl *= pow_F ((kmgb / 20000.f), 0.85f);
+            kl *= xpowf ((kmgb / 20000.f), 0.85f);
         }
 
         const float factor = 20000.f * SatLow * kl * rlo * balanS;

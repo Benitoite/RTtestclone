@@ -137,4 +137,5 @@ vfloat xatan2f(vfloat y, vfloat x);
 vfloat xlogf(vfloat d);
 vfloat xlogf0(vfloat d);
 vfloat xexpf(vfloat d);
+vfloat xpowf(vfloat a, vfloat b);
 vfloat xcbrtf(vfloat s);

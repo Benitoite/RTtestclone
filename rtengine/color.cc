@@ -373,48 +373,48 @@ void Color::rgb2lab01 (const Glib::ustring &profile, const Glib::ustring &profil
         if (profileW == "sRGB") { //apply sRGB inverse gamma
 
             if (r > 0.04045f) {
-                r = pow_F(((r + 0.055f) / 1.055f), rtengine::Color::sRGBGammaCurve);
+                r = xpowf(((r + 0.055f) / 1.055f), rtengine::Color::sRGBGammaCurve);
             } else {
                 r /= 12.92f;
             }
 
             if (g > 0.04045f) {
-                g = pow_F(((g + 0.055f) / 1.055f), rtengine::Color::sRGBGammaCurve);
+                g = xpowf(((g + 0.055f) / 1.055f), rtengine::Color::sRGBGammaCurve);
             } else {
                 g /= 12.92f;
             }
 
             if (b > 0.04045f) {
-                b = pow_F(((b + 0.055f) / 1.055f), rtengine::Color::sRGBGammaCurve);
+                b = xpowf(((b + 0.055f) / 1.055f), rtengine::Color::sRGBGammaCurve);
             } else {
                 b /= 12.92f;
             }
         } else if (profileW == "ProPhoto") { // apply inverse gamma 1.8
-            r = pow_F(r, 1.8f);
-            g = pow_F(g, 1.8f);
-            b = pow_F(b, 1.8f);
+            r = xpowf(r, 1.8f);
+            g = xpowf(g, 1.8f);
+            b = xpowf(b, 1.8f);
         } else if (profileW == "Rec2020") {
             if (r > 0.0795f) {
-                r = pow_F(((r + 0.0954f) / 1.0954f), 2.2f);
+                r = xpowf(((r + 0.0954f) / 1.0954f), 2.2f);
             } else {
                 r /= 4.5f;
             }
 
             if (g > 0.0795f) {
-                g = pow_F(((g + 0.0954f) / 1.0954f), 2.2f);
+                g = xpowf(((g + 0.0954f) / 1.0954f), 2.2f);
             } else {
                 g /= 4.5f;
             }
 
             if (b > 0.0795f) {
-                b = pow_F(((b + 0.0954f) / 1.0954f), 2.2f);
+                b = xpowf(((b + 0.0954f) / 1.0954f), 2.2f);
             } else {
                 b /= 4.5f;
             }
         } else { // apply inverse gamma 2.2
-            r = pow_F(r, 2.2f);
-            g = pow_F(g, 2.2f);
-            b = pow_F(b, 2.2f);
+            r = xpowf(r, 2.2f);
+            g = xpowf(g, 2.2f);
+            b = xpowf(b, 2.2f);
         }
     } else { //display output profile
         if (profile == settings->srgb) {
@@ -429,51 +429,51 @@ void Color::rgb2lab01 (const Glib::ustring &profile, const Glib::ustring &profil
 
         if (profile == settings->srgb || profile == settings->adobe) { //apply sRGB inverse gamma
             if (r > 0.04045f) {
-                r = pow_F(((r + 0.055f) / 1.055f), rtengine::Color::sRGBGammaCurve);
+                r = xpowf(((r + 0.055f) / 1.055f), rtengine::Color::sRGBGammaCurve);
             } else {
                 r /= 12.92f;
             }
 
             if (g > 0.04045f) {
-                g = pow_F(((g + 0.055f) / 1.055f), rtengine::Color::sRGBGammaCurve);
+                g = xpowf(((g + 0.055f) / 1.055f), rtengine::Color::sRGBGammaCurve);
             } else {
                 g /= 12.92f;
             }
 
             if (b > 0.04045f) {
-                b = pow_F(((b + 0.055f) / 1.055f), rtengine::Color::sRGBGammaCurve);
+                b = xpowf(((b + 0.055f) / 1.055f), rtengine::Color::sRGBGammaCurve);
             } else {
                 b /= 12.92f;
             }
         } else if (profile == settings->prophoto || profile == settings->rec2020) {
             if (r > 0.0795f) {
-                r = pow_F(((r + 0.0954f) / 1.0954f), 2.2f);
+                r = xpowf(((r + 0.0954f) / 1.0954f), 2.2f);
             } else {
                 r /= 4.5f;
             }
 
             if (g > 0.0795f) {
-                g = pow_F(((g + 0.0954f) / 1.0954f), 2.2f);
+                g = xpowf(((g + 0.0954f) / 1.0954f), 2.2f);
             } else {
                 g /= 4.5f;
             }
 
             if (b > 0.0795f) {
-                b = pow_F(((b + 0.0954f) / 1.0954f), 2.2f);
+                b = xpowf(((b + 0.0954f) / 1.0954f), 2.2f);
             } else {
                 b /= 4.5f;
             }
 
         } else if (profile == "ProPhoto") { // apply inverse gamma 1.8
 
-            r = pow_F(r, 1.8f);
-            g = pow_F(g, 1.8f);
-            b = pow_F(b, 1.8f);
+            r = xpowf(r, 1.8f);
+            g = xpowf(g, 1.8f);
+            b = xpowf(b, 1.8f);
         } else {// apply inverse gamma 2.2
 
-            r = pow_F(r, 2.2f);
-            g = pow_F(g, 2.2f);
-            b = pow_F(b, 2.2f);
+            r = xpowf(r, 2.2f);
+            g = xpowf(g, 2.2f);
+            b = xpowf(b, 2.2f);
         }
     }
 
@@ -1011,7 +1011,7 @@ void Color::trcGammaBW (float &r, float &g, float &b, float gammabwr, float gamm
     vfloat c65535v = F2V(65535.f);
     rgbv /= c65535v;
     rgbv = vmaxf(rgbv, ZEROV);
-    rgbv = pow_F(rgbv, gammabwv);
+    rgbv = xpowf(rgbv, gammabwv);
     rgbv *= c65535v;
     float temp[4] ALIGNED16;
     STVF(temp[0], rgbv);
@@ -1031,9 +1031,9 @@ void Color::trcGammaBWRow (float *r, float *g, float *b, int width, float gammab
         vfloat inv = _mm_loadu_ps(&r[i]); // input channel is always r
         inv /= c65535v;
         inv = vmaxf(inv, ZEROV);
-        vfloat rv = pow_F(inv, gammabwrv);
-        vfloat gv = pow_F(inv, gammabwgv);
-        vfloat bv = pow_F(inv, gammabwbv);
+        vfloat rv = xpowf(inv, gammabwrv);
+        vfloat gv = xpowf(inv, gammabwgv);
+        vfloat bv = xpowf(inv, gammabwbv);
         rv *= c65535v;
         gv *= c65535v;
         bv *= c65535v;
@@ -1053,11 +1053,11 @@ void Color::trcGammaBW (float &r, float &g, float &b, float gammabwr, float gamm
     float in = r; // input channel is always r
     in /= 65535.0f;
     in = max(in, 0.f);
-    b = pow_F (in, gammabwb);
+    b = xpowf (in, gammabwb);
     b *= 65535.0f;
-    r = pow_F (in, gammabwr);
+    r = xpowf (in, gammabwr);
     r *= 65535.0f;
-    g = pow_F (in, gammabwg);
+    g = xpowf (in, gammabwg);
     g *= 65535.0f;
 }
 #endif

@@ -733,7 +733,7 @@ float *EdgePreservingDecomposition::CreateBlur(float *Source, float Scale, float
                 gxv = (LVFU(rg[x + 1]) -  LVFU(rg[x])) + (LVFU(rg[x + w + 1]) - LVFU(rg[x + w]));
                 gyv = (LVFU(rg[x + w]) -  LVFU(rg[x])) + (LVFU(rg[x + w + 1]) - LVFU(rg[x + 1]));
                 //Apply power to the magnitude of the gradient to get the edge stopping function.
-                _mm_storeu_ps( &a[x + w * y], Scalev * pow_F((zd5v * vsqrtf(gxv * gxv + gyv * gyv + sqrepsv)), EdgeStoppingv) );
+                _mm_storeu_ps( &a[x + w * y], Scalev * xpowf((zd5v * vsqrtf(gxv * gxv + gyv * gyv + sqrepsv)), EdgeStoppingv) );
             }
 
             for(; x < w1; x++) {
@@ -741,7 +741,7 @@ float *EdgePreservingDecomposition::CreateBlur(float *Source, float Scale, float
                 float gx = (rg[x + 1] - rg[x]) + (rg[x + w + 1] - rg[x + w]);
                 float gy = (rg[x + w] - rg[x]) + (rg[x + w + 1] - rg[x + 1]);
                 //Apply power to the magnitude of the gradient to get the edge stopping function.
-                a[x + w * y] = Scale * pow_F(0.5f * sqrtf(gx * gx + gy * gy + sqreps), -EdgeStopping);
+                a[x + w * y] = Scale * xpowf(0.5f * sqrtf(gx * gx + gy * gy + sqreps), -EdgeStopping);
             }
 
 #else
@@ -752,7 +752,7 @@ float *EdgePreservingDecomposition::CreateBlur(float *Source, float Scale, float
                 float gy = (rg[x + w] - rg[x]) + (rg[x + w + 1] - rg[x + 1]);
 
                 //Apply power to the magnitude of the gradient to get the edge stopping function.
-                a[x + w * y] = Scale * pow_F(0.5f * sqrtf(gx * gx + gy * gy + sqreps), -EdgeStopping);
+                a[x + w * y] = Scale * xpowf(0.5f * sqrtf(gx * gx + gy * gy + sqreps), -EdgeStopping);
             }
 
 #endif

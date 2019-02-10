@@ -896,13 +896,13 @@ BENCHFUN
 
                 for(; j < winw - (border + offsX) - 3; j += 4) {
                     vfloat blendv = vmaxf(LVFU(psMask[i][j]), onev) - onev;
-                    blendv = pow_F(blendv, smoothv);
+                    blendv = xpowf(blendv, smoothv);
                     blendv = vself(vmaskf_eq(smoothv, ZEROV), onev, blendv);
                     STVFU(psMask[i][j], blendv);
                 }
 
                 for(; j < winw - (border + offsX); ++j) {
-                    psMask[i][j] = smoothFactor == 0.f ? 1.f : pow_F(std::max(psMask[i][j] - 1.f, 0.f), smoothFactor);
+                    psMask[i][j] = smoothFactor == 0.f ? 1.f : xpowf(std::max(psMask[i][j] - 1.f, 0.f), smoothFactor);
                 }
             }
 
@@ -921,7 +921,7 @@ BENCHFUN
                         // use pre calculated blend factor
                         const float blend = psMask[i][j];
 #else
-                        const float blend = smoothFactor == 0.f ? 1.f : pow_F(std::max(psMask[i][j] - 1.f, 0.f), smoothFactor);
+                        const float blend = smoothFactor == 0.f ? 1.f : xpowf(std::max(psMask[i][j] - 1.f, 0.f), smoothFactor);
 #endif
                         redDest[j + offsX] = greenDest[j + offsX] = blueDest[j + offsX] = blend * 32768.f;
                     } else {
@@ -935,7 +935,7 @@ BENCHFUN
                         // use pre calculated blend factor
                         const float blend = psMask[i][j];
 #else
-                        const float blend = smoothFactor == 0.f ? 1.f : pow_F(std::max(psMask[i][j] - 1.f, 0.f), smoothFactor);
+                        const float blend = smoothFactor == 0.f ? 1.f : xpowf(std::max(psMask[i][j] - 1.f, 0.f), smoothFactor);
 #endif
                         redDest[j + offsX] = intp(blend, showMotion ? 0.f : redDest[j + offsX], psRed[i][j] );
                         greenDest[j + offsX] = intp(blend, showMotion ? 13500.f : greenDest[j + offsX], ((*rawDataFrames[1 - offset])[i - offset + 1][j] * greenBrightness[1 - offset] + (*rawDataFrames[3 - offset])[i + offset][j + 1] * greenBrightness[3 - offset]) * 0.5f);

@@ -203,7 +203,7 @@ BENCHFUN
                 Color::Lab2XYZ(l, a, b, x, y, z);
                 Color::xyz2rgb(x, y, z, rgb[0], rgb[1], rgb[2], iws);
                 for (int i = 0; i < 3; ++i) {
-                    rgb[i] = (pow_F(max((rgb[i] / 65535.f) * slope + offset, 0.f), power)) * 65535.f;
+                    rgb[i] = (xpowf(max((rgb[i] / 65535.f) * slope + offset, 0.f), power)) * 65535.f;
                 }
                 if (saturation != 1.f) {
                     float Y = Color::rgbLuminance(rgb[0], rgb[1], rgb[2], ws);

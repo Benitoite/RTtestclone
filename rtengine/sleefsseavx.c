@@ -1319,6 +1319,11 @@ static INLINE vfloat xexpf(vfloat d) {
   return vselfnotzero(vmaskf_gt(vcast_vf_f(-104.f), d), u);
 }
 
+static INLINE vfloat xpowf(vfloat a, vfloat b)
+{
+    return xexpf(b * xlogf(a));
+}
+
 static INLINE vfloat xexpfNoCheck(vfloat d) { // this version does not check input values. Use it only when you know the input values are > -104.f e.g. when filling a lookup table
   vint2 q = vrint_vi2_vf(vmulf(d, vcast_vf_f(R_LN2f)));
   vfloat s, u;

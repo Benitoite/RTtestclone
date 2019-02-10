@@ -2141,7 +2141,7 @@ void PerceptualToneCurve::init()
 
     Ciecam02::initcam1float(yb, 1.f, f, la, xw, yw, zw, n, d, nbb, ncb,
                             cz, aw, wh, pfl, fl, c);
-    pow1 = pow_F( 1.64f - pow_F( 0.29f, n ), 0.73f );
+    pow1 = xpowf( 1.64f - xpowf( 0.29f, n ), 0.73f );
 
     {
         // init contrast-value-to-chroma-scaling conversion curve

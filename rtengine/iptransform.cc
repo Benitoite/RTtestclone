@@ -62,7 +62,7 @@ float pown (float x, int n)
             return pow4 (x) * pow4 (x);
 
         default:
-            return pow_F (x, n);
+            return xpowf (x, n);
     }
 }
 
@@ -82,7 +82,7 @@ float normn (float a, float b, int n)
             return sqrtf (sqrtf (sqrtf (pow4 (a) * pow4 (a) + pow4 (b) * pow4 (b))));
 
         default:
-            return pow_F (pown (a, n) + pown (b, n), 1.f / n);
+            return xpowf (pown (a, n) + pown (b, n), 1.f / n);
     }
 }
 

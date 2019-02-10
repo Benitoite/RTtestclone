@@ -419,11 +419,11 @@ void Ciecam02::initcam1float (float yb, float pilotd, float f, float la, float x
     }
 
     fl = calculate_fl_from_la_ciecam02float ( la );
-    nbb = ncb = 0.725f * pow_F ( 1.0f / n, 0.2f );
+    nbb = ncb = 0.725f * xpowf ( 1.0f / n, 0.2f );
     cz = 1.48f + sqrt ( n );
     aw = achromatic_response_to_whitefloat ( xw, yw, zw, d, fl, nbb);
-    wh = ( 4.0f / c ) * ( aw + 4.0f ) * pow_F ( fl, 0.25f );
-    pfl = pow_F ( fl, 0.25f );
+    wh = ( 4.0f / c ) * ( aw + 4.0f ) * xpowf ( fl, 0.25f );
+    pfl = xpowf ( fl, 0.25f );
 #ifdef _DEBUG
 
     if (settings->verbose) {
@@ -446,7 +446,7 @@ void Ciecam02::initcam2float (float yb, float pilotd, float f, float la, float x
 
 //   d = d_factorfloat( f, la );
     fl = calculate_fl_from_la_ciecam02float ( la );
-    nbb = ncb = 0.725f * pow_F ( 1.0f / n, 0.2f );
+    nbb = ncb = 0.725f * xpowf ( 1.0f / n, 0.2f );
     cz = 1.48f + sqrt ( n );
     aw = achromatic_response_to_whitefloat ( xw, yw, zw, d, fl, nbb);
 #ifdef _DEBUG
@@ -505,12 +505,12 @@ void Ciecam02::xyz2jchqms_ciecam02float ( float &J, float &C, float &h, float &Q
     a = MAXR (a, 0.0f); //gamut correction M.H.Brill S.Susstrunk
 //    }
 
-    J = pow_F ( a / aw, c * cz * 0.5f);
+    J = xpowf ( a / aw, c * cz * 0.5f);
 
     e = ((961.53846f) * nc * ncb) * (xcosf ( myh + 2.0f ) + 3.8f);
     t = (e * sqrtf ( (ca * ca) + (cb * cb) )) / (rpa + gpa + (1.05f * bpa));
 
-    C = pow_F ( t, 0.9f ) * J * pow1;
+    C = xpowf ( t, 0.9f ) * J * pow1;
 
     Q = wh * J;
     J *= J * 100.0f;
@@ -561,12 +561,12 @@ void Ciecam02::xyz2jchqms_ciecam02float ( vfloat &J, vfloat &C, vfloat &h, vfloa
     a = ((rpa + rpa) + gpa + (F2V (0.05f) * bpa) - F2V (0.305f)) * nbb;
     a = vmaxf (a, ZEROV);  //gamut correction M.H.Brill S.Susstrunk
 
-    J = pow_F ( a / aw, c * cz * F2V (0.5f));
+    J = xpowf ( a / aw, c * cz * F2V (0.5f));
 
     e = ((F2V (961.53846f)) * nc * ncb) * (xcosf ( myh + F2V (2.0f) ) + F2V (3.8f));
     t = (e * vsqrtf ( (ca * ca) + (cb * cb) )) / (rpa + gpa + (F2V (1.05f) * bpa));
 
-    C = pow_F ( t, F2V (0.9f) ) * J * pow1;
+    C = xpowf ( t, F2V (0.9f) ) * J * pow1;
 
     Q = wh * J;
     J *= J * F2V (100.0f);
@@ -633,12 +633,12 @@ void Ciecam02::xyz2jch_ciecam02float ( float &J, float &C, float &h, float aw, f
     a = MAXR (a, 0.0f); //gamut correction M.H.Brill S.Susstrunk
 //    }
 
-    J = pow_F ( a / aw, c * cz * 0.5f);
+    J = xpowf ( a / aw, c * cz * 0.5f);
 
     e = ((961.53846f) * nc * ncb) * (xcosf ( myh + 2.0f ) + 3.8f);
     t = (e * sqrtf ( (ca * ca) + (cb * cb) )) / (rpa + gpa + (1.05f * bpa));
 
-    C = pow_F ( t, 0.9f ) * J * pow1;
+    C = xpowf ( t, 0.9f ) * J * pow1;
 
     J *= J * 100.0f;
     h = (myh * 180.f) / (float)rtengine::RT_PI;
@@ -662,12 +662,12 @@ void Ciecam02::jch2xyz_ciecam02float ( float &x, float &y, float &z, float J, fl
 #ifdef __SSE2__
     vfloat powinv1 = _mm_setr_ps(J / 100.0f, 10.f * C / (sqrtf(J) * pow1), 1.f, 1.f);
     vfloat powinv2 = _mm_setr_ps(1.0f / (c * cz), 1.1111111f, 1.f, 1.f);
-    vfloat powoutv = pow_F(powinv1, powinv2);
+    vfloat powoutv = xpowf(powinv1, powinv2);
     a = powoutv[0] * aw;
     t = powoutv[1];
 #else
-    a = pow_F(J / 100.0f, 1.0f / (c * cz)) * aw;
-    t = pow_F(10.f * C / (sqrtf(J) * pow1), 1.1111111f);
+    a = xpowf(J / 100.0f, 1.0f / (c * cz)) * aw;
+    t = xpowf(10.f * C / (sqrtf(J) * pow1), 1.1111111f);
 #endif
 
     calculate_abfloat(ca, cb, h, e, t, nbb, a);
@@ -709,8 +709,8 @@ void Ciecam02::jch2xyz_ciecam02float ( vfloat &x, vfloat &y, vfloat &z, vfloat J
     vfloat e, t;
     xyz_to_cat02float ( rw, gw, bw, xw, yw, zw);
     e = ((F2V (961.53846f)) * nc * ncb) * (xcosf ( ((h * F2V (rtengine::RT_PI)) / F2V (180.0f)) + F2V (2.0f) ) + F2V (3.8f));
-    a = pow_F ( J / F2V (100.0f), reccmcz ) * aw;
-    t = pow_F ( F2V (10.f) * C / (vsqrtf ( J ) * pow1), F2V (1.1111111f) );
+    a = xpowf ( J / F2V (100.0f), reccmcz ) * aw;
+    t = xpowf ( F2V (10.f) * C / (vsqrtf ( J ) * pow1), F2V (1.1111111f) );
 
     calculate_abfloat ( ca, cb, h, e, t, nbb, a );
     Aab_to_rgbfloat ( rpa, gpa, bpa, a, ca, cb, nbb );
@@ -735,10 +735,10 @@ float Ciecam02::nonlinear_adaptationfloat ( float c, float fl )
     float p;
 
     if (c < 0.0f) {
-        p = pow_F ( (-1.0f * fl * c) / 100.0f, 0.42f );
+        p = xpowf ( (-1.0f * fl * c) / 100.0f, 0.42f );
         return ((-1.0f * 400.0f * p) / (27.13f + p)) + 0.1f;
     } else {
-        p = pow_F ( (fl * c) / 100.0f, 0.42f );
+        p = xpowf ( (fl * c) / 100.0f, 0.42f );
         return ((400.0f * p) / (27.13f + p)) + 0.1f;
     }
 }
@@ -750,7 +750,7 @@ vfloat Ciecam02::nonlinear_adaptationfloat ( vfloat c, vfloat fl )
     vfloat czd42 = F2V (0.42f);
     vfloat c400 = vmulsignf (F2V (400.f), c);
     fl = vmulsignf (fl, c);
-    vfloat p = pow_F ( (fl * c) / c100, czd42 );
+    vfloat p = xpowf ( (fl * c) / c100, czd42 );
     vfloat c27d13 = F2V (27.13);
     vfloat czd1 = F2V (0.1f);
     return ((c400 * p) / (c27d13 + p)) + czd1;
@@ -771,7 +771,7 @@ float Ciecam02::inverse_nonlinear_adaptationfloat ( float c, float fl )
         c = 399.99f;
     }
 
-    return (100.0f / fl) * pow_F ( (27.13f * fabsf ( c )) / (400.0f - fabsf ( c )), 2.38095238f );
+    return (100.0f / fl) * xpowf ( (27.13f * fabsf ( c )) / (400.0f - fabsf ( c )), 2.38095238f );
 }
 
 #ifdef __SSE2__
@@ -781,7 +781,7 @@ vfloat Ciecam02::inverse_nonlinear_adaptationfloat ( vfloat c, vfloat fl )
     fl = vmulsignf (fl, c);
     c = vabsf (c);
     c = vminf ( c, F2V (399.99f));
-    return (F2V (100.0f) / fl) * pow_F ( (F2V (27.13f) * c) / (F2V (400.0f) - c), F2V (2.38095238f) );
+    return (F2V (100.0f) / fl) * xpowf ( (F2V (27.13f) * c) / (F2V (400.0f) - c), F2V (2.38095238f) );
 }
 #endif
 //end CIECAM Billy Bigg
