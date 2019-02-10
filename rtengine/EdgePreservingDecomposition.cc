@@ -300,11 +300,11 @@ void MultiDiagonalSymmetricMatrix::VectorProduct(float* RESTRICT Product, float*
 #ifdef __SSE2__
 
         for(int j = srm; j < lm - 3; j += 4) {
-            __m128 prodv = LVFU(Diagonals[0][j]) * LVFU(x[j]);
+            __m128 prodv = lvfu(Diagonals[0][j]) * lvfu(x[j]);
 
             for(int i = m - 1; i > 0; i--) {
                 int s = StartRows[i];
-                prodv += (LVFU(Diagonals[i][j - s]) * LVFU(x[j - s])) + (LVFU(Diagonals[i][j]) * LVFU(x[j + s]));
+                prodv += (lvfu(Diagonals[i][j - s]) * lvfu(x[j - s])) + (lvfu(Diagonals[i][j]) * lvfu(x[j + s]));
             }
 
             _mm_storeu_ps(&Product[j], prodv);
@@ -730,8 +730,8 @@ float *EdgePreservingDecomposition::CreateBlur(float *Source, float Scale, float
 
             for(x = 0; x < w1 - 3; x += 4) {
                 //Estimate the central difference gradient in the center of a four pixel square. (gx, gy) is actually 2*gradient.
-                gxv = (LVFU(rg[x + 1]) -  LVFU(rg[x])) + (LVFU(rg[x + w + 1]) - LVFU(rg[x + w]));
-                gyv = (LVFU(rg[x + w]) -  LVFU(rg[x])) + (LVFU(rg[x + w + 1]) - LVFU(rg[x + 1]));
+                gxv = (lvfu(rg[x + 1]) -  lvfu(rg[x])) + (lvfu(rg[x + w + 1]) - lvfu(rg[x + w]));
+                gyv = (lvfu(rg[x + w]) -  lvfu(rg[x])) + (lvfu(rg[x + w + 1]) - lvfu(rg[x + 1]));
                 //Apply power to the magnitude of the gradient to get the edge stopping function.
                 _mm_storeu_ps( &a[x + w * y], Scalev * xpowf((zd5v * vsqrtf(gxv * gxv + gyv * gyv + sqrepsv)), EdgeStoppingv) );
             }
@@ -894,7 +894,7 @@ void EdgePreservingDecomposition::CompressDynamicRange(float *Source, float Scal
 #endif
 
         for(int ii = 0; ii < n - 3; ii += 4) {
-            _mm_storeu_ps( &Source[ii], xlogf(vmaxf(LVFU(Source[ii]), ZEROV) + epsv));
+            _mm_storeu_ps( &Source[ii], xlogf(vmaxf(lvfu(Source[ii]), zerov) + epsv));
         }
     }
 
@@ -940,9 +940,9 @@ void EdgePreservingDecomposition::CompressDynamicRange(float *Source, float Scal
 #endif
 
         for(int i = 0; i < n - 3; i += 4) {
-            cev = xexpf(LVFU(Source[i]) + LVFU(u[i]) * (tempv)) - epsv;
-            uev = xexpf(LVFU(u[i])) - epsv;
-            sourcev = xexpf(LVFU(Source[i])) - epsv;
+            cev = xexpf(lvfu(Source[i]) + lvfu(u[i]) * (tempv)) - epsv;
+            uev = xexpf(lvfu(u[i])) - epsv;
+            sourcev = xexpf(lvfu(Source[i])) - epsv;
             _mm_storeu_ps( &Source[i], cev + DetailBoostv * (sourcev - uev) );
         }
     }

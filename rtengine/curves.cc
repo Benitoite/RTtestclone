@@ -609,7 +609,7 @@ void CurveFactory::complexCurve (double ecomp, double black, double hlcompr, dou
             vdouble resultv = xlog(onev + Rv * exp_scalev) / Rv;
             vfloat resultfv = _mm_cvtpd_ps(resultv);
             _mm_store_ss(&hlCurve[i], resultfv);
-            resultfv = PERMUTEPS<1, 1, 1, 1>(resultfv);
+            resultfv = permuteps<1, 1, 1, 1>(resultfv);
             _mm_store_ss(&hlCurve[i + 1], resultfv);
             Rv += incrementv;
         }
@@ -754,17 +754,17 @@ void CurveFactory::complexCurve (double ecomp, double black, double hlcompr, dou
     //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 #ifdef __SSE2__
-    vfloat gamma_v = F2V(gamma_);
-    vfloat startv = F2V(start);
-    vfloat slopev = F2V(slope);
-    vfloat mulv = F2V(mul);
-    vfloat addv = F2V(add);
-    vfloat c65535v = F2V(65535.f);
+    vfloat gamma_v = f2v(gamma_);
+    vfloat startv = f2v(start);
+    vfloat slopev = f2v(slope);
+    vfloat mulv = f2v(mul);
+    vfloat addv = f2v(add);
+    vfloat c65535v = f2v(65535.f);
 
     for (int i = 0; i <= 0xffff; i += 4) {
-        vfloat valv = LVFU(dcurve[i]);
+        vfloat valv = lvfu(dcurve[i]);
         valv = igamma (valv, gamma_v, startv, slopev, mulv, addv);
-        STVFU(outCurve[i], c65535v * valv);
+        stvfu(outCurve[i], c65535v * valv);
     }
 
 #else

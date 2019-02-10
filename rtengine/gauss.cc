@@ -231,11 +231,11 @@ template<class T> void gaussHorizontal3 (T** src, T** dst, int W, int H, const f
 #ifdef __SSE2__
 template<class T> void gaussVertical3 (T** src, T** dst, int W, int H, const float c0, const float c1)
 {
-    vfloat Tv = F2V(0.f), Tm1v, Tp1v;
-    vfloat Tv1 = F2V(0.f), Tm1v1, Tp1v1;
+    vfloat Tv = f2v(0.f), Tm1v, Tp1v;
+    vfloat Tv1 = f2v(0.f), Tm1v1, Tp1v1;
     vfloat c0v, c1v;
-    c0v = F2V(c0);
-    c1v = F2V(c1);
+    c0v = f2v(c0);
+    c1v = f2v(c1);
 
 #ifdef _OPENMP
     #pragma omp for nowait
@@ -243,29 +243,29 @@ template<class T> void gaussVertical3 (T** src, T** dst, int W, int H, const flo
 
     // process 8 columns per iteration for better usage of cpu cache
     for (int i = 0; i < W - 7; i += 8) {
-        Tm1v = LVFU( src[0][i] );
-        Tm1v1 = LVFU( src[0][i + 4] );
-        STVFU( dst[0][i], Tm1v);
-        STVFU( dst[0][i + 4], Tm1v1);
+        Tm1v = lvfu( src[0][i] );
+        Tm1v1 = lvfu( src[0][i + 4] );
+        stvfu( dst[0][i], Tm1v);
+        stvfu( dst[0][i + 4], Tm1v1);
 
         if (H > 1) {
-            Tv = LVFU( src[1][i]);
-            Tv1 = LVFU( src[1][i + 4]);
+            Tv = lvfu( src[1][i]);
+            Tv1 = lvfu( src[1][i + 4]);
         }
 
         for (int j = 1; j < H - 1; j++) {
-            Tp1v = LVFU( src[j + 1][i]);
-            Tp1v1 = LVFU( src[j + 1][i + 4]);
-            STVFU( dst[j][i], c1v * (Tp1v + Tm1v) + Tv * c0v);
-            STVFU( dst[j][i + 4], c1v * (Tp1v1 + Tm1v1) + Tv1 * c0v);
+            Tp1v = lvfu( src[j + 1][i]);
+            Tp1v1 = lvfu( src[j + 1][i + 4]);
+            stvfu( dst[j][i], c1v * (Tp1v + Tm1v) + Tv * c0v);
+            stvfu( dst[j][i + 4], c1v * (Tp1v1 + Tm1v1) + Tv1 * c0v);
             Tm1v = Tv;
             Tm1v1 = Tv1;
             Tv = Tp1v;
             Tv1 = Tp1v1;
         }
 
-        STVFU( dst[H - 1][i], LVFU( src[H - 1][i]));
-        STVFU( dst[H - 1][i + 4], LVFU( src[H - 1][i + 4]));
+        stvfu( dst[H - 1][i], lvfu( src[H - 1][i]));
+        stvfu( dst[H - 1][i + 4], lvfu( src[H - 1][i + 4]));
     }
 
 // Borders are done without SSE
@@ -330,10 +330,10 @@ template<class T> void gaussHorizontalSse (T** src, T** dst, const int W, const 
     vfloat Bv, b1v, b2v, b3v;
     vfloat temp2W, temp2Wp1;
     float tmp[W][4] ALIGNED16;
-    Bv = F2V(B);
-    b1v = F2V(b1);
-    b2v = F2V(b2);
-    b3v = F2V(b3);
+    Bv = f2v(B);
+    b1v = f2v(b1);
+    b2v = f2v(b2);
+    b3v = f2v(b3);
 
 #ifdef _OPENMP
     #pragma omp for nowait
@@ -342,35 +342,35 @@ template<class T> void gaussHorizontalSse (T** src, T** dst, const int W, const 
     for (int i = 0; i < H - 3; i += 4) {
         Tv = _mm_set_ps(src[i][0], src[i + 1][0], src[i + 2][0], src[i + 3][0]);
         Tm3v = Tv * (Bv + b1v + b2v + b3v);
-        STVF( tmp[0][0], Tm3v );
+        stvf( tmp[0][0], Tm3v );
 
         Tm2v = _mm_set_ps(src[i][1], src[i + 1][1], src[i + 2][1], src[i + 3][1]) * Bv + Tm3v * b1v + Tv * (b2v + b3v);
-        STVF( tmp[1][0], Tm2v );
+        stvf( tmp[1][0], Tm2v );
 
         Rv = _mm_set_ps(src[i][2], src[i + 1][2], src[i + 2][2], src[i + 3][2]) * Bv + Tm2v * b1v + Tm3v * b2v + Tv * b3v;
-        STVF( tmp[2][0], Rv );
+        stvf( tmp[2][0], Rv );
 
         for (int j = 3; j < W; j++) {
             Tv = Rv;
             Rv = _mm_set_ps(src[i][j], src[i + 1][j], src[i + 2][j], src[i + 3][j]) * Bv + Tv * b1v + Tm2v * b2v + Tm3v * b3v;
-            STVF( tmp[j][0], Rv );
+            stvf( tmp[j][0], Rv );
             Tm3v = Tm2v;
             Tm2v = Tv;
         }
 
         Tv = _mm_set_ps(src[i][W - 1], src[i + 1][W - 1], src[i + 2][W - 1], src[i + 3][W - 1]);
 
-        temp2Wp1 = Tv + F2V(M[2][0]) * (Rv - Tv) + F2V(M[2][1]) * ( Tm2v - Tv ) +  F2V(M[2][2]) * (Tm3v - Tv);
-        temp2W = Tv + F2V(M[1][0]) * (Rv - Tv) + F2V(M[1][1]) * (Tm2v - Tv) + F2V(M[1][2]) * (Tm3v - Tv);
+        temp2Wp1 = Tv + f2v(M[2][0]) * (Rv - Tv) + f2v(M[2][1]) * ( Tm2v - Tv ) +  f2v(M[2][2]) * (Tm3v - Tv);
+        temp2W = Tv + f2v(M[1][0]) * (Rv - Tv) + f2v(M[1][1]) * (Tm2v - Tv) + f2v(M[1][2]) * (Tm3v - Tv);
 
-        Rv = Tv + F2V(M[0][0]) * (Rv - Tv) + F2V(M[0][1]) * (Tm2v - Tv) + F2V(M[0][2]) * (Tm3v - Tv);
-        STVF(tmp[W - 1][0], Rv);
+        Rv = Tv + f2v(M[0][0]) * (Rv - Tv) + f2v(M[0][1]) * (Tm2v - Tv) + f2v(M[0][2]) * (Tm3v - Tv);
+        stvf(tmp[W - 1][0], Rv);
 
         Tm2v = Bv * Tm2v + b1v * Rv + b2v * temp2W + b3v * temp2Wp1;
-        STVF(tmp[W - 2][0], Tm2v);
+        stvf(tmp[W - 2][0], Tm2v);
 
         Tm3v = Bv * Tm3v + b1v * Tm2v + b2v * Rv + b3v * temp2W;
-        STVF(tmp[W - 3][0], Tm3v);
+        stvf(tmp[W - 3][0], Tm3v);
 
         Tv = Rv;
         Rv = Tm3v;
@@ -378,8 +378,8 @@ template<class T> void gaussHorizontalSse (T** src, T** dst, const int W, const 
 
         for (int j = W - 4; j >= 0; j--) {
             Tv = Rv;
-            Rv = LVF(tmp[j][0]) * Bv + Tv * b1v + Tm2v * b2v + Tm3v * b3v;
-            STVF(tmp[j][0], Rv);
+            Rv = lvf(tmp[j][0]) * Bv + Tv * b1v + Tm2v * b2v + Tm3v * b3v;
+            stvf(tmp[j][0], Rv);
             Tm3v = Tm2v;
             Tm2v = Tv;
         }
@@ -493,10 +493,10 @@ template<class T> void gaussVerticalSse (T** src, T** dst, const int W, const in
     vfloat Bv, b1v, b2v, b3v;
     vfloat temp2W, temp2Wp1;
     vfloat temp2W1, temp2Wp11;
-    Bv = F2V(B);
-    b1v = F2V(b1);
-    b2v = F2V(b2);
-    b3v = F2V(b3);
+    Bv = f2v(B);
+    b1v = f2v(b1);
+    b2v = f2v(b2);
+    b3v = f2v(b3);
 
 #ifdef _OPENMP
     #pragma omp for nowait
@@ -504,62 +504,62 @@ template<class T> void gaussVerticalSse (T** src, T** dst, const int W, const in
 
     // process 8 columns per iteration for better usage of cpu cache
     for (int i = 0; i < W - 7; i += 8) {
-        Tv = LVFU( src[0][i]);
-        Tv1 = LVFU( src[0][i + 4]);
+        Tv = lvfu( src[0][i]);
+        Tv1 = lvfu( src[0][i + 4]);
         Rv = Tv * (Bv + b1v + b2v + b3v);
         Rv1 = Tv1 * (Bv + b1v + b2v + b3v);
         Tm3v = Rv;
         Tm3v1 = Rv1;
-        STVF( tmp[0][0], Rv );
-        STVF( tmp[0][4], Rv1 );
+        stvf( tmp[0][0], Rv );
+        stvf( tmp[0][4], Rv1 );
 
-        Rv = LVFU(src[1][i]) * Bv + Rv * b1v + Tv * (b2v + b3v);
-        Rv1 = LVFU(src[1][i + 4]) * Bv + Rv1 * b1v + Tv1 * (b2v + b3v);
+        Rv = lvfu(src[1][i]) * Bv + Rv * b1v + Tv * (b2v + b3v);
+        Rv1 = lvfu(src[1][i + 4]) * Bv + Rv1 * b1v + Tv1 * (b2v + b3v);
         Tm2v = Rv;
         Tm2v1 = Rv1;
-        STVF( tmp[1][0], Rv );
-        STVF( tmp[1][4], Rv1 );
+        stvf( tmp[1][0], Rv );
+        stvf( tmp[1][4], Rv1 );
 
-        Rv = LVFU(src[2][i]) * Bv + Rv * b1v + Tm3v * b2v + Tv * b3v;
-        Rv1 = LVFU(src[2][i + 4]) * Bv + Rv1 * b1v + Tm3v1 * b2v + Tv1 * b3v;
-        STVF( tmp[2][0], Rv );
-        STVF( tmp[2][4], Rv1 );
+        Rv = lvfu(src[2][i]) * Bv + Rv * b1v + Tm3v * b2v + Tv * b3v;
+        Rv1 = lvfu(src[2][i + 4]) * Bv + Rv1 * b1v + Tm3v1 * b2v + Tv1 * b3v;
+        stvf( tmp[2][0], Rv );
+        stvf( tmp[2][4], Rv1 );
 
         for (int j = 3; j < H; j++) {
             Tv = Rv;
             Tv1 = Rv1;
-            Rv = LVFU(src[j][i]) * Bv +  Tv * b1v + Tm2v * b2v + Tm3v * b3v;
-            Rv1 = LVFU(src[j][i + 4]) * Bv +  Tv1 * b1v + Tm2v1 * b2v + Tm3v1 * b3v;
-            STVF( tmp[j][0], Rv );
-            STVF( tmp[j][4], Rv1 );
+            Rv = lvfu(src[j][i]) * Bv +  Tv * b1v + Tm2v * b2v + Tm3v * b3v;
+            Rv1 = lvfu(src[j][i + 4]) * Bv +  Tv1 * b1v + Tm2v1 * b2v + Tm3v1 * b3v;
+            stvf( tmp[j][0], Rv );
+            stvf( tmp[j][4], Rv1 );
             Tm3v = Tm2v;
             Tm3v1 = Tm2v1;
             Tm2v = Tv;
             Tm2v1 = Tv1;
         }
 
-        Tv = LVFU(src[H - 1][i]);
-        Tv1 = LVFU(src[H - 1][i + 4]);
+        Tv = lvfu(src[H - 1][i]);
+        Tv1 = lvfu(src[H - 1][i + 4]);
 
-        temp2Wp1 = Tv + F2V(M[2][0]) * (Rv - Tv) + F2V(M[2][1]) * (Tm2v - Tv) + F2V(M[2][2]) * (Tm3v - Tv);
-        temp2Wp11 = Tv1 + F2V(M[2][0]) * (Rv1 - Tv1) + F2V(M[2][1]) * (Tm2v1 - Tv1) + F2V(M[2][2]) * (Tm3v1 - Tv1);
-        temp2W = Tv + F2V(M[1][0]) * (Rv - Tv) + F2V(M[1][1]) * (Tm2v - Tv) + F2V(M[1][2]) * (Tm3v - Tv);
-        temp2W1 = Tv1 + F2V(M[1][0]) * (Rv1 - Tv1) + F2V(M[1][1]) * (Tm2v1 - Tv1) + F2V(M[1][2]) * (Tm3v1 - Tv1);
+        temp2Wp1 = Tv + f2v(M[2][0]) * (Rv - Tv) + f2v(M[2][1]) * (Tm2v - Tv) + f2v(M[2][2]) * (Tm3v - Tv);
+        temp2Wp11 = Tv1 + f2v(M[2][0]) * (Rv1 - Tv1) + f2v(M[2][1]) * (Tm2v1 - Tv1) + f2v(M[2][2]) * (Tm3v1 - Tv1);
+        temp2W = Tv + f2v(M[1][0]) * (Rv - Tv) + f2v(M[1][1]) * (Tm2v - Tv) + f2v(M[1][2]) * (Tm3v - Tv);
+        temp2W1 = Tv1 + f2v(M[1][0]) * (Rv1 - Tv1) + f2v(M[1][1]) * (Tm2v1 - Tv1) + f2v(M[1][2]) * (Tm3v1 - Tv1);
 
-        Rv = Tv + F2V(M[0][0]) * (Rv - Tv) + F2V(M[0][1]) * (Tm2v - Tv) + F2V(M[0][2]) * (Tm3v - Tv);
-        Rv1 = Tv1 + F2V(M[0][0]) * (Rv1 - Tv1) + F2V(M[0][1]) * (Tm2v1 - Tv1) + F2V(M[0][2]) * (Tm3v1 - Tv1);
-        STVFU( dst[H - 1][i], Rv );
-        STVFU( dst[H - 1][i + 4], Rv1 );
+        Rv = Tv + f2v(M[0][0]) * (Rv - Tv) + f2v(M[0][1]) * (Tm2v - Tv) + f2v(M[0][2]) * (Tm3v - Tv);
+        Rv1 = Tv1 + f2v(M[0][0]) * (Rv1 - Tv1) + f2v(M[0][1]) * (Tm2v1 - Tv1) + f2v(M[0][2]) * (Tm3v1 - Tv1);
+        stvfu( dst[H - 1][i], Rv );
+        stvfu( dst[H - 1][i + 4], Rv1 );
 
         Tm2v = Bv * Tm2v + b1v * Rv + b2v * temp2W + b3v * temp2Wp1;
         Tm2v1 = Bv * Tm2v1 + b1v * Rv1 + b2v * temp2W1 + b3v * temp2Wp11;
-        STVFU( dst[H - 2][i], Tm2v );
-        STVFU( dst[H - 2][i + 4], Tm2v1 );
+        stvfu( dst[H - 2][i], Tm2v );
+        stvfu( dst[H - 2][i + 4], Tm2v1 );
 
         Tm3v = Bv * Tm3v + b1v * Tm2v + b2v * Rv + b3v * temp2W;
         Tm3v1 = Bv * Tm3v1 + b1v * Tm2v1 + b2v * Rv1 + b3v * temp2W1;
-        STVFU( dst[H - 3][i], Tm3v );
-        STVFU( dst[H - 3][i + 4], Tm3v1 );
+        stvfu( dst[H - 3][i], Tm3v );
+        stvfu( dst[H - 3][i + 4], Tm3v1 );
 
         Tv = Rv;
         Tv1 = Rv1;
@@ -571,10 +571,10 @@ template<class T> void gaussVerticalSse (T** src, T** dst, const int W, const in
         for (int j = H - 4; j >= 0; j--) {
             Tv = Rv;
             Tv1 = Rv1;
-            Rv = LVF(tmp[j][0]) * Bv +  Tv * b1v + Tm2v * b2v + Tm3v * b3v;
-            Rv1 = LVF(tmp[j][4]) * Bv +  Tv1 * b1v + Tm2v1 * b2v + Tm3v1 * b3v;
-            STVFU( dst[j][i], Rv );
-            STVFU( dst[j][i + 4], Rv1 );
+            Rv = lvf(tmp[j][0]) * Bv +  Tv * b1v + Tm2v * b2v + Tm3v * b3v;
+            Rv1 = lvf(tmp[j][4]) * Bv +  Tv1 * b1v + Tm2v1 * b2v + Tm3v1 * b3v;
+            stvfu( dst[j][i], Rv );
+            stvfu( dst[j][i + 4], Rv1 );
             Tm3v = Tm2v;
             Tm3v1 = Tm2v1;
             Tm2v = Tv;
@@ -636,10 +636,10 @@ template<class T> void gaussVerticalSsemult (T** RESTRICT src, T** RESTRICT dst,
     vfloat Bv, b1v, b2v, b3v;
     vfloat temp2W, temp2Wp1;
     vfloat temp2W1, temp2Wp11;
-    Bv = F2V(B);
-    b1v = F2V(b1);
-    b2v = F2V(b2);
-    b3v = F2V(b3);
+    Bv = f2v(B);
+    b1v = f2v(b1);
+    b2v = f2v(b2);
+    b3v = f2v(b3);
 
 #ifdef _OPENMP
     #pragma omp for nowait
@@ -647,62 +647,62 @@ template<class T> void gaussVerticalSsemult (T** RESTRICT src, T** RESTRICT dst,
 
     // process 8 columns per iteration for better usage of cpu cache
     for (int i = 0; i < W - 7; i += 8) {
-        Tv = LVFU( src[0][i]);
-        Tv1 = LVFU( src[0][i + 4]);
+        Tv = lvfu( src[0][i]);
+        Tv1 = lvfu( src[0][i + 4]);
         Rv = Tv * (Bv + b1v + b2v + b3v);
         Rv1 = Tv1 * (Bv + b1v + b2v + b3v);
         Tm3v = Rv;
         Tm3v1 = Rv1;
-        STVF( tmp[0][0], Rv );
-        STVF( tmp[0][4], Rv1 );
+        stvf( tmp[0][0], Rv );
+        stvf( tmp[0][4], Rv1 );
 
-        Rv = LVFU(src[1][i]) * Bv + Rv * b1v + Tv * (b2v + b3v);
-        Rv1 = LVFU(src[1][i + 4]) * Bv + Rv1 * b1v + Tv1 * (b2v + b3v);
+        Rv = lvfu(src[1][i]) * Bv + Rv * b1v + Tv * (b2v + b3v);
+        Rv1 = lvfu(src[1][i + 4]) * Bv + Rv1 * b1v + Tv1 * (b2v + b3v);
         Tm2v = Rv;
         Tm2v1 = Rv1;
-        STVF( tmp[1][0], Rv );
-        STVF( tmp[1][4], Rv1 );
+        stvf( tmp[1][0], Rv );
+        stvf( tmp[1][4], Rv1 );
 
-        Rv = LVFU(src[2][i]) * Bv + Rv * b1v + Tm3v * b2v + Tv * b3v;
-        Rv1 = LVFU(src[2][i + 4]) * Bv + Rv1 * b1v + Tm3v1 * b2v + Tv1 * b3v;
-        STVF( tmp[2][0], Rv );
-        STVF( tmp[2][4], Rv1 );
+        Rv = lvfu(src[2][i]) * Bv + Rv * b1v + Tm3v * b2v + Tv * b3v;
+        Rv1 = lvfu(src[2][i + 4]) * Bv + Rv1 * b1v + Tm3v1 * b2v + Tv1 * b3v;
+        stvf( tmp[2][0], Rv );
+        stvf( tmp[2][4], Rv1 );
 
         for (int j = 3; j < H; j++) {
             Tv = Rv;
             Tv1 = Rv1;
-            Rv = LVFU(src[j][i]) * Bv +  Tv * b1v + Tm2v * b2v + Tm3v * b3v;
-            Rv1 = LVFU(src[j][i + 4]) * Bv +  Tv1 * b1v + Tm2v1 * b2v + Tm3v1 * b3v;
-            STVF( tmp[j][0], Rv );
-            STVF( tmp[j][4], Rv1 );
+            Rv = lvfu(src[j][i]) * Bv +  Tv * b1v + Tm2v * b2v + Tm3v * b3v;
+            Rv1 = lvfu(src[j][i + 4]) * Bv +  Tv1 * b1v + Tm2v1 * b2v + Tm3v1 * b3v;
+            stvf( tmp[j][0], Rv );
+            stvf( tmp[j][4], Rv1 );
             Tm3v = Tm2v;
             Tm3v1 = Tm2v1;
             Tm2v = Tv;
             Tm2v1 = Tv1;
         }
 
-        Tv = LVFU(src[H - 1][i]);
-        Tv1 = LVFU(src[H - 1][i + 4]);
+        Tv = lvfu(src[H - 1][i]);
+        Tv1 = lvfu(src[H - 1][i + 4]);
 
-        temp2Wp1 = Tv + F2V(M[2][0]) * (Rv - Tv) + F2V(M[2][1]) * (Tm2v - Tv) + F2V(M[2][2]) * (Tm3v - Tv);
-        temp2Wp11 = Tv1 + F2V(M[2][0]) * (Rv1 - Tv1) + F2V(M[2][1]) * (Tm2v1 - Tv1) + F2V(M[2][2]) * (Tm3v1 - Tv1);
-        temp2W = Tv + F2V(M[1][0]) * (Rv - Tv) + F2V(M[1][1]) * (Tm2v - Tv) + F2V(M[1][2]) * (Tm3v - Tv);
-        temp2W1 = Tv1 + F2V(M[1][0]) * (Rv1 - Tv1) + F2V(M[1][1]) * (Tm2v1 - Tv1) + F2V(M[1][2]) * (Tm3v1 - Tv1);
+        temp2Wp1 = Tv + f2v(M[2][0]) * (Rv - Tv) + f2v(M[2][1]) * (Tm2v - Tv) + f2v(M[2][2]) * (Tm3v - Tv);
+        temp2Wp11 = Tv1 + f2v(M[2][0]) * (Rv1 - Tv1) + f2v(M[2][1]) * (Tm2v1 - Tv1) + f2v(M[2][2]) * (Tm3v1 - Tv1);
+        temp2W = Tv + f2v(M[1][0]) * (Rv - Tv) + f2v(M[1][1]) * (Tm2v - Tv) + f2v(M[1][2]) * (Tm3v - Tv);
+        temp2W1 = Tv1 + f2v(M[1][0]) * (Rv1 - Tv1) + f2v(M[1][1]) * (Tm2v1 - Tv1) + f2v(M[1][2]) * (Tm3v1 - Tv1);
 
-        Rv = Tv + F2V(M[0][0]) * (Rv - Tv) + F2V(M[0][1]) * (Tm2v - Tv) + F2V(M[0][2]) * (Tm3v - Tv);
-        Rv1 = Tv1 + F2V(M[0][0]) * (Rv1 - Tv1) + F2V(M[0][1]) * (Tm2v1 - Tv1) + F2V(M[0][2]) * (Tm3v1 - Tv1);
-        STVFU( dst[H - 1][i], LVFU(dst[H - 1][i]) * Rv );
-        STVFU( dst[H - 1][i + 4], LVFU(dst[H - 1][i + 4]) * Rv1 );
+        Rv = Tv + f2v(M[0][0]) * (Rv - Tv) + f2v(M[0][1]) * (Tm2v - Tv) + f2v(M[0][2]) * (Tm3v - Tv);
+        Rv1 = Tv1 + f2v(M[0][0]) * (Rv1 - Tv1) + f2v(M[0][1]) * (Tm2v1 - Tv1) + f2v(M[0][2]) * (Tm3v1 - Tv1);
+        stvfu( dst[H - 1][i], lvfu(dst[H - 1][i]) * Rv );
+        stvfu( dst[H - 1][i + 4], lvfu(dst[H - 1][i + 4]) * Rv1 );
 
         Tm2v = Bv * Tm2v + b1v * Rv + b2v * temp2W + b3v * temp2Wp1;
         Tm2v1 = Bv * Tm2v1 + b1v * Rv1 + b2v * temp2W1 + b3v * temp2Wp11;
-        STVFU( dst[H - 2][i], LVFU(dst[H - 2][i]) * Tm2v );
-        STVFU( dst[H - 2][i + 4], LVFU(dst[H - 2][i + 4]) * Tm2v1 );
+        stvfu( dst[H - 2][i], lvfu(dst[H - 2][i]) * Tm2v );
+        stvfu( dst[H - 2][i + 4], lvfu(dst[H - 2][i + 4]) * Tm2v1 );
 
         Tm3v = Bv * Tm3v + b1v * Tm2v + b2v * Rv + b3v * temp2W;
         Tm3v1 = Bv * Tm3v1 + b1v * Tm2v1 + b2v * Rv1 + b3v * temp2W1;
-        STVFU( dst[H - 3][i], LVFU(dst[H - 3][i]) * Tm3v );
-        STVFU( dst[H - 3][i + 4], LVFU(dst[H - 3][i + 4]) * Tm3v1 );
+        stvfu( dst[H - 3][i], lvfu(dst[H - 3][i]) * Tm3v );
+        stvfu( dst[H - 3][i + 4], lvfu(dst[H - 3][i + 4]) * Tm3v1 );
 
         Tv = Rv;
         Tv1 = Rv1;
@@ -714,10 +714,10 @@ template<class T> void gaussVerticalSsemult (T** RESTRICT src, T** RESTRICT dst,
         for (int j = H - 4; j >= 0; j--) {
             Tv = Rv;
             Tv1 = Rv1;
-            Rv = LVF(tmp[j][0]) * Bv +  Tv * b1v + Tm2v * b2v + Tm3v * b3v;
-            Rv1 = LVF(tmp[j][4]) * Bv +  Tv1 * b1v + Tm2v1 * b2v + Tm3v1 * b3v;
-            STVFU( dst[j][i], LVFU(dst[j][i]) * Rv );
-            STVFU( dst[j][i + 4], LVFU(dst[j][i + 4]) * Rv1 );
+            Rv = lvf(tmp[j][0]) * Bv +  Tv * b1v + Tm2v * b2v + Tm3v * b3v;
+            Rv1 = lvf(tmp[j][4]) * Bv +  Tv1 * b1v + Tm2v1 * b2v + Tm3v1 * b3v;
+            stvfu( dst[j][i], lvfu(dst[j][i]) * Rv );
+            stvfu( dst[j][i + 4], lvfu(dst[j][i + 4]) * Rv1 );
             Tm3v = Tm2v;
             Tm3v1 = Tm2v1;
             Tm2v = Tv;
@@ -777,11 +777,11 @@ template<class T> void gaussVerticalSsediv (T** src, T** dst, T** divBuffer, con
     vfloat Bv, b1v, b2v, b3v;
     vfloat temp2W, temp2Wp1;
     vfloat temp2W1, temp2Wp11;
-    vfloat onev = F2V(1.f);
-    Bv = F2V(B);
-    b1v = F2V(b1);
-    b2v = F2V(b2);
-    b3v = F2V(b3);
+    vfloat onev = f2v(1.f);
+    Bv = f2v(B);
+    b1v = f2v(b1);
+    b2v = f2v(b2);
+    b3v = f2v(b3);
 
 #ifdef _OPENMP
     #pragma omp for nowait
@@ -789,63 +789,63 @@ template<class T> void gaussVerticalSsediv (T** src, T** dst, T** divBuffer, con
 
     // process 8 columns per iteration for better usage of cpu cache
     for (int i = 0; i < W - 7; i += 8) {
-        Tv = LVFU( src[0][i]);
-        Tv1 = LVFU( src[0][i + 4]);
+        Tv = lvfu( src[0][i]);
+        Tv1 = lvfu( src[0][i + 4]);
         Rv = Tv * (Bv + b1v + b2v + b3v);
         Rv1 = Tv1 * (Bv + b1v + b2v + b3v);
         Tm3v = Rv;
         Tm3v1 = Rv1;
-        STVF( tmp[0][0], Rv );
-        STVF( tmp[0][4], Rv1 );
+        stvf( tmp[0][0], Rv );
+        stvf( tmp[0][4], Rv1 );
 
-        Rv = LVFU(src[1][i]) * Bv + Rv * b1v + Tv * (b2v + b3v);
-        Rv1 = LVFU(src[1][i + 4]) * Bv + Rv1 * b1v + Tv1 * (b2v + b3v);
+        Rv = lvfu(src[1][i]) * Bv + Rv * b1v + Tv * (b2v + b3v);
+        Rv1 = lvfu(src[1][i + 4]) * Bv + Rv1 * b1v + Tv1 * (b2v + b3v);
         Tm2v = Rv;
         Tm2v1 = Rv1;
-        STVF( tmp[1][0], Rv );
-        STVF( tmp[1][4], Rv1 );
+        stvf( tmp[1][0], Rv );
+        stvf( tmp[1][4], Rv1 );
 
-        Rv = LVFU(src[2][i]) * Bv + Rv * b1v + Tm3v * b2v + Tv * b3v;
-        Rv1 = LVFU(src[2][i + 4]) * Bv + Rv1 * b1v + Tm3v1 * b2v + Tv1 * b3v;
-        STVF( tmp[2][0], Rv );
-        STVF( tmp[2][4], Rv1 );
+        Rv = lvfu(src[2][i]) * Bv + Rv * b1v + Tm3v * b2v + Tv * b3v;
+        Rv1 = lvfu(src[2][i + 4]) * Bv + Rv1 * b1v + Tm3v1 * b2v + Tv1 * b3v;
+        stvf( tmp[2][0], Rv );
+        stvf( tmp[2][4], Rv1 );
 
         for (int j = 3; j < H; j++) {
             Tv = Rv;
             Tv1 = Rv1;
-            Rv = LVFU(src[j][i]) * Bv +  Tv * b1v + Tm2v * b2v + Tm3v * b3v;
-            Rv1 = LVFU(src[j][i + 4]) * Bv +  Tv1 * b1v + Tm2v1 * b2v + Tm3v1 * b3v;
-            STVF( tmp[j][0], Rv );
-            STVF( tmp[j][4], Rv1 );
+            Rv = lvfu(src[j][i]) * Bv +  Tv * b1v + Tm2v * b2v + Tm3v * b3v;
+            Rv1 = lvfu(src[j][i + 4]) * Bv +  Tv1 * b1v + Tm2v1 * b2v + Tm3v1 * b3v;
+            stvf( tmp[j][0], Rv );
+            stvf( tmp[j][4], Rv1 );
             Tm3v = Tm2v;
             Tm3v1 = Tm2v1;
             Tm2v = Tv;
             Tm2v1 = Tv1;
         }
 
-        Tv = LVFU(src[H - 1][i]);
-        Tv1 = LVFU(src[H - 1][i + 4]);
+        Tv = lvfu(src[H - 1][i]);
+        Tv1 = lvfu(src[H - 1][i + 4]);
 
-        temp2Wp1 = Tv + F2V(M[2][0]) * (Rv - Tv) + F2V(M[2][1]) * (Tm2v - Tv) + F2V(M[2][2]) * (Tm3v - Tv);
-        temp2Wp11 = Tv1 + F2V(M[2][0]) * (Rv1 - Tv1) + F2V(M[2][1]) * (Tm2v1 - Tv1) + F2V(M[2][2]) * (Tm3v1 - Tv1);
-        temp2W = Tv + F2V(M[1][0]) * (Rv - Tv) + F2V(M[1][1]) * (Tm2v - Tv) + F2V(M[1][2]) * (Tm3v - Tv);
-        temp2W1 = Tv1 + F2V(M[1][0]) * (Rv1 - Tv1) + F2V(M[1][1]) * (Tm2v1 - Tv1) + F2V(M[1][2]) * (Tm3v1 - Tv1);
+        temp2Wp1 = Tv + f2v(M[2][0]) * (Rv - Tv) + f2v(M[2][1]) * (Tm2v - Tv) + f2v(M[2][2]) * (Tm3v - Tv);
+        temp2Wp11 = Tv1 + f2v(M[2][0]) * (Rv1 - Tv1) + f2v(M[2][1]) * (Tm2v1 - Tv1) + f2v(M[2][2]) * (Tm3v1 - Tv1);
+        temp2W = Tv + f2v(M[1][0]) * (Rv - Tv) + f2v(M[1][1]) * (Tm2v - Tv) + f2v(M[1][2]) * (Tm3v - Tv);
+        temp2W1 = Tv1 + f2v(M[1][0]) * (Rv1 - Tv1) + f2v(M[1][1]) * (Tm2v1 - Tv1) + f2v(M[1][2]) * (Tm3v1 - Tv1);
 
-        Rv = Tv + F2V(M[0][0]) * (Rv - Tv) + F2V(M[0][1]) * (Tm2v - Tv) + F2V(M[0][2]) * (Tm3v - Tv);
-        Rv1 = Tv1 + F2V(M[0][0]) * (Rv1 - Tv1) + F2V(M[0][1]) * (Tm2v1 - Tv1) + F2V(M[0][2]) * (Tm3v1 - Tv1);
+        Rv = Tv + f2v(M[0][0]) * (Rv - Tv) + f2v(M[0][1]) * (Tm2v - Tv) + f2v(M[0][2]) * (Tm3v - Tv);
+        Rv1 = Tv1 + f2v(M[0][0]) * (Rv1 - Tv1) + f2v(M[0][1]) * (Tm2v1 - Tv1) + f2v(M[0][2]) * (Tm3v1 - Tv1);
 
-        STVFU( dst[H - 1][i], LVFU(divBuffer[H - 1][i]) / vself(vmaskf_gt(Rv, ZEROV), Rv, onev));
-        STVFU( dst[H - 1][i + 4], LVFU(divBuffer[H - 1][i + 4]) / vself(vmaskf_gt(Rv1, ZEROV), Rv1, onev));
+        stvfu( dst[H - 1][i], lvfu(divBuffer[H - 1][i]) / vself(vmaskf_gt(Rv, zerov), Rv, onev));
+        stvfu( dst[H - 1][i + 4], lvfu(divBuffer[H - 1][i + 4]) / vself(vmaskf_gt(Rv1, zerov), Rv1, onev));
 
         Tm2v = Bv * Tm2v + b1v * Rv + b2v * temp2W + b3v * temp2Wp1;
         Tm2v1 = Bv * Tm2v1 + b1v * Rv1 + b2v * temp2W1 + b3v * temp2Wp11;
-        STVFU( dst[H - 2][i], LVFU(divBuffer[H - 2][i]) / vself(vmaskf_gt(Tm2v, ZEROV), Tm2v, onev));
-        STVFU( dst[H - 2][i + 4], LVFU(divBuffer[H - 2][i + 4]) / vself(vmaskf_gt(Tm2v1, ZEROV), Tm2v1, onev));
+        stvfu( dst[H - 2][i], lvfu(divBuffer[H - 2][i]) / vself(vmaskf_gt(Tm2v, zerov), Tm2v, onev));
+        stvfu( dst[H - 2][i + 4], lvfu(divBuffer[H - 2][i + 4]) / vself(vmaskf_gt(Tm2v1, zerov), Tm2v1, onev));
 
         Tm3v = Bv * Tm3v + b1v * Tm2v + b2v * Rv + b3v * temp2W;
         Tm3v1 = Bv * Tm3v1 + b1v * Tm2v1 + b2v * Rv1 + b3v * temp2W1;
-        STVFU( dst[H - 3][i], LVFU(divBuffer[H - 3][i]) / vself(vmaskf_gt(Tm3v, ZEROV), Tm3v, onev));
-        STVFU( dst[H - 3][i + 4], LVFU(divBuffer[H - 3][i + 4]) / vself(vmaskf_gt(Tm3v1, ZEROV), Tm3v1, onev));
+        stvfu( dst[H - 3][i], lvfu(divBuffer[H - 3][i]) / vself(vmaskf_gt(Tm3v, zerov), Tm3v, onev));
+        stvfu( dst[H - 3][i + 4], lvfu(divBuffer[H - 3][i + 4]) / vself(vmaskf_gt(Tm3v1, zerov), Tm3v1, onev));
 
         Tv = Rv;
         Tv1 = Rv1;
@@ -857,10 +857,10 @@ template<class T> void gaussVerticalSsediv (T** src, T** dst, T** divBuffer, con
         for (int j = H - 4; j >= 0; j--) {
             Tv = Rv;
             Tv1 = Rv1;
-            Rv = LVF(tmp[j][0]) * Bv +  Tv * b1v + Tm2v * b2v + Tm3v * b3v;
-            Rv1 = LVF(tmp[j][4]) * Bv +  Tv1 * b1v + Tm2v1 * b2v + Tm3v1 * b3v;
-            STVFU( dst[j][i], vmaxf(LVFU(divBuffer[j][i]) / vself(vmaskf_gt(Rv, ZEROV), Rv, onev), ZEROV));
-            STVFU( dst[j][i + 4], vmaxf(LVFU(divBuffer[j][i + 4]) / vself(vmaskf_gt(Rv1, ZEROV), Rv1, onev), ZEROV));
+            Rv = lvf(tmp[j][0]) * Bv +  Tv * b1v + Tm2v * b2v + Tm3v * b3v;
+            Rv1 = lvf(tmp[j][4]) * Bv +  Tv1 * b1v + Tm2v1 * b2v + Tm3v1 * b3v;
+            stvfu( dst[j][i], vmaxf(lvfu(divBuffer[j][i]) / vself(vmaskf_gt(Rv, zerov), Rv, onev), zerov));
+            stvfu( dst[j][i + 4], vmaxf(lvfu(divBuffer[j][i + 4]) / vself(vmaskf_gt(Rv1, zerov), Rv1, onev), zerov));
             Tm3v = Tm2v;
             Tm3v1 = Tm2v1;
             Tm2v = Tv;

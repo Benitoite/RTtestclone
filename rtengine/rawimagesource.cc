@@ -1421,10 +1421,10 @@ int RawImageSource::findHotDeadPixels( PixelsMap &bpMap, float thresh, bool find
 #ifdef __SSE2__
                 // sum up 5*4 = 20 values using SSE
                 // 10 fabs function calls and float 10 additions with SSE
-                vfloat sum = vabsf(LVFU(cfablur[(rr - 2) * W + cc - 2])) + vabsf(LVFU(cfablur[(rr - 1) * W + cc - 2]));
-                sum += vabsf(LVFU(cfablur[(rr) * W + cc - 2]));
-                sum += vabsf(LVFU(cfablur[(rr + 1) * W + cc - 2]));
-                sum += vabsf(LVFU(cfablur[(rr + 2) * W + cc - 2]));
+                vfloat sum = vabsf(lvfu(cfablur[(rr - 2) * W + cc - 2])) + vabsf(lvfu(cfablur[(rr - 1) * W + cc - 2]));
+                sum += vabsf(lvfu(cfablur[(rr) * W + cc - 2]));
+                sum += vabsf(lvfu(cfablur[(rr + 1) * W + cc - 2]));
+                sum += vabsf(lvfu(cfablur[(rr + 2) * W + cc - 2]));
                 // horizontally add the values and add the result to hfnbrave
                 hfnbrave += vhadd(sum);
 
@@ -2282,7 +2282,7 @@ void RawImageSource::retinexPrepareBuffers(const ColorManagementParams& cmp, con
             }
 
 #ifdef __SSE2__
-            vfloat c32768 = F2V(32768.f);
+            vfloat c32768 = f2v(32768.f);
 #endif
 #ifdef _OPENMP
             #pragma omp for
@@ -2295,12 +2295,12 @@ void RawImageSource::retinexPrepareBuffers(const ColorManagementParams& cmp, con
 
                 for (; j < W - border - 3; j += 4) {
                     vfloat H, S, L;
-                    Color::rgb2hsl(LVFU(red[i][j]), LVFU(green[i][j]), LVFU(blue[i][j]), H, S, L);
-                    STVFU(conversionBuffer[0][i - border][j - border], H);
-                    STVFU(conversionBuffer[1][i - border][j - border], S);
+                    Color::rgb2hsl(lvfu(red[i][j]), lvfu(green[i][j]), lvfu(blue[i][j]), H, S, L);
+                    stvfu(conversionBuffer[0][i - border][j - border], H);
+                    stvfu(conversionBuffer[1][i - border][j - border], S);
                     L *= c32768;
-                    STVFU(conversionBuffer[2][i - border][j - border], L);
-                    STVFU(conversionBuffer[3][i - border][j - border], H);
+                    stvfu(conversionBuffer[2][i - border][j - border], L);
+                    stvfu(conversionBuffer[3][i - border][j - border], H);
 
                     if(lhist16RETI) {
                         for(int p = 0; p < 4; p++) {
@@ -2596,15 +2596,15 @@ void RawImageSource::retinex(const ColorManagementParams& cmp, const RetinexPara
         for (int i = border; i < H - border; i++ ) {
             int j = border;
 #ifdef __SSE2__
-            vfloat c32768 = F2V(32768.f);
+            vfloat c32768 = f2v(32768.f);
 
             for (; j < W - border - 3; j += 4) {
                 vfloat R, G, B;
-                Color::hsl2rgb(LVFU(conversionBuffer[0][i - border][j - border]), LVFU(conversionBuffer[1][i - border][j - border]), LVFU(LBuffer[i - border][j - border]) / c32768, R, G, B);
+                Color::hsl2rgb(lvfu(conversionBuffer[0][i - border][j - border]), lvfu(conversionBuffer[1][i - border][j - border]), lvfu(LBuffer[i - border][j - border]) / c32768, R, G, B);
 
-                STVFU(red[i][j], R);
-                STVFU(green[i][j], G);
-                STVFU(blue[i][j], B);
+                stvfu(red[i][j], R);
+                stvfu(green[i][j], G);
+                stvfu(blue[i][j], B);
             }
 
 #endif
@@ -2634,8 +2634,8 @@ void RawImageSource::retinex(const ColorManagementParams& cmp, const RetinexPara
             float sqrtBuffer[W] ALIGNED16;
             float sincosxBuffer[W] ALIGNED16;
             float sincosyBuffer[W] ALIGNED16;
-            const vfloat c327d68v = F2V(327.68);
-            const vfloat onev = F2V(1.f);
+            const vfloat c327d68v = f2v(327.68);
+            const vfloat onev = f2v(1.f);
 #endif // __SSE2__
 #ifdef _OPENMP
             #pragma omp for
@@ -2649,17 +2649,17 @@ void RawImageSource::retinex(const ColorManagementParams& cmp, const RetinexPara
 
                     for (; j < W - border - 3; j += 4)
                     {
-                        vfloat av = LVFU(conversionBuffer[0][i - border][j - border]);
-                        vfloat bv = LVFU(conversionBuffer[1][i - border][j - border]);
+                        vfloat av = lvfu(conversionBuffer[0][i - border][j - border]);
+                        vfloat bv = lvfu(conversionBuffer[1][i - border][j - border]);
                         vfloat chprovv = vsqrtf(SQRV(av) + SQRV(bv));
-                        STVF(sqrtBuffer[j - border], chprovv / c327d68v);
+                        stvf(sqrtBuffer[j - border], chprovv / c327d68v);
                         vfloat HHv = xatan2f(bv, av);
-                        STVF(atan2Buffer[j - border], HHv);
+                        stvf(atan2Buffer[j - border], HHv);
                         av /= chprovv;
                         bv /= chprovv;
-                        vmask selMask = vmaskf_eq(chprovv, ZEROV);
-                        STVF(sincosyBuffer[j - border], vself(selMask, onev, av));
-                        STVF(sincosxBuffer[j - border], vselfnotzero(selMask, bv));
+                        vmask selMask = vmaskf_eq(chprovv, zerov);
+                        stvf(sincosyBuffer[j - border], vself(selMask, onev, av));
+                        stvf(sincosxBuffer[j - border], vselfnotzero(selMask, bv));
                     }
 
                     for (; j < W - border; j++)
@@ -2738,7 +2738,7 @@ void RawImageSource::retinex(const ColorManagementParams& cmp, const RetinexPara
 
         for(int i = 0; i < 3; i++)
             for(int j = 0; j < 3; j++) {
-                wipv[i][j] = F2V(wiprof[i][j]);
+                wipv[i][j] = f2v(wiprof[i][j]);
             }
 
 #endif // __SSE2__
@@ -2753,12 +2753,12 @@ void RawImageSource::retinex(const ColorManagementParams& cmp, const RetinexPara
             for (; j < W - border - 3; j += 4) {
                 vfloat x_, y_, z_;
                 vfloat R, G, B;
-                Color::Lab2XYZ(LVFU(LBuffer[i - border][j - border]), LVFU(conversionBuffer[0][i - border][j - border]), LVFU(conversionBuffer[1][i - border][j - border]), x_, y_, z_) ;
+                Color::Lab2XYZ(lvfu(LBuffer[i - border][j - border]), lvfu(conversionBuffer[0][i - border][j - border]), lvfu(conversionBuffer[1][i - border][j - border]), x_, y_, z_) ;
                 Color::xyz2rgb(x_, y_, z_, R, G, B, wipv);
 
-                STVFU(red[i][j], R);
-                STVFU(green[i][j], G);
-                STVFU(blue[i][j], B);
+                stvfu(red[i][j], R);
+                stvfu(green[i][j], G);
+                stvfu(blue[i][j], B);
 
             }
 
@@ -2958,8 +2958,8 @@ void RawImageSource::processFlatField(const RAWParams &raw, RawImage *riFlatFile
                             _mm_set_ps(black[c4[1][1]], black[c4[1][0]], black[c4[1][1]], black[c4[1][0]])
                            };
 
-        vfloat onev = F2V(1.f);
-        vfloat minValuev = F2V(minValue);
+        vfloat onev = f2v(1.f);
+        vfloat minValuev = f2v(minValue);
 #endif
 #ifdef _OPENMP
         #pragma omp parallel for schedule(dynamic,16)
@@ -2972,12 +2972,12 @@ void RawImageSource::processFlatField(const RAWParams &raw, RawImage *riFlatFile
             vfloat rowRefcolorv = refcolorv[row & 1];
 
             for (; col < W - 3; col += 4) {
-                vfloat blurv = LVFU(cfablur[(row) * W + col]) - rowBlackv;
+                vfloat blurv = lvfu(cfablur[(row) * W + col]) - rowBlackv;
                 vfloat vignettecorrv = rowRefcolorv / blurv;
                 vignettecorrv = vself(vmaskf_le(blurv, minValuev), onev, vignettecorrv);
-                vfloat valv = LVFU(rawData[row][col]);
+                vfloat valv = lvfu(rawData[row][col]);
                 valv -= rowBlackv;
-                STVFU(rawData[row][col], valv * vignettecorrv + rowBlackv);
+                stvfu(rawData[row][col], valv * vignettecorrv + rowBlackv);
             }
 
 #endif
@@ -3098,7 +3098,7 @@ void RawImageSource::processFlatField(const RAWParams &raw, RawImage *riFlatFile
                                 _mm_set_ps(black[c4[1][1]], black[c4[1][0]], black[c4[1][1]], black[c4[1][0]])
                                };
 
-            vfloat epsv = F2V(1e-5f);
+            vfloat epsv = f2v(1e-5f);
 #endif
 #ifdef _OPENMP
             #pragma omp parallel for schedule(dynamic,16)
@@ -3110,11 +3110,11 @@ void RawImageSource::processFlatField(const RAWParams &raw, RawImage *riFlatFile
                 vfloat rowBlackv = blackv[row & 1];
 
                 for (; col < W - 3; col += 4) {
-                    vfloat linecorrv = SQRV(vmaxf(LVFU(cfablur[row * W + col]) - rowBlackv, epsv)) /
-                                       (vmaxf(LVFU(cfablur1[row * W + col]) - rowBlackv, epsv) * vmaxf(LVFU(cfablur2[row * W + col]) - rowBlackv, epsv));
-                    vfloat valv = LVFU(rawData[row][col]);
+                    vfloat linecorrv = SQRV(vmaxf(lvfu(cfablur[row * W + col]) - rowBlackv, epsv)) /
+                                       (vmaxf(lvfu(cfablur1[row * W + col]) - rowBlackv, epsv) * vmaxf(lvfu(cfablur2[row * W + col]) - rowBlackv, epsv));
+                    vfloat valv = lvfu(rawData[row][col]);
                     valv -= rowBlackv;
-                    STVFU(rawData[row][col], valv * linecorrv + rowBlackv);
+                    stvfu(rawData[row][col], valv * linecorrv + rowBlackv);
                 }
 
 #endif
@@ -3320,8 +3320,8 @@ void RawImageSource::cfaboxblur(RawImage *riFlatFile, float* cfablur, int boxH, 
         if(boxH > 0) {
             //vertical blur
 #ifdef __SSE2__
-            vfloat  leninitv = F2V(boxH / 2 + 1);
-            vfloat  onev = F2V( 1.0f );
+            vfloat  leninitv = f2v(boxH / 2 + 1);
+            vfloat  onev = f2v( 1.0f );
             vfloat  temp1v, temp2v, temp3v, temp4v, lenv, lenp1v, lenm1v;
             int row;
 #ifdef _OPENMP
@@ -3330,52 +3330,52 @@ void RawImageSource::cfaboxblur(RawImage *riFlatFile, float* cfablur, int boxH, 
 
             for (int col = 0; col < W - 7; col += 8) {
                 lenv = leninitv;
-                temp1v = LVFU(srcVertical[0 * W + col]) / lenv;
-                temp2v = LVFU(srcVertical[1 * W + col]) / lenv;
-                temp3v = LVFU(srcVertical[0 * W + col + 4]) / lenv;
-                temp4v = LVFU(srcVertical[1 * W + col + 4]) / lenv;
+                temp1v = lvfu(srcVertical[0 * W + col]) / lenv;
+                temp2v = lvfu(srcVertical[1 * W + col]) / lenv;
+                temp3v = lvfu(srcVertical[0 * W + col + 4]) / lenv;
+                temp4v = lvfu(srcVertical[1 * W + col + 4]) / lenv;
 
                 for (int i = 2; i < boxH + 2; i += 2) {
-                    temp1v += LVFU(srcVertical[i * W + col]) / lenv;
-                    temp2v += LVFU(srcVertical[(i + 1) * W + col]) / lenv;
-                    temp3v += LVFU(srcVertical[i * W + col + 4]) / lenv;
-                    temp4v += LVFU(srcVertical[(i + 1) * W + col + 4]) / lenv;
+                    temp1v += lvfu(srcVertical[i * W + col]) / lenv;
+                    temp2v += lvfu(srcVertical[(i + 1) * W + col]) / lenv;
+                    temp3v += lvfu(srcVertical[i * W + col + 4]) / lenv;
+                    temp4v += lvfu(srcVertical[(i + 1) * W + col + 4]) / lenv;
                 }
 
-                STVFU(cfablur[0 * W + col], temp1v);
-                STVFU(cfablur[1 * W + col], temp2v);
-                STVFU(cfablur[0 * W + col + 4], temp3v);
-                STVFU(cfablur[1 * W + col + 4], temp4v);
+                stvfu(cfablur[0 * W + col], temp1v);
+                stvfu(cfablur[1 * W + col], temp2v);
+                stvfu(cfablur[0 * W + col + 4], temp3v);
+                stvfu(cfablur[1 * W + col + 4], temp4v);
 
                 for (row = 2; row < boxH + 2; row += 2) {
                     lenp1v = lenv + onev;
-                    temp1v = (temp1v * lenv + LVFU(srcVertical[(row + boxH) * W + col])) / lenp1v;
-                    temp2v = (temp2v * lenv + LVFU(srcVertical[(row + boxH + 1) * W + col])) / lenp1v;
-                    temp3v = (temp3v * lenv + LVFU(srcVertical[(row + boxH) * W + col + 4])) / lenp1v;
-                    temp4v = (temp4v * lenv + LVFU(srcVertical[(row + boxH + 1) * W + col + 4])) / lenp1v;
-                    STVFU(cfablur[row * W + col], temp1v);
-                    STVFU(cfablur[(row + 1)*W + col], temp2v);
-                    STVFU(cfablur[row * W + col + 4], temp3v);
-                    STVFU(cfablur[(row + 1)*W + col + 4], temp4v);
+                    temp1v = (temp1v * lenv + lvfu(srcVertical[(row + boxH) * W + col])) / lenp1v;
+                    temp2v = (temp2v * lenv + lvfu(srcVertical[(row + boxH + 1) * W + col])) / lenp1v;
+                    temp3v = (temp3v * lenv + lvfu(srcVertical[(row + boxH) * W + col + 4])) / lenp1v;
+                    temp4v = (temp4v * lenv + lvfu(srcVertical[(row + boxH + 1) * W + col + 4])) / lenp1v;
+                    stvfu(cfablur[row * W + col], temp1v);
+                    stvfu(cfablur[(row + 1)*W + col], temp2v);
+                    stvfu(cfablur[row * W + col + 4], temp3v);
+                    stvfu(cfablur[(row + 1)*W + col + 4], temp4v);
                     lenv = lenp1v;
                 }
 
                 for (; row < H - boxH - 1; row += 2) {
-                    temp1v = temp1v + (LVFU(srcVertical[(row + boxH) * W + col]) - LVFU(srcVertical[(row - boxH - 2) * W + col])) / lenv;
-                    temp2v = temp2v + (LVFU(srcVertical[(row + 1 + boxH) * W + col]) - LVFU(srcVertical[(row + 1 - boxH - 2) * W + col])) / lenv;
-                    temp3v = temp3v + (LVFU(srcVertical[(row + boxH) * W + col + 4]) - LVFU(srcVertical[(row - boxH - 2) * W + col + 4])) / lenv;
-                    temp4v = temp4v + (LVFU(srcVertical[(row + 1 + boxH) * W + col + 4]) - LVFU(srcVertical[(row + 1 - boxH - 2) * W + col + 4])) / lenv;
-                    STVFU(cfablur[row * W + col], temp1v);
-                    STVFU(cfablur[(row + 1)*W + col], temp2v);
-                    STVFU(cfablur[row * W + col + 4], temp3v);
-                    STVFU(cfablur[(row + 1)*W + col + 4], temp4v);
+                    temp1v = temp1v + (lvfu(srcVertical[(row + boxH) * W + col]) - lvfu(srcVertical[(row - boxH - 2) * W + col])) / lenv;
+                    temp2v = temp2v + (lvfu(srcVertical[(row + 1 + boxH) * W + col]) - lvfu(srcVertical[(row + 1 - boxH - 2) * W + col])) / lenv;
+                    temp3v = temp3v + (lvfu(srcVertical[(row + boxH) * W + col + 4]) - lvfu(srcVertical[(row - boxH - 2) * W + col + 4])) / lenv;
+                    temp4v = temp4v + (lvfu(srcVertical[(row + 1 + boxH) * W + col + 4]) - lvfu(srcVertical[(row + 1 - boxH - 2) * W + col + 4])) / lenv;
+                    stvfu(cfablur[row * W + col], temp1v);
+                    stvfu(cfablur[(row + 1)*W + col], temp2v);
+                    stvfu(cfablur[row * W + col + 4], temp3v);
+                    stvfu(cfablur[(row + 1)*W + col + 4], temp4v);
                 }
 
                 for(; row < H - boxH; row++) {
-                    temp1v = temp1v + (LVFU(srcVertical[(row + boxH) * W + col]) - LVFU(srcVertical[(row - boxH - 2) * W + col])) / lenv;
-                    temp3v = temp3v + (LVFU(srcVertical[(row + boxH) * W + col + 4]) - LVFU(srcVertical[(row - boxH - 2) * W + col + 4])) / lenv;
-                    STVFU(cfablur[row * W + col], temp1v);
-                    STVFU(cfablur[row * W + col + 4], temp3v);
+                    temp1v = temp1v + (lvfu(srcVertical[(row + boxH) * W + col]) - lvfu(srcVertical[(row - boxH - 2) * W + col])) / lenv;
+                    temp3v = temp3v + (lvfu(srcVertical[(row + boxH) * W + col + 4]) - lvfu(srcVertical[(row - boxH - 2) * W + col + 4])) / lenv;
+                    stvfu(cfablur[row * W + col], temp1v);
+                    stvfu(cfablur[row * W + col + 4], temp3v);
                     vfloat swapv = temp1v;
                     temp1v = temp2v;
                     temp2v = swapv;
@@ -3386,23 +3386,23 @@ void RawImageSource::cfaboxblur(RawImage *riFlatFile, float* cfablur, int boxH, 
 
                 for (; row < H - 1; row += 2) {
                     lenm1v = lenv - onev;
-                    temp1v = (temp1v * lenv - LVFU(srcVertical[(row - boxH - 2) * W + col])) / lenm1v;
-                    temp2v = (temp2v * lenv - LVFU(srcVertical[(row - boxH - 1) * W + col])) / lenm1v;
-                    temp3v = (temp3v * lenv - LVFU(srcVertical[(row - boxH - 2) * W + col + 4])) / lenm1v;
-                    temp4v = (temp4v * lenv - LVFU(srcVertical[(row - boxH - 1) * W + col + 4])) / lenm1v;
-                    STVFU(cfablur[row * W + col], temp1v);
-                    STVFU(cfablur[(row + 1)*W + col], temp2v);
-                    STVFU(cfablur[row * W + col + 4], temp3v);
-                    STVFU(cfablur[(row + 1)*W + col + 4], temp4v);
+                    temp1v = (temp1v * lenv - lvfu(srcVertical[(row - boxH - 2) * W + col])) / lenm1v;
+                    temp2v = (temp2v * lenv - lvfu(srcVertical[(row - boxH - 1) * W + col])) / lenm1v;
+                    temp3v = (temp3v * lenv - lvfu(srcVertical[(row - boxH - 2) * W + col + 4])) / lenm1v;
+                    temp4v = (temp4v * lenv - lvfu(srcVertical[(row - boxH - 1) * W + col + 4])) / lenm1v;
+                    stvfu(cfablur[row * W + col], temp1v);
+                    stvfu(cfablur[(row + 1)*W + col], temp2v);
+                    stvfu(cfablur[row * W + col + 4], temp3v);
+                    stvfu(cfablur[(row + 1)*W + col + 4], temp4v);
                     lenv = lenm1v;
                 }
 
                 for(; row < H; row++) {
                     lenm1v = lenv - onev;
-                    temp1v = (temp1v * lenv - LVFU(srcVertical[(row - boxH - 2) * W + col])) / lenm1v;
-                    temp3v = (temp3v * lenv - LVFU(srcVertical[(row - boxH - 2) * W + col + 4])) / lenm1v;
-                    STVFU(cfablur[(row)*W + col], temp1v);
-                    STVFU(cfablur[(row)*W + col + 4], temp3v);
+                    temp1v = (temp1v * lenv - lvfu(srcVertical[(row - boxH - 2) * W + col])) / lenm1v;
+                    temp3v = (temp3v * lenv - lvfu(srcVertical[(row - boxH - 2) * W + col + 4])) / lenm1v;
+                    stvfu(cfablur[(row)*W + col], temp1v);
+                    stvfu(cfablur[(row)*W + col + 4], temp3v);
                 }
 
             }

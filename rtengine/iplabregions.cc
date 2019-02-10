@@ -34,13 +34,13 @@ namespace {
 void fastlin2log(float *x, float factor, float base, int w)
 {
     float baseLog = 1.f / xlogf(base);
-    vfloat baseLogv = F2V(baseLog);
+    vfloat baseLogv = f2v(baseLog);
     factor = factor * (base - 1.f);
-    vfloat factorv = F2V(factor);
-    vfloat onev = F2V(1.f);
+    vfloat factorv = f2v(factor);
+    vfloat onev = f2v(1.f);
     int i = 0;
     for (; i < w - 3; i += 4) {
-        STVFU(x[i], xlogf(LVFU(x[i]) * factorv + onev) * baseLogv);
+        stvfu(x[i], xlogf(lvfu(x[i]) * factorv + onev) * baseLogv);
     }
     for (; i < w; ++i) {
         x[i] = xlogf(x[i] * factor + 1.f) * baseLog;
@@ -241,15 +241,15 @@ BENCHFUN
                 float ll[4];
                 float aa[4];
                 float bb[4];
-                STVFU(ll[0], l);
-                STVFU(aa[0], a);
-                STVFU(bb[0], b);
+                stvfu(ll[0], l);
+                stvfu(aa[0], a);
+                stvfu(bb[0], b);
                 for (int i = 0; i < 4; ++i) {
                     CDL(ll[i], aa[i], bb[i], slope, offset, power, saturation);
                 }
-                l = LVFU(ll[0]);
-                a = LVFU(aa[0]);
-                b = LVFU(bb[0]);
+                l = lvfu(ll[0]);
+                a = lvfu(aa[0]);
+                b = lvfu(bb[0]);
             }
         };
 
@@ -260,21 +260,21 @@ BENCHFUN
                 float ll[4];
                 float aa[4];
                 float bb[4];
-                STVFU(ll[0], l);
-                STVFU(aa[0], a);
-                STVFU(bb[0], b);
+                stvfu(ll[0], l);
+                stvfu(aa[0], a);
+                stvfu(bb[0], b);
                 float prev_ll[4];
                 float prev_aa[4];
                 float prev_bb[4];
-                STVFU(prev_ll[0], prev_l);
-                STVFU(prev_aa[0], prev_a);
-                STVFU(prev_bb[0], prev_b);
+                stvfu(prev_ll[0], prev_l);
+                stvfu(prev_aa[0], prev_a);
+                stvfu(prev_bb[0], prev_b);
                 for (int i = 0; i < 4; ++i) {
                     chan(prev_ll[i], prev_aa[i], prev_bb[i], ll[i], aa[i], bb[i], channel);
                 }
-                l = LVFU(ll[0]);
-                a = LVFU(aa[0]);
-                b = LVFU(bb[0]);
+                l = lvfu(ll[0]);
+                a = lvfu(aa[0]);
+                b = lvfu(bb[0]);
             }
         };
 #endif
@@ -284,8 +284,8 @@ BENCHFUN
 #endif
     {
 #ifdef __SSE2__
-        vfloat c42000v = F2V(42000.f);
-        vfloat cm42000v = F2V(-42000.f);
+        vfloat c42000v = f2v(42000.f);
+        vfloat cm42000v = f2v(-42000.f);
 #endif
 #ifdef _OPENMP
         #pragma omp for
@@ -294,25 +294,25 @@ BENCHFUN
             int x = 0;
 #ifdef __SSE2__
             for (; x < lab->W - 3; x += 4) {
-                vfloat lv = LVFU(lab->L[y][x]);
-                vfloat av = LVFU(lab->a[y][x]);
-                vfloat bv = LVFU(lab->b[y][x]);
+                vfloat lv = lvfu(lab->L[y][x]);
+                vfloat av = lvfu(lab->a[y][x]);
+                vfloat bv = lvfu(lab->b[y][x]);
 
                 for (int i = 0; i < n; ++i) {
-                    vfloat blendv = LVFU(abmask[i][y][x]);
+                    vfloat blendv = lvfu(abmask[i][y][x]);
                     vfloat l_newv = lv;
-                    vfloat a_newv = vclampf(av + lv * F2V(abca[i]), cm42000v, c42000v);
-                    vfloat b_newv = vclampf(bv + lv * F2V(abcb[i]), cm42000v, c42000v);
+                    vfloat a_newv = vclampf(av + lv * f2v(abca[i]), cm42000v, c42000v);
+                    vfloat b_newv = vclampf(bv + lv * f2v(abcb[i]), cm42000v, c42000v);
                     CDL_v(l_newv, a_newv, b_newv, slope[i], offset[i], power[i], rs[i]);
-                    l_newv = vmaxf(l_newv, ZEROV);
+                    l_newv = vmaxf(l_newv, zerov);
                     chan_v(lv, av, bv, l_newv, a_newv, b_newv, channel[i]);
-                    lv = vintpf(LVFU(Lmask[i][y][x]), l_newv, lv);
+                    lv = vintpf(lvfu(Lmask[i][y][x]), l_newv, lv);
                     av = vintpf(blendv, a_newv, av);
                     bv = vintpf(blendv, b_newv, bv);
                 }
-                STVFU(lab->L[y][x], lv);
-                STVFU(lab->a[y][x], av);
-                STVFU(lab->b[y][x], bv);
+                stvfu(lab->L[y][x], lv);
+                stvfu(lab->a[y][x], av);
+                stvfu(lab->b[y][x], bv);
             }
 #endif
             for (; x < lab->W; ++x) {

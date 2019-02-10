@@ -61,7 +61,7 @@ inline void setUnlessOOG(float &r, float &g, float &b, const float &rr, const fl
 #ifdef __SSE2__
 inline vmask OOG(const vfloat val)
 {
-    return vorm(vmaskf_lt(val, ZEROV), vmaskf_gt(val, F2V(65535.f)));
+    return vorm(vmaskf_lt(val, zerov), vmaskf_gt(val, f2v(65535.f)));
 }
 
 
@@ -988,13 +988,13 @@ inline void StandardToneCurve::BatchApply(
 
 #ifdef __SSE2__
     for (; i + 3 < end; i += 4) {
-        vfloat r_val = LVF(r[i]);
-        vfloat g_val = LVF(g[i]);
-        vfloat b_val = LVF(b[i]);
+        vfloat r_val = lvf(r[i]);
+        vfloat g_val = lvf(g[i]);
+        vfloat b_val = lvf(b[i]);
         setUnlessOOG(r_val, g_val, b_val, lutToneCurve[r_val], lutToneCurve[g_val], lutToneCurve[b_val]);
-        STVF(r[i], r_val);
-        STVF(g[i], g_val);
-        STVF(b[i], b_val);
+        stvf(r[i], r_val);
+        stvf(g[i], g_val);
+        stvf(b[i], b_val);
     }
 
     // Remainder in non-SSE.
@@ -1093,8 +1093,8 @@ inline vfloat WeightedStdToneCurve::Triangle(vfloat a, vfloat a1, vfloat b) cons
         vmask eqmask = vmaskf_eq(b, a);
         vfloat a2 = a1 - a;
         vmask cmask = vmaskf_lt(b, a);
-        vfloat b3 = vself(cmask, b, F2V(65535.f) - b);
-        vfloat a3 = vself(cmask, a, F2V(65535.f) - a);
+        vfloat b3 = vself(cmask, b, f2v(65535.f) - b);
+        vfloat a3 = vself(cmask, a, f2v(65535.f) - a);
         return vself(eqmask, a1, b + a2 * b3 / a3);
 }
 #endif
@@ -1155,14 +1155,14 @@ inline void WeightedStdToneCurve::BatchApply(const size_t start, const size_t en
     }
 
 #ifdef __SSE2__
-    const vfloat c65535v = F2V(65535.f);
-    const vfloat zd5v = F2V(0.5f);
-    const vfloat zd25v = F2V(0.25f);
+    const vfloat c65535v = f2v(65535.f);
+    const vfloat zd5v = f2v(0.5f);
+    const vfloat zd25v = f2v(0.25f);
 
     for (; i + 3 < end; i += 4) {
-        vfloat r_val = vclampf(LVF(r[i]), ZEROV, c65535v);
-        vfloat g_val = vclampf(LVF(g[i]), ZEROV, c65535v);
-        vfloat b_val = vclampf(LVF(b[i]), ZEROV, c65535v);
+        vfloat r_val = vclampf(lvf(r[i]), zerov, c65535v);
+        vfloat g_val = vclampf(lvf(g[i]), zerov, c65535v);
+        vfloat b_val = vclampf(lvf(b[i]), zerov, c65535v);
         vfloat r1 = lutToneCurve[r_val];
         vfloat g1 = Triangle(r_val, r1, g_val);
         vfloat b1 = Triangle(r_val, r1, b_val);
@@ -1175,16 +1175,16 @@ inline void WeightedStdToneCurve::BatchApply(const size_t start, const size_t en
         vfloat r3 = Triangle(b_val, b3, r_val);
         vfloat g3 = Triangle(b_val, b3, g_val);
 
-        vfloat r_old = LVF(r[i]);
-        vfloat g_old = LVF(g[i]);
-        vfloat b_old = LVF(b[i]);
-        vfloat r_new = vclampf(r1 * zd5v + r2 * zd25v + r3 * zd25v, ZEROV, c65535v);
-        vfloat g_new = vclampf(g1 * zd25v + g2 * zd5v + g3 * zd25v, ZEROV, c65535v);
-        vfloat b_new = vclampf(b1 * zd25v + b2 * zd25v + b3 * zd5v, ZEROV, c65535v);
+        vfloat r_old = lvf(r[i]);
+        vfloat g_old = lvf(g[i]);
+        vfloat b_old = lvf(b[i]);
+        vfloat r_new = vclampf(r1 * zd5v + r2 * zd25v + r3 * zd25v, zerov, c65535v);
+        vfloat g_new = vclampf(g1 * zd25v + g2 * zd5v + g3 * zd25v, zerov, c65535v);
+        vfloat b_new = vclampf(b1 * zd25v + b2 * zd25v + b3 * zd5v, zerov, c65535v);
         setUnlessOOG(r_old, g_old, b_old, r_new, g_new, b_new);
-        STVF(r[i], r_old);
-        STVF(g[i], g_old);
-        STVF(b[i], b_old);
+        stvf(r[i], r_old);
+        stvf(g[i], g_old);
+        stvf(b[i], b_old);
     }
 
     // Remainder in non-SSE.

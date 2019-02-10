@@ -890,15 +890,15 @@ BENCHFUN
 
             // pow() is expensive => pre calculate blend factor using SSE
             if(smoothTransitions) { //
-                vfloat onev = F2V(1.f);
-                vfloat smoothv = F2V(smoothFactor);
+                vfloat onev = f2v(1.f);
+                vfloat smoothv = f2v(smoothFactor);
                 int j = winx + border - offsX;
 
                 for(; j < winw - (border + offsX) - 3; j += 4) {
-                    vfloat blendv = vmaxf(LVFU(psMask[i][j]), onev) - onev;
+                    vfloat blendv = vmaxf(lvfu(psMask[i][j]), onev) - onev;
                     blendv = xpowf(blendv, smoothv);
-                    blendv = vself(vmaskf_eq(smoothv, ZEROV), onev, blendv);
-                    STVFU(psMask[i][j], blendv);
+                    blendv = vself(vmaskf_eq(smoothv, zerov), onev, blendv);
+                    stvfu(psMask[i][j], blendv);
                 }
 
                 for(; j < winw - (border + offsX); ++j) {

@@ -444,9 +444,9 @@ void RawImageSource::MSR(float** luminance, float** originalLuminance, float **e
                 }
 
 #ifdef __SSE2__
-                vfloat pondv = F2V(pond);
-                vfloat limMinv = F2V(ilimdx);
-                vfloat limMaxv = F2V(limdx);
+                vfloat pondv = f2v(pond);
+                vfloat limMinv = f2v(ilimdx);
+                vfloat limMaxv = f2v(limdx);
 
 #endif
 
@@ -504,11 +504,11 @@ void RawImageSource::MSR(float** luminance, float** originalLuminance, float **e
 
                     if(useHslLin) {
                         for (; j < W_L - 3; j += 4) {
-                            _mm_storeu_ps(&luminance[i][j], LVFU(luminance[i][j]) + pondv *  (vclampf(LVFU(src[i][j]) / LVFU(out[i][j]), limMinv, limMaxv) ));
+                            _mm_storeu_ps(&luminance[i][j], lvfu(luminance[i][j]) + pondv *  (vclampf(lvfu(src[i][j]) / lvfu(out[i][j]), limMinv, limMaxv) ));
                         }
                     } else {
                         for (; j < W_L - 3; j += 4) {
-                            _mm_storeu_ps(&luminance[i][j], LVFU(luminance[i][j]) + pondv *  xlogf(vclampf(LVFU(src[i][j]) / LVFU(out[i][j]), limMinv, limMaxv) ));
+                            _mm_storeu_ps(&luminance[i][j], lvfu(luminance[i][j]) + pondv *  xlogf(vclampf(lvfu(src[i][j]) / lvfu(out[i][j]), limMinv, limMaxv) ));
                         }
                     }
 

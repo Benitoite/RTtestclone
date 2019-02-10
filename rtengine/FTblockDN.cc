@@ -233,34 +233,34 @@ void do_median_denoise(float **src, float **dst, float upperBound, int width, in
 #ifdef __SSE2__
 
                     for (; !useUpperBound && j < width - border - 3; j += 4) {
-                        STVFU(
+                        stvfu(
                             medianOut[i][j],
                             median(
-                                LVFU(medianIn[i - 2][j - 2]),
-                                LVFU(medianIn[i - 2][j - 1]),
-                                LVFU(medianIn[i - 2][j]),
-                                LVFU(medianIn[i - 2][j + 1]),
-                                LVFU(medianIn[i - 2][j + 2]),
-                                LVFU(medianIn[i - 1][j - 2]),
-                                LVFU(medianIn[i - 1][j - 1]),
-                                LVFU(medianIn[i - 1][j]),
-                                LVFU(medianIn[i - 1][j + 1]),
-                                LVFU(medianIn[i - 1][j + 2]),
-                                LVFU(medianIn[i][j - 2]),
-                                LVFU(medianIn[i][j - 1]),
-                                LVFU(medianIn[i][j]),
-                                LVFU(medianIn[i][j + 1]),
-                                LVFU(medianIn[i][j + 2]),
-                                LVFU(medianIn[i + 1][j - 2]),
-                                LVFU(medianIn[i + 1][j - 1]),
-                                LVFU(medianIn[i + 1][j]),
-                                LVFU(medianIn[i + 1][j + 1]),
-                                LVFU(medianIn[i + 1][j + 2]),
-                                LVFU(medianIn[i + 2][j - 2]),
-                                LVFU(medianIn[i + 2][j - 1]),
-                                LVFU(medianIn[i + 2][j]),
-                                LVFU(medianIn[i + 2][j + 1]),
-                                LVFU(medianIn[i + 2][j + 2])
+                                lvfu(medianIn[i - 2][j - 2]),
+                                lvfu(medianIn[i - 2][j - 1]),
+                                lvfu(medianIn[i - 2][j]),
+                                lvfu(medianIn[i - 2][j + 1]),
+                                lvfu(medianIn[i - 2][j + 2]),
+                                lvfu(medianIn[i - 1][j - 2]),
+                                lvfu(medianIn[i - 1][j - 1]),
+                                lvfu(medianIn[i - 1][j]),
+                                lvfu(medianIn[i - 1][j + 1]),
+                                lvfu(medianIn[i - 1][j + 2]),
+                                lvfu(medianIn[i][j - 2]),
+                                lvfu(medianIn[i][j - 1]),
+                                lvfu(medianIn[i][j]),
+                                lvfu(medianIn[i][j + 1]),
+                                lvfu(medianIn[i][j + 2]),
+                                lvfu(medianIn[i + 1][j - 2]),
+                                lvfu(medianIn[i + 1][j - 1]),
+                                lvfu(medianIn[i + 1][j]),
+                                lvfu(medianIn[i + 1][j + 1]),
+                                lvfu(medianIn[i + 1][j + 2]),
+                                lvfu(medianIn[i + 2][j - 2]),
+                                lvfu(medianIn[i + 2][j - 1]),
+                                lvfu(medianIn[i + 2][j]),
+                                lvfu(medianIn[i + 2][j + 1]),
+                                lvfu(medianIn[i + 2][j + 2])
                             )
                         );
                     }
@@ -311,11 +311,11 @@ void do_median_denoise(float **src, float **dst, float upperBound, int width, in
                     for (; !useUpperBound && j < width - border - 3; j += 4) {
                         for (int kk = 0, ii = -border; ii <= border; ++ii) {
                             for (int jj = -border; jj <= border; ++jj, ++kk) {
-                                vpp[kk] = LVFU(medianIn[i + ii][j + jj]);
+                                vpp[kk] = lvfu(medianIn[i + ii][j + jj]);
                             }
                         }
 
-                        STVFU(medianOut[i][j], median(vpp));
+                        stvfu(medianOut[i][j], median(vpp));
                     }
 
 #endif
@@ -346,11 +346,11 @@ void do_median_denoise(float **src, float **dst, float upperBound, int width, in
                     for (; !useUpperBound && j < width - border - 3; j += 4) {
                         for (int kk = 0, ii = -border; ii <= border; ++ii) {
                             for (int jj = -border; jj <= border; ++jj, ++kk) {
-                                vpp[kk] = LVFU(medianIn[i + ii][j + jj]);
+                                vpp[kk] = lvfu(medianIn[i + ii][j + jj]);
                             }
                         }
 
-                        STVFU(medianOut[i][j], median(vpp));
+                        stvfu(medianOut[i][j], median(vpp));
                     }
 
 #endif
@@ -2078,8 +2078,8 @@ void ImProcFunctions::RGBtile_denoise(float * fLblox, int hblproc, float noiseva
     __m128  onev = _mm_set1_ps(1.0f);
 
     for (int n = 0; n < TS * TS; n += 4) { //for DCT
-        tempv  = onev - xexpf(-SQRV(LVF(nbrwt[n])) / noisevar_Ldetailv);
-        _mm_storeu_ps(&fLblox[blkstart + n], LVFU(fLblox[blkstart + n]) * tempv);
+        tempv  = onev - xexpf(-SQRV(lvf(nbrwt[n])) / noisevar_Ldetailv);
+        _mm_storeu_ps(&fLblox[blkstart + n], lvfu(fLblox[blkstart + n]) * tempv);
     }//output neighbor averaged result
 
 #else
@@ -2342,8 +2342,8 @@ bool ImProcFunctions::WaveletDenoiseAll_BiShrinkL(wavelet_decomposition &Wavelet
                         int coeffloc_L;
 
                         for (coeffloc_L = 0; coeffloc_L < Hlvl_L * Wlvl_L - 3; coeffloc_L += 4) {
-                            mad_Lv = LVFU(noisevarlum[coeffloc_L]) * levelFactorv;
-                            mag_Lv = SQRV(LVFU(WavCoeffs_L[dir][coeffloc_L]));
+                            mad_Lv = lvfu(noisevarlum[coeffloc_L]) * levelFactorv;
+                            mag_Lv = SQRV(lvfu(WavCoeffs_L[dir][coeffloc_L]));
                             _mm_storeu_ps(&sfave[coeffloc_L], mag_Lv / (mag_Lv + mad_Lv * xexpf(-mag_Lv / (mad_Lv * ninev)) + epsv));
                         }
 
@@ -2370,9 +2370,9 @@ bool ImProcFunctions::WaveletDenoiseAll_BiShrinkL(wavelet_decomposition &Wavelet
                         __m128 sf_Lv;
 
                         for (coeffloc_L = 0; coeffloc_L < Hlvl_L * Wlvl_L - 3; coeffloc_L += 4) {
-                            sfavev = LVFU(sfaved[coeffloc_L]);
-                            sf_Lv = LVFU(sfave[coeffloc_L]);
-                            _mm_storeu_ps(&WavCoeffs_L[dir][coeffloc_L], LVFU(WavCoeffs_L[dir][coeffloc_L]) * (SQRV(sfavev) + SQRV(sf_Lv)) / (sfavev + sf_Lv + epsv));
+                            sfavev = lvfu(sfaved[coeffloc_L]);
+                            sf_Lv = lvfu(sfave[coeffloc_L]);
+                            _mm_storeu_ps(&WavCoeffs_L[dir][coeffloc_L], lvfu(WavCoeffs_L[dir][coeffloc_L]) * (SQRV(sfavev) + SQRV(sf_Lv)) / (sfavev + sf_Lv + epsv));
                             //use smoothed shrinkage unless local shrinkage is much less
                         }
 
@@ -2501,10 +2501,10 @@ bool ImProcFunctions::WaveletDenoiseAll_BiShrinkAB(wavelet_decomposition &Wavele
                             int coeffloc_ab;
 
                             for (coeffloc_ab = 0; coeffloc_ab < Hlvl_ab * Wlvl_ab - 3; coeffloc_ab += 4) {
-                                mad_abv = LVFU(noisevarchrom[coeffloc_ab]) * mad_abrv;
+                                mad_abv = lvfu(noisevarchrom[coeffloc_ab]) * mad_abrv;
 
-                                tempabv = LVFU(WavCoeffs_ab[dir][coeffloc_ab]);
-                                mag_Lv = LVFU(WavCoeffs_L[dir][coeffloc_ab]);
+                                tempabv = lvfu(WavCoeffs_ab[dir][coeffloc_ab]);
+                                mag_Lv = lvfu(WavCoeffs_L[dir][coeffloc_ab]);
                                 mag_abv = SQRV(tempabv);
                                 mag_Lv = SQRV(mag_Lv) * rmad_Lm9v;
                                 _mm_storeu_ps(&WavCoeffs_ab[dir][coeffloc_ab], tempabv * SQRV((onev - xexpf(-(mag_abv / mad_abv) - (mag_Lv)))));
@@ -2702,8 +2702,8 @@ void ImProcFunctions::ShrinkAllL(wavelet_decomposition &WaveletCoeffs_L, float *
     int i;
 
     for (i = 0; i < W_L * H_L - 3; i += 4) {
-        mad_Lv = LVFU(noisevarlum[i]) * levelFactorv;
-        magv = SQRV(LVFU(WavCoeffs_L[dir][i]));
+        mad_Lv = lvfu(noisevarlum[i]) * levelFactorv;
+        magv = SQRV(lvfu(WavCoeffs_L[dir][i]));
         _mm_storeu_ps(&sfave[i], magv / (magv + mad_Lv * xexpf(-magv / (ninev * mad_Lv)) + epsv));
     }
 
@@ -2729,9 +2729,9 @@ void ImProcFunctions::ShrinkAllL(wavelet_decomposition &WaveletCoeffs_L, float *
     __m128  sfv;
 
     for (i = 0; i < W_L * H_L - 3; i += 4) {
-        sfv = LVFU(sfave[i]);
+        sfv = lvfu(sfave[i]);
         //use smoothed shrinkage unless local shrinkage is much less
-        _mm_storeu_ps(&WavCoeffs_L[dir][i], _mm_loadu_ps(&WavCoeffs_L[dir][i]) * (SQRV(LVFU(sfaved[i])) + SQRV(sfv)) / (LVFU(sfaved[i]) + sfv + epsv));
+        _mm_storeu_ps(&WavCoeffs_L[dir][i], _mm_loadu_ps(&WavCoeffs_L[dir][i]) * (SQRV(lvfu(sfaved[i])) + SQRV(sfv)) / (lvfu(sfaved[i]) + sfv + epsv));
     }
 
     // few remaining pixels
@@ -2803,10 +2803,10 @@ void ImProcFunctions::ShrinkAllAB(wavelet_decomposition &WaveletCoeffs_L, wavele
         int coeffloc_ab;
 
         for (coeffloc_ab = 0; coeffloc_ab < H_ab * W_ab - 3; coeffloc_ab += 4) {
-            mad_abv = LVFU(noisevarchrom[coeffloc_ab]) * mad_abrv;
+            mad_abv = lvfu(noisevarchrom[coeffloc_ab]) * mad_abrv;
 
-            mag_Lv = LVFU(WavCoeffs_L[dir][coeffloc_ab]);
-            mag_abv = SQRV(LVFU(WavCoeffs_ab[dir][coeffloc_ab]));
+            mag_Lv = lvfu(WavCoeffs_L[dir][coeffloc_ab]);
+            mag_abv = SQRV(lvfu(WavCoeffs_ab[dir][coeffloc_ab]));
             mag_Lv = (SQRV(mag_Lv)) * rmadLm9v;
             _mm_storeu_ps(&sfaveab[coeffloc_ab], (onev - xexpf(-(mag_abv / mad_abv) - (mag_Lv))));
         }
@@ -2838,11 +2838,11 @@ void ImProcFunctions::ShrinkAllAB(wavelet_decomposition &WaveletCoeffs_L, wavele
         __m128 sfaveabv;
 
         for (coeffloc_ab = 0; coeffloc_ab < H_ab * W_ab - 3; coeffloc_ab += 4) {
-            sfabv = LVFU(sfaveab[coeffloc_ab]);
-            sfaveabv = LVFU(sfaveabd[coeffloc_ab]);
+            sfabv = lvfu(sfaveab[coeffloc_ab]);
+            sfaveabv = lvfu(sfaveabd[coeffloc_ab]);
 
             //use smoothed shrinkage unless local shrinkage is much less
-            _mm_storeu_ps(&WavCoeffs_ab[dir][coeffloc_ab], LVFU(WavCoeffs_ab[dir][coeffloc_ab]) * (SQRV(sfaveabv) + SQRV(sfabv)) / (sfaveabv + sfabv + epsv));
+            _mm_storeu_ps(&WavCoeffs_ab[dir][coeffloc_ab], lvfu(WavCoeffs_ab[dir][coeffloc_ab]) * (SQRV(sfaveabv) + SQRV(sfabv)) / (sfaveabv + sfabv + epsv));
         }
 
         // few remaining pixels
@@ -3351,8 +3351,8 @@ void ImProcFunctions::RGB_denoise_info(Imagefloat * src, Imagefloat * provicalc,
 
                     for (j = tileleft; j < tileright - 7; j += 8) {
                         int j1 = j - tileleft;
-                        aNv = LVFU(acalc[i >> 1][j >> 1]);
-                        bNv = LVFU(bcalc[i >> 1][j >> 1]);
+                        aNv = lvfu(acalc[i >> 1][j >> 1]);
+                        bNv = lvfu(bcalc[i >> 1][j >> 1]);
                         _mm_storeu_ps(&noisevarhue[i1 >> 1][j1 >> 1], xatan2f(bNv, aNv));
                         _mm_storeu_ps(&noisevarchrom[i1 >> 1][j1 >> 1], vmaxf(vsqrtf(SQRV(aNv) + SQRV(bNv)),c100v));
                     }

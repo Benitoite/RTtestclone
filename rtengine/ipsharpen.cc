@@ -102,10 +102,10 @@ void dcdamping (float** aI, float** aO, float damping, int W, int H)
 #ifdef __SSE2__
     vfloat Iv, Ov, Uv, zerov, onev, fourv, fivev, dampingFacv, Tv, Wv, Lv;
     zerov = _mm_setzero_ps();
-    onev = F2V(1.f);
-    fourv = F2V(4.f);
-    fivev = F2V(5.f);
-    dampingFacv = F2V(dampingFac);
+    onev = f2v(1.f);
+    fourv = f2v(4.f);
+    fivev = f2v(5.f);
+    dampingFacv = f2v(dampingFac);
 #endif
 #ifdef _OPENMP
     #pragma omp for
@@ -116,8 +116,8 @@ void dcdamping (float** aI, float** aO, float damping, int W, int H)
 #ifdef __SSE2__
 
         for (; j < W - 3; j += 4) {
-            Iv = LVFU(aI[i][j]);
-            Ov = LVFU(aO[i][j]);
+            Iv = lvfu(aI[i][j]);
+            Ov = lvfu(aO[i][j]);
             Lv = xlogf(Iv / Ov);
             Wv = Ov - Iv;
             Uv = (Ov * Lv + Wv) * dampingFacv;
@@ -128,7 +128,7 @@ void dcdamping (float** aI, float** aO, float damping, int W, int H)
             Uv = (Wv / Iv) * Uv + onev;
             Uv = vselfzero(vmaskf_gt(Iv, zerov), Uv);
             Uv = vselfzero(vmaskf_gt(Ov, zerov), Uv);
-            STVFU(aI[i][j], Uv);
+            stvfu(aI[i][j], Uv);
         }
 
 #endif

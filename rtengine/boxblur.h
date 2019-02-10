@@ -184,8 +184,8 @@ template<class T, class A> void boxblur (T** src, A** dst, T* buffer, int radx, 
     } else {
         const int numCols = 8; // process numCols columns at once for better usage of L1 cpu cache
 #ifdef __SSE2__
-        vfloat  leninitv = F2V( (float)(rady + 1));
-        vfloat  onev = F2V( 1.f );
+        vfloat  leninitv = f2v( (float)(rady + 1));
+        vfloat  onev = f2v( 1.f );
         vfloat  tempv, temp1v, lenv, lenp1v, lenm1v, rlenv;
 
 #ifdef _OPENMP
@@ -194,43 +194,43 @@ template<class T, class A> void boxblur (T** src, A** dst, T* buffer, int radx, 
 
         for (int col = 0; col < W - 7; col += 8) {
             lenv = leninitv;
-            tempv = LVFU(temp[0 * W + col]);
-            temp1v = LVFU(temp[0 * W + col + 4]);
+            tempv = lvfu(temp[0 * W + col]);
+            temp1v = lvfu(temp[0 * W + col + 4]);
 
             for (int i = 1; i <= rady; i++) {
-                tempv = tempv + LVFU(temp[i * W + col]);
-                temp1v = temp1v + LVFU(temp[i * W + col + 4]);
+                tempv = tempv + lvfu(temp[i * W + col]);
+                temp1v = temp1v + lvfu(temp[i * W + col + 4]);
             }
 
             tempv = tempv / lenv;
             temp1v = temp1v / lenv;
-            STVFU( dst[0][col], tempv);
-            STVFU( dst[0][col + 4], temp1v);
+            stvfu( dst[0][col], tempv);
+            stvfu( dst[0][col + 4], temp1v);
 
             for (int row = 1; row <= rady; row++) {
                 lenp1v = lenv + onev;
-                tempv = (tempv * lenv + LVFU(temp[(row + rady) * W + col])) / lenp1v;
-                temp1v = (temp1v * lenv + LVFU(temp[(row + rady) * W + col + 4])) / lenp1v;
-                STVFU( dst[row][col], tempv);
-                STVFU( dst[row][col + 4], temp1v);
+                tempv = (tempv * lenv + lvfu(temp[(row + rady) * W + col])) / lenp1v;
+                temp1v = (temp1v * lenv + lvfu(temp[(row + rady) * W + col + 4])) / lenp1v;
+                stvfu( dst[row][col], tempv);
+                stvfu( dst[row][col + 4], temp1v);
                 lenv = lenp1v;
             }
 
             rlenv = onev / lenv;
 
             for (int row = rady + 1; row < H - rady; row++) {
-                tempv = tempv + (LVFU(temp[(row + rady) * W + col]) - LVFU(temp[(row - rady - 1) * W + col])) * rlenv ;
-                temp1v = temp1v + (LVFU(temp[(row + rady) * W + col + 4]) - LVFU(temp[(row - rady - 1) * W + col + 4])) * rlenv ;
-                STVFU( dst[row][col], tempv);
-                STVFU( dst[row][col + 4], temp1v);
+                tempv = tempv + (lvfu(temp[(row + rady) * W + col]) - lvfu(temp[(row - rady - 1) * W + col])) * rlenv ;
+                temp1v = temp1v + (lvfu(temp[(row + rady) * W + col + 4]) - lvfu(temp[(row - rady - 1) * W + col + 4])) * rlenv ;
+                stvfu( dst[row][col], tempv);
+                stvfu( dst[row][col + 4], temp1v);
             }
 
             for (int row = H - rady; row < H; row++) {
                 lenm1v = lenv - onev;
-                tempv = (tempv * lenv - LVFU(temp[(row - rady - 1) * W + col])) / lenm1v;
-                temp1v = (temp1v * lenv - LVFU(temp[(row - rady - 1) * W + col + 4])) / lenm1v;
-                STVFU( dst[row][col], tempv);
-                STVFU( dst[row][col + 4], temp1v);
+                tempv = (tempv * lenv - lvfu(temp[(row - rady - 1) * W + col])) / lenm1v;
+                temp1v = (temp1v * lenv - lvfu(temp[(row - rady - 1) * W + col + 4])) / lenm1v;
+                stvfu( dst[row][col], tempv);
+                stvfu( dst[row][col + 4], temp1v);
                 lenv = lenm1v;
             }
         }
@@ -365,83 +365,83 @@ template<class T, class A> void boxblur (T* src, A* dst, A* buffer, int radx, in
     } else {
         //vertical blur
 #ifdef __SSE2__
-        vfloat  leninitv = F2V( (float)(rady + 1));
-        vfloat  onev = F2V( 1.f );
+        vfloat  leninitv = f2v( (float)(rady + 1));
+        vfloat  onev = f2v( 1.f );
         vfloat  tempv, temp1v, lenv, lenp1v, lenm1v, rlenv;
         int col;
 
         for (col = 0; col < W - 7; col += 8) {
             lenv = leninitv;
-            tempv = LVFU(temp[0 * W + col]);
-            temp1v = LVFU(temp[0 * W + col + 4]);
+            tempv = lvfu(temp[0 * W + col]);
+            temp1v = lvfu(temp[0 * W + col + 4]);
 
             for (int i = 1; i <= rady; i++) {
-                tempv = tempv + LVFU(temp[i * W + col]);
-                temp1v = temp1v + LVFU(temp[i * W + col + 4]);
+                tempv = tempv + lvfu(temp[i * W + col]);
+                temp1v = temp1v + lvfu(temp[i * W + col + 4]);
             }
 
             tempv = tempv / lenv;
             temp1v = temp1v / lenv;
-            STVFU( dst[0 * W + col], tempv);
-            STVFU( dst[0 * W + col + 4], temp1v);
+            stvfu( dst[0 * W + col], tempv);
+            stvfu( dst[0 * W + col + 4], temp1v);
 
             for (int row = 1; row <= rady; row++) {
                 lenp1v = lenv + onev;
-                tempv = (tempv * lenv + LVFU(temp[(row + rady) * W + col])) / lenp1v;
-                temp1v = (temp1v * lenv + LVFU(temp[(row + rady) * W + col + 4])) / lenp1v;
-                STVFU( dst[row * W + col], tempv);
-                STVFU( dst[row * W + col + 4], temp1v);
+                tempv = (tempv * lenv + lvfu(temp[(row + rady) * W + col])) / lenp1v;
+                temp1v = (temp1v * lenv + lvfu(temp[(row + rady) * W + col + 4])) / lenp1v;
+                stvfu( dst[row * W + col], tempv);
+                stvfu( dst[row * W + col + 4], temp1v);
                 lenv = lenp1v;
             }
 
             rlenv = onev / lenv;
 
             for (int row = rady + 1; row < H - rady; row++) {
-                tempv = tempv + (LVFU(temp[(row + rady) * W + col]) - LVFU(temp[(row - rady - 1) * W + col])) * rlenv ;
-                temp1v = temp1v + (LVFU(temp[(row + rady) * W + col + 4]) - LVFU(temp[(row - rady - 1) * W + col + 4])) * rlenv ;
-                STVFU( dst[row * W + col], tempv);
-                STVFU( dst[row * W + col + 4], temp1v);
+                tempv = tempv + (lvfu(temp[(row + rady) * W + col]) - lvfu(temp[(row - rady - 1) * W + col])) * rlenv ;
+                temp1v = temp1v + (lvfu(temp[(row + rady) * W + col + 4]) - lvfu(temp[(row - rady - 1) * W + col + 4])) * rlenv ;
+                stvfu( dst[row * W + col], tempv);
+                stvfu( dst[row * W + col + 4], temp1v);
             }
 
             for (int row = H - rady; row < H; row++) {
                 lenm1v = lenv - onev;
-                tempv = (tempv * lenv - LVFU(temp[(row - rady - 1) * W + col])) / lenm1v;
-                temp1v = (temp1v * lenv - LVFU(temp[(row - rady - 1) * W + col + 4])) / lenm1v;
-                STVFU( dst[row * W + col], tempv);
-                STVFU( dst[row * W + col + 4], temp1v);
+                tempv = (tempv * lenv - lvfu(temp[(row - rady - 1) * W + col])) / lenm1v;
+                temp1v = (temp1v * lenv - lvfu(temp[(row - rady - 1) * W + col + 4])) / lenm1v;
+                stvfu( dst[row * W + col], tempv);
+                stvfu( dst[row * W + col + 4], temp1v);
                 lenv = lenm1v;
             }
         }
 
         for (; col < W - 3; col += 4) {
             lenv = leninitv;
-            tempv = LVFU(temp[0 * W + col]);
+            tempv = lvfu(temp[0 * W + col]);
 
             for (int i = 1; i <= rady; i++) {
-                tempv = tempv + LVFU(temp[i * W + col]);
+                tempv = tempv + lvfu(temp[i * W + col]);
             }
 
             tempv = tempv / lenv;
-            STVFU( dst[0 * W + col], tempv);
+            stvfu( dst[0 * W + col], tempv);
 
             for (int row = 1; row <= rady; row++) {
                 lenp1v = lenv + onev;
-                tempv = (tempv * lenv + LVFU(temp[(row + rady) * W + col])) / lenp1v;
-                STVFU( dst[row * W + col], tempv);
+                tempv = (tempv * lenv + lvfu(temp[(row + rady) * W + col])) / lenp1v;
+                stvfu( dst[row * W + col], tempv);
                 lenv = lenp1v;
             }
 
             rlenv = onev / lenv;
 
             for (int row = rady + 1; row < H - rady; row++) {
-                tempv = tempv + (LVFU(temp[(row + rady) * W + col]) - LVFU(temp[(row - rady - 1) * W + col])) * rlenv ;
-                STVFU( dst[row * W + col], tempv);
+                tempv = tempv + (lvfu(temp[(row + rady) * W + col]) - lvfu(temp[(row - rady - 1) * W + col])) * rlenv ;
+                stvfu( dst[row * W + col], tempv);
             }
 
             for (int row = H - rady; row < H; row++) {
                 lenm1v = lenv - onev;
-                tempv = (tempv * lenv - LVFU(temp[(row - rady - 1) * W + col])) / lenm1v;
-                STVFU( dst[row * W + col], tempv);
+                tempv = (tempv * lenv - lvfu(temp[(row - rady - 1) * W + col])) / lenm1v;
+                stvfu( dst[row * W + col], tempv);
                 lenv = lenm1v;
             }
         }
@@ -552,39 +552,39 @@ template<class T, class A> void boxabsblur (T* src, A* dst, int radx, int rady, 
     } else {
         //vertical blur
 #ifdef __SSE2__
-        vfloat  leninitv = F2V( (float)(rady + 1));
-        vfloat  onev = F2V( 1.f );
+        vfloat  leninitv = f2v( (float)(rady + 1));
+        vfloat  onev = f2v( 1.f );
         vfloat  tempv, lenv, lenp1v, lenm1v, rlenv;
 
         for (int col = 0; col < W - 3; col += 4) {
             lenv = leninitv;
-            tempv = LVF(temp[0 * W + col]);
+            tempv = lvf(temp[0 * W + col]);
 
             for (int i = 1; i <= rady; i++) {
-                tempv = tempv + LVF(temp[i * W + col]);
+                tempv = tempv + lvf(temp[i * W + col]);
             }
 
             tempv = tempv / lenv;
-            STVF(dst[0 * W + col], tempv);
+            stvf(dst[0 * W + col], tempv);
 
             for (int row = 1; row <= rady; row++) {
                 lenp1v = lenv + onev;
-                tempv = (tempv * lenv + LVF(temp[(row + rady) * W + col])) / lenp1v;
-                STVF(dst[row * W + col], tempv);
+                tempv = (tempv * lenv + lvf(temp[(row + rady) * W + col])) / lenp1v;
+                stvf(dst[row * W + col], tempv);
                 lenv = lenp1v;
             }
 
             rlenv = onev / lenv;
 
             for (int row = rady + 1; row < H - rady; row++) {
-                tempv = tempv + (LVF(temp[(row + rady) * W + col]) - LVF(temp[(row - rady - 1) * W + col])) * rlenv;
-                STVF(dst[row * W + col], tempv);
+                tempv = tempv + (lvf(temp[(row + rady) * W + col]) - lvf(temp[(row - rady - 1) * W + col])) * rlenv;
+                stvf(dst[row * W + col], tempv);
             }
 
             for (int row = H - rady; row < H; row++) {
                 lenm1v = lenv - onev;
-                tempv = (tempv * lenv - LVF(temp[(row - rady - 1) * W + col])) / lenm1v;
-                STVF(dst[row * W + col], tempv);
+                tempv = (tempv * lenv - lvf(temp[(row - rady - 1) * W + col])) / lenm1v;
+                stvf(dst[row * W + col], tempv);
                 lenv = lenm1v;
             }
         }

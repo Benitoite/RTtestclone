@@ -348,13 +348,13 @@ template<typename T> void wavelet_level<T>::AnalysisFilterSubsampVertical (T * R
             __m128 hiv = _mm_setzero_ps();
 
             for (int j = 0, l = -skip * offset; j < taps; j++, l += skip) {
-                __m128 srcv = LVFU(srcbuffer[(row - l) * width + k]);
-                lov += LVF(filterLo[j][0]) * srcv;//lopass channel
-                hiv += LVF(filterHi[j][0]) * srcv;//hipass channel
+                __m128 srcv = lvfu(srcbuffer[(row - l) * width + k]);
+                lov += lvf(filterLo[j][0]) * srcv;//lopass channel
+                hiv += lvf(filterHi[j][0]) * srcv;//hipass channel
             }
 
-            STVF(dstLo[k], lov);
-            STVF(dstHi[k], hiv);
+            stvf(dstLo[k], lov);
+            stvf(dstHi[k], hiv);
         }
 
         for (; k < width; k++) {
@@ -377,13 +377,13 @@ template<typename T> void wavelet_level<T>::AnalysisFilterSubsampVertical (T * R
 
             for (int j = 0; j < taps; j++) {
                 int arg = max(0, min(row + skip * (offset - j), height - 1)) * width + k; //clamped BC's
-                __m128 srcv = LVFU(srcbuffer[arg]);
-                lov += LVF(filterLo[j][0]) * srcv;//lopass channel
-                hiv += LVF(filterHi[j][0]) * srcv;//hipass channel
+                __m128 srcv = lvfu(srcbuffer[arg]);
+                lov += lvf(filterLo[j][0]) * srcv;//lopass channel
+                hiv += lvf(filterHi[j][0]) * srcv;//hipass channel
             }
 
-            STVF(dstLo[k], lov);
-            STVF(dstHi[k], hiv);
+            stvf(dstLo[k], lov);
+            stvf(dstHi[k], hiv);
         }
 
         for (; k < width; k++) {
@@ -537,10 +537,10 @@ template<typename T> void wavelet_level<T>::SynthesisFilterSubsampVertical (T * 
                 __m128 totv = _mm_setzero_ps();
 
                 for (int j = begin, l = 0; j < taps; j += 2, l += skip) {
-                    totv += ((LVF(filterLo[j][0]) * LVFU(srcLo[(i_src - l) * width + k]) + LVF(filterHi[j][0]) * LVFU(srcHi[(i_src - l) * width + k])));
+                    totv += ((lvf(filterLo[j][0]) * lvfu(srcLo[(i_src - l) * width + k]) + lvf(filterHi[j][0]) * lvfu(srcHi[(i_src - l) * width + k])));
                 }
 
-                _mm_storeu_ps(&dst[width * i + k], LVFU(dst[width * i + k]) * srcFactorv + dstFactorv * fourv * totv);
+                _mm_storeu_ps(&dst[width * i + k], lvfu(dst[width * i + k]) * srcFactorv + dstFactorv * fourv * totv);
             }
 
             for (; k < width; k++) {
@@ -560,10 +560,10 @@ template<typename T> void wavelet_level<T>::SynthesisFilterSubsampVertical (T * 
 
                 for (int j = begin, l = 0; j < taps; j += 2, l += skip) {
                     int arg = max(0, min((i_src - l), srcheight - 1)) * width + k; //clamped BC's
-                    totv += ((LVF(filterLo[j][0]) * LVFU(srcLo[arg]) + LVF(filterHi[j][0]) * LVFU(srcHi[arg])));
+                    totv += ((lvf(filterLo[j][0]) * lvfu(srcLo[arg]) + lvf(filterHi[j][0]) * lvfu(srcHi[arg])));
                 }
 
-                _mm_storeu_ps(&dst[width * i + k], LVFU(dst[width * i + k]) * srcFactorv + dstFactorv * fourv * totv);
+                _mm_storeu_ps(&dst[width * i + k], lvfu(dst[width * i + k]) * srcFactorv + dstFactorv * fourv * totv);
             }
 
             for (; k < width; k++) {

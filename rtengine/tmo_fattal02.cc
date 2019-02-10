@@ -481,8 +481,8 @@ void tmo_fattal02 (size_t width,
 #endif
     {
 #ifdef __SSE2__
-        vfloat epsv = F2V (eps);
-        vfloat tempv = F2V (temp);
+        vfloat epsv = f2v (eps);
+        vfloat tempv = f2v (temp);
 #endif
 #ifdef _OPENMP
         #pragma omp for schedule(dynamic,16)
@@ -493,7 +493,7 @@ void tmo_fattal02 (size_t width,
 #ifdef __SSE2__
 
             for (; j < width - 3; j += 4) {
-                STVFU ((*H)[i][j], xlogf (tempv * LVFU (Y[i][j]) + epsv));
+                stvfu ((*H)[i][j], xlogf (tempv * lvfu (Y[i][j]) + epsv));
             }
 
 #endif
@@ -651,7 +651,7 @@ void tmo_fattal02 (size_t width,
 #endif
     {
 #ifdef __SSE2__
-        vfloat gammav = F2V (gamma);
+        vfloat gammav = f2v (gamma);
 #endif
 #ifdef _OPENMP
         #pragma omp for schedule(dynamic,16)
@@ -662,7 +662,7 @@ void tmo_fattal02 (size_t width,
 #ifdef __SSE2__
 
             for (; j < width - 3; j += 4) {
-                STVFU (L[i][j], xexpf (gammav * LVFU (L[i][j])));
+                stvfu (L[i][j], xexpf (gammav * lvfu (L[i][j])));
             }
 
 #endif

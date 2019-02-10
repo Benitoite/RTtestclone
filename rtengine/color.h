@@ -730,10 +730,10 @@ public:
 #ifdef __SSE2__
     static inline vfloat f2xyz(vfloat f)
     {
-        const vfloat epsilonExpInv3v = F2V(epsilonExpInv3f);
-        const vfloat kappaInvv = F2V(kappaInvf);
+        const vfloat epsilonExpInv3v = f2v(epsilonExpInv3f);
+        const vfloat kappaInvv = f2v(kappaInvf);
         vfloat res1 = f * f * f;
-        vfloat res2 = (F2V(116.f) * f - F2V(16.f)) * kappaInvv;
+        vfloat res2 = (f2v(116.f) * f - f2v(16.f)) * kappaInvv;
         return vself(vmaskf_gt(f, epsilonExpInv3v), res1, res2);
     }
 #endif

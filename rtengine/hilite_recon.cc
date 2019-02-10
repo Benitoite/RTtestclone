@@ -73,29 +73,29 @@ void RawImageSource::boxblur2(float** src, float** dst, float** temp, int H, int
 #endif
     {
         float len = box + 1;
-        vfloat lenv = F2V( len );
-        vfloat lenp1v = F2V( len + 1.0f );
-        vfloat onev = F2V( 1.0f );
+        vfloat lenv = f2v( len );
+        vfloat lenp1v = f2v( len + 1.0f );
+        vfloat onev = f2v( 1.0f );
         vfloat tempv, temp2v;
 #ifdef _OPENMP
         #pragma omp for nowait
 #endif
 
         for (int col = 0; col < W - 7; col += 8) {
-            tempv = LVFU(temp[0][col]) / lenv;
-            temp2v = LVFU(temp[0][col + 4]) / lenv;
+            tempv = lvfu(temp[0][col]) / lenv;
+            temp2v = lvfu(temp[0][col + 4]) / lenv;
 
             for (int i = 1; i <= box; i++) {
-                tempv = tempv + LVFU(temp[i][col]) / lenv;
-                temp2v = temp2v + LVFU(temp[i][col + 4]) / lenv;
+                tempv = tempv + lvfu(temp[i][col]) / lenv;
+                temp2v = temp2v + lvfu(temp[i][col + 4]) / lenv;
             }
 
             _mm_storeu_ps( &dst[0][col], tempv);
             _mm_storeu_ps( &dst[0][col + 4], temp2v);
 
             for (int row = 1; row <= box; row++) {
-                tempv = (tempv * lenv + LVFU(temp[(row + box)][col])) / lenp1v;
-                temp2v = (temp2v * lenv + LVFU(temp[(row + box)][col + 4])) / lenp1v;
+                tempv = (tempv * lenv + lvfu(temp[(row + box)][col])) / lenp1v;
+                temp2v = (temp2v * lenv + lvfu(temp[(row + box)][col + 4])) / lenp1v;
                 _mm_storeu_ps( &dst[row][col], tempv);
                 _mm_storeu_ps( &dst[row][col + 4], temp2v);
                 lenv = lenp1v;
@@ -103,8 +103,8 @@ void RawImageSource::boxblur2(float** src, float** dst, float** temp, int H, int
             }
 
             for (int row = box + 1; row < H - box; row++) {
-                tempv = tempv + (LVFU(temp[(row + box)][col]) - LVFU(temp[(row - box - 1)][col])) / lenv;
-                temp2v = temp2v + (LVFU(temp[(row + box)][col + 4]) - LVFU(temp[(row - box - 1)][col + 4])) / lenv;
+                tempv = tempv + (lvfu(temp[(row + box)][col]) - lvfu(temp[(row - box - 1)][col])) / lenv;
+                temp2v = temp2v + (lvfu(temp[(row + box)][col + 4]) - lvfu(temp[(row - box - 1)][col + 4])) / lenv;
                 _mm_storeu_ps( &dst[row][col], tempv);
                 _mm_storeu_ps( &dst[row][col + 4], temp2v);
             }
@@ -112,8 +112,8 @@ void RawImageSource::boxblur2(float** src, float** dst, float** temp, int H, int
             for (int row = H - box; row < H; row++) {
                 lenp1v = lenv;
                 lenv = lenv - onev;
-                tempv = (tempv * lenp1v - LVFU(temp[(row - box - 1)][col])) / lenv;
-                temp2v = (temp2v * lenp1v - LVFU(temp[(row - box - 1)][col + 4])) / lenv;
+                tempv = (tempv * lenp1v - lvfu(temp[(row - box - 1)][col])) / lenv;
+                temp2v = (temp2v * lenp1v - lvfu(temp[(row - box - 1)][col + 4])) / lenv;
                 _mm_storeu_ps( &dst[row][col], tempv );
                 _mm_storeu_ps( &dst[row][col + 4], temp2v );
             }
@@ -124,30 +124,30 @@ void RawImageSource::boxblur2(float** src, float** dst, float** temp, int H, int
 #endif
         {
             for (int col = W - (W % 8); col < W - 3; col += 4) {
-                tempv = LVFU(temp[0][col]) / lenv;
+                tempv = lvfu(temp[0][col]) / lenv;
 
                 for (int i = 1; i <= box; i++) {
-                    tempv = tempv + LVFU(temp[i][col]) / lenv;
+                    tempv = tempv + lvfu(temp[i][col]) / lenv;
                 }
 
                 _mm_storeu_ps( &dst[0][col], tempv);
 
                 for (int row = 1; row <= box; row++) {
-                    tempv = (tempv * lenv + LVFU(temp[(row + box)][col])) / lenp1v;
+                    tempv = (tempv * lenv + lvfu(temp[(row + box)][col])) / lenp1v;
                     _mm_storeu_ps( &dst[row][col], tempv);
                     lenv = lenp1v;
                     lenp1v = lenp1v + onev;
                 }
 
                 for (int row = box + 1; row < H - box; row++) {
-                    tempv = tempv + (LVFU(temp[(row + box)][col]) - LVFU(temp[(row - box - 1)][col])) / lenv;
+                    tempv = tempv + (lvfu(temp[(row + box)][col]) - lvfu(temp[(row - box - 1)][col])) / lenv;
                     _mm_storeu_ps( &dst[row][col], tempv);
                 }
 
                 for (int row = H - box; row < H; row++) {
                     lenp1v = lenv;
                     lenv = lenv - onev;
-                    tempv = (tempv * lenp1v - LVFU(temp[(row - box - 1)][col])) / lenv;
+                    tempv = (tempv * lenp1v - lvfu(temp[(row - box - 1)][col])) / lenv;
                     _mm_storeu_ps( &dst[row][col], tempv );
                 }
             }

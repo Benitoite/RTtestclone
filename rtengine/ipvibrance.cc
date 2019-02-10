@@ -186,13 +186,13 @@ void ImProcFunctions::vibrance (LabImage* lab)
         for (int i = 0; i < height; i++) {
 #ifdef __SSE2__
             // vectorized per row calculation of HH and CC
-            vfloat c327d68v = F2V(327.68f);
+            vfloat c327d68v = f2v(327.68f);
             int k = 0;
             for (; k < width - 3; k += 4) {
-                vfloat av = LVFU(lab->a[i][k]);
-                vfloat bv = LVFU(lab->b[i][k]);
-                STVF(HHbuffer[k], xatan2f(bv, av));
-                STVF(CCbuffer[k], vsqrtf(SQRV(av) + SQRV(bv)) / c327d68v);
+                vfloat av = lvfu(lab->a[i][k]);
+                vfloat bv = lvfu(lab->b[i][k]);
+                stvf(HHbuffer[k], xatan2f(bv, av));
+                stvf(CCbuffer[k], vsqrtf(SQRV(av) + SQRV(bv)) / c327d68v);
             }
             for (; k < width; k++) {
                 HHbuffer[k] = xatan2f (lab->b[i][k], lab->a[i][k]);

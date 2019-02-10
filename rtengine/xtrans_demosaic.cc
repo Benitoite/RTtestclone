@@ -55,15 +55,15 @@ void RawImageSource::cielab (const float (*rgb)[3], float* l, float* a, float *b
     }
 
 #ifdef __SSE2__
-    vfloat c116v = F2V(116.f);
-    vfloat c16v = F2V(16.f);
-    vfloat c500v = F2V(500.f);
-    vfloat c200v = F2V(200.f);
+    vfloat c116v = f2v(116.f);
+    vfloat c16v = f2v(16.f);
+    vfloat c500v = f2v(500.f);
+    vfloat c200v = f2v(200.f);
     vfloat xyz_camv[3][3];
 
     for(int i = 0; i < 3; i++)
         for(int j = 0; j < 3; j++) {
-            xyz_camv[i][j] = F2V(xyz_cam[i][j]);
+            xyz_camv[i][j] = f2v(xyz_cam[i][j]);
         }
 
 #endif // __SSE2__
@@ -82,9 +82,9 @@ void RawImageSource::cielab (const float (*rgb)[3], float* l, float* a, float *b
             xyz1v = cbrt[_mm_cvtps_epi32(xyz1v)];
             xyz2v = cbrt[_mm_cvtps_epi32(xyz2v)];
 
-            STVFU(l[i * labWidth + j], c116v * xyz1v - c16v);
-            STVFU(a[i * labWidth + j], c500v * (xyz0v - xyz1v));
-            STVFU(b[i * labWidth + j], c200v * (xyz1v - xyz2v));
+            stvfu(l[i * labWidth + j], c116v * xyz1v - c16v);
+            stvfu(a[i * labWidth + j], c500v * (xyz0v - xyz1v));
+            stvfu(b[i * labWidth + j], c200v * (xyz1v - xyz2v));
         }
 
 #endif
@@ -679,11 +679,11 @@ void RawImageSource::xtrans_interpolate (const int passes, const bool useCieLab)
                     for (int d = 0; d < ndir; d++) {
                         float (*yuv)[ts - 8][ts - 8] = lab; // we use the lab buffer, which has the same dimensions
 #ifdef __SSE2__
-                        vfloat zd2627v = F2V(0.2627f);
-                        vfloat zd6780v = F2V(0.6780f);
-                        vfloat zd0593v = F2V(0.0593f);
-                        vfloat zd56433v = F2V(0.56433f);
-                        vfloat zd67815v = F2V(0.67815f);
+                        vfloat zd2627v = f2v(0.2627f);
+                        vfloat zd6780v = f2v(0.6780f);
+                        vfloat zd0593v = f2v(0.0593f);
+                        vfloat zd56433v = f2v(0.56433f);
+                        vfloat zd67815v = f2v(0.67815f);
 #endif
 
                         for (int row = 4; row < mrow - 4; row++) {
@@ -698,9 +698,9 @@ void RawImageSource::xtrans_interpolate (const int passes, const bool useCieLab)
                                 vfloat redv, greenv, bluev;
                                 vconvertrgbrgbrgbrgb2rrrrggggbbbb(rgb[d][row][col], redv, greenv, bluev);
                                 vfloat yv = zd2627v * redv + zd6780v * bluev + zd0593v * greenv;
-                                STVFU(yuv[0][row - 4][col - 4], yv);
-                                STVFU(yuv[1][row - 4][col - 4], (bluev - yv) * zd56433v);
-                                STVFU(yuv[2][row - 4][col - 4], (redv - yv) * zd67815v);
+                                stvfu(yuv[0][row - 4][col - 4], yv);
+                                stvfu(yuv[1][row - 4][col - 4], (bluev - yv) * zd56433v);
+                                stvfu(yuv[2][row - 4][col - 4], (redv - yv) * zd67815v);
                             }
 
 #endif
@@ -734,9 +734,9 @@ void RawImageSource::xtrans_interpolate (const int passes, const bool useCieLab)
 
                 /* Build homogeneity maps from the derivatives:         */
 #ifdef __SSE2__
-                vfloat eightv = F2V(8.f);
-                vfloat zerov = F2V(0.f);
-                vfloat onev = F2V(1.f);
+                vfloat eightv = f2v(8.f);
+                vfloat zerov = f2v(0.f);
+                vfloat onev = f2v(1.f);
 #endif
 
                 for (int row = 6; row < mrow - 6; row++) {
@@ -744,12 +744,12 @@ void RawImageSource::xtrans_interpolate (const int passes, const bool useCieLab)
 #ifdef __SSE2__
 
                     for (; col < mcol - 9; col += 4) {
-                        vfloat tr1v = vminf(LVFU(drv[0][row - 5][col - 5]), LVFU(drv[1][row - 5][col - 5]));
-                        vfloat tr2v = vminf(LVFU(drv[2][row - 5][col - 5]), LVFU(drv[3][row - 5][col - 5]));
+                        vfloat tr1v = vminf(lvfu(drv[0][row - 5][col - 5]), lvfu(drv[1][row - 5][col - 5]));
+                        vfloat tr2v = vminf(lvfu(drv[2][row - 5][col - 5]), lvfu(drv[3][row - 5][col - 5]));
 
                         if(ndir > 4) {
-                            vfloat tr3v = vminf(LVFU(drv[4][row - 5][col - 5]), LVFU(drv[5][row - 5][col - 5]));
-                            vfloat tr4v = vminf(LVFU(drv[6][row - 5][col - 5]), LVFU(drv[7][row - 5][col - 5]));
+                            vfloat tr3v = vminf(lvfu(drv[4][row - 5][col - 5]), lvfu(drv[5][row - 5][col - 5]));
+                            vfloat tr4v = vminf(lvfu(drv[6][row - 5][col - 5]), lvfu(drv[7][row - 5][col - 5]));
                             tr1v = vminf(tr1v, tr3v);
                             tr1v = vminf(tr1v, tr4v);
                         }
@@ -763,7 +763,7 @@ void RawImageSource::xtrans_interpolate (const int passes, const bool useCieLab)
 
                             for (int v = -1; v <= 1; v++) {
                                 for (int h = -1; h <= 1; h++) {
-                                    tempv += vselfzero(vmaskf_le(LVFU(drv[d][row + v - 5][col + h - 5]), tr1v), onev);
+                                    tempv += vselfzero(vmaskf_le(lvfu(drv[d][row + v - 5][col + h - 5]), tr1v), onev);
                                 }
                             }
 
@@ -821,7 +821,7 @@ void RawImageSource::xtrans_interpolate (const int passes, const bool useCieLab)
 
                         // crunching 16 values at once is faster than summing up column sums
                         for (; col < endcol; col += 16) {
-                            vint v5sumv = (vint)ZEROV;
+                            vint v5sumv = (vint)zerov;
 
                             for(int v = -2; v <= 2; v++)
                                 for(int h = -2; h <= 2; h++) {

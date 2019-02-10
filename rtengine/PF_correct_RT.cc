@@ -78,7 +78,7 @@ void ImProcFunctions::PF_correct_RT(LabImage * lab, double radius, int thresh)
                 int k = 0;
 
                 for (; k < width - 3; k += 4) {
-                    STVFU(fringe[i * width + k], xatan2f(LVFU(lab->b[i][k]), LVFU(lab->a[i][k])));
+                    stvfu(fringe[i * width + k], xatan2f(lvfu(lab->b[i][k]), lvfu(lab->a[i][k])));
                 }
 
                 for (; k < width; k++) {
@@ -230,7 +230,7 @@ void ImProcFunctions::PF_correct_RTcam(CieImage * ncie, double radius, int thres
 #endif
     {
 #ifdef __SSE2__
-        const vfloat piDiv180v = F2V(RT_PI_F_180);
+        const vfloat piDiv180v = f2v(RT_PI_F_180);
 #endif
 #ifdef _OPENMP
         #pragma omp for
@@ -241,9 +241,9 @@ void ImProcFunctions::PF_correct_RTcam(CieImage * ncie, double radius, int thres
 #ifdef __SSE2__
 
             for (; j < width - 3; j += 4) {
-                const vfloat2 sincosvalv = xsincosf(piDiv180v * LVFU(ncie->h_p[i][j]));
-                STVFU(sraa[i][j], LVFU(ncie->C_p[i][j]) * sincosvalv.y);
-                STVFU(srbb[i][j], LVFU(ncie->C_p[i][j]) * sincosvalv.x);
+                const vfloat2 sincosvalv = xsincosf(piDiv180v * lvfu(ncie->h_p[i][j]));
+                stvfu(sraa[i][j], lvfu(ncie->C_p[i][j]) * sincosvalv.y);
+                stvfu(srbb[i][j], lvfu(ncie->C_p[i][j]) * sincosvalv.x);
             }
 #endif
             for (; j < width; j++) {
@@ -274,7 +274,7 @@ void ImProcFunctions::PF_correct_RTcam(CieImage * ncie, double radius, int thres
             if (chCurve) {
                 int j = 0;
                 for (; j < width - 3; j += 4) {
-                    STVFU(fringe[i * width + j], xatan2f(LVFU(srbb[i][j]), LVFU(sraa[i][j])));
+                    stvfu(fringe[i * width + j], xatan2f(lvfu(srbb[i][j]), lvfu(sraa[i][j])));
                 }
 
                 for (; j < width; j++) {
@@ -405,10 +405,10 @@ void ImProcFunctions::PF_correct_RTcam(CieImage * ncie, double radius, int thres
 #ifdef __SSE2__
 
         for (; j < width - 3; j += 4) {
-            const vfloat interav = LVFU(tmaa[i][j]);
-            const vfloat interbv = LVFU(tmbb[i][j]);
-            STVFU(ncie->h_p[i][j], xatan2f(interbv, interav) / F2V(RT_PI_F_180));
-            STVFU(ncie->C_p[i][j], vsqrtf(SQRV(interbv) + SQRV(interav)));
+            const vfloat interav = lvfu(tmaa[i][j]);
+            const vfloat interbv = lvfu(tmbb[i][j]);
+            stvfu(ncie->h_p[i][j], xatan2f(interbv, interav) / f2v(RT_PI_F_180));
+            stvfu(ncie->C_p[i][j], vsqrtf(SQRV(interbv) + SQRV(interav)));
         }
 #endif
         for (; j < width; j++) {
@@ -451,7 +451,7 @@ void ImProcFunctions::Badpixelscam(CieImage * ncie, double radius, int thresh, i
             gaussianBlur(ncie->sh_p, tmL, width, height, radius / 2.0); // low value to avoid artifacts
 
 #ifdef __SSE2__
-            const vfloat shthrv = F2V(shthr);
+            const vfloat shthrv = f2v(shthr);
 #endif
 #ifdef _OPENMP
             #pragma omp for
@@ -475,12 +475,12 @@ void ImProcFunctions::Badpixelscam(CieImage * ncie, double radius, int thresh, i
 #ifdef __SSE2__
 
                 for (; j < width - 5; j += 4) {
-                    const vfloat shfabsv = vabsf(LVFU(ncie->sh_p[i][j]) - LVFU(tmL[i][j]));
-                    vfloat shmedv = ZEROV;
+                    const vfloat shfabsv = vabsf(lvfu(ncie->sh_p[i][j]) - lvfu(tmL[i][j]));
+                    vfloat shmedv = zerov;
 
                     for (int i1 = std::max(0, i - 2); i1 <= std::min(i + 2, height - 1); i1++) {
                         for (int j1 = j - 2; j1 <= j + 2; j1++) {
-                            shmedv += vabsf(LVFU(ncie->sh_p[i1][j1]) - LVFU(tmL[i1][j1]));
+                            shmedv += vabsf(lvfu(ncie->sh_p[i1][j1]) - lvfu(tmL[i1][j1]));
                         }
                     }
 
@@ -606,7 +606,7 @@ void ImProcFunctions::Badpixelscam(CieImage * ncie, double radius, int thresh, i
         {
 
 #ifdef __SSE2__
-            const vfloat piDiv180v = F2V(RT_PI_F_180);
+            const vfloat piDiv180v = f2v(RT_PI_F_180);
 #endif
 #ifdef _OPENMP
             #pragma omp for
@@ -617,9 +617,9 @@ void ImProcFunctions::Badpixelscam(CieImage * ncie, double radius, int thresh, i
 #ifdef __SSE2__
 
                 for (; j < width - 3; j += 4) {
-                    const vfloat2 sincosvalv = xsincosf(piDiv180v * LVFU(ncie->h_p[i][j]));
-                    STVFU(sraa[i][j], LVFU(ncie->C_p[i][j])*sincosvalv.y);
-                    STVFU(srbb[i][j], LVFU(ncie->C_p[i][j])*sincosvalv.x);
+                    const vfloat2 sincosvalv = xsincosf(piDiv180v * lvfu(ncie->h_p[i][j]));
+                    stvfu(sraa[i][j], lvfu(ncie->C_p[i][j])*sincosvalv.y);
+                    stvfu(srbb[i][j], lvfu(ncie->C_p[i][j])*sincosvalv.x);
                 }
 #endif
                 for (; j < width; j++) {
@@ -706,8 +706,8 @@ void ImProcFunctions::Badpixelscam(CieImage * ncie, double radius, int thresh, i
 #endif
             {
 #ifdef __SSE2__
-                const vfloat chrommedv = F2V(chrommed);
-                const vfloat onev = F2V(1.f);
+                const vfloat chrommedv = f2v(chrommed);
+                const vfloat onev = f2v(1.f);
 #endif
 #ifdef _OPENMP
                 #pragma omp for
@@ -717,7 +717,7 @@ void ImProcFunctions::Badpixelscam(CieImage * ncie, double radius, int thresh, i
                     int j = 0;
 #ifdef __SSE2__
                     for (; j < width - 3; j += 4) {
-                        STVFU(badpix[i * width + j], onev / (LVFU(badpix[i * width + j]) + chrommedv));
+                        stvfu(badpix[i * width + j], onev / (lvfu(badpix[i * width + j]) + chrommedv));
                     }
 #endif
                     for (; j < width; j++) {
@@ -756,20 +756,20 @@ void ImProcFunctions::Badpixelscam(CieImage * ncie, double radius, int thresh, i
                     }
 
 #ifdef __SSE2__
-                    const vfloat threshfactorv = F2V(threshfactor);
-                    const vfloat chromv = F2V(chrom);
-                    const vfloat piDiv180v = F2V(RT_PI_F_180);
+                    const vfloat threshfactorv = f2v(threshfactor);
+                    const vfloat chromv = f2v(chrom);
+                    const vfloat piDiv180v = f2v(RT_PI_F_180);
                     for (; j < width - halfwin - 3; j+=4) {
 
-                        vmask selMask = vmaskf_lt(LVFU(badpix[i * width + j]), threshfactorv);
+                        vmask selMask = vmaskf_lt(lvfu(badpix[i * width + j]), threshfactorv);
                         if (_mm_movemask_ps((vfloat)selMask)) {
-                            vfloat atotv = ZEROV, btotv = ZEROV, normv = ZEROV;
+                            vfloat atotv = zerov, btotv = zerov, normv = zerov;
 
                             for (int i1 = std::max(0, i - halfwin + 1); i1 < std::min(height, i + halfwin); i1++) {
                                 for (int j1 = j - halfwin + 1; j1 < j + halfwin; j1++) {
-                                    const vfloat wtv = LVFU(badpix[i1 * width + j1]);
-                                    atotv += wtv * LVFU(sraa[i1][j1]);
-                                    btotv += wtv * LVFU(srbb[i1][j1]);
+                                    const vfloat wtv = lvfu(badpix[i1 * width + j1]);
+                                    atotv += wtv * lvfu(sraa[i1][j1]);
+                                    btotv += wtv * lvfu(srbb[i1][j1]);
                                     normv += wtv;
                                 }
                             }
@@ -779,8 +779,8 @@ void ImProcFunctions::Badpixelscam(CieImage * ncie, double radius, int thresh, i
 
                             selMask = vandm(selMask, vmaskf_lt(CCv, chromv));
                             if (_mm_movemask_ps((vfloat)selMask)) {
-                                STVFU(ncie->h_p[i][j], vself(selMask, xatan2f(interbv, interav) / piDiv180v, LVFU(ncie->h_p[i][j])));
-                                STVFU(ncie->C_p[i][j], vself(selMask, CCv, LVFU(ncie->C_p[i][j])));
+                                stvfu(ncie->h_p[i][j], vself(selMask, xatan2f(interbv, interav) / piDiv180v, lvfu(ncie->h_p[i][j])));
+                                stvfu(ncie->C_p[i][j], vself(selMask, CCv, lvfu(ncie->C_p[i][j])));
                             }
                         }
                     }
@@ -872,7 +872,7 @@ void ImProcFunctions::BadpixelsLab(LabImage * lab, double radius, int thresh, fl
             gaussianBlur(lab->L, tmL, width, height, radius / 2.0); // low value to avoid artifacts
 
 #ifdef __SSE2__
-            const vfloat shthrv = F2V(shthr);
+            const vfloat shthrv = f2v(shthr);
 #endif
 #ifdef _OPENMP
             #pragma omp for
@@ -895,12 +895,12 @@ void ImProcFunctions::BadpixelsLab(LabImage * lab, double radius, int thresh, fl
 #ifdef __SSE2__
 
                 for (; j < width - 5; j += 4) {
-                    const vfloat shfabsv = vabsf(LVFU(lab->L[i][j]) - LVFU(tmL[i][j]));
-                    vfloat shmedv = ZEROV;
+                    const vfloat shfabsv = vabsf(lvfu(lab->L[i][j]) - lvfu(tmL[i][j]));
+                    vfloat shmedv = zerov;
 
                     for (int i1 = std::max(0, i - 2); i1 <= std::min(i + 2, height - 1); i1++) {
                         for (int j1 = j - 2; j1 <= j + 2; j1++) {
-                            shmedv += vabsf(LVFU(lab->L[i1][j1]) - LVFU(tmL[i1][j1]));
+                            shmedv += vabsf(lvfu(lab->L[i1][j1]) - lvfu(tmL[i1][j1]));
                         }
                     }
                     uint8_t mask = _mm_movemask_ps((vfloat)vmaskf_gt(shfabsv, (shmedv - shfabsv) * shthrv));
@@ -1050,8 +1050,8 @@ void ImProcFunctions::BadpixelsLab(LabImage * lab, double radius, int thresh, fl
 #endif
         {
 #ifdef __SSE2__
-            const vfloat chrommedv = F2V(chrommed);
-            const vfloat onev = F2V(1.f);
+            const vfloat chrommedv = f2v(chrommed);
+            const vfloat onev = f2v(1.f);
 #endif
 #ifdef _OPENMP
             #pragma omp for
@@ -1061,7 +1061,7 @@ void ImProcFunctions::BadpixelsLab(LabImage * lab, double radius, int thresh, fl
                 int j = 0;
 #ifdef __SSE2__
                 for (; j < width - 3; j += 4) {
-                    STVFU(badpix[i * width + j], onev / (LVFU(badpix[i * width + j]) + chrommedv));
+                    stvfu(badpix[i * width + j], onev / (lvfu(badpix[i * width + j]) + chrommedv));
                 }
 #endif
                 for (; j < width; j++) {
@@ -1101,27 +1101,27 @@ void ImProcFunctions::BadpixelsLab(LabImage * lab, double radius, int thresh, fl
             }
 
 #ifdef __SSE2__
-            const vfloat chromv = F2V(chrom);
-            const vfloat threshfactorv = F2V(threshfactor);
+            const vfloat chromv = f2v(chrom);
+            const vfloat threshfactorv = f2v(threshfactor);
             for (; j < width - halfwin - 3; j += 4) {
-                vmask selMask = vmaskf_lt(LVFU(badpix[i * width + j]), threshfactorv);
+                vmask selMask = vmaskf_lt(lvfu(badpix[i * width + j]), threshfactorv);
                 if (_mm_movemask_ps(reinterpret_cast<vfloat>(selMask))) {
-                    vfloat atotv = ZEROV, btotv = ZEROV, normv = ZEROV;
+                    vfloat atotv = zerov, btotv = zerov, normv = zerov;
 
                     for (int i1 = std::max(0, i - halfwin + 1); i1 < std::min(height, i + halfwin); i1++) {
                         for (int j1 = j - halfwin + 1; j1 < j + halfwin; j1++) {
-                            const vfloat wtv = LVFU(badpix[i1 * width + j1]);
-                            atotv += wtv * LVFU(lab->a[i1][j1]);
-                            btotv += wtv * LVFU(lab->b[i1][j1]);
+                            const vfloat wtv = lvfu(badpix[i1 * width + j1]);
+                            atotv += wtv * lvfu(lab->a[i1][j1]);
+                            btotv += wtv * lvfu(lab->b[i1][j1]);
                             normv += wtv;
                         }
                     }
                     selMask = vandm(selMask, vmaskf_lt(SQRV(atotv) + SQR(btotv), chromv * SQRV(normv)));
                     if (_mm_movemask_ps(reinterpret_cast<vfloat>(selMask))) {
-                        const vfloat aOrig = LVFU(lab->a[i][j]);
-                        const vfloat bOrig = LVFU(lab->b[i][j]);
-                        STVFU(lab->a[i][j], vself(selMask, atotv / normv, aOrig));
-                        STVFU(lab->b[i][j], vself(selMask, btotv / normv, bOrig));
+                        const vfloat aOrig = lvfu(lab->a[i][j]);
+                        const vfloat bOrig = lvfu(lab->b[i][j]);
+                        stvfu(lab->a[i][j], vself(selMask, atotv / normv, aOrig));
+                        stvfu(lab->b[i][j], vself(selMask, btotv / normv, bOrig));
                     }
                 }
             }

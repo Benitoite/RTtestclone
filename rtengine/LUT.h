@@ -133,9 +133,9 @@ public:
         maxs = size - 2;
         maxsf = (float)maxs;
 #ifdef __SSE2__
-        maxsv =  F2V( maxs );
+        maxsv =  f2v( maxs );
         sizeiv =  _mm_set1_epi32( (int)(size - 1) );
-        sizev = F2V( size - 1 );
+        sizev = f2v( size - 1 );
 #endif
         if (initZero) {
             clear();
@@ -166,9 +166,9 @@ public:
         maxs = size - 2;
         maxsf = (float)maxs;
 #ifdef __SSE2__
-        maxsv =  F2V( maxs );
+        maxsv =  f2v( maxs );
         sizeiv =  _mm_set1_epi32( (int)(size - 1) );
-        sizev = F2V( size - 1 );
+        sizev = f2v( size - 1 );
 #endif
         if (initZero) {
             clear();
@@ -181,8 +181,8 @@ public:
         data = nullptr;
         reset();
 #ifdef __SSE2__
-        maxsv = ZEROV;
-        sizev = ZEROV;
+        maxsv = zerov;
+        sizev = zerov;
         sizeiv = _mm_setzero_si128();
 #endif
     }
@@ -247,9 +247,9 @@ public:
             this->maxs = this->size - 2;
             this->maxsf = (float)this->maxs;
 #ifdef __SSE2__
-            this->maxsv =  F2V( this->size - 2);
+            this->maxsv =  f2v( this->size - 2);
             this->sizeiv =  _mm_set1_epi32( (int)(this->size - 1) );
-            this->sizev = F2V( this->size - 1 );
+            this->sizev = f2v( this->size - 1 );
 #endif
         }
 
@@ -320,7 +320,7 @@ public:
 
         // Clamp and convert to integer values. Extract out of SSE register because all
         // lookup operations use regular addresses.
-        vfloat clampedIndexes = vclampf(indexv, ZEROV, maxsv); // this automagically uses ZEROV in case indexv is NaN
+        vfloat clampedIndexes = vclampf(indexv, zerov, maxsv); // this automagically uses zerov in case indexv is NaN
         vint indexes = _mm_cvttps_epi32(clampedIndexes);
         int indexArray[4];
         _mm_storeu_si128(reinterpret_cast<__m128i*>(&indexArray[0]), indexes);
@@ -330,7 +330,7 @@ public:
         // Cast to int for convenience in the next operation (partial transpose).
         vint values[4];
         for (int i = 0; i < 4; ++i) {
-            values[i] = _mm_castps_si128(LVFU(data[indexArray[i]]));
+            values[i] = _mm_castps_si128(lvfu(data[indexArray[i]]));
         }
 
         // Partial 4x4 transpose operation. We want two new vectors, the first consisting
@@ -340,7 +340,7 @@ public:
         vfloat lower = _mm_castsi128_ps(_mm_unpacklo_epi64(temp0, temp1));
         vfloat upper = _mm_castsi128_ps(_mm_unpackhi_epi64(temp0, temp1));
 
-        vfloat diff = vmaxf(ZEROV, indexv) - _mm_cvtepi32_ps(indexes);
+        vfloat diff = vmaxf(zerov, indexv) - _mm_cvtepi32_ps(indexes);
         return vintpf(diff, upper, lower);
     }
 
@@ -352,7 +352,7 @@ public:
 
         // Clamp and convert to integer values. Extract out of SSE register because all
         // lookup operations use regular addresses.
-        vfloat clampedIndexes = vclampf(indexv, ZEROV, maxsv); // this automagically uses ZEROV in case indexv is NaN
+        vfloat clampedIndexes = vclampf(indexv, zerov, maxsv); // this automagically uses zerov in case indexv is NaN
         vint indexes = _mm_cvttps_epi32(clampedIndexes);
         int indexArray[4];
         _mm_storeu_si128(reinterpret_cast<__m128i*>(&indexArray[0]), indexes);
@@ -362,7 +362,7 @@ public:
         // Cast to int for convenience in the next operation (partial transpose).
         vint values[4];
         for (int i = 0; i < 4; ++i) {
-            values[i] = _mm_castps_si128(LVFU(data[indexArray[i]]));
+            values[i] = _mm_castps_si128(lvfu(data[indexArray[i]]));
         }
 
         // Partial 4x4 transpose operation. We want two new vectors, the first consisting
@@ -372,7 +372,7 @@ public:
         vfloat lower = _mm_castsi128_ps(_mm_unpacklo_epi64(temp0, temp1));
         vfloat upper = _mm_castsi128_ps(_mm_unpackhi_epi64(temp0, temp1));
 
-        vfloat diff = vclampf(indexv, ZEROV, sizev) - _mm_cvtepi32_ps(indexes); // this automagically uses ZEROV in case indexv is NaN
+        vfloat diff = vclampf(indexv, zerov, sizev) - _mm_cvtepi32_ps(indexes); // this automagically uses zerov in case indexv is NaN
         return vintpf(diff, upper, lower);
     }
 
@@ -383,7 +383,7 @@ public:
 
         // Clamp and convert to integer values. Extract out of SSE register because all
         // lookup operations use regular addresses.
-        vfloat clampedIndexes = vclampf(indexv, ZEROV, maxsv); // this automagically uses ZEROV in case indexv is NaN
+        vfloat clampedIndexes = vclampf(indexv, zerov, maxsv); // this automagically uses zerov in case indexv is NaN
         vint indexes = _mm_cvttps_epi32(clampedIndexes);
         int indexArray[4];
         _mm_storeu_si128(reinterpret_cast<__m128i*>(&indexArray[0]), indexes);
@@ -393,7 +393,7 @@ public:
         // Cast to int for convenience in the next operation (partial transpose).
         vint values[4];
         for (int i = 0; i < 4; ++i) {
-            values[i] = _mm_castps_si128(LVFU(data[indexArray[i]]));
+            values[i] = _mm_castps_si128(lvfu(data[indexArray[i]]));
         }
 
         // Partial 4x4 transpose operation. We want two new vectors, the first consisting
@@ -421,7 +421,7 @@ public:
     vfloat operator[](vint idxv) const
     {
         // convert to float because SSE2 has no min/max for 32bit integers
-        vfloat tempv = vclampf(_mm_cvtepi32_ps(idxv), ZEROV, sizev); // this automagically uses ZEROV in case idxv is NaN (which will never happen because it is a vector of int)
+        vfloat tempv = vclampf(_mm_cvtepi32_ps(idxv), zerov, sizev); // this automagically uses zerov in case idxv is NaN (which will never happen because it is a vector of int)
         idxv = _mm_cvttps_epi32(tempv);
         // access the LUT 4 times. Trust the compiler. It generates good code here, better than hand written SSE code
         return _mm_setr_ps(data[_mm_cvtsi128_si32(idxv)],
@@ -588,9 +588,9 @@ public:
         int i = 0;
 #ifdef __SSE2__
         vfloat iv = _mm_set_ps(3.f, 2.f, 1.f, 0.f);
-        vfloat fourv = F2V(4.f);
-        vint sumv = (vint)ZEROV;
-        vfloat avgv = ZEROV;
+        vfloat fourv = f2v(4.f);
+        vint sumv = (vint)zerov;
+        vfloat avgv = zerov;
 
         for(; i < static_cast<int>(size) - 3; i += 4) {
             vint datav = _mm_loadu_si128((__m128i*)&data[i]);
@@ -641,9 +641,9 @@ public:
         maxs = size - 2;
         maxsf = (float)maxs;
 #ifdef __SSE2__
-        maxsv =  F2V( size - 2);
+        maxsv =  f2v( size - 2);
         sizeiv =  _mm_set1_epi32( (int)(size - 1) );
-        sizev = F2V( size - 1 );
+        sizev = f2v( size - 1 );
 #endif
     }
 

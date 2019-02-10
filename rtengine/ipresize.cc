@@ -279,14 +279,14 @@ void ImProcFunctions::Lanczos (const LabImage* src, LabImage* dst, float scale)
                 for (int ii = ii0; ii < ii1; ii++) {
                     int k = ii - ii0;
                     wkv = _mm_set1_ps (w[k]);
-                    Lv += wkv * LVFU (src->L[ii][j]);
-                    av += wkv * LVFU (src->a[ii][j]);
-                    bv += wkv * LVFU (src->b[ii][j]);
+                    Lv += wkv * lvfu (src->L[ii][j]);
+                    av += wkv * lvfu (src->a[ii][j]);
+                    bv += wkv * lvfu (src->b[ii][j]);
                 }
 
-                STVF (lL[j], Lv);
-                STVF (la[j], av);
-                STVF (lb[j], bv);
+                stvf (lL[j], Lv);
+                stvf (la[j], av);
+                stvf (lb[j], bv);
             }
 
 #else

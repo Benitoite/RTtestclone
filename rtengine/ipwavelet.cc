@@ -733,15 +733,15 @@ void ImProcFunctions::ip_wavelet(LabImage * lab, LabImage * dst, int kall, const
 
                     for (j = tileleft; j < tileright - 3; j += 4) {
                         int j1 = j - tileleft;
-                        av = LVFU(lab->a[i][j]);
-                        bv = LVFU(lab->b[i][j]);
+                        av = lvfu(lab->a[i][j]);
+                        bv = lvfu(lab->b[i][j]);
                         huev = xatan2f(bv, av);
                         chrov = vsqrtf(SQRV(av) + SQRV(bv)) / c327d68v;
                         _mm_storeu_ps(&varhue[i1][j1], huev);
                         _mm_storeu_ps(&varchro[i1][j1], chrov);
 
                         if(labco != lab) {
-                            _mm_storeu_ps(&(labco->L[i1][j1]), LVFU(lab->L[i][j]));
+                            _mm_storeu_ps(&(labco->L[i1][j1]), lvfu(lab->L[i][j]));
                             _mm_storeu_ps(&(labco->a[i1][j1]), av);
                             _mm_storeu_ps(&(labco->b[i1][j1]), bv);
                         }
@@ -1100,9 +1100,9 @@ void ImProcFunctions::ip_wavelet(LabImage * lab, LabImage * dst, int kall, const
                             vmask xyMask;
 
                             for(col = 0; col < rowWidth - 3; col += 4) {
-                                av = LVFU(labco->a[i1][col]);
-                                bv = LVFU(labco->b[i1][col]);
-                                STVF(atan2Buffer[col], xatan2f(bv, av));
+                                av = lvfu(labco->a[i1][col]);
+                                bv = lvfu(labco->b[i1][col]);
+                                stvf(atan2Buffer[col], xatan2f(bv, av));
 
                                 cv = vsqrtf(SQRV(av) + SQRV(bv));
                                 yv = av / cv;
@@ -1110,9 +1110,9 @@ void ImProcFunctions::ip_wavelet(LabImage * lab, LabImage * dst, int kall, const
                                 xyMask = vmaskf_eq(zerov, cv);
                                 yv = vself(xyMask, onev, yv);
                                 xv = vself(xyMask, zerov, xv);
-                                STVF(yBuffer[col], yv);
-                                STVF(xBuffer[col], xv);
-                                STVF(chprovBuffer[col], cv / c327d68v);
+                                stvf(yBuffer[col], yv);
+                                stvf(xBuffer[col], xv);
+                                stvf(chprovBuffer[col], cv / c327d68v);
 
                             }
 
@@ -1455,13 +1455,13 @@ void ImProcFunctions::CompressDR(float *Source, int W_L, int H_L, float Compress
     #pragma omp parallel
 #endif
     {
-        vfloat exponentv = F2V(exponent);
+        vfloat exponentv = f2v(exponent);
 #ifdef _OPENMP
         #pragma omp for
 #endif
 
         for(int i = 0; i < n - 3; i += 4) {
-            STVFU(Source[i], xexpf(xlogf(LVFU(Source[i])) * exponentv));
+            stvfu(Source[i], xexpf(xlogf(lvfu(Source[i])) * exponentv));
         }
     }
 
@@ -1989,12 +1989,12 @@ void ImProcFunctions::WaveletAandBAllAB(wavelet_decomposition &WaveletCoeffs_a, 
                 int k;
 
                 for (k = 0; k < W_L - 3; k += 4) {
-                    __m128 av = LVFU(WavCoeffs_a0[i * W_L + k]);
-                    __m128 bv = LVFU(WavCoeffs_b0[i * W_L + k]);
+                    __m128 av = lvfu(WavCoeffs_a0[i * W_L + k]);
+                    __m128 bv = lvfu(WavCoeffs_b0[i * W_L + k]);
                     __m128 huev = xatan2f(bv, av);
                     __m128 chrv = vsqrtf(SQRV(av) + SQRV(bv));
-                    STVF(huebuffer[k], huev);
-                    STVF(chrbuffer[k], chrv);
+                    stvf(huebuffer[k], huev);
+                    stvf(chrbuffer[k], chrv);
                 }
 
                 for(; k < W_L; k++) {

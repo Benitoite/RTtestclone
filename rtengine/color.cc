@@ -551,21 +551,21 @@ void Color::rgb2hsl(vfloat r, vfloat g, vfloat b, vfloat &h, vfloat &s, vfloat &
     vfloat minv = vminf(r, vminf(g, b));
     vfloat C = maxv - minv;
     vfloat tempv = maxv + minv;
-    l = (tempv) * F2V(7.6295109e-6f);
+    l = (tempv) * f2v(7.6295109e-6f);
     s = (maxv - minv);
-    s /= vself(vmaskf_gt(l, F2V(0.5f)), F2V(131070.f) - tempv, tempv);
+    s /= vself(vmaskf_gt(l, f2v(0.5f)), f2v(131070.f) - tempv, tempv);
 
-    h = F2V(4.f) * C + r - g;
-    h = vself(vmaskf_eq(g, maxv), F2V(2.f) * C + b - r, h);
+    h = f2v(4.f) * C + r - g;
+    h = vself(vmaskf_eq(g, maxv), f2v(2.f) * C + b - r, h);
     h = vself(vmaskf_eq(r, maxv), g - b, h);
 
-    h /= (F2V(6.f) * C);
-    vfloat onev = F2V(1.f);
-    h = vself(vmaskf_lt(h, ZEROV), h + onev, h);
+    h /= (f2v(6.f) * C);
+    vfloat onev = f2v(1.f);
+    h = vself(vmaskf_lt(h, zerov), h + onev, h);
 
-    vmask zeromask = vmaskf_lt(C, F2V(0.65535f));
-    h = vself(zeromask, ZEROV, h);
-    s = vself(zeromask, ZEROV, s);
+    vmask zeromask = vmaskf_lt(C, f2v(0.65535f));
+    h = vself(zeromask, zerov, h);
+    s = vself(zeromask, zerov, s);
 }
 #endif
 
@@ -610,10 +610,10 @@ float Color::hue2rgbfloat(float p, float q, float t)
 #ifdef __SSE2__
 vfloat Color::hue2rgb(vfloat p, vfloat q, vfloat t)
 {
-    vfloat fourv = F2V(4.f);
-    vfloat threev = F2V(3.f);
+    vfloat fourv = f2v(4.f);
+    vfloat threev = f2v(3.f);
     vfloat sixv = threev + threev;
-    t = vself(vmaskf_lt(t, ZEROV), t + sixv, t);
+    t = vself(vmaskf_lt(t, zerov), t + sixv, t);
     t = vself(vmaskf_gt(t, sixv), t - sixv, t);
 
     vfloat temp1 = p + (q - p) * t;
@@ -654,19 +654,19 @@ void Color::hsl2rgb (vfloat h, vfloat s, vfloat l, vfloat &r, vfloat &g, vfloat 
 {
 
     vfloat m2 = s * l;
-    m2 = vself(vmaskf_gt(l, F2V(0.5f)), s - m2, m2);
+    m2 = vself(vmaskf_gt(l, f2v(0.5f)), s - m2, m2);
     m2 += l;
 
-    vfloat twov = F2V(2.f);
-    vfloat c65535v = F2V(65535.f);
+    vfloat twov = f2v(2.f);
+    vfloat c65535v = f2v(65535.f);
     vfloat m1 = l + l - m2;
 
-    h *= F2V(6.f);
+    h *= f2v(6.f);
     r = c65535v * hue2rgb (m1, m2, h + twov);
     g = c65535v * hue2rgb (m1, m2, h);
     b = c65535v * hue2rgb (m1, m2, h - twov);
 
-    vmask selectsMask = vmaskf_eq(ZEROV, s);
+    vmask selectsMask = vmaskf_eq(zerov, s);
     vfloat lc65535v = c65535v * l;
     r = vself(selectsMask, lc65535v, r);
     g = vself(selectsMask, lc65535v, g);
@@ -1008,13 +1008,13 @@ void Color::trcGammaBW (float &r, float &g, float &b, float gammabwr, float gamm
     // correct gamma for black and white image : pseudo TRC curve of ICC profile
     vfloat rgbv = _mm_set_ps(0.f, r, r, r); // input channel is always r
     vfloat gammabwv = _mm_set_ps(0.f, gammabwb, gammabwg, gammabwr);
-    vfloat c65535v = F2V(65535.f);
+    vfloat c65535v = f2v(65535.f);
     rgbv /= c65535v;
-    rgbv = vmaxf(rgbv, ZEROV);
+    rgbv = vmaxf(rgbv, zerov);
     rgbv = xpowf(rgbv, gammabwv);
     rgbv *= c65535v;
     float temp[4] ALIGNED16;
-    STVF(temp[0], rgbv);
+    stvf(temp[0], rgbv);
     r = temp[0];
     g = temp[1];
     b = temp[2];
@@ -1022,15 +1022,15 @@ void Color::trcGammaBW (float &r, float &g, float &b, float gammabwr, float gamm
 void Color::trcGammaBWRow (float *r, float *g, float *b, int width, float gammabwr, float gammabwg, float gammabwb)
 {
     // correct gamma for black and white image : pseudo TRC curve of ICC profile
-    vfloat c65535v = F2V(65535.f);
-    vfloat gammabwrv = F2V(gammabwr);
-    vfloat gammabwgv = F2V(gammabwg);
-    vfloat gammabwbv = F2V(gammabwb);
+    vfloat c65535v = f2v(65535.f);
+    vfloat gammabwrv = f2v(gammabwr);
+    vfloat gammabwgv = f2v(gammabwg);
+    vfloat gammabwbv = f2v(gammabwb);
     int i = 0;
     for(; i < width - 3; i += 4 ) {
         vfloat inv = _mm_loadu_ps(&r[i]); // input channel is always r
         inv /= c65535v;
-        inv = vmaxf(inv, ZEROV);
+        inv = vmaxf(inv, zerov);
         vfloat rv = xpowf(inv, gammabwrv);
         vfloat gv = xpowf(inv, gammabwgv);
         vfloat bv = xpowf(inv, gammabwbv);
@@ -1629,12 +1629,12 @@ void Color::gammaf2lut (LUTf &gammacurve, float gamma, float start, float slope,
 #ifdef __SSE2__
     // SSE2 version is more than 6 times faster than scalar version
     vfloat iv = _mm_set_ps(3.f, 2.f, 1.f, 0.f);
-    vfloat fourv = F2V(4.f);
-    vfloat gammav = F2V(1.f / gamma);
-    vfloat slopev = F2V((slope / divisor) * factor);
-    vfloat divisorv = F2V(xlogf(divisor));
-    vfloat factorv = F2V(factor);
-    vfloat comparev = F2V(start * divisor);
+    vfloat fourv = f2v(4.f);
+    vfloat gammav = f2v(1.f / gamma);
+    vfloat slopev = f2v((slope / divisor) * factor);
+    vfloat divisorv = f2v(xlogf(divisor));
+    vfloat factorv = f2v(factor);
+    vfloat comparev = f2v(start * divisor);
     int border = start * divisor;
     int border1 = border - (border & 3);
     int border2 = border1 + 4;
@@ -1642,20 +1642,20 @@ void Color::gammaf2lut (LUTf &gammacurve, float gamma, float start, float slope,
 
     for(; i < border1; i += 4) {
         vfloat resultv = iv * slopev;
-        STVFU(gammacurve[i], resultv);
+        stvfu(gammacurve[i], resultv);
         iv += fourv;
     }
 
     for(; i < border2; i += 4) {
         vfloat result0v = iv * slopev;
         vfloat result1v = xexpf((xlogf(iv) - divisorv) * gammav) * factorv;
-        STVFU(gammacurve[i], vself(vmaskf_le(iv, comparev), result0v, result1v));
+        stvfu(gammacurve[i], vself(vmaskf_le(iv, comparev), result0v, result1v));
         iv += fourv;
     }
 
     for(; i < 65536; i += 4) {
         vfloat resultv = xexpfNoCheck((xlogfNoCheck(iv) - divisorv) * gammav) * factorv;
-        STVFU(gammacurve[i], resultv);
+        stvfu(gammacurve[i], resultv);
         iv += fourv;
     }
 
@@ -1673,20 +1673,20 @@ void Color::gammanf2lut (LUTf &gammacurve, float gamma, float divisor, float fac
 #ifdef __SSE2__
     // SSE2 version is more than 6 times faster than scalar version
     vfloat iv = _mm_set_ps(3.f, 2.f, 1.f, 0.f);
-    vfloat fourv = F2V(4.f);
-    vfloat gammav = F2V(1.f / gamma);
-    vfloat divisorv = F2V(xlogf(divisor));
-    vfloat factorv = F2V(factor);
+    vfloat fourv = f2v(4.f);
+    vfloat gammav = f2v(1.f / gamma);
+    vfloat divisorv = f2v(xlogf(divisor));
+    vfloat factorv = f2v(factor);
 
     // first input value is zero => we have to use the xlogf function which checks this
     vfloat resultv = xexpf((xlogf(iv) - divisorv) * gammav) * factorv;
-    STVFU(gammacurve[0], resultv);
+    stvfu(gammacurve[0], resultv);
     iv += fourv;
 
     // inside the loop we can use xlogfNoCheck and xexpfNoCheck because we know about the input values
     for(int i = 4; i < 65536; i += 4) {
         resultv = xexpfNoCheck((xlogfNoCheck(iv) - divisorv) * gammav) * factorv;
-        STVFU(gammacurve[i], resultv);
+        stvfu(gammacurve[i], resultv);
         iv += fourv;
     }
 
@@ -1726,19 +1726,19 @@ void Color::L2XYZ(float L, float &x, float &y, float &z) // for black & white
 #ifdef __SSE2__
 void Color::Lab2XYZ(vfloat L, vfloat a, vfloat b, vfloat &x, vfloat &y, vfloat &z)
 {
-    vfloat c327d68 = F2V(327.68f);
+    vfloat c327d68 = f2v(327.68f);
     L /= c327d68;
     a /= c327d68;
     b /= c327d68;
-    vfloat fy = F2V(c1By116) * L + F2V(c16By116);
-    vfloat fx = F2V(0.002f) * a + fy;
-    vfloat fz = fy - (F2V(0.005f) * b);
-    vfloat c65535 = F2V(65535.f);
-    x = c65535 * f2xyz(fx) * F2V(D50x);
-    z = c65535 * f2xyz(fz) * F2V(D50z);
+    vfloat fy = f2v(c1By116) * L + f2v(c16By116);
+    vfloat fx = f2v(0.002f) * a + fy;
+    vfloat fz = fy - (f2v(0.005f) * b);
+    vfloat c65535 = f2v(65535.f);
+    x = c65535 * f2xyz(fx) * f2v(D50x);
+    z = c65535 * f2xyz(fz) * f2v(D50z);
     vfloat res1 = fy * fy * fy;
-    vfloat res2 = L / F2V(kappa);
-    y = vself(vmaskf_gt(L, F2V(epskap)), res1, res2);
+    vfloat res2 = L / f2v(kappa);
+    y = vself(vmaskf_gt(L, f2v(epskap)), res1, res2);
     y *= c65535;
 }
 #endif // __SSE2__
@@ -1771,21 +1771,21 @@ void Color::RGB2Lab(float *R, float *G, float *B, float *L, float *a, float *b, 
 {
 
 #ifdef __SSE2__
-    vfloat minvalfv = F2V(0.f);
-    vfloat maxvalfv = F2V(MAXVALF);
-    vfloat c500v = F2V(500.f);
-    vfloat c200v = F2V(200.f);
+    vfloat minvalfv = f2v(0.f);
+    vfloat maxvalfv = f2v(MAXVALF);
+    vfloat c500v = f2v(500.f);
+    vfloat c200v = f2v(200.f);
 #endif
     int i = 0;
     
 #ifdef __SSE2__
     for(;i < width - 3; i+=4) {
-        const vfloat rv = LVFU(R[i]);
-        const vfloat gv = LVFU(G[i]);
-        const vfloat bv = LVFU(B[i]);
-        const vfloat xv = F2V(wp[0][0]) * rv + F2V(wp[0][1]) * gv + F2V(wp[0][2]) * bv;
-        const vfloat yv = F2V(wp[1][0]) * rv + F2V(wp[1][1]) * gv + F2V(wp[1][2]) * bv;
-        const vfloat zv = F2V(wp[2][0]) * rv + F2V(wp[2][1]) * gv + F2V(wp[2][2]) * bv;
+        const vfloat rv = lvfu(R[i]);
+        const vfloat gv = lvfu(G[i]);
+        const vfloat bv = lvfu(B[i]);
+        const vfloat xv = f2v(wp[0][0]) * rv + f2v(wp[0][1]) * gv + f2v(wp[0][2]) * bv;
+        const vfloat yv = f2v(wp[1][0]) * rv + f2v(wp[1][1]) * gv + f2v(wp[1][2]) * bv;
+        const vfloat zv = f2v(wp[2][0]) * rv + f2v(wp[2][1]) * gv + f2v(wp[2][2]) * bv;
 
         vmask maxMask = vmaskf_gt(vmaxf(xv, vmaxf(yv, zv)), maxvalfv);
         vmask minMask = vmaskf_lt(vminf(xv, vminf(yv, zv)), minvalfv);
@@ -1808,9 +1808,9 @@ void Color::RGB2Lab(float *R, float *G, float *B, float *L, float *a, float *b, 
             const vfloat fy = cachef[yv];
             const vfloat fz = cachef[zv];
 
-            STVFU(L[i], cachefy[yv]);
-            STVFU(a[i], c500v * (fx - fy));
-            STVFU(b[i], c200v * (fy - fz));
+            stvfu(L[i], cachefy[yv]);
+            stvfu(a[i], c500v * (fx - fy));
+            stvfu(b[i], c200v * (fy - fz));
         }
     }
 #endif
@@ -1837,17 +1837,17 @@ void Color::RGB2L(float *R, float *G, float *B, float *L, const float wp[3][3], 
 {
 
 #ifdef __SSE2__
-    vfloat minvalfv = F2V(0.f);
-    vfloat maxvalfv = F2V(MAXVALF);
+    vfloat minvalfv = f2v(0.f);
+    vfloat maxvalfv = f2v(MAXVALF);
 #endif
     int i = 0;
     
 #ifdef __SSE2__
     for(;i < width - 3; i+=4) {
-        const vfloat rv = LVFU(R[i]);
-        const vfloat gv = LVFU(G[i]);
-        const vfloat bv = LVFU(B[i]);
-        const vfloat yv = F2V(wp[1][0]) * rv + F2V(wp[1][1]) * gv + F2V(wp[1][2]) * bv;
+        const vfloat rv = lvfu(R[i]);
+        const vfloat gv = lvfu(G[i]);
+        const vfloat bv = lvfu(B[i]);
+        const vfloat yv = f2v(wp[1][0]) * rv + f2v(wp[1][1]) * gv + f2v(wp[1][2]) * bv;
 
         vmask maxMask = vmaskf_gt(yv, maxvalfv);
         vmask minMask = vmaskf_lt(yv, minvalfv);
@@ -1858,7 +1858,7 @@ void Color::RGB2L(float *R, float *G, float *B, float *L, const float wp[3][3], 
                 L[i + k] = computeXYZ2LabY(y);
             }
         } else {
-            STVFU(L[i], cachefy[yv]);
+            stvfu(L[i], cachefy[yv]);
         }
     }
 #endif
@@ -1935,12 +1935,12 @@ void Color::Lab2Lch(float a, float b, float &c, float &h)
 void Color::Lab2Lch(float *a, float *b, float *c, float *h, int w)
 {
     int i = 0;
-    vfloat c327d68v = F2V(327.68f);
+    vfloat c327d68v = f2v(327.68f);
     for (; i < w - 3; i += 4) {
-        vfloat av = LVFU(a[i]);
-        vfloat bv = LVFU(b[i]);
-        STVFU(c[i], vsqrtf(SQRV(av) + SQRV(bv)) / c327d68v);
-        STVFU(h[i], xatan2f(bv, av));
+        vfloat av = lvfu(a[i]);
+        vfloat bv = lvfu(b[i]);
+        stvfu(c[i], vsqrtf(SQRV(av) + SQRV(bv)) / c327d68v);
+        stvfu(h[i], xatan2f(bv, av));
     }
     for (; i < w; ++i) {
         c[i] = sqrtf(SQR(a[i]) + SQR(b[i])) / 327.68f;
@@ -2876,8 +2876,8 @@ void Color::LabGamutMunsell(float *labL, float *laba, float *labb, const int N, 
     int k;
 
     for (k = 0; k < N - 3; k += 4) {
-        av = LVFU(laba[k]);
-        bv = LVFU(labb[k]);
+        av = lvfu(laba[k]);
+        bv = lvfu(labb[k]);
         _mm_storeu_ps(&HHBuffer[k], xatan2f(bv, av));
         _mm_storeu_ps(&CCBuffer[k], vsqrtf(SQRV(av) + SQRV(bv)) / c327d68v);
     }

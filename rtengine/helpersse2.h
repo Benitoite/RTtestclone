@@ -38,41 +38,41 @@ namespace
 
 //
 
-INLINE vfloat LVF(const float& x)
+INLINE vfloat lvf(const float& x)
 {
     return _mm_load_ps(&x);
 }
 
-INLINE vfloat LVFU(const float& x)
+INLINE vfloat lvfu(const float& x)
 {
     return _mm_loadu_ps(&x);
 }
 
-INLINE void STVF(float& x, vfloat y)
+INLINE void stvf(float& x, vfloat y)
 {
     _mm_store_ps(&x, y);
 }
 
-INLINE void STVFU(float& x, vfloat y)
+INLINE void stvfu(float& x, vfloat y)
 {
     _mm_storeu_ps(&x, y);
 }
 
 #ifdef __AVX__
 template<std::uint8_t FP3, std::uint8_t FP2, std::uint8_t FP1, std::uint8_t FP0>
-INLINE vfloat PERMUTEPS(vfloat a)
+INLINE vfloat permuteps(vfloat a)
 {
     return _mm_permute_ps(a, _MM_SHUFFLE(FP3, FP2, FP1, FP0));
 }
 #else
 template<std::uint8_t FP3, std::uint8_t FP2, std::uint8_t FP1, std::uint8_t FP0>
-INLINE vfloat PERMUTEPS(vfloat a)
+INLINE vfloat permuteps(vfloat a)
 {
     return _mm_shuffle_ps(a, a, _MM_SHUFFLE(FP3, FP2, FP1, FP0));
 }
 #endif
 
-INLINE vfloat LC2VFU(float &a)
+INLINE vfloat lc2vfu(float &a)
 {
     // Load 8 floats from a and combine a[0],a[2],a[4] and a[6] into a vector of 4 floats
     vfloat a1 = _mm_loadu_ps( &a );
@@ -84,7 +84,7 @@ INLINE vfloat LC2VFU(float &a)
 // Store a vector of 4 floats in a[0],a[2],a[4] and a[6]
 #ifdef __SSE4_1__
 // SSE4.1 => use _mm_blend_ps instead of _mm_set_epi32 and vself
-INLINE void STC2VFU(float& a, vfloat v)
+INLINE void stc2vfu(float& a, vfloat v)
 {
     vfloat tst1_v = _mm_loadu_ps(&a);
     vfloat tst2_v = _mm_unpacklo_ps(v,v);
@@ -94,7 +94,7 @@ INLINE void STC2VFU(float& a, vfloat v)
     _mm_storeu_ps(&a + 4, _mm_blend_ps(tst1_v, tst2_v, 5));
 }
 #else
-INLINE void STC2VFU(float& a, vfloat v)
+INLINE void stc2vfu(float& a, vfloat v)
 {
     vfloat tst1_v = _mm_loadu_ps(&a);
     vfloat tst2_v = _mm_unpacklo_ps(v, v);
@@ -106,9 +106,9 @@ INLINE void STC2VFU(float& a, vfloat v)
 }
 #endif
 
-constexpr vfloat ZEROV = {};
+constexpr vfloat zerov = {};
 
-INLINE vfloat F2V(float a)
+INLINE vfloat f2v(float a)
 {
     return _mm_set1_ps(a);
 }

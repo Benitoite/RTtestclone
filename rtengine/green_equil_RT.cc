@@ -107,7 +107,7 @@ void RawImageSource::green_equilibrate(const GreenEqulibrateThreshold &thresh, a
 #ifdef __SSE2__
 
         for (; j < width - 7; j += 8) {
-            STVFU(cfa[i][j >> 1], LC2VFU(rawData[i][j]));
+            stvfu(cfa[i][j >> 1], lc2vfu(rawData[i][j]));
         }
 
 #endif
@@ -133,11 +133,11 @@ void RawImageSource::green_equilibrate(const GreenEqulibrateThreshold &thresh, a
 #endif
     {
 #ifdef __SSE2__
-        vfloat zd5v = F2V(0.5f);
-        vfloat onev = F2V(1.f);
-        // vfloat threshv = F2V(thresh);
-        // vfloat thresh6v = F2V(thresh6);
-        vfloat epsv = F2V(eps);
+        vfloat zd5v = f2v(0.5f);
+        vfloat onev = f2v(1.f);
+        // vfloat threshv = f2v(thresh);
+        // vfloat thresh6v = f2v(thresh6);
+        vfloat epsv = f2v(eps);
 #endif
 #ifdef _OPENMP
         #pragma omp for schedule(dynamic,16)
@@ -149,14 +149,14 @@ void RawImageSource::green_equilibrate(const GreenEqulibrateThreshold &thresh, a
 
             for (; cc < width - 12; cc += 8) {
                 //neighbour checking code from Manuel Llorens Garcia
-                vfloat o1_1 = LVFU(cfa[rr - 1][(cc - 1) >> 1]);
-                vfloat o1_2 = LVFU(cfa[rr - 1][(cc + 1) >> 1]);
-                vfloat o1_3 = LVFU(cfa[rr + 1][(cc - 1) >> 1]);
-                vfloat o1_4 = LVFU(cfa[rr + 1][(cc + 1) >> 1]);
-                vfloat o2_1 = LVFU(cfa[rr - 2][cc >> 1]);
-                vfloat o2_2 = LVFU(cfa[rr + 2][cc >> 1]);
-                vfloat o2_3 = LVFU(cfa[rr][(cc >> 1) - 1]);
-                vfloat o2_4 = LVFU(cfa[rr][(cc >> 1) + 1]);
+                vfloat o1_1 = lvfu(cfa[rr - 1][(cc - 1) >> 1]);
+                vfloat o1_2 = lvfu(cfa[rr - 1][(cc + 1) >> 1]);
+                vfloat o1_3 = lvfu(cfa[rr + 1][(cc - 1) >> 1]);
+                vfloat o1_4 = lvfu(cfa[rr + 1][(cc + 1) >> 1]);
+                vfloat o2_1 = lvfu(cfa[rr - 2][cc >> 1]);
+                vfloat o2_2 = lvfu(cfa[rr + 2][cc >> 1]);
+                vfloat o2_3 = lvfu(cfa[rr][(cc >> 1) - 1]);
+                vfloat o2_4 = lvfu(cfa[rr][(cc >> 1) + 1]);
 
                 vfloat d1 = (o1_1 + o1_2 + o1_3 + o1_4);
                 vfloat d2 = (o2_1 + o2_2 + o2_3 + o2_4);
@@ -168,34 +168,34 @@ void RawImageSource::green_equilibrate(const GreenEqulibrateThreshold &thresh, a
                 for (int k = 0; k < 4; ++k) {
                     tfv[k] = thresh(rr, cc + 2 * k);
                 }
-                vfloat tf6v = F2V(6.f) * tfv;
+                vfloat tf6v = f2v(6.f) * tfv;
 
                 vmask mask1 = vmaskf_lt(c1 + c2, tf6v * vabsf(d1 - d2));
 
                 if (_mm_movemask_ps((vfloat)mask1)) {  // if for any of the 4 pixels the condition is true, do the maths for all 4 pixels and mask the unused out at the end
                     //pixel interpolation
-                    vfloat gin = LVFU(cfa[rr][cc >> 1]);
+                    vfloat gin = lvfu(cfa[rr][cc >> 1]);
 
-                    vfloat gmp2p2 = gin - LVFU(cfa[rr + 2][(cc >> 1) + 1]);
-                    vfloat gmm2m2 = gin - LVFU(cfa[rr - 2][(cc >> 1) - 1]);
-                    vfloat gmm2p2 = gin - LVFU(cfa[rr - 2][(cc >> 1) + 1]);
-                    vfloat gmp2m2 = gin - LVFU(cfa[rr + 2][(cc >> 1) - 1]);
+                    vfloat gmp2p2 = gin - lvfu(cfa[rr + 2][(cc >> 1) + 1]);
+                    vfloat gmm2m2 = gin - lvfu(cfa[rr - 2][(cc >> 1) - 1]);
+                    vfloat gmm2p2 = gin - lvfu(cfa[rr - 2][(cc >> 1) + 1]);
+                    vfloat gmp2m2 = gin - lvfu(cfa[rr + 2][(cc >> 1) - 1]);
 
                     vfloat gse = o1_4 + zd5v * gmp2p2;
                     vfloat gnw = o1_1 + zd5v * gmm2m2;
                     vfloat gne = o1_2 + zd5v * gmm2p2;
                     vfloat gsw = o1_3 + zd5v * gmp2m2;
 
-                    vfloat wtse = onev / (epsv + SQRV(gmp2p2) + SQRV(LVFU(cfa[rr + 3][(cc + 3) >> 1]) - o1_4));
-                    vfloat wtnw = onev / (epsv + SQRV(gmm2m2) + SQRV(LVFU(cfa[rr - 3][(cc - 3) >> 1]) - o1_1));
-                    vfloat wtne = onev / (epsv + SQRV(gmm2p2) + SQRV(LVFU(cfa[rr - 3][(cc + 3) >> 1]) - o1_2));
-                    vfloat wtsw = onev / (epsv + SQRV(gmp2m2) + SQRV(LVFU(cfa[rr + 3][(cc - 3) >> 1]) - o1_3));
+                    vfloat wtse = onev / (epsv + SQRV(gmp2p2) + SQRV(lvfu(cfa[rr + 3][(cc + 3) >> 1]) - o1_4));
+                    vfloat wtnw = onev / (epsv + SQRV(gmm2m2) + SQRV(lvfu(cfa[rr - 3][(cc - 3) >> 1]) - o1_1));
+                    vfloat wtne = onev / (epsv + SQRV(gmm2p2) + SQRV(lvfu(cfa[rr - 3][(cc + 3) >> 1]) - o1_2));
+                    vfloat wtsw = onev / (epsv + SQRV(gmp2m2) + SQRV(lvfu(cfa[rr + 3][(cc - 3) >> 1]) - o1_3));
 
                     vfloat ginterp = (gse * wtse + gnw * wtnw + gne * wtne + gsw * wtsw) / (wtse + wtnw + wtne + wtsw);
 
                     vfloat val = vself(vmaskf_lt(ginterp - gin, tfv * (ginterp + gin)), zd5v * (ginterp + gin), gin);
                     val = vself(mask1, val, gin);
-                    STC2VFU(rawData[rr][cc], val);
+                    stc2vfu(rawData[rr][cc], val);
                 }
             }
 

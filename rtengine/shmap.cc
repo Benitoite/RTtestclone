@@ -408,11 +408,11 @@ void SHMap::dirpyr_shmap(float ** data_fine, float ** data_coarse, int width, in
                 for(; j < (width - scalewin) - 3; j += 4) {
                     valv = _mm_setzero_ps();
                     normv = _mm_setzero_ps();
-                    dftemp1v = LVFU(data_fine[i][j]);
+                    dftemp1v = lvfu(data_fine[i][j]);
 
                     for(int inbr = inbrMin; inbr <= min(i + scalewin, height - 1); inbr += scale) {
                         for (int jnbr = j - scalewin; jnbr <= j + scalewin; jnbr += scale) {
-                            dftemp2v = LVFU(data_fine[inbr][jnbr]);
+                            dftemp2v = lvfu(data_fine[inbr][jnbr]);
                             dirwtv = ( rangefn[_mm_cvttps_epi32(vabsf(dftemp2v - dftemp1v))] );
                             valv += dirwtv * dftemp2v;
                             normv += dirwtv;
@@ -515,14 +515,14 @@ void SHMap::dirpyr_shmap(float ** data_fine, float ** data_coarse, int width, in
                 for(; j < width - scalewin - 3; j += 4) {
                     valv = _mm_setzero_ps();
                     normv = _mm_setzero_ps();
-                    dftemp1v = LVFU(data_fine[i][j]);
+                    dftemp1v = lvfu(data_fine[i][j]);
 
                     for(int inbr = max(i - scalewin, i % scale); inbr <= MIN(i + scalewin, height - 1); inbr += scale) {
                         int indexihlp = (inbr - i) / scale + halfwin;
 
                         for (int jnbr = j - scalewin, indexjhlp = 0; jnbr <= j + scalewin; jnbr += scale, indexjhlp++) {
-                            dftemp2v = LVFU(data_fine[inbr][jnbr]);
-                            dirwtv = ( LVF(*domkerv[indexihlp][indexjhlp]) * rangefn[_mm_cvttps_epi32(vabsf(dftemp2v - dftemp1v))] );
+                            dftemp2v = lvfu(data_fine[inbr][jnbr]);
+                            dirwtv = ( lvf(*domkerv[indexihlp][indexjhlp]) * rangefn[_mm_cvttps_epi32(vabsf(dftemp2v - dftemp1v))] );
                             valv += dirwtv * dftemp2v;
                             normv += dirwtv;
                         }

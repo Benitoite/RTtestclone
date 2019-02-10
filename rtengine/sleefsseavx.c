@@ -929,23 +929,23 @@ static INLINE vfloat vnegf(vfloat f) { return (vfloat)vxorm((vmask)f, (vmask)vca
 
 static INLINE vfloat vselfzero(vmask mask, vfloat x) {
      // returns value of x if corresponding mask bits are 1, else returns 0
-     // faster than vself(mask, x, ZEROV)
+     // faster than vself(mask, x, zerov)
     return _mm_and_ps((vfloat)mask, x);
 }
 static INLINE vfloat vselfnotzero(vmask mask, vfloat x) {
     // returns value of x if corresponding mask bits are 0, else returns 0
-    // faster than vself(mask, ZEROV, x)
+    // faster than vself(mask, zerov, x)
     return _mm_andnot_ps((vfloat)mask, x);
 }
 
 static INLINE vint vselizero(vmask mask, vint x) {
      // returns value of x if corresponding mask bits are 1, else returns 0
-     // faster than vselc(mask, x, ZEROV)
+     // faster than vselc(mask, x, zerov)
     return _mm_and_si128(mask, x);
 }
 static INLINE vint vselinotzero(vmask mask, vint x) {
     // returns value of x if corresponding mask bits are 0, else returns 0
-    // faster than vselc(mask, ZEROV, x)
+    // faster than vselc(mask, zerov, x)
     return _mm_andnot_si128(mask, x);
 }
 

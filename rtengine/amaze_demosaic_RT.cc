@@ -204,7 +204,7 @@ void RawImageSource::amaze_demosaic_RT(int winx, int winy, int winw, int winh, c
 
                 // begin of tile initialization
 #ifdef __SSE2__
-                vfloat c65535v = F2V( 65535.f );
+                vfloat c65535v = f2v( 65535.f );
 
                 //fill upper border
                 if (rrmin > 0) {
@@ -213,9 +213,9 @@ void RawImageSource::amaze_demosaic_RT(int winx, int winy, int winw, int winh, c
 
                         for (int cc = ccmin; cc < ccmax; cc += 4) {
                             int indx1 = rr * ts + cc;
-                            vfloat tempv = LVFU(rawData[row][cc + left]) / c65535v;
-                            STVF(cfa[indx1], tempv);
-                            STVF(rgbgreen[indx1], tempv );
+                            vfloat tempv = lvfu(rawData[row][cc + left]) / c65535v;
+                            stvf(cfa[indx1], tempv);
+                            stvf(rgbgreen[indx1], tempv );
                         }
                     }
                 }
@@ -226,9 +226,9 @@ void RawImageSource::amaze_demosaic_RT(int winx, int winy, int winw, int winh, c
                     int cc = ccmin;
                     for (; cc < ccmax - 3; cc += 4) {
                         int indx1 = rr * ts + cc;
-                        vfloat tempv = LVFU(rawData[row][cc + left]) / c65535v;
-                        STVF(cfa[indx1], tempv );
-                        STVF(rgbgreen[indx1], tempv );
+                        vfloat tempv = lvfu(rawData[row][cc + left]) / c65535v;
+                        stvf(cfa[indx1], tempv );
+                        stvf(rgbgreen[indx1], tempv );
                     }
                     for (; cc < ccmax; ++cc) {
                         int indx1 = rr * ts + cc;
@@ -243,9 +243,9 @@ void RawImageSource::amaze_demosaic_RT(int winx, int winy, int winw, int winh, c
                     for (int rr = 0; rr < 16; rr++)
                         for (int cc = ccmin; cc < ccmax; cc += 4) {
                             int indx1 = (rrmax + rr) * ts + cc;
-                            vfloat tempv = LVFU(rawData[(winy + height - rr - 2)][left + cc]) / c65535v;
-                            STVF(cfa[indx1], tempv );
-                            STVF(rgbgreen[indx1], tempv );
+                            vfloat tempv = lvfu(rawData[(winy + height - rr - 2)][left + cc]) / c65535v;
+                            stvf(cfa[indx1], tempv );
+                            stvf(rgbgreen[indx1], tempv );
                         }
                 }
 
@@ -337,15 +337,15 @@ void RawImageSource::amaze_demosaic_RT(int winx, int winy, int winw, int winh, c
 
                 // horizontal and vertical gradients
 #ifdef __SSE2__
-                vfloat epsv = F2V( eps );
+                vfloat epsv = f2v( eps );
 
                 for (int rr = 2; rr < rr1 - 2; rr++) {
                     for (int indx = rr * ts; indx < rr * ts + cc1; indx += 4) {
-                        vfloat delhv = vabsf( LVFU( cfa[indx + 1] ) -  LVFU( cfa[indx - 1] ) );
-                        vfloat delvv = vabsf( LVF( cfa[indx + v1] ) -  LVF( cfa[indx - v1] ) );
-                        STVF(dirwts1[indx], epsv + vabsf( LVFU( cfa[indx + 2] ) - LVF( cfa[indx] )) + vabsf( LVF( cfa[indx] ) - LVFU( cfa[indx - 2] )) + delhv );
-                        STVF(dirwts0[indx], epsv + vabsf( LVF( cfa[indx + v2] ) - LVF( cfa[indx] )) + vabsf( LVF( cfa[indx] ) - LVF( cfa[indx - v2] )) + delvv );
-                        STVF(delhvsqsum[indx], SQRV(delhv) + SQRV(delvv));
+                        vfloat delhv = vabsf( lvfu( cfa[indx + 1] ) -  lvfu( cfa[indx - 1] ) );
+                        vfloat delvv = vabsf( lvf( cfa[indx + v1] ) -  lvf( cfa[indx - v1] ) );
+                        stvf(dirwts1[indx], epsv + vabsf( lvfu( cfa[indx + 2] ) - lvf( cfa[indx] )) + vabsf( lvf( cfa[indx] ) - lvfu( cfa[indx - 2] )) + delhv );
+                        stvf(dirwts0[indx], epsv + vabsf( lvf( cfa[indx + v2] ) - lvf( cfa[indx] )) + vabsf( lvf( cfa[indx] ) - lvf( cfa[indx - v2] )) + delvv );
+                        stvf(delhvsqsum[indx], SQRV(delhv) + SQRV(delvv));
                     }
                 }
 
@@ -372,27 +372,27 @@ void RawImageSource::amaze_demosaic_RT(int winx, int winy, int winw, int winh, c
                     sgnv = _mm_set_ps( -1.f, 1.f, -1.f, 1.f );
                 }
 
-                vfloat zd5v = F2V( 0.5f );
-                vfloat onev = F2V( 1.f );
-                vfloat arthreshv = F2V( arthresh );
-                vfloat clip_pt8v = F2V( clip_pt8 );
+                vfloat zd5v = f2v( 0.5f );
+                vfloat onev = f2v( 1.f );
+                vfloat arthreshv = f2v( arthresh );
+                vfloat clip_pt8v = f2v( clip_pt8 );
 
                 for (int rr = 4; rr < rr1 - 4; rr++) {
                     sgnv = -sgnv;
 
                     for (int indx = rr * ts + 4; indx < rr * ts + cc1 - 7; indx += 4) {
                         //colour ratios in each cardinal direction
-                        vfloat cfav = LVF(cfa[indx]);
-                        vfloat cruv = LVF(cfa[indx - v1]) * (LVF(dirwts0[indx - v2]) + LVF(dirwts0[indx])) / (LVF(dirwts0[indx - v2]) * (epsv + cfav) + LVF(dirwts0[indx]) * (epsv + LVF(cfa[indx - v2])));
-                        vfloat crdv = LVF(cfa[indx + v1]) * (LVF(dirwts0[indx + v2]) + LVF(dirwts0[indx])) / (LVF(dirwts0[indx + v2]) * (epsv + cfav) + LVF(dirwts0[indx]) * (epsv + LVF(cfa[indx + v2])));
-                        vfloat crlv = LVFU(cfa[indx - 1]) * (LVFU(dirwts1[indx - 2]) + LVF(dirwts1[indx])) / (LVFU(dirwts1[indx - 2]) * (epsv + cfav) + LVF(dirwts1[indx]) * (epsv + LVFU(cfa[indx - 2])));
-                        vfloat crrv = LVFU(cfa[indx + 1]) * (LVFU(dirwts1[indx + 2]) + LVF(dirwts1[indx])) / (LVFU(dirwts1[indx + 2]) * (epsv + cfav) + LVF(dirwts1[indx]) * (epsv + LVFU(cfa[indx + 2])));
+                        vfloat cfav = lvf(cfa[indx]);
+                        vfloat cruv = lvf(cfa[indx - v1]) * (lvf(dirwts0[indx - v2]) + lvf(dirwts0[indx])) / (lvf(dirwts0[indx - v2]) * (epsv + cfav) + lvf(dirwts0[indx]) * (epsv + lvf(cfa[indx - v2])));
+                        vfloat crdv = lvf(cfa[indx + v1]) * (lvf(dirwts0[indx + v2]) + lvf(dirwts0[indx])) / (lvf(dirwts0[indx + v2]) * (epsv + cfav) + lvf(dirwts0[indx]) * (epsv + lvf(cfa[indx + v2])));
+                        vfloat crlv = lvfu(cfa[indx - 1]) * (lvfu(dirwts1[indx - 2]) + lvf(dirwts1[indx])) / (lvfu(dirwts1[indx - 2]) * (epsv + cfav) + lvf(dirwts1[indx]) * (epsv + lvfu(cfa[indx - 2])));
+                        vfloat crrv = lvfu(cfa[indx + 1]) * (lvfu(dirwts1[indx + 2]) + lvf(dirwts1[indx])) / (lvfu(dirwts1[indx + 2]) * (epsv + cfav) + lvf(dirwts1[indx]) * (epsv + lvfu(cfa[indx + 2])));
 
                         //G interpolated in vert/hor directions using Hamilton-Adams method
-                        vfloat guhav = LVF(cfa[indx - v1]) + zd5v * (cfav - LVF(cfa[indx - v2]));
-                        vfloat gdhav = LVF(cfa[indx + v1]) + zd5v * (cfav - LVF(cfa[indx + v2]));
-                        vfloat glhav = LVFU(cfa[indx - 1]) + zd5v * (cfav - LVFU(cfa[indx - 2]));
-                        vfloat grhav = LVFU(cfa[indx + 1]) + zd5v * (cfav - LVFU(cfa[indx + 2]));
+                        vfloat guhav = lvf(cfa[indx - v1]) + zd5v * (cfav - lvf(cfa[indx - v2]));
+                        vfloat gdhav = lvf(cfa[indx + v1]) + zd5v * (cfav - lvf(cfa[indx + v2]));
+                        vfloat glhav = lvfu(cfa[indx - 1]) + zd5v * (cfav - lvfu(cfa[indx - 2]));
+                        vfloat grhav = lvfu(cfa[indx + 1]) + zd5v * (cfav - lvfu(cfa[indx + 2]));
 
                         //G interpolated in vert/hor directions using adaptive ratios
                         vfloat guarv = vself(vmaskf_lt(vabsf(onev - cruv), arthreshv), cfav * cruv, guhav);
@@ -401,8 +401,8 @@ void RawImageSource::amaze_demosaic_RT(int winx, int winy, int winw, int winh, c
                         vfloat grarv = vself(vmaskf_lt(vabsf(onev - crrv), arthreshv), cfav * crrv, grhav);
 
                         //adaptive weights for vertical/horizontal directions
-                        vfloat hwtv = LVFU(dirwts1[indx - 1]) / (LVFU(dirwts1[indx - 1]) + LVFU(dirwts1[indx + 1]));
-                        vfloat vwtv = LVF(dirwts0[indx - v1]) / (LVF(dirwts0[indx + v1]) + LVF(dirwts0[indx - v1]));
+                        vfloat hwtv = lvfu(dirwts1[indx - 1]) / (lvfu(dirwts1[indx - 1]) + lvfu(dirwts1[indx + 1]));
+                        vfloat vwtv = lvf(dirwts0[indx - v1]) / (lvf(dirwts0[indx + v1]) + lvf(dirwts0[indx - v1]));
 
                         //interpolated G via adaptive weights of cardinal evaluations
                         vfloat Ginthhav = vintpf(hwtv, grhav, glhav);
@@ -411,8 +411,8 @@ void RawImageSource::amaze_demosaic_RT(int winx, int winy, int winw, int winh, c
                         //interpolated colour differences
                         vfloat hcdaltv = sgnv * (Ginthhav - cfav);
                         vfloat vcdaltv = sgnv * (Gintvhav - cfav);
-                        STVF(hcdalt[indx], hcdaltv);
-                        STVF(vcdalt[indx], vcdaltv);
+                        stvf(hcdalt[indx], hcdaltv);
+                        stvf(vcdalt[indx], vcdaltv);
 
                         vmask clipmask = vorm( vorm( vmaskf_gt( cfav, clip_pt8v ), vmaskf_gt( Gintvhav, clip_pt8v ) ), vmaskf_gt( Ginthhav, clip_pt8v ));
                         guarv = vself( clipmask, guhav, guarv);
@@ -421,12 +421,12 @@ void RawImageSource::amaze_demosaic_RT(int winx, int winy, int winw, int winh, c
                         grarv = vself( clipmask, grhav, grarv);
 
                         //use HA if highlights are (nearly) clipped
-                        STVF(vcd[indx], vself( clipmask, vcdaltv, sgnv * (vintpf(vwtv, gdarv, guarv) - cfav)));
-                        STVF(hcd[indx], vself( clipmask, hcdaltv, sgnv * (vintpf(hwtv, grarv, glarv) - cfav)));
+                        stvf(vcd[indx], vself( clipmask, vcdaltv, sgnv * (vintpf(vwtv, gdarv, guarv) - cfav)));
+                        stvf(hcd[indx], vself( clipmask, hcdaltv, sgnv * (vintpf(hwtv, grarv, glarv) - cfav)));
 
                         //differences of interpolations in opposite directions
-                        STVF(dgintv[indx], vminf(SQRV(guhav - gdhav), SQRV(guarv - gdarv)));
-                        STVF(dginth[indx], vminf(SQRV(glhav - grhav), SQRV(glarv - grarv)));
+                        stvf(dgintv[indx], vminf(SQRV(guhav - gdhav), SQRV(guarv - gdarv)));
+                        stvf(dginth[indx], vminf(SQRV(glhav - grhav), SQRV(glarv - grarv)));
                     }
                 }
 
@@ -522,7 +522,7 @@ void RawImageSource::amaze_demosaic_RT(int winx, int winy, int winw, int winh, c
 
 
 #ifdef __SSE2__
-                vfloat  clip_ptv = F2V( clip_pt );
+                vfloat  clip_ptv = f2v( clip_pt );
                 vfloat  sgn3v;
 
                 if( !(FC(4, 4) & 1) ) {
@@ -539,14 +539,14 @@ void RawImageSource::amaze_demosaic_RT(int winx, int winy, int winw, int winh, c
                     sgn3v = -sgn3v;
 
                     for (int indx = rr * ts + 4; indx < rr * ts + cc1 - 4; indx += 4) {
-                        vfloat hcdv = LVF( hcd[indx] );
-                        vfloat hcdvarv = SQRV(LVFU(hcd[indx - 2]) - hcdv) + SQRV(LVFU(hcd[indx - 2]) - LVFU(hcd[indx + 2])) + SQRV(hcdv - LVFU(hcd[indx + 2]));
-                        vfloat hcdaltv = LVF( hcdalt[indx] );
-                        vfloat hcdaltvarv = SQRV(LVFU(hcdalt[indx - 2]) - hcdaltv) + SQRV(LVFU(hcdalt[indx - 2]) - LVFU(hcdalt[indx + 2])) + SQRV(hcdaltv - LVFU(hcdalt[indx + 2]));
-                        vfloat vcdv = LVF( vcd[indx] );
-                        vfloat vcdvarv = SQRV(LVF(vcd[indx - v2]) - vcdv) + SQRV(LVF(vcd[indx - v2]) - LVF(vcd[indx + v2])) + SQRV(vcdv - LVF(vcd[indx + v2]));
-                        vfloat vcdaltv = LVF( vcdalt[indx] );
-                        vfloat vcdaltvarv = SQRV(LVF(vcdalt[indx - v2]) - vcdaltv) + SQRV(LVF(vcdalt[indx - v2]) - LVF(vcdalt[indx + v2])) + SQRV(vcdaltv - LVF(vcdalt[indx + v2]));
+                        vfloat hcdv = lvf( hcd[indx] );
+                        vfloat hcdvarv = SQRV(lvfu(hcd[indx - 2]) - hcdv) + SQRV(lvfu(hcd[indx - 2]) - lvfu(hcd[indx + 2])) + SQRV(hcdv - lvfu(hcd[indx + 2]));
+                        vfloat hcdaltv = lvf( hcdalt[indx] );
+                        vfloat hcdaltvarv = SQRV(lvfu(hcdalt[indx - 2]) - hcdaltv) + SQRV(lvfu(hcdalt[indx - 2]) - lvfu(hcdalt[indx + 2])) + SQRV(hcdaltv - lvfu(hcdalt[indx + 2]));
+                        vfloat vcdv = lvf( vcd[indx] );
+                        vfloat vcdvarv = SQRV(lvf(vcd[indx - v2]) - vcdv) + SQRV(lvf(vcd[indx - v2]) - lvf(vcd[indx + v2])) + SQRV(vcdv - lvf(vcd[indx + v2]));
+                        vfloat vcdaltv = lvf( vcdalt[indx] );
+                        vfloat vcdaltvarv = SQRV(lvf(vcdalt[indx - v2]) - vcdaltv) + SQRV(lvf(vcdalt[indx - v2]) - lvf(vcdalt[indx + v2])) + SQRV(vcdaltv - lvf(vcdalt[indx + v2]));
 
                         //choose the smallest variance; this yields a smoother interpolation
                         hcdv = vself( vmaskf_lt( hcdaltvarv, hcdvarv ), hcdaltv, hcdv);
@@ -554,28 +554,28 @@ void RawImageSource::amaze_demosaic_RT(int winx, int winy, int winw, int winh, c
 
                         //bound the interpolation in regions of high saturation
                         //vertical and horizontal G interpolations
-                        vfloat Ginthv = sgnv * hcdv + LVF( cfa[indx] );
+                        vfloat Ginthv = sgnv * hcdv + lvf( cfa[indx] );
                         vfloat temp2v = sgn3v * hcdv;
-                        vfloat hwtv = onev + temp2v / ( epsv + Ginthv + LVF( cfa[indx]));
-                        vmask hcdmask = vmaskf_gt( nsgnv * hcdv, ZEROV );
+                        vfloat hwtv = onev + temp2v / ( epsv + Ginthv + lvf( cfa[indx]));
+                        vmask hcdmask = vmaskf_gt( nsgnv * hcdv, zerov );
                         vfloat hcdoldv = hcdv;
-                        vfloat tempv = nsgnv * (LVF(cfa[indx]) - median( Ginthv, LVFU(cfa[indx - 1]), LVFU(cfa[indx + 1]) ));
-                        hcdv = vself( vmaskf_lt( temp2v, -(LVF(cfa[indx]) + Ginthv)), tempv, vintpf(hwtv, hcdv, tempv));
+                        vfloat tempv = nsgnv * (lvf(cfa[indx]) - median( Ginthv, lvfu(cfa[indx - 1]), lvfu(cfa[indx + 1]) ));
+                        hcdv = vself( vmaskf_lt( temp2v, -(lvf(cfa[indx]) + Ginthv)), tempv, vintpf(hwtv, hcdv, tempv));
                         hcdv = vself( hcdmask, hcdv, hcdoldv );
                         hcdv = vself( vmaskf_gt( Ginthv, clip_ptv), tempv, hcdv);
-                        STVF(hcd[indx], hcdv);
+                        stvf(hcd[indx], hcdv);
 
-                        vfloat Gintvv = sgnv * vcdv + LVF( cfa[indx] );
+                        vfloat Gintvv = sgnv * vcdv + lvf( cfa[indx] );
                         temp2v = sgn3v * vcdv;
-                        vfloat vwtv = onev + temp2v / ( epsv + Gintvv + LVF( cfa[indx]));
-                        vmask vcdmask = vmaskf_gt( nsgnv * vcdv, ZEROV );
+                        vfloat vwtv = onev + temp2v / ( epsv + Gintvv + lvf( cfa[indx]));
+                        vmask vcdmask = vmaskf_gt( nsgnv * vcdv, zerov );
                         vfloat vcdoldv = vcdv;
-                        tempv = nsgnv * (LVF(cfa[indx]) - median( Gintvv, LVF(cfa[indx - v1]), LVF(cfa[indx + v1]) ));
-                        vcdv = vself( vmaskf_lt( temp2v, -(LVF(cfa[indx]) + Gintvv)), tempv, vintpf(vwtv, vcdv, tempv));
+                        tempv = nsgnv * (lvf(cfa[indx]) - median( Gintvv, lvf(cfa[indx - v1]), lvf(cfa[indx + v1]) ));
+                        vcdv = vself( vmaskf_lt( temp2v, -(lvf(cfa[indx]) + Gintvv)), tempv, vintpf(vwtv, vcdv, tempv));
                         vcdv = vself( vcdmask, vcdv, vcdoldv );
                         vcdv = vself( vmaskf_gt( Gintvv, clip_ptv), tempv, vcdv);
-                        STVF(vcd[indx], vcdv);
-                        STVFU(cddiffsq[indx], SQRV(vcdv - hcdv));
+                        stvf(vcd[indx], vcdv);
+                        stvfu(cddiffsq[indx], SQRV(vcdv - hcdv));
                     }
 
                 }
@@ -676,40 +676,40 @@ void RawImageSource::amaze_demosaic_RT(int winx, int winy, int winw, int winh, c
 
 
 #ifdef __SSE2__
-                vfloat  epssqv = F2V( epssq );
+                vfloat  epssqv = f2v( epssq );
 
                 for (int rr = 6; rr < rr1 - 6; rr++) {
                     for (int indx = rr * ts + 6 + (FC(rr, 2) & 1); indx < rr * ts + cc1 - 6; indx += 8) {
                         //compute colour difference variances in cardinal directions
-                        vfloat tempv = LC2VFU(vcd[indx]);
-                        vfloat uavev = tempv + LC2VFU(vcd[indx - v1]) + LC2VFU(vcd[indx - v2]) + LC2VFU(vcd[indx - v3]);
-                        vfloat davev = tempv + LC2VFU(vcd[indx + v1]) + LC2VFU(vcd[indx + v2]) + LC2VFU(vcd[indx + v3]);
-                        vfloat Dgrbvvaruv = SQRV(tempv - uavev) + SQRV(LC2VFU(vcd[indx - v1]) - uavev) + SQRV(LC2VFU(vcd[indx - v2]) - uavev) + SQRV(LC2VFU(vcd[indx - v3]) - uavev);
-                        vfloat Dgrbvvardv = SQRV(tempv - davev) + SQRV(LC2VFU(vcd[indx + v1]) - davev) + SQRV(LC2VFU(vcd[indx + v2]) - davev) + SQRV(LC2VFU(vcd[indx + v3]) - davev);
+                        vfloat tempv = lc2vfu(vcd[indx]);
+                        vfloat uavev = tempv + lc2vfu(vcd[indx - v1]) + lc2vfu(vcd[indx - v2]) + lc2vfu(vcd[indx - v3]);
+                        vfloat davev = tempv + lc2vfu(vcd[indx + v1]) + lc2vfu(vcd[indx + v2]) + lc2vfu(vcd[indx + v3]);
+                        vfloat Dgrbvvaruv = SQRV(tempv - uavev) + SQRV(lc2vfu(vcd[indx - v1]) - uavev) + SQRV(lc2vfu(vcd[indx - v2]) - uavev) + SQRV(lc2vfu(vcd[indx - v3]) - uavev);
+                        vfloat Dgrbvvardv = SQRV(tempv - davev) + SQRV(lc2vfu(vcd[indx + v1]) - davev) + SQRV(lc2vfu(vcd[indx + v2]) - davev) + SQRV(lc2vfu(vcd[indx + v3]) - davev);
 
-                        vfloat hwtv = vadivapb(LC2VFU(dirwts1[indx - 1]), LC2VFU(dirwts1[indx + 1]));
-                        vfloat vwtv = vadivapb(LC2VFU(dirwts0[indx - v1]), LC2VFU(dirwts0[indx + v1]));
+                        vfloat hwtv = vadivapb(lc2vfu(dirwts1[indx - 1]), lc2vfu(dirwts1[indx + 1]));
+                        vfloat vwtv = vadivapb(lc2vfu(dirwts0[indx - v1]), lc2vfu(dirwts0[indx + v1]));
 
-                        tempv = LC2VFU(hcd[indx]);
-                        vfloat lavev = tempv + vaddc2vfu(hcd[indx - 3]) + LC2VFU(hcd[indx - 1]);
-                        vfloat ravev = tempv + vaddc2vfu(hcd[indx + 1]) + LC2VFU(hcd[indx + 3]);
+                        tempv = lc2vfu(hcd[indx]);
+                        vfloat lavev = tempv + vaddc2vfu(hcd[indx - 3]) + lc2vfu(hcd[indx - 1]);
+                        vfloat ravev = tempv + vaddc2vfu(hcd[indx + 1]) + lc2vfu(hcd[indx + 3]);
 
-                        vfloat Dgrbhvarlv = SQRV(tempv - lavev) + SQRV(LC2VFU(hcd[indx - 1]) - lavev) + SQRV(LC2VFU(hcd[indx - 2]) - lavev) + SQRV(LC2VFU(hcd[indx - 3]) - lavev);
-                        vfloat Dgrbhvarrv = SQRV(tempv - ravev) + SQRV(LC2VFU(hcd[indx + 1]) - ravev) + SQRV(LC2VFU(hcd[indx + 2]) - ravev) + SQRV(LC2VFU(hcd[indx + 3]) - ravev);
+                        vfloat Dgrbhvarlv = SQRV(tempv - lavev) + SQRV(lc2vfu(hcd[indx - 1]) - lavev) + SQRV(lc2vfu(hcd[indx - 2]) - lavev) + SQRV(lc2vfu(hcd[indx - 3]) - lavev);
+                        vfloat Dgrbhvarrv = SQRV(tempv - ravev) + SQRV(lc2vfu(hcd[indx + 1]) - ravev) + SQRV(lc2vfu(hcd[indx + 2]) - ravev) + SQRV(lc2vfu(hcd[indx + 3]) - ravev);
 
 
                         vfloat vcdvarv = epssqv + vintpf(vwtv, Dgrbvvardv, Dgrbvvaruv);
                         vfloat hcdvarv = epssqv + vintpf(hwtv, Dgrbhvarrv, Dgrbhvarlv);
 
                         //compute fluctuations in up/down and left/right interpolations of colours
-                        Dgrbvvaruv = LC2VFU(dgintv[indx - v1]) + LC2VFU(dgintv[indx - v2]);
-                        Dgrbvvardv = LC2VFU(dgintv[indx + v1]) + LC2VFU(dgintv[indx + v2]);
+                        Dgrbvvaruv = lc2vfu(dgintv[indx - v1]) + lc2vfu(dgintv[indx - v2]);
+                        Dgrbvvardv = lc2vfu(dgintv[indx + v1]) + lc2vfu(dgintv[indx + v2]);
 
                         Dgrbhvarlv = vaddc2vfu(dginth[indx - 2]);
                         Dgrbhvarrv = vaddc2vfu(dginth[indx + 1]);
 
-                        vfloat vcdvar1v = epssqv + LC2VFU(dgintv[indx]) + vintpf(vwtv, Dgrbvvardv, Dgrbvvaruv);
-                        vfloat hcdvar1v = epssqv + LC2VFU(dginth[indx]) + vintpf(hwtv, Dgrbhvarrv, Dgrbhvarlv);
+                        vfloat vcdvar1v = epssqv + lc2vfu(dgintv[indx]) + vintpf(vwtv, Dgrbvvardv, Dgrbvvaruv);
+                        vfloat hcdvar1v = epssqv + lc2vfu(dginth[indx]) + vintpf(hwtv, Dgrbhvarrv, Dgrbhvarlv);
 
                         //determine adaptive weights for G interpolation
                         vfloat varwtv = hcdvarv / (vcdvarv + hcdvarv);
@@ -717,8 +717,8 @@ void RawImageSource::amaze_demosaic_RT(int winx, int winy, int winw, int winh, c
 
                         //if both agree on interpolation direction, choose the one with strongest directional discrimination;
                         //otherwise, choose the u/d and l/r difference fluctuation weights
-                        vmask decmask = vandm( vmaskf_gt( (zd5v - varwtv) * (zd5v - diffwtv), ZEROV ), vmaskf_lt( vabsf( zd5v - diffwtv), vabsf( zd5v - varwtv) ) );
-                        STVFU(hvwt[indx >> 1], vself( decmask, varwtv, diffwtv));
+                        vmask decmask = vandm( vmaskf_gt( (zd5v - varwtv) * (zd5v - diffwtv), zerov ), vmaskf_lt( vabsf( zd5v - diffwtv), vabsf( zd5v - varwtv) ) );
+                        stvfu(hvwt[indx >> 1], vself( decmask, varwtv, diffwtv));
                     }
                 }
 
@@ -772,16 +772,16 @@ void RawImageSource::amaze_demosaic_RT(int winx, int winy, int winw, int winh, c
 #endif
 
 #ifdef __SSE2__
-                vfloat gaussg0 = F2V(gaussgrad[0]);
-                vfloat gaussg1 = F2V(gaussgrad[1]);
-                vfloat gaussg2 = F2V(gaussgrad[2]);
-                vfloat gaussg3 = F2V(gaussgrad[3]);
-                vfloat gaussg4 = F2V(gaussgrad[4]);
-                vfloat gaussg5 = F2V(gaussgrad[5]);
-                vfloat gausso0 = F2V(gaussodd[0]);
-                vfloat gausso1 = F2V(gaussodd[1]);
-                vfloat gausso2 = F2V(gaussodd[2]);
-                vfloat gausso3 = F2V(gaussodd[3]);
+                vfloat gaussg0 = f2v(gaussgrad[0]);
+                vfloat gaussg1 = f2v(gaussgrad[1]);
+                vfloat gaussg2 = f2v(gaussgrad[2]);
+                vfloat gaussg3 = f2v(gaussgrad[3]);
+                vfloat gaussg4 = f2v(gaussgrad[4]);
+                vfloat gaussg5 = f2v(gaussgrad[5]);
+                vfloat gausso0 = f2v(gaussodd[0]);
+                vfloat gausso1 = f2v(gaussodd[1]);
+                vfloat gausso2 = f2v(gaussodd[2]);
+                vfloat gausso3 = f2v(gaussodd[3]);
 
 #endif
 
@@ -793,27 +793,27 @@ void RawImageSource::amaze_demosaic_RT(int winx, int winy, int winw, int winh, c
 #ifdef __SSE2__
 
                     for (; cc < cc1 - 7; cc += 8, indx += 8) {
-                        vfloat valv = (gausso0 * LC2VFU(cddiffsq[indx]) +
-                                       gausso1 * (LC2VFU(cddiffsq[(indx - m1)]) + LC2VFU(cddiffsq[(indx + p1)]) +
-                                                  LC2VFU(cddiffsq[(indx - p1)]) + LC2VFU(cddiffsq[(indx + m1)])) +
-                                       gausso2 * (LC2VFU(cddiffsq[(indx - v2)]) + LC2VFU(cddiffsq[(indx - 2)]) +
-                                                  LC2VFU(cddiffsq[(indx + 2)]) + LC2VFU(cddiffsq[(indx + v2)])) +
-                                       gausso3 * (LC2VFU(cddiffsq[(indx - m2)]) + LC2VFU(cddiffsq[(indx + p2)]) +
-                                                  LC2VFU(cddiffsq[(indx - p2)]) + LC2VFU(cddiffsq[(indx + m2)]))) -
-                                      (gaussg0 * LC2VFU(delhvsqsum[indx]) +
-                                       gaussg1 * (LC2VFU(delhvsqsum[indx - v1]) + LC2VFU(delhvsqsum[indx - 1]) +
-                                                  LC2VFU(delhvsqsum[indx + 1]) + LC2VFU(delhvsqsum[indx + v1])) +
-                                       gaussg2 * (LC2VFU(delhvsqsum[indx - m1]) + LC2VFU(delhvsqsum[indx + p1]) +
-                                                  LC2VFU(delhvsqsum[indx - p1]) + LC2VFU(delhvsqsum[indx + m1])) +
-                                       gaussg3 * (LC2VFU(delhvsqsum[indx - v2]) + LC2VFU(delhvsqsum[indx - 2]) +
-                                                  LC2VFU(delhvsqsum[indx + 2]) + LC2VFU(delhvsqsum[indx + v2])) +
-                                       gaussg4 * (LC2VFU(delhvsqsum[indx - v2 - 1]) + LC2VFU(delhvsqsum[indx - v2 + 1]) +
-                                                  LC2VFU(delhvsqsum[indx - ts - 2]) + LC2VFU(delhvsqsum[indx - ts + 2]) +
-                                                  LC2VFU(delhvsqsum[indx + ts - 2]) + LC2VFU(delhvsqsum[indx + ts + 2]) +
-                                                  LC2VFU(delhvsqsum[indx + v2 - 1]) + LC2VFU(delhvsqsum[indx + v2 + 1])) +
-                                       gaussg5 * (LC2VFU(delhvsqsum[indx - m2]) + LC2VFU(delhvsqsum[indx + p2]) +
-                                                  LC2VFU(delhvsqsum[indx - p2]) + LC2VFU(delhvsqsum[indx + m2])));
-                        STVFU(nyqutest[indx >> 1], valv);
+                        vfloat valv = (gausso0 * lc2vfu(cddiffsq[indx]) +
+                                       gausso1 * (lc2vfu(cddiffsq[(indx - m1)]) + lc2vfu(cddiffsq[(indx + p1)]) +
+                                                  lc2vfu(cddiffsq[(indx - p1)]) + lc2vfu(cddiffsq[(indx + m1)])) +
+                                       gausso2 * (lc2vfu(cddiffsq[(indx - v2)]) + lc2vfu(cddiffsq[(indx - 2)]) +
+                                                  lc2vfu(cddiffsq[(indx + 2)]) + lc2vfu(cddiffsq[(indx + v2)])) +
+                                       gausso3 * (lc2vfu(cddiffsq[(indx - m2)]) + lc2vfu(cddiffsq[(indx + p2)]) +
+                                                  lc2vfu(cddiffsq[(indx - p2)]) + lc2vfu(cddiffsq[(indx + m2)]))) -
+                                      (gaussg0 * lc2vfu(delhvsqsum[indx]) +
+                                       gaussg1 * (lc2vfu(delhvsqsum[indx - v1]) + lc2vfu(delhvsqsum[indx - 1]) +
+                                                  lc2vfu(delhvsqsum[indx + 1]) + lc2vfu(delhvsqsum[indx + v1])) +
+                                       gaussg2 * (lc2vfu(delhvsqsum[indx - m1]) + lc2vfu(delhvsqsum[indx + p1]) +
+                                                  lc2vfu(delhvsqsum[indx - p1]) + lc2vfu(delhvsqsum[indx + m1])) +
+                                       gaussg3 * (lc2vfu(delhvsqsum[indx - v2]) + lc2vfu(delhvsqsum[indx - 2]) +
+                                                  lc2vfu(delhvsqsum[indx + 2]) + lc2vfu(delhvsqsum[indx + v2])) +
+                                       gaussg4 * (lc2vfu(delhvsqsum[indx - v2 - 1]) + lc2vfu(delhvsqsum[indx - v2 + 1]) +
+                                                  lc2vfu(delhvsqsum[indx - ts - 2]) + lc2vfu(delhvsqsum[indx - ts + 2]) +
+                                                  lc2vfu(delhvsqsum[indx + ts - 2]) + lc2vfu(delhvsqsum[indx + ts + 2]) +
+                                                  lc2vfu(delhvsqsum[indx + v2 - 1]) + lc2vfu(delhvsqsum[indx + v2 + 1])) +
+                                       gaussg5 * (lc2vfu(delhvsqsum[indx - m2]) + lc2vfu(delhvsqsum[indx + p2]) +
+                                                  lc2vfu(delhvsqsum[indx - p2]) + lc2vfu(delhvsqsum[indx + m2])));
+                        stvfu(nyqutest[indx >> 1], valv);
 
                     }
 
@@ -1004,23 +1004,23 @@ void RawImageSource::amaze_demosaic_RT(int winx, int winy, int winw, int winh, c
                 for (int rr = 6; rr < rr1 - 6; rr++) {
                     if((FC(rr, 2) & 1) == 0) {
                         for (int cc = 6, indx = rr * ts + cc; cc < cc1 - 6; cc += 8, indx += 8) {
-                            vfloat tempv = LC2VFU(cfa[indx + 1]);
-                            vfloat Dgrbsq1pv = (SQRV(tempv - LC2VFU(cfa[indx + 1 - p1])) + SQRV(tempv - LC2VFU(cfa[indx + 1 + p1])));
-                            STVFU(delp[indx >> 1], vabsf(LC2VFU(cfa[indx + p1]) - LC2VFU(cfa[indx - p1])));
-                            STVFU(delm[indx >> 1], vabsf(LC2VFU(cfa[indx + m1]) - LC2VFU(cfa[indx - m1])));
-                            vfloat Dgrbsq1mv = (SQRV(tempv - LC2VFU(cfa[indx + 1 - m1])) + SQRV(tempv - LC2VFU(cfa[indx + 1 + m1])));
-                            STVFU(Dgrbsq1m[indx >> 1], Dgrbsq1mv );
-                            STVFU(Dgrbsq1p[indx >> 1], Dgrbsq1pv );
+                            vfloat tempv = lc2vfu(cfa[indx + 1]);
+                            vfloat Dgrbsq1pv = (SQRV(tempv - lc2vfu(cfa[indx + 1 - p1])) + SQRV(tempv - lc2vfu(cfa[indx + 1 + p1])));
+                            stvfu(delp[indx >> 1], vabsf(lc2vfu(cfa[indx + p1]) - lc2vfu(cfa[indx - p1])));
+                            stvfu(delm[indx >> 1], vabsf(lc2vfu(cfa[indx + m1]) - lc2vfu(cfa[indx - m1])));
+                            vfloat Dgrbsq1mv = (SQRV(tempv - lc2vfu(cfa[indx + 1 - m1])) + SQRV(tempv - lc2vfu(cfa[indx + 1 + m1])));
+                            stvfu(Dgrbsq1m[indx >> 1], Dgrbsq1mv );
+                            stvfu(Dgrbsq1p[indx >> 1], Dgrbsq1pv );
                         }
                     } else {
                         for (int cc = 6, indx = rr * ts + cc; cc < cc1 - 6; cc += 8, indx += 8) {
-                            vfloat tempv = LC2VFU(cfa[indx]);
-                            vfloat Dgrbsq1pv = (SQRV(tempv - LC2VFU(cfa[indx - p1])) + SQRV(tempv - LC2VFU(cfa[indx + p1])));
-                            STVFU(delp[indx >> 1], vabsf(LC2VFU(cfa[indx + 1 + p1]) - LC2VFU(cfa[indx + 1 - p1])));
-                            STVFU(delm[indx >> 1], vabsf(LC2VFU(cfa[indx + 1 + m1]) - LC2VFU(cfa[indx + 1 - m1])));
-                            vfloat Dgrbsq1mv = (SQRV(tempv - LC2VFU(cfa[indx - m1])) + SQRV(tempv - LC2VFU(cfa[indx + m1])));
-                            STVFU(Dgrbsq1m[indx >> 1], Dgrbsq1mv );
-                            STVFU(Dgrbsq1p[indx >> 1], Dgrbsq1pv );
+                            vfloat tempv = lc2vfu(cfa[indx]);
+                            vfloat Dgrbsq1pv = (SQRV(tempv - lc2vfu(cfa[indx - p1])) + SQRV(tempv - lc2vfu(cfa[indx + p1])));
+                            stvfu(delp[indx >> 1], vabsf(lc2vfu(cfa[indx + 1 + p1]) - lc2vfu(cfa[indx + 1 - p1])));
+                            stvfu(delm[indx >> 1], vabsf(lc2vfu(cfa[indx + 1 + m1]) - lc2vfu(cfa[indx + 1 - m1])));
+                            vfloat Dgrbsq1mv = (SQRV(tempv - lc2vfu(cfa[indx - m1])) + SQRV(tempv - lc2vfu(cfa[indx + m1])));
+                            stvfu(Dgrbsq1m[indx >> 1], Dgrbsq1mv );
+                            stvfu(Dgrbsq1p[indx >> 1], Dgrbsq1pv );
                         }
                     }
                 }
@@ -1050,8 +1050,8 @@ void RawImageSource::amaze_demosaic_RT(int winx, int winy, int winw, int winh, c
                 // diagonal interpolation correction
 
 #ifdef __SSE2__
-                vfloat gausseven0v = F2V(gausseven[0]);
-                vfloat gausseven1v = F2V(gausseven[1]);
+                vfloat gausseven0v = f2v(gausseven[0]);
+                vfloat gausseven1v = f2v(gausseven[1]);
 #endif
 
                 for (int rr = 8; rr < rr1 - 8; rr++) {
@@ -1060,63 +1060,63 @@ void RawImageSource::amaze_demosaic_RT(int winx, int winy, int winw, int winh, c
                     for (int indx = rr * ts + 8 + (FC(rr, 2) & 1), indx1 = indx >> 1; indx < rr * ts + cc1 - 8; indx += 8, indx1 += 4) {
 
                         //diagonal colour ratios
-                        vfloat cfav = LC2VFU(cfa[indx]);
+                        vfloat cfav = lc2vfu(cfa[indx]);
 
-                        vfloat temp1v = LC2VFU(cfa[indx + m1]);
-                        vfloat temp2v = LC2VFU(cfa[indx + m2]);
+                        vfloat temp1v = lc2vfu(cfa[indx + m1]);
+                        vfloat temp2v = lc2vfu(cfa[indx + m2]);
                         vfloat rbsev = vmul2f(temp1v) / (epsv + cfav + temp2v );
                         rbsev = vself(vmaskf_lt(vabsf(onev - rbsev), arthreshv), cfav * rbsev, temp1v + zd5v * (cfav - temp2v));
 
-                        temp1v = LC2VFU(cfa[indx - m1]);
-                        temp2v = LC2VFU(cfa[indx - m2]);
+                        temp1v = lc2vfu(cfa[indx - m1]);
+                        temp2v = lc2vfu(cfa[indx - m2]);
                         vfloat rbnwv = vmul2f(temp1v) / (epsv + cfav + temp2v );
                         rbnwv = vself(vmaskf_lt(vabsf(onev - rbnwv), arthreshv), cfav * rbnwv, temp1v + zd5v * (cfav - temp2v));
 
-                        temp1v = epsv + LVFU(delm[indx1]);
-                        vfloat wtsev = temp1v + LVFU(delm[(indx + m1) >> 1]) + LVFU(delm[(indx + m2) >> 1]); //same as for wtu,wtd,wtl,wtr
-                        vfloat wtnwv = temp1v + LVFU(delm[(indx - m1) >> 1]) + LVFU(delm[(indx - m2) >> 1]);
+                        temp1v = epsv + lvfu(delm[indx1]);
+                        vfloat wtsev = temp1v + lvfu(delm[(indx + m1) >> 1]) + lvfu(delm[(indx + m2) >> 1]); //same as for wtu,wtd,wtl,wtr
+                        vfloat wtnwv = temp1v + lvfu(delm[(indx - m1) >> 1]) + lvfu(delm[(indx - m2) >> 1]);
 
                         vfloat rbmv = (wtsev * rbnwv + wtnwv * rbsev) / (wtsev + wtnwv);
 
-                        temp1v = median(rbmv , LC2VFU(cfa[indx - m1]), LC2VFU(cfa[indx + m1]));
+                        temp1v = median(rbmv , lc2vfu(cfa[indx - m1]), lc2vfu(cfa[indx + m1]));
                         vfloat wtv = vmul2f(cfav - rbmv) / (epsv + rbmv + cfav);
                         temp2v = vintpf(wtv, rbmv, temp1v);
 
                         temp2v = vself(vmaskf_lt(rbmv + rbmv, cfav), temp1v, temp2v);
                         temp2v = vself(vmaskf_lt(rbmv, cfav), temp2v, rbmv);
-                        STVFU(rbm[indx1], vself(vmaskf_gt(temp2v, clip_ptv), median(temp2v , LC2VFU(cfa[indx - m1]), LC2VFU(cfa[indx + m1])), temp2v ));
+                        stvfu(rbm[indx1], vself(vmaskf_gt(temp2v, clip_ptv), median(temp2v , lc2vfu(cfa[indx - m1]), lc2vfu(cfa[indx + m1])), temp2v ));
 
 
-                        temp1v = LC2VFU(cfa[indx + p1]);
-                        temp2v = LC2VFU(cfa[indx + p2]);
+                        temp1v = lc2vfu(cfa[indx + p1]);
+                        temp2v = lc2vfu(cfa[indx + p2]);
                         vfloat rbnev = vmul2f(temp1v) / (epsv + cfav + temp2v );
                         rbnev = vself(vmaskf_lt(vabsf(onev - rbnev), arthreshv), cfav * rbnev, temp1v + zd5v * (cfav - temp2v));
 
-                        temp1v = LC2VFU(cfa[indx - p1]);
-                        temp2v = LC2VFU(cfa[indx - p2]);
+                        temp1v = lc2vfu(cfa[indx - p1]);
+                        temp2v = lc2vfu(cfa[indx - p2]);
                         vfloat rbswv = vmul2f(temp1v) / (epsv + cfav + temp2v );
                         rbswv = vself(vmaskf_lt(vabsf(onev - rbswv), arthreshv), cfav * rbswv, temp1v + zd5v * (cfav - temp2v));
 
-                        temp1v = epsv + LVFU(delp[indx1]);
-                        vfloat wtnev = temp1v + LVFU(delp[(indx + p1) >> 1]) + LVFU(delp[(indx + p2) >> 1]);
-                        vfloat wtswv = temp1v + LVFU(delp[(indx - p1) >> 1]) + LVFU(delp[(indx - p2) >> 1]);
+                        temp1v = epsv + lvfu(delp[indx1]);
+                        vfloat wtnev = temp1v + lvfu(delp[(indx + p1) >> 1]) + lvfu(delp[(indx + p2) >> 1]);
+                        vfloat wtswv = temp1v + lvfu(delp[(indx - p1) >> 1]) + lvfu(delp[(indx - p2) >> 1]);
 
                         vfloat rbpv = (wtnev * rbswv + wtswv * rbnev) / (wtnev + wtswv);
 
-                        temp1v = median(rbpv , LC2VFU(cfa[indx - p1]), LC2VFU(cfa[indx + p1]));
+                        temp1v = median(rbpv , lc2vfu(cfa[indx - p1]), lc2vfu(cfa[indx + p1]));
                         wtv = vmul2f(cfav - rbpv) / (epsv + rbpv + cfav);
                         temp2v = vintpf(wtv, rbpv, temp1v);
 
                         temp2v = vself(vmaskf_lt(rbpv + rbpv, cfav), temp1v, temp2v);
                         temp2v = vself(vmaskf_lt(rbpv, cfav), temp2v, rbpv);
-                        STVFU(rbp[indx1], vself(vmaskf_gt(temp2v, clip_ptv), median(temp2v , LC2VFU(cfa[indx - p1]), LC2VFU(cfa[indx + p1])), temp2v ));
+                        stvfu(rbp[indx1], vself(vmaskf_gt(temp2v, clip_ptv), median(temp2v , lc2vfu(cfa[indx - p1]), lc2vfu(cfa[indx + p1])), temp2v ));
 
-                        vfloat rbvarmv = epssqv + (gausseven0v * (LVFU(Dgrbsq1m[(indx - v1) >> 1]) + LVFU(Dgrbsq1m[(indx - 1) >> 1]) + LVFU(Dgrbsq1m[(indx + 1) >> 1]) + LVFU(Dgrbsq1m[(indx + v1) >> 1])) +
-                                                   gausseven1v * (LVFU(Dgrbsq1m[(indx - v2 - 1) >> 1]) + LVFU(Dgrbsq1m[(indx - v2 + 1) >> 1]) + LVFU(Dgrbsq1m[(indx - 2 - v1) >> 1]) + LVFU(Dgrbsq1m[(indx + 2 - v1) >> 1]) +
-                                                           LVFU(Dgrbsq1m[(indx - 2 + v1) >> 1]) + LVFU(Dgrbsq1m[(indx + 2 + v1) >> 1]) + LVFU(Dgrbsq1m[(indx + v2 - 1) >> 1]) + LVFU(Dgrbsq1m[(indx + v2 + 1) >> 1])));
-                        STVFU(pmwt[indx1] , rbvarmv / ((epssqv + (gausseven0v * (LVFU(Dgrbsq1p[(indx - v1) >> 1]) + LVFU(Dgrbsq1p[(indx - 1) >> 1]) + LVFU(Dgrbsq1p[(indx + 1) >> 1]) + LVFU(Dgrbsq1p[(indx + v1) >> 1])) +
-                                                        gausseven1v * (LVFU(Dgrbsq1p[(indx - v2 - 1) >> 1]) + LVFU(Dgrbsq1p[(indx - v2 + 1) >> 1]) + LVFU(Dgrbsq1p[(indx - 2 - v1) >> 1]) + LVFU(Dgrbsq1p[(indx + 2 - v1) >> 1]) +
-                                                                LVFU(Dgrbsq1p[(indx - 2 + v1) >> 1]) + LVFU(Dgrbsq1p[(indx + 2 + v1) >> 1]) + LVFU(Dgrbsq1p[(indx + v2 - 1) >> 1]) + LVFU(Dgrbsq1p[(indx + v2 + 1) >> 1])))) + rbvarmv));
+                        vfloat rbvarmv = epssqv + (gausseven0v * (lvfu(Dgrbsq1m[(indx - v1) >> 1]) + lvfu(Dgrbsq1m[(indx - 1) >> 1]) + lvfu(Dgrbsq1m[(indx + 1) >> 1]) + lvfu(Dgrbsq1m[(indx + v1) >> 1])) +
+                                                   gausseven1v * (lvfu(Dgrbsq1m[(indx - v2 - 1) >> 1]) + lvfu(Dgrbsq1m[(indx - v2 + 1) >> 1]) + lvfu(Dgrbsq1m[(indx - 2 - v1) >> 1]) + lvfu(Dgrbsq1m[(indx + 2 - v1) >> 1]) +
+                                                           lvfu(Dgrbsq1m[(indx - 2 + v1) >> 1]) + lvfu(Dgrbsq1m[(indx + 2 + v1) >> 1]) + lvfu(Dgrbsq1m[(indx + v2 - 1) >> 1]) + lvfu(Dgrbsq1m[(indx + v2 + 1) >> 1])));
+                        stvfu(pmwt[indx1] , rbvarmv / ((epssqv + (gausseven0v * (lvfu(Dgrbsq1p[(indx - v1) >> 1]) + lvfu(Dgrbsq1p[(indx - 1) >> 1]) + lvfu(Dgrbsq1p[(indx + 1) >> 1]) + lvfu(Dgrbsq1p[(indx + v1) >> 1])) +
+                                                        gausseven1v * (lvfu(Dgrbsq1p[(indx - v2 - 1) >> 1]) + lvfu(Dgrbsq1p[(indx - v2 + 1) >> 1]) + lvfu(Dgrbsq1p[(indx - 2 - v1) >> 1]) + lvfu(Dgrbsq1p[(indx + 2 - v1) >> 1]) +
+                                                                lvfu(Dgrbsq1p[(indx - 2 + v1) >> 1]) + lvfu(Dgrbsq1p[(indx + 2 + v1) >> 1]) + lvfu(Dgrbsq1p[(indx + v2 - 1) >> 1]) + lvfu(Dgrbsq1p[(indx + v2 + 1) >> 1])))) + rbvarmv));
 
                     }
 
@@ -1207,7 +1207,7 @@ void RawImageSource::amaze_demosaic_RT(int winx, int winy, int winw, int winh, c
                 }
 
 #ifdef __SSE2__
-                vfloat zd25v = F2V(0.25f);
+                vfloat zd25v = f2v(0.25f);
 #endif
 
                 for (int rr = 10; rr < rr1 - 10; rr++)
@@ -1215,11 +1215,11 @@ void RawImageSource::amaze_demosaic_RT(int winx, int winy, int winw, int winh, c
                     for (int indx = rr * ts + 10 + (FC(rr, 2) & 1), indx1 = indx >> 1; indx < rr * ts + cc1 - 10; indx += 8, indx1 += 4) {
 
                         //first ask if one gets more directional discrimination from nearby B/R sites
-                        vfloat pmwtaltv = zd25v * (LVFU(pmwt[(indx - m1) >> 1]) + LVFU(pmwt[(indx + p1) >> 1]) + LVFU(pmwt[(indx - p1) >> 1]) + LVFU(pmwt[(indx + m1) >> 1]));
-                        vfloat tempv = LVFU(pmwt[indx1]);
+                        vfloat pmwtaltv = zd25v * (lvfu(pmwt[(indx - m1) >> 1]) + lvfu(pmwt[(indx + p1) >> 1]) + lvfu(pmwt[(indx - p1) >> 1]) + lvfu(pmwt[(indx + m1) >> 1]));
+                        vfloat tempv = lvfu(pmwt[indx1]);
                         tempv = vself(vmaskf_lt(vabsf(zd5v - tempv), vabsf(zd5v - pmwtaltv)), pmwtaltv, tempv);
-                        STVFU(pmwt[indx1], tempv);
-                        STVFU(rbint[indx1], zd5v * (LC2VFU(cfa[indx]) + vintpf(tempv, LVFU(rbp[indx1]), LVFU(rbm[indx1]))));
+                        stvfu(pmwt[indx1], tempv);
+                        stvfu(rbint[indx1], zd5v * (lc2vfu(cfa[indx]) + vintpf(tempv, lvfu(rbp[indx1]), lvfu(rbm[indx1]))));
                     }
 
 #else
@@ -1241,55 +1241,55 @@ void RawImageSource::amaze_demosaic_RT(int winx, int winy, int winw, int winh, c
                 for (int rr = 12; rr < rr1 - 12; rr++)
 #ifdef __SSE2__
                     for (int indx = rr * ts + 12 + (FC(rr, 2) & 1), indx1 = indx >> 1; indx < rr * ts + cc1 - 12; indx += 8, indx1 += 4) {
-                        vmask copymask = vmaskf_ge(vabsf(zd5v - LVFU(pmwt[indx1])), vabsf(zd5v - LVFU(hvwt[indx1])));
+                        vmask copymask = vmaskf_ge(vabsf(zd5v - lvfu(pmwt[indx1])), vabsf(zd5v - lvfu(hvwt[indx1])));
 
                         if(_mm_movemask_ps((vfloat)copymask)) { // if for any of the 4 pixels the condition is true, do the maths for all 4 pixels and mask the unused out at the end
                             //now interpolate G vertically/horizontally using R+B values
                             //unfortunately, since G interpolation cannot be done diagonally this may lead to colour shifts
                             //colour ratios for G interpolation
-                            vfloat rbintv = LVFU(rbint[indx1]);
+                            vfloat rbintv = lvfu(rbint[indx1]);
 
                             //interpolated G via adaptive ratios or Hamilton-Adams in each cardinal direction
-                            vfloat cruv = vmul2f(LC2VFU(cfa[indx - v1])) / (epsv + rbintv + LVFU(rbint[(indx1 - v1)]));
+                            vfloat cruv = vmul2f(lc2vfu(cfa[indx - v1])) / (epsv + rbintv + lvfu(rbint[(indx1 - v1)]));
                             vfloat guv = rbintv * cruv;
-                            vfloat gu2v = LC2VFU(cfa[indx - v1]) + zd5v * (rbintv - LVFU(rbint[(indx1 - v1)]));
+                            vfloat gu2v = lc2vfu(cfa[indx - v1]) + zd5v * (rbintv - lvfu(rbint[(indx1 - v1)]));
                             guv = vself(vmaskf_lt(vabsf(onev - cruv), arthreshv), guv, gu2v);
 
-                            vfloat crdv = vmul2f(LC2VFU(cfa[indx + v1])) / (epsv + rbintv + LVFU(rbint[(indx1 + v1)]));
+                            vfloat crdv = vmul2f(lc2vfu(cfa[indx + v1])) / (epsv + rbintv + lvfu(rbint[(indx1 + v1)]));
                             vfloat gdv = rbintv * crdv;
-                            vfloat gd2v = LC2VFU(cfa[indx + v1]) + zd5v * (rbintv - LVFU(rbint[(indx1 + v1)]));
+                            vfloat gd2v = lc2vfu(cfa[indx + v1]) + zd5v * (rbintv - lvfu(rbint[(indx1 + v1)]));
                             gdv = vself(vmaskf_lt(vabsf(onev - crdv), arthreshv), gdv, gd2v);
 
-                            vfloat Gintvv = (LC2VFU(dirwts0[indx - v1]) * gdv + LC2VFU(dirwts0[indx + v1]) * guv) / (LC2VFU(dirwts0[indx + v1]) + LC2VFU(dirwts0[indx - v1]));
-                            vfloat Gint1v = median(Gintvv , LC2VFU(cfa[indx - v1]), LC2VFU(cfa[indx + v1]));
+                            vfloat Gintvv = (lc2vfu(dirwts0[indx - v1]) * gdv + lc2vfu(dirwts0[indx + v1]) * guv) / (lc2vfu(dirwts0[indx + v1]) + lc2vfu(dirwts0[indx - v1]));
+                            vfloat Gint1v = median(Gintvv , lc2vfu(cfa[indx - v1]), lc2vfu(cfa[indx + v1]));
                             vfloat vwtv = vmul2f(rbintv - Gintvv) / (epsv + Gintvv + rbintv);
                             vfloat Gint2v = vintpf(vwtv, Gintvv, Gint1v);
                             Gint1v = vself(vmaskf_lt(vmul2f(Gintvv), rbintv), Gint1v, Gint2v);
                             Gintvv = vself(vmaskf_lt(Gintvv, rbintv), Gint1v, Gintvv);
-                            Gintvv = vself(vmaskf_gt(Gintvv, clip_ptv), median(Gintvv, LC2VFU(cfa[indx - v1]), LC2VFU(cfa[indx + v1])), Gintvv);
+                            Gintvv = vself(vmaskf_gt(Gintvv, clip_ptv), median(Gintvv, lc2vfu(cfa[indx - v1]), lc2vfu(cfa[indx + v1])), Gintvv);
 
-                            vfloat crlv = vmul2f(LC2VFU(cfa[indx - 1])) / (epsv + rbintv + LVFU(rbint[(indx1 - 1)]));
+                            vfloat crlv = vmul2f(lc2vfu(cfa[indx - 1])) / (epsv + rbintv + lvfu(rbint[(indx1 - 1)]));
                             vfloat glv = rbintv * crlv;
-                            vfloat gl2v = LC2VFU(cfa[indx - 1]) + zd5v * (rbintv - LVFU(rbint[(indx1 - 1)]));
+                            vfloat gl2v = lc2vfu(cfa[indx - 1]) + zd5v * (rbintv - lvfu(rbint[(indx1 - 1)]));
                             glv = vself(vmaskf_lt(vabsf(onev - crlv), arthreshv), glv, gl2v);
 
-                            vfloat crrv = vmul2f(LC2VFU(cfa[indx + 1])) / (epsv + rbintv + LVFU(rbint[(indx1 + 1)]));
+                            vfloat crrv = vmul2f(lc2vfu(cfa[indx + 1])) / (epsv + rbintv + lvfu(rbint[(indx1 + 1)]));
                             vfloat grv = rbintv * crrv;
-                            vfloat gr2v = LC2VFU(cfa[indx + 1]) + zd5v * (rbintv - LVFU(rbint[(indx1 + 1)]));
+                            vfloat gr2v = lc2vfu(cfa[indx + 1]) + zd5v * (rbintv - lvfu(rbint[(indx1 + 1)]));
                             grv = vself(vmaskf_lt(vabsf(onev - crrv), arthreshv), grv, gr2v);
 
-                            vfloat Ginthv = (LC2VFU(dirwts1[indx - 1]) * grv + LC2VFU(dirwts1[indx + 1]) * glv) / (LC2VFU(dirwts1[indx - 1]) + LC2VFU(dirwts1[indx + 1]));
-                            vfloat Gint1h = median(Ginthv , LC2VFU(cfa[indx - 1]), LC2VFU(cfa[indx + 1]));
+                            vfloat Ginthv = (lc2vfu(dirwts1[indx - 1]) * grv + lc2vfu(dirwts1[indx + 1]) * glv) / (lc2vfu(dirwts1[indx - 1]) + lc2vfu(dirwts1[indx + 1]));
+                            vfloat Gint1h = median(Ginthv , lc2vfu(cfa[indx - 1]), lc2vfu(cfa[indx + 1]));
                             vfloat hwtv = vmul2f(rbintv - Ginthv) / (epsv + Ginthv + rbintv);
                             vfloat Gint2h = vintpf(hwtv, Ginthv, Gint1h);
                             Gint1h = vself(vmaskf_lt(vmul2f(Ginthv), rbintv), Gint1h, Gint2h);
                             Ginthv = vself(vmaskf_lt(Ginthv, rbintv), Gint1h, Ginthv);
-                            Ginthv = vself(vmaskf_gt(Ginthv, clip_ptv), median(Ginthv, LC2VFU(cfa[indx - 1]), LC2VFU(cfa[indx + 1])), Ginthv);
+                            Ginthv = vself(vmaskf_gt(Ginthv, clip_ptv), median(Ginthv, lc2vfu(cfa[indx - 1]), lc2vfu(cfa[indx + 1])), Ginthv);
 
-                            vfloat greenv = vself(copymask, vintpf(LVFU(hvwt[indx1]), Gintvv, Ginthv), LC2VFU(rgbgreen[indx]));
-                            STC2VFU(rgbgreen[indx], greenv);
+                            vfloat greenv = vself(copymask, vintpf(lvfu(hvwt[indx1]), Gintvv, Ginthv), lc2vfu(rgbgreen[indx]));
+                            stc2vfu(rgbgreen[indx], greenv);
 
-                            STVFU(Dgrb[0][indx1], vself(copymask, greenv - LC2VFU(cfa[indx]), LVFU(Dgrb[0][indx1])));
+                            stvfu(Dgrb[0][indx1], vself(copymask, greenv - lc2vfu(cfa[indx]), lvfu(Dgrb[0][indx1])));
                         }
                     }
 
@@ -1386,25 +1386,25 @@ void RawImageSource::amaze_demosaic_RT(int winx, int winy, int winw, int winh, c
                     }
 
 #ifdef __SSE2__
-                vfloat oned325v = F2V( 1.325f );
-                vfloat zd175v = F2V( 0.175f );
-                vfloat zd075v = F2V( 0.075f );
+                vfloat oned325v = f2v( 1.325f );
+                vfloat zd175v = f2v( 0.175f );
+                vfloat zd075v = f2v( 0.075f );
 #endif
 
                 for (int rr = 14; rr < rr1 - 14; rr++)
 #ifdef __SSE2__
                     for (int cc = 14 + (FC(rr, 2) & 1), indx = rr * ts + cc, c = 1 - FC(rr, cc) / 2; cc < cc1 - 14; cc += 8, indx += 8) {
-                        vfloat tempv = epsv + vabsf(LVFU(Dgrb[c][(indx - m1) >> 1]) - LVFU(Dgrb[c][(indx + m1) >> 1]));
-                        vfloat temp2v = epsv + vabsf(LVFU(Dgrb[c][(indx + p1) >> 1]) - LVFU(Dgrb[c][(indx - p1) >> 1]));
-                        vfloat wtnwv = onev / (tempv + vabsf(LVFU(Dgrb[c][(indx - m1) >> 1]) - LVFU(Dgrb[c][(indx - m3) >> 1])) + vabsf(LVFU(Dgrb[c][(indx + m1) >> 1]) - LVFU(Dgrb[c][(indx - m3) >> 1])));
-                        vfloat wtnev = onev / (temp2v + vabsf(LVFU(Dgrb[c][(indx + p1) >> 1]) - LVFU(Dgrb[c][(indx + p3) >> 1])) + vabsf(LVFU(Dgrb[c][(indx - p1) >> 1]) - LVFU(Dgrb[c][(indx + p3) >> 1])));
-                        vfloat wtswv = onev / (temp2v + vabsf(LVFU(Dgrb[c][(indx - p1) >> 1]) - LVFU(Dgrb[c][(indx + m3) >> 1])) + vabsf(LVFU(Dgrb[c][(indx + p1) >> 1]) - LVFU(Dgrb[c][(indx - p3) >> 1])));
-                        vfloat wtsev = onev / (tempv + vabsf(LVFU(Dgrb[c][(indx + m1) >> 1]) - LVFU(Dgrb[c][(indx - p3) >> 1])) + vabsf(LVFU(Dgrb[c][(indx - m1) >> 1]) - LVFU(Dgrb[c][(indx + m3) >> 1])));
+                        vfloat tempv = epsv + vabsf(lvfu(Dgrb[c][(indx - m1) >> 1]) - lvfu(Dgrb[c][(indx + m1) >> 1]));
+                        vfloat temp2v = epsv + vabsf(lvfu(Dgrb[c][(indx + p1) >> 1]) - lvfu(Dgrb[c][(indx - p1) >> 1]));
+                        vfloat wtnwv = onev / (tempv + vabsf(lvfu(Dgrb[c][(indx - m1) >> 1]) - lvfu(Dgrb[c][(indx - m3) >> 1])) + vabsf(lvfu(Dgrb[c][(indx + m1) >> 1]) - lvfu(Dgrb[c][(indx - m3) >> 1])));
+                        vfloat wtnev = onev / (temp2v + vabsf(lvfu(Dgrb[c][(indx + p1) >> 1]) - lvfu(Dgrb[c][(indx + p3) >> 1])) + vabsf(lvfu(Dgrb[c][(indx - p1) >> 1]) - lvfu(Dgrb[c][(indx + p3) >> 1])));
+                        vfloat wtswv = onev / (temp2v + vabsf(lvfu(Dgrb[c][(indx - p1) >> 1]) - lvfu(Dgrb[c][(indx + m3) >> 1])) + vabsf(lvfu(Dgrb[c][(indx + p1) >> 1]) - lvfu(Dgrb[c][(indx - p3) >> 1])));
+                        vfloat wtsev = onev / (tempv + vabsf(lvfu(Dgrb[c][(indx + m1) >> 1]) - lvfu(Dgrb[c][(indx - p3) >> 1])) + vabsf(lvfu(Dgrb[c][(indx - m1) >> 1]) - lvfu(Dgrb[c][(indx + m3) >> 1])));
 
-                        STVFU(Dgrb[c][indx >> 1], (wtnwv * (oned325v * LVFU(Dgrb[c][(indx - m1) >> 1]) - zd175v * LVFU(Dgrb[c][(indx - m3) >> 1]) - zd075v * (LVFU(Dgrb[c][(indx - m1 - 2) >> 1]) + LVFU(Dgrb[c][(indx - m1 - v2) >> 1])) ) +
-                                                   wtnev * (oned325v * LVFU(Dgrb[c][(indx + p1) >> 1]) - zd175v * LVFU(Dgrb[c][(indx + p3) >> 1]) - zd075v * (LVFU(Dgrb[c][(indx + p1 + 2) >> 1]) + LVFU(Dgrb[c][(indx + p1 + v2) >> 1])) ) +
-                                                   wtswv * (oned325v * LVFU(Dgrb[c][(indx - p1) >> 1]) - zd175v * LVFU(Dgrb[c][(indx - p3) >> 1]) - zd075v * (LVFU(Dgrb[c][(indx - p1 - 2) >> 1]) + LVFU(Dgrb[c][(indx - p1 - v2) >> 1])) ) +
-                                                   wtsev * (oned325v * LVFU(Dgrb[c][(indx + m1) >> 1]) - zd175v * LVFU(Dgrb[c][(indx + m3) >> 1]) - zd075v * (LVFU(Dgrb[c][(indx + m1 + 2) >> 1]) + LVFU(Dgrb[c][(indx + m1 + v2) >> 1])) )) / (wtnwv + wtnev + wtswv + wtsev));
+                        stvfu(Dgrb[c][indx >> 1], (wtnwv * (oned325v * lvfu(Dgrb[c][(indx - m1) >> 1]) - zd175v * lvfu(Dgrb[c][(indx - m3) >> 1]) - zd075v * (lvfu(Dgrb[c][(indx - m1 - 2) >> 1]) + lvfu(Dgrb[c][(indx - m1 - v2) >> 1])) ) +
+                                                   wtnev * (oned325v * lvfu(Dgrb[c][(indx + p1) >> 1]) - zd175v * lvfu(Dgrb[c][(indx + p3) >> 1]) - zd075v * (lvfu(Dgrb[c][(indx + p1 + 2) >> 1]) + lvfu(Dgrb[c][(indx + p1 + v2) >> 1])) ) +
+                                                   wtswv * (oned325v * lvfu(Dgrb[c][(indx - p1) >> 1]) - zd175v * lvfu(Dgrb[c][(indx - p3) >> 1]) - zd075v * (lvfu(Dgrb[c][(indx - p1 - 2) >> 1]) + lvfu(Dgrb[c][(indx - p1 - v2) >> 1])) ) +
+                                                   wtsev * (oned325v * lvfu(Dgrb[c][(indx + m1) >> 1]) - zd175v * lvfu(Dgrb[c][(indx + m3) >> 1]) - zd075v * (lvfu(Dgrb[c][(indx + m1 + 2) >> 1]) + lvfu(Dgrb[c][(indx + m1 + v2) >> 1])) )) / (wtnwv + wtnev + wtswv + wtsev));
                     }
 
 #else
@@ -1425,7 +1425,7 @@ void RawImageSource::amaze_demosaic_RT(int winx, int winy, int winw, int winh, c
 
 #ifdef __SSE2__
                 int offset;
-                vfloat twov = F2V(2.f);
+                vfloat twov = f2v(2.f);
                 vmask selmask;
 
                 if((FC(16, 2) & 1) == 1) {
@@ -1447,17 +1447,17 @@ void RawImageSource::amaze_demosaic_RT(int winx, int winy, int winw, int winh, c
                     selmask = vnotm(selmask);
 
                     for (; indx < rr * ts + cc1 - 18 - (cc1 & 1); indx += 4, col += 4) {
-                        vfloat greenv = LVF(rgbgreen[indx]);
-                        vfloat temp00v = vdup(LVFU(hvwt[(indx - v1) >> 1]));
-                        vfloat temp01v = vdup(LVFU(hvwt[(indx + v1) >> 1]));
-                        vfloat tempv =  onev / (temp00v + twov - vdup(LVFU(hvwt[(indx + 1 + offset) >> 1])) - vdup(LVFU(hvwt[(indx - 1 + offset) >> 1])) + temp01v);
+                        vfloat greenv = lvf(rgbgreen[indx]);
+                        vfloat temp00v = vdup(lvfu(hvwt[(indx - v1) >> 1]));
+                        vfloat temp01v = vdup(lvfu(hvwt[(indx + v1) >> 1]));
+                        vfloat tempv =  onev / (temp00v + twov - vdup(lvfu(hvwt[(indx + 1 + offset) >> 1])) - vdup(lvfu(hvwt[(indx - 1 + offset) >> 1])) + temp01v);
 
-                        vfloat redv1  = greenv - (temp00v * vdup(LVFU(Dgrb[0][(indx - v1) >> 1])) + (onev - vdup(LVFU(hvwt[(indx + 1 + offset) >> 1]))) * vdup(LVFU(Dgrb[0][(indx + 1 + offset) >> 1])) + (onev - vdup(LVFU(hvwt[(indx - 1 + offset) >> 1]))) * vdup(LVFU(Dgrb[0][(indx - 1 + offset) >> 1])) + temp01v * vdup(LVFU(Dgrb[0][(indx + v1) >> 1]))) * tempv;
-                        vfloat bluev1 = greenv - (temp00v * vdup(LVFU(Dgrb[1][(indx - v1) >> 1])) + (onev - vdup(LVFU(hvwt[(indx + 1 + offset) >> 1]))) * vdup(LVFU(Dgrb[1][(indx + 1 + offset) >> 1])) + (onev - vdup(LVFU(hvwt[(indx - 1 + offset) >> 1]))) * vdup(LVFU(Dgrb[1][(indx - 1 + offset) >> 1])) + temp01v * vdup(LVFU(Dgrb[1][(indx + v1) >> 1]))) * tempv;
-                        vfloat redv2  = greenv - vdup(LVFU(Dgrb[0][indx >> 1]));
-                        vfloat bluev2 = greenv - vdup(LVFU(Dgrb[1][indx >> 1]));
-                        STVFU(red[row][col], c65535v * vself(selmask, redv1, redv2));
-                        STVFU(blue[row][col], c65535v * vself(selmask, bluev1, bluev2));
+                        vfloat redv1  = greenv - (temp00v * vdup(lvfu(Dgrb[0][(indx - v1) >> 1])) + (onev - vdup(lvfu(hvwt[(indx + 1 + offset) >> 1]))) * vdup(lvfu(Dgrb[0][(indx + 1 + offset) >> 1])) + (onev - vdup(lvfu(hvwt[(indx - 1 + offset) >> 1]))) * vdup(lvfu(Dgrb[0][(indx - 1 + offset) >> 1])) + temp01v * vdup(lvfu(Dgrb[0][(indx + v1) >> 1]))) * tempv;
+                        vfloat bluev1 = greenv - (temp00v * vdup(lvfu(Dgrb[1][(indx - v1) >> 1])) + (onev - vdup(lvfu(hvwt[(indx + 1 + offset) >> 1]))) * vdup(lvfu(Dgrb[1][(indx + 1 + offset) >> 1])) + (onev - vdup(lvfu(hvwt[(indx - 1 + offset) >> 1]))) * vdup(lvfu(Dgrb[1][(indx - 1 + offset) >> 1])) + temp01v * vdup(lvfu(Dgrb[1][(indx + v1) >> 1]))) * tempv;
+                        vfloat redv2  = greenv - vdup(lvfu(Dgrb[0][indx >> 1]));
+                        vfloat bluev2 = greenv - vdup(lvfu(Dgrb[1][indx >> 1]));
+                        stvfu(red[row][col], c65535v * vself(selmask, redv1, redv2));
+                        stvfu(blue[row][col], c65535v * vself(selmask, bluev1, bluev2));
                     }
 
                     if(offset == 0) {
@@ -1554,7 +1554,7 @@ void RawImageSource::amaze_demosaic_RT(int winx, int winy, int winw, int winh, c
 #ifdef __SSE2__
 
                     for (; cc < cc1 - 19; cc += 4) {
-                        STVFU(green[row][cc + left], LVF(rgbgreen[rr * ts + cc]) * c65535v);
+                        stvfu(green[row][cc + left], lvf(rgbgreen[rr * ts + cc]) * c65535v);
                     }
 
 #endif

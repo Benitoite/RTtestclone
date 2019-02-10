@@ -167,7 +167,7 @@ void rtengine::HaldCLUT::getRGB(
     const unsigned int level_square = level * level;
 
 #ifdef __SSE2__
-    const vfloat v_strength = F2V(strength);
+    const vfloat v_strength = f2v(strength);
 #endif
 
     for (std::size_t column = 0; column < line_size; ++column, ++r, ++g, ++b, out_rgbx += 4) {
@@ -225,12 +225,12 @@ void rtengine::HaldCLUT::getRGB(
         out_rgbx[2] = intp<float>(strength, out_rgbx[2], *b);
 #else
         const vfloat v_in = _mm_set_ps(0.0f, *b, *g, *r);
-        const vfloat v_tmp = v_in * F2V(flevel_minus_one);
-        const vfloat v_rgb = v_tmp - _mm_cvtepi32_ps(_mm_cvttps_epi32(vminf(v_tmp, F2V(flevel_minus_two))));
+        const vfloat v_tmp = v_in * f2v(flevel_minus_one);
+        const vfloat v_rgb = v_tmp - _mm_cvtepi32_ps(_mm_cvttps_epi32(vminf(v_tmp, f2v(flevel_minus_two))));
 
         size_t index = color * 4;
 
-        const vfloat v_r = PERMUTEPS<0, 0, 0, 0>(v_rgb);
+        const vfloat v_r = permuteps<0, 0, 0, 0>(v_rgb);
 
         vfloat2 v_clut_values = getClutValues(clut_image, index);
         vfloat v_tmp1 = vintpf(v_r, v_clut_values.y, v_clut_values.x);
@@ -240,7 +240,7 @@ void rtengine::HaldCLUT::getRGB(
         v_clut_values = getClutValues(clut_image, index);
         vfloat v_tmp2 = vintpf(v_r, v_clut_values.y, v_clut_values.x);
 
-        const vfloat v_g = PERMUTEPS<1, 1, 1, 1>(v_rgb);
+        const vfloat v_g = permuteps<1, 1, 1, 1>(v_rgb);
 
         vfloat v_out = vintpf(v_g, v_tmp2, v_tmp1);
 
@@ -256,11 +256,11 @@ void rtengine::HaldCLUT::getRGB(
 
         v_tmp1 = vintpf(v_g, v_tmp2, v_tmp1);
 
-        const vfloat v_b = PERMUTEPS<2, 2, 2, 2>(v_rgb);
+        const vfloat v_b = permuteps<2, 2, 2, 2>(v_rgb);
 
         v_out = vintpf(v_b, v_tmp1, v_out);
 
-        STVF(*out_rgbx, vintpf(v_strength, v_out, v_in));
+        stvf(*out_rgbx, vintpf(v_strength, v_out, v_in));
 #endif
     }
 }

@@ -300,7 +300,7 @@ float* RawImageSource::CA_correct_RT(
                         // after white balance multipliers are applied
 
 #ifdef __SSE2__
-                        vfloat c65535v = F2V(65535.f);
+                        vfloat c65535v = f2v(65535.f);
 #endif
 
                         for (int rr = rrmin; rr < rrmax; rr++) {
@@ -317,12 +317,12 @@ float* RawImageSource::CA_correct_RT(
                             }
                             int indx1 = rr * ts + cc;
                             for (; cc < ccmax - 7; cc+=8, col+=8, indx1 += 8) {
-                                vfloat val1 = LVFU(rawData[row][col]) / c65535v;
-                                vfloat val2 = LVFU(rawData[row][col + 4]) / c65535v;
+                                vfloat val1 = lvfu(rawData[row][col]) / c65535v;
+                                vfloat val2 = lvfu(rawData[row][col + 4]) / c65535v;
                                 vfloat nonGreenv = _mm_shuffle_ps(val1,val2,_MM_SHUFFLE(2,0,2,0));
-                                STVFU(rgb[c0][indx1 >> 1], nonGreenv);
-                                STVFU(rgb[1][indx1], val1);
-                                STVFU(rgb[1][indx1 + 4], val2);
+                                stvfu(rgb[c0][indx1 >> 1], nonGreenv);
+                                stvfu(rgb[1][indx1], val1);
+                                stvfu(rgb[1][indx1 + 4], val2);
                             }
 #endif
                             for (; cc < ccmax; cc++, col++) {
@@ -410,8 +410,8 @@ float* RawImageSource::CA_correct_RT(
                         //end of initialization
 
 #ifdef __SSE2__
-                        vfloat onev = F2V(1.f);
-                        vfloat epsv = F2V(eps);
+                        vfloat onev = f2v(1.f);
+                        vfloat epsv = f2v(eps);
 #endif
                         for (int rr = 3; rr < rr1 - 3; rr++) {
                             int row = rr + top;
@@ -421,20 +421,20 @@ float* RawImageSource::CA_correct_RT(
 #ifdef __SSE2__
                             for (; cc < cc1 - 9; cc+=8, indx+=8) {
                                 //compute directional weights using image gradients
-                                vfloat rgb1mv1v = LC2VFU(rgb[1][indx - v1]);
-                                vfloat rgb1pv1v = LC2VFU(rgb[1][indx + v1]);
-                                vfloat rgbcv = LVFU(rgb[c][indx >> 1]);
+                                vfloat rgb1mv1v = lc2vfu(rgb[1][indx - v1]);
+                                vfloat rgb1pv1v = lc2vfu(rgb[1][indx + v1]);
+                                vfloat rgbcv = lvfu(rgb[c][indx >> 1]);
                                 vfloat temp1v = epsv + vabsf(rgb1mv1v - rgb1pv1v);
-                                vfloat wtuv = onev / SQRV(temp1v + vabsf(rgbcv - LVFU(rgb[c][(indx - v2) >> 1])) + vabsf(rgb1mv1v - LC2VFU(rgb[1][indx - v3])));
-                                vfloat wtdv = onev / SQRV(temp1v + vabsf(rgbcv - LVFU(rgb[c][(indx + v2) >> 1])) + vabsf(rgb1pv1v - LC2VFU(rgb[1][indx + v3])));
-                                vfloat rgb1m1v = LC2VFU(rgb[1][indx - 1]);
-                                vfloat rgb1p1v = LC2VFU(rgb[1][indx + 1]);
+                                vfloat wtuv = onev / SQRV(temp1v + vabsf(rgbcv - lvfu(rgb[c][(indx - v2) >> 1])) + vabsf(rgb1mv1v - lc2vfu(rgb[1][indx - v3])));
+                                vfloat wtdv = onev / SQRV(temp1v + vabsf(rgbcv - lvfu(rgb[c][(indx + v2) >> 1])) + vabsf(rgb1pv1v - lc2vfu(rgb[1][indx + v3])));
+                                vfloat rgb1m1v = lc2vfu(rgb[1][indx - 1]);
+                                vfloat rgb1p1v = lc2vfu(rgb[1][indx + 1]);
                                 vfloat temp2v = epsv + vabsf(rgb1m1v - rgb1p1v);
-                                vfloat wtlv = onev / SQRV(temp2v + vabsf(rgbcv - LVFU(rgb[c][(indx - 2) >> 1])) + vabsf(rgb1m1v - LC2VFU(rgb[1][indx - 3])));
-                                vfloat wtrv = onev / SQRV(temp2v + vabsf(rgbcv - LVFU(rgb[c][(indx + 2) >> 1])) + vabsf(rgb1p1v - LC2VFU(rgb[1][indx + 3])));
+                                vfloat wtlv = onev / SQRV(temp2v + vabsf(rgbcv - lvfu(rgb[c][(indx - 2) >> 1])) + vabsf(rgb1m1v - lc2vfu(rgb[1][indx - 3])));
+                                vfloat wtrv = onev / SQRV(temp2v + vabsf(rgbcv - lvfu(rgb[c][(indx + 2) >> 1])) + vabsf(rgb1p1v - lc2vfu(rgb[1][indx + 3])));
 
                                 //store in rgb array the interpolated G value at R/B grid points using directional weighted average
-                                STC2VFU(rgb[1][indx], (wtuv * rgb1mv1v + wtdv * rgb1pv1v + wtlv * rgb1m1v + wtrv * rgb1p1v) / (wtuv + wtdv + wtlv + wtrv));
+                                stc2vfu(rgb[1][indx], (wtuv * rgb1mv1v + wtdv * rgb1pv1v + wtlv * rgb1m1v + wtrv * rgb1p1v) / (wtuv + wtdv + wtlv + wtrv));
                             }
 
 #endif
@@ -455,7 +455,7 @@ float* RawImageSource::CA_correct_RT(
                                 int indx = rr * ts + 3 - (left < 0 ? (left+3) : 0) + offset;
 #ifdef __SSE2__
                                 for (; col < min(cc1 + left - 3, width) - 7; col+=8, indx+=8) {
-                                    STVFU(Gtmp[(row * width + col) >> 1], LC2VFU(rgb[1][indx]));
+                                    stvfu(Gtmp[(row * width + col) >> 1], lc2vfu(rgb[1][indx]));
                                 }
 #endif
                                 for (; col < min(cc1 + left - 3, width); col+=2, indx+=2) {
@@ -465,7 +465,7 @@ float* RawImageSource::CA_correct_RT(
                         }
 
 #ifdef __SSE2__
-                        vfloat zd25v = F2V(0.25f);
+                        vfloat zd25v = f2v(0.25f);
 #endif
                         for (int rr = 4; rr < rr1 - 4; rr++) {
                             int cc = 4 + (FC(rr, 2) & 1);
@@ -473,30 +473,30 @@ float* RawImageSource::CA_correct_RT(
                             int c = FC(rr, cc);
 #ifdef __SSE2__
                             for (; cc < cc1 - 10; cc += 8, indx += 8) {
-                                vfloat rgb1v = LC2VFU(rgb[1][indx]);
-                                vfloat rgbcv = LVFU(rgb[c][indx >> 1]);
-                                vfloat rgb1mv4 = LC2VFU(rgb[1][indx - v4]);
-                                vfloat rgb1pv4 = LC2VFU(rgb[1][indx + v4]);
-                                vfloat temp1v = vabsf(vabsf((rgb1v - rgbcv) - (rgb1pv4 - LVFU(rgb[c][(indx + v4) >> 1]))) +
-                                                      vabsf(rgb1mv4 - LVFU(rgb[c][(indx - v4) >> 1]) - rgb1v + rgbcv) -
-                                                      vabsf(rgb1mv4 - LVFU(rgb[c][(indx - v4) >> 1]) - rgb1pv4 + LVFU(rgb[c][(indx + v4) >> 1])));
-                                STVFU(rbhpfv[indx >> 1], temp1v);
-                                vfloat rgb1m4 = LC2VFU(rgb[1][indx - 4]);
-                                vfloat rgb1p4 = LC2VFU(rgb[1][indx + 4]);
-                                vfloat temp2v = vabsf(vabsf((rgb1v - rgbcv) - (rgb1p4 - LVFU(rgb[c][(indx + 4) >> 1]))) +
-                                                      vabsf(rgb1m4 - LVFU(rgb[c][(indx - 4) >> 1]) - rgb1v + rgbcv) -
-                                                      vabsf(rgb1m4 - LVFU(rgb[c][(indx - 4) >> 1]) - rgb1p4 + LVFU(rgb[c][(indx + 4) >> 1])));
-                                STVFU(rbhpfh[indx >> 1], temp2v);
+                                vfloat rgb1v = lc2vfu(rgb[1][indx]);
+                                vfloat rgbcv = lvfu(rgb[c][indx >> 1]);
+                                vfloat rgb1mv4 = lc2vfu(rgb[1][indx - v4]);
+                                vfloat rgb1pv4 = lc2vfu(rgb[1][indx + v4]);
+                                vfloat temp1v = vabsf(vabsf((rgb1v - rgbcv) - (rgb1pv4 - lvfu(rgb[c][(indx + v4) >> 1]))) +
+                                                      vabsf(rgb1mv4 - lvfu(rgb[c][(indx - v4) >> 1]) - rgb1v + rgbcv) -
+                                                      vabsf(rgb1mv4 - lvfu(rgb[c][(indx - v4) >> 1]) - rgb1pv4 + lvfu(rgb[c][(indx + v4) >> 1])));
+                                stvfu(rbhpfv[indx >> 1], temp1v);
+                                vfloat rgb1m4 = lc2vfu(rgb[1][indx - 4]);
+                                vfloat rgb1p4 = lc2vfu(rgb[1][indx + 4]);
+                                vfloat temp2v = vabsf(vabsf((rgb1v - rgbcv) - (rgb1p4 - lvfu(rgb[c][(indx + 4) >> 1]))) +
+                                                      vabsf(rgb1m4 - lvfu(rgb[c][(indx - 4) >> 1]) - rgb1v + rgbcv) -
+                                                      vabsf(rgb1m4 - lvfu(rgb[c][(indx - 4) >> 1]) - rgb1p4 + lvfu(rgb[c][(indx + 4) >> 1])));
+                                stvfu(rbhpfh[indx >> 1], temp2v);
 
                                 //low and high pass 1D filters of G in vertical/horizontal directions
                                 rgb1v = vmul2f(rgb1v);
-                                vfloat glpfvv = (rgb1v + LC2VFU(rgb[1][indx + v2]) + LC2VFU(rgb[1][indx - v2]));
-                                vfloat glpfhv = (rgb1v + LC2VFU(rgb[1][indx + 2]) + LC2VFU(rgb[1][indx - 2]));
+                                vfloat glpfvv = (rgb1v + lc2vfu(rgb[1][indx + v2]) + lc2vfu(rgb[1][indx - v2]));
+                                vfloat glpfhv = (rgb1v + lc2vfu(rgb[1][indx + 2]) + lc2vfu(rgb[1][indx - 2]));
                                 rgbcv = vmul2f(rgbcv);
-                                STVFU(rblpfv[indx >> 1], zd25v * vabsf(glpfvv - (rgbcv + LVFU(rgb[c][(indx + v2) >> 1]) + LVFU(rgb[c][(indx - v2) >> 1]))));
-                                STVFU(rblpfh[indx >> 1], zd25v * vabsf(glpfhv - (rgbcv + LVFU(rgb[c][(indx + 2) >> 1]) + LVFU(rgb[c][(indx - 2) >> 1]))));
-                                STVFU(grblpfv[indx >> 1], zd25v * (glpfvv + (rgbcv + LVFU(rgb[c][(indx + v2) >> 1]) + LVFU(rgb[c][(indx - v2) >> 1]))));
-                                STVFU(grblpfh[indx >> 1], zd25v * (glpfhv + (rgbcv + LVFU(rgb[c][(indx + 2) >> 1]) + LVFU(rgb[c][(indx - 2) >> 1]))));
+                                stvfu(rblpfv[indx >> 1], zd25v * vabsf(glpfvv - (rgbcv + lvfu(rgb[c][(indx + v2) >> 1]) + lvfu(rgb[c][(indx - v2) >> 1]))));
+                                stvfu(rblpfh[indx >> 1], zd25v * vabsf(glpfhv - (rgbcv + lvfu(rgb[c][(indx + 2) >> 1]) + lvfu(rgb[c][(indx - 2) >> 1]))));
+                                stvfu(grblpfv[indx >> 1], zd25v * (glpfvv + (rgbcv + lvfu(rgb[c][(indx + v2) >> 1]) + lvfu(rgb[c][(indx - v2) >> 1]))));
+                                stvfu(grblpfh[indx >> 1], zd25v * (glpfhv + (rgbcv + lvfu(rgb[c][(indx + 2) >> 1]) + lvfu(rgb[c][(indx - 2) >> 1]))));
                             }
 #endif
                             for (; cc < cc1 - 4; cc += 2, indx += 2) {
@@ -526,9 +526,9 @@ float* RawImageSource::CA_correct_RT(
                         }
 
 #ifdef __SSE2__
-                        vfloat zd3v = F2V(0.3f);
-                        vfloat zd1v = F2V(0.1f);
-                        vfloat zd5v = F2V(0.5f);
+                        vfloat zd3v = f2v(0.3f);
+                        vfloat zd1v = f2v(0.1f);
+                        vfloat zd5v = f2v(0.5f);
 #endif
 
                         // along line segments, find the point along each segment that minimizes the colour variance
@@ -538,32 +538,32 @@ float* RawImageSource::CA_correct_RT(
                             int indx = rr * ts + cc;
                             int c = FC(rr, cc);
 #ifdef __SSE2__
-                            vfloat coeff00v = ZEROV;
-                            vfloat coeff01v = ZEROV;
-                            vfloat coeff02v = ZEROV;
-                            vfloat coeff10v = ZEROV;
-                            vfloat coeff11v = ZEROV;
-                            vfloat coeff12v = ZEROV;
+                            vfloat coeff00v = zerov;
+                            vfloat coeff01v = zerov;
+                            vfloat coeff02v = zerov;
+                            vfloat coeff10v = zerov;
+                            vfloat coeff11v = zerov;
+                            vfloat coeff12v = zerov;
                             for (; cc < cc1 - 14; cc += 8, indx += 8) {
                                 //in linear interpolation, colour differences are a quadratic function of interpolation position;
                                 //solve for the interpolation position that minimizes colour difference variance over the tile
 
                                 //vertical
-                                vfloat temp1 = zd3v * (LC2VFU(rgb[1][indx + ts + 1]) - LC2VFU(rgb[1][indx - ts - 1]));
-                                vfloat temp2 = zd3v * (LC2VFU(rgb[1][indx - ts + 1]) - LC2VFU(rgb[1][indx + ts - 1]));
-                                vfloat gdiffvv = (LC2VFU(rgb[1][indx + ts]) - LC2VFU(rgb[1][indx - ts])) + (temp1 - temp2);
-                                vfloat deltgrbv = LVFU(rgb[c][indx >> 1]) - LC2VFU(rgb[1][indx]);
+                                vfloat temp1 = zd3v * (lc2vfu(rgb[1][indx + ts + 1]) - lc2vfu(rgb[1][indx - ts - 1]));
+                                vfloat temp2 = zd3v * (lc2vfu(rgb[1][indx - ts + 1]) - lc2vfu(rgb[1][indx + ts - 1]));
+                                vfloat gdiffvv = (lc2vfu(rgb[1][indx + ts]) - lc2vfu(rgb[1][indx - ts])) + (temp1 - temp2);
+                                vfloat deltgrbv = lvfu(rgb[c][indx >> 1]) - lc2vfu(rgb[1][indx]);
 
-                                vfloat gradwtvv = (LVFU(rbhpfv[indx >> 1]) + zd5v * (LVFU(rbhpfv[(indx >> 1) + 1]) + LVFU(rbhpfv[(indx >> 1) - 1]))) * (LVFU(grblpfv[(indx >> 1) - v1]) + LVFU(grblpfv[(indx >> 1) + v1])) / (epsv + zd1v * (LVFU(grblpfv[(indx >> 1) - v1]) + LVFU(grblpfv[(indx >> 1) + v1])) + LVFU(rblpfv[(indx >> 1) - v1]) + LVFU(rblpfv[(indx >> 1) + v1]));
+                                vfloat gradwtvv = (lvfu(rbhpfv[indx >> 1]) + zd5v * (lvfu(rbhpfv[(indx >> 1) + 1]) + lvfu(rbhpfv[(indx >> 1) - 1]))) * (lvfu(grblpfv[(indx >> 1) - v1]) + lvfu(grblpfv[(indx >> 1) + v1])) / (epsv + zd1v * (lvfu(grblpfv[(indx >> 1) - v1]) + lvfu(grblpfv[(indx >> 1) + v1])) + lvfu(rblpfv[(indx >> 1) - v1]) + lvfu(rblpfv[(indx >> 1) + v1]));
 
                                 coeff00v += gradwtvv * deltgrbv * deltgrbv;
                                 coeff01v += gradwtvv * gdiffvv * deltgrbv;
                                 coeff02v += gradwtvv * gdiffvv * gdiffvv;
 
                                 //horizontal
-                                vfloat gdiffhv = (LC2VFU(rgb[1][indx + 1]) - LC2VFU(rgb[1][indx - 1])) + (temp1 + temp2);
+                                vfloat gdiffhv = (lc2vfu(rgb[1][indx + 1]) - lc2vfu(rgb[1][indx - 1])) + (temp1 + temp2);
 
-                                vfloat gradwthv = (LVFU(rbhpfh[indx >> 1]) + zd5v * (LVFU(rbhpfh[(indx >> 1) + v1]) + LVFU(rbhpfh[(indx >> 1) - v1]))) * (LVFU(grblpfh[(indx >> 1) - 1]) + LVFU(grblpfh[(indx >> 1) + 1])) / (epsv + zd1v * (LVFU(grblpfh[(indx >> 1) - 1]) + LVFU(grblpfh[(indx >> 1) + 1])) + LVFU(rblpfh[(indx >> 1) - 1]) + LVFU(rblpfh[(indx >> 1) + 1]));
+                                vfloat gradwthv = (lvfu(rbhpfh[indx >> 1]) + zd5v * (lvfu(rbhpfh[(indx >> 1) + v1]) + lvfu(rbhpfh[(indx >> 1) - v1]))) * (lvfu(grblpfh[(indx >> 1) - 1]) + lvfu(grblpfh[(indx >> 1) + 1])) / (epsv + zd1v * (lvfu(grblpfh[(indx >> 1) - 1]) + lvfu(grblpfh[(indx >> 1) + 1])) + lvfu(rblpfh[(indx >> 1) - 1]) + lvfu(rblpfh[(indx >> 1) + 1]));
 
                                 coeff10v += gradwthv * deltgrbv * deltgrbv;
                                 coeff11v += gradwthv * gdiffhv * deltgrbv;
@@ -844,7 +844,7 @@ float* RawImageSource::CA_correct_RT(
                         // after white balance multipliers are applied
 
 #ifdef __SSE2__
-                        vfloat c65535v = F2V(65535.f);
+                        vfloat c65535v = f2v(65535.f);
                         vmask gmask = _mm_set_epi32(0, 0xffffffff, 0, 0xffffffff);
 #endif
                         for (int rr = rrmin; rr < rrmax; rr++) {
@@ -864,12 +864,12 @@ float* RawImageSource::CA_correct_RT(
                                 c = FC(rr, cc);
                             }
                             for (; cc < ccmax - 7; cc += 8, col += 8, indx += 8, indx1 += 8) {
-                                vfloat val1v = LVFU(rawData[row][col]) / c65535v;
-                                vfloat val2v = LVFU(rawData[row][col + 4]) / c65535v;
-                                STVFU(rgb[c][indx1 >> 1], _mm_shuffle_ps(val1v, val2v, _MM_SHUFFLE(2, 0, 2, 0)));
-                                vfloat gtmpv = LVFU(Gtmp[indx >> 1]);
-                                STVFU(rgb[1][indx1], vself(gmask, PERMUTEPS<1, 1, 0, 0>(gtmpv), val1v));
-                                STVFU(rgb[1][indx1 + 4], vself(gmask, PERMUTEPS<3, 3, 2, 2>(gtmpv), val2v));
+                                vfloat val1v = lvfu(rawData[row][col]) / c65535v;
+                                vfloat val2v = lvfu(rawData[row][col + 4]) / c65535v;
+                                stvfu(rgb[c][indx1 >> 1], _mm_shuffle_ps(val1v, val2v, _MM_SHUFFLE(2, 0, 2, 0)));
+                                vfloat gtmpv = lvfu(Gtmp[indx >> 1]);
+                                stvfu(rgb[1][indx1], vself(gmask, permuteps<1, 1, 0, 0>(gtmpv), val1v));
+                                stvfu(rgb[1][indx1 + 4], vself(gmask, permuteps<3, 3, 2, 2>(gtmpv), val2v));
                             }
 #endif
                             for (; cc < ccmax; cc++, col++, indx++, indx1++) {
@@ -979,8 +979,8 @@ float* RawImageSource::CA_correct_RT(
 
                         if (!autoCA || fitParamsIn) {
 #ifdef __SSE2__
-                            const vfloat onev = F2V(1.f);
-                            const vfloat epsv = F2V(eps);
+                            const vfloat onev = f2v(1.f);
+                            const vfloat epsv = f2v(eps);
 #endif
                             //manual CA correction; use red/blue slider values to set CA shift parameters
                             for (int rr = 3; rr < rr1 - 3; rr++) {
@@ -988,15 +988,15 @@ float* RawImageSource::CA_correct_RT(
 #ifdef __SSE2__
                                 for (; cc < cc1 - 10; cc += 8, indx += 8) {
                                     //compute directional weights using image gradients
-                                    vfloat val1v = epsv + vabsf(LC2VFU(rgb[1][(rr + 1) * ts + cc]) - LC2VFU(rgb[1][(rr - 1) * ts + cc]));
-                                    vfloat val2v = epsv + vabsf(LC2VFU(rgb[1][indx + 1]) - LC2VFU(rgb[1][indx - 1]));
-                                    vfloat wtuv = onev / SQRV(val1v + vabsf(LVFU(rgb[c][(rr * ts + cc) >> 1]) - LVFU(rgb[c][((rr - 2) * ts + cc) >> 1])) + vabsf(LC2VFU(rgb[1][(rr - 1) * ts + cc]) - LC2VFU(rgb[1][(rr - 3) * ts + cc])));
-                                    vfloat wtdv = onev / SQRV(val1v + vabsf(LVFU(rgb[c][(rr * ts + cc) >> 1]) - LVFU(rgb[c][((rr + 2) * ts + cc) >> 1])) + vabsf(LC2VFU(rgb[1][(rr + 1) * ts + cc]) - LC2VFU(rgb[1][(rr + 3) * ts + cc])));
-                                    vfloat wtlv = onev / SQRV(val2v + vabsf(LVFU(rgb[c][indx >> 1]) - LVFU(rgb[c][(indx - 2) >> 1])) + vabsf(LC2VFU(rgb[1][indx - 1]) - LC2VFU(rgb[1][indx - 3])));
-                                    vfloat wtrv = onev / SQRV(val2v + vabsf(LVFU(rgb[c][indx >> 1]) - LVFU(rgb[c][(indx + 2) >> 1])) + vabsf(LC2VFU(rgb[1][indx + 1]) - LC2VFU(rgb[1][indx + 3])));
+                                    vfloat val1v = epsv + vabsf(lc2vfu(rgb[1][(rr + 1) * ts + cc]) - lc2vfu(rgb[1][(rr - 1) * ts + cc]));
+                                    vfloat val2v = epsv + vabsf(lc2vfu(rgb[1][indx + 1]) - lc2vfu(rgb[1][indx - 1]));
+                                    vfloat wtuv = onev / SQRV(val1v + vabsf(lvfu(rgb[c][(rr * ts + cc) >> 1]) - lvfu(rgb[c][((rr - 2) * ts + cc) >> 1])) + vabsf(lc2vfu(rgb[1][(rr - 1) * ts + cc]) - lc2vfu(rgb[1][(rr - 3) * ts + cc])));
+                                    vfloat wtdv = onev / SQRV(val1v + vabsf(lvfu(rgb[c][(rr * ts + cc) >> 1]) - lvfu(rgb[c][((rr + 2) * ts + cc) >> 1])) + vabsf(lc2vfu(rgb[1][(rr + 1) * ts + cc]) - lc2vfu(rgb[1][(rr + 3) * ts + cc])));
+                                    vfloat wtlv = onev / SQRV(val2v + vabsf(lvfu(rgb[c][indx >> 1]) - lvfu(rgb[c][(indx - 2) >> 1])) + vabsf(lc2vfu(rgb[1][indx - 1]) - lc2vfu(rgb[1][indx - 3])));
+                                    vfloat wtrv = onev / SQRV(val2v + vabsf(lvfu(rgb[c][indx >> 1]) - lvfu(rgb[c][(indx + 2) >> 1])) + vabsf(lc2vfu(rgb[1][indx + 1]) - lc2vfu(rgb[1][indx + 3])));
 
                                     //store in rgb array the interpolated G value at R/B grid points using directional weighted average
-                                    STC2VFU(rgb[1][indx], (wtuv * LC2VFU(rgb[1][indx - v1]) + wtdv * LC2VFU(rgb[1][indx + v1]) + wtlv * LC2VFU(rgb[1][indx - 1]) + wtrv * LC2VFU(rgb[1][indx + 1])) / (wtuv + wtdv + wtlv + wtrv));
+                                    stc2vfu(rgb[1][indx], (wtuv * lc2vfu(rgb[1][indx - v1]) + wtdv * lc2vfu(rgb[1][indx + v1]) + wtlv * lc2vfu(rgb[1][indx - 1]) + wtrv * lc2vfu(rgb[1][indx + 1])) / (wtuv + wtdv + wtlv + wtrv));
                                 }
 #endif
                                 for (; cc < cc1 - 3; cc += 2, indx += 2) {
@@ -1072,19 +1072,19 @@ float* RawImageSource::CA_correct_RT(
                             int indxcc = (rr + shiftvceil[c]) * ts + cc + shifthceil[c];
                             int indxcf = (rr + shiftvceil[c]) * ts + cc + shifthfloor[c];
 #ifdef __SSE2__
-                            vfloat shifthfracv = F2V(shifthfrac[c]);
-                            vfloat shiftvfracv = F2V(shiftvfrac[c]);
+                            vfloat shifthfracv = f2v(shifthfrac[c]);
+                            vfloat shiftvfracv = f2v(shiftvfrac[c]);
                             for (; cc < cc1 - 10; cc += 8, indxfc += 8, indxff += 8, indxcc += 8, indxcf += 8, indx += 4) {
                                 //perform CA correction using colour ratios or colour differences
-                                vfloat Ginthfloorv = vintpf(shifthfracv, LC2VFU(rgb[1][indxfc]), LC2VFU(rgb[1][indxff]));
-                                vfloat Ginthceilv = vintpf(shifthfracv, LC2VFU(rgb[1][indxcc]), LC2VFU(rgb[1][indxcf]));
+                                vfloat Ginthfloorv = vintpf(shifthfracv, lc2vfu(rgb[1][indxfc]), lc2vfu(rgb[1][indxff]));
+                                vfloat Ginthceilv = vintpf(shifthfracv, lc2vfu(rgb[1][indxcc]), lc2vfu(rgb[1][indxcf]));
                                 //Gint is bilinear interpolation of G at CA shift point
                                 vfloat Gintv = vintpf(shiftvfracv, Ginthceilv, Ginthfloorv);
 
                                 //determine R/B at grid points using colour differences at shift point plus interpolated G value at grid point
                                 //but first we need to interpolate G-R/G-B to grid points...
-                                STVFU(grbdiff[indx], Gintv - LVFU(rgb[c][indx]));
-                                STVFU(gshift[indx], Gintv);
+                                stvfu(grbdiff[indx], Gintv - lvfu(rgb[c][indx]));
+                                stvfu(gshift[indx], Gintv);
                             }
 
 #endif
@@ -1108,10 +1108,10 @@ float* RawImageSource::CA_correct_RT(
                         shiftvfrac[2] /= 2.f;
 
 #ifdef __SSE2__
-                        vfloat zd25v = F2V(0.25f);
-                        vfloat onev = F2V(1.f);
-                        vfloat zd5v = F2V(0.5f);
-                        vfloat epsv = F2V(eps);
+                        vfloat zd25v = f2v(0.25f);
+                        vfloat onev = f2v(1.f);
+                        vfloat zd5v = f2v(0.5f);
+                        vfloat epsv = f2v(eps);
 #endif
                         for (int rr = 8; rr < rr1 - 8; rr++) {
                             int cc = 8 + (FC(rr, 2) & 1);
@@ -1119,37 +1119,37 @@ float* RawImageSource::CA_correct_RT(
                             int GRBdir0 = GRBdir[0][c];
                             int GRBdir1 = GRBdir[1][c];
 #ifdef __SSE2__
-                            vfloat shifthfracc = F2V(shifthfrac[c]);
-                            vfloat shiftvfracc = F2V(shiftvfrac[c]);
+                            vfloat shifthfracc = f2v(shifthfrac[c]);
+                            vfloat shiftvfracc = f2v(shiftvfrac[c]);
                             for (int indx = rr * ts + cc; cc < cc1 - 14; cc += 8, indx += 8) {
                                 //interpolate colour difference from optical R/B locations to grid locations
-                                vfloat grbdiffinthfloor = vintpf(shifthfracc, LVFU(grbdiff[(indx - GRBdir1) >> 1]), LVFU(grbdiff[indx >> 1]));
-                                vfloat grbdiffinthceil = vintpf(shifthfracc, LVFU(grbdiff[((rr - GRBdir0) * ts + cc - GRBdir1) >> 1]), LVFU(grbdiff[((rr - GRBdir0) * ts + cc) >> 1]));
+                                vfloat grbdiffinthfloor = vintpf(shifthfracc, lvfu(grbdiff[(indx - GRBdir1) >> 1]), lvfu(grbdiff[indx >> 1]));
+                                vfloat grbdiffinthceil = vintpf(shifthfracc, lvfu(grbdiff[((rr - GRBdir0) * ts + cc - GRBdir1) >> 1]), lvfu(grbdiff[((rr - GRBdir0) * ts + cc) >> 1]));
                                 //grbdiffint is bilinear interpolation of G-R/G-B at grid point
                                 vfloat grbdiffint = vintpf(shiftvfracc, grbdiffinthceil, grbdiffinthfloor);
 
                                 //now determine R/B at grid points using interpolated colour differences and interpolated G value at grid point
-                                vfloat cinv = LVFU(rgb[c][indx >> 1]);
-                                vfloat rinv = LC2VFU(rgb[1][indx]);
+                                vfloat cinv = lvfu(rgb[c][indx >> 1]);
+                                vfloat rinv = lc2vfu(rgb[1][indx]);
                                 vfloat RBint = rinv - grbdiffint;
                                 vmask cmask = vmaskf_ge(vabsf(RBint - cinv), zd25v * (RBint + cinv));
                                 if (_mm_movemask_ps((vfloat)cmask)) {
                                     // if for any of the 4 pixels the condition is true, do the math for all 4 pixels and mask the unused out at the end
                                     //gradient weights using difference from G at CA shift points and G at grid points
-                                    vfloat p0 = onev / (epsv + vabsf(rinv - LVFU(gshift[indx >> 1])));
-                                    vfloat p1 = onev / (epsv + vabsf(rinv - LVFU(gshift[(indx - GRBdir1) >> 1])));
-                                    vfloat p2 = onev / (epsv + vabsf(rinv - LVFU(gshift[((rr - GRBdir0) * ts + cc) >> 1])));
-                                    vfloat p3 = onev / (epsv + vabsf(rinv - LVFU(gshift[((rr - GRBdir0) * ts + cc - GRBdir1) >> 1])));
+                                    vfloat p0 = onev / (epsv + vabsf(rinv - lvfu(gshift[indx >> 1])));
+                                    vfloat p1 = onev / (epsv + vabsf(rinv - lvfu(gshift[(indx - GRBdir1) >> 1])));
+                                    vfloat p2 = onev / (epsv + vabsf(rinv - lvfu(gshift[((rr - GRBdir0) * ts + cc) >> 1])));
+                                    vfloat p3 = onev / (epsv + vabsf(rinv - lvfu(gshift[((rr - GRBdir0) * ts + cc - GRBdir1) >> 1])));
 
-                                    grbdiffint = vself(cmask, (p0 * LVFU(grbdiff[indx >> 1]) + p1 * LVFU(grbdiff[(indx - GRBdir1) >> 1]) +
-                                                  p2 * LVFU(grbdiff[((rr - GRBdir0) * ts + cc) >> 1]) + p3 * LVFU(grbdiff[((rr - GRBdir0) * ts + cc - GRBdir1) >> 1])) / (p0 + p1 + p2 + p3), grbdiffint);
+                                    grbdiffint = vself(cmask, (p0 * lvfu(grbdiff[indx >> 1]) + p1 * lvfu(grbdiff[(indx - GRBdir1) >> 1]) +
+                                                  p2 * lvfu(grbdiff[((rr - GRBdir0) * ts + cc) >> 1]) + p3 * lvfu(grbdiff[((rr - GRBdir0) * ts + cc - GRBdir1) >> 1])) / (p0 + p1 + p2 + p3), grbdiffint);
 
                                 }
                                 vfloat grbdiffold = rinv - cinv;
                                 RBint = rinv - grbdiffint;
                                 RBint = vself(vmaskf_gt(vabsf(grbdiffold), vabsf(grbdiffint)), RBint, cinv);
-                                RBint = vself(vmaskf_lt(grbdiffold * grbdiffint, ZEROV), rinv - zd5v * (grbdiffold + grbdiffint), RBint);
-                                STVFU(rgb[c][indx >> 1], RBint);
+                                RBint = vself(vmaskf_lt(grbdiffold * grbdiffint, zerov), rinv - zd5v * (grbdiffold + grbdiffint), RBint);
+                                stvfu(rgb[c][indx >> 1], RBint);
                             }
 #endif
                             for (int c = FC(rr, cc), indx = rr * ts + cc; cc < cc1 - 8; cc += 2, indx += 2) {
@@ -1201,7 +1201,7 @@ float* RawImageSource::CA_correct_RT(
                             int indx1 = (rr * ts + cc) >> 1;
 #ifdef __SSE2__
                             for (; indx < (row * width + cc1 - border - 7 + left) >> 1; indx+=4, indx1 += 4) {
-                                STVFU(RawDataTmp[indx], c65535v * LVFU(rgb[c][indx1]));
+                                stvfu(RawDataTmp[indx], c65535v * lvfu(rgb[c][indx1]));
                             }
 #endif
                             for (; indx < (row * width + cc1 - border + left) >> 1; indx++, indx1++) {
@@ -1235,7 +1235,7 @@ float* RawImageSource::CA_correct_RT(
                     int indx = (row * width + col) >> 1;
 #ifdef __SSE2__
                     for (; col < width - 7 - cb; col += 8, indx += 4) {
-                        STC2VFU(rawData[row][col], LVFU(RawDataTmp[indx]));
+                        stc2vfu(rawData[row][col], lvfu(RawDataTmp[indx]));
                     }
 #endif
                     for (; col < width - cb; col += 2, indx++) {
@@ -1257,9 +1257,9 @@ float* RawImageSource::CA_correct_RT(
 #endif
             {
 #ifdef __SSE2__
-                const vfloat onev = F2V(1.f);
-                const vfloat twov = F2V(2.f);
-                const vfloat zd5v = F2V(0.5f);
+                const vfloat onev = f2v(1.f);
+                const vfloat twov = f2v(2.f);
+                const vfloat zd5v = f2v(0.5f);
 #endif
 #ifdef _OPENMP
                 #pragma omp for
@@ -1271,12 +1271,12 @@ float* RawImageSource::CA_correct_RT(
                     int j = firstCol;
 #ifdef __SSE2__
                     for (; j < W - 7 - 2 * cb; j += 8) {
-                        const vfloat newvals = LC2VFU(rawData[i + cb][j + cb]);
-                        const vfloat oldvals = LVFU((*oldraw)[i][j / 2]);
+                        const vfloat newvals = lc2vfu(rawData[i + cb][j + cb]);
+                        const vfloat oldvals = lvfu((*oldraw)[i][j / 2]);
                         vfloat factors = oldvals / newvals;
                         factors = vself(vmaskf_le(newvals, onev), onev, factors);
                         factors = vself(vmaskf_le(oldvals, onev), onev, factors);
-                        STVFU((*nonGreen)[i/2][j/2], vclampf(factors, zd5v, twov));
+                        stvfu((*nonGreen)[i/2][j/2], vclampf(factors, zd5v, twov));
                     }
 #endif
                     for (; j < W - 2 * cb; j += 2) {

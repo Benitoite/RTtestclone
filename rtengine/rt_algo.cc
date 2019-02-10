@@ -46,8 +46,8 @@ vfloat calcBlendFactor(vfloat valv, vfloat thresholdv) {
     // sigmoid function
     // result is in ]0;1] range
     // inflexion point is at (x, y) (threshold, 0.5)
-    const vfloat onev = F2V(1.f);
-    const vfloat c16v = F2V(16.f);
+    const vfloat onev = f2v(1.f);
+    const vfloat c16v = f2v(16.f);
     return onev / (onev + xexpf(c16v - c16v * valv / thresholdv));
 }
 #endif
@@ -56,13 +56,13 @@ float tileAverage(float **data, size_t tileY, size_t tileX, size_t tilesize) {
 
     float avg = 0.f;
 #ifdef __SSE2__
-    vfloat avgv = ZEROV;
+    vfloat avgv = zerov;
 #endif
     for (std::size_t y = tileY; y < tileY + tilesize; ++y) {
         std::size_t x = tileX;
 #ifdef __SSE2__
         for (; x < tileX + tilesize - 3; x += 4) {
-            avgv += LVFU(data[y][x]);
+            avgv += lvfu(data[y][x]);
         }
 #endif
         for (; x < tileX + tilesize; ++x) {
@@ -79,14 +79,14 @@ float tileVariance(float **data, size_t tileY, size_t tileX, size_t tilesize, fl
 
     float var = 0.f;
 #ifdef __SSE2__
-    vfloat varv = ZEROV;
-    const vfloat avgv = F2V(avg);
+    vfloat varv = zerov;
+    const vfloat avgv = f2v(avg);
 #endif
     for (std::size_t y = tileY; y < tileY + tilesize; ++y) {
         std::size_t x = tileX;
 #ifdef __SSE2__
         for (; x < tileX + tilesize - 3; x += 4) {
-            varv += SQRV(LVFU(data[y][x]) - avgv);
+            varv += SQRV(lvfu(data[y][x]) - avgv);
         }
 #endif
         for (; x < tileX + tilesize; ++x) {
@@ -105,16 +105,16 @@ float calcContrastThreshold(float** luminance, int tileY, int tileX, int tilesiz
     std::vector<std::vector<float>> blend(tilesize - 4, std::vector<float>(tilesize - 4));
 
 #ifdef __SSE2__
-    const vfloat scalev = F2V(scale);
+    const vfloat scalev = f2v(scale);
 #endif
 
     for(int j = tileY + 2; j < tileY + tilesize - 2; ++j) {
         int i = tileX + 2;
 #ifdef __SSE2__
         for(; i < tileX + tilesize - 5; i += 4) {
-            vfloat contrastv = vsqrtf(SQRV(LVFU(luminance[j][i+1]) - LVFU(luminance[j][i-1])) + SQRV(LVFU(luminance[j+1][i]) - LVFU(luminance[j-1][i])) +
-                                      SQRV(LVFU(luminance[j][i+2]) - LVFU(luminance[j][i-2])) + SQRV(LVFU(luminance[j+2][i]) - LVFU(luminance[j-2][i]))) * scalev;
-            STVFU(blend[j - tileY - 2][i - tileX - 2], contrastv);
+            vfloat contrastv = vsqrtf(SQRV(lvfu(luminance[j][i+1]) - lvfu(luminance[j][i-1])) + SQRV(lvfu(luminance[j+1][i]) - lvfu(luminance[j-1][i])) +
+                                      SQRV(lvfu(luminance[j][i+2]) - lvfu(luminance[j][i-2])) + SQRV(lvfu(luminance[j+2][i]) - lvfu(luminance[j-2][i]))) * scalev;
+            stvfu(blend[j - tileY - 2][i - tileX - 2], contrastv);
         }
 #endif
         for(; i < tileX + tilesize - 2; ++i) {
@@ -133,15 +133,15 @@ float calcContrastThreshold(float** luminance, int tileY, int tileX, int tilesiz
         const float contrastThreshold = c / 100.f;
         float sum = 0.f;
 #ifdef __SSE2__
-        const vfloat contrastThresholdv = F2V(contrastThreshold);
-        vfloat sumv = ZEROV;
+        const vfloat contrastThresholdv = f2v(contrastThreshold);
+        vfloat sumv = zerov;
 #endif
 
         for(int j = 0; j < tilesize - 4; ++j) {
             int i = 0;
 #ifdef __SSE2__
             for(; i < tilesize - 7; i += 4) {
-                sumv += calcBlendFactor(LVFU(blend[j][i]), contrastThresholdv);
+                sumv += calcBlendFactor(lvfu(blend[j][i]), contrastThresholdv);
             }
 #endif
             for(; i < tilesize - 4; ++i) {
@@ -413,9 +413,9 @@ void buildBlendMask(float** luminance, float **blend, int W, int H, float &contr
 #endif
         {
 #ifdef __SSE2__
-            const vfloat contrastThresholdv = F2V(contrastThreshold);
-            const vfloat scalev = F2V(scale);
-            const vfloat amountv = F2V(amount);
+            const vfloat contrastThresholdv = f2v(contrastThreshold);
+            const vfloat scalev = f2v(scale);
+            const vfloat amountv = f2v(amount);
 #endif
 #ifdef _OPENMP
             #pragma omp for schedule(dynamic,16)
@@ -425,10 +425,10 @@ void buildBlendMask(float** luminance, float **blend, int W, int H, float &contr
                 int i = 2;
 #ifdef __SSE2__
                 for(; i < W - 5; i += 4) {
-                    vfloat contrastv = vsqrtf(SQRV(LVFU(luminance[j][i+1]) - LVFU(luminance[j][i-1])) + SQRV(LVFU(luminance[j+1][i]) - LVFU(luminance[j-1][i])) +
-                                              SQRV(LVFU(luminance[j][i+2]) - LVFU(luminance[j][i-2])) + SQRV(LVFU(luminance[j+2][i]) - LVFU(luminance[j-2][i]))) * scalev;
+                    vfloat contrastv = vsqrtf(SQRV(lvfu(luminance[j][i+1]) - lvfu(luminance[j][i-1])) + SQRV(lvfu(luminance[j+1][i]) - lvfu(luminance[j-1][i])) +
+                                              SQRV(lvfu(luminance[j][i+2]) - lvfu(luminance[j][i-2])) + SQRV(lvfu(luminance[j+2][i]) - lvfu(luminance[j-2][i]))) * scalev;
 
-                    STVFU(blend[j][i], amountv * calcBlendFactor(contrastv, contrastThresholdv));
+                    stvfu(blend[j][i], amountv * calcBlendFactor(contrastv, contrastThresholdv));
                 }
 #endif
                 for(; i < W - 2; ++i) {

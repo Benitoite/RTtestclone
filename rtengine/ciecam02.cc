@@ -240,8 +240,8 @@ void Ciecam02::xyz_to_cat02float ( float &r, float &g, float &b, float x, float 
 void Ciecam02::xyz_to_cat02float ( vfloat &r, vfloat &g, vfloat &b, vfloat x, vfloat y, vfloat z )
 {
     //gamut correction M.H.Brill S.Susstrunk
-    r = ( F2V (1.007245f) * x) + (F2V (0.011136f) * y) - (F2V (0.018381f) * z); //Changjun Li
-    g = (F2V (-0.318061f) * x) + (F2V (1.314589f) * y) + (F2V (0.003471f) * z);
+    r = ( f2v (1.007245f) * x) + (f2v (0.011136f) * y) - (f2v (0.018381f) * z); //Changjun Li
+    g = (f2v (-0.318061f) * x) + (f2v (1.314589f) * y) + (f2v (0.003471f) * z);
     b = z;
 }
 #endif
@@ -267,8 +267,8 @@ void Ciecam02::cat02_to_xyzfloat ( float &x, float &y, float &z, float r, float 
 void Ciecam02::cat02_to_xyzfloat ( vfloat &x, vfloat &y, vfloat &z, vfloat r, vfloat g, vfloat b )
 {
     //gamut correction M.H.Brill S.Susstrunk
-    x = ( F2V (0.99015849f) * r) - (F2V (0.00838772f) * g) + (F2V (0.018229217f) * b); //Changjun Li
-    y = ( F2V (0.239565979f) * r) + (F2V (0.758664642f) * g) + (F2V (0.001770137f) * b);
+    x = ( f2v (0.99015849f) * r) - (f2v (0.00838772f) * g) + (f2v (0.018229217f) * b); //Changjun Li
+    y = ( f2v (0.239565979f) * r) + (f2v (0.758664642f) * g) + (f2v (0.001770137f) * b);
     z = b;
 }
 #endif
@@ -282,8 +282,8 @@ void Ciecam02::hpe_to_xyzfloat ( float &x, float &y, float &z, float r, float g,
 #ifdef __SSE2__
 void Ciecam02::hpe_to_xyzfloat ( vfloat &x, vfloat &y, vfloat &z, vfloat r, vfloat g, vfloat b )
 {
-    x = (F2V (1.910197f) * r) - (F2V (1.112124f) * g) + (F2V (0.201908f) * b);
-    y = (F2V (0.370950f) * r) + (F2V (0.629054f) * g) - (F2V (0.000008f) * b);
+    x = (f2v (1.910197f) * r) - (f2v (1.112124f) * g) + (f2v (0.201908f) * b);
+    y = (f2v (0.370950f) * r) + (f2v (0.629054f) * g) - (f2v (0.000008f) * b);
     z = b;
 }
 #endif
@@ -307,8 +307,8 @@ void Ciecam02::cat02_to_hpefloat ( float &rh, float &gh, float &bh, float r, flo
 void Ciecam02::cat02_to_hpefloat ( vfloat &rh, vfloat &gh, vfloat &bh, vfloat r, vfloat g, vfloat b)
 {
     //Changjun Li
-    rh = ( F2V (0.550930835f) * r) + (F2V (0.519435987f) * g) - ( F2V (0.070356303f) * b);
-    gh = ( F2V (0.055954056f) * r) + (F2V (0.89973132f) * g) + (F2V (0.044315524f) * b);
+    rh = ( f2v (0.550930835f) * r) + (f2v (0.519435987f) * g) - ( f2v (0.070356303f) * b);
+    gh = ( f2v (0.055954056f) * r) + (f2v (0.89973132f) * g) + (f2v (0.044315524f) * b);
     bh = b;
 }
 #endif
@@ -327,14 +327,14 @@ void Ciecam02::Aab_to_rgbfloat ( float &r, float &g, float &b, float A, float aa
 #ifdef __SSE2__
 void Ciecam02::Aab_to_rgbfloat ( vfloat &r, vfloat &g, vfloat &b, vfloat A, vfloat aa, vfloat bb, vfloat nbb )
 {
-    vfloat c1 = F2V (0.32787f) * ((A / nbb) + F2V (0.305f));
+    vfloat c1 = f2v (0.32787f) * ((A / nbb) + f2v (0.305f));
 
     /*       c1              c2               c3       */
-    r = c1 + (F2V (0.32145f) * aa) + (F2V (0.20527f) * bb);
+    r = c1 + (f2v (0.32145f) * aa) + (f2v (0.20527f) * bb);
     /*       c1              c4               c5       */
-    g = c1 - (F2V (0.63507f) * aa) - (F2V (0.18603f) * bb);
+    g = c1 - (f2v (0.63507f) * aa) - (f2v (0.18603f) * bb);
     /*       c1              c6               c7       */
-    b = c1 - (F2V (0.15681f) * aa) - (F2V (4.49038f) * bb);
+    b = c1 - (f2v (0.15681f) * aa) - (f2v (4.49038f) * bb);
 }
 #endif
 
@@ -378,28 +378,28 @@ void Ciecam02::calculate_abfloat ( float &aa, float &bb, float h, float e, float
 #ifdef __SSE2__
 void Ciecam02::calculate_abfloat ( vfloat &aa, vfloat &bb, vfloat h, vfloat e, vfloat t, vfloat nbb, vfloat a )
 {
-    vfloat2 sincosval = xsincosf ((h * F2V (rtengine::RT_PI)) / F2V (180.0f));
+    vfloat2 sincosval = xsincosf ((h * f2v (rtengine::RT_PI)) / f2v (180.0f));
     vfloat sinh = sincosval.x;
     vfloat cosh = sincosval.y;
-    vfloat x = (a / nbb) + F2V (0.305f);
-    vfloat p3 = F2V (1.05f);
+    vfloat x = (a / nbb) + f2v (0.305f);
+    vfloat p3 = f2v (1.05f);
     vmask swapMask = vmaskf_gt (vabsf (sinh), vabsf (cosh));
     vswap (swapMask, sinh, cosh);
-    vfloat c1 = F2V (1.f);
+    vfloat c1 = f2v (1.f);
     vfloat c2 = sinh / cosh;
     vswap (swapMask, c1, c2);
 
-    vfloat div = ((e / (t * cosh)) - (F2V (-0.31362f) - (p3 * F2V (0.15681f))) * c1 - ((F2V (0.01924f) - (p3 * F2V (4.49038f))) * (c2)));
+    vfloat div = ((e / (t * cosh)) - (f2v (-0.31362f) - (p3 * f2v (0.15681f))) * c1 - ((f2v (0.01924f) - (p3 * f2v (4.49038f))) * (c2)));
     // for large values of t the above calculation can change its sign which results in a hue shift of 180 degree
     // so we have to check the sign to avoid this shift.
     // Additionally it seems useful to limit the minimum value of div
     // I limited it, but I'm sure the actual limit is not the best one
 
     vmask limitMask = vmaskf_neq (vsignf (div), vsignf (cosh));
-    limitMask = vorm (limitMask, vmaskf_le (vabsf (div), vabsf (cosh) * F2V (2.f)));
-    div = vself (limitMask, cosh * F2V (2.f), div);
+    limitMask = vorm (limitMask, vmaskf_le (vabsf (div), vabsf (cosh) * f2v (2.f)));
+    div = vself (limitMask, cosh * f2v (2.f), div);
 
-    aa = ((F2V (0.32787f) * x) * (F2V (2.0f) + p3)) / div;
+    aa = ((f2v (0.32787f) * x) * (f2v (2.0f) + p3)) / div;
     bb = (aa * sinh) / cosh;
 
     vswap (swapMask, aa, bb);
@@ -535,45 +535,45 @@ void Ciecam02::xyz2jchqms_ciecam02float ( vfloat &J, vfloat &C, vfloat &h, vfloa
 
     xyz_to_cat02float ( r, g, b, x, y, z);
     xyz_to_cat02float ( rw, gw, bw, xw, yw, zw);
-    vfloat onev = F2V (1.f);
+    vfloat onev = f2v (1.f);
     rc = r * (((yw * d) / rw) + (onev - d));
     gc = g * (((yw * d) / gw) + (onev - d));
     bc = b * (((yw * d) / bw) + (onev - d));
 
     cat02_to_hpefloat ( rp, gp, bp, rc, gc, bc);
     //gamut correction M.H.Brill S.Susstrunk
-    rp = vmaxf (rp, ZEROV);
-    gp = vmaxf (gp, ZEROV);
-    bp = vmaxf (bp, ZEROV);
+    rp = vmaxf (rp, zerov);
+    gp = vmaxf (gp, zerov);
+    bp = vmaxf (bp, zerov);
     rpa = nonlinear_adaptationfloat ( rp, fl );
     gpa = nonlinear_adaptationfloat ( gp, fl );
     bpa = nonlinear_adaptationfloat ( bp, fl );
 
-    ca = rpa - ((F2V (12.0f) * gpa) - bpa) / F2V (11.0f);
-    cb = F2V (0.11111111f) * (rpa + gpa - (bpa + bpa));
+    ca = rpa - ((f2v (12.0f) * gpa) - bpa) / f2v (11.0f);
+    cb = f2v (0.11111111f) * (rpa + gpa - (bpa + bpa));
 
     vfloat myh = xatan2f ( cb, ca );
-    vfloat temp = F2V (rtengine::RT_PI);
+    vfloat temp = f2v (rtengine::RT_PI);
     temp += temp;
     temp += myh;
-    myh = vself (vmaskf_lt (myh, ZEROV), temp, myh);
+    myh = vself (vmaskf_lt (myh, zerov), temp, myh);
 
-    a = ((rpa + rpa) + gpa + (F2V (0.05f) * bpa) - F2V (0.305f)) * nbb;
-    a = vmaxf (a, ZEROV);  //gamut correction M.H.Brill S.Susstrunk
+    a = ((rpa + rpa) + gpa + (f2v (0.05f) * bpa) - f2v (0.305f)) * nbb;
+    a = vmaxf (a, zerov);  //gamut correction M.H.Brill S.Susstrunk
 
-    J = xpowf ( a / aw, c * cz * F2V (0.5f));
+    J = xpowf ( a / aw, c * cz * f2v (0.5f));
 
-    e = ((F2V (961.53846f)) * nc * ncb) * (xcosf ( myh + F2V (2.0f) ) + F2V (3.8f));
-    t = (e * vsqrtf ( (ca * ca) + (cb * cb) )) / (rpa + gpa + (F2V (1.05f) * bpa));
+    e = ((f2v (961.53846f)) * nc * ncb) * (xcosf ( myh + f2v (2.0f) ) + f2v (3.8f));
+    t = (e * vsqrtf ( (ca * ca) + (cb * cb) )) / (rpa + gpa + (f2v (1.05f) * bpa));
 
-    C = xpowf ( t, F2V (0.9f) ) * J * pow1;
+    C = xpowf ( t, f2v (0.9f) ) * J * pow1;
 
     Q = wh * J;
-    J *= J * F2V (100.0f);
+    J *= J * f2v (100.0f);
     M = C * pfl;
-    Q = vmaxf (Q, F2V (0.0001f)); // avoid division by zero
-    s = F2V (100.0f) * vsqrtf ( M / Q );
-    h = (myh * F2V (180.f)) / F2V (rtengine::RT_PI);
+    Q = vmaxf (Q, f2v (0.0001f)); // avoid division by zero
+    s = f2v (100.0f) * vsqrtf ( M / Q );
+    h = (myh * f2v (180.f)) / f2v (rtengine::RT_PI);
 }
 #endif
 
@@ -607,7 +607,7 @@ void Ciecam02::xyz2jch_ciecam02float ( float &J, float &C, float &h, float aw, f
 
 #ifdef __SSE2__
     vfloat pv = _mm_setr_ps(rp, gp, bp, 1.f);
-    vfloat fv = F2V(fl);
+    vfloat fv = f2v(fl);
     vfloat outv = nonlinear_adaptationfloat(pv, fv);
     rpa = outv[0];
     gpa = outv[1];
@@ -675,7 +675,7 @@ void Ciecam02::jch2xyz_ciecam02float ( float &x, float &y, float &z, float J, fl
 
 #ifdef __SSE2__
     vfloat pav = _mm_setr_ps(rpa, gpa, bpa, 1.f);
-    vfloat fv = F2V(fl);
+    vfloat fv = f2v(fl);
     vfloat outv = inverse_nonlinear_adaptationfloat(pav, fv);
     rp = outv[0];
     gp = outv[1];
@@ -708,9 +708,9 @@ void Ciecam02::jch2xyz_ciecam02float ( vfloat &x, vfloat &y, vfloat &z, vfloat J
     vfloat a, ca, cb;
     vfloat e, t;
     xyz_to_cat02float ( rw, gw, bw, xw, yw, zw);
-    e = ((F2V (961.53846f)) * nc * ncb) * (xcosf ( ((h * F2V (rtengine::RT_PI)) / F2V (180.0f)) + F2V (2.0f) ) + F2V (3.8f));
-    a = xpowf ( J / F2V (100.0f), reccmcz ) * aw;
-    t = xpowf ( F2V (10.f) * C / (vsqrtf ( J ) * pow1), F2V (1.1111111f) );
+    e = ((f2v (961.53846f)) * nc * ncb) * (xcosf ( ((h * f2v (rtengine::RT_PI)) / f2v (180.0f)) + f2v (2.0f) ) + f2v (3.8f));
+    a = xpowf ( J / f2v (100.0f), reccmcz ) * aw;
+    t = xpowf ( f2v (10.f) * C / (vsqrtf ( J ) * pow1), f2v (1.1111111f) );
 
     calculate_abfloat ( ca, cb, h, e, t, nbb, a );
     Aab_to_rgbfloat ( rpa, gpa, bpa, a, ca, cb, nbb );
@@ -722,9 +722,9 @@ void Ciecam02::jch2xyz_ciecam02float ( vfloat &x, vfloat &y, vfloat &z, vfloat J
     hpe_to_xyzfloat ( x, y, z, rp, gp, bp );
     xyz_to_cat02float ( rc, gc, bc, x, y, z );
 
-    r = rc / (((yw * d) / rw) + (F2V (1.0f) - d));
-    g = gc / (((yw * d) / gw) + (F2V (1.0f) - d));
-    b = bc / (((yw * d) / bw) + (F2V (1.0f) - d));
+    r = rc / (((yw * d) / rw) + (f2v (1.0f) - d));
+    g = gc / (((yw * d) / gw) + (f2v (1.0f) - d));
+    b = bc / (((yw * d) / bw) + (f2v (1.0f) - d));
 
     cat02_to_xyzfloat ( x, y, z, r, g, b );
 }
@@ -746,13 +746,13 @@ float Ciecam02::nonlinear_adaptationfloat ( float c, float fl )
 #ifdef __SSE2__
 vfloat Ciecam02::nonlinear_adaptationfloat ( vfloat c, vfloat fl )
 {
-    vfloat c100 = F2V (100.f);
-    vfloat czd42 = F2V (0.42f);
-    vfloat c400 = vmulsignf (F2V (400.f), c);
+    vfloat c100 = f2v (100.f);
+    vfloat czd42 = f2v (0.42f);
+    vfloat c400 = vmulsignf (f2v (400.f), c);
     fl = vmulsignf (fl, c);
     vfloat p = xpowf ( (fl * c) / c100, czd42 );
-    vfloat c27d13 = F2V (27.13);
-    vfloat czd1 = F2V (0.1f);
+    vfloat c27d13 = f2v (27.13);
+    vfloat czd1 = f2v (0.1f);
     return ((c400 * p) / (c27d13 + p)) + czd1;
 }
 #endif
@@ -777,11 +777,11 @@ float Ciecam02::inverse_nonlinear_adaptationfloat ( float c, float fl )
 #ifdef __SSE2__
 vfloat Ciecam02::inverse_nonlinear_adaptationfloat ( vfloat c, vfloat fl )
 {
-    c -= F2V (0.1f);
+    c -= f2v (0.1f);
     fl = vmulsignf (fl, c);
     c = vabsf (c);
-    c = vminf ( c, F2V (399.99f));
-    return (F2V (100.0f) / fl) * xpowf ( (F2V (27.13f) * c) / (F2V (400.0f) - c), F2V (2.38095238f) );
+    c = vminf ( c, f2v (399.99f));
+    return (f2v (100.0f) / fl) * xpowf ( (f2v (27.13f) * c) / (f2v (400.0f) - c), f2v (2.38095238f) );
 }
 #endif
 //end CIECAM Billy Bigg

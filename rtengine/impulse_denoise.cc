@@ -81,7 +81,7 @@ void ImProcFunctions::impulse_nr (LabImage* lab, double thresh)
         float hpfabs, hfnbrave;
 #ifdef __SSE2__
         vfloat hfnbravev, hpfabsv;
-        vfloat impthrDiv24v = F2V( impthrDiv24 );
+        vfloat impthrDiv24v = f2v( impthrDiv24 );
 #endif
 #ifdef _OPENMP
         #pragma omp for
@@ -103,13 +103,13 @@ void ImProcFunctions::impulse_nr (LabImage* lab, double thresh)
 #ifdef __SSE2__
 
             for (; j < width - 5; j += 4) {
-                hfnbravev = ZEROV;
-                hpfabsv = vabsf(LVFU(lab->L[i][j]) - LVFU(lpf[i][j]));
+                hfnbravev = zerov;
+                hpfabsv = vabsf(lvfu(lab->L[i][j]) - lvfu(lpf[i][j]));
 
                 //block average of high pass data
                 for (i1 = max(0, i - 2); i1 <= min(i + 2, height - 1); i1++ ) {
                     for (j1 = j - 2; j1 <= j + 2; j1++) {
-                        hfnbravev += vabsf(LVFU(lab->L[i1][j1]) - LVFU(lpf[i1][j1]));
+                        hfnbravev += vabsf(lvfu(lab->L[i1][j1]) - lvfu(lpf[i1][j1]));
                     }
                 }
 
@@ -305,8 +305,8 @@ void ImProcFunctions::impulse_nrcam (CieImage* ncie, double thresh, float **buff
         float hpfabs, hfnbrave;
 #ifdef __SSE2__
         vfloat hfnbravev, hpfabsv;
-        vfloat impthrDiv24v = F2V( impthrDiv24 );
-        vfloat onev = F2V( 1.0f );
+        vfloat impthrDiv24v = f2v( impthrDiv24 );
+        vfloat onev = f2v( 1.0f );
 #endif
 #ifdef _OPENMP
         #pragma omp for
@@ -328,18 +328,18 @@ void ImProcFunctions::impulse_nrcam (CieImage* ncie, double thresh, float **buff
 #ifdef __SSE2__
 
             for (; j < width - 5; j += 4) {
-                hpfabsv = vabsf(LVFU(ncie->sh_p[i][j]) - LVFU(lpf[i][j]));
-                hfnbravev = ZEROV;
+                hpfabsv = vabsf(lvfu(ncie->sh_p[i][j]) - lvfu(lpf[i][j]));
+                hfnbravev = zerov;
 
                 //block average of high pass data
                 for (i1 = max(0, i - 2); i1 <= min(i + 2, height - 1); i1++ ) {
                     for (j1 = j - 2; j1 <= j + 2; j1++ ) {
-                        hfnbravev += vabsf(LVFU(ncie->sh_p[i1][j1]) - LVFU(lpf[i1][j1]));
+                        hfnbravev += vabsf(lvfu(ncie->sh_p[i1][j1]) - lvfu(lpf[i1][j1]));
                     }
 
                 }
 
-                STVFU(impish[i][j], vselfzero(vmaskf_gt(hpfabsv, (hfnbravev - hpfabsv)*impthrDiv24v), onev));
+                stvfu(impish[i][j], vselfzero(vmaskf_gt(hpfabsv, (hfnbravev - hpfabsv)*impthrDiv24v), onev));
             }
 
 #endif
@@ -384,7 +384,7 @@ void ImProcFunctions::impulse_nrcam (CieImage* ncie, double thresh, float **buff
 
 #ifdef __SSE2__
         vfloat2 sincosvalv;
-        vfloat piidv = F2V( piid );
+        vfloat piidv = f2v( piid );
         vfloat tempv;
 #endif
 #ifdef _OPENMP
@@ -396,10 +396,10 @@ void ImProcFunctions::impulse_nrcam (CieImage* ncie, double thresh, float **buff
 #ifdef __SSE2__
 
             for (; j < width - 3; j += 4) {
-                sincosvalv = xsincosf(piidv * LVFU(ncie->h_p[i][j]));
-                tempv = LVFU(ncie->C_p[i][j]);
-                STVFU(sraa[i][j], tempv * sincosvalv.y);
-                STVFU(srbb[i][j], tempv * sincosvalv.x);
+                sincosvalv = xsincosf(piidv * lvfu(ncie->h_p[i][j]));
+                tempv = lvfu(ncie->C_p[i][j]);
+                stvfu(sraa[i][j], tempv * sincosvalv.y);
+                stvfu(srbb[i][j], tempv * sincosvalv.x);
             }
 
 #endif
@@ -523,7 +523,7 @@ void ImProcFunctions::impulse_nrcam (CieImage* ncie, double thresh, float **buff
     {
 #ifdef __SSE2__
         vfloat interav, interbv;
-        vfloat piidv = F2V(piid);
+        vfloat piidv = f2v(piid);
 #endif // __SSE2__
 #ifdef _OPENMP
         #pragma omp for
@@ -534,10 +534,10 @@ void ImProcFunctions::impulse_nrcam (CieImage* ncie, double thresh, float **buff
 #ifdef __SSE2__
 
             for(; j < width - 3; j += 4) {
-                interav = LVFU(sraa[i][j]);
-                interbv = LVFU(srbb[i][j]);
-                STVFU(ncie->h_p[i][j], (xatan2f(interbv, interav)) / piidv);
-                STVFU(ncie->C_p[i][j], vsqrtf(SQRV(interbv) + SQRV(interav)));
+                interav = lvfu(sraa[i][j]);
+                interbv = lvfu(srbb[i][j]);
+                stvfu(ncie->h_p[i][j], (xatan2f(interbv, interav)) / piidv);
+                stvfu(ncie->C_p[i][j], vsqrtf(SQRV(interbv) + SQRV(interav)));
             }
 
 #endif

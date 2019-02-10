@@ -47,8 +47,8 @@ void hphd_vertical(const array2D<float> &rawData, float** hpmap, int col_from, i
 
     int k = col_from;
 #ifdef __SSE2__
-    const vfloat ninev = F2V(9.f);
-    const vfloat epsv = F2V(0.001f);
+    const vfloat ninev = f2v(9.f);
+    const vfloat epsv = f2v(0.001f);
 #endif
     for (; k < col_to - 7; k += numCols) {
         for (int i = 5; i < H - 5; i++) {
@@ -63,12 +63,12 @@ void hphd_vertical(const array2D<float> &rawData, float** hpmap, int col_from, i
         for (int j = 4; j < H - 4; j++) {
 #ifdef __SSE2__
             // faster than #pragma omp simd...
-            const vfloat avgL1 = ((LVFU(temp[j - 4][0]) + LVFU(temp[j - 3][0])) + (LVFU(temp[j - 2][0]) + LVFU(temp[j - 1][0])) + (LVFU(temp[j][0]) + LVFU(temp[j + 1][0])) + (LVFU(temp[j + 2][0]) + LVFU(temp[j + 3][0])) + LVFU(temp[j + 4][0])) / ninev;
-            STVFU(avg[j][0], avgL1);
-            STVFU(dev[j][0], vmaxf(epsv, (SQRV(LVFU(temp[j - 4][0]) - avgL1) + SQRV(LVFU(temp[j - 3][0]) - avgL1)) + (SQRV(LVFU(temp[j - 2][0]) - avgL1) + SQRV(LVFU(temp[j - 1][0]) - avgL1)) + (SQRV(LVFU(temp[j][0]) - avgL1) + SQRV(LVFU(temp[j + 1][0]) - avgL1)) + (SQRV(LVFU(temp[j + 2][0]) - avgL1) + SQRV(LVFU(temp[j + 3][0]) - avgL1)) + SQRV(LVFU(temp[j + 4][0]) - avgL1)));
-            const vfloat avgL2 = ((LVFU(temp[j - 4][4]) + LVFU(temp[j - 3][4])) + (LVFU(temp[j - 2][4]) + LVFU(temp[j - 1][4])) + (LVFU(temp[j][4]) + LVFU(temp[j + 1][4])) + (LVFU(temp[j + 2][4]) + LVFU(temp[j + 3][4])) + LVFU(temp[j + 4][4])) / ninev;
-            STVFU(avg[j][4], avgL2);
-            STVFU(dev[j][4], vmaxf(epsv, (SQRV(LVFU(temp[j - 4][4]) - avgL2) + SQRV(LVFU(temp[j - 3][4]) - avgL2)) + (SQRV(LVFU(temp[j - 2][4]) - avgL2) + SQRV(LVFU(temp[j - 1][4]) - avgL2)) + (SQRV(LVFU(temp[j][4]) - avgL2) + SQRV(LVFU(temp[j + 1][4]) - avgL2)) + (SQRV(LVFU(temp[j + 2][4]) - avgL2) + SQRV(LVFU(temp[j + 3][4]) - avgL2)) + SQRV(LVFU(temp[j + 4][4]) - avgL2)));
+            const vfloat avgL1 = ((lvfu(temp[j - 4][0]) + lvfu(temp[j - 3][0])) + (lvfu(temp[j - 2][0]) + lvfu(temp[j - 1][0])) + (lvfu(temp[j][0]) + lvfu(temp[j + 1][0])) + (lvfu(temp[j + 2][0]) + lvfu(temp[j + 3][0])) + lvfu(temp[j + 4][0])) / ninev;
+            stvfu(avg[j][0], avgL1);
+            stvfu(dev[j][0], vmaxf(epsv, (SQRV(lvfu(temp[j - 4][0]) - avgL1) + SQRV(lvfu(temp[j - 3][0]) - avgL1)) + (SQRV(lvfu(temp[j - 2][0]) - avgL1) + SQRV(lvfu(temp[j - 1][0]) - avgL1)) + (SQRV(lvfu(temp[j][0]) - avgL1) + SQRV(lvfu(temp[j + 1][0]) - avgL1)) + (SQRV(lvfu(temp[j + 2][0]) - avgL1) + SQRV(lvfu(temp[j + 3][0]) - avgL1)) + SQRV(lvfu(temp[j + 4][0]) - avgL1)));
+            const vfloat avgL2 = ((lvfu(temp[j - 4][4]) + lvfu(temp[j - 3][4])) + (lvfu(temp[j - 2][4]) + lvfu(temp[j - 1][4])) + (lvfu(temp[j][4]) + lvfu(temp[j + 1][4])) + (lvfu(temp[j + 2][4]) + lvfu(temp[j + 3][4])) + lvfu(temp[j + 4][4])) / ninev;
+            stvfu(avg[j][4], avgL2);
+            stvfu(dev[j][4], vmaxf(epsv, (SQRV(lvfu(temp[j - 4][4]) - avgL2) + SQRV(lvfu(temp[j - 3][4]) - avgL2)) + (SQRV(lvfu(temp[j - 2][4]) - avgL2) + SQRV(lvfu(temp[j - 1][4]) - avgL2)) + (SQRV(lvfu(temp[j][4]) - avgL2) + SQRV(lvfu(temp[j + 1][4]) - avgL2)) + (SQRV(lvfu(temp[j + 2][4]) - avgL2) + SQRV(lvfu(temp[j + 3][4]) - avgL2)) + SQRV(lvfu(temp[j + 4][4]) - avgL2)));
 #else
 #ifdef _OPENMP
             #pragma omp simd
@@ -127,9 +127,9 @@ void hphd_horizontal(const array2D<float> &rawData, float** hpmap, int row_from,
     memset(dev, 0, W * sizeof(float));
 
 #ifdef __SSE2__
-    const vfloat onev = F2V(1.f);
-    const vfloat twov = F2V(2.f);
-    const vfloat zd8v = F2V(0.8f);
+    const vfloat onev = f2v(1.f);
+    const vfloat twov = f2v(2.f);
+    const vfloat zd8v = f2v(0.8f);
 #endif
     for (int i = row_from; i < row_to; i++) {
 #ifdef _OPENMP
@@ -152,15 +152,15 @@ void hphd_horizontal(const array2D<float> &rawData, float** hpmap, int row_from,
 #ifdef __SSE2__
         // faster than #pragma omp simd
         for (; j < W - 8; j+=4) {
-            const vfloat avgL = LVFU(avg[j - 1]);
-            const vfloat avgR = LVFU(avg[j + 1]);
-            const vfloat devL = LVFU(dev[j - 1]);
-            const vfloat devR = LVFU(dev[j + 1]);
+            const vfloat avgL = lvfu(avg[j - 1]);
+            const vfloat avgR = lvfu(avg[j + 1]);
+            const vfloat devL = lvfu(dev[j - 1]);
+            const vfloat devR = lvfu(dev[j + 1]);
             const vfloat hpv = avgL + (avgR - avgL) * devL / (devL + devR);
 
-            const vfloat hpmapoldv = LVFU(hpmap[i][j]);
+            const vfloat hpmapoldv = lvfu(hpmap[i][j]);
             const vfloat hpmapv = vselfzero(vmaskf_lt(hpmapoldv, zd8v * hpv), twov);
-            STVFU(hpmap[i][j], vself(vmaskf_lt(hpv, zd8v * hpmapoldv), onev, hpmapv));
+            stvfu(hpmap[i][j], vself(vmaskf_lt(hpv, zd8v * hpmapoldv), onev, hpmapv));
         }
 #endif
         for (; j < W - 5; j++) {

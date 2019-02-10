@@ -719,57 +719,57 @@ void RawImageSource::lmmse_interpolate_omp(int winw, int winh, array2D<float> &r
                 rix[3] = qix[3] + rr * cc1 + cc;
                 rix[4] = qix[4] + rr * cc1 + cc;
                 // horizontal
-                p1v = LC2VFU(rix[2][-4]);
-                p2v = LC2VFU(rix[2][-3]);
-                p3v = LC2VFU(rix[2][-2]);
-                p4v = LC2VFU(rix[2][-1]);
-                p5v = LC2VFU(rix[2][ 0]);
-                p6v = LC2VFU(rix[2][ 1]);
-                p7v = LC2VFU(rix[2][ 2]);
-                p8v = LC2VFU(rix[2][ 3]);
-                p9v = LC2VFU(rix[2][ 4]);
+                p1v = lc2vfu(rix[2][-4]);
+                p2v = lc2vfu(rix[2][-3]);
+                p3v = lc2vfu(rix[2][-2]);
+                p4v = lc2vfu(rix[2][-1]);
+                p5v = lc2vfu(rix[2][ 0]);
+                p6v = lc2vfu(rix[2][ 1]);
+                p7v = lc2vfu(rix[2][ 2]);
+                p8v = lc2vfu(rix[2][ 3]);
+                p9v = lc2vfu(rix[2][ 4]);
                 muv = (p1v + p2v + p3v + p4v + p5v + p6v + p7v + p8v + p9v) / ninev;
                 vxv = epsv + SQRV(p1v - muv) + SQRV(p2v - muv) + SQRV(p3v - muv) + SQRV(p4v - muv) + SQRV(p5v - muv) + SQRV(p6v - muv) + SQRV(p7v - muv) + SQRV(p8v - muv) + SQRV(p9v - muv);
-                p1v -= LC2VFU(rix[0][-4]);
-                p2v -= LC2VFU(rix[0][-3]);
-                p3v -= LC2VFU(rix[0][-2]);
-                p4v -= LC2VFU(rix[0][-1]);
-                p5v -= LC2VFU(rix[0][ 0]);
-                p6v -= LC2VFU(rix[0][ 1]);
-                p7v -= LC2VFU(rix[0][ 2]);
-                p8v -= LC2VFU(rix[0][ 3]);
-                p9v -= LC2VFU(rix[0][ 4]);
+                p1v -= lc2vfu(rix[0][-4]);
+                p2v -= lc2vfu(rix[0][-3]);
+                p3v -= lc2vfu(rix[0][-2]);
+                p4v -= lc2vfu(rix[0][-1]);
+                p5v -= lc2vfu(rix[0][ 0]);
+                p6v -= lc2vfu(rix[0][ 1]);
+                p7v -= lc2vfu(rix[0][ 2]);
+                p8v -= lc2vfu(rix[0][ 3]);
+                p9v -= lc2vfu(rix[0][ 4]);
                 vnv = epsv + SQRV(p1v) + SQRV(p2v) + SQRV(p3v) + SQRV(p4v) + SQRV(p5v) + SQRV(p6v) + SQRV(p7v) + SQRV(p8v) + SQRV(p9v);
-                xhv = (LC2VFU(rix[0][0]) * vxv + LC2VFU(rix[2][0]) * vnv) / (vxv + vnv);
+                xhv = (lc2vfu(rix[0][0]) * vxv + lc2vfu(rix[2][0]) * vnv) / (vxv + vnv);
                 vhv = vxv * vnv / (vxv + vnv);
 
                 // vertical
-                p1v = LC2VFU(rix[3][-w4]);
-                p2v = LC2VFU(rix[3][-w3]);
-                p3v = LC2VFU(rix[3][-w2]);
-                p4v = LC2VFU(rix[3][-w1]);
-                p5v = LC2VFU(rix[3][  0]);
-                p6v = LC2VFU(rix[3][ w1]);
-                p7v = LC2VFU(rix[3][ w2]);
-                p8v = LC2VFU(rix[3][ w3]);
-                p9v = LC2VFU(rix[3][ w4]);
+                p1v = lc2vfu(rix[3][-w4]);
+                p2v = lc2vfu(rix[3][-w3]);
+                p3v = lc2vfu(rix[3][-w2]);
+                p4v = lc2vfu(rix[3][-w1]);
+                p5v = lc2vfu(rix[3][  0]);
+                p6v = lc2vfu(rix[3][ w1]);
+                p7v = lc2vfu(rix[3][ w2]);
+                p8v = lc2vfu(rix[3][ w3]);
+                p9v = lc2vfu(rix[3][ w4]);
                 muv = (p1v + p2v + p3v + p4v + p5v + p6v + p7v + p8v + p9v) / ninev;
                 vxv = epsv + SQRV(p1v - muv) + SQRV(p2v - muv) + SQRV(p3v - muv) + SQRV(p4v - muv) + SQRV(p5v - muv) + SQRV(p6v - muv) + SQRV(p7v - muv) + SQRV(p8v - muv) + SQRV(p9v - muv);
-                p1v -= LC2VFU(rix[1][-w4]);
-                p2v -= LC2VFU(rix[1][-w3]);
-                p3v -= LC2VFU(rix[1][-w2]);
-                p4v -= LC2VFU(rix[1][-w1]);
-                p5v -= LC2VFU(rix[1][  0]);
-                p6v -= LC2VFU(rix[1][ w1]);
-                p7v -= LC2VFU(rix[1][ w2]);
-                p8v -= LC2VFU(rix[1][ w3]);
-                p9v -= LC2VFU(rix[1][ w4]);
+                p1v -= lc2vfu(rix[1][-w4]);
+                p2v -= lc2vfu(rix[1][-w3]);
+                p3v -= lc2vfu(rix[1][-w2]);
+                p4v -= lc2vfu(rix[1][-w1]);
+                p5v -= lc2vfu(rix[1][  0]);
+                p6v -= lc2vfu(rix[1][ w1]);
+                p7v -= lc2vfu(rix[1][ w2]);
+                p8v -= lc2vfu(rix[1][ w3]);
+                p9v -= lc2vfu(rix[1][ w4]);
                 vnv = epsv + SQRV(p1v) + SQRV(p2v) + SQRV(p3v) + SQRV(p4v) + SQRV(p5v) + SQRV(p6v) + SQRV(p7v) + SQRV(p8v) + SQRV(p9v);
-                xvv = (LC2VFU(rix[1][0]) * vxv + LC2VFU(rix[3][0]) * vnv) / (vxv + vnv);
+                xvv = (lc2vfu(rix[1][0]) * vxv + lc2vfu(rix[3][0]) * vnv) / (vxv + vnv);
                 vvv = vxv * vnv / (vxv + vnv);
                 // interpolated G-R(B)
                 muv = (xhv * vvv + xvv * vhv) / (vhv + vvv);
-                STC2VFU(rix[4][0], muv);
+                stc2vfu(rix[4][0], muv);
             }
 
 #endif
@@ -946,15 +946,15 @@ void RawImageSource::lmmse_interpolate_omp(int winw, int winh, array2D<float> &r
                     rix[1] = qix[1] + rr * cc1 + cc;
                     // Assign 3x3 differential color values
                     const std::array<vfloat, 9> p = {
-                        LVFU(rix[c][-w1 - 1]) - LVFU(rix[1][-w1 - 1]),
-                        LVFU(rix[c][-w1]) - LVFU(rix[1][-w1]),
-                        LVFU(rix[c][-w1 + 1]) - LVFU(rix[1][-w1 + 1]),
-                        LVFU(rix[c][   -1]) - LVFU(rix[1][   -1]),
-                        LVFU(rix[c][  0]) - LVFU(rix[1][  0]),
-                        LVFU(rix[c][    1]) - LVFU(rix[1][    1]),
-                        LVFU(rix[c][ w1 - 1]) - LVFU(rix[1][ w1 - 1]),
-                        LVFU(rix[c][ w1]) - LVFU(rix[1][ w1]),
-                        LVFU(rix[c][ w1 + 1]) - LVFU(rix[1][ w1 + 1])
+                        lvfu(rix[c][-w1 - 1]) - lvfu(rix[1][-w1 - 1]),
+                        lvfu(rix[c][-w1]) - lvfu(rix[1][-w1]),
+                        lvfu(rix[c][-w1 + 1]) - lvfu(rix[1][-w1 + 1]),
+                        lvfu(rix[c][   -1]) - lvfu(rix[1][   -1]),
+                        lvfu(rix[c][  0]) - lvfu(rix[1][  0]),
+                        lvfu(rix[c][    1]) - lvfu(rix[1][    1]),
+                        lvfu(rix[c][ w1 - 1]) - lvfu(rix[1][ w1 - 1]),
+                        lvfu(rix[c][ w1]) - lvfu(rix[1][ w1]),
+                        lvfu(rix[c][ w1 + 1]) - lvfu(rix[1][ w1 + 1])
                     };
                     _mm_storeu_ps(&rix[d][0], median(p));
                 }
@@ -1195,9 +1195,9 @@ void RawImageSource::igv_interpolate(int winw, int winh)
             int col, indx;
 
             for (col = 0, indx = row * width + col; col < width - 7; col += 8, indx += 8) {
-                temp1v = LVFU( rawData[row][col] );
+                temp1v = lvfu( rawData[row][col] );
                 temp1v = CLIPV( temp1v );
-                temp2v = LVFU( rawData[row][col + 4] );
+                temp2v = lvfu( rawData[row][col + 4] );
                 temp2v = CLIPV( temp2v );
                 tempv = _mm_shuffle_ps( temp1v, temp2v, _MM_SHUFFLE( 2, 0, 2, 0 ) );
                 _mm_storeu_ps( &dest1[indx >> 1], tempv );
@@ -1231,20 +1231,20 @@ void RawImageSource::igv_interpolate(int winw, int winh)
 
             for (col = 5 + (FC(row, 1) & 1), indx = row * width + col, indx1 = indx >> 1; col < width - 12; col += 8, indx += 8, indx1 += 4) {
                 //N,E,W,S Gradients
-                ngv = (epsv + (vabsf(LVFU(rgb[1][(indx - v1) >> 1]) - LVFU(rgb[1][(indx - v3) >> 1])) + vabsf(LVFU(rgb[0][indx1]) - LVFU(rgb[0][(indx1 - v1)]))) / c65535v);
-                egv = (epsv + (vabsf(LVFU(rgb[1][(indx + h1) >> 1]) - LVFU(rgb[1][(indx + h3) >> 1])) + vabsf(LVFU(rgb[0][indx1]) - LVFU(rgb[0][(indx1 + h1)]))) / c65535v);
-                wgv = (epsv + (vabsf(LVFU(rgb[1][(indx - h1) >> 1]) - LVFU(rgb[1][(indx - h3) >> 1])) + vabsf(LVFU(rgb[0][indx1]) - LVFU(rgb[0][(indx1 - h1)]))) / c65535v);
-                sgv = (epsv + (vabsf(LVFU(rgb[1][(indx + v1) >> 1]) - LVFU(rgb[1][(indx + v3) >> 1])) + vabsf(LVFU(rgb[0][indx1]) - LVFU(rgb[0][(indx1 + v1)]))) / c65535v);
+                ngv = (epsv + (vabsf(lvfu(rgb[1][(indx - v1) >> 1]) - lvfu(rgb[1][(indx - v3) >> 1])) + vabsf(lvfu(rgb[0][indx1]) - lvfu(rgb[0][(indx1 - v1)]))) / c65535v);
+                egv = (epsv + (vabsf(lvfu(rgb[1][(indx + h1) >> 1]) - lvfu(rgb[1][(indx + h3) >> 1])) + vabsf(lvfu(rgb[0][indx1]) - lvfu(rgb[0][(indx1 + h1)]))) / c65535v);
+                wgv = (epsv + (vabsf(lvfu(rgb[1][(indx - h1) >> 1]) - lvfu(rgb[1][(indx - h3) >> 1])) + vabsf(lvfu(rgb[0][indx1]) - lvfu(rgb[0][(indx1 - h1)]))) / c65535v);
+                sgv = (epsv + (vabsf(lvfu(rgb[1][(indx + v1) >> 1]) - lvfu(rgb[1][(indx + v3) >> 1])) + vabsf(lvfu(rgb[0][indx1]) - lvfu(rgb[0][(indx1 + v1)]))) / c65535v);
                 //N,E,W,S High Order Interpolation (Li & Randhawa)
                 //N,E,W,S Hamilton Adams Interpolation
                 // (48.f * 65535.f) = 3145680.f
-                tempv = c40v * LVFU(rgb[0][indx1]);
-                nvv = vclampf(((c23v * LVFU(rgb[1][(indx - v1) >> 1]) + c23v * LVFU(rgb[1][(indx - v3) >> 1]) + LVFU(rgb[1][(indx - v5) >> 1]) + LVFU(rgb[1][(indx + v1) >> 1]) + tempv - c32v * LVFU(rgb[0][(indx1 - v1)]) - c8v * LVFU(rgb[0][(indx1 - v2)]))) / c3145680v, zerov, onev);
-                evv = vclampf(((c23v * LVFU(rgb[1][(indx + h1) >> 1]) + c23v * LVFU(rgb[1][(indx + h3) >> 1]) + LVFU(rgb[1][(indx + h5) >> 1]) + LVFU(rgb[1][(indx - h1) >> 1]) + tempv - c32v * LVFU(rgb[0][(indx1 + h1)]) - c8v * LVFU(rgb[0][(indx1 + h2)]))) / c3145680v, zerov, onev);
-                wvv = vclampf(((c23v * LVFU(rgb[1][(indx - h1) >> 1]) + c23v * LVFU(rgb[1][(indx - h3) >> 1]) + LVFU(rgb[1][(indx - h5) >> 1]) + LVFU(rgb[1][(indx + h1) >> 1]) + tempv - c32v * LVFU(rgb[0][(indx1 - h1)]) - c8v * LVFU(rgb[0][(indx1 - h2)]))) / c3145680v, zerov, onev);
-                svv = vclampf(((c23v * LVFU(rgb[1][(indx + v1) >> 1]) + c23v * LVFU(rgb[1][(indx + v3) >> 1]) + LVFU(rgb[1][(indx + v5) >> 1]) + LVFU(rgb[1][(indx - v1) >> 1]) + tempv - c32v * LVFU(rgb[0][(indx1 + v1)]) - c8v * LVFU(rgb[0][(indx1 + v2)]))) / c3145680v, zerov, onev);
+                tempv = c40v * lvfu(rgb[0][indx1]);
+                nvv = vclampf(((c23v * lvfu(rgb[1][(indx - v1) >> 1]) + c23v * lvfu(rgb[1][(indx - v3) >> 1]) + lvfu(rgb[1][(indx - v5) >> 1]) + lvfu(rgb[1][(indx + v1) >> 1]) + tempv - c32v * lvfu(rgb[0][(indx1 - v1)]) - c8v * lvfu(rgb[0][(indx1 - v2)]))) / c3145680v, zerov, onev);
+                evv = vclampf(((c23v * lvfu(rgb[1][(indx + h1) >> 1]) + c23v * lvfu(rgb[1][(indx + h3) >> 1]) + lvfu(rgb[1][(indx + h5) >> 1]) + lvfu(rgb[1][(indx - h1) >> 1]) + tempv - c32v * lvfu(rgb[0][(indx1 + h1)]) - c8v * lvfu(rgb[0][(indx1 + h2)]))) / c3145680v, zerov, onev);
+                wvv = vclampf(((c23v * lvfu(rgb[1][(indx - h1) >> 1]) + c23v * lvfu(rgb[1][(indx - h3) >> 1]) + lvfu(rgb[1][(indx - h5) >> 1]) + lvfu(rgb[1][(indx + h1) >> 1]) + tempv - c32v * lvfu(rgb[0][(indx1 - h1)]) - c8v * lvfu(rgb[0][(indx1 - h2)]))) / c3145680v, zerov, onev);
+                svv = vclampf(((c23v * lvfu(rgb[1][(indx + v1) >> 1]) + c23v * lvfu(rgb[1][(indx + v3) >> 1]) + lvfu(rgb[1][(indx + v5) >> 1]) + lvfu(rgb[1][(indx - v1) >> 1]) + tempv - c32v * lvfu(rgb[0][(indx1 + v1)]) - c8v * lvfu(rgb[0][(indx1 + v2)]))) / c3145680v, zerov, onev);
                 //Horizontal and vertical color differences
-                tempv = LVFU( rgb[0][indx1] ) / c65535v;
+                tempv = lvfu( rgb[0][indx1] ) / c65535v;
                 _mm_storeu_ps( &vdif[indx1], (sgv * nvv + ngv * svv) / (ngv + sgv) - tempv );
                 _mm_storeu_ps( &hdif[indx1], (wgv * evv + egv * wvv) / (egv + wgv) - tempv );
             }
@@ -1287,18 +1287,18 @@ void RawImageSource::igv_interpolate(int winw, int winh)
             for (col = 7 + (FC(row, 1) & 1), indx1 = (row * width + col) >> 1, d = FC(row, col) / 2; col < width - 14; col += 8, indx1 += 4) {
                 //H&V integrated gaussian vector over variance on color differences
                 //Mod Jacques 3/2013
-                ngv = vclampf(epssqv + c78v * SQRV(LVFU(vdif[indx1])) + c69v * (SQRV(LVFU(vdif[indx1 - v1])) + SQRV(LVFU(vdif[indx1 + v1]))) + c51v * (SQRV(LVFU(vdif[indx1 - v2])) + SQRV(LVFU(vdif[indx1 + v2]))) + c21v * (SQRV(LVFU(vdif[indx1 - v3])) + SQRV(LVFU(vdif[indx1 + v3]))) - c6v * SQRV(LVFU(vdif[indx1 - v1]) + LVFU(vdif[indx1]) + LVFU(vdif[indx1 + v1]))
-                           - c10v * (SQRV(LVFU(vdif[indx1 - v2]) + LVFU(vdif[indx1 - v1]) + LVFU(vdif[indx1])) + SQRV(LVFU(vdif[indx1]) + LVFU(vdif[indx1 + v1]) + LVFU(vdif[indx1 + v2]))) - c7v * (SQRV(LVFU(vdif[indx1 - v3]) + LVFU(vdif[indx1 - v2]) + LVFU(vdif[indx1 - v1])) + SQRV(LVFU(vdif[indx1 + v1]) + LVFU(vdif[indx1 + v2]) + LVFU(vdif[indx1 + v3]))), zerov, onev);
-                egv = vclampf(epssqv + c78v * SQRV(LVFU(hdif[indx1])) + c69v * (SQRV(LVFU(hdif[indx1 - h1])) + SQRV(LVFU(hdif[indx1 + h1]))) + c51v * (SQRV(LVFU(hdif[indx1 - h2])) + SQRV(LVFU(hdif[indx1 + h2]))) + c21v * (SQRV(LVFU(hdif[indx1 - h3])) + SQRV(LVFU(hdif[indx1 + h3]))) - c6v * SQRV(LVFU(hdif[indx1 - h1]) + LVFU(hdif[indx1]) + LVFU(hdif[indx1 + h1]))
-                           - c10v * (SQRV(LVFU(hdif[indx1 - h2]) + LVFU(hdif[indx1 - h1]) + LVFU(hdif[indx1])) + SQRV(LVFU(hdif[indx1]) + LVFU(hdif[indx1 + h1]) + LVFU(hdif[indx1 + h2]))) - c7v * (SQRV(LVFU(hdif[indx1 - h3]) + LVFU(hdif[indx1 - h2]) + LVFU(hdif[indx1 - h1])) + SQRV(LVFU(hdif[indx1 + h1]) + LVFU(hdif[indx1 + h2]) + LVFU(hdif[indx1 + h3]))), zerov, onev);
+                ngv = vclampf(epssqv + c78v * SQRV(lvfu(vdif[indx1])) + c69v * (SQRV(lvfu(vdif[indx1 - v1])) + SQRV(lvfu(vdif[indx1 + v1]))) + c51v * (SQRV(lvfu(vdif[indx1 - v2])) + SQRV(lvfu(vdif[indx1 + v2]))) + c21v * (SQRV(lvfu(vdif[indx1 - v3])) + SQRV(lvfu(vdif[indx1 + v3]))) - c6v * SQRV(lvfu(vdif[indx1 - v1]) + lvfu(vdif[indx1]) + lvfu(vdif[indx1 + v1]))
+                           - c10v * (SQRV(lvfu(vdif[indx1 - v2]) + lvfu(vdif[indx1 - v1]) + lvfu(vdif[indx1])) + SQRV(lvfu(vdif[indx1]) + lvfu(vdif[indx1 + v1]) + lvfu(vdif[indx1 + v2]))) - c7v * (SQRV(lvfu(vdif[indx1 - v3]) + lvfu(vdif[indx1 - v2]) + lvfu(vdif[indx1 - v1])) + SQRV(lvfu(vdif[indx1 + v1]) + lvfu(vdif[indx1 + v2]) + lvfu(vdif[indx1 + v3]))), zerov, onev);
+                egv = vclampf(epssqv + c78v * SQRV(lvfu(hdif[indx1])) + c69v * (SQRV(lvfu(hdif[indx1 - h1])) + SQRV(lvfu(hdif[indx1 + h1]))) + c51v * (SQRV(lvfu(hdif[indx1 - h2])) + SQRV(lvfu(hdif[indx1 + h2]))) + c21v * (SQRV(lvfu(hdif[indx1 - h3])) + SQRV(lvfu(hdif[indx1 + h3]))) - c6v * SQRV(lvfu(hdif[indx1 - h1]) + lvfu(hdif[indx1]) + lvfu(hdif[indx1 + h1]))
+                           - c10v * (SQRV(lvfu(hdif[indx1 - h2]) + lvfu(hdif[indx1 - h1]) + lvfu(hdif[indx1])) + SQRV(lvfu(hdif[indx1]) + lvfu(hdif[indx1 + h1]) + lvfu(hdif[indx1 + h2]))) - c7v * (SQRV(lvfu(hdif[indx1 - h3]) + lvfu(hdif[indx1 - h2]) + lvfu(hdif[indx1 - h1])) + SQRV(lvfu(hdif[indx1 + h1]) + lvfu(hdif[indx1 + h2]) + lvfu(hdif[indx1 + h3]))), zerov, onev);
                 //Limit chrominance using H/V neighbourhood
-                nvv = median(d725v * LVFU(vdif[indx1]) + d1375v * LVFU(vdif[indx1 - v1]) + d1375v * LVFU(vdif[indx1 + v1]), LVFU(vdif[indx1 - v1]), LVFU(vdif[indx1 + v1]));
-                evv = median(d725v * LVFU(hdif[indx1]) + d1375v * LVFU(hdif[indx1 - h1]) + d1375v * LVFU(hdif[indx1 + h1]), LVFU(hdif[indx1 - h1]), LVFU(hdif[indx1 + h1]));
+                nvv = median(d725v * lvfu(vdif[indx1]) + d1375v * lvfu(vdif[indx1 - v1]) + d1375v * lvfu(vdif[indx1 + v1]), lvfu(vdif[indx1 - v1]), lvfu(vdif[indx1 + v1]));
+                evv = median(d725v * lvfu(hdif[indx1]) + d1375v * lvfu(hdif[indx1 - h1]) + d1375v * lvfu(hdif[indx1 + h1]), lvfu(hdif[indx1 - h1]), lvfu(hdif[indx1 + h1]));
                 //Chrominance estimation
                 tempv = (egv * nvv + ngv * evv) / (ngv + egv);
                 _mm_storeu_ps(&(chr[d][indx1]), tempv);
                 //Green channel population
-                temp1v = c65535v * tempv + LVFU(rgb[0][indx1]);
+                temp1v = c65535v * tempv + lvfu(rgb[0][indx1]);
                 _mm_storeu_ps( &(rgb[0][indx1]), temp1v );
             }
 
@@ -1336,15 +1336,15 @@ void RawImageSource::igv_interpolate(int winw, int winh)
 
             for (col = 7 + (FC(row, 1) & 1), indx = row * width + col, c = 1 - FC(row, col) / 2; col < width - 14; col += 8, indx += 8) {
                 //NW,NE,SW,SE Gradients
-                nwgv = onev / (epsv + vabsf(LVFU(chr[c][(indx - v1 - h1) >> 1]) - LVFU(chr[c][(indx - v3 - h3) >> 1])) + vabsf(LVFU(chr[c][(indx + v1 + h1) >> 1]) - LVFU(chr[c][(indx - v3 - h3) >> 1])));
-                negv = onev / (epsv + vabsf(LVFU(chr[c][(indx - v1 + h1) >> 1]) - LVFU(chr[c][(indx - v3 + h3) >> 1])) + vabsf(LVFU(chr[c][(indx + v1 - h1) >> 1]) - LVFU(chr[c][(indx - v3 + h3) >> 1])));
-                swgv = onev / (epsv + vabsf(LVFU(chr[c][(indx + v1 - h1) >> 1]) - LVFU(chr[c][(indx + v3 + h3) >> 1])) + vabsf(LVFU(chr[c][(indx - v1 + h1) >> 1]) - LVFU(chr[c][(indx + v3 - h3) >> 1])));
-                segv = onev / (epsv + vabsf(LVFU(chr[c][(indx + v1 + h1) >> 1]) - LVFU(chr[c][(indx + v3 - h3) >> 1])) + vabsf(LVFU(chr[c][(indx - v1 - h1) >> 1]) - LVFU(chr[c][(indx + v3 + h3) >> 1])));
+                nwgv = onev / (epsv + vabsf(lvfu(chr[c][(indx - v1 - h1) >> 1]) - lvfu(chr[c][(indx - v3 - h3) >> 1])) + vabsf(lvfu(chr[c][(indx + v1 + h1) >> 1]) - lvfu(chr[c][(indx - v3 - h3) >> 1])));
+                negv = onev / (epsv + vabsf(lvfu(chr[c][(indx - v1 + h1) >> 1]) - lvfu(chr[c][(indx - v3 + h3) >> 1])) + vabsf(lvfu(chr[c][(indx + v1 - h1) >> 1]) - lvfu(chr[c][(indx - v3 + h3) >> 1])));
+                swgv = onev / (epsv + vabsf(lvfu(chr[c][(indx + v1 - h1) >> 1]) - lvfu(chr[c][(indx + v3 + h3) >> 1])) + vabsf(lvfu(chr[c][(indx - v1 + h1) >> 1]) - lvfu(chr[c][(indx + v3 - h3) >> 1])));
+                segv = onev / (epsv + vabsf(lvfu(chr[c][(indx + v1 + h1) >> 1]) - lvfu(chr[c][(indx + v3 - h3) >> 1])) + vabsf(lvfu(chr[c][(indx - v1 - h1) >> 1]) - lvfu(chr[c][(indx + v3 + h3) >> 1])));
                 //Limit NW,NE,SW,SE Color differences
-                nwvv = median(LVFU(chr[c][(indx - v1 - h1) >> 1]), LVFU(chr[c][(indx - v3 - h1) >> 1]), LVFU(chr[c][(indx - v1 - h3) >> 1]));
-                nevv = median(LVFU(chr[c][(indx - v1 + h1) >> 1]), LVFU(chr[c][(indx - v3 + h1) >> 1]), LVFU(chr[c][(indx - v1 + h3) >> 1]));
-                swvv = median(LVFU(chr[c][(indx + v1 - h1) >> 1]), LVFU(chr[c][(indx + v3 - h1) >> 1]), LVFU(chr[c][(indx + v1 - h3) >> 1]));
-                sevv = median(LVFU(chr[c][(indx + v1 + h1) >> 1]), LVFU(chr[c][(indx + v3 + h1) >> 1]), LVFU(chr[c][(indx + v1 + h3) >> 1]));
+                nwvv = median(lvfu(chr[c][(indx - v1 - h1) >> 1]), lvfu(chr[c][(indx - v3 - h1) >> 1]), lvfu(chr[c][(indx - v1 - h3) >> 1]));
+                nevv = median(lvfu(chr[c][(indx - v1 + h1) >> 1]), lvfu(chr[c][(indx - v3 + h1) >> 1]), lvfu(chr[c][(indx - v1 + h3) >> 1]));
+                swvv = median(lvfu(chr[c][(indx + v1 - h1) >> 1]), lvfu(chr[c][(indx + v3 - h1) >> 1]), lvfu(chr[c][(indx + v1 - h3) >> 1]));
+                sevv = median(lvfu(chr[c][(indx + v1 + h1) >> 1]), lvfu(chr[c][(indx + v3 + h1) >> 1]), lvfu(chr[c][(indx + v1 + h3) >> 1]));
                 //Interpolate chrominance: R@B and B@R
                 tempv = (nwgv * nwvv + negv * nevv + swgv * swvv + segv * sevv) / (nwgv + negv + swgv + segv);
                 _mm_storeu_ps( &(chr[c][indx >> 1]), tempv);
@@ -1383,12 +1383,12 @@ void RawImageSource::igv_interpolate(int winw, int winh)
 
             for (col = 7 + (FC(row, 0) & 1), indx = row * width + col; col < width - 14; col += 8, indx += 8) {
                 //N,E,W,S Gradients
-                ngv = onev / (epsv + vabsf(LVFU(chr[0][(indx - v1) >> 1]) - LVFU(chr[0][(indx - v3) >> 1])) + vabsf(LVFU(chr[0][(indx + v1) >> 1]) - LVFU(chr[0][(indx - v3) >> 1])));
-                egv = onev / (epsv + vabsf(LVFU(chr[0][(indx + h1) >> 1]) - LVFU(chr[0][(indx + h3) >> 1])) + vabsf(LVFU(chr[0][(indx - h1) >> 1]) - LVFU(chr[0][(indx + h3) >> 1])));
-                wgv = onev / (epsv + vabsf(LVFU(chr[0][(indx - h1) >> 1]) - LVFU(chr[0][(indx - h3) >> 1])) + vabsf(LVFU(chr[0][(indx + h1) >> 1]) - LVFU(chr[0][(indx - h3) >> 1])));
-                sgv = onev / (epsv + vabsf(LVFU(chr[0][(indx + v1) >> 1]) - LVFU(chr[0][(indx + v3) >> 1])) + vabsf(LVFU(chr[0][(indx - v1) >> 1]) - LVFU(chr[0][(indx + v3) >> 1])));
+                ngv = onev / (epsv + vabsf(lvfu(chr[0][(indx - v1) >> 1]) - lvfu(chr[0][(indx - v3) >> 1])) + vabsf(lvfu(chr[0][(indx + v1) >> 1]) - lvfu(chr[0][(indx - v3) >> 1])));
+                egv = onev / (epsv + vabsf(lvfu(chr[0][(indx + h1) >> 1]) - lvfu(chr[0][(indx + h3) >> 1])) + vabsf(lvfu(chr[0][(indx - h1) >> 1]) - lvfu(chr[0][(indx + h3) >> 1])));
+                wgv = onev / (epsv + vabsf(lvfu(chr[0][(indx - h1) >> 1]) - lvfu(chr[0][(indx - h3) >> 1])) + vabsf(lvfu(chr[0][(indx + h1) >> 1]) - lvfu(chr[0][(indx - h3) >> 1])));
+                sgv = onev / (epsv + vabsf(lvfu(chr[0][(indx + v1) >> 1]) - lvfu(chr[0][(indx + v3) >> 1])) + vabsf(lvfu(chr[0][(indx - v1) >> 1]) - lvfu(chr[0][(indx + v3) >> 1])));
                 //Interpolate chrominance: R@G and B@G
-                tempv = ((ngv * LVFU(chr[0][(indx - v1) >> 1]) + egv * LVFU(chr[0][(indx + h1) >> 1]) + wgv * LVFU(chr[0][(indx - h1) >> 1]) + sgv * LVFU(chr[0][(indx + v1) >> 1])) / (ngv + egv + wgv + sgv));
+                tempv = ((ngv * lvfu(chr[0][(indx - v1) >> 1]) + egv * lvfu(chr[0][(indx + h1) >> 1]) + wgv * lvfu(chr[0][(indx - h1) >> 1]) + sgv * lvfu(chr[0][(indx + v1) >> 1])) / (ngv + egv + wgv + sgv));
                 _mm_storeu_ps( &chr[0 + 2][indx >> 1], tempv);
             }
 
@@ -1420,12 +1420,12 @@ void RawImageSource::igv_interpolate(int winw, int winh)
 
             for (col = 7 + (FC(row, 0) & 1), indx = row * width + col; col < width - 14; col += 8, indx += 8) {
                 //N,E,W,S Gradients
-                ngv = onev / (epsv + vabsf(LVFU(chr[1][(indx - v1) >> 1]) - LVFU(chr[1][(indx - v3) >> 1])) + vabsf(LVFU(chr[1][(indx + v1) >> 1]) - LVFU(chr[1][(indx - v3) >> 1])));
-                egv = onev / (epsv + vabsf(LVFU(chr[1][(indx + h1) >> 1]) - LVFU(chr[1][(indx + h3) >> 1])) + vabsf(LVFU(chr[1][(indx - h1) >> 1]) - LVFU(chr[1][(indx + h3) >> 1])));
-                wgv = onev / (epsv + vabsf(LVFU(chr[1][(indx - h1) >> 1]) - LVFU(chr[1][(indx - h3) >> 1])) + vabsf(LVFU(chr[1][(indx + h1) >> 1]) - LVFU(chr[1][(indx - h3) >> 1])));
-                sgv = onev / (epsv + vabsf(LVFU(chr[1][(indx + v1) >> 1]) - LVFU(chr[1][(indx + v3) >> 1])) + vabsf(LVFU(chr[1][(indx - v1) >> 1]) - LVFU(chr[1][(indx + v3) >> 1])));
+                ngv = onev / (epsv + vabsf(lvfu(chr[1][(indx - v1) >> 1]) - lvfu(chr[1][(indx - v3) >> 1])) + vabsf(lvfu(chr[1][(indx + v1) >> 1]) - lvfu(chr[1][(indx - v3) >> 1])));
+                egv = onev / (epsv + vabsf(lvfu(chr[1][(indx + h1) >> 1]) - lvfu(chr[1][(indx + h3) >> 1])) + vabsf(lvfu(chr[1][(indx - h1) >> 1]) - lvfu(chr[1][(indx + h3) >> 1])));
+                wgv = onev / (epsv + vabsf(lvfu(chr[1][(indx - h1) >> 1]) - lvfu(chr[1][(indx - h3) >> 1])) + vabsf(lvfu(chr[1][(indx + h1) >> 1]) - lvfu(chr[1][(indx - h3) >> 1])));
+                sgv = onev / (epsv + vabsf(lvfu(chr[1][(indx + v1) >> 1]) - lvfu(chr[1][(indx + v3) >> 1])) + vabsf(lvfu(chr[1][(indx - v1) >> 1]) - lvfu(chr[1][(indx + v3) >> 1])));
                 //Interpolate chrominance: R@G and B@G
-                tempv = ((ngv * LVFU(chr[1][(indx - v1) >> 1]) + egv * LVFU(chr[1][(indx + h1) >> 1]) + wgv * LVFU(chr[1][(indx - h1) >> 1]) + sgv * LVFU(chr[1][(indx + v1) >> 1])) / (ngv + egv + wgv + sgv));
+                tempv = ((ngv * lvfu(chr[1][(indx - v1) >> 1]) + egv * lvfu(chr[1][(indx + h1) >> 1]) + wgv * lvfu(chr[1][(indx - h1) >> 1]) + sgv * lvfu(chr[1][(indx + v1) >> 1])) / (ngv + egv + wgv + sgv));
                 _mm_storeu_ps( &chr[1 + 2][indx >> 1], tempv);
             }
 
@@ -1464,19 +1464,19 @@ void RawImageSource::igv_interpolate(int winw, int winh)
             bluesrc1 = chr[((fc ^ 1) << 1) + 1];
 
             for(col = 7, indx = row * width + col; col < width - 14; col += 8, indx += 8) {
-                temp1v = LVFU( src1[indx >> 1] );
-                temp2v = LVFU( src2[(indx + 1) >> 1] );
+                temp1v = lvfu( src1[indx >> 1] );
+                temp2v = lvfu( src2[(indx + 1) >> 1] );
                 tempv = _mm_shuffle_ps( temp1v, temp2v, _MM_SHUFFLE( 1, 0, 1, 0 ) );
                 tempv = _mm_shuffle_ps( tempv, tempv, _MM_SHUFFLE( 3, 1, 2, 0 ) );
                 _mm_storeu_ps( &green[row][col], CLIPV( tempv ));
-                temp5v = LVFU(redsrc0[indx >> 1]);
-                temp6v = LVFU(redsrc1[(indx + 1) >> 1]);
+                temp5v = lvfu(redsrc0[indx >> 1]);
+                temp6v = lvfu(redsrc1[(indx + 1) >> 1]);
                 temp3v = _mm_shuffle_ps( temp5v, temp6v, _MM_SHUFFLE( 1, 0, 1, 0 ) );
                 temp3v = _mm_shuffle_ps( temp3v, temp3v, _MM_SHUFFLE( 3, 1, 2, 0 ) );
                 temp3v = CLIPV( tempv - c65535v * temp3v );
                 _mm_storeu_ps( &red[row][col], temp3v);
-                temp7v = LVFU(bluesrc0[indx >> 1]);
-                temp8v = LVFU(bluesrc1[(indx + 1) >> 1]);
+                temp7v = lvfu(bluesrc0[indx >> 1]);
+                temp8v = lvfu(bluesrc1[(indx + 1) >> 1]);
                 temp4v = _mm_shuffle_ps( temp7v, temp8v, _MM_SHUFFLE( 1, 0, 1, 0 ) );
                 temp4v = _mm_shuffle_ps( temp4v, temp4v, _MM_SHUFFLE( 3, 1, 2, 0 ) );
                 temp4v = CLIPV( tempv - c65535v * temp4v );
@@ -1843,7 +1843,7 @@ void RawImageSource::nodemosaic(bool bw)
 */
 
 #ifdef __SSE2__
-#define CLIPV(a) vclampf(a,ZEROV,c65535v)
+#define CLIPV(a) vclampf(a,zerov,c65535v)
 #endif
 void RawImageSource::refinement(int PassCount)
 {
@@ -1894,12 +1894,12 @@ void RawImageSource::refinement(int PassCount)
                     int indx = row * width + col;
                     pix[c] = (float*)(*rgb[c]) + indx;
                     pix[1] = (float*)(*rgb[1]) + indx;
-                    dLv = onev / (onev + vabsf(LC2VFU(pix[c][ -2]) - LC2VFU(pix[c][0])) + vabsf(LC2VFU(pix[1][ 1]) - LC2VFU(pix[1][ -1])));
-                    dRv = onev / (onev + vabsf(LC2VFU(pix[c][  2]) - LC2VFU(pix[c][0])) + vabsf(LC2VFU(pix[1][ 1]) - LC2VFU(pix[1][ -1])));
-                    dUv = onev / (onev + vabsf(LC2VFU(pix[c][-w2]) - LC2VFU(pix[c][0])) + vabsf(LC2VFU(pix[1][w1]) - LC2VFU(pix[1][-w1])));
-                    dDv = onev / (onev + vabsf(LC2VFU(pix[c][ w2]) - LC2VFU(pix[c][0])) + vabsf(LC2VFU(pix[1][w1]) - LC2VFU(pix[1][-w1])));
-                    v0v = CLIPV(LC2VFU(pix[c][0]) + zd5v + ((LC2VFU(pix[1][-1]) - LC2VFU(pix[c][-1])) * dLv + (LC2VFU(pix[1][1]) - LC2VFU(pix[c][1])) * dRv + (LC2VFU(pix[1][-w1]) - LC2VFU(pix[c][-w1])) * dUv + (LC2VFU(pix[1][w1]) - LC2VFU(pix[c][w1])) * dDv ) / (dLv + dRv + dUv + dDv));
-                    STC2VFU(pix[1][0], v0v);
+                    dLv = onev / (onev + vabsf(lc2vfu(pix[c][ -2]) - lc2vfu(pix[c][0])) + vabsf(lc2vfu(pix[1][ 1]) - lc2vfu(pix[1][ -1])));
+                    dRv = onev / (onev + vabsf(lc2vfu(pix[c][  2]) - lc2vfu(pix[c][0])) + vabsf(lc2vfu(pix[1][ 1]) - lc2vfu(pix[1][ -1])));
+                    dUv = onev / (onev + vabsf(lc2vfu(pix[c][-w2]) - lc2vfu(pix[c][0])) + vabsf(lc2vfu(pix[1][w1]) - lc2vfu(pix[1][-w1])));
+                    dDv = onev / (onev + vabsf(lc2vfu(pix[c][ w2]) - lc2vfu(pix[c][0])) + vabsf(lc2vfu(pix[1][w1]) - lc2vfu(pix[1][-w1])));
+                    v0v = CLIPV(lc2vfu(pix[c][0]) + zd5v + ((lc2vfu(pix[1][-1]) - lc2vfu(pix[c][-1])) * dLv + (lc2vfu(pix[1][1]) - lc2vfu(pix[c][1])) * dRv + (lc2vfu(pix[1][-w1]) - lc2vfu(pix[c][-w1])) * dUv + (lc2vfu(pix[1][w1]) - lc2vfu(pix[c][w1])) * dDv ) / (dLv + dRv + dUv + dDv));
+                    stc2vfu(pix[1][0], v0v);
                 }
 
 #endif
@@ -1937,12 +1937,12 @@ void RawImageSource::refinement(int PassCount)
 
                     for (int i = 0; i < 2; c = 2 - c, i++) {
                         pix[c] = (float*)(*rgb[c]) + indx;
-                        dLv = onev / (onev + vabsf(LC2VFU(pix[1][ -2]) - LC2VFU(pix[1][0])) + vabsf(LC2VFU(pix[c][ 1]) - LC2VFU(pix[c][ -1])));
-                        dRv = onev / (onev + vabsf(LC2VFU(pix[1][  2]) - LC2VFU(pix[1][0])) + vabsf(LC2VFU(pix[c][ 1]) - LC2VFU(pix[c][ -1])));
-                        dUv = onev / (onev + vabsf(LC2VFU(pix[1][-w2]) - LC2VFU(pix[1][0])) + vabsf(LC2VFU(pix[c][w1]) - LC2VFU(pix[c][-w1])));
-                        dDv = onev / (onev + vabsf(LC2VFU(pix[1][ w2]) - LC2VFU(pix[1][0])) + vabsf(LC2VFU(pix[c][w1]) - LC2VFU(pix[c][-w1])));
-                        v0v = CLIPV(LC2VFU(pix[1][0]) + zd5v - ((LC2VFU(pix[1][-1]) - LC2VFU(pix[c][-1])) * dLv + (LC2VFU(pix[1][1]) - LC2VFU(pix[c][1])) * dRv + (LC2VFU(pix[1][-w1]) - LC2VFU(pix[c][-w1])) * dUv + (LC2VFU(pix[1][w1]) - LC2VFU(pix[c][w1])) * dDv ) / (dLv + dRv + dUv + dDv));
-                        STC2VFU(pix[c][0], v0v);
+                        dLv = onev / (onev + vabsf(lc2vfu(pix[1][ -2]) - lc2vfu(pix[1][0])) + vabsf(lc2vfu(pix[c][ 1]) - lc2vfu(pix[c][ -1])));
+                        dRv = onev / (onev + vabsf(lc2vfu(pix[1][  2]) - lc2vfu(pix[1][0])) + vabsf(lc2vfu(pix[c][ 1]) - lc2vfu(pix[c][ -1])));
+                        dUv = onev / (onev + vabsf(lc2vfu(pix[1][-w2]) - lc2vfu(pix[1][0])) + vabsf(lc2vfu(pix[c][w1]) - lc2vfu(pix[c][-w1])));
+                        dDv = onev / (onev + vabsf(lc2vfu(pix[1][ w2]) - lc2vfu(pix[1][0])) + vabsf(lc2vfu(pix[c][w1]) - lc2vfu(pix[c][-w1])));
+                        v0v = CLIPV(lc2vfu(pix[1][0]) + zd5v - ((lc2vfu(pix[1][-1]) - lc2vfu(pix[c][-1])) * dLv + (lc2vfu(pix[1][1]) - lc2vfu(pix[c][1])) * dRv + (lc2vfu(pix[1][-w1]) - lc2vfu(pix[c][-w1])) * dUv + (lc2vfu(pix[1][w1]) - lc2vfu(pix[c][w1])) * dDv ) / (dLv + dRv + dUv + dDv));
+                        stc2vfu(pix[c][0], v0v);
                     }
                 }
 
@@ -1984,12 +1984,12 @@ void RawImageSource::refinement(int PassCount)
                     pix[1] = (float*)(*rgb[1]) + indx;
                     pix[2] = (float*)(*rgb[2]) + indx;
                     int d = 2 - c;
-                    dLv = onev / (onev + vabsf(LC2VFU(pix[d][ -2]) - LC2VFU(pix[d][0])) + vabsf(LC2VFU(pix[1][ 1]) - LC2VFU(pix[1][ -1])));
-                    dRv = onev / (onev + vabsf(LC2VFU(pix[d][  2]) - LC2VFU(pix[d][0])) + vabsf(LC2VFU(pix[1][ 1]) - LC2VFU(pix[1][ -1])));
-                    dUv = onev / (onev + vabsf(LC2VFU(pix[d][-w2]) - LC2VFU(pix[d][0])) + vabsf(LC2VFU(pix[1][w1]) - LC2VFU(pix[1][-w1])));
-                    dDv = onev / (onev + vabsf(LC2VFU(pix[d][ w2]) - LC2VFU(pix[d][0])) + vabsf(LC2VFU(pix[1][w1]) - LC2VFU(pix[1][-w1])));
-                    v0v = CLIPV(LC2VFU(pix[1][0]) + zd5v - ((LC2VFU(pix[1][-1]) - LC2VFU(pix[c][-1])) * dLv + (LC2VFU(pix[1][1]) - LC2VFU(pix[c][1])) * dRv + (LC2VFU(pix[1][-w1]) - LC2VFU(pix[c][-w1])) * dUv + (LC2VFU(pix[1][w1]) - LC2VFU(pix[c][w1])) * dDv ) / (dLv + dRv + dUv + dDv));
-                    STC2VFU(pix[c][0], v0v);
+                    dLv = onev / (onev + vabsf(lc2vfu(pix[d][ -2]) - lc2vfu(pix[d][0])) + vabsf(lc2vfu(pix[1][ 1]) - lc2vfu(pix[1][ -1])));
+                    dRv = onev / (onev + vabsf(lc2vfu(pix[d][  2]) - lc2vfu(pix[d][0])) + vabsf(lc2vfu(pix[1][ 1]) - lc2vfu(pix[1][ -1])));
+                    dUv = onev / (onev + vabsf(lc2vfu(pix[d][-w2]) - lc2vfu(pix[d][0])) + vabsf(lc2vfu(pix[1][w1]) - lc2vfu(pix[1][-w1])));
+                    dDv = onev / (onev + vabsf(lc2vfu(pix[d][ w2]) - lc2vfu(pix[d][0])) + vabsf(lc2vfu(pix[1][w1]) - lc2vfu(pix[1][-w1])));
+                    v0v = CLIPV(lc2vfu(pix[1][0]) + zd5v - ((lc2vfu(pix[1][-1]) - lc2vfu(pix[c][-1])) * dLv + (lc2vfu(pix[1][1]) - lc2vfu(pix[c][1])) * dRv + (lc2vfu(pix[1][-w1]) - lc2vfu(pix[c][-w1])) * dUv + (lc2vfu(pix[1][w1]) - lc2vfu(pix[c][w1])) * dDv ) / (dLv + dRv + dUv + dDv));
+                    stc2vfu(pix[c][0], v0v);
                 }
 
 #endif

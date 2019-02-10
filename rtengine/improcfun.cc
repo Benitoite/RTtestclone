@@ -57,9 +57,9 @@ void shadowToneCurve(const LUTf &shtonecurve, float *rtemp, float *gtemp, float 
 {
 
 #if defined( __SSE2__ ) && defined( __x86_64__ )
-    vfloat cr = F2V(0.299f);
-    vfloat cg = F2V(0.587f);
-    vfloat cb = F2V(0.114f);
+    vfloat cr = f2v(0.299f);
+    vfloat cg = f2v(0.587f);
+    vfloat cb = f2v(0.114f);
 #endif
 
     for (int i = istart, ti = 0; i < tH; i++, ti++) {
@@ -68,16 +68,16 @@ void shadowToneCurve(const LUTf &shtonecurve, float *rtemp, float *gtemp, float 
 
         for (; j < tW - 3; j += 4, tj += 4) {
 
-            vfloat rv = LVF(rtemp[ti * tileSize + tj]);
-            vfloat gv = LVF(gtemp[ti * tileSize + tj]);
-            vfloat bv = LVF(btemp[ti * tileSize + tj]);
+            vfloat rv = lvf(rtemp[ti * tileSize + tj]);
+            vfloat gv = lvf(gtemp[ti * tileSize + tj]);
+            vfloat bv = lvf(btemp[ti * tileSize + tj]);
 
             //shadow tone curve
             vfloat Yv = cr * rv + cg * gv + cb * bv;
             vfloat tonefactorv = shtonecurve(Yv);
-            STVF(rtemp[ti * tileSize + tj], rv * tonefactorv);
-            STVF(gtemp[ti * tileSize + tj], gv * tonefactorv);
-            STVF(btemp[ti * tileSize + tj], bv * tonefactorv);
+            stvf(rtemp[ti * tileSize + tj], rv * tonefactorv);
+            stvf(gtemp[ti * tileSize + tj], gv * tonefactorv);
+            stvf(btemp[ti * tileSize + tj], bv * tonefactorv);
         }
 
 #endif
@@ -102,8 +102,8 @@ void highlightToneCurve(const LUTf &hltonecurve, float *rtemp, float *gtemp, flo
 {
 
 #if defined( __SSE2__ ) && defined( __x86_64__ )
-    vfloat threev = F2V(3.f);
-    vfloat maxvalfv = F2V(MAXVALF);
+    vfloat threev = f2v(3.f);
+    vfloat maxvalfv = f2v(MAXVALF);
 #endif
 
     for (int i = istart, ti = 0; i < tH; i++, ti++) {
@@ -112,9 +112,9 @@ void highlightToneCurve(const LUTf &hltonecurve, float *rtemp, float *gtemp, flo
 
         for (; j < tW - 3; j += 4, tj += 4) {
 
-            vfloat rv = LVF(rtemp[ti * tileSize + tj]);
-            vfloat gv = LVF(gtemp[ti * tileSize + tj]);
-            vfloat bv = LVF(btemp[ti * tileSize + tj]);
+            vfloat rv = lvf(rtemp[ti * tileSize + tj]);
+            vfloat gv = lvf(gtemp[ti * tileSize + tj]);
+            vfloat bv = lvf(btemp[ti * tileSize + tj]);
 
             //TODO: proper treatment of out-of-gamut colors
             //float tonefactor = hltonecurve[(0.299f*r+0.587f*g+0.114f*b)];
@@ -137,9 +137,9 @@ void highlightToneCurve(const LUTf &hltonecurve, float *rtemp, float *gtemp, flo
             } else {
                 vfloat tonefactorv = (hltonecurve.cb(rv) + hltonecurve.cb(gv) + hltonecurve.cb(bv)) / threev;
                 // note: tonefactor includes exposure scaling, that is here exposure slider and highlight compression takes place
-                STVF(rtemp[ti * tileSize + tj], rv * tonefactorv);
-                STVF(gtemp[ti * tileSize + tj], gv * tonefactorv);
-                STVF(btemp[ti * tileSize + tj], bv * tonefactorv);
+                stvf(rtemp[ti * tileSize + tj], rv * tonefactorv);
+                stvf(gtemp[ti * tileSize + tj], gv * tonefactorv);
+                stvf(btemp[ti * tileSize + tj], bv * tonefactorv);
             }
         }
 
@@ -171,9 +171,9 @@ void proPhotoBlue(float *rtemp, float *gtemp, float *btemp, int istart, int tH, 
         int j = jstart, tj = 0;
 #ifdef __SSE2__
         for (; j < tW - 3; j+=4, tj+=4) {
-            vfloat rv = LVF(rtemp[ti * tileSize + tj]);
-            vfloat gv = LVF(gtemp[ti * tileSize + tj]);
-            vmask zeromask = vorm(vmaskf_eq(rv, ZEROV), vmaskf_eq(gv, ZEROV));
+            vfloat rv = lvf(rtemp[ti * tileSize + tj]);
+            vfloat gv = lvf(gtemp[ti * tileSize + tj]);
+            vmask zeromask = vorm(vmaskf_eq(rv, zerov), vmaskf_eq(gv, zerov));
             if(_mm_movemask_ps((vfloat)zeromask)) {
                 for (int k = 0; k < 4; ++k) {
                     float r = rtemp[ti * tileSize + tj + k];
@@ -1028,24 +1028,24 @@ void ImProcFunctions::ciecam_02float (CieImage* ncie, float adap, int pW, int pw
                 vfloat x, y, z;
                 vfloat J, C, h, Q, M, s;
 
-                vfloat c655d35 = F2V (655.35f);
+                vfloat c655d35 = f2v (655.35f);
 
                 for (k = 0; k < width - 3; k += 4) {
-                    Color::Lab2XYZ (LVFU (lab->L[i][k]), LVFU (lab->a[i][k]), LVFU (lab->b[i][k]), x, y, z);
+                    Color::Lab2XYZ (lvfu (lab->L[i][k]), lvfu (lab->a[i][k]), lvfu (lab->b[i][k]), x, y, z);
                     x = x / c655d35;
                     y = y / c655d35;
                     z = z / c655d35;
                     Ciecam02::xyz2jchqms_ciecam02float ( J, C,  h,
-                                                         Q,  M,  s, F2V (aw), F2V (fl), F2V (wh),
+                                                         Q,  M,  s, f2v (aw), f2v (fl), f2v (wh),
                                                          x,  y,  z,
-                                                         F2V (xw1), F2V (yw1),  F2V (zw1),
-                                                         F2V (c),  F2V (nc), F2V (pow1), F2V (nbb), F2V (ncb), F2V (pfl), F2V (cz), F2V (d));
-                    STVF (Jbuffer[k], J);
-                    STVF (Cbuffer[k], C);
-                    STVF (hbuffer[k], h);
-                    STVF (Qbuffer[k], Q);
-                    STVF (Mbuffer[k], M);
-                    STVF (sbuffer[k], s);
+                                                         f2v (xw1), f2v (yw1),  f2v (zw1),
+                                                         f2v (c),  f2v (nc), f2v (pow1), f2v (nbb), f2v (ncb), f2v (pfl), f2v (cz), f2v (d));
+                    stvf (Jbuffer[k], J);
+                    stvf (Cbuffer[k], C);
+                    stvf (hbuffer[k], h);
+                    stvf (Qbuffer[k], Q);
+                    stvf (Mbuffer[k], M);
+                    stvf (sbuffer[k], s);
                 }
 
                 for (; k < width; k++) {
@@ -1574,12 +1574,12 @@ void ImProcFunctions::ciecam_02float (CieImage* ncie, float adap, int pW, int pw
 
                 for (k = 0; k < bufferLength; k += 4) {
                     Ciecam02::jch2xyz_ciecam02float ( x, y, z,
-                                                      LVF (Jbuffer[k]), LVF (Cbuffer[k]), LVF (hbuffer[k]),
-                                                      F2V (xw2), F2V (yw2), F2V (zw2),
-                                                      F2V (nc2), F2V (pow1n), F2V (nbbj), F2V (ncbj), F2V (flj), F2V (dj), F2V (awj), F2V (reccmcz));
-                    STVF (xbuffer[k], x * c655d35);
-                    STVF (ybuffer[k], y * c655d35);
-                    STVF (zbuffer[k], z * c655d35);
+                                                      lvf (Jbuffer[k]), lvf (Cbuffer[k]), lvf (hbuffer[k]),
+                                                      f2v (xw2), f2v (yw2), f2v (zw2),
+                                                      f2v (nc2), f2v (pow1n), f2v (nbbj), f2v (ncbj), f2v (flj), f2v (dj), f2v (awj), f2v (reccmcz));
+                    stvf (xbuffer[k], x * c655d35);
+                    stvf (ybuffer[k], y * c655d35);
+                    stvf (zbuffer[k], z * c655d35);
                 }
 
                 // XYZ2Lab uses a lookup table. The function behind that lut is a cube root.
@@ -1908,19 +1908,19 @@ void ImProcFunctions::ciecam_02float (CieImage* ncie, float adap, int pW, int pw
                     // process line buffers
                     int k;
                     vfloat x, y, z;
-                    vfloat c655d35 = F2V (655.35f);
+                    vfloat c655d35 = f2v (655.35f);
 
                     for (k = 0; k < bufferLength; k += 4) {
                         Ciecam02::jch2xyz_ciecam02float ( x, y, z,
-                                                          LVF (Jbuffer[k]), LVF (Cbuffer[k]), LVF (hbuffer[k]),
-                                                          F2V (xw2), F2V (yw2), F2V (zw2),
-                                                          F2V (nc2), F2V (pow1n), F2V (nbbj), F2V (ncbj), F2V (flj), F2V (dj), F2V (awj), F2V (reccmcz));
+                                                          lvf (Jbuffer[k]), lvf (Cbuffer[k]), lvf (hbuffer[k]),
+                                                          f2v (xw2), f2v (yw2), f2v (zw2),
+                                                          f2v (nc2), f2v (pow1n), f2v (nbbj), f2v (ncbj), f2v (flj), f2v (dj), f2v (awj), f2v (reccmcz));
                         x *= c655d35;
                         y *= c655d35;
                         z *= c655d35;
-                        STVF (xbuffer[k], x);
-                        STVF (ybuffer[k], y);
-                        STVF (zbuffer[k], z);
+                        stvf (xbuffer[k], x);
+                        stvf (ybuffer[k], y);
+                        stvf (zbuffer[k], z);
                     }
 
                     // XYZ2Lab uses a lookup table. The function behind that lut is a cube root.
@@ -2204,10 +2204,10 @@ void ImProcFunctions::rgbProc (Imagefloat* working, LabImage* lab, PipetteBuffer
 
                 for (int i = 0; i < 3; ++i) {
                     for (int j = 0; j < 3; ++j) {
-                        v_work2xyz[i][j] = F2V (wprof[i][j]);
-                        v_xyz2clut[i][j] = F2V (xyz2clut[i][j]);
-                        v_xyz2work[i][j] = F2V (wiprof[i][j]);
-                        v_clut2xyz[i][j] = F2V (clut2xyz[i][j]);
+                        v_work2xyz[i][j] = f2v (wprof[i][j]);
+                        v_xyz2clut[i][j] = f2v (xyz2clut[i][j]);
+                        v_xyz2work[i][j] = f2v (wiprof[i][j]);
+                        v_clut2xyz[i][j] = f2v (clut2xyz[i][j]);
                     }
                 }
 
@@ -2520,9 +2520,9 @@ void ImProcFunctions::rgbProc (Imagefloat* working, LabImage* lab, PipetteBuffer
 #ifdef __SSE2__
                         for (; j < tW - 3; j+=4, tj+=4) {
                             //brightness/contrast
-                            STVF(tmpr[0], tonecurve(LVF(rtemp[ti * TS + tj])));
-                            STVF(tmpg[0], tonecurve(LVF(gtemp[ti * TS + tj])));
-                            STVF(tmpb[0], tonecurve(LVF(btemp[ti * TS + tj])));
+                            stvf(tmpr[0], tonecurve(lvf(rtemp[ti * TS + tj])));
+                            stvf(tmpg[0], tonecurve(lvf(gtemp[ti * TS + tj])));
+                            stvf(tmpb[0], tonecurve(lvf(btemp[ti * TS + tj])));
                             for (int k = 0; k < 4; ++k) {
                                 setUnlessOOG(rtemp[ti * TS + tj + k], gtemp[ti * TS + tj + k], btemp[ti * TS + tj + k], tmpr[k], tmpg[k], tmpb[k]);
                             }
@@ -3110,9 +3110,9 @@ void ImProcFunctions::rgbProc (Imagefloat* working, LabImage* lab, PipetteBuffer
 #ifdef __SSE2__
 
                             for (; j < tW - 3; j += 4, tj += 4) {
-                                vfloat sourceR = LVF (rtemp[ti * TS + tj]);
-                                vfloat sourceG = LVF (gtemp[ti * TS + tj]);
-                                vfloat sourceB = LVF (btemp[ti * TS + tj]);
+                                vfloat sourceR = lvf (rtemp[ti * TS + tj]);
+                                vfloat sourceG = lvf (gtemp[ti * TS + tj]);
+                                vfloat sourceB = lvf (btemp[ti * TS + tj]);
 
                                 vfloat x;
                                 vfloat y;
@@ -3120,9 +3120,9 @@ void ImProcFunctions::rgbProc (Imagefloat* working, LabImage* lab, PipetteBuffer
                                 Color::rgbxyz (sourceR, sourceG, sourceB, x, y, z, v_work2xyz);
                                 Color::xyz2rgb (x, y, z, sourceR, sourceG, sourceB, v_xyz2clut);
 
-                                STVF (clutr[tj], sourceR);
-                                STVF (clutg[tj], sourceG);
-                                STVF (clutb[tj], sourceB);
+                                stvf (clutr[tj], sourceR);
+                                stvf (clutg[tj], sourceG);
+                                stvf (clutb[tj], sourceB);
                             }
 
 #endif
@@ -3181,9 +3181,9 @@ void ImProcFunctions::rgbProc (Imagefloat* working, LabImage* lab, PipetteBuffer
 #ifdef __SSE2__
 
                             for (; j < tW - 3; j += 4, tj += 4) {
-                                vfloat sourceR = LVF (clutr[tj]);
-                                vfloat sourceG = LVF (clutg[tj]);
-                                vfloat sourceB = LVF (clutb[tj]);
+                                vfloat sourceR = lvf (clutr[tj]);
+                                vfloat sourceG = lvf (clutg[tj]);
+                                vfloat sourceB = lvf (clutb[tj]);
 
                                 vfloat x;
                                 vfloat y;
@@ -3191,9 +3191,9 @@ void ImProcFunctions::rgbProc (Imagefloat* working, LabImage* lab, PipetteBuffer
                                 Color::rgbxyz (sourceR, sourceG, sourceB, x, y, z, v_clut2xyz);
                                 Color::xyz2rgb (x, y, z, sourceR, sourceG, sourceB, v_xyz2work);
 
-                                STVF (clutr[tj], sourceR);
-                                STVF (clutg[tj], sourceG);
-                                STVF (clutb[tj], sourceB);
+                                stvf (clutr[tj], sourceR);
+                                stvf (clutg[tj], sourceG);
+                                stvf (clutb[tj], sourceB);
                             }
 
 #endif
@@ -4439,10 +4439,10 @@ void ImProcFunctions::chromiLuminanceCurve (PipetteBuffer *pipetteBuffer, int pW
                 int k;
 
                 for (k = 0; k < W - 3; k += 4) {
-                    av = LVFU (lold->a[i][k]);
-                    bv = LVFU (lold->b[i][k]);
-                    STVF (HHBuffer[k], xatan2f (bv, av));
-                    STVF (CCBuffer[k], vsqrtf (SQRV (av) + SQRV (bv)) / c327d68v);
+                    av = lvfu (lold->a[i][k]);
+                    bv = lvfu (lold->b[i][k]);
+                    stvf (HHBuffer[k], xatan2f (bv, av));
+                    stvf (CCBuffer[k], vsqrtf (SQRV (av) + SQRV (bv)) / c327d68v);
                 }
 
                 for (; k < W; k++) {
@@ -5777,7 +5777,7 @@ void ImProcFunctions::lab2rgb (const LabImage &src, Imagefloat &dst, const Glib:
 
     for (int i = 0; i < 3; i++) {
         for (int j = 0; j < 3; j++) {
-            wipv[i][j] = F2V (wiprof[i][j]);
+            wipv[i][j] = f2v (wiprof[i][j]);
         }
     }
 
@@ -5794,11 +5794,11 @@ void ImProcFunctions::lab2rgb (const LabImage &src, Imagefloat &dst, const Glib:
         for (; j < W - 3; j += 4) {
             vfloat X, Y, Z;
             vfloat R, G, B;
-            Color::Lab2XYZ (LVFU (src.L[i][j]), LVFU (src.a[i][j]), LVFU (src.b[i][j]), X, Y, Z);
+            Color::Lab2XYZ (lvfu (src.L[i][j]), lvfu (src.a[i][j]), lvfu (src.b[i][j]), X, Y, Z);
             Color::xyz2rgb (X, Y, Z, R, G, B, wipv);
-            STVFU (dst.r (i, j), R);
-            STVFU (dst.g (i, j), G);
-            STVFU (dst.b (i, j), B);
+            stvfu (dst.r (i, j), R);
+            stvfu (dst.g (i, j), G);
+            stvfu (dst.b (i, j), B);
         }
 
 #endif
