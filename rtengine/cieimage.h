@@ -16,8 +16,7 @@
  *  You should have received a copy of the GNU General Public License
  *  along with RawTherapee.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef _CIEIMAGE_H_
-#define _CIEIMAGE_H_
+#pragma once
 
 #include "image16.h"
 #include "noncopyable.h"
@@ -50,4 +49,3 @@ public:
 };
 
 }
-#endif

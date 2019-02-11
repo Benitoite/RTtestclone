@@ -10,11 +10,11 @@ and prints the features to the screen.
 #include <cmath>
 #include <cstring>
 
-#define N_FEATURES 100
-#define DELTA_1 0.05
-#define DELTA_2 0.01
-#define RXY_LIMIT 0.6
-#define CENTER_R 0.3
+constexpr int n_features = 100;
+constexpr double delta_1 = 0.05;
+constexpr double delta_2 = 0.01;
+constexpr double rxy_limit = 0.6;
+constexpr double center_r = 0.3;
 
 //#define DEBUG_IMG
 
@@ -40,10 +40,10 @@ int calcDistortion(unsigned char* img1, unsigned char* img2, int ncols, int nrow
     int i, n;
     double radius, wc, hc;
 
-    double r0[N_FEATURES * nfactor];
-    memset(r0, 0, N_FEATURES * nfactor * sizeof(double));
-    double r10[N_FEATURES * nfactor];
-    memset(r10, 0, N_FEATURES * nfactor * sizeof(double));
+    double r0[n_features * nfactor];
+    memset(r0, 0, n_features * nfactor * sizeof(double));
+    double r10[n_features * nfactor];
+    memset(r10, 0, n_features * nfactor * sizeof(double));
 
     tc = KLTCreateTrackingContext();
     //tc->mindist = 20;
@@ -52,8 +52,8 @@ int calcDistortion(unsigned char* img1, unsigned char* img2, int ncols, int nrow
     tc->step_factor = 2.0;
     tc->max_iterations = 20;
     //KLTPrintTrackingContext(tc);
-    fl = KLTCreateFeatureList(N_FEATURES * nfactor);
-    ft = KLTCreateFeatureTable(2, N_FEATURES * nfactor);
+    fl = KLTCreateFeatureList(n_features * nfactor);
+    ft = KLTCreateFeatureTable(2, n_features * nfactor);
 
     radius = sqrt(ncols * ncols + nrows * nrows) / 2.0;
     wc = ((double)ncols) / 2.0 - 0.5;
@@ -74,7 +74,7 @@ int calcDistortion(unsigned char* img1, unsigned char* img2, int ncols, int nrow
     n = 0;
     double total_r10 = 0.0, total_r0 = 0.0;
 
-    for (i = 0; i < N_FEATURES * nfactor; i++) {
+    for (i = 0; i < n_features * nfactor; i++) {
         if (ft->feature[i][1]->val >= 0) {
             double x0, y0, x1, y1;
             x0 = ft->feature[i][0]->x;
@@ -85,7 +85,7 @@ int calcDistortion(unsigned char* img1, unsigned char* img2, int ncols, int nrow
             r0[n] = sqrt((x0 - wc) * (x0 - wc) + (y0 - hc) * (y0 - hc)) / radius;
 
             // dots too close to the center tends to have big diviation and create noise, extract them
-            if (r0[n] < CENTER_R) {
+            if (r0[n] < center_r) {
                 continue;
             }
 
@@ -142,7 +142,7 @@ int calcDistortion(unsigned char* img1, unsigned char* img2, int ncols, int nrow
         drawDot(img2, ncols, nrows, r0[i], r10[i], 255);
 #endif
 
-        if (delta >= DELTA_1) {
+        if (delta >= delta_1) {
             total_r10 -= r10[i];
             total_r0 -= r0[i];
             r0[i] = -1.0;
@@ -203,7 +203,7 @@ int calcDistortion(unsigned char* img1, unsigned char* img2, int ncols, int nrow
             }
         }
 
-        val += DELTA_1;
+        val += delta_1;
 
         if (val >= 0.8 && val < 1.2) {
             if (img2[i + ((int)((val - 0.8) * 2.5 * nrows))*ncols] != 255) {
@@ -211,7 +211,7 @@ int calcDistortion(unsigned char* img1, unsigned char* img2, int ncols, int nrow
             }
         }
 
-        val -= DELTA_1 * 2;
+        val -= delta_1 * 2;
 
         if (val >= 0.8 && val < 1.2) {
             if (img2[i + ((int)((val - 0.8) * 2.5 * nrows))*ncols] != 255) {
@@ -219,7 +219,7 @@ int calcDistortion(unsigned char* img1, unsigned char* img2, int ncols, int nrow
             }
         }
 
-        val += DELTA_1 + DELTA_2;
+        val += delta_1 + delta_2;
 
         if (val >= 0.8 && val < 1.2) {
             if (img2[i + ((int)((val - 0.8) * 2.5 * nrows))*ncols] != 255) {
@@ -227,7 +227,7 @@ int calcDistortion(unsigned char* img1, unsigned char* img2, int ncols, int nrow
             }
         }
 
-        val -= DELTA_2 * 2;
+        val -= delta_2 * 2;
 
         if (val >= 0.8 && val < 1.2) {
             if (img2[i + ((int)((val - 0.8) * 2.5 * nrows))*ncols] != 255) {
@@ -255,7 +255,7 @@ int calcDistortion(unsigned char* img1, unsigned char* img2, int ncols, int nrow
 
     printf ("distortion amount=%lf scale=%lf deviation=%lf, rxy=%lf\n", a, b, total_delta / n, rxy);
 
-    if (total_delta / new_n > DELTA_2) {
+    if (total_delta / new_n > delta_2) {
         printf ("Deviation is too big.\n");
         distortion = 0.0;
         KLTFreeFeatureTable(ft);
@@ -264,7 +264,7 @@ int calcDistortion(unsigned char* img1, unsigned char* img2, int ncols, int nrow
         return -2;
     }
 
-    if (rxy < RXY_LIMIT) {
+    if (rxy < rxy_limit) {
         printf ("Not linear enough\n");
         distortion = 0.0;
         KLTFreeFeatureTable(ft);

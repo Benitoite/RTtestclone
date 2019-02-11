@@ -29,8 +29,6 @@
 #include "lcms2.h"
 #include "sleef.c"
 
-#define SAT(a,b,c) ((float)max(a,b,c)-(float)min(a,b,c))/(float)max(a,b,c)
-
 namespace rtengine
 {
 
@@ -102,7 +100,7 @@ private:
 
     static float computeXYZ2Lab(float f);
     static float computeXYZ2LabY(float f);
-    
+
 public:
 
     typedef enum Channel {
@@ -1093,7 +1091,7 @@ public:
 		//very small differences between the 2
         return x <= 0.003040 ? x * 12.92310 : 1.055 * exp(log(x) / sRGBGammaCurve) - 0.055;//continuous
       //  return x <= 0.003041 ? x * 12.92310 : 1.055011 * exp(log(x) / sRGBGammaCurve) - 0.055011;//continuous
-		
+
     }
 
 
@@ -1110,7 +1108,7 @@ public:
 		//very small differences between the 4
         return x <= 0.039286 ? x / 12.92310 : exp(log((x + 0.055) / 1.055) * sRGBGammaCurve);//continuous
       //  return x <= 0.039293 ? x / 12.92310 : exp(log((x + 0.055011) / 1.055011) * sRGBGammaCurve);//continuous
-		
+
     }
 
 

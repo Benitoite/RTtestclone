@@ -52,16 +52,18 @@
  *
  *          !! locked arrays cannot be resized and cannot be unlocked again !!
  */
-#ifndef ARRAY2D_H_
-#define ARRAY2D_H_
+#pragma once
+
 #include <csignal>  // for raise()
 #include <cassert>
 
 // flags for use
-#define ARRAY2D_LOCK_DATA   1
-#define ARRAY2D_CLEAR_DATA  2
-#define ARRAY2D_BYREFERENCE 4
-#define ARRAY2D_VERBOSE     8
+enum Array2DFlags {
+    ARRAY2D_LOCK_DATA = 1,
+    ARRAY2D_CLEAR_DATA = 2,
+    ARRAY2D_BYREFERENCE = 4,
+    ARRAY2D_VERBOSE = 8
+};
 
 #include <cstring>
 #include <cstdio>
@@ -307,4 +309,3 @@ public:
         return list[index];
     }
 };
-#endif /* array2D_H_ */

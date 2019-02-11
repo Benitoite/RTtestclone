@@ -1,8 +1,7 @@
 /*
  *  This file is part of RawTherapee.
  */
-#ifndef __CAMCONST__
-#define __CAMCONST__
+#pragma once
 
 #include <glibmm.h>
 #include <map>
@@ -27,7 +26,7 @@ private:
     std::vector<int> pdafPattern;
     int pdafOffset;
     int globalGreenEquilibration;
-    
+
     CameraConst();
     static bool parseLevels(CameraConst *cc, int bw, void *ji);
     static bool parseApertureScaling(CameraConst *cc, void *ji);
@@ -72,5 +71,3 @@ public:
 };
 
 }
-
-#endif

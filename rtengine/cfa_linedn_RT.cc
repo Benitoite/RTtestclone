@@ -28,9 +28,7 @@
 #include "rawimagesource.h"
 #include "rt_math.h"
 
-#define TS 224      // Tile size of 224 instead of 512 speeds up processing
-
-#define CLASS
+constexpr int tilesize = 224;      // Tile size of 224 instead of 512 speeds up processing
 
 // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -39,7 +37,7 @@ using namespace rtengine;
 
 // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-void RawImageSource::CLASS cfa_linedn(float noise, bool horizontal, bool vertical, const CFALineDenoiseRowBlender &rowblender)
+void RawImageSource::cfa_linedn(float noise, bool horizontal, bool vertical, const CFALineDenoiseRowBlender &rowblender)
 {
     // local variables
     int height = H, width = W;
@@ -70,10 +68,10 @@ void RawImageSource::CLASS cfa_linedn(float noise, bool horizontal, bool vertica
     {
 
         // allocate memory and assure the arrays don't have same 64 byte boundary to avoid L1 conflict misses
-        float *cfain = (float*)malloc(3 * TS * TS * sizeof(float) + 2 * 16 * sizeof(float));
-        float *cfadiff = (cfain + (1 * TS * TS) + 1 * 16);
-        float *cfadn = (cfain + (2 * TS * TS) + 2 * 16);
-        float cfablur[TS];
+        float *cfain = (float*)malloc(3 * tilesize * tilesize * sizeof(float) + 2 * 16 * sizeof(float));
+        float *cfadiff = (cfain + (1 * tilesize * tilesize) + 1 * 16);
+        float *cfadn = (cfain + (2 * tilesize * tilesize) + 2 * 16);
+        float cfablur[tilesize];
 
         float linehvar[4], linevvar[4], noisefactor[4][8][2], coeffsq;
         float dctblock[4][8][8];
@@ -92,40 +90,40 @@ void RawImageSource::CLASS cfa_linedn(float noise, bool horizontal, bool vertica
         #pragma omp for schedule(dynamic) collapse(2)
 #endif
 
-        for (int top = 0; top < height - 16; top += TS - 32)
-            for (int left = 0; left < width - 16; left += TS - 32) {
+        for (int top = 0; top < height - 16; top += tilesize - 32)
+            for (int left = 0; left < width - 16; left += tilesize - 32) {
 
-                int bottom = min(top + TS, height);
-                int right  = min(left + TS, width);
+                int bottom = min(top + tilesize, height);
+                int right  = min(left + tilesize, width);
                 int numrows = bottom - top;
                 int numcols = right - left;
                 int indx1;
 
                 // load CFA data; data should be in linear gamma space, before white balance multipliers are applied
                 for (int rr = top; rr < top + numrows; rr++)
-                    for (int cc = left, indx = (rr - top) * TS; cc < left + numcols; cc++, indx++) {
+                    for (int cc = left, indx = (rr - top) * tilesize; cc < left + numcols; cc++, indx++) {
                         cfain[indx] = rawData[rr][cc];
                     }
 
                 //pad the block to a multiple of 16 on both sides
 
-                if (numcols < TS) {
+                if (numcols < tilesize) {
                     indx1 = numcols % 16;
 
                     for (int i = 0; i < (16 - indx1); i++)
                         for (int rr = 0; rr < numrows; rr++) {
-                            cfain[(rr)*TS + numcols + i] = cfain[(rr) * TS + numcols - i - 1];
+                            cfain[(rr)*tilesize + numcols + i] = cfain[(rr) * tilesize + numcols - i - 1];
                         }
 
                     numcols += 16 - indx1;
                 }
 
-                if (numrows < TS) {
+                if (numrows < tilesize) {
                     indx1 = numrows % 16;
 
                     for (int i = 0; i < (16 - indx1); i++)
                         for (int cc = 0; cc < numcols; cc++) {
-                            cfain[(numrows + i)*TS + cc] = cfain[(numrows - i - 1) * TS + cc];
+                            cfain[(numrows + i)*tilesize + cc] = cfain[(numrows - i - 1) * tilesize + cc];
                         }
 
                     numrows += 16 - indx1;
@@ -135,15 +133,15 @@ void RawImageSource::CLASS cfa_linedn(float noise, bool horizontal, bool vertica
 
                 //gaussian blur of CFA data
                 for (int rr = 8; rr < numrows - 8; rr++) {
-                    for (int indx = rr * TS, indxb = 0; indx < rr * TS + numcols; indx++, indxb++) {
+                    for (int indx = rr * tilesize, indxb = 0; indx < rr * tilesize + numcols; indx++, indxb++) {
                         cfablur[indxb] = gauss[0] * cfain[indx];
 
                         for (int i = 1; i < 5; i++) {
-                            cfablur[indxb] += gauss[i] * (cfain[indx - (2 * i) * TS] + cfain[indx + (2 * i) * TS]);
+                            cfablur[indxb] += gauss[i] * (cfain[indx - (2 * i) * tilesize] + cfain[indx + (2 * i) * tilesize]);
                         }
                     }
 
-                    for (int indx = rr * TS + 8, indxb = 8; indx < rr * TS + numcols - 8; indx++, indxb++) {
+                    for (int indx = rr * tilesize + 8, indxb = 8; indx < rr * tilesize + numcols - 8; indx++, indxb++) {
                         cfadn[indx] = gauss[0] * cfablur[indxb];
 
                         for (int i = 1; i < 5; i++) {
@@ -162,7 +160,7 @@ void RawImageSource::CLASS cfa_linedn(float noise, bool horizontal, bool vertica
                                 //grab an 8x8 block of a given RGGB channel
                                 for (int i = 0; i < 8; i++)
                                     for (int j = 0; j < 8; j++) {
-                                        dctblock[2 * ey + ex][i][j] = cfadiff[(rr + 2 * i + ey) * TS + cc + 2 * j + ex];
+                                        dctblock[2 * ey + ex][i][j] = cfadiff[(rr + 2 * i + ey) * tilesize + cc + 2 * j + ex];
                                     }
 
                                 ddct8x8s(-1, dctblock[2 * ey + ex]); //forward DCT
@@ -224,7 +222,7 @@ void RawImageSource::CLASS cfa_linedn(float noise, bool horizontal, bool vertica
                                 //multiply by window fn and add to output (cfadn)
                                 for (int i = 0; i < 8; i++)
                                     for (int j = 0; j < 8; j++) {
-                                        cfadn[(rr + 2 * i + ey)*TS + cc + 2 * j + ex] += window[i] * window[j] * dctblock[2 * ey + ex][i][j];
+                                        cfadn[(rr + 2 * i + ey)*tilesize + cc + 2 * j + ex] += window[i] * window[j] * dctblock[2 * ey + ex][i][j];
                                     }
                             }
                     }
@@ -234,7 +232,7 @@ void RawImageSource::CLASS cfa_linedn(float noise, bool horizontal, bool vertica
                 for (int rr = 16; rr < numrows - 16; rr++) {
                     int row = rr + top;
 
-                    for (int col = 16 + left, indx = rr * TS + 16; indx < rr * TS + numcols - 16; indx++, col++) {
+                    for (int col = 16 + left, indx = rr * tilesize + 16; indx < rr * tilesize + numcols - 16; indx++, col++) {
                         if (rawData[row][col] < clip_pt && cfadn[indx] < clip_pt) {
                             RawDataTmp[row * width + col] = CLIP(cfadn[indx]);
                         }
@@ -242,7 +240,7 @@ void RawImageSource::CLASS cfa_linedn(float noise, bool horizontal, bool vertica
                 }
 
                 if(plistener) {
-                    progress += (double)((TS - 32) * (TS - 32)) / (height * width);
+                    progress += (double)((tilesize - 32) * (tilesize - 32)) / (height * width);
 
                     if (progress > 1.0) {
                         progress = 1.0;
@@ -330,14 +328,14 @@ void RawImageSource::CLASS cfa_linedn(float noise, bool horizontal, bool vertica
 /* Cn_kI = sqrt(2.0/n) * sin(pi/2*k/n) */
 /* Wn_kR = cos(pi/2*k/n) */
 /* Wn_kI = sin(pi/2*k/n) */
-#define C8_1R   0.49039264020161522456f
-#define C8_1I   0.09754516100806413392f
-#define C8_2R   0.46193976625564337806f
-#define C8_2I   0.19134171618254488586f
-#define C8_3R   0.41573480615127261854f
-#define C8_3I   0.27778511650980111237f
-#define C8_4R   0.35355339059327376220f
-#define W8_4R   0.70710678118654752440f
+constexpr float c8_1r = 0.49039264020161522456f;
+constexpr float c8_1i = 0.09754516100806413392f;
+constexpr float c8_2r = 0.46193976625564337806f;
+constexpr float c8_2i = 0.19134171618254488586f;
+constexpr float c8_3r = 0.41573480615127261854f;
+constexpr float c8_3i = 0.27778511650980111237f;
+constexpr float c8_4r = 0.35355339059327376220f;
+constexpr float w8_4r = 0.70710678118654752440f;
 
 
 void RawImageSource::ddct8x8s(int isgn, float a[8][8])
@@ -358,22 +356,22 @@ void RawImageSource::ddct8x8s(int isgn, float a[8][8])
             x3i = a[6][j] - a[1][j];
             xr = x0r + x2r;
             xi = x0i + x2i;
-            a[0][j] = C8_4R * (xr + xi);
-            a[4][j] = C8_4R * (xr - xi);
+            a[0][j] = c8_4r * (xr + xi);
+            a[4][j] = c8_4r * (xr - xi);
             xr = x0r - x2r;
             xi = x0i - x2i;
-            a[2][j] = C8_2R * xr - C8_2I * xi;
-            a[6][j] = C8_2R * xi + C8_2I * xr;
-            xr = W8_4R * (x1i - x3i);
-            x1i = W8_4R * (x1i + x3i);
+            a[2][j] = c8_2r * xr - c8_2i * xi;
+            a[6][j] = c8_2r * xi + c8_2i * xr;
+            xr = w8_4r * (x1i - x3i);
+            x1i = w8_4r * (x1i + x3i);
             x3i = x1i - x3r;
             x1i += x3r;
             x3r = x1r - xr;
             x1r += xr;
-            a[1][j] = C8_1R * x1r - C8_1I * x1i;
-            a[7][j] = C8_1R * x1i + C8_1I * x1r;
-            a[3][j] = C8_3R * x3r - C8_3I * x3i;
-            a[5][j] = C8_3R * x3i + C8_3I * x3r;
+            a[1][j] = c8_1r * x1r - c8_1i * x1i;
+            a[7][j] = c8_1r * x1i + c8_1i * x1r;
+            a[3][j] = c8_3r * x3r - c8_3i * x3i;
+            a[5][j] = c8_3r * x3i + c8_3i * x3r;
         }
 
         for (j = 0; j <= 7; j++) {
@@ -387,39 +385,39 @@ void RawImageSource::ddct8x8s(int isgn, float a[8][8])
             x3i = a[j][6] - a[j][1];
             xr = x0r + x2r;
             xi = x0i + x2i;
-            a[j][0] = C8_4R * (xr + xi);
-            a[j][4] = C8_4R * (xr - xi);
+            a[j][0] = c8_4r * (xr + xi);
+            a[j][4] = c8_4r * (xr - xi);
             xr = x0r - x2r;
             xi = x0i - x2i;
-            a[j][2] = C8_2R * xr - C8_2I * xi;
-            a[j][6] = C8_2R * xi + C8_2I * xr;
-            xr = W8_4R * (x1i - x3i);
-            x1i = W8_4R * (x1i + x3i);
+            a[j][2] = c8_2r * xr - c8_2i * xi;
+            a[j][6] = c8_2r * xi + c8_2i * xr;
+            xr = w8_4r * (x1i - x3i);
+            x1i = w8_4r * (x1i + x3i);
             x3i = x1i - x3r;
             x1i += x3r;
             x3r = x1r - xr;
             x1r += xr;
-            a[j][1] = C8_1R * x1r - C8_1I * x1i;
-            a[j][7] = C8_1R * x1i + C8_1I * x1r;
-            a[j][3] = C8_3R * x3r - C8_3I * x3i;
-            a[j][5] = C8_3R * x3i + C8_3I * x3r;
+            a[j][1] = c8_1r * x1r - c8_1i * x1i;
+            a[j][7] = c8_1r * x1i + c8_1i * x1r;
+            a[j][3] = c8_3r * x3r - c8_3i * x3i;
+            a[j][5] = c8_3r * x3i + c8_3i * x3r;
         }
     } else {
         for (j = 0; j <= 7; j++) {
-            x1r = C8_1R * a[1][j] + C8_1I * a[7][j];
-            x1i = C8_1R * a[7][j] - C8_1I * a[1][j];
-            x3r = C8_3R * a[3][j] + C8_3I * a[5][j];
-            x3i = C8_3R * a[5][j] - C8_3I * a[3][j];
+            x1r = c8_1r * a[1][j] + c8_1i * a[7][j];
+            x1i = c8_1r * a[7][j] - c8_1i * a[1][j];
+            x3r = c8_3r * a[3][j] + c8_3i * a[5][j];
+            x3i = c8_3r * a[5][j] - c8_3i * a[3][j];
             xr = x1r - x3r;
             xi = x1i + x3i;
             x1r += x3r;
             x3i -= x1i;
-            x1i = W8_4R * (xr + xi);
-            x3r = W8_4R * (xr - xi);
-            xr = C8_2R * a[2][j] + C8_2I * a[6][j];
-            xi = C8_2R * a[6][j] - C8_2I * a[2][j];
-            x0r = C8_4R * (a[0][j] + a[4][j]);
-            x0i = C8_4R * (a[0][j] - a[4][j]);
+            x1i = w8_4r * (xr + xi);
+            x3r = w8_4r * (xr - xi);
+            xr = c8_2r * a[2][j] + c8_2i * a[6][j];
+            xi = c8_2r * a[6][j] - c8_2i * a[2][j];
+            x0r = c8_4r * (a[0][j] + a[4][j]);
+            x0i = c8_4r * (a[0][j] - a[4][j]);
             x2r = x0r - xr;
             x2i = x0i - xi;
             x0r += xr;
@@ -435,20 +433,20 @@ void RawImageSource::ddct8x8s(int isgn, float a[8][8])
         }
 
         for (j = 0; j <= 7; j++) {
-            x1r = C8_1R * a[j][1] + C8_1I * a[j][7];
-            x1i = C8_1R * a[j][7] - C8_1I * a[j][1];
-            x3r = C8_3R * a[j][3] + C8_3I * a[j][5];
-            x3i = C8_3R * a[j][5] - C8_3I * a[j][3];
+            x1r = c8_1r * a[j][1] + c8_1i * a[j][7];
+            x1i = c8_1r * a[j][7] - c8_1i * a[j][1];
+            x3r = c8_3r * a[j][3] + c8_3i * a[j][5];
+            x3i = c8_3r * a[j][5] - c8_3i * a[j][3];
             xr = x1r - x3r;
             xi = x1i + x3i;
             x1r += x3r;
             x3i -= x1i;
-            x1i = W8_4R * (xr + xi);
-            x3r = W8_4R * (xr - xi);
-            xr = C8_2R * a[j][2] + C8_2I * a[j][6];
-            xi = C8_2R * a[j][6] - C8_2I * a[j][2];
-            x0r = C8_4R * (a[j][0] + a[j][4]);
-            x0i = C8_4R * (a[j][0] - a[j][4]);
+            x1i = w8_4r * (xr + xi);
+            x3r = w8_4r * (xr - xi);
+            xr = c8_2r * a[j][2] + c8_2i * a[j][6];
+            xi = c8_2r * a[j][6] - c8_2i * a[j][2];
+            x0r = c8_4r * (a[j][0] + a[j][4]);
+            x0i = c8_4r * (a[j][0] - a[j][4]);
             x2r = x0r - xr;
             x2i = x0i - xi;
             x0r += xr;

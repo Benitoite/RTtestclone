@@ -16,8 +16,7 @@
  *  You should have received a copy of the GNU General Public License
  *  along with RawTherapee.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef _BOXBLUR_H_
-#define _BOXBLUR_H_
+#pragma once
 
 #include <assert.h>
 #include <stdlib.h>
@@ -643,4 +642,3 @@ template<class T, class A> void boxabsblur (T* src, A* dst, int radx, int rady, 
 }
 
 }
-#endif /* _BOXBLUR_H_ */

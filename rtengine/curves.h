@@ -16,8 +16,7 @@
  *  You should have received a copy of the GNU General Public License
  *  along with RawTherapee.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef __CURVES_H__
-#define __CURVES_H__
+#pragma once
 
 #include <map>
 #include <string>
@@ -35,11 +34,9 @@
 
 #include "LUT.h"
 
-#define CURVES_MIN_POLY_POINTS  1000
+constexpr int CURVES_MIN_POLY_POINTS = 1000;
 
 #include "rt_math.h"
-
-#define CLIPI(a) ((a)>0?((a)<65534?(a):65534):0)
 
 using namespace std;
 
@@ -268,7 +265,7 @@ public:
     //linearly interpolate from ends of range if arg is out of bounds
     static inline float interp(int *array, float f)
     {
-        int index = CLIPI(floor(f));
+        int index = LIM(floor(f), 0.f, 65534.f);
         float part = (float)((f) - index) * (float)(array[index + 1] - array[index]);
         return (float)array[index] + part;
     }
@@ -277,7 +274,7 @@ public:
     //linearly interpolate from ends of range if arg is out of bounds
     static inline float flinterp(float *array, float f)
     {
-        int index = CLIPI(floor(f));
+        int index = LIM(floor(f), 0.f, 65534.f);
         float part = ((f) - (float)index) * (array[index + 1] - array[index]);
         return array[index] + part;
     }
@@ -1232,7 +1229,3 @@ inline void SatAndValueBlendingToneCurve::Apply (float& ir, float& ig, float& ib
 }
 
 }
-
-#undef CLIPI
-
-#endif

@@ -16,8 +16,7 @@
  *  You should have received a copy of the GNU General Public License
  *  along with RawTherapee.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef _COLORTEMP_
-#define _COLORTEMP_
+#pragma once
 
 #include <cmath>
 #include <map>
@@ -206,5 +205,5 @@ public:
     static void spectrum_to_color_xyz_preset    (const double* spec_color, const double* spec_intens, double &xx, double &yy, double &zz);
 
 };
+
 }
-#endif

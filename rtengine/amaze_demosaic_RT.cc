@@ -53,14 +53,11 @@ void RawImageSource::amaze_demosaic_RT(int winx, int winy, int winw, int winh, c
     const float clip_pt = 1.0 / initialGain;
     const float clip_pt8 = 0.8 / initialGain;
 
-// this allows to pass AMAZETS to the code. On some machines larger AMAZETS is faster
-// If AMAZETS is undefined it will be set to 160, which is the fastest on modern x86/64 machines
-#ifndef AMAZETS
-#define AMAZETS 160
-#endif
+    constexpr std::size_t amazets = 160; // fastest on modern x86/64 machines
+
     // Tile size; the image is processed in square tiles to lower memory requirements and facilitate multi-threading
     // We assure that Tile size is a multiple of 32 in the range [96;992]
-    constexpr int ts = (AMAZETS & 992) < 96 ? 96 : (AMAZETS & 992);
+    constexpr int ts = (amazets & 992) < 96 ? 96 : (amazets & 992);
     constexpr int tsh = ts / 2; // half of Tile size
 
     //offset of R pixel within a Bayer quartet

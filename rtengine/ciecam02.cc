@@ -27,10 +27,6 @@
 #include <stdio.h>
 #endif
 
-#undef CLIPD
-#define CLIPD(a) ((a)>0.0?((a)<1.0?(a):1.0):0.0)
-#define MAXR(a,b) ((a) > (b) ? (a) : (b))
-
 namespace rtengine
 {
 
@@ -98,7 +94,7 @@ void Ciecam02::curveJfloat (float br, float contr, const LUTu & histogram, LUTf 
             val = brightcurve.getVal (val);
 
             // store result
-            outCurve[i] = CLIPD (val);
+            outCurve[i] = LIM01 (val);
         }
 
     } else {
@@ -207,9 +203,9 @@ float Ciecam02::achromatic_response_to_whitefloat ( float x, float y, float z, f
     cat02_to_hpefloat ( rp, gp, bp, rc, gc, bc);
 
 //    if (gamu == 1) { //gamut correction M.H.Brill S.Susstrunk
-    rp = MAXR (rp, 0.0f);
-    gp = MAXR (gp, 0.0f);
-    bp = MAXR (bp, 0.0f);
+    rp = max (rp, 0.0f);
+    gp = max (gp, 0.0f);
+    bp = max (bp, 0.0f);
 //    }
 
     rpa = nonlinear_adaptationfloat ( rp, fl );
@@ -481,9 +477,9 @@ void Ciecam02::xyz2jchqms_ciecam02float ( float &J, float &C, float &h, float &Q
     cat02_to_hpefloat ( rp, gp, bp, rc, gc, bc);
 
 //    if (gamu == 1) { //gamut correction M.H.Brill S.Susstrunk
-    rp = MAXR (rp, 0.0f);
-    gp = MAXR (gp, 0.0f);
-    bp = MAXR (bp, 0.0f);
+    rp = max (rp, 0.0f);
+    gp = max (gp, 0.0f);
+    bp = max (bp, 0.0f);
 //    }
 
     rpa = nonlinear_adaptationfloat ( rp, fl );
@@ -502,7 +498,7 @@ void Ciecam02::xyz2jchqms_ciecam02float ( float &J, float &C, float &h, float &Q
     a = ((2.0f * rpa) + gpa + (0.05f * bpa) - 0.305f) * nbb;
 
 //    if (gamu == 1) {
-    a = MAXR (a, 0.0f); //gamut correction M.H.Brill S.Susstrunk
+    a = max (a, 0.0f); //gamut correction M.H.Brill S.Susstrunk
 //    }
 
     J = xpowf ( a / aw, c * cz * 0.5f);
@@ -600,9 +596,9 @@ void Ciecam02::xyz2jch_ciecam02float ( float &J, float &C, float &h, float aw, f
     cat02_to_hpefloat ( rp, gp, bp, rc, gc, bc);
 
 //    if (gamu == 1) { //gamut correction M.H.Brill S.Susstrunk
-    rp = MAXR (rp, 0.0f);
-    gp = MAXR (gp, 0.0f);
-    bp = MAXR (bp, 0.0f);
+    rp = max (rp, 0.0f);
+    gp = max (gp, 0.0f);
+    bp = max (bp, 0.0f);
 //    }
 
 #ifdef __SSE2__
@@ -630,7 +626,7 @@ void Ciecam02::xyz2jch_ciecam02float ( float &J, float &C, float &h, float aw, f
     a = ((2.0f * rpa) + gpa + (0.05f * bpa) - 0.305f) * nbb;
 
 //    if (gamu == 1) {
-    a = MAXR (a, 0.0f); //gamut correction M.H.Brill S.Susstrunk
+    a = max (a, 0.0f); //gamut correction M.H.Brill S.Susstrunk
 //    }
 
     J = xpowf ( a / aw, c * cz * 0.5f);

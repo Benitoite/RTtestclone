@@ -34,12 +34,14 @@
 
 namespace rtengine
 {
-#define TS 144
+
+constexpr int ts = 144;
+
 void RawImageSource::ahd_demosaic()
 {
     BENCHFUN
 
-    constexpr int dir[4] = { -1, 1, -TS, TS };
+    constexpr int dir[4] = { -1, 1, -ts, ts };
     float xyz_cam[3][3];
     LUTf cbrt(65536);
 
@@ -79,19 +81,19 @@ void RawImageSource::ahd_demosaic()
 #endif
 {
     int progresscounter = 0;
-    float *buffer = new float[13 * TS * TS]; /* 1053 kB per core */
-    auto rgb  = (float(*)[TS][TS][3]) buffer;
-    auto lab  = (float(*)[TS][TS][3])(buffer + 6 * TS * TS);
-    auto homo = (uint16_t(*)[TS][TS])(buffer + 12 * TS * TS);
+    float *buffer = new float[13 * ts * ts]; /* 1053 kB per core */
+    auto rgb  = (float(*)[ts][ts][3]) buffer;
+    auto lab  = (float(*)[ts][ts][3])(buffer + 6 * ts * ts);
+    auto homo = (uint16_t(*)[ts][ts])(buffer + 12 * ts * ts);
 
 #ifdef _OPENMP
     #pragma omp for collapse(2) schedule(dynamic) nowait
 #endif
-    for (int top = 2; top < height - 5; top += TS - 6) {
-        for (int left = 2; left < width - 5; left += TS - 6) {
+    for (int top = 2; top < height - 5; top += ts - 6) {
+        for (int left = 2; left < width - 5; left += ts - 6) {
             //  Interpolate green horizontally and vertically:
-            for (int row = top; row < top + TS && row < height - 2; row++) {
-                for (int col = left + (FC(row, left) & 1); col < std::min(left + TS, width - 2); col += 2) {
+            for (int row = top; row < top + ts && row < height - 2; row++) {
+                for (int col = left + (FC(row, left) & 1); col < std::min(left + ts, width - 2); col += 2) {
                     auto pix = &rawData[row][col];
                     float val0 = 0.25f * ((pix[-1] + pix[0] + pix[1]) * 2
                                   - pix[-2] - pix[2]) ;
@@ -104,9 +106,9 @@ void RawImageSource::ahd_demosaic()
 
             //  Interpolate red and blue, and convert to CIELab:
             for (int d = 0; d < 2; d++)
-                for (int row = top + 1; row < top + TS - 1 && row < height - 3; row++) {
+                for (int row = top + 1; row < top + ts - 1 && row < height - 3; row++) {
                     int cng = FC(row + 1, FC(row + 1, 0) & 1);
-                    for (int col = left + 1; col < std::min(left + TS - 1, width - 3); col++) {
+                    for (int col = left + 1; col < std::min(left + ts - 1, width - 3); col++) {
                         auto pix = &rawData[row][col];
                         auto rix = &rgb[d][row - top][col - left];
                         auto lix = lab[d][row - top][col - left];
@@ -114,17 +116,17 @@ void RawImageSource::ahd_demosaic()
                             rix[0][2 - cng] = CLIP(pix[0] + (0.5f * (pix[-1] + pix[1]
                                                        - rix[-1][1] - rix[1][1] ) ));
                             rix[0][cng] = CLIP(pix[0] + (0.5f * (pix[-width] + pix[width]
-                                                       - rix[-TS][1] - rix[TS][1])));
+                                                       - rix[-ts][1] - rix[ts][1])));
                             rix[0][1] = pix[0];
                         } else {
                             rix[0][cng] = CLIP(rix[0][1] + (0.25f * (pix[-width - 1] + pix[-width + 1]
                                                         + pix[+width - 1] + pix[+width + 1]
-                                                        - rix[-TS - 1][1] - rix[-TS + 1][1]
-                                                        - rix[+TS - 1][1] - rix[+TS + 1][1])));
+                                                        - rix[-ts - 1][1] - rix[-ts + 1][1]
+                                                        - rix[+ts - 1][1] - rix[+ts + 1][1])));
                             rix[0][2 - cng] = pix[0];
                         }
                         float xyz[3] = {};
-                        
+
                         for(unsigned int c = 0; c < 3; ++c) {
                             xyz[0] += xyz_cam[0][c] * rix[0][c];
                             xyz[1] += xyz_cam[1][c] * rix[0][c];
@@ -143,11 +145,11 @@ void RawImageSource::ahd_demosaic()
 
             //  Build homogeneity maps from the CIELab images:
 
-            for (int row = top + 2; row < top + TS - 2 && row < height - 4; row++) {
+            for (int row = top + 2; row < top + ts - 2 && row < height - 4; row++) {
                 int tr = row - top;
                 float ldiff[2][4], abdiff[2][4];
 
-                for (int col = left + 2, tc = 2; col < left + TS - 2 && col < width - 4; col++, tc++) {
+                for (int col = left + 2, tc = 2; col < left + ts - 2 && col < width - 4; col++, tc++) {
                     for (int d = 0; d < 2; d++) {
                         auto lix = &lab[d][tr][tc];
 
@@ -173,10 +175,10 @@ void RawImageSource::ahd_demosaic()
             }
 
             //  Combine the most homogenous pixels for the final result:
-            for (int row = top + 3; row < top + TS - 3 && row < height - 5; row++) {
+            for (int row = top + 3; row < top + ts - 3 && row < height - 5; row++) {
                 int tr = row - top;
 
-                for (int col = left + 3, tc = 3; col < std::min(left + TS - 3, width - 5); col++, tc++) {
+                for (int col = left + 3, tc = 3; col < std::min(left + ts - 3, width - 5); col++, tc++) {
                     uint16_t hm0 = 0, hm1 = 0;
                     for (int i = tr - 1; i <= tr + 1; i++)
                         for (int j = tc - 1; j <= tc + 1; j++) {
@@ -205,13 +207,13 @@ void RawImageSource::ahd_demosaic()
                     #pragma omp critical (ahdprogress)
 #endif
                     {
-                        progress += 32.0 * SQR(TS - 6) / (height * width);
+                        progress += 32.0 * SQR(ts - 6) / (height * width);
                         progress = std::min(progress, 1.0);
                         plistener->setProgress(progress);
                     }
                 }
             }
- 
+
         }
     }
     delete [] buffer;
