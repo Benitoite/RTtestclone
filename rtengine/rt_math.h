@@ -145,7 +145,7 @@ constexpr std::uint8_t uint16ToUint8Rounded(std::uint16_t i)
 }
 
 template <typename T>
-constexpr bool OOG(const T &val, const T &high=T(MAXVAL))
+constexpr bool OOG(const T &val, const T& high = T(MAXVAL))
 {
     return (val < T(0)) || (val > high);
 }
@@ -157,7 +157,6 @@ void setUnlessOOG(T &out, const T &val)
         out = val;
     }
 }
-
 
 template <typename T>
 bool invertMatrix(const std::array<std::array<T, 3>, 3> &in, std::array<std::array<T, 3>, 3> &out)
@@ -185,7 +184,6 @@ bool invertMatrix(const std::array<std::array<T, 3>, 3> &in, std::array<std::arr
     return true;
 }
 
-
 template <typename T>
 std::array<std::array<T, 3>, 3> dotProduct(const std::array<std::array<T, 3>, 3> &a, const std::array<std::array<T, 3>, 3> &b)
 {
@@ -204,7 +202,6 @@ std::array<std::array<T, 3>, 3> dotProduct(const std::array<std::array<T, 3>, 3>
     return res;
 }
 
-
 template <typename T>
 std::array<T, 3> dotProduct(const std::array<std::array<T, 3>, 3> &a, const std::array<T, 3> &b)
 {
@@ -220,14 +217,12 @@ std::array<T, 3> dotProduct(const std::array<std::array<T, 3>, 3> &a, const std:
     return res;
 }
 
-
 template <typename T>
 T lin2log(T x, T base)
 {
     constexpr T one(1);
-    return std::log(x * (base - one) + one) / std::log(base); 
+    return std::log(x * (base - one) + one) / std::log(base);
 }
-
 
 template <typename T>
 T log2lin(T x, T base)

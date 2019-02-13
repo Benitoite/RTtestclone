@@ -245,7 +245,7 @@ void CurveFactory::curveLightBrightColor (const std::vector<double>& curvePoints
     customColCurve3.Reset();
 
     if (!curvePoints3.empty() && curvePoints3[0] > DCT_Linear && curvePoints3[0] < DCT_Unchanged) {
-        DiagonalCurve tcurve(curvePoints3, CURVES_MIN_POLY_POINTS / skip);
+        DiagonalCurve tcurve(curvePoints3, curves_min_poly_points / skip);
 
         if (outBeforeCCurveHistogramC) {
             histogramC.compressTo(outBeforeCCurveHistogramC, 48000);
@@ -260,7 +260,7 @@ void CurveFactory::curveLightBrightColor (const std::vector<double>& curvePoints
     customColCurve2.Reset();
 
     if (!curvePoints2.empty() && curvePoints2[0] > DCT_Linear && curvePoints2[0] < DCT_Unchanged) {
-        DiagonalCurve tcurve(curvePoints2, CURVES_MIN_POLY_POINTS / skip);
+        DiagonalCurve tcurve(curvePoints2, curves_min_poly_points / skip);
 
         if (outBeforeCCurveHistogram) {
             histNeeded = true;
@@ -276,7 +276,7 @@ void CurveFactory::curveLightBrightColor (const std::vector<double>& curvePoints
     customColCurve1.Reset();
 
     if (!curvePoints1.empty() && curvePoints1[0] > DCT_Linear && curvePoints1[0] < DCT_Unchanged) {
-        DiagonalCurve tcurve(curvePoints1, CURVES_MIN_POLY_POINTS / skip);
+        DiagonalCurve tcurve(curvePoints1, curves_min_poly_points / skip);
 
         if (outBeforeCCurveHistogram) {
             histNeeded = true;
@@ -305,7 +305,7 @@ void CurveFactory::curveBW ( const std::vector<double>& curvePointsbw, const std
     customToneCurvebw2.Reset();
 
     if (!curvePointsbw2.empty() && curvePointsbw2[0] > DCT_Linear && curvePointsbw2[0] < DCT_Unchanged) {
-        DiagonalCurve tcurve(curvePointsbw2, CURVES_MIN_POLY_POINTS / skip);
+        DiagonalCurve tcurve(curvePointsbw2, curves_min_poly_points / skip);
 
         if (outBeforeCCurveHistogrambw) {
             histNeeded = true;
@@ -320,7 +320,7 @@ void CurveFactory::curveBW ( const std::vector<double>& curvePointsbw, const std
     customToneCurvebw1.Reset();
 
     if (!curvePointsbw.empty() && curvePointsbw[0] > DCT_Linear && curvePointsbw[0] < DCT_Unchanged) {
-        DiagonalCurve tcurve(curvePointsbw, CURVES_MIN_POLY_POINTS / skip);
+        DiagonalCurve tcurve(curvePointsbw, curves_min_poly_points / skip);
 
         if (outBeforeCCurveHistogrambw ) {
             histNeeded = true;
@@ -345,7 +345,7 @@ void CurveFactory::curveCL ( bool & clcutili, const std::vector<double>& clcurve
     std::unique_ptr<DiagonalCurve> dCurve;
 
     if (!clcurvePoints.empty() && clcurvePoints[0] != 0) {
-        dCurve = std::unique_ptr<DiagonalCurve>(new DiagonalCurve(clcurvePoints, CURVES_MIN_POLY_POINTS / skip));
+        dCurve = std::unique_ptr<DiagonalCurve>(new DiagonalCurve(clcurvePoints, curves_min_poly_points / skip));
 
         if (dCurve && !dCurve->isIdentity()) {
             clcutili = true;
@@ -363,7 +363,7 @@ void CurveFactory::mapcurve ( bool & mapcontlutili, const std::vector<double>& m
     bool histNeeded = false;
 
     if (!mapcurvePoints.empty() && mapcurvePoints[0] != 0) {
-        dCurve = std::unique_ptr<DiagonalCurve>(new DiagonalCurve(mapcurvePoints, CURVES_MIN_POLY_POINTS / skip));
+        dCurve = std::unique_ptr<DiagonalCurve>(new DiagonalCurve(mapcurvePoints, curves_min_poly_points / skip));
 
         if (outBeforeCurveHistogram) {
             histNeeded = true;
@@ -390,7 +390,7 @@ void CurveFactory::curveDehaContL ( bool & dehacontlutili, const std::vector<dou
     bool histNeeded = false;
 
     if (!dehaclcurvePoints.empty() && dehaclcurvePoints[0] != 0) {
-        dCurve = std::unique_ptr<DiagonalCurve>(new DiagonalCurve(dehaclcurvePoints, CURVES_MIN_POLY_POINTS / skip));
+        dCurve = std::unique_ptr<DiagonalCurve>(new DiagonalCurve(dehaclcurvePoints, curves_min_poly_points / skip));
 
         if (outBeforeCurveHistogram) {
             histNeeded = true;
@@ -416,7 +416,7 @@ void CurveFactory::curveWavContL ( bool & wavcontlutili, const std::vector<doubl
     std::unique_ptr<DiagonalCurve> dCurve;
 
     if (!wavclcurvePoints.empty() && wavclcurvePoints[0] != 0) {
-        dCurve = std::unique_ptr<DiagonalCurve>(new DiagonalCurve(wavclcurvePoints, CURVES_MIN_POLY_POINTS / skip));
+        dCurve = std::unique_ptr<DiagonalCurve>(new DiagonalCurve(wavclcurvePoints, curves_min_poly_points / skip));
 
         if (dCurve && !dCurve->isIdentity()) {
             needed = true;
@@ -434,7 +434,7 @@ void CurveFactory::curveToning ( const std::vector<double>& curvePoints, LUTf & 
     std::unique_ptr<DiagonalCurve> dCurve;
 
     if (!curvePoints.empty() && curvePoints[0] != 0) {
-        dCurve = std::unique_ptr<DiagonalCurve>(new DiagonalCurve(curvePoints, CURVES_MIN_POLY_POINTS / skip));
+        dCurve = std::unique_ptr<DiagonalCurve>(new DiagonalCurve(curvePoints, curves_min_poly_points / skip));
 
         if (dCurve && !dCurve->isIdentity()) {
             needed = true;
@@ -457,7 +457,7 @@ void CurveFactory::complexsgnCurve (bool & autili,  bool & butili, bool & ccutil
 
     // create a curve if needed
     if (!acurvePoints.empty() && acurvePoints[0] != 0) {
-        dCurve = std::unique_ptr<DiagonalCurve>(new DiagonalCurve(acurvePoints, CURVES_MIN_POLY_POINTS / skip));
+        dCurve = std::unique_ptr<DiagonalCurve>(new DiagonalCurve(acurvePoints, curves_min_poly_points / skip));
 
         if (dCurve && !dCurve->isIdentity()) {
             autili = true;
@@ -471,7 +471,7 @@ void CurveFactory::complexsgnCurve (bool & autili,  bool & butili, bool & ccutil
     //-----------------------------------------------------
 
     if (!bcurvePoints.empty() && bcurvePoints[0] != 0) {
-        dCurve = std::unique_ptr<DiagonalCurve>(new DiagonalCurve(bcurvePoints, CURVES_MIN_POLY_POINTS / skip));
+        dCurve = std::unique_ptr<DiagonalCurve>(new DiagonalCurve(bcurvePoints, curves_min_poly_points / skip));
 
         if (dCurve && !dCurve->isIdentity()) {
             butili = true;
@@ -485,7 +485,7 @@ void CurveFactory::complexsgnCurve (bool & autili,  bool & butili, bool & ccutil
     //-----------------------------------------------
 
     if (!cccurvePoints.empty() && cccurvePoints[0] != 0) {
-        dCurve = std::unique_ptr<DiagonalCurve>(new DiagonalCurve(cccurvePoints, CURVES_MIN_POLY_POINTS / skip));
+        dCurve = std::unique_ptr<DiagonalCurve>(new DiagonalCurve(cccurvePoints, curves_min_poly_points / skip));
 
         if (dCurve && !dCurve->isIdentity()) {
             ccutili = true;
@@ -499,7 +499,7 @@ void CurveFactory::complexsgnCurve (bool & autili,  bool & butili, bool & ccutil
     //----------------------------
 
     if (!lccurvePoints.empty() && lccurvePoints[0] != 0) {
-        dCurve = std::unique_ptr<DiagonalCurve>(new DiagonalCurve(lccurvePoints, CURVES_MIN_POLY_POINTS / skip));
+        dCurve = std::unique_ptr<DiagonalCurve>(new DiagonalCurve(lccurvePoints, curves_min_poly_points / skip));
 
         if (dCurve && !dCurve->isIdentity()) {
             cclutili = true;
@@ -568,7 +568,7 @@ void CurveFactory::complexCurve (double ecomp, double black, double hlcompr, dou
         brightcurvePoints[7] = 1.; // white point
         brightcurvePoints[8] = 1.; // value at white point
 
-        brightcurve = std::unique_ptr<DiagonalCurve>(new DiagonalCurve(brightcurvePoints, CURVES_MIN_POLY_POINTS / skip));
+        brightcurve = std::unique_ptr<DiagonalCurve>(new DiagonalCurve(brightcurvePoints, curves_min_poly_points / skip));
     }
 
     //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -703,7 +703,7 @@ void CurveFactory::complexCurve (double ecomp, double black, double hlcompr, dou
         contrastcurvePoints[7] = 1.; // white point
         contrastcurvePoints[8] = 1.; // value at white point
 
-        const DiagonalCurve contrastcurve(contrastcurvePoints, CURVES_MIN_POLY_POINTS / skip);
+        const DiagonalCurve contrastcurve(contrastcurvePoints, curves_min_poly_points / skip);
 
         //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         // apply contrast enhancement
@@ -719,7 +719,7 @@ void CurveFactory::complexCurve (double ecomp, double black, double hlcompr, dou
     customToneCurve2.Reset();
 
     if (!curvePoints2.empty() && curvePoints2[0] > DCT_Linear && curvePoints2[0] < DCT_Unchanged) {
-        const DiagonalCurve tcurve(curvePoints2, CURVES_MIN_POLY_POINTS / skip);
+        const DiagonalCurve tcurve(curvePoints2, curves_min_poly_points / skip);
 
         if (!tcurve.isIdentity()) {
             customToneCurve2.Set(tcurve, gamma_);
@@ -738,7 +738,7 @@ void CurveFactory::complexCurve (double ecomp, double black, double hlcompr, dou
     customToneCurve1.Reset();
 
     if (!curvePoints.empty() && curvePoints[0] > DCT_Linear && curvePoints[0] < DCT_Unchanged) {
-        const DiagonalCurve tcurve(curvePoints, CURVES_MIN_POLY_POINTS / skip);
+        const DiagonalCurve tcurve(curvePoints, curves_min_poly_points / skip);
 
         if (!tcurve.isIdentity()) {
             customToneCurve1.Set(tcurve, gamma_);
@@ -834,7 +834,7 @@ void CurveFactory::complexLCurve (double br, double contr, const std::vector<dou
         brightcurvePoints.at(7) = 1.; // white point
         brightcurvePoints.at(8) = 1.; // value at white point
 
-        DiagonalCurve brightcurve(brightcurvePoints, CURVES_MIN_POLY_POINTS / skip);
+        DiagonalCurve brightcurve(brightcurvePoints, curves_min_poly_points / skip);
         //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
         // Applying brightness curve
@@ -908,7 +908,7 @@ void CurveFactory::complexLCurve (double br, double contr, const std::vector<dou
             //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         }
 
-        DiagonalCurve contrastcurve(contrastcurvePoints, CURVES_MIN_POLY_POINTS / skip);
+        DiagonalCurve contrastcurve(contrastcurvePoints, curves_min_poly_points / skip);
 
         // apply contrast enhancement
         for (int i = 0; i < 32768; i++) {
@@ -924,7 +924,7 @@ void CurveFactory::complexLCurve (double br, double contr, const std::vector<dou
     bool histNeeded = false;
 
     if (!curvePoints.empty() && curvePoints[0] != 0) {
-        tcurve = std::unique_ptr<DiagonalCurve>(new DiagonalCurve (curvePoints, CURVES_MIN_POLY_POINTS / skip));
+        tcurve = std::unique_ptr<DiagonalCurve>(new DiagonalCurve (curvePoints, curves_min_poly_points / skip));
 
         if (outBeforeCCurveHistogram) {
             histNeeded = true;
@@ -982,7 +982,7 @@ void CurveFactory::RGBCurve (const std::vector<double>& curvePoints, LUTf & outC
     std::unique_ptr<DiagonalCurve> tcurve;
 
     if (!curvePoints.empty() && curvePoints[0] != 0) {
-        tcurve = std::unique_ptr<DiagonalCurve>(new DiagonalCurve(curvePoints, CURVES_MIN_POLY_POINTS / skip));
+        tcurve = std::unique_ptr<DiagonalCurve>(new DiagonalCurve(curvePoints, curves_min_poly_points / skip));
     }
 
     if (tcurve && tcurve->isIdentity()) {
@@ -1047,7 +1047,7 @@ void RetinextransmissionCurve::Set(const Curve &pCurve)
 void RetinextransmissionCurve::Set(const std::vector<double> &curvePoints)
 {
     if (!curvePoints.empty() && curvePoints[0] > FCT_Linear && curvePoints[0] < FCT_Unchanged) {
-        FlatCurve tcurve(curvePoints, false, CURVES_MIN_POLY_POINTS / 2);
+        FlatCurve tcurve(curvePoints, false, curves_min_poly_points / 2);
         tcurve.setIdentityValue(0.);
         Set(tcurve);
     } else {
@@ -1080,7 +1080,7 @@ void RetinexgaintransmissionCurve::Set(const Curve &pCurve)
 void RetinexgaintransmissionCurve::Set(const std::vector<double> &curvePoints)
 {
     if (!curvePoints.empty() && curvePoints[0] > FCT_Linear && curvePoints[0] < FCT_Unchanged) {
-        FlatCurve tcurve(curvePoints, false, CURVES_MIN_POLY_POINTS / 2);
+        FlatCurve tcurve(curvePoints, false, curves_min_poly_points / 2);
         tcurve.setIdentityValue(0.);
         Set(tcurve);
     } else {
@@ -1154,7 +1154,7 @@ void OpacityCurve::Set(const std::vector<double> &curvePoints, bool &opautili)
     std::unique_ptr<FlatCurve> tcurve;
 
     if (!curvePoints.empty() && curvePoints[0] > FCT_Linear && curvePoints[0] < FCT_Unchanged) {
-        tcurve = std::unique_ptr<FlatCurve>(new FlatCurve(curvePoints, false, CURVES_MIN_POLY_POINTS / 2));
+        tcurve = std::unique_ptr<FlatCurve>(new FlatCurve(curvePoints, false, curves_min_poly_points / 2));
         tcurve->setIdentityValue(0.);
     }
 
@@ -1200,7 +1200,7 @@ void WavCurve::Set(const std::vector<double> &curvePoints)
 {
 
     if (!curvePoints.empty() && curvePoints[0] > FCT_Linear && curvePoints[0] < FCT_Unchanged) {
-        FlatCurve tcurve(curvePoints, false, CURVES_MIN_POLY_POINTS / 2);
+        FlatCurve tcurve(curvePoints, false, curves_min_poly_points / 2);
         tcurve.setIdentityValue(0.);
         Set(tcurve);
     } else {
@@ -1233,7 +1233,7 @@ void WavOpacityCurveRG::Set(const Curve &pCurve)
 void WavOpacityCurveRG::Set(const std::vector<double> &curvePoints)
 {
     if (!curvePoints.empty() && curvePoints[0] > FCT_Linear && curvePoints[0] < FCT_Unchanged) {
-        FlatCurve tcurve(curvePoints, false, CURVES_MIN_POLY_POINTS / 2);
+        FlatCurve tcurve(curvePoints, false, curves_min_poly_points / 2);
         tcurve.setIdentityValue(0.);
         Set(tcurve);
     } else {
@@ -1266,7 +1266,7 @@ void WavOpacityCurveBY::Set(const Curve &pCurve)
 void WavOpacityCurveBY::Set(const std::vector<double> &curvePoints)
 {
     if (!curvePoints.empty() && curvePoints[0] > FCT_Linear && curvePoints[0] < FCT_Unchanged) {
-        FlatCurve tcurve(curvePoints, false, CURVES_MIN_POLY_POINTS / 2);
+        FlatCurve tcurve(curvePoints, false, curves_min_poly_points / 2);
         tcurve.setIdentityValue(0.);
         Set(tcurve);
     } else {
@@ -1298,7 +1298,7 @@ void WavOpacityCurveW::Set(const Curve &pCurve)
 void WavOpacityCurveW::Set(const std::vector<double> &curvePoints)
 {
     if (!curvePoints.empty() && curvePoints[0] > FCT_Linear && curvePoints[0] < FCT_Unchanged) {
-        FlatCurve tcurve(curvePoints, false, CURVES_MIN_POLY_POINTS / 2);
+        FlatCurve tcurve(curvePoints, false, curves_min_poly_points / 2);
         tcurve.setIdentityValue(0.);
         Set(tcurve);
     } else {
@@ -1330,7 +1330,7 @@ void WavOpacityCurveWL::Set(const Curve &pCurve)
 void WavOpacityCurveWL::Set(const std::vector<double> &curvePoints)
 {
     if (!curvePoints.empty() && curvePoints[0] > FCT_Linear && curvePoints[0] < FCT_Unchanged) {
-        FlatCurve tcurve(curvePoints, false, CURVES_MIN_POLY_POINTS / 2);
+        FlatCurve tcurve(curvePoints, false, curves_min_poly_points / 2);
         tcurve.setIdentityValue(0.);
         Set(tcurve);
     } else {
@@ -1374,7 +1374,7 @@ void NoiseCurve::Set(const std::vector<double> &curvePoints)
 {
 
     if (!curvePoints.empty() && curvePoints[0] > FCT_Linear && curvePoints[0] < FCT_Unchanged) {
-        FlatCurve tcurve(curvePoints, false, CURVES_MIN_POLY_POINTS / 2);
+        FlatCurve tcurve(curvePoints, false, curves_min_poly_points / 2);
         tcurve.setIdentityValue(0.);
         Set(tcurve);
     } else {
@@ -1535,7 +1535,7 @@ void ColorGradientCurve::SetXYZ(const std::vector<double> &curvePoints, const do
     std::unique_ptr<FlatCurve> tcurve;
 
     if (!curvePoints.empty() && curvePoints[0] > FCT_Linear && curvePoints[0] < FCT_Unchanged) {
-        tcurve = std::unique_ptr<FlatCurve>(new FlatCurve(curvePoints, false, CURVES_MIN_POLY_POINTS / 2));
+        tcurve = std::unique_ptr<FlatCurve>(new FlatCurve(curvePoints, false, curves_min_poly_points / 2));
     }
 
     if (tcurve) {
@@ -1634,7 +1634,7 @@ void ColorGradientCurve::SetRGB(const std::vector<double> &curvePoints)
     std::unique_ptr<FlatCurve> tcurve;
 
     if (!curvePoints.empty() && curvePoints[0] > FCT_Linear && curvePoints[0] < FCT_Unchanged) {
-        tcurve = std::unique_ptr<FlatCurve>(new FlatCurve(curvePoints, false, CURVES_MIN_POLY_POINTS / 2));
+        tcurve = std::unique_ptr<FlatCurve>(new FlatCurve(curvePoints, false, curves_min_poly_points / 2));
     }
 
     if (tcurve) {

@@ -5446,8 +5446,8 @@ void RawImageSource::init ()
             cInversePoints.push_back(phase_one_forward[i + 0]);
         }
 
-        phaseOneIccCurve = new DiagonalCurve(cForwardPoints, CURVES_MIN_POLY_POINTS);
-        phaseOneIccCurveInv = new DiagonalCurve(cInversePoints, CURVES_MIN_POLY_POINTS);
+        phaseOneIccCurve = new DiagonalCurve(cForwardPoints, curves_min_poly_points);
+        phaseOneIccCurveInv = new DiagonalCurve(cInversePoints, curves_min_poly_points);
     }
 }
 

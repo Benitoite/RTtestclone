@@ -957,7 +957,7 @@ DCPProfile::DCPProfile(const Glib::ustring& filename) :
         if (!curve_is_linear) {
             // Create the curve
             has_tone_curve = true;
-            tone_curve.Set(DiagonalCurve(curve_points, CURVES_MIN_POLY_POINTS));
+            tone_curve.Set(DiagonalCurve(curve_points, curves_min_poly_points));
         }
     } else {
         tag = tagDir->getTag(toUnderlying(TagKey::PROFILE_TONE_COPYRIGHT));
@@ -978,7 +978,7 @@ DCPProfile::DCPProfile(const Glib::ustring& filename) :
             }
 
             has_tone_curve = true;
-            tone_curve.Set(DiagonalCurve(curve_points, CURVES_MIN_POLY_POINTS));
+            tone_curve.Set(DiagonalCurve(curve_points, curves_min_poly_points));
         }
     }
 
@@ -1208,10 +1208,6 @@ void DCPProfile::setStep2ApplyState(const Glib::ustring& working_space, bool use
 
 void DCPProfile::step2ApplyTile(float* rc, float* gc, float* bc, int width, int height, int tile_width, const ApplyState& as_in) const
 {
-
-#define FCLIP(a) ((a)>0.0?((a)<65535.5?(a):65535.5):0.0)
-#define CLIP01(a) ((a)>0?((a)<1?(a):1):0)
-
     float exp_scale = as_in.data->bl_scale;
 
     if (!as_in.data->use_tone_curve && !as_in.data->apply_look_table) {
@@ -1260,16 +1256,16 @@ void DCPProfile::step2ApplyTile(float* rc, float* gc, float* bc, int width, int 
                 // newb = FCLIP(newb);
 
                 if (as_in.data->apply_look_table) {
-                    float cnewr = FCLIP(newr);
-                    float cnewg = FCLIP(newg);
-                    float cnewb = FCLIP(newb);
+                    float cnewr = LIM(newr, 0.f, 65535.5f);
+                    float cnewg = LIM(newg, 0.f, 65535.5f);
+                    float cnewb = LIM(newb, 0.f, 65535.5f);
 
                     float h, s, v;
                     Color::rgb2hsvdcp(cnewr, cnewg, cnewb, h, s, v);
 
                     hsdApply(look_info, look_table, h, s, v);
-                    s = CLIP01(s);
-                    v = CLIP01(v);
+                    s = LIM01(s);
+                    v = LIM01(v);
 
                     // RT range correction
                     if (h < 0.0f) {
@@ -1801,7 +1797,7 @@ void DCPStore::init(const Glib::ustring& rt_profile_dir, bool loadAll)
 
     std::deque<Glib::ustring> dirs = {
         rt_profile_dir,
-        Glib::build_filename(options.rtdir, "dcpprofiles")        
+        Glib::build_filename(options.rtdir, "dcpprofiles")
     };
 
     while (!dirs.empty()) {

@@ -74,7 +74,7 @@ void ImProcFunctions::vibrance (LabImage* lab)
 
 //  int skip=1; //scale==1 ? 1 : 16;
     bool skinCurveIsSet = false;
-    DiagonalCurve* dcurve = new DiagonalCurve (params->vibrance.skintonescurve, CURVES_MIN_POLY_POINTS);
+    DiagonalCurve* dcurve = new DiagonalCurve (params->vibrance.skintonescurve, curves_min_poly_points);
 
     if (dcurve) {
         if (!dcurve->isIdentity()) {

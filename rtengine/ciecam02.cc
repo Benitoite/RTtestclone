@@ -82,7 +82,7 @@ void Ciecam02::curveJfloat (float br, float contr, const LUTu & histogram, LUTf 
         brightcurvePoints[7] = 1.f; // white point
         brightcurvePoints[8] = 1.f; // value at white point
 
-        DiagonalCurve brightcurve (brightcurvePoints, CURVES_MIN_POLY_POINTS);
+        DiagonalCurve brightcurve (brightcurvePoints, curves_min_poly_points);
 
         // Applying brightness curve
         for (int i = 0; i < 32768; i++) {
@@ -131,7 +131,7 @@ void Ciecam02::curveJfloat (float br, float contr, const LUTu & histogram, LUTf 
         contrastcurvePoints[7] = 1.f; // white point
         contrastcurvePoints[8] = 1.f; // value at white point
 
-        DiagonalCurve contrastcurve (contrastcurvePoints, CURVES_MIN_POLY_POINTS);
+        DiagonalCurve contrastcurve (contrastcurvePoints, curves_min_poly_points);
 
         // apply contrast enhancement
         for (int i = 0; i < 32768; i++) {

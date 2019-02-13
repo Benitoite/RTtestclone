@@ -34,7 +34,7 @@
 
 #include "LUT.h"
 
-constexpr int CURVES_MIN_POLY_POINTS = 1000;
+constexpr int curves_min_poly_points = 1000;
 
 #include "rt_math.h"
 
@@ -466,7 +466,7 @@ protected:
     void NURBS_set ();
 
 public:
-    DiagonalCurve (const std::vector<double>& points, int ppn = CURVES_MIN_POLY_POINTS);
+    DiagonalCurve (const std::vector<double>& points, int ppn = curves_min_poly_points);
     ~DiagonalCurve () override;
 
     double getVal     (double t) const override;
@@ -491,7 +491,7 @@ private:
 
 public:
 
-    FlatCurve (const std::vector<double>& points, bool isPeriodic = true, int ppn = CURVES_MIN_POLY_POINTS);
+    FlatCurve (const std::vector<double>& points, bool isPeriodic = true, int ppn = curves_min_poly_points);
     ~FlatCurve () override;
 
     double getVal     (double t) const override;
