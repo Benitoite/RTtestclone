@@ -80,32 +80,6 @@ INLINE vfloat lc2vfu(float &a)
     return _mm_shuffle_ps(a1,a2,_MM_SHUFFLE( 2,0,2,0 ));
 }
 
-
-// Store a vector of 4 floats in a[0],a[2],a[4] and a[6]
-#ifdef __SSE4_1__
-// SSE4.1 => use _mm_blend_ps instead of _mm_set_epi32 and vself
-INLINE void stc2vfu(float& a, vfloat v)
-{
-    vfloat tst1_v = _mm_loadu_ps(&a);
-    vfloat tst2_v = _mm_unpacklo_ps(v,v);
-    _mm_storeu_ps(&a, _mm_blend_ps(tst1_v, tst2_v, 5));
-    tst1_v = _mm_loadu_ps(&a + 4);
-    tst2_v = _mm_unpackhi_ps(v, v);
-    _mm_storeu_ps(&a + 4, _mm_blend_ps(tst1_v, tst2_v, 5));
-}
-#else
-INLINE void stc2vfu(float& a, vfloat v)
-{
-    vfloat tst1_v = _mm_loadu_ps(&a);
-    vfloat tst2_v = _mm_unpacklo_ps(v, v);
-    vmask cmask = _mm_set_epi32(0xFFFFFFFF, 0, 0xFFFFFFFF, 0);
-    _mm_storeu_ps(&a, vself(cmask, tst1_v, tst2_v));
-    tst1_v = _mm_loadu_ps(&a + 4);
-    tst2_v = _mm_unpackhi_ps(v, v);
-    _mm_storeu_ps(&a + 4, vself(cmask, tst1_v, tst2_v));
-}
-#endif
-
 constexpr vfloat zerov = {};
 
 INLINE vfloat f2v(float a)
