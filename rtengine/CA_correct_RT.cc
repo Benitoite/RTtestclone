@@ -868,8 +868,8 @@ float* RawImageSource::CA_correct_RT(
                                 vfloat val2v = lvfu(rawData[row][col + 4]) / c65535v;
                                 stvfu(rgb[c][indx1 >> 1], _mm_shuffle_ps(val1v, val2v, _MM_SHUFFLE(2, 0, 2, 0)));
                                 vfloat gtmpv = lvfu(Gtmp[indx >> 1]);
-                                stvfu(rgb[1][indx1], vself(gmask, permuteps<1, 1, 0, 0>(gtmpv), val1v));
-                                stvfu(rgb[1][indx1 + 4], vself(gmask, permuteps<3, 3, 2, 2>(gtmpv), val2v));
+                                stvfu(rgb[1][indx1], vself(gmask, _mm_unpacklo_ps(gtmpv, gtmpv), val1v));
+                                stvfu(rgb[1][indx1 + 4], vself(gmask, _mm_unpackhi_ps(gtmpv, gtmpv), val2v));
                             }
 #endif
                             for (; cc < ccmax; cc++, col++, indx++, indx1++) {
