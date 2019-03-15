@@ -27,6 +27,7 @@
 #include "alignedbuffer.h"
 #include "rt_math.h"
 #include "color.h"
+#include "procparams.h"
 
 using namespace rtengine;
 
@@ -499,7 +500,6 @@ void Imagefloat::ExecCMSTransform(cmsHTRANSFORM hTransform)
                 *(p++) = *(pR++);
                 *(p++) = *(pG++);
                 *(p++) = *(pB++);
-				
             }
 
             cmsDoTransform (hTransform, pBuf.data, pBuf.data, width);

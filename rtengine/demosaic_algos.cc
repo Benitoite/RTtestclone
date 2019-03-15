@@ -30,7 +30,7 @@
 #include "sleef.c"
 #include "opthelper.h"
 #include "median.h"
-#define BENCHMARK
+//#define BENCHMARK
 #include "StopWatch.h"
 #ifdef _OPENMP
 #include <omp.h>
@@ -409,7 +409,7 @@ void RawImageSource::jdl_interpolate_omp()  // from "Lassus"
     }
 
 #ifdef _OPENMP
-    #pragma omp parallel default(none) shared(image,width,height,u,w,v,y,x,z,dif,chr) private(row,col,f,g,indx,c,d,i)
+    #pragma omp parallel shared(image,width,height,u,w,v,y,x,z,dif,chr) private(row,col,f,g,indx,c,d,i)
 #endif
     {
 #ifdef _OPENMP
@@ -1180,7 +1180,7 @@ void RawImageSource::igv_interpolate(int winw, int winh)
     }
 
 #ifdef _OPENMP
-    #pragma omp parallel default(none) shared(rgb,vdif,hdif,chr)
+    #pragma omp parallel shared(rgb,vdif,hdif,chr)
 #endif
     {
         vfloat ngv, egv, wgv, sgv, nvv, evv, wvv, svv, nwgv, negv, swgv, segv, nwvv, nevv, swvv, sevv, tempv, temp1v, temp2v, temp3v, temp4v, temp5v, temp6v, temp7v, temp8v;
@@ -1568,7 +1568,7 @@ void RawImageSource::igv_interpolate(int winw, int winh)
     }
 
 #ifdef _OPENMP
-    #pragma omp parallel default(none) shared(rgb,vdif,hdif,chr)
+    #pragma omp parallel shared(rgb,vdif,hdif,chr)
 #endif
     {
 
