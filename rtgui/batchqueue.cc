@@ -21,6 +21,7 @@
 #include <cstring>
 #include <functional>
 #include "../rtengine/rt_math.h"
+#include "../rtengine/procparams.h"
 
 #include <fstream>
 #include <iomanip>
@@ -39,39 +40,18 @@
 using namespace std;
 using namespace rtengine;
 
-namespace
-{
-
-struct NLParams {
-    BatchQueueListener* listener;
-    int qsize;
-    bool queueRunning;
-    bool queueError;
-    Glib::ustring queueErrorMessage;
-};
-
-int bqnotifylistenerUI (void* data)
-{
-    NLParams* params = static_cast<NLParams*>(data);
-    params->listener->queueSizeChanged (params->qsize, params->queueRunning, params->queueError, params->queueErrorMessage);
-    delete params;
-    return 0;
-}
-
-}
-
-BatchQueue::BatchQueue (FileCatalog* aFileCatalog) : processing (nullptr), fileCatalog (aFileCatalog), sequence (0), listener (nullptr)
+BatchQueue::BatchQueue (FileCatalog* aFileCatalog) : processing(nullptr), fileCatalog(aFileCatalog), sequence(0), listener(nullptr)
 {
 
     location = THLOC_BATCHQUEUE;
 
     int p = 0;
 
-    pmenu.attach (*Gtk::manage (open = new Gtk::MenuItem (M ("FILEBROWSER_POPUPOPENINEDITOR"))), 0, 1, p, p + 1);
+    pmenu.attach (*Gtk::manage(open = new Gtk::MenuItem (M("FILEBROWSER_POPUPOPENINEDITOR"))), 0, 1, p, p + 1);
     p++;
-    pmenu.attach (*Gtk::manage (selall = new Gtk::MenuItem (M ("FILEBROWSER_POPUPSELECTALL"))), 0, 1, p, p + 1);
+    pmenu.attach (*Gtk::manage(selall = new Gtk::MenuItem (M("FILEBROWSER_POPUPSELECTALL"))), 0, 1, p, p + 1);
     p++;
-    pmenu.attach (*Gtk::manage (new Gtk::SeparatorMenuItem ()), 0, 1, p, p + 1);
+    pmenu.attach (*Gtk::manage(new Gtk::SeparatorMenuItem ()), 0, 1, p, p + 1);
     p++;
 
     pmenu.attach (*Gtk::manage(head = new MyImageMenuItem (M("FILEBROWSER_POPUPMOVEHEAD"), "goto-start-small.png")), 0, 1, p, p + 1);
@@ -80,7 +60,7 @@ BatchQueue::BatchQueue (FileCatalog* aFileCatalog) : processing (nullptr), fileC
     pmenu.attach (*Gtk::manage(tail = new MyImageMenuItem (M("FILEBROWSER_POPUPMOVEEND"), "goto-end-small.png")), 0, 1, p, p + 1);
     p++;
 
-    pmenu.attach (*Gtk::manage (new Gtk::SeparatorMenuItem ()), 0, 1, p, p + 1);
+    pmenu.attach (*Gtk::manage(new Gtk::SeparatorMenuItem ()), 0, 1, p, p + 1);
     p++;
 
     pmenu.attach (*Gtk::manage(cancel = new MyImageMenuItem (M("FILEBROWSER_POPUPCANCELJOB"), "cancel-small.png")), 0, 1, p, p + 1);
@@ -96,24 +76,35 @@ BatchQueue::BatchQueue (FileCatalog* aFileCatalog) : processing (nullptr), fileC
     tail->add_accelerator ("activate", pmaccelgroup, GDK_KEY_End, (Gdk::ModifierType)0, Gtk::ACCEL_VISIBLE);
     cancel->add_accelerator ("activate", pmaccelgroup, GDK_KEY_Delete, (Gdk::ModifierType)0, Gtk::ACCEL_VISIBLE);
 
-    open->signal_activate().connect (sigc::mem_fun (*this, &BatchQueue::openLastSelectedItemInEditor));
+    open->signal_activate().connect(sigc::mem_fun(*this, &BatchQueue::openLastSelectedItemInEditor));
     cancel->signal_activate().connect (std::bind (&BatchQueue::cancelItems, this, std::ref (selected)));
     head->signal_activate().connect (std::bind (&BatchQueue::headItems, this, std::ref (selected)));
     tail->signal_activate().connect (std::bind (&BatchQueue::tailItems, this, std::ref (selected)));
-    selall->signal_activate().connect (sigc::mem_fun (*this, &BatchQueue::selectAll));
+    selall->signal_activate().connect (sigc::mem_fun(*this, &BatchQueue::selectAll));
 
     setArrangement (ThumbBrowserBase::TB_Vertical);
 }
 
 BatchQueue::~BatchQueue ()
 {
+    std::set<BatchQueueEntry*> removable_bqes;
+
+    mutex_removable_batch_queue_entries.lock();
+    removable_batch_queue_entries.swap(removable_bqes);
+    mutex_removable_batch_queue_entries.unlock();
+
+    for (const auto entry : removable_bqes) {
+        ::g_remove(entry->savedParamsFile.c_str());
+        delete entry;
+    }
+
     idle_register.destroy();
 
-    MYWRITERLOCK (l, entryRW);
+    MYWRITERLOCK(l, entryRW);
 
     // The listener merges parameters with old values, so delete afterwards
     for (size_t i = 0; i < fd.size(); i++) {
-        delete fd.at (i);
+        delete fd.at(i);
     }
 
     fd.clear ();
@@ -121,20 +112,19 @@ BatchQueue::~BatchQueue ()
 
 void BatchQueue::resizeLoadedQueue()
 {
-    MYWRITERLOCK (l, entryRW);
+    MYWRITERLOCK(l, entryRW);
 
     const auto height = getThumbnailHeight ();
 
-    for (const auto entry : fd) {
-        entry->resize (height);
-    }
+    for (const auto entry : fd)
+        entry->resize(height);
 }
 
 // Reduce the max size of a thumb, since thumb is processed synchronously on adding to queue
 // leading to very long waiting when adding more images
 int BatchQueue::calcMaxThumbnailHeight()
 {
-    return std::min (options.maxThumbnailHeight, 200);
+    return std::min(options.maxThumbnailHeight, 200);
 }
 
 // Function for virtual override in thumbbrowser base
@@ -151,7 +141,7 @@ void BatchQueue::saveThumbnailHeight (int height)
 int BatchQueue::getThumbnailHeight ()
 {
     // The user could have manually forced the option to a too big value
-    return std::max (std::min (options.thumbSizeQueue, 200), 10);
+    return std::max(std::min(options.thumbSizeQueue, 200), 10);
 }
 
 void BatchQueue::rightClicked (ThumbBrowserEntryBase* entry)
@@ -159,9 +149,9 @@ void BatchQueue::rightClicked (ThumbBrowserEntryBase* entry)
     pmenu.popup (3, this->eventTime);
 }
 
-void BatchQueue::doubleClicked (ThumbBrowserEntryBase* entry)
+void BatchQueue::doubleClicked(ThumbBrowserEntryBase* entry)
 {
-    openItemInEditor (entry);
+    openItemInEditor(entry);
 }
 
 bool BatchQueue::keyPressed (GdkEventKey* event)
@@ -191,7 +181,7 @@ bool BatchQueue::keyPressed (GdkEventKey* event)
 void BatchQueue::addEntries (const std::vector<BatchQueueEntry*>& entries, bool head, bool save)
 {
     {
-        MYWRITERLOCK (l, entryRW);
+        MYWRITERLOCK(l, entryRW);
 
         for (const auto entry : entries) {
 
@@ -208,9 +198,8 @@ void BatchQueue::addEntries (const std::vector<BatchQueueEntry*>& entries, bool 
             // recovery save
             const auto tempFile = getTempFilenameForParams (entry->filename);
 
-            if (!entry->params.save (tempFile)) {
+            if (!entry->params->save (tempFile))
                 entry->savedParamsFile = tempFile;
-            }
 
             entry->selected = false;
 
@@ -218,21 +207,17 @@ void BatchQueue::addEntries (const std::vector<BatchQueueEntry*>& entries, bool 
             auto pos = fd.end ();
 
             if (head)
-                pos = std::find_if (fd.begin (), fd.end (), [] (const ThumbBrowserEntryBase * fdEntry) {
-                return !fdEntry->processing;
-            });
+                pos = std::find_if (fd.begin (), fd.end (), [] (const ThumbBrowserEntryBase* fdEntry) { return !fdEntry->processing; });
 
             fd.insert (pos, entry);
 
-            if (entry->thumbnail) {
+            if (entry->thumbnail)
                 entry->thumbnail->imageEnqueued ();
-            }
         }
     }
 
-    if (save) {
+    if (save)
         saveBatchQueue ();
-    }
 
     redraw ();
     notifyListener ();
@@ -244,16 +229,14 @@ bool BatchQueue::saveBatchQueue ()
 
     std::ofstream file (fileName, std::ios::binary | std::ios::trunc);
 
-    if (!file.is_open ()) {
+    if (!file.is_open ())
         return false;
-    }
 
     {
-        MYREADERLOCK (l, entryRW);
+        MYREADERLOCK(l, entryRW);
 
-        if (fd.empty ()) {
+        if (fd.empty ())
             return true;
-        }
 
         // The column's header is mandatory (the first line will be skipped when loaded)
         file << "input image full path|param file full path|output image full path|file format|jpeg quality|jpeg subsampling|"
@@ -294,7 +277,7 @@ bool BatchQueue::loadBatchQueue ()
     if (file.is_open ()) {
         // Yes, it's better to get the lock for the whole file reading,
         // to update the list in one shot without any other concurrent access!
-        MYWRITERLOCK (l, entryRW);
+        MYWRITERLOCK(l, entryRW);
 
         std::string row, column;
         std::vector<std::string> values;
@@ -308,20 +291,22 @@ bool BatchQueue::loadBatchQueue ()
 
             values.clear ();
 
-            while (std::getline (line, column, '|')) {
+            while (std::getline(line, column, '|')) {
                 values.push_back (column);
             }
 
             auto value = values.begin ();
 
-            const auto nextStringOr = [&] (const Glib::ustring & defaultValue) -> Glib::ustring {
-                return value != values.end () ? Glib::ustring (*value++) : defaultValue;
+            const auto nextStringOr = [&] (const Glib::ustring& defaultValue) -> Glib::ustring
+            {
+                return value != values.end () ? Glib::ustring(*value++) : defaultValue;
             };
-            const auto nextIntOr = [&] (int defaultValue) -> int {
+            const auto nextIntOr = [&] (int defaultValue) -> int
+            {
                 try {
-                    return value != values.end () ? std::stoi (*value++) : defaultValue;
-                } catch (std::exception&)
-                {
+                    return value != values.end () ? std::stoi(*value++) : defaultValue;
+                }
+                catch (std::exception&) {
                     return defaultValue;
                 }
             };
@@ -329,9 +314,8 @@ bool BatchQueue::loadBatchQueue ()
             const auto source = nextStringOr (Glib::ustring ());
             const auto paramsFile = nextStringOr (Glib::ustring ());
 
-            if (source.empty () || paramsFile.empty ()) {
+            if (source.empty () || paramsFile.empty ())
                 continue;
-            }
 
             const auto outputFile = nextStringOr (Glib::ustring ());
             const auto saveFmt = nextStringOr (options.saveFormat.format);
@@ -343,19 +327,17 @@ bool BatchQueue::loadBatchQueue ()
             const auto tiffUncompressed = nextIntOr (options.saveFormat.tiffUncompressed);
             const auto saveParams = nextIntOr (options.saveFormat.saveParams);
             const auto forceFormatOpts = nextIntOr (options.forceFormatOpts);
-            const auto fast = nextIntOr (false);
+            const auto fast = nextIntOr(false);
 
             rtengine::procparams::ProcParams pparams;
 
-            if (pparams.load (paramsFile)) {
+            if (pparams.load (paramsFile))
                 continue;
-            }
 
             auto thumb = CacheManager::getInstance ()->getEntry (source);
 
-            if (!thumb) {
+            if (!thumb)
                 continue;
-            }
 
             auto job = rtengine::ProcessingJob::create (source, thumb->getType () == FT_Raw, pparams, fast);
 
@@ -401,18 +383,18 @@ bool BatchQueue::loadBatchQueue ()
     return !fd.empty ();
 }
 
-Glib::ustring BatchQueue::getTempFilenameForParams ( const Glib::ustring &filename )
+Glib::ustring BatchQueue::getTempFilenameForParams( const Glib::ustring &filename )
 {
     timeval tv;
-    gettimeofday (&tv, nullptr);
+    gettimeofday(&tv, nullptr);
     char mseconds[11];
-    sprintf (mseconds, "%d", (int) (tv.tv_usec / 1000));
+    sprintf(mseconds, "%d", (int)(tv.tv_usec / 1000));
     time_t rawtime;
     struct tm *timeinfo;
     char stringTimestamp [80];
     time ( &rawtime );
     timeinfo = localtime ( &rawtime );
-    strftime (stringTimestamp, sizeof (stringTimestamp), "_%Y%m%d%H%M%S_", timeinfo);
+    strftime (stringTimestamp, sizeof(stringTimestamp), "_%Y%m%d%H%M%S_", timeinfo);
     Glib::ustring savedParamPath;
     savedParamPath = options.rtdir + "/batch/";
     g_mkdir_with_parents (savedParamPath.c_str (), 0755);
@@ -425,49 +407,62 @@ Glib::ustring BatchQueue::getTempFilenameForParams ( const Glib::ustring &filena
 
 void BatchQueue::cancelItems (const std::vector<ThumbBrowserEntryBase*>& items)
 {
+    std::set<BatchQueueEntry*> removable_bqes;
+
     {
-        MYWRITERLOCK (l, entryRW);
+        MYWRITERLOCK(l, entryRW);
 
         for (const auto item : items) {
 
             const auto entry = static_cast<BatchQueueEntry*> (item);
 
-            if (entry->processing) {
+            if (entry->processing)
                 continue;
-            }
 
             const auto pos = std::find (fd.begin (), fd.end (), entry);
 
-            if (pos == fd.end ()) {
+            if (pos == fd.end ())
                 continue;
-            }
 
             fd.erase (pos);
 
             rtengine::ProcessingJob::destroy (entry->job);
 
-            if (entry->thumbnail) {
+            if (entry->thumbnail)
                 entry->thumbnail->imageRemovedFromQueue ();
-            }
 
-            const auto func = [] (gpointer data) -> gboolean {
-                const BatchQueueEntry* const bqe = static_cast<BatchQueueEntry*> (data);
-
-                ::g_remove (bqe->savedParamsFile.c_str());
-                delete bqe;
-
-                return FALSE;
-            };
-
-            idle_register.add (func, entry);
+            removable_bqes.insert(entry);
         }
 
-        for (const auto entry : fd) {
+        for (const auto entry : fd)
             entry->selected = false;
-        }
 
         lastClicked = nullptr;
         selected.clear ();
+    }
+
+    if (!removable_bqes.empty()) {
+        mutex_removable_batch_queue_entries.lock();
+        removable_batch_queue_entries.insert(removable_bqes.begin(), removable_bqes.end());
+        mutex_removable_batch_queue_entries.unlock();
+
+        idle_register.add(
+            [this]() -> bool
+            {
+                std::set<BatchQueueEntry*> removable_bqes;
+
+                mutex_removable_batch_queue_entries.lock();
+                removable_batch_queue_entries.swap(removable_bqes);
+                mutex_removable_batch_queue_entries.unlock();
+
+                for (const auto entry : removable_bqes) {
+                    ::g_remove(entry->savedParamsFile.c_str());
+                    delete entry;
+                }
+
+                return false;
+            }
+        );
     }
 
     saveBatchQueue ();
@@ -479,28 +474,24 @@ void BatchQueue::cancelItems (const std::vector<ThumbBrowserEntryBase*>& items)
 void BatchQueue::headItems (const std::vector<ThumbBrowserEntryBase*>& items)
 {
     {
-        MYWRITERLOCK (l, entryRW);
+        MYWRITERLOCK(l, entryRW);
 
         for (auto item = items.rbegin(); item != items.rend(); ++item) {
 
             const auto entry = static_cast<BatchQueueEntry*> (*item);
 
-            if (entry->processing) {
+            if (entry->processing)
                 continue;
-            }
 
             const auto pos = std::find (fd.begin (), fd.end (), entry);
 
-            if (pos == fd.end () || pos == fd.begin ()) {
+            if (pos == fd.end () || pos == fd.begin ())
                 continue;
-            }
 
             fd.erase (pos);
 
             // find the first item that is not under processing
-            const auto newPos = std::find_if (fd.begin (), fd.end (), [] (const ThumbBrowserEntryBase * fdEntry) {
-                return !fdEntry->processing;
-            });
+            const auto newPos = std::find_if (fd.begin (), fd.end (), [] (const ThumbBrowserEntryBase* fdEntry) { return !fdEntry->processing; });
 
             fd.insert (newPos, entry);
         }
@@ -514,21 +505,19 @@ void BatchQueue::headItems (const std::vector<ThumbBrowserEntryBase*>& items)
 void BatchQueue::tailItems (const std::vector<ThumbBrowserEntryBase*>& items)
 {
     {
-        MYWRITERLOCK (l, entryRW);
+        MYWRITERLOCK(l, entryRW);
 
         for (const auto item : items) {
 
             const auto entry = static_cast<BatchQueueEntry*> (item);
 
-            if (entry->processing) {
+            if (entry->processing)
                 continue;
-            }
 
             const auto pos = std::find (fd.begin (), fd.end (), entry);
 
-            if (pos == fd.end ()) {
+            if (pos == fd.end ())
                 continue;
-            }
 
             fd.erase (pos);
 
@@ -544,7 +533,7 @@ void BatchQueue::tailItems (const std::vector<ThumbBrowserEntryBase*>& items)
 void BatchQueue::selectAll ()
 {
     {
-        MYWRITERLOCK (l, entryRW);
+        MYWRITERLOCK(l, entryRW);
 
         lastClicked = nullptr;
         selected.clear ();
@@ -564,20 +553,20 @@ void BatchQueue::selectAll ()
 void BatchQueue::openLastSelectedItemInEditor()
 {
     {
-        MYREADERLOCK (l, entryRW);
+        MYREADERLOCK(l, entryRW);
 
         if (selected.size() > 0) {
-            openItemInEditor (selected.back());
+            openItemInEditor(selected.back());
         }
     }
 }
 
-void BatchQueue::openItemInEditor (ThumbBrowserEntryBase* item)
+void BatchQueue::openItemInEditor(ThumbBrowserEntryBase* item)
 {
     if (item) {
         std::vector< ::Thumbnail*> requestedItem;
-        requestedItem.push_back (item->thumbnail);
-        fileCatalog->openRequested (requestedItem);
+        requestedItem.push_back(item->thumbnail);
+        fileCatalog->openRequested(requestedItem);
     }
 }
 
@@ -586,12 +575,12 @@ void BatchQueue::startProcessing ()
 {
 
     if (!processing) {
-        MYWRITERLOCK (l, entryRW);
+        MYWRITERLOCK(l, entryRW);
 
         if (!fd.empty()) {
             BatchQueueEntry* next;
 
-            next = static_cast<BatchQueueEntry*> (fd[0]);
+            next = static_cast<BatchQueueEntry*>(fd[0]);
             // tag it as processing and set sequence
             next->processing = true;
             next->sequence = sequence = 1;
@@ -608,7 +597,7 @@ void BatchQueue::startProcessing ()
                 processing->selected = false;
             }
 
-            MYWRITERLOCK_RELEASE (l);
+            MYWRITERLOCK_RELEASE(l);
 
             // remove button set
             next->removeButtonSet ();
@@ -629,12 +618,13 @@ void BatchQueue::setProgress(double p)
     }
 
     // No need to acquire the GUI, setProgressUI will do it
-    const auto func = [](gpointer data) -> gboolean {
-        static_cast<BatchQueue*>(data)->redraw();
-        return FALSE;
-    };
-
-    idle_register.add(func, this);
+    idle_register.add(
+        [this]() -> bool
+        {
+            redraw();
+            return false;
+        }
+    );
 }
 
 void BatchQueue::setProgressStr(const Glib::ustring& str)
@@ -653,18 +643,21 @@ void BatchQueue::error(const Glib::ustring& descr)
         bqbs->setButtonListener (this);
         processing->addButtonSet (bqbs);
         processing->processing = false;
-        processing->job = rtengine::ProcessingJob::create(processing->filename, processing->thumbnail->getType() == FT_Raw, processing->params);
+        processing->job = rtengine::ProcessingJob::create(processing->filename, processing->thumbnail->getType() == FT_Raw, *processing->params);
         processing = nullptr;
         redraw ();
     }
 
     if (listener) {
-        NLParams* params = new NLParams;
-        params->listener = listener;
-        params->queueRunning = false;
-        params->queueError = true;
-        params->queueErrorMessage = descr;
-        idle_register.add(bqnotifylistenerUI, params);
+        BatchQueueListener* const bql = listener;
+
+        idle_register.add(
+            [bql, descr]() -> bool
+            {
+                bql->queueSizeChanged(0, false, true, descr);
+                return false;
+            }
+        );
     }
 }
 
@@ -687,7 +680,7 @@ rtengine::ProcessingJob* BatchQueue::imageReady(rtengine::IImagefloat* img)
 
         // The output filename's extension is forced to the current or selected output format,
         // despite what the user have set in the fielneame's field of the "Save as" dialgo box
-        fname = autoCompleteFileName (removeExtension (processing->outFileName), saveFormat.format);
+        fname = autoCompleteFileName (removeExtension(processing->outFileName), saveFormat.format);
         //fname = autoCompleteFileName (removeExtension(processing->outFileName), getExtension(processing->outFileName));
     }
 
@@ -707,14 +700,14 @@ rtengine::ProcessingJob* BatchQueue::imageReady(rtengine::IImagefloat* img)
         img->free ();
 
         if (err) {
-            throw Glib::FileError (Glib::FileError::FAILED, M ("MAIN_MSG_CANNOTSAVE") + "\n" + fname);
+            throw Glib::FileError(Glib::FileError::FAILED, M("MAIN_MSG_CANNOTSAVE") + "\n" + fname);
         }
 
         if (saveFormat.saveParams) {
             // We keep the extension to avoid overwriting the profile when we have
             // the same output filename with different extension
             //processing->params.save (removeExtension(fname) + paramFileExtension);
-            processing->params.save (fname + ".out" + paramFileExtension);
+            processing->params->save (fname + ".out" + paramFileExtension);
         }
 
         if (processing->thumbnail) {
@@ -730,7 +723,7 @@ rtengine::ProcessingJob* BatchQueue::imageReady(rtengine::IImagefloat* img)
     bool remove_button_set = false;
 
     {
-        MYWRITERLOCK (l, entryRW);
+        MYWRITERLOCK(l, entryRW);
 
         delete processing;
         processing = nullptr;
@@ -739,7 +732,7 @@ rtengine::ProcessingJob* BatchQueue::imageReady(rtengine::IImagefloat* img)
 
         // return next job
         if (!fd.empty() && listener && listener->canStartNext ()) {
-            BatchQueueEntry* next = static_cast<BatchQueueEntry*> (fd[0]);
+            BatchQueueEntry* next = static_cast<BatchQueueEntry*>(fd[0]);
             // tag it as selected and set sequence
             next->processing = true;
             next->sequence = ++sequence;
@@ -774,7 +767,7 @@ rtengine::ProcessingJob* BatchQueue::imageReady(rtengine::IImagefloat* img)
         auto isEmpty = false;
 
         {
-            MYREADERLOCK (l, entryRW);
+            MYREADERLOCK(l, entryRW);
             isEmpty = fd.empty();
         }
 
@@ -820,7 +813,7 @@ Glib::ustring BatchQueue::calcAutoFileNameBase (const Glib::ustring& origFileNam
 
         Glib::ustring tok = "";
 
-        while ((i < origFileName.size()) && ! (origFileName[i] == '\\' || origFileName[i] == '/')) {
+        while ((i < origFileName.size()) && !(origFileName[i] == '\\' || origFileName[i] == '/')) {
             tok = tok + origFileName[i++];
         }
 
@@ -895,7 +888,7 @@ Glib::ustring BatchQueue::calcAutoFileNameBase (const Glib::ustring& origFileNam
                     char rank;
                     rtengine::procparams::ProcParams pparams;
 
-                    if ( pparams.load (origFileName + paramFileExtension) == 0 ) {
+                    if( pparams.load(origFileName + paramFileExtension) == 0 ) {
                         if (!pparams.inTrash) {
                             rank = pparams.rank + '0';
                         } else {
@@ -978,9 +971,7 @@ Glib::ustring BatchQueue::autoCompleteFileName (const Glib::ustring& fileName, c
 
 void BatchQueue::buttonPressed (LWButton* button, int actionCode, void* actionData)
 {
-
-    std::vector<ThumbBrowserEntryBase*> bqe;
-    bqe.push_back (static_cast<BatchQueueEntry*> (actionData));
+    const std::vector<ThumbBrowserEntryBase*> bqe = {static_cast<BatchQueueEntry*>(actionData)};
 
     if (actionCode == 10) { // cancel
         cancelItems (bqe);
@@ -995,15 +986,21 @@ void BatchQueue::notifyListener ()
 {
     const bool queueRunning = processing;
     if (listener) {
-        NLParams* params = new NLParams;
-        params->listener = listener;
+        BatchQueueListener* const bql = listener;
+
+        int qsize = 0;
         {
-            MYREADERLOCK (l, entryRW);
-            params->qsize = fd.size();
+            MYREADERLOCK(l, entryRW);
+            qsize = fd.size();
         }
-        params->queueRunning = queueRunning;
-        params->queueError = false;
-        idle_register.add (bqnotifylistenerUI, params);
+
+        idle_register.add(
+            [bql, qsize, queueRunning]() -> bool
+            {
+                bql->queueSizeChanged(qsize, queueRunning, false, {});
+                return false;
+            }
+        );
     }
 }
 

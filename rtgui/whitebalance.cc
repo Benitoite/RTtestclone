@@ -35,27 +35,22 @@ using namespace rtengine;
 using namespace rtengine::procparams;
 
 Glib::RefPtr<Gdk::Pixbuf> WhiteBalance::wbPixbufs[toUnderlying(WBEntry::Type::CUSTOM) + 1];
-/*
-Glib::RefPtr<Gdk::Pixbuf> WhiteBalance::wbCameraPB, WhiteBalance::wbAutoPB, WhiteBalance::wbSunPB, WhiteBalance::wbTungstenPB,
-                          WhiteBalance::wbCloudyPB, WhiteBalance::wbShadePB, WhiteBalance::wbFluorescentPB, WhiteBalance::wbLampPB,
-                          WhiteBalance::wbFlashPB, WhiteBalance::wbLedPB, WhiteBalance::wbCustomPB;
-*/
 
 void WhiteBalance::init ()
 {
-    wbPixbufs[toUnderlying(WBEntry::Type::CAMERA)]      = RTImage::createFromFile ("wb-camera-small.png");
-    wbPixbufs[toUnderlying(WBEntry::Type::AUTO)]        = RTImage::createFromFile ("wb-auto-small.png");
-    wbPixbufs[toUnderlying(WBEntry::Type::DAYLIGHT)]    = RTImage::createFromFile ("wb-sun-small.png");
-    wbPixbufs[toUnderlying(WBEntry::Type::CLOUDY)]      = RTImage::createFromFile ("wb-cloudy-small.png");
-    wbPixbufs[toUnderlying(WBEntry::Type::SHADE)]       = RTImage::createFromFile ("wb-shade-small.png");
-    wbPixbufs[toUnderlying(WBEntry::Type::WATER)]       = RTImage::createFromFile ("wb-water-small.png");
-  //wbPixbufs[WBEntry::Type::WATER2]                    = RTImage::createFromFile ("wb-water-small.png");
-    wbPixbufs[toUnderlying(WBEntry::Type::TUNGSTEN)]    = RTImage::createFromFile ("wb-tungsten-small.png");
-    wbPixbufs[toUnderlying(WBEntry::Type::FLUORESCENT)] = RTImage::createFromFile ("wb-fluorescent-small.png");
-    wbPixbufs[toUnderlying(WBEntry::Type::LAMP)]        = RTImage::createFromFile ("wb-lamp-small.png");
-    wbPixbufs[toUnderlying(WBEntry::Type::FLASH)]       = RTImage::createFromFile ("wb-flash-small.png");
-    wbPixbufs[toUnderlying(WBEntry::Type::LED)]         = RTImage::createFromFile ("wb-led-small.png");
-    wbPixbufs[toUnderlying(WBEntry::Type::CUSTOM)]      = RTImage::createFromFile ("wb-custom-small.png");
+    wbPixbufs[toUnderlying(WBEntry::Type::CAMERA)]      = RTImage::createPixbufFromFile ("wb-camera-small.png");
+    wbPixbufs[toUnderlying(WBEntry::Type::AUTO)]        = RTImage::createPixbufFromFile ("wb-auto-small.png");
+    wbPixbufs[toUnderlying(WBEntry::Type::DAYLIGHT)]    = RTImage::createPixbufFromFile ("wb-sun-small.png");
+    wbPixbufs[toUnderlying(WBEntry::Type::CLOUDY)]      = RTImage::createPixbufFromFile ("wb-cloudy-small.png");
+    wbPixbufs[toUnderlying(WBEntry::Type::SHADE)]       = RTImage::createPixbufFromFile ("wb-shade-small.png");
+    wbPixbufs[toUnderlying(WBEntry::Type::WATER)]       = RTImage::createPixbufFromFile ("wb-water-small.png");
+  //wbPixbufs[toUnderlying(WBEntry::Type::WATER2)]      = RTImage::createPixbufFromFile ("wb-water-small.png");
+    wbPixbufs[toUnderlying(WBEntry::Type::TUNGSTEN)]    = RTImage::createPixbufFromFile ("wb-tungsten-small.png");
+    wbPixbufs[toUnderlying(WBEntry::Type::FLUORESCENT)] = RTImage::createPixbufFromFile ("wb-fluorescent-small.png");
+    wbPixbufs[toUnderlying(WBEntry::Type::LAMP)]        = RTImage::createPixbufFromFile ("wb-lamp-small.png");
+    wbPixbufs[toUnderlying(WBEntry::Type::FLASH)]       = RTImage::createPixbufFromFile ("wb-flash-small.png");
+    wbPixbufs[toUnderlying(WBEntry::Type::LED)]         = RTImage::createPixbufFromFile ("wb-led-small.png");
+    wbPixbufs[toUnderlying(WBEntry::Type::CUSTOM)]      = RTImage::createPixbufFromFile ("wb-custom-small.png");
 }
 
 void WhiteBalance::cleanup ()
@@ -149,11 +144,11 @@ static double wbTemp2Slider(double temp)
 
 WhiteBalance::WhiteBalance () : FoldableToolPanel(this, "whitebalance", M("TP_WBALANCE_LABEL"), false, true), wbp(nullptr), wblistener(nullptr)
 {
-    
+
     Gtk::Grid* methodgrid = Gtk::manage(new Gtk::Grid());
     methodgrid->get_style_context()->add_class("grid-spacing");
     setExpandAlignProperties(methodgrid, true, false, Gtk::ALIGN_FILL, Gtk::ALIGN_CENTER);
-    
+
     Gtk::Label* lab = Gtk::manage (new Gtk::Label (M("TP_WBALANCE_METHOD") + ":"));
     setExpandAlignProperties(lab, false, false, Gtk::ALIGN_START, Gtk::ALIGN_CENTER);
 
@@ -263,7 +258,7 @@ WhiteBalance::WhiteBalance () : FoldableToolPanel(this, "whitebalance", M("TP_WB
 
     Gtk::Label* slab = Gtk::manage (new Gtk::Label (M("TP_WBALANCE_SIZE")));
     setExpandAlignProperties(slab, false, false, Gtk::ALIGN_START, Gtk::ALIGN_CENTER);
-    
+
     Gtk::Grid* wbsizehelper = Gtk::manage(new Gtk::Grid());
     wbsizehelper->set_name("WB-Size-Helper");
     setExpandAlignProperties(wbsizehelper, false, false, Gtk::ALIGN_START, Gtk::ALIGN_CENTER);
@@ -299,14 +294,14 @@ WhiteBalance::WhiteBalance () : FoldableToolPanel(this, "whitebalance", M("TP_WB
     if (options.whiteBalanceSpotSize == 32) {
         spotsize->set_active(4);
     }
-    
+
     wbsizehelper->attach (*spotsize, 0, 0, 1, 1);
 
     spotgrid->attach (*spotbutton, 0, 0, 1, 1);
     spotgrid->attach (*slab, 1, 0, 1, 1);
     spotgrid->attach (*wbsizehelper, 2, 0, 1, 1);
     pack_start (*spotgrid, Gtk::PACK_SHRINK, 0 );
-    
+
     Gtk::HSeparator *separator = Gtk::manage (new  Gtk::HSeparator());
     separator->get_style_context()->add_class("grid-row-separator");
     pack_start (*separator, Gtk::PACK_SHRINK, 0);
@@ -700,7 +695,7 @@ void WhiteBalance::read (const ProcParams* pp, const ParamsEdited* pedited)
         set_inconsistent(multiImage && !pedited->wb.enabled);
     }
 
-    
+
     methconn.block (false);
     enableListener ();
 }
@@ -913,28 +908,18 @@ inline Gtk::TreeRow WhiteBalance::getActiveMethod ()
 
 void WhiteBalance::WBChanged(double temperature, double greenVal)
 {
-    struct Data {
-        WhiteBalance* self;
-        double temperature;
-        double green_val;
-    };
+    idle_register.add(
+        [this, temperature, greenVal]() -> bool
+        {
+            disableListener();
+            setEnabled(true);
+            temp->setValue(temperature);
+            green->setValue(greenVal);
+            temp->setDefault(temperature);
+            green->setDefault(greenVal);
+            enableListener();
 
-    const auto func = [](gpointer data) -> gboolean {
-        WhiteBalance* const self = static_cast<WhiteBalance*>(static_cast<Data*>(data)->self);
-        const double temperature = static_cast<Data*>(data)->temperature;
-        const double green_val = static_cast<Data*>(data)->green_val;
-        delete static_cast<Data*>(data);
-
-        self->disableListener();
-        self->setEnabled(true);
-        self->temp->setValue(temperature);
-        self->green->setValue(green_val);
-        self->temp->setDefault(temperature);
-        self->green->setDefault(green_val);
-        self->enableListener();
-
-        return FALSE;
-    };
-
-    idle_register.add(func, new Data{this, temperature, greenVal});
+            return false;
+        }
+    );
 }

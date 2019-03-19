@@ -36,19 +36,20 @@
 
 */
 
-#include <cstdlib>
-#include <cstdio>
 #include <cmath>
+#include <cstdio>
+#include <cstdlib>
 #include <cstring>
-//#include <stdlib.h>
+
 //#include <stdio.h>
 //#include <math.h>
-#include "rtengine.h"
 #include "gauss.h"
-#include "rawimagesource.h"
 #include "improcfun.h"
-#include "opthelper.h"
 #include "median.h"
+#include "opthelper.h"
+#include "procparams.h"
+#include "rawimagesource.h"
+#include "rtengine.h"
 #include "StopWatch.h"
 
 #define clipretinex( val, minv, maxv )    (( val = (val < minv ? minv : val ) ) > maxv ? maxv : val )
@@ -418,7 +419,8 @@ void RawImageSource::MSR (float** luminance, float** originalLuminance, float **
                 pond /= log (elogt);
             }
 
-            auto shmap = ((mapmet == 2 || mapmet == 3 || mapmet == 4) && it == 1 && chrome == 0) ? new SHMap (W_L, H_L, true) : nullptr;//
+  //          auto shmap = ((mapmet == 2 || mapmet == 3 || mapmet == 4) && it == 1) ? new SHMap (W_L, H_L) : nullptr;
+            auto shmap = ((mapmet == 2 || mapmet == 3 || mapmet == 4) && it == 1 && chrome == 0) ? new SHMap (W_L, H_L) : nullptr;//
 
             float *buffer = new float[W_L * H_L];;
 
@@ -922,7 +924,7 @@ void ImProcFunctions::MSRWav (float** luminance, const float* const *originalLum
             pond /= log (elogt);
         }
 
-        auto shmap = mapmet == 4 ? new SHMap (W_L, H_L, true) : nullptr;
+        auto shmap = mapmet == 4 ? new SHMap (W_L, H_L) : nullptr;
 
         float *buffer = new float[W_L * H_L];
 

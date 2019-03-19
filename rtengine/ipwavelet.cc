@@ -40,6 +40,7 @@
 #include "median.h"
 #include "EdgePreservingDecomposition.h"
 #include "iccstore.h"
+#include "procparams.h"
 
 #include <fstream>
 #define BENCHMARK

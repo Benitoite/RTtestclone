@@ -19,6 +19,8 @@
 #ifndef _IMPROCCOORDINATOR_H_
 #define _IMPROCCOORDINATOR_H_
 
+#include <memory>
+
 #include "rtengine.h"
 #include "improcfun.h"
 #include "image8.h"
@@ -69,8 +71,6 @@ protected:
 
     double lastAwbEqual;
     double lastAwbTempBias;
-
-    ImProcFunctions ipf;
 
     Glib::ustring monitorProfile;
     RenderingIntent monitorIntent;
@@ -192,7 +192,7 @@ protected:
     void updatePreviewImage (int todo, bool panningRelatedChange);
 
     MyMutex mProcessing;
-    ProcParams params;
+    const std::unique_ptr<ProcParams> params;
 
     // for optimization purpose, the output profile, output rendering intent and
     // output BPC will trigger a regeneration of the profile on parameter change only
@@ -207,7 +207,7 @@ protected:
     MyMutex paramsUpdateMutex;
     int  changeSinceLast;
     bool updaterRunning;
-    ProcParams nextParams;
+    const std::unique_ptr<ProcParams> nextParams;
     bool destroying;
     bool utili;
     bool autili;
@@ -224,16 +224,16 @@ protected:
     bool highQualityComputed;
     cmsHTRANSFORM customTransformIn;
     cmsHTRANSFORM customTransformOut;
+
+    ImProcFunctions ipf;
+
 public:
 
     ImProcCoordinator ();
     ~ImProcCoordinator () override;
     void assign     (ImageSource* imgsrc);
 
-    void        getParams (procparams::ProcParams* dst) override
-    {
-        *dst = params;
-    }
+    void        getParams (procparams::ProcParams* dst) override;
 
     void        startProcessing (int changeCode) override;
     ProcParams* beginUpdateParams () override;

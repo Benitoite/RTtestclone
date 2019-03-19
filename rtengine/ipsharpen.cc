@@ -22,6 +22,7 @@
 #include "bilateral2.h"
 #include "jaggedarray.h"
 #include "rt_math.h"
+#include "procparams.h"
 #include "sleef.c"
 #include "opthelper.h"
 //#define BENCHMARK
@@ -159,7 +160,7 @@ extern const Settings* settings;
 
 void ImProcFunctions::deconvsharpening (float** luminance, float** tmp, int W, int H, const SharpeningParams &sharpenParam)
 {
-    if (sharpenParam.deconvamount < 1) {
+    if (sharpenParam.deconvamount == 0 && sharpenParam.blurradius < 0.25f) {
         return;
     }
 BENCHFUN
@@ -177,11 +178,31 @@ BENCHFUN
     // calculate contrast based blend factors to reduce sharpening in regions with low contrast
     JaggedArray<float> blend(W, H);
     float contrast = sharpenParam.contrast / 100.f;
-    buildBlendMask(luminance, blend, W, H, contrast, sharpenParam.deconvamount / 100.f);
+    buildBlendMask(luminance, blend, W, H, contrast, 1.f);
+    JaggedArray<float>* blurbuffer = nullptr;
 
+    if (sharpenParam.blurradius >= 0.25f) {
+        blurbuffer = new JaggedArray<float>(W, H);
+        JaggedArray<float> &blur = *blurbuffer;
+#ifdef _OPENMP
+        #pragma omp parallel
+#endif
+        {
+            gaussianBlur(tmpI, blur, W, H, sharpenParam.blurradius);
+#ifdef _OPENMP
+            #pragma omp for
+#endif
+            for (int i = 0; i < H; ++i) {
+                for (int j = 0; j < W; ++j) {
+                    blur[i][j] = intp(blend[i][j], luminance[i][j], std::max(blur[i][j], 0.0f));
+                }
+            }
+        }
+    }
     const float damping = sharpenParam.deconvdamping / 5.0;
     const bool needdamp = sharpenParam.deconvdamping > 0;
     const double sigma = sharpenParam.deconvradius / scale;
+    const float amount = sharpenParam.deconvamount / 100.f;
 
 #ifdef _OPENMP
     #pragma omp parallel
@@ -205,10 +226,23 @@ BENCHFUN
 
         for (int i = 0; i < H; ++i) {
             for (int j = 0; j < W; ++j) {
-                luminance[i][j] = intp(blend[i][j], max(tmpI[i][j], 0.0f), luminance[i][j]);
+                luminance[i][j] = intp(blend[i][j] * amount, max(tmpI[i][j], 0.0f), luminance[i][j]);
+            }
+        }
+
+        if (sharpenParam.blurradius >= 0.25f) {
+            JaggedArray<float> &blur = *blurbuffer;
+#ifdef _OPENMP
+        #pragma omp for
+#endif
+            for (int i = 0; i < H; ++i) {
+                for (int j = 0; j < W; ++j) {
+                    luminance[i][j] = intp(blend[i][j], luminance[i][j], max(blur[i][j], 0.0f));
+                }
             }
         }
     } // end parallel
+    delete blurbuffer;
 }
 
 void ImProcFunctions::sharpening (LabImage* lab, const SharpeningParams &sharpenParam, bool showMask)
@@ -224,7 +258,7 @@ void ImProcFunctions::sharpening (LabImage* lab, const SharpeningParams &sharpen
         // calculate contrast based blend factors to reduce sharpening in regions with low contrast
         JaggedArray<float> blend(W, H);
         float contrast = sharpenParam.contrast / 100.f;
-        buildBlendMask(lab->L, blend, W, H, contrast, sharpenParam.method == "rld" ? sharpenParam.deconvamount / 100.f : 1.f);
+        buildBlendMask(lab->L, blend, W, H, contrast, 1.f);
 #ifdef _OPENMP
         #pragma omp parallel for
 #endif
@@ -260,6 +294,26 @@ BENCHFUN
     JaggedArray<float> blend(W, H);
     float contrast = sharpenParam.contrast / 100.f;
     buildBlendMask(lab->L, blend, W, H, contrast);
+
+    JaggedArray<float> blur(W, H);
+
+    if (sharpenParam.blurradius >= 0.25f) {
+#ifdef _OPENMP
+        #pragma omp parallel
+#endif
+        {
+            gaussianBlur(lab->L, blur, W, H, sharpenParam.blurradius);
+#ifdef _OPENMP
+            #pragma omp for
+#endif
+            for (int i = 0; i < H; ++i) {
+                for (int j = 0; j < W; ++j) {
+                    blur[i][j] = intp(blend[i][j], lab->L[i][j], std::max(blur[i][j], 0.0f));
+                }
+            }
+        }
+    }
+
 
 #ifdef _OPENMP
     #pragma omp parallel
@@ -322,6 +376,18 @@ BENCHFUN
 
         delete [] b3;
     }
+
+    if (sharpenParam.blurradius >= 0.25f) {
+#ifdef _OPENMP
+    #pragma omp parallel for
+#endif
+        for (int i = 0; i < H; ++i) {
+            for (int j = 0; j < W; ++j) {
+                lab->L[i][j] = intp(blend[i][j], lab->L[i][j], max(blur[i][j], 0.0f));
+            }
+        }
+    }
+
 }
 
 // To the extent possible under law, Manuel Llorens <manuelllorens@gmail.com>
@@ -578,7 +644,7 @@ BENCHFUN
     const int k = params->sharpenMicro.matrix ? 1 : 2;
     // k=2 matrix 5x5  k=1 matrix 3x3
     const int width = W, height = H;
-    const int unif = params->sharpenMicro.uniformity / 10.0f; //put unif between 0 to 10
+    const int unif = params->sharpenMicro.uniformity;
     const float amount = (k == 1 ? 2.7f : 1.f) * params->sharpenMicro.amount / 1500.0f; //amount 2000.0 quasi no artifacts ==> 1500 = maximum, after artifacts, 25/9 if 3x3
 
     if (settings->verbose) {

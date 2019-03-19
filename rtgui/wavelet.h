@@ -38,7 +38,7 @@ class WavelListener
 public:
     virtual ~WavelListener() {}
     virtual Glib::ustring GetCurrentImageFilePath() = 0;
-    virtual void savelabReference (Glib::ustring fname) {}
+    virtual void savelabReference(Glib::ustring fname) {}
 };
 
 
@@ -56,40 +56,40 @@ class Wavelet :
 
 {
 public:
-    Wavelet ();
-    ~Wavelet () override;
+    Wavelet();
+    ~Wavelet() override;
 
 
 
-    bool wavComputed_ ();
+//    bool wavComputed_();
     void adjusterChanged(Adjuster* a, double newval) override;
     void adjusterAutoToggled(Adjuster* a, bool newval) override;
-    void autoOpenCurve () override;
-    void curveChanged (CurveEditor* ce) override;
-    void read (const rtengine::procparams::ProcParams* pp, const ParamsEdited* pedited = nullptr) override;
-    void setAdjusterBehavior (bool multiplieradd, bool thresholdadd, bool threshold2add, bool thresadd, bool chroadd, bool chromaadd, bool contrastadd, bool skinadd, bool reschroadd, bool tmrsadd, bool resconadd, bool resconHadd, bool thradd, bool thrHadd, bool skyadd, bool edgradadd, bool edgvaladd, bool strengthadd, bool gammaadd, bool edgedetectadd, bool edgedetectthradd, bool edgedetectthr2add);
-    void setBatchMode (bool batchMode) override;
-    void setDefaults  (const rtengine::procparams::ProcParams* defParams, const ParamsEdited* pedited = nullptr) override;
-    void setEditProvider (EditDataProvider *provider) override;
-    void updateToolState (std::vector<int> &tpOpen);
-    void write (rtengine::procparams::ProcParams* pp, ParamsEdited* pedited = nullptr) override;
-    void writeOptions (std::vector<int> &tpOpen);
+    void autoOpenCurve() override;
+    void curveChanged(CurveEditor* ce) override;
+    void read(const rtengine::procparams::ProcParams* pp, const ParamsEdited* pedited = nullptr) override;
+    void setAdjusterBehavior(bool multiplieradd, bool thresholdadd, bool threshold2add, bool thresadd, bool chroadd, bool chromaadd, bool contrastadd, bool skinadd, bool reschroadd, bool tmrsadd, bool resconadd, bool resconHadd, bool thradd, bool thrHadd, bool skyadd, bool edgradadd, bool edgvaladd, bool strengthadd, bool gammaadd, bool edgedetectadd, bool edgedetectthradd, bool edgedetectthr2add);
+    void setBatchMode(bool batchMode) override;
+    void setDefaults(const rtengine::procparams::ProcParams* defParams, const ParamsEdited* pedited = nullptr) override;
+    void setEditProvider(EditDataProvider *provider) override;
+    void updateToolState(std::vector<int> &tpOpen);
+    void write(rtengine::procparams::ProcParams* pp, ParamsEdited* pedited = nullptr) override;
+    void writeOptions(std::vector<int> &tpOpen);
     void retinexMethodChanged();
     void retinexMethodproChanged();
     void shapMethodChanged();
-    void minmaxChanged (double cdma, double cdmin, double mini, double maxi, double Tmean, double Tsigma, double Tmin, double Tmax);
-    bool minmaxComputed_ ();
-    void updateLabel      ();
-    void updateTrans      ();
+    void minmaxChanged(double cdma, double cdmin, double mini, double maxi, double Tmean, double Tsigma, double Tmin, double Tmax);
+//    bool minmaxComputed_ ();
+//    void updateLabel();
+//    void updateTrans();
 
-    void setWavelListener (WavelListener* ipl)
+    void setWavelListener(WavelListener* ipl)
     {
         walistener = ipl;
     }
 
-    void inputeChanged ();
-    void mFile_Reset        ();
-    void savelabPressed ();
+    void inputeChanged();
+    void mFile_Reset();
+    void savelabPressed();
 
     void adjusterChanged(ThresholdAdjuster* a, double newBottom, double newTop) override;
     void adjusterChanged(ThresholdAdjuster* a, double newBottomLeft, double newTopLeft, double newBottomRight, double newTopRight) override;
@@ -150,9 +150,9 @@ private:
     rtengine::ProcEvent EvWavsty2Curve;// = 544,
     rtengine::ProcEvent EvWavusharpmet;// = 545,
     rtengine::ProcEvent EvWavmergeL;// = 546,
-	
 
-    void foldAllButMe (GdkEventButton* event, MyExpander *expander);
+
+    void foldAllButMe(GdkEventButton* event, MyExpander *expander);
     /*    MyFileChooserButton* ipDialog;
         std::auto_ptr<FileChooserLastFolderPersister> ipDialogPersister;
         sigc::connection   ipc;
@@ -165,44 +165,44 @@ private:
 
     Glib::ustring      oldip;
 
-    void colorForValue (double valX, double valY, enum ColorCaller::ElemType elemType, int callerId, ColorCaller* caller) override;
-    void BAmethodChanged ();
-    void NPmethodChanged ();
-    void BackmethodChanged ();
-    void CHSLmethodChanged ();
-    void CHmethodChanged ();
-    void CLmethodChanged ();
-    void DirmethodChanged ();
-    void EDmethodChanged ();
-    void HSmethodChanged ();
-    void LmethodChanged ();
-    void mergevMethodChanged ();
-    void mergMethodChanged ();
-    void mergBMethodChanged ();
-    void mergMethod2Changed ();
+    void colorForValue(double valX, double valY, enum ColorCaller::ElemType elemType, int callerId, ColorCaller* caller) override;
+    void BAmethodChanged();
+    void NPmethodChanged();
+    void BackmethodChanged();
+    void CHSLmethodChanged();
+    void CHmethodChanged();
+    void CLmethodChanged();
+    void DirmethodChanged();
+    void EDmethodChanged();
+    void HSmethodChanged();
+    void LmethodChanged();
+    void mergevMethodChanged();
+    void mergMethodChanged();
+    void mergBMethodChanged();
+    void mergMethod2Changed();
 
-    void MedgreinfChanged ();
-    void TMmethodChanged ();
-    void TilesmethodChanged ();
-    void usharpmethodChanged ();
-    void ushamethodChanged ();
-    void avoidToggled ();
-    void cbenabToggled ();
-    void contrastMinusPressed ();
-    void contrastPlusPressed ();
-    void daubcoeffmethodChanged ();
-    void enabledChanged () override;
-    void linkedgToggled ();
-    void lipstToggled ();
-    void medianToggled ();
-    void medianlevToggled ();
-    void neutralPressed ();
-    void neutral_pressed ();
-    void neutral2_pressed       ();
-    void neutralchPressed ();
-    void tmrToggled ();
-    void updatewavLabel ();
-    void wavChanged (double nlevel) override;
+    void MedgreinfChanged();
+    void TMmethodChanged();
+    void TilesmethodChanged();
+    void usharpmethodChanged();
+    void ushamethodChanged();
+    void avoidToggled();
+    void cbenabToggled();
+    void contrastMinusPressed();
+    void contrastPlusPressed();
+    void daubcoeffmethodChanged();
+    void enabledChanged() override;
+    void linkedgToggled();
+    void lipstToggled();
+    void medianToggled();
+    void medianlevToggled();
+    void neutralPressed();
+    void neutral_pressed();
+    void neutral2_pressed();
+    void neutralchPressed();
+    void tmrToggled();
+//    void updatewavLabel ();
+    void wavChanged(double nlevel) override;
 
     void HSmethodUpdateUI();
     void CHmethodUpdateUI();
@@ -218,13 +218,13 @@ private:
 //  void MedgreinfUpdateUI();
 //  void DirmethodUpdateUI();
 //  void LmethodUpdateUI();
-    void adjusterUpdateUI (Adjuster* a);
-    void enabledUpdateUI ();
-    void medianlevUpdateUI ();
-    void cbenabUpdateUI ();
-    void lipstUpdateUI ();
+    void adjusterUpdateUI(Adjuster* a);
+    void enabledUpdateUI();
+    void medianlevUpdateUI();
+    void cbenabUpdateUI();
+    void lipstUpdateUI();
 
-    void enableToggled (MyExpander *expander);
+    void enableToggled(MyExpander *expander);
     WavelListener*  walistener;
 
     CurveEditorGroup* const curveEditorG;

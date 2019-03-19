@@ -626,7 +626,6 @@ TP_WBALANCE_TEMPERATURE;Θερμοκρασία
 !HISTORY_MSG_122;Dark-Frame - Auto-selection
 !HISTORY_MSG_123;Dark-Frame - File
 !HISTORY_MSG_124;White point correction
-!HISTORY_MSG_125;Highlight preservation
 !HISTORY_MSG_126;Flat-Field - File
 !HISTORY_MSG_127;Flat-Field - Auto-selection
 !HISTORY_MSG_128;Flat-Field - Blur radius
@@ -1021,6 +1020,7 @@ TP_WBALANCE_TEMPERATURE;Θερμοκρασία
 !HISTORY_MSG_RAWCACORR_COLORSHIFT;Raw CA Correction - Avoid color shift
 !HISTORY_MSG_RAW_BORDER;Raw border
 !HISTORY_MSG_RESIZE_ALLOWUPSCALING;Resize - Allow upscaling
+!HISTORY_MSG_SHARPENING_BLUR;Sharpening - Blur radius
 !HISTORY_MSG_SHARPENING_CONTRAST;Sharpening - Contrast threshold
 !HISTORY_MSG_SH_COLORSPACE;S/H - Colorspace
 !HISTORY_MSG_SOFTLIGHT_ENABLED;Soft light
@@ -1121,6 +1121,8 @@ TP_WBALANCE_TEMPERATURE;Θερμοκρασία
 !MAIN_TAB_DETAIL_TOOLTIP;Shortcut: <b>Alt-d</b>
 !MAIN_TAB_EXPORT; Fast Export
 !MAIN_TAB_EXPOSURE_TOOLTIP;Shortcut: <b>Alt-e</b>
+!MAIN_TAB_FAVORITES;Favorites
+!MAIN_TAB_FAVORITES_TOOLTIP;Shortcut: <b>Alt-u</b>
 !MAIN_TAB_INSPECT; Inspect
 !MAIN_TAB_METADATA_TOOLTIP;Shortcut: <b>Alt-m</b>
 !MAIN_TAB_RAW;Raw
@@ -1200,7 +1202,6 @@ TP_WBALANCE_TEMPERATURE;Θερμοκρασία
 !PARTIALPASTE_RAWCACORR_CAREDBLUE;CA red & blue
 !PARTIALPASTE_RAWEXPOS_BLACK;Black levels
 !PARTIALPASTE_RAWEXPOS_LINEAR;White point correction
-!PARTIALPASTE_RAWEXPOS_PRESER;Highlight preservation
 !PARTIALPASTE_RAWGROUP;Raw Settings
 !PARTIALPASTE_RAW_BORDER;Raw border
 !PARTIALPASTE_RAW_DCBENHANCE;DCB enhancement
@@ -1892,7 +1893,6 @@ TP_WBALANCE_TEMPERATURE;Θερμοκρασία
 !TP_RAWEXPOS_BLACK_GREEN;Green
 !TP_RAWEXPOS_BLACK_RED;Red
 !TP_RAWEXPOS_LINEAR;White-point correction
-!TP_RAWEXPOS_PRESER;Highlight preservation
 !TP_RAWEXPOS_RGB;Red, Green, Blue
 !TP_RAWEXPOS_TWOGREEN;Link greens
 !TP_RAW_1PASSMEDIUM;1-pass (Markesteijn)
@@ -1920,7 +1920,8 @@ TP_WBALANCE_TEMPERATURE;Θερμοκρασία
 !TP_RAW_HPHD;HPHD
 !TP_RAW_IGV;IGV
 !TP_RAW_IMAGENUM;Sub-image
-!TP_RAW_IMAGENUM_TOOLTIP;Some raw files consist of several sub-images (Pentax/Sony Pixel Shift, Pentax 3-in-1 HDR, Canon Dual Pixel).\n\nWhen using any demosaicing method other than Pixel Shift, this selects which sub-image is used.\n\nWhen using the Pixel Shift demosaicing method on a Pixel Shift raw, all sub-images are used, and this selects which sub-image should be used for moving parts.
+!TP_RAW_IMAGENUM_SN;SN mode
+!TP_RAW_IMAGENUM_TOOLTIP;Some raw files consist of several sub-images (Pentax/Sony Pixel Shift, Pentax 3-in-1 HDR, Canon Dual Pixel, Fuji EXR).\n\nWhen using any demosaicing method other than Pixel Shift, this selects which sub-image is used.\n\nWhen using the Pixel Shift demosaicing method on a Pixel Shift raw, all sub-images are used, and this selects which sub-image should be used for moving parts.
 !TP_RAW_LABEL;Demosaicing
 !TP_RAW_LMMSE;LMMSE
 !TP_RAW_LMMSEITERATIONS;LMMSE enhancement steps
@@ -2065,6 +2066,7 @@ TP_WBALANCE_TEMPERATURE;Θερμοκρασία
 !TP_SHARPENEDGE_LABEL;Edges
 !TP_SHARPENEDGE_PASSES;Iterations
 !TP_SHARPENEDGE_THREE;Luminance only
+!TP_SHARPENING_BLUR;Blur radius
 !TP_SHARPENING_CONTRAST;Contrast threshold
 !TP_SHARPENMICRO_AMOUNT;Quantity
 !TP_SHARPENMICRO_CONTRAST;Contrast threshold

@@ -16,10 +16,14 @@
  *  You should have received a copy of the GNU General Public License
  *  along with RawTherapee.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "paramsedited.h"
 #include <cstring>
-#include "options.h"
+
+#include "paramsedited.h"
+
 #include "addsetids.h"
+#include "options.h"
+
+#include "../rtengine/procparams.h"
 
 ParamsEdited::ParamsEdited(bool value)
 {
@@ -148,6 +152,7 @@ void ParamsEdited::set(bool v)
     sharpening.enabled            = v;
     sharpening.contrast           = v;
     sharpening.radius             = v;
+    sharpening.blurradius         = v;
     sharpening.amount             = v;
     sharpening.threshold          = v;
     sharpening.edgesonly          = v;
@@ -432,6 +437,7 @@ void ParamsEdited::set(bool v)
     raw.xtranssensor.method = v;
     raw.xtranssensor.dualDemosaicAutoContrast = v;
     raw.xtranssensor.dualDemosaicContrast = v;
+    raw.xtranssensor.border = v;
     raw.xtranssensor.ccSteps = v;
     raw.xtranssensor.exBlackRed = v;
     raw.xtranssensor.exBlackGreen = v;
@@ -453,7 +459,6 @@ void ParamsEdited::set(bool v)
     raw.ff_AutoClipControl = v;
     raw.ff_clipControl = v;
     raw.exPos = v;
-    raw.exPreser = v;
     wavelet.enabled = v;
     wavelet.strength = v;
     wavelet.balance = v;
@@ -780,6 +785,7 @@ void ParamsEdited::initFrom(const std::vector<rtengine::procparams::ProcParams>&
         sharpening.enabled = sharpening.enabled && p.sharpening.enabled == other.sharpening.enabled;
         sharpening.contrast = sharpening.contrast && p.sharpening.contrast == other.sharpening.contrast;
         sharpening.radius = sharpening.radius && p.sharpening.radius == other.sharpening.radius;
+        sharpening.blurradius = sharpening.blurradius && p.sharpening.blurradius == other.sharpening.blurradius;
         sharpening.amount = sharpening.amount && p.sharpening.amount == other.sharpening.amount;
         sharpening.threshold = sharpening.threshold && p.sharpening.threshold == other.sharpening.threshold;
         sharpening.edgesonly = sharpening.edgesonly && p.sharpening.edgesonly == other.sharpening.edgesonly;
@@ -1058,6 +1064,7 @@ void ParamsEdited::initFrom(const std::vector<rtengine::procparams::ProcParams>&
         raw.xtranssensor.method = raw.xtranssensor.method && p.raw.xtranssensor.method == other.raw.xtranssensor.method;
         raw.xtranssensor.dualDemosaicAutoContrast = raw.xtranssensor.dualDemosaicAutoContrast && p.raw.xtranssensor.dualDemosaicAutoContrast == other.raw.xtranssensor.dualDemosaicAutoContrast;
         raw.xtranssensor.dualDemosaicContrast = raw.xtranssensor.dualDemosaicContrast && p.raw.xtranssensor.dualDemosaicContrast == other.raw.xtranssensor.dualDemosaicContrast;
+        raw.xtranssensor.border = raw.xtranssensor.border && p.raw.xtranssensor.border == other.raw.xtranssensor.border;
         raw.xtranssensor.ccSteps = raw.xtranssensor.ccSteps && p.raw.xtranssensor.ccSteps == other.raw.xtranssensor.ccSteps;
         raw.xtranssensor.exBlackRed = raw.xtranssensor.exBlackRed && p.raw.xtranssensor.blackred == other.raw.xtranssensor.blackred;
         raw.xtranssensor.exBlackGreen = raw.xtranssensor.exBlackGreen && p.raw.xtranssensor.blackgreen == other.raw.xtranssensor.blackgreen;
@@ -1079,7 +1086,6 @@ void ParamsEdited::initFrom(const std::vector<rtengine::procparams::ProcParams>&
         raw.ff_AutoClipControl = raw.ff_AutoClipControl && p.raw.ff_AutoClipControl == other.raw.ff_AutoClipControl;
         raw.ff_clipControl = raw.ff_clipControl && p.raw.ff_clipControl == other.raw.ff_clipControl;
         raw.exPos = raw.exPos && p.raw.expos == other.raw.expos;
-        raw.exPreser = raw.exPreser && p.raw.preser == other.raw.preser;
         wavelet.enabled = wavelet.enabled && p.wavelet.enabled == other.wavelet.enabled;
         wavelet.inpute = wavelet.inpute && p.wavelet.inpute == other.wavelet.inpute;
         wavelet.strength = wavelet.strength && p.wavelet.strength == other.wavelet.strength;
@@ -1759,6 +1765,10 @@ void ParamsEdited::combine(rtengine::procparams::ProcParams& toEdit, const rteng
 
     if (sharpening.radius) {
         toEdit.sharpening.radius  = dontforceSet && options.baBehav[ADDSET_SHARP_RADIUS] ? toEdit.sharpening.radius + mods.sharpening.radius : mods.sharpening.radius;
+    }
+
+    if (sharpening.blurradius) {
+        toEdit.sharpening.blurradius  = dontforceSet && options.baBehav[ADDSET_SHARP_RADIUS] ? toEdit.sharpening.blurradius + mods.sharpening.blurradius : mods.sharpening.blurradius;
     }
 
     if (sharpening.amount) {
@@ -2774,6 +2784,10 @@ void ParamsEdited::combine(rtengine::procparams::ProcParams& toEdit, const rteng
         toEdit.raw.xtranssensor.ccSteps         = mods.raw.xtranssensor.ccSteps;
     }
 
+    if (raw.xtranssensor.border) {
+        toEdit.raw.xtranssensor.border         = mods.raw.xtranssensor.border;
+    }
+
     if (raw.xtranssensor.exBlackRed) {
         toEdit.raw.xtranssensor.blackred        = dontforceSet && options.baBehav[ADDSET_RAWEXPOS_BLACKS] ? toEdit.raw.xtranssensor.blackred + mods.raw.xtranssensor.blackred : mods.raw.xtranssensor.blackred;
     }
@@ -2808,10 +2822,6 @@ void ParamsEdited::combine(rtengine::procparams::ProcParams& toEdit, const rteng
 
     if (raw.exPos) {
         toEdit.raw.expos           = dontforceSet && options.baBehav[ADDSET_RAWEXPOS_LINEAR] ? toEdit.raw.expos + mods.raw.expos : mods.raw.expos;
-    }
-
-    if (raw.exPreser) {
-        toEdit.raw.preser          = dontforceSet && options.baBehav[ADDSET_RAWEXPOS_PRESER] ? toEdit.raw.preser + mods.raw.preser : mods.raw.preser;
     }
 
     if (raw.hotPixelFilter) {
@@ -3521,13 +3531,13 @@ bool RAWParamsEdited::BayerSensor::isUnchanged() const
 
 bool RAWParamsEdited::XTransSensor::isUnchanged() const
 {
-    return method && exBlackRed && exBlackGreen && exBlackBlue && dualDemosaicAutoContrast && dualDemosaicContrast;
+    return method && border && exBlackRed && exBlackGreen && exBlackBlue && dualDemosaicAutoContrast && dualDemosaicContrast;
 }
 
 bool RAWParamsEdited::isUnchanged() const
 {
     return  bayersensor.isUnchanged() && xtranssensor.isUnchanged() && ca_autocorrect && ca_avoidcolourshift && caautoiterations && cared && cablue && hotPixelFilter && deadPixelFilter && hotdeadpix_thresh && darkFrame
-            && df_autoselect && ff_file && ff_AutoSelect && ff_BlurRadius && ff_BlurType && exPos && exPreser && ff_AutoClipControl && ff_clipControl;
+            && df_autoselect && ff_file && ff_AutoSelect && ff_BlurRadius && ff_BlurType && exPos && ff_AutoClipControl && ff_clipControl;
 }
 
 bool LensProfParamsEdited::isUnchanged() const
