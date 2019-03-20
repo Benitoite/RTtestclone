@@ -376,7 +376,6 @@ HISTORY_MSG_121;RAW CA-correctie - Auto
 HISTORY_MSG_122;Donkerframe - Autom. selectie
 HISTORY_MSG_123;Donkerframe - Bestand
 HISTORY_MSG_124;Witpunt correctie
-HISTORY_MSG_125;Hoge lichten behouden
 HISTORY_MSG_126;Vlakveld - Bestand
 HISTORY_MSG_127;Vlakveld - Autom. selectie
 HISTORY_MSG_128;Vlakveld - Verzachten straal
@@ -881,7 +880,6 @@ PARTIALPASTE_RAWCACORR_AUTO;Autom. C/A-correctie
 PARTIALPASTE_RAWCACORR_CAREDBLUE;CA rood & blauw
 PARTIALPASTE_RAWEXPOS_BLACK;Zwartniveau
 PARTIALPASTE_RAWEXPOS_LINEAR;Raw witpunt- lineaire corr. factor
-PARTIALPASTE_RAWEXPOS_PRESER;Raw witpunt- herstel hoge lichten (EV)
 PARTIALPASTE_RAWGROUP;Raw-instellingen
 PARTIALPASTE_RAW_DCBENHANCE;Pas DCB-verbetering toe
 PARTIALPASTE_RAW_DCBITERATIONS;aantal DCB-herhalingen
@@ -1593,7 +1591,6 @@ TP_RAWEXPOS_BLACK_BLUE;Blauw
 TP_RAWEXPOS_BLACK_GREEN;Groen
 TP_RAWEXPOS_BLACK_RED;Rood
 TP_RAWEXPOS_LINEAR;Witpunt Correctie
-TP_RAWEXPOS_PRESER;Herstel hoge lichten
 TP_RAWEXPOS_RGB;Rood, Groen, Blauw
 TP_RAWEXPOS_TWOGREEN;Koppel Groen 1 en 2
 TP_RAW_1PASSMEDIUM;1 keer (Gemiddeld)
@@ -2135,6 +2132,7 @@ ZOOMPANEL_ZOOMOUT;Zoom uit\nSneltoets: <b>-</b>
 !HISTORY_MSG_RAWCACORR_COLORSHIFT;Raw CA Correction - Avoid color shift
 !HISTORY_MSG_RAW_BORDER;Raw border
 !HISTORY_MSG_RESIZE_ALLOWUPSCALING;Resize - Allow upscaling
+!HISTORY_MSG_SHARPENING_BLUR;Sharpening - Blur radius
 !HISTORY_MSG_SHARPENING_CONTRAST;Sharpening - Contrast threshold
 !HISTORY_MSG_SH_COLORSPACE;S/H - Colorspace
 !HISTORY_MSG_SOFTLIGHT_ENABLED;Soft light
@@ -2185,6 +2183,8 @@ ZOOMPANEL_ZOOMOUT;Zoom uit\nSneltoets: <b>-</b>
 !MAIN_MSG_TOOMANYOPENEDITORS;Too many open editors.\nPlease close an editor to continue.
 !MAIN_TAB_ADVANCED;Advanced
 !MAIN_TAB_ADVANCED_TOOLTIP;Shortcut: <b>Alt-w</b>
+!MAIN_TAB_FAVORITES;Favorites
+!MAIN_TAB_FAVORITES_TOOLTIP;Shortcut: <b>Alt-u</b>
 !MAIN_TOOLTIP_BACKCOLOR3;Background color of the preview: <b>middle grey</b>\nShortcut: <b>9</b>
 !MAIN_TOOLTIP_PREVIEWSHARPMASK;Preview the <b>sharpening contrast mask</b>.\nShortcut: <b>p</b>\n\nOnly works when sharpening is enabled and zoom >= 100%.
 !OPTIONS_BUNDLED_MISSING;The bundled profile "<b>%1</b>" could not be found!\n\nYour installation could be damaged.\n\nDefault internal values will be used instead.
@@ -2328,7 +2328,8 @@ ZOOMPANEL_ZOOMOUT;Zoom uit\nSneltoets: <b>-</b>
 !TP_RAW_DUALDEMOSAICAUTOCONTRAST;Auto threshold
 !TP_RAW_DUALDEMOSAICAUTOCONTRAST_TOOLTIP;If the checkbox is checked (recommended), RawTherapee calculates an optimum value based on flat regions in the image.\nIf there is no flat region in the image or the image is too noisy, the value will be set to 0.\nTo set the value manually, uncheck the checkbox first (reasonable values depend on the image).
 !TP_RAW_DUALDEMOSAICCONTRAST;Contrast threshold
-!TP_RAW_IMAGENUM_TOOLTIP;Some raw files consist of several sub-images (Pentax/Sony Pixel Shift, Pentax 3-in-1 HDR, Canon Dual Pixel).\n\nWhen using any demosaicing method other than Pixel Shift, this selects which sub-image is used.\n\nWhen using the Pixel Shift demosaicing method on a Pixel Shift raw, all sub-images are used, and this selects which sub-image should be used for moving parts.
+!TP_RAW_IMAGENUM_SN;SN mode
+!TP_RAW_IMAGENUM_TOOLTIP;Some raw files consist of several sub-images (Pentax/Sony Pixel Shift, Pentax 3-in-1 HDR, Canon Dual Pixel, Fuji EXR).\n\nWhen using any demosaicing method other than Pixel Shift, this selects which sub-image is used.\n\nWhen using the Pixel Shift demosaicing method on a Pixel Shift raw, all sub-images are used, and this selects which sub-image should be used for moving parts.
 !TP_RAW_PIXELSHIFTDMETHOD;Demosaic method for motion
 !TP_RAW_PIXELSHIFTEPERISO;Sensitivity
 !TP_RAW_PIXELSHIFTEPERISO_TOOLTIP;The default value of 0 should work fine for base ISO.\nHigher values increase sensitivity of motion detection.\nChange in small steps and watch the motion mask while changing.\nIncrease sensitivity for underexposed or high ISO images.
@@ -2343,6 +2344,7 @@ ZOOMPANEL_ZOOMOUT;Zoom uit\nSneltoets: <b>-</b>
 !TP_RETINEX_GAINTRANSMISSION;Gain transmission
 !TP_RETINEX_GAINTRANSMISSION_TOOLTIP;Amplify or reduce the transmission map to achieve the desired luminance.\nThe x-axis is the transmission.\nThe y-axis is the gain.
 !TP_RETINEX_MAP;Method
+!TP_SHARPENING_BLUR;Blur radius
 !TP_SHARPENING_CONTRAST;Contrast threshold
 !TP_SHARPENMICRO_CONTRAST;Contrast threshold
 !TP_SOFTLIGHT_LABEL;Soft Light

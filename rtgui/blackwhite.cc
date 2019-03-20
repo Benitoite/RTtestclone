@@ -16,13 +16,17 @@
  *  You should have received a copy of the GNU General Public License
  *  along with RawTherapee.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "blackwhite.h"
-#include "rtimage.h"
-#include "../rtengine/color.h"
 #include <iomanip>
 #include <cmath>
-#include "guiutils.h"
+
+#include "blackwhite.h"
+
 #include "edit.h"
+#include "guiutils.h"
+#include "rtimage.h"
+
+#include "../rtengine/color.h"
+#include "../rtengine/procparams.h"
 
 using namespace rtengine;
 using namespace rtengine::procparams;
@@ -375,12 +379,13 @@ void BlackWhite::BWChanged  (double redbw, double greenbw, double bluebw)
     nextgreenbw = greenbw;
     nextbluebw = bluebw;
 
-    const auto func = [](gpointer data) -> gboolean {
-        static_cast<BlackWhite*>(data)->BWComputed_();
-        return FALSE;
-    };
-
-    idle_register.add(func, this);
+    idle_register.add(
+        [this]() -> bool
+        {
+            BWComputed_();
+            return false;
+        }
+    );
 }
 
 bool BlackWhite::BWComputed_ ()

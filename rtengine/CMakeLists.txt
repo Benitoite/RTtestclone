@@ -10,6 +10,7 @@ include_directories(${EXTRA_INCDIR}
     ${IPTCDATA_INCLUDE_DIRS}
     ${LCMS_INCLUDE_DIRS}
     ${LENSFUN_INCLUDE_DIRS}
+    ${RSVG_INCLUDE_DIRS}
     )
 
 link_directories("${PROJECT_SOURCE_DIR}/rtexif"
@@ -23,6 +24,7 @@ link_directories("${PROJECT_SOURCE_DIR}/rtexif"
     ${IPTCDATA_LIBRARY_DIRS}
     ${LCMS_LIBRARY_DIRS}
     ${LENSFUN_LIBRARY_DIRS}
+    ${RSVG_LIBRARY_DIRS}
     )
 
 set(CAMCONSTSFILE "camconst.json")
@@ -56,16 +58,15 @@ set(RTENGINESOURCEFILES
     dual_demosaic_RT.cc
     dynamicprofile.cc
     eahd_demosaic.cc
-    expo_before_b.cc
     fast_demo.cc
     ffmanager.cc
     flatcurves.cc
     gauss.cc
     green_equil_RT.cc
     hilite_recon.cc
+    hphd_demosaic_RT.cc
     iccjpeg.cc
     iccstore.cc
-    icons.cc
     iimage.cc
     image16.cc
     image8.cc
@@ -185,6 +186,7 @@ target_link_libraries(rtengine rtexif
     ${TIFF_LIBRARIES}
     ${ZLIB_LIBRARIES}
     ${LENSFUN_LIBRARIES}
+    ${RSVG_LIBRARIES}
     )
 
 install(FILES ${CAMCONSTSFILE} DESTINATION "${DATADIR}" PERMISSIONS OWNER_WRITE OWNER_READ GROUP_READ WORLD_READ)

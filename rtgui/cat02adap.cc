@@ -224,57 +224,31 @@ void CAT02Adaptation::adjusterAutoToggled(Adjuster* a, bool newval)
 
 void CAT02Adaptation::cat02AmountChanged(int amount, bool ciecamEnabled)
 {
-    nextAmount = amount;
-    nextciecam = ciecamEnabled;
-
-    const auto func = [](gpointer data) -> gboolean {
-        static_cast<CAT02Adaptation*>(data)->cat02AmountComputed_();
-        return FALSE;
-    };
-
-    idle_register.add(func, this);
+        idle_register.add(
+        [this, amount, ciecamEnabled]() -> bool {
+            bool necie = ciecamEnabled;
+            if (necie) {
+                labena->show();
+                labdis->hide();
+            } else {
+                labena->hide();
+                labdis->show();
+            }
+            
+            return false;
+        }
+        );
+    
 }
-
-bool CAT02Adaptation::cat02AmountComputed_()
-{
-
-    disableListener();
-    amount->setValue(nextAmount);
-    labdis->hide();
-
-    if (nextciecam) {
-        labena->show();
-        labdis->hide();
-    } else {
-        labena->hide();
-        labdis->show();
-    }
-
-    enableListener();
-
-    return false;
-}
-
 void CAT02Adaptation::cat02LuminanceScalingChanged(double scaling)
 {
-    nextLuminanceScaling = scaling;
-
-    const auto func = [](gpointer data) -> gboolean {
-        static_cast<CAT02Adaptation*>(data)->cat02LuminanceScalingComputed_();
-        return FALSE;
-    };
-
-    idle_register.add(func, this);
-}
-
-bool CAT02Adaptation::cat02LuminanceScalingComputed_()
-{
-
-    disableListener();
-    luminanceScaling->setValue(nextLuminanceScaling);
-    enableListener();
-
-    return false;
+        idle_register.add(
+        [this, scaling]() -> bool {
+            double scal = scaling;
+              luminanceScaling->setValue(scal);
+            return false;
+        }
+        );
 }
 
 void CAT02Adaptation::enabledChanged()

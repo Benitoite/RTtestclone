@@ -27,7 +27,7 @@
 
 namespace rtengine {
 
-void cat02adaptationAutoCompute(ImageSource *imgsrc, ProcParams &params);
-void cat02adaptation(Imagefloat *image, float gain, const ProcParams &params);
+void cat02adaptationAutoCompute(ImageSource *imgsrc,  procparams::CAT02AdaptationParams &cat02Param, const procparams::WBParams &wbparam, const procparams::ToneCurveParams &toneparam, const procparams::RAWParams &rawparam);
+void cat02adaptation(Imagefloat *image, float gain, const procparams::ProcParams &params);
 
 } // namespace rtengine

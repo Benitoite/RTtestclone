@@ -27,7 +27,6 @@
 #include "rt_math.h"
 #include "gauss.h"
 #include "median.h"
-//#define BENCHMARK
 #include "StopWatch.h"
 namespace {
 
@@ -121,10 +120,19 @@ float* RawImageSource::CA_correct_RT(
     bool fitParamsIn,
     bool fitParamsOut,
     float* buffer,
-    bool freeBuffer
+    bool freeBuffer,
+    size_t chunkSize,
+    bool measure
 )
 {
-    BENCHFUN
+
+    std::unique_ptr<StopWatch> stop;
+
+    if (measure) {
+        std::cout << "CA correcting " << W << "x" << H << " image with " << chunkSize << " tiles per thread" << std::endl;
+        stop.reset(new StopWatch("CA correction"));
+    }
+
     // multithreaded and vectorized by Ingo Weyrich
     constexpr int ts = 128;
     constexpr int tsh = ts / 2;
@@ -151,7 +159,9 @@ float* RawImageSource::CA_correct_RT(
         blueFactor = new array2D<float>((W + 1 - 2 * cb) / 2, (H + 1 - 2 * cb) / 2);
         oldraw = new array2D<float>((W + 1- 2 * cb) / 2, H- 2 * cb);
         // copy raw values before ca correction
+#ifdef _OPENMP
         #pragma omp parallel for
+#endif
         for (int i = cb; i < H - cb; ++i) {
             for (int j = cb + (FC(i, 0) & 1); j < W - cb; j += 2) {
                 (*oldraw)[i - cb][(j - cb) / 2] = rawData[i][j];
@@ -220,7 +230,9 @@ float* RawImageSource::CA_correct_RT(
 
         constexpr float eps = 1e-5f, eps2 = 1e-10f; //tolerance to avoid dividing by zero
 
+#ifdef _OPENMP
         #pragma omp parallel
+#endif
         {
             int progresscounter = 0;
 
@@ -274,7 +286,9 @@ float* RawImageSource::CA_correct_RT(
                 float blocksqavethr[2][2] = {};
                 float blockdenomthr[2][2] = {};
 
-                #pragma omp for collapse(2) schedule(dynamic) nowait
+#ifdef _OPENMP
+                #pragma omp for collapse(2) schedule(dynamic, chunkSize) nowait
+#endif
                 for (int top = -border ; top < height; top += ts - border2) {
                     for (int left = -border; left < width - (W & 1); left += ts - border2) {
                         memset(bufferThr, 0, buffersize);
@@ -428,7 +442,8 @@ float* RawImageSource::CA_correct_RT(
                                 vfloat wtrv = onev / SQRV(temp2v + vabsf(rgbcv - LVFU(rgb[c][(indx + 2) >> 1])) + vabsf(rgb1p1v - LC2VFU(rgb[1][indx + 3])));
 
                                 //store in rgb array the interpolated G value at R/B grid points using directional weighted average
-                                STC2VFU(rgb[1][indx], (wtuv * rgb1mv1v + wtdv * rgb1pv1v + wtlv * rgb1m1v + wtrv * rgb1p1v) / (wtuv + wtdv + wtlv + wtrv));
+                                vfloat result = (wtuv * rgb1mv1v + wtdv * rgb1pv1v + wtlv * rgb1m1v + wtrv * rgb1p1v) / (wtuv + wtdv + wtlv + wtrv);
+                                STC2VFU(rgb[1][indx], result);
                             }
 
 #endif
@@ -647,7 +662,9 @@ float* RawImageSource::CA_correct_RT(
                             progresscounter++;
 
                             if (progresscounter % 8 == 0) {
+#ifdef _OPENMP
                                 #pragma omp critical (cadetectpass1)
+#endif
                                 {
                                     progress += 4.0 * SQR(ts - border2) / (iterations * height * width);
                                     progress = std::min(progress, 1.0);
@@ -658,7 +675,9 @@ float* RawImageSource::CA_correct_RT(
                     }
                 }
                 //end of diagnostic pass
+#ifdef _OPENMP
                 #pragma omp critical (cadetectpass2)
+#endif
                 {
                     for (int dir = 0; dir < 2; dir++) {
                         for (int c = 0; c < 2; c++) {
@@ -668,9 +687,13 @@ float* RawImageSource::CA_correct_RT(
                         }
                     }
                 }
+#ifdef _OPENMP
                 #pragma omp barrier
+#endif
 
+#ifdef _OPENMP
                 #pragma omp single
+#endif
                 {
                     for (int dir = 0; dir < 2; dir++)
                         for (int c = 0; c < 2; c++) {
@@ -806,7 +829,9 @@ float* RawImageSource::CA_correct_RT(
                 float* grbdiff = (float (*)) (data + 2 * sizeof(float) * ts * ts + 3 * 64); // there is no overlap in buffer usage => share
                 //green interpolated to optical sample points for R/B
                 float* gshift  = (float (*)) (data + 2 * sizeof(float) * ts * ts + sizeof(float) * ts * tsh + 4 * 64); // there is no overlap in buffer usage => share
-                #pragma omp for schedule(dynamic) collapse(2)
+#ifdef _OPENMP
+                #pragma omp for schedule(dynamic, chunkSize) collapse(2)
+#endif
                 for (int top = -border; top < height; top += ts - border2) {
                     for (int left = -border; left < width - (W & 1); left += ts - border2) {
                         memset(bufferThr, 0, buffersizePassTwo);
@@ -980,7 +1005,8 @@ float* RawImageSource::CA_correct_RT(
                                     vfloat wtrv = onev / SQRV(val2v + vabsf(LVFU(rgb[c][indx >> 1]) - LVFU(rgb[c][(indx + 2) >> 1])) + vabsf(LC2VFU(rgb[1][indx + 1]) - LC2VFU(rgb[1][indx + 3])));
 
                                     //store in rgb array the interpolated G value at R/B grid points using directional weighted average
-                                    STC2VFU(rgb[1][indx], (wtuv * LC2VFU(rgb[1][indx - v1]) + wtdv * LC2VFU(rgb[1][indx + v1]) + wtlv * LC2VFU(rgb[1][indx - 1]) + wtrv * LC2VFU(rgb[1][indx + 1])) / (wtuv + wtdv + wtlv + wtrv));
+                                    vfloat result = (wtuv * LC2VFU(rgb[1][indx - v1]) + wtdv * LC2VFU(rgb[1][indx + v1]) + wtlv * LC2VFU(rgb[1][indx - 1]) + wtrv * LC2VFU(rgb[1][indx + 1])) / (wtuv + wtdv + wtlv + wtrv);
+                                    STC2VFU(rgb[1][indx], result);
                                 }
 #endif
                                 for (; cc < cc1 - 3; cc += 2, indx += 2) {
@@ -1197,7 +1223,9 @@ float* RawImageSource::CA_correct_RT(
                             progresscounter++;
 
                             if (progresscounter % 8 == 0)
+#ifdef _OPENMP
                                 #pragma omp critical (cacorrect)
+#endif
                             {
                                 progress += 4.0 * SQR(ts - border2) / (iterations * height * width);
                                 progress = std::min(progress, 1.0);
@@ -1208,14 +1236,17 @@ float* RawImageSource::CA_correct_RT(
                 }
 
                 // copy temporary image matrix back to image matrix
+#ifdef _OPENMP
                 #pragma omp for
+#endif
 
                 for (int row = cb; row < height - cb; row++) {
                     int col = cb + (FC(row, 0) & 1);
                     int indx = (row * width + col) >> 1;
 #ifdef __SSE2__
                     for (; col < width - 7 - cb; col += 8, indx += 4) {
-                        STC2VFU(rawData[row][col], LVFU(RawDataTmp[indx]));
+                        vfloat val = LVFU(RawDataTmp[indx]);
+                        STC2VFU(rawData[row][col], val);
                     }
 #endif
                     for (; col < width - cb; col += 2, indx++) {
@@ -1232,14 +1263,18 @@ float* RawImageSource::CA_correct_RT(
             // of red and blue channel and apply a gaussian blur to them.
             // Then we apply the resulting factors per pixel on the result of raw ca correction
 
+#ifdef _OPENMP
             #pragma omp parallel
+#endif
             {
 #ifdef __SSE2__
                 const vfloat onev = F2V(1.f);
                 const vfloat twov = F2V(2.f);
                 const vfloat zd5v = F2V(0.5f);
 #endif
+#ifdef _OPENMP
                 #pragma omp for
+#endif
                 for (int i = 0; i < H - 2 * cb; ++i) {
                     const int firstCol = FC(i, 0) & 1;
                     const int colour = FC(i, firstCol);
@@ -1260,7 +1295,9 @@ float* RawImageSource::CA_correct_RT(
                     }
                 }
 
+#ifdef _OPENMP
                 #pragma omp single
+#endif
                 {
                     if (H % 2) {
                         // odd height => factors are not set in last row => use values of preceding row
@@ -1287,7 +1324,9 @@ float* RawImageSource::CA_correct_RT(
                 gaussianBlur(*blueFactor, *blueFactor, (W + 1 - 2 * cb) / 2, (H + 1 - 2 * cb) / 2, 30.0);
 
                 // apply correction factors to avoid (reduce) colour shift
+#ifdef _OPENMP
                 #pragma omp for
+#endif
                 for (int i = 0; i < H - 2 * cb; ++i) {
                     const int firstCol = FC(i, 0) & 1;
                     const int colour = FC(i, firstCol);

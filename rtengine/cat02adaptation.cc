@@ -315,13 +315,13 @@ void ciecamcat02loc_float(LabImage* lab, LabImage* dest, int tempa, double gree,
 } // namespace
 
 
-void cat02adaptationAutoCompute(ImageSource *imgsrc, ProcParams &params)
-{
-    if (!params.wb.enabled) {
-        params.cat02adap.enabled = false;
+void cat02adaptationAutoCompute(ImageSource *imgsrc,  CAT02AdaptationParams &cat02Param, const WBParams &wbparam, const ToneCurveParams &toneparam, const RAWParams &rawparam)
+{ 
+    if (!wbparam.enabled) {
+        cat02Param.enabled = false;
     }
 
-    if (!params.cat02adap.enabled) {
+    if (!cat02Param.enabled) {
         return;
     }
 
@@ -330,9 +330,9 @@ void cat02adaptationAutoCompute(ImageSource *imgsrc, ProcParams &params)
 
     if (imgsrc->isRAW()) {
         if (imgsrc->getSensorType() == ST_BAYER) {
-            imgNumc = rtengine::LIM<unsigned int>(params.raw.bayersensor.imageNum, 0, metaDatac->getFrameCount() - 1);
+            imgNumc = rtengine::LIM<unsigned int>(rawparam.bayersensor.imageNum, 0, metaDatac->getFrameCount() - 1);
         } else if (imgsrc->getSensorType() == ST_FUJI_XTRANS) {
-            //imgNum = rtengine::LIM<unsigned int>(params.raw.xtranssensor.imageNum, 0, metaData->getFrameCount() - 1);
+           // imgNumc = rtengine::LIM<unsigned int>(rawparam.xtranssensor.imageNum, 0, metaDatac->getFrameCount() - 1);
         }
     }
 
@@ -346,8 +346,8 @@ void cat02adaptationAutoCompute(ImageSource *imgsrc, ProcParams &params)
         ada = 2000.;
     } else {
         double E_V = fcompc + log2(double ((fnumc * fnumc) / fspeedc / (fisoc / 100.f)));
-        E_V += params.toneCurve.expcomp;// exposure compensation in tonecurve ==> direct EV
-        E_V += log2(params.raw.expos);  // exposure raw white point ; log2 ==> linear to EV
+        E_V += toneparam.expcomp;// exposure compensation in tonecurve ==> direct EV
+        E_V += log2(rawparam.expos);  // exposure raw white point ; log2 ==> linear to EV
         ada = powf(2.f, E_V - 3.f);  // cd / m2
         // end calculation adaptation scene luminosity
     }
@@ -355,10 +355,10 @@ void cat02adaptationAutoCompute(ImageSource *imgsrc, ProcParams &params)
     int cat0 = 100;
 
     //printf("temp=%i \n", params.wb.temperature);
-    if (params.wb.temperature < 4000  || params.wb.temperature > 15000) { //15000 arbitrary value
+    if (wbparam.temperature < 4000  || wbparam.temperature > 15000) { //15000 arbitrary value
         float kunder = 1.f;
 
-        if (params.wb.temperature > 20000) {
+        if (wbparam.temperature > 20000) {
             kunder = 0.05f;    //underwater photos
         }
 
@@ -402,12 +402,12 @@ void cat02adaptationAutoCompute(ImageSource *imgsrc, ProcParams &params)
         }
     }
 
-    if (params.cat02adap.autoAmount) {
-        params.cat02adap.amount = cat0;
+    if (cat02Param.autoAmount) {
+        cat02Param.amount = cat0;
     }
 
     double gree0 = 1.0;
-    float Tref = (float) params.wb.temperature;
+    float Tref = (float) wbparam.temperature;
 
     if (Tref > 8000.f) {
         Tref = 8000.f;
@@ -418,12 +418,13 @@ void cat02adaptationAutoCompute(ImageSource *imgsrc, ProcParams &params)
     }
 
     float dT = fabs((Tref - 5000.) / 1000.f);
-    float dG = params.wb.green - 1.;
-    gree0 = 1.f - 0.00055f * dT * dG * params.cat02adap.amount;//empirical formula
+    float dG = wbparam.green - 1.;
+    gree0 = 1.f - 0.00055f * dT * dG * cat02Param.amount;//empirical formula
 
-    if (params.cat02adap.autoLuminanceScaling) {
-        params.cat02adap.luminanceScaling = gree0;
+    if (cat02Param.autoLuminanceScaling) {
+        cat02Param.luminanceScaling = gree0;
     }
+    
 }
 
 

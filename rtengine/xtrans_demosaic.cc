@@ -43,6 +43,7 @@ void RawImageSource::cielab (const float (*rgb)[3], float* l, float* a, float *b
 
     if (!rgb) {
         if(!cbrtinit) {
+        #pragma omp parallel for
             for (int i = 0; i < 0x14000; i++) {
                 double r = i / 65535.0;
                 cbrt[i] = r > Color::eps ? std::cbrt(r) : (Color::kappa * r + 16.0) / 116.0;
@@ -120,6 +121,11 @@ void RawImageSource::xtransborder_interpolate (int border, array2D<float> &red, 
 
     int xtrans[6][6];
     ri->getXtransMatrix(xtrans);
+    const float weight[3][3] = {
+                                {0.25f, 0.5f, 0.25f},
+                                {0.5f,  0.f,  0.5f},
+                                {0.25f, 0.5f, 0.25f}
+                               };
 
     for (int row = 0; row < height; row++)
         for (int col = 0; col < width; col++) {
@@ -129,11 +135,11 @@ void RawImageSource::xtransborder_interpolate (int border, array2D<float> &red, 
 
             float sum[6] = {0.f};
 
-            for (int y = MAX(0, row - 1); y <= MIN(row + 1, height - 1); y++)
-                for (int x = MAX(0, col - 1); x <= MIN(col + 1, width - 1); x++) {
+            for (int y = MAX(0, row - 1), v = row == 0 ? 0 : -1; y <= MIN(row + 1, height - 1); y++, v++)
+                for (int x = MAX(0, col - 1), h = col == 0 ? 0 : -1; x <= MIN(col + 1, width - 1); x++, h++) {
                     int f = fcol(y, x);
-                    sum[f] += rawData[y][x];
-                    sum[f + 3]++;
+                    sum[f] += rawData[y][x] * weight[v + 1][h + 1];
+                    sum[f + 3] += weight[v + 1][h + 1];
                 }
 
             switch(fcol(row, col)) {
@@ -168,9 +174,16 @@ void RawImageSource::xtransborder_interpolate (int border, array2D<float> &red, 
 */
 // override CLIP function to test unclipped output
 #define CLIP(x) (x)
-void RawImageSource::xtrans_interpolate (const int passes, const bool useCieLab)
+void RawImageSource::xtrans_interpolate (const int passes, const bool useCieLab, size_t chunkSize, bool measure)
 {
-    BENCHFUN
+
+    std::unique_ptr<StopWatch> stop;
+
+    if (measure) {
+        std::cout << passes << "-pass Xtrans Demosaicing " << W << "x" << H << " image with " << chunkSize << " tiles per thread" << std::endl;
+        stop.reset(new StopWatch("xtrans demosaic"));
+    }
+
     constexpr int ts = 114;      /* Tile Size */
     constexpr int tsh = ts / 2;  /* half of Tile Size */
 
@@ -196,12 +209,6 @@ void RawImageSource::xtrans_interpolate (const int passes, const bool useCieLab)
     ushort sgrow = 0, sgcol = 0;
 
     const int height = H, width = W;
-
-//    if (settings->verbose) {
-//        printf("%d-pass X-Trans interpolation using %s conversion...\n", passes, useCieLab ? "lab" : "yuv");
-//    }
-
-    xtransborder_interpolate(6, red, green, blue);
 
     float xyz_cam[3][3];
     {
@@ -297,7 +304,7 @@ void RawImageSource::xtrans_interpolate (const int passes, const bool useCieLab)
         uint8_t (*homosummax)[ts] = (uint8_t (*)[ts]) homo[ndir - 1]; // we can reuse the homo-buffer because they are not used together
 
 #ifdef _OPENMP
-        #pragma omp for collapse(2) schedule(dynamic) nowait
+        #pragma omp for collapse(2) schedule(dynamic, chunkSize) nowait
 #endif
 
         for (int top = 3; top < height - 19; top += ts - 16)
@@ -956,63 +963,67 @@ void RawImageSource::xtrans_interpolate (const int passes, const bool useCieLab)
         free(buffer);
     }
 
+    xtransborder_interpolate(8, red, green, blue);
 }
 #undef CLIP
 void RawImageSource::fast_xtrans_interpolate (const array2D<float> &rawData, array2D<float> &red, array2D<float> &green, array2D<float> &blue)
 {
-//    if (settings->verbose) {
-//        printf("fast X-Trans interpolation...\n");
-//    }
 
-    double progress = 0.0;
-    const bool plistenerActive = plistener;
-
-    if (plistenerActive) {
-        plistener->setProgressStr (Glib::ustring::compose(M("TP_RAW_DMETHOD_PROGRESSBAR"), "fast Xtrans"));
-        plistener->setProgress (progress);
+    if (plistener) {
+        plistener->setProgressStr(Glib::ustring::compose(M("TP_RAW_DMETHOD_PROGRESSBAR"), "fast Xtrans"));
+        plistener->setProgress(0.0);
     }
 
-    const int height = H, width = W;
-
-    xtransborder_interpolate (1, red, green, blue);
+    xtransborder_interpolate(1, red, green, blue);
     int xtrans[6][6];
     ri->getXtransMatrix(xtrans);
 
-    #pragma omp parallel for
+    const float weight[3][3] = {
+                                {0.25f, 0.5f, 0.25f},
+                                {0.5f,  0.f,  0.5f},
+                                {0.25f, 0.5f, 0.25f}
+                               };
+#ifdef _OPENMP
+    #pragma omp parallel for schedule(dynamic, 16)
+#endif
+    for (int row = 1; row < H - 1; ++row) {
+        for (int col = 1; col < W - 1; ++col) {
+            float sum[3] = {};
 
-    for(int row = 1; row < height - 1; row++) {
-        for(int col = 1; col < width - 1; col++) {
-            float sum[3] = {0.f};
-
-            for(int v = -1; v <= 1; v++) {
-                for(int h = -1; h <= 1; h++) {
-                    sum[fcol(row + v, col + h)] += rawData[row + v][(col + h)];
+            for (int v = -1; v <= 1; v++) {
+                for (int h = -1; h <= 1; h++) {
+                    sum[fcol(row + v, col + h)] += rawData[row + v][(col + h)] * weight[v + 1][h + 1];
                 }
             }
 
             switch(fcol(row, col)) {
-            case 0:
+            case 0: // red pixel
                 red[row][col] = rawData[row][col];
-                green[row][col] = sum[1] * 0.2f;
-                blue[row][col] = sum[2] * 0.33333333f;
+                green[row][col] = sum[1] * 0.5f;
+                blue[row][col] = sum[2];
                 break;
 
-            case 1:
-                red[row][col] = sum[0] * 0.5f;
+            case 1: // green pixel
                 green[row][col] = rawData[row][col];
-                blue[row][col] = sum[2] * 0.5f;
+                if (fcol(row, col - 1) == fcol(row, col + 1)) { // Solitary green pixel always has exactly two direct red and blue neighbors in 3x3 grid
+                    red[row][col] = sum[0];
+                    blue[row][col] = sum[2];
+                } else { // Non solitary green pixel always has one direct and one diagonal red and blue neighbor in 3x3 grid
+                    red[row][col] = sum[0] * 1.3333333f;
+                    blue[row][col] = sum[2] * 1.3333333f;
+                }
                 break;
 
-            case 2:
-                red[row][col] = sum[0] * 0.33333333f;
-                green[row][col] = sum[1] * 0.2f;
+            case 2: // blue pixel
+                red[row][col] = sum[0];
+                green[row][col] = sum[1] * 0.5f;
                 blue[row][col] = rawData[row][col];
                 break;
             }
         }
     }
 
-    if (plistenerActive) {
+    if (plistener) {
         plistener->setProgress (1.0);
     }
 }

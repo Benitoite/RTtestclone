@@ -332,7 +332,6 @@ HISTORY_MSG_121;AC automatica (Raw)
 HISTORY_MSG_122;Dark Frame - Automatico
 HISTORY_MSG_123;Dark Frame - File
 HISTORY_MSG_124;Correzione Punto di Bianco
-HISTORY_MSG_125;Protezione AlteLuci
 HISTORY_MSG_126;Flat Field - File
 HISTORY_MSG_127;Flat Field - Automatico
 HISTORY_MSG_128;Flat Field - Raggio di Sfocamento
@@ -600,7 +599,6 @@ PARTIALPASTE_PREPROCESS_LINEDENOISE;Filtro per rumore a bande
 PARTIALPASTE_RAWCACORR_AUTO;Autocorrezione AC
 PARTIALPASTE_RAWEXPOS_BLACK;Punto del Nero
 PARTIALPASTE_RAWEXPOS_LINEAR;Correzione Punto del Bianco
-PARTIALPASTE_RAWEXPOS_PRESER;Conservazione Alteluci
 PARTIALPASTE_RAWGROUP;Impostazioni del Raw
 PARTIALPASTE_RAW_DCBENHANCE;Miglioramento DCB
 PARTIALPASTE_RAW_DCBITERATIONS;Numero di iterazioni DCB
@@ -1135,7 +1133,6 @@ TP_RAWCACORR_CABLUE;Blu
 TP_RAWCACORR_CARED;Rosso
 TP_RAWEXPOS_BLACKS;Livelli del nero
 TP_RAWEXPOS_LINEAR;Punto del Bianco - Correzione
-TP_RAWEXPOS_PRESER;Punto del Bianco - Protezione Alteluci
 TP_RAWEXPOS_TWOGREEN;Valori del verde uniti
 TP_RAW_DCBENHANCE;Miglioramento DCB
 TP_RAW_DCBITERATIONS;Numero di iterazioni DCB
@@ -1605,6 +1602,7 @@ ZOOMPANEL_ZOOMOUT;Rimpicciolisci.\nScorciatoia: <b>-</b>
 !HISTORY_MSG_RAWCACORR_COLORSHIFT;Raw CA Correction - Avoid color shift
 !HISTORY_MSG_RAW_BORDER;Raw border
 !HISTORY_MSG_RESIZE_ALLOWUPSCALING;Resize - Allow upscaling
+!HISTORY_MSG_SHARPENING_BLUR;Sharpening - Blur radius
 !HISTORY_MSG_SHARPENING_CONTRAST;Sharpening - Contrast threshold
 !HISTORY_MSG_SH_COLORSPACE;S/H - Colorspace
 !HISTORY_MSG_SOFTLIGHT_ENABLED;Soft light
@@ -1681,6 +1679,8 @@ ZOOMPANEL_ZOOMOUT;Rimpicciolisci.\nScorciatoia: <b>-</b>
 !MAIN_MSG_TOOMANYOPENEDITORS;Too many open editors.\nPlease close an editor to continue.
 !MAIN_TAB_ADVANCED;Advanced
 !MAIN_TAB_ADVANCED_TOOLTIP;Shortcut: <b>Alt-w</b>
+!MAIN_TAB_FAVORITES;Favorites
+!MAIN_TAB_FAVORITES_TOOLTIP;Shortcut: <b>Alt-u</b>
 !MAIN_TAB_INSPECT; Inspect
 !MAIN_TOOLTIP_BACKCOLOR3;Background color of the preview: <b>middle grey</b>\nShortcut: <b>9</b>
 !MAIN_TOOLTIP_PREVIEWSHARPMASK;Preview the <b>sharpening contrast mask</b>.\nShortcut: <b>p</b>\n\nOnly works when sharpening is enabled and zoom >= 100%.
@@ -2020,7 +2020,8 @@ ZOOMPANEL_ZOOMOUT;Rimpicciolisci.\nScorciatoia: <b>-</b>
 !TP_RAW_HPHD;HPHD
 !TP_RAW_IGV;IGV
 !TP_RAW_IMAGENUM;Sub-image
-!TP_RAW_IMAGENUM_TOOLTIP;Some raw files consist of several sub-images (Pentax/Sony Pixel Shift, Pentax 3-in-1 HDR, Canon Dual Pixel).\n\nWhen using any demosaicing method other than Pixel Shift, this selects which sub-image is used.\n\nWhen using the Pixel Shift demosaicing method on a Pixel Shift raw, all sub-images are used, and this selects which sub-image should be used for moving parts.
+!TP_RAW_IMAGENUM_SN;SN mode
+!TP_RAW_IMAGENUM_TOOLTIP;Some raw files consist of several sub-images (Pentax/Sony Pixel Shift, Pentax 3-in-1 HDR, Canon Dual Pixel, Fuji EXR).\n\nWhen using any demosaicing method other than Pixel Shift, this selects which sub-image is used.\n\nWhen using the Pixel Shift demosaicing method on a Pixel Shift raw, all sub-images are used, and this selects which sub-image should be used for moving parts.
 !TP_RAW_LMMSE;LMMSE
 !TP_RAW_MONO;Mono
 !TP_RAW_NONE;None (Shows sensor pattern)
@@ -2141,6 +2142,7 @@ ZOOMPANEL_ZOOMOUT;Rimpicciolisci.\nScorciatoia: <b>-</b>
 !TP_RETINEX_VIEW_TRAN;Transmission - Auto
 !TP_RETINEX_VIEW_TRAN2;Transmission - Fixed
 !TP_RETINEX_VIEW_UNSHARP;Unsharp mask
+!TP_SHARPENING_BLUR;Blur radius
 !TP_SHARPENING_CONTRAST;Contrast threshold
 !TP_SHARPENMICRO_CONTRAST;Contrast threshold
 !TP_SOFTLIGHT_LABEL;Soft Light

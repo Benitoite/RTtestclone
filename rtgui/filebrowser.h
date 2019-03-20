@@ -61,6 +61,8 @@ class FileBrowser  : public ThumbBrowserBase,
 private:
     typedef sigc::signal<void> type_trash_changed;
 
+    using ThumbBrowserBase::redrawNeeded;
+
     IdleRegister idle_register;
     unsigned int session_id_;
 
@@ -179,20 +181,20 @@ public:
         return tbl ? tbl->isInTabMode() : false;
     }
 
-    void openNextImage ();
-    void openPrevImage ();
+    void openNextImage();
+    void openPrevImage();
+    void selectImage(const Glib::ustring& fname, bool doScroll = true);
+
     void copyProfile ();
     void pasteProfile ();
     void partPasteProfile ();
-    void selectImage (Glib::ustring fname);
-    void openNextPreviousEditorImage (Glib::ustring fname, eRTNav eNextPrevious);
+    void openNextPreviousEditorImage(const Glib::ustring& fname, eRTNav eNextPrevious);
 
 #ifdef WIN32
     void openDefaultViewer (int destination);
 #endif
 
     void thumbRearrangementNeeded () override;
-    void _thumbRearrangementNeeded ();
 
     void selectionChanged () override;
 

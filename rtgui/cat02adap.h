@@ -62,9 +62,7 @@ public:
 
     void enabledChanged();
     void cat02AmountChanged(int amount, bool ciecamEnabled);
-    bool cat02AmountComputed_();
     void cat02LuminanceScalingChanged(double scaling);
-    bool cat02LuminanceScalingComputed_();
 
     void trimValues(rtengine::procparams::ProcParams* pp);
 };

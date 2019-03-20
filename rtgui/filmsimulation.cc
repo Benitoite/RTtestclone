@@ -1,12 +1,13 @@
+#include <chrono>
 #include <map>
 #include <set>
 
 #include "filmsimulation.h"
 
-#include <chrono>
-
 #include "options.h"
+
 #include "../rtengine/clutstore.h"
+#include "../rtengine/procparams.h"
 
 using namespace rtengine;
 using namespace rtengine::procparams;
@@ -262,10 +263,17 @@ void ClutComboBox::setBatchMode(bool yes)
 }
 
 
+void ClutComboBox::cleanup()
+{
+    cm.reset();
+    cm2.reset();
+}
+
+
 void ClutComboBox::updateUnchangedEntry()
 {
     auto c = m_model()->children();
-    
+
     if (batchMode) {
         if (c.empty() || c[c.size()-1][m_columns().clutFilename] != "NULL") {
             Gtk::TreeModel::Row row = *(m_model()->append());

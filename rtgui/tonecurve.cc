@@ -16,13 +16,18 @@
  *  You should have received a copy of the GNU General Public License
  *  along with RawTherapee.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "tonecurve.h"
-#include "adjuster.h"
-#include <sigc++/slot.h>
 #include <iomanip>
-#include "ppversion.h"
+
+#include <sigc++/slot.h>
+
+#include "tonecurve.h"
+
+#include "adjuster.h"
 #include "edit.h"
 #include "eventmapper.h"
+#include "ppversion.h"
+
+#include "../rtengine/procparams.h"
 
 using namespace rtengine;
 using namespace rtengine::procparams;
@@ -45,7 +50,7 @@ ToneCurve::ToneCurve () : FoldableToolPanel(this, "tonecurve", M("TP_EXPOSURE_LA
     pack_start(*clampOOG);
     pack_start (*Gtk::manage (new  Gtk::HSeparator()));
     clampOOG->signal_toggled().connect(sigc::mem_fun(*this, &ToneCurve::clampOOGChanged));
-    
+
 //----------- Auto Levels ----------------------------------
     abox = Gtk::manage (new Gtk::HBox ());
     abox->set_spacing (4);
@@ -238,7 +243,7 @@ void ToneCurve::read (const ProcParams* pp, const ParamsEdited* pedited)
     if (!black->getAddMode() && !batchMode) {
         shcompr->set_sensitive(!((int)black->getValue () == 0));    //at black=0 shcompr value has no effect
     }
-    
+
     if (!hlcompr->getAddMode() && !batchMode) {
         hlcomprthresh->set_sensitive(!((int)hlcompr->getValue () == 0));    //at hlcompr=0 hlcomprthresh value has no effect
     }
@@ -347,33 +352,33 @@ void ToneCurve::write (ProcParams* pp, ParamsEdited* pedited)
     int tcMode = toneCurveMode->get_active_row_number();
 
     if      (tcMode == 0) {
-        pp->toneCurve.curveMode = ToneCurveParams::TcMode::STD;
+        pp->toneCurve.curveMode = ToneCurveMode::STD;
     } else if (tcMode == 1) {
-        pp->toneCurve.curveMode = ToneCurveParams::TcMode::WEIGHTEDSTD;
+        pp->toneCurve.curveMode = ToneCurveMode::WEIGHTEDSTD;
     } else if (tcMode == 2) {
-        pp->toneCurve.curveMode = ToneCurveParams::TcMode::FILMLIKE;
+        pp->toneCurve.curveMode = ToneCurveMode::FILMLIKE;
     } else if (tcMode == 3) {
-        pp->toneCurve.curveMode = ToneCurveParams::TcMode::SATANDVALBLENDING;
+        pp->toneCurve.curveMode = ToneCurveMode::SATANDVALBLENDING;
     } else if (tcMode == 4) {
-        pp->toneCurve.curveMode = ToneCurveParams::TcMode::LUMINANCE;
+        pp->toneCurve.curveMode = ToneCurveMode::LUMINANCE;
     } else if (tcMode == 5) {
-        pp->toneCurve.curveMode = ToneCurveParams::TcMode::PERCEPTUAL;
+        pp->toneCurve.curveMode = ToneCurveMode::PERCEPTUAL;
     }
 
     tcMode = toneCurveMode2->get_active_row_number();
 
     if      (tcMode == 0) {
-        pp->toneCurve.curveMode2 = ToneCurveParams::TcMode::STD;
+        pp->toneCurve.curveMode2 = ToneCurveMode::STD;
     } else if (tcMode == 1) {
-        pp->toneCurve.curveMode2 = ToneCurveParams::TcMode::WEIGHTEDSTD;
+        pp->toneCurve.curveMode2 = ToneCurveMode::WEIGHTEDSTD;
     } else if (tcMode == 2) {
-        pp->toneCurve.curveMode2 = ToneCurveParams::TcMode::FILMLIKE;
+        pp->toneCurve.curveMode2 = ToneCurveMode::FILMLIKE;
     } else if (tcMode == 3) {
-        pp->toneCurve.curveMode2 = ToneCurveParams::TcMode::SATANDVALBLENDING;
+        pp->toneCurve.curveMode2 = ToneCurveMode::SATANDVALBLENDING;
     } else if (tcMode == 4) {
-        pp->toneCurve.curveMode2 = ToneCurveParams::TcMode::LUMINANCE;
+        pp->toneCurve.curveMode2 = ToneCurveMode::LUMINANCE;
     } else if (tcMode == 5) {
-        pp->toneCurve.curveMode2 = ToneCurveParams::TcMode::PERCEPTUAL;
+        pp->toneCurve.curveMode2 = ToneCurveMode::PERCEPTUAL;
     }
 
     pp->toneCurve.histmatching = histmatching->get_active();
@@ -604,7 +609,7 @@ void ToneCurve::adjusterChanged(Adjuster* a, double newval)
     if (a != expcomp && a != hlcompr && a != hlcomprthresh) {
         setHistmatching(false);
     }
-    
+
     Glib::ustring costr;
 
     if (a == expcomp) {
@@ -629,7 +634,7 @@ void ToneCurve::adjusterChanged(Adjuster* a, double newval)
         listener->panelChanged (EvSaturation, costr);
     } else if (a == hlcompr) {
         listener->panelChanged (EvHLCompr, costr);
-        
+
         if (!hlcompr->getAddMode() && !batchMode) {
             hlcomprthresh->set_sensitive(!((int)hlcompr->getValue () == 0));    //at hlcompr=0 hlcomprthresh value has no effect
         }
@@ -650,7 +655,7 @@ void ToneCurve::neutral_pressed ()
 // and sets neutral values to params in exposure panel
 
     setHistmatching(false);
-    
+
     if (batchMode) {
         autolevels->set_inconsistent (false);
         autoconn.block (true);
@@ -680,7 +685,7 @@ void ToneCurve::neutral_pressed ()
     if (!black->getAddMode() && !batchMode) {
         shcompr->set_sensitive(!((int)black->getValue () == 0));    //at black=0 shcompr value has no effect
     }
-    
+
     if (!hlcompr->getAddMode() && !batchMode) {
         hlcomprthresh->set_sensitive(!((int)hlcompr->getValue () == 0));    //at hlcompr=0 hlcomprthresh value has no effect
     }
@@ -754,7 +759,7 @@ void ToneCurve::autolevels_toggled ()
             if (!black->getAddMode()) {
                 shcompr->set_sensitive(!((int)black->getValue () == 0));    //at black=0 shcompr value has no effect
             }
-            
+
             if (!hlcompr->getAddMode() && !batchMode) {
                 hlcomprthresh->set_sensitive(!((int)hlcompr->getValue () == 0));    //at hlcompr=0 hlcomprthresh value has no effect
             }
@@ -830,41 +835,6 @@ void ToneCurve::enableAll ()
     hrenabled->set_sensitive(true);
     method->set_sensitive(true);
     histmatching->set_sensitive(true);
-}
-
-bool ToneCurve::autoExpComputed_ ()
-{
-
-    GThreadLock lock; // All GUI access from idle_add callbacks or separate thread HAVE to be protected
-    disableListener ();
-    enableAll ();
-    expcomp->setValue (nextExpcomp);
-    brightness->setValue (nextBrightness);
-    contrast->setValue (nextContrast);
-    black->setValue (nextBlack);
-    hlcompr->setValue (nextHlcompr);
-    hlcomprthresh->setValue (nextHlcomprthresh);
-    enaconn.block (true);
-    hrenabled->set_active (nextHLRecons);
-    enaconn.block (false);
-
-    if (nextHLRecons) {
-        hlrbox->show();
-    } else if (!batchMode) {
-        hlrbox->hide();
-    }
-
-    if (!black->getAddMode() && !batchMode) {
-        shcompr->set_sensitive(!((int)black->getValue () == 0));    //at black=0 shcompr value has no effect
-    }
-    
-    if (!hlcompr->getAddMode() && !batchMode) {
-        hlcomprthresh->set_sensitive(!((int)hlcompr->getValue () == 0));    //at hlcompr=0 hlcomprthresh value has no effect
-    }
-
-    enableListener ();
-
-    return false;
 }
 
 void ToneCurve::setBatchMode (bool batchMode)
@@ -967,42 +937,6 @@ void ToneCurve::histmatchingToggled()
     }
 }
 
-bool ToneCurve::histmatchingComputed()
-{
-    GThreadLock lock;
-    disableListener();
-    enableAll();
-    brightness->setValue(0);
-    contrast->setValue(0);
-    black->setValue(0);
-
-    if (!black->getAddMode() && !batchMode) {
-        shcompr->set_sensitive(!((int)black->getValue() == 0));
-    }
-    
-    if (!hlcompr->getAddMode() && !batchMode) {
-        hlcomprthresh->set_sensitive(!((int)hlcompr->getValue () == 0));    //at hlcompr=0 hlcomprthresh value has no effect
-    }
-
-    if (autolevels->get_active() ) {
-        expcomp->setValue(0);
-        autoconn.block(true);
-        autolevels->set_active(false);
-        autoconn.block(false);
-        autolevels->set_inconsistent(false);
-    }
-
-    toneCurveMode->set_active(rtengine::toUnderlying(nextToneCurveMode));
-    shape->setCurve(nextToneCurve);
-    shape2->setCurve({ DCT_Linear });
-    shape->openIfNonlinear();
-
-    enableListener();
-    fromHistMatching = true;
-
-    return false;
-}
-
 void ToneCurve::autoExpChanged(double expcomp, int bright, int contr, int black, int hlcompr, int hlcomprthresh, bool hlrecons)
 {
     nextBlack = black;
@@ -1013,25 +947,83 @@ void ToneCurve::autoExpChanged(double expcomp, int bright, int contr, int black,
     nextHlcomprthresh = hlcomprthresh;
     nextHLRecons = hlrecons;
 
-    const auto func = [](gpointer data) -> gboolean {
-        static_cast<ToneCurve*>(data)->autoExpComputed_();
+    idle_register.add(
+        [this]() -> bool
+        {
+            GThreadLock lock; // All GUI access from idle_add callbacks or separate thread HAVE to be protected
+            // FIXME: We don't need the GThreadLock, don't we?
+            disableListener();
+            enableAll();
+            this->expcomp->setValue(nextExpcomp);
+            brightness->setValue(nextBrightness);
+            contrast->setValue(nextContrast);
+            this->black->setValue(nextBlack);
+            this->hlcompr->setValue(nextHlcompr);
+            this->hlcomprthresh->setValue(nextHlcomprthresh);
+            enaconn.block(true);
+            hrenabled->set_active(nextHLRecons);
+            enaconn.block(false);
 
-        return FALSE;
-    };
+            if (nextHLRecons) {
+                hlrbox->show();
+            } else if (!batchMode) {
+                hlrbox->hide();
+            }
 
-    idle_register.add(func, this);
+            if (!this->black->getAddMode() && !batchMode) {
+                shcompr->set_sensitive(static_cast<int>(this->black->getValue()));    //at black=0 shcompr value has no effect
+            }
+
+            if (!this->hlcompr->getAddMode() && !batchMode) {
+                this->hlcomprthresh->set_sensitive(static_cast<int>(this->hlcompr->getValue()));    //at hlcompr=0 hlcomprthresh value has no effect
+            }
+
+            enableListener();
+            return false;
+        }
+    );
 }
 
-void ToneCurve::autoMatchedToneCurveChanged(rtengine::procparams::ToneCurveParams::TcMode curveMode, const std::vector<double>& curve)
+void ToneCurve::autoMatchedToneCurveChanged(rtengine::procparams::ToneCurveMode curveMode, const std::vector<double>& curve)
 {
     nextToneCurveMode = curveMode;
     nextToneCurve = curve;
 
-    const auto func = [](gpointer data) -> gboolean {
-        static_cast<ToneCurve*>(data)->histmatchingComputed();
+    idle_register.add(
+        [this]() -> bool
+        {
+            GThreadLock lock; // FIXME: Obsolete
+            disableListener();
+            enableAll();
+            brightness->setValue(0);
+            contrast->setValue(0);
+            black->setValue(0);
 
-        return FALSE;
-    };
+            if (!black->getAddMode() && !batchMode) {
+                shcompr->set_sensitive(static_cast<int>(black->getValue()));
+            }
 
-    idle_register.add(func, this);
+            if (!hlcompr->getAddMode() && !batchMode) {
+                hlcomprthresh->set_sensitive(static_cast<int>(hlcompr->getValue()));    //at hlcompr=0 hlcomprthresh value has no effect
+            }
+
+            if (autolevels->get_active() ) {
+                expcomp->setValue(0);
+                autoconn.block(true);
+                autolevels->set_active(false);
+                autoconn.block(false);
+                autolevels->set_inconsistent(false);
+            }
+
+            toneCurveMode->set_active(rtengine::toUnderlying(nextToneCurveMode));
+            shape->setCurve(nextToneCurve);
+            shape2->setCurve({DCT_Linear});
+            shape->openIfNonlinear();
+
+            enableListener();
+            fromHistMatching = true;
+
+            return false;
+        }
+    );
 }

@@ -27,6 +27,7 @@
 #include "alignedbuffer.h"
 #include "rt_math.h"
 #include "color.h"
+#include "procparams.h"
 
 using namespace rtengine;
 
@@ -108,8 +109,6 @@ void Imagefloat::setScanline (int row, unsigned char* buffer, int bps, unsigned 
 }
 
 
-namespace rtengine { extern void filmlike_clip(float *r, float *g, float *b); }
-
 void Imagefloat::getScanline (int row, unsigned char* buffer, int bps, bool isFloat) const
 {
 
@@ -143,9 +142,6 @@ void Imagefloat::getScanline (int row, unsigned char* buffer, int bps, bool isFl
             float ri = r(row, i);
             float gi = g(row, i);
             float bi = b(row, i);
-            if (ri > 65535.f || gi > 65535.f || bi > 65535.f) {
-                filmlike_clip(&ri, &gi, &bi);
-            }
             if (bps == 16) {
                 sbuffer[ix++] = CLIP(ri);
                 sbuffer[ix++] = CLIP(gi);
@@ -444,11 +440,15 @@ void Imagefloat::calcCroppedHistogram(const ProcParams &params, float scale, LUT
     int x1, x2, y1, y2;
     params.crop.mapToResized(width, height, scale, x1, x2, y1, y2);
 
+#ifdef _OPENMP
     #pragma omp parallel
+#endif
     {
         LUTu histThr(65536);
         histThr.clear();
+#ifdef _OPENMP
         #pragma omp for nowait
+#endif
 
         for (int y = y1; y < y2; y++) {
             for (int x = x1; x < x2; x++) {
@@ -464,7 +464,9 @@ void Imagefloat::calcCroppedHistogram(const ProcParams &params, float scale, LUT
             }
         }
 
+#ifdef _OPENMP
         #pragma omp critical
+#endif
         {
             for(int i = 0; i <= 0xffff; i++) {
                 hist[i] += histThr[i];
@@ -498,7 +500,6 @@ void Imagefloat::ExecCMSTransform(cmsHTRANSFORM hTransform)
                 *(p++) = *(pR++);
                 *(p++) = *(pG++);
                 *(p++) = *(pB++);
-				
             }
 
             cmsDoTransform (hTransform, pBuf.data, pBuf.data, width);

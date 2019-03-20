@@ -41,6 +41,7 @@
 #include "clutstore.h"
 #include "ciecam02.h"
 #include "StopWatch.h"
+#include "procparams.h"
 #include "../rtgui/ppversion.h"
 #include "../rtgui/guiutils.h"
 
@@ -205,33 +206,31 @@ void proPhotoBlue(float *rtemp, float *gtemp, float *btemp, int istart, int tH, 
     }
 }
 
-void customToneCurve(const ToneCurve &customToneCurve, ToneCurveParams::TcMode curveMode, float *rtemp, float *gtemp, float *btemp, int istart, int tH, int jstart, int tW, int tileSize, PerceptualToneCurveState ptcApplyState) {
+void customToneCurve(const ToneCurve &customToneCurve, ToneCurveMode curveMode, float *rtemp, float *gtemp, float *btemp, int istart, int tH, int jstart, int tW, int tileSize, PerceptualToneCurveState ptcApplyState) {
 
-    if (curveMode == ToneCurveParams::TcMode::STD) { // Standard
+    if (curveMode == ToneCurveMode::STD) { // Standard
         const StandardToneCurve& userToneCurve = static_cast<const StandardToneCurve&> (customToneCurve);
         for (int i = istart, ti = 0; i < tH; i++, ti++) {
             userToneCurve.BatchApply(0, tW - jstart, &rtemp[ti * tileSize], &gtemp[ti * tileSize], &btemp[ti * tileSize]);
         }
-    } else if (curveMode == ToneCurveParams::TcMode::FILMLIKE) { // Adobe like
+    } else if (curveMode == ToneCurveMode::FILMLIKE) { // Adobe like
         const AdobeToneCurve& userToneCurve = static_cast<const AdobeToneCurve&> (customToneCurve);
         for (int i = istart, ti = 0; i < tH; i++, ti++) {
-            for (int j = jstart, tj = 0; j < tW; j++, tj++) {
-                userToneCurve.Apply(rtemp[ti * tileSize + tj], gtemp[ti * tileSize + tj], btemp[ti * tileSize + tj]);
-            }
+            userToneCurve.BatchApply(0, tW - jstart, &rtemp[ti * tileSize], &gtemp[ti * tileSize], &btemp[ti * tileSize]);
         }
-    } else if (curveMode == ToneCurveParams::TcMode::SATANDVALBLENDING) { // apply the curve on the saturation and value channels
+    } else if (curveMode == ToneCurveMode::SATANDVALBLENDING) { // apply the curve on the saturation and value channels
         const SatAndValueBlendingToneCurve& userToneCurve = static_cast<const SatAndValueBlendingToneCurve&> (customToneCurve);
         for (int i = istart, ti = 0; i < tH; i++, ti++) {
             for (int j = jstart, tj = 0; j < tW; j++, tj++) {
                 userToneCurve.Apply(rtemp[ti * tileSize + tj], gtemp[ti * tileSize + tj], btemp[ti * tileSize + tj]);
             }
         }
-    } else if (curveMode == ToneCurveParams::TcMode::WEIGHTEDSTD) { // apply the curve to the rgb channels, weighted
+    } else if (curveMode == ToneCurveMode::WEIGHTEDSTD) { // apply the curve to the rgb channels, weighted
         const WeightedStdToneCurve& userToneCurve = static_cast<const WeightedStdToneCurve&> (customToneCurve);
         for (int i = istart, ti = 0; i < tH; i++, ti++) {
             userToneCurve.BatchApply(0, tW - jstart, &rtemp[ti * tileSize], &gtemp[ti * tileSize], &btemp[ti * tileSize]);
         }
-    } else if (curveMode == ToneCurveParams::TcMode::LUMINANCE) { // apply the curve to the luminance channel
+    } else if (curveMode == ToneCurveMode::LUMINANCE) { // apply the curve to the luminance channel
         const LuminanceToneCurve& userToneCurve = static_cast<const LuminanceToneCurve&> (customToneCurve);
 
         for (int i = istart, ti = 0; i < tH; i++, ti++) {
@@ -239,7 +238,7 @@ void customToneCurve(const ToneCurve &customToneCurve, ToneCurveParams::TcMode c
                 userToneCurve.Apply(rtemp[ti * tileSize + tj], gtemp[ti * tileSize + tj], btemp[ti * tileSize + tj]);
             }
         }
-    } else if (curveMode == ToneCurveParams::TcMode::PERCEPTUAL) { // apply curve while keeping color appearance constant
+    } else if (curveMode == ToneCurveMode::PERCEPTUAL) { // apply curve while keeping color appearance constant
         const PerceptualToneCurve& userToneCurve = static_cast<const PerceptualToneCurve&> (customToneCurve);
         for (int i = istart, ti = 0; i < tH; i++, ti++) {
             userToneCurve.BatchApply(0, tW - jstart, &rtemp[ti * tileSize], &gtemp[ti * tileSize], &btemp[ti * tileSize], ptcApplyState);
@@ -322,7 +321,7 @@ void ImProcFunctions::updateColorProfiles (const Glib::ustring& monitorProfile, 
                 if (settings->printerBPC) {
                     flags |= cmsFLAGS_BLACKPOINTCOMPENSATION;
                 }
-                outIntent = settings->printerIntent;
+                outIntent = RenderingIntent(settings->printerIntent);
             } else {
                 oprof = ICCStore::getInstance()->getProfile(params->icm.outputProfile);
                 if (params->icm.outputBPC) {
@@ -338,13 +337,38 @@ void ImProcFunctions::updateColorProfiles (const Glib::ustring& monitorProfile, 
                 //     flags |= cmsFLAGS_GAMUTCHECK;
                 // }
 
+                const auto make_gamma_table =
+                    [](cmsHPROFILE prof, cmsTagSignature tag) -> void
+                    {
+                        cmsToneCurve *tc = static_cast<cmsToneCurve *>(cmsReadTag(prof, tag));
+                        if (tc) {
+                            const cmsUInt16Number *table = cmsGetToneCurveEstimatedTable(tc);
+                            cmsToneCurve *tc16 = cmsBuildTabulatedToneCurve16(nullptr, cmsGetToneCurveEstimatedTableEntries(tc), table);
+                            if (tc16) {
+                                cmsWriteTag(prof, tag, tc16);
+                                cmsFreeToneCurve(tc16);
+                            }
+                        }
+                    };
+
+                cmsHPROFILE softproof = ProfileContent(oprof).toProfile();
+                if (softproof) {
+                    make_gamma_table(softproof, cmsSigRedTRCTag);
+                    make_gamma_table(softproof, cmsSigGreenTRCTag);
+                    make_gamma_table(softproof, cmsSigBlueTRCTag);
+                }
+
                 monitorTransform = cmsCreateProofingTransform (
                                        iprof, TYPE_Lab_FLT,
                                        monitor, TYPE_RGB_FLT,
-                                       oprof,
+                                       softproof, //oprof,
                                        monitorIntent, outIntent,
                                        flags
                                    );
+
+                if (softproof) {
+                    cmsCloseProfile(softproof);
+                }
 
                 if (monitorTransform) {
                     softProofCreated = true;
@@ -752,7 +776,9 @@ void ImProcFunctions::ciecam_02float (CieImage* ncie, float adap, int pW, int pw
                     hist16Qthr.clear();
                 }
 
+#ifdef _OPENMP
                 #pragma omp for reduction(+:sum)
+#endif
 
 
                 for (int i = 0; i < height; i++)
@@ -821,7 +847,9 @@ void ImProcFunctions::ciecam_02float (CieImage* ncie, float adap, int pW, int pw
                         //can be used in case of...
                     }
 
+#ifdef _OPENMP
                 #pragma omp critical
+#endif
                 {
                     if (needJ) {
                         hist16J += hist16Jthr;
@@ -970,7 +998,9 @@ void ImProcFunctions::ciecam_02float (CieImage* ncie, float adap, int pW, int pw
         int bufferLength = ((width + 3) / 4) * 4; // bufferLength has to be a multiple of 4
 #endif
 #ifndef _DEBUG
+#ifdef _OPENMP
         #pragma omp parallel
+#endif
 #endif
         {
             float minQThr = 10000.f;
@@ -985,7 +1015,9 @@ void ImProcFunctions::ciecam_02float (CieImage* ncie, float adap, int pW, int pw
             float sbuffer[bufferLength] ALIGNED16;
 #endif
 #ifndef _DEBUG
+#ifdef _OPENMP
             #pragma omp for schedule(dynamic, 16)
+#endif
 #endif
 
             for (int i = 0; i < height; i++) {
@@ -1593,7 +1625,9 @@ void ImProcFunctions::ciecam_02float (CieImage* ncie, float adap, int pW, int pw
 #endif
             }
 
+#ifdef _OPENMP
             #pragma omp critical
+#endif
             {
                 if (minQThr < minQ) {
                     minQ = minQThr;
@@ -1706,11 +1740,15 @@ void ImProcFunctions::ciecam_02float (CieImage* ncie, float adap, int pW, int pw
 
 
 #ifndef _DEBUG
+#ifdef _OPENMP
                 #pragma omp parallel
+#endif
 #endif
                 {
 #ifndef _DEBUG
+#ifdef _OPENMP
                     #pragma omp for schedule(dynamic, 10)
+#endif
 #endif
 
                     for (int i = 0; i < height; i++) // update CieImages with new values after sharpening, defringe, contrast by detail level
@@ -1743,7 +1781,9 @@ void ImProcFunctions::ciecam_02float (CieImage* ncie, float adap, int pW, int pw
             const float co_e = (pow_F (f_l, 0.25f)) + eps;
 
 #ifndef _DEBUG
+#ifdef _OPENMP
             #pragma omp parallel
+#endif
 #endif
             {
 #ifdef __SSE2__
@@ -1757,7 +1797,9 @@ void ImProcFunctions::ciecam_02float (CieImage* ncie, float adap, int pW, int pw
 #endif
 
 #ifndef _DEBUG
+#ifdef _OPENMP
                 #pragma omp for schedule(dynamic, 10)
+#endif
 #endif
 
                 for (int i = 0; i < height; i++) { // update CIECAM with new values after tone-mapping
@@ -2009,17 +2051,24 @@ filmlike_clip (float *r, float *g, float *b)
 
 void ImProcFunctions::rgbProc (Imagefloat* working, LabImage* lab, PipetteBuffer *pipetteBuffer, LUTf & hltonecurve, LUTf & shtonecurve, LUTf & tonecurve,
                                int sat, LUTf & rCurve, LUTf & gCurve, LUTf & bCurve, float satLimit, float satLimitOpacity, const ColorGradientCurve & ctColorCurve, const OpacityCurve & ctOpacityCurve, bool opautili,  LUTf & clToningcurve, LUTf & cl2Toningcurve,
-                               const ToneCurve & customToneCurve1, const ToneCurve & customToneCurve2, const ToneCurve & customToneCurvebw1, const ToneCurve & customToneCurvebw2, double &rrm, double &ggm, double &bbm, float &autor, float &autog, float &autob, DCPProfile *dcpProf, const DCPProfile::ApplyState &asIn, LUTu &histToneCurve )
+                               const ToneCurve & customToneCurve1, const ToneCurve & customToneCurve2, const ToneCurve & customToneCurvebw1, const ToneCurve & customToneCurvebw2, double &rrm, double &ggm, double &bbm, float &autor, float &autog, float &autob, DCPProfile *dcpProf, const DCPProfile::ApplyState &asIn, LUTu &histToneCurve, size_t chunkSize, bool measure)
 {
-    rgbProc (working, lab, pipetteBuffer, hltonecurve, shtonecurve, tonecurve, sat, rCurve, gCurve, bCurve, satLimit, satLimitOpacity, ctColorCurve, ctOpacityCurve, opautili, clToningcurve, cl2Toningcurve, customToneCurve1, customToneCurve2,  customToneCurvebw1, customToneCurvebw2, rrm, ggm, bbm, autor, autog, autob, params->toneCurve.expcomp, params->toneCurve.hlcompr, params->toneCurve.hlcomprthresh, dcpProf, asIn, histToneCurve);
+    rgbProc (working, lab, pipetteBuffer, hltonecurve, shtonecurve, tonecurve, sat, rCurve, gCurve, bCurve, satLimit, satLimitOpacity, ctColorCurve, ctOpacityCurve, opautili, clToningcurve, cl2Toningcurve, customToneCurve1, customToneCurve2,  customToneCurvebw1, customToneCurvebw2, rrm, ggm, bbm, autor, autog, autob, params->toneCurve.expcomp, params->toneCurve.hlcompr, params->toneCurve.hlcomprthresh, dcpProf, asIn, histToneCurve, chunkSize, measure);
 }
 
 // Process RGB image and convert to LAB space
 void ImProcFunctions::rgbProc (Imagefloat* working, LabImage* lab, PipetteBuffer *pipetteBuffer, LUTf & hltonecurve, LUTf & shtonecurve, LUTf & tonecurve,
                                int sat, LUTf & rCurve, LUTf & gCurve, LUTf & bCurve, float satLimit, float satLimitOpacity, const ColorGradientCurve & ctColorCurve, const OpacityCurve & ctOpacityCurve, bool opautili, LUTf & clToningcurve, LUTf & cl2Toningcurve,
-                               const ToneCurve & customToneCurve1, const ToneCurve & customToneCurve2,  const ToneCurve & customToneCurvebw1, const ToneCurve & customToneCurvebw2, double &rrm, double &ggm, double &bbm, float &autor, float &autog, float &autob, double expcomp, int hlcompr, int hlcomprthresh, DCPProfile *dcpProf, const DCPProfile::ApplyState &asIn, LUTu &histToneCurve )
+                               const ToneCurve & customToneCurve1, const ToneCurve & customToneCurve2,  const ToneCurve & customToneCurvebw1, const ToneCurve & customToneCurvebw2, double &rrm, double &ggm, double &bbm, float &autor, float &autog, float &autob, double expcomp, int hlcompr, int hlcomprthresh, DCPProfile *dcpProf, const DCPProfile::ApplyState &asIn, LUTu &histToneCurve, size_t chunkSize, bool measure)
 {
-    BENCHFUN
+
+    std::unique_ptr<StopWatch> stop;
+
+    if (measure) {
+        std::cout << "rgb processing " << working->getWidth() << "x" << working->getHeight() << " image with " << chunkSize << " tiles per thread" << std::endl;
+        stop.reset(new StopWatch("rgb processing"));
+    }
+
     Imagefloat *tmpImage = nullptr;
 
     Imagefloat* editImgFloat = nullptr;
@@ -2182,8 +2231,8 @@ void ImProcFunctions::rgbProc (Imagefloat* working, LabImage* lab, PipetteBuffer
     const float hlrange = 65536.0 - shoulder;
     const bool isProPhoto = (params->icm.workingProfile == "ProPhoto");
     // extracting datas from 'params' to avoid cache flush (to be confirmed)
-    ToneCurveParams::TcMode curveMode = params->toneCurve.curveMode;
-    ToneCurveParams::TcMode curveMode2 = params->toneCurve.curveMode2;
+    ToneCurveMode curveMode = params->toneCurve.curveMode;
+    ToneCurveMode curveMode2 = params->toneCurve.curveMode2;
     bool highlight = params->toneCurve.hrenabled;//Get the value if "highlight reconstruction" is activated
     bool hasToneCurve1 = bool (customToneCurve1);
     bool hasToneCurve2 = bool (customToneCurve2);
@@ -2195,12 +2244,12 @@ void ImProcFunctions::rgbProc (Imagefloat* working, LabImage* lab, PipetteBuffer
 
     PerceptualToneCurveState ptc1ApplyState, ptc2ApplyState;
 
-    if (hasToneCurve1 && curveMode == ToneCurveParams::TcMode::PERCEPTUAL) {
+    if (hasToneCurve1 && curveMode == ToneCurveMode::PERCEPTUAL) {
         const PerceptualToneCurve& userToneCurve = static_cast<const PerceptualToneCurve&> (customToneCurve1);
         userToneCurve.initApplyState (ptc1ApplyState, params->icm.workingProfile);
     }
 
-    if (hasToneCurve2 && curveMode2 == ToneCurveParams::TcMode::PERCEPTUAL) {
+    if (hasToneCurve2 && curveMode2 == ToneCurveMode::PERCEPTUAL) {
         const PerceptualToneCurve& userToneCurve = static_cast<const PerceptualToneCurve&> (customToneCurve2);
         userToneCurve.initApplyState (ptc2ApplyState, params->icm.workingProfile);
     }
@@ -2389,7 +2438,7 @@ void ImProcFunctions::rgbProc (Imagefloat* working, LabImage* lab, PipetteBuffer
         }
 
 #ifdef _OPENMP
-        #pragma omp for schedule(dynamic) collapse(2)
+        #pragma omp for schedule(dynamic, chunkSize) collapse(2)
 #endif
 
         for (int ii = 0; ii < working->getHeight(); ii += TS)
@@ -4095,7 +4144,9 @@ void ImProcFunctions::luminanceCurve (LabImage* lold, LabImage* lnew, LUTf & cur
     int W = lold->W;
     int H = lold->H;
 
+#ifdef _OPENMP
     #pragma omp parallel for if (multiThread)
+#endif
 
     for (int i = 0; i < H; i++)
         for (int j = 0; j < W; j++) {
@@ -4244,17 +4295,8 @@ void ImProcFunctions::chromiLuminanceCurve (PipetteBuffer *pipetteBuffer, int pW
     }
 
 
-    LUTu hist16Clad;
-    LUTu hist16Llad;
-
-    //preparate for histograms CIECAM
-    if (pW != 1) { //only with improccoordinator
-        hist16Clad (65536);
-        hist16Clad.clear();
-        hist16Llad (65536);
-        hist16Llad.clear();
-
-    }
+    const float histLFactor = pW != 1 ? histLCurve.getSize() / 100.f : 1.f;
+    const float histCFactor = pW != 1 ? histCCurve.getSize() / 48000.f : 1.f;
 
 #ifdef _DEBUG
     MyTime t1e, t2e;
@@ -4361,17 +4403,21 @@ void ImProcFunctions::chromiLuminanceCurve (PipetteBuffer *pipetteBuffer, int pW
         {wprof[2][0], wprof[2][1], wprof[2][2]}
     };
 
+#ifdef _OPENMP
 #ifdef _DEBUG
     #pragma omp parallel default(shared) firstprivate(lold, lnew, MunsDebugInfo, pW) if (multiThread)
 #else
     #pragma omp parallel if (multiThread)
+#endif
 #endif
     {
 #ifdef __SSE2__
         float HHBuffer[W] ALIGNED16;
         float CCBuffer[W] ALIGNED16;
 #endif
+#ifdef _OPENMP
         #pragma omp for schedule(dynamic, 16)
+#endif
 
         for (int i = 0; i < H; i++) {
             if (avoidColorShift)
@@ -4750,8 +4796,7 @@ void ImProcFunctions::chromiLuminanceCurve (PipetteBuffer *pipetteBuffer, int pW
 
                 //update histogram C
                 if (pW != 1) { //only with improccoordinator
-                    int posp = (int)sqrt (atmp * atmp + btmp * btmp);
-                    hist16Clad[posp]++;
+                    histCCurve[histCFactor * sqrt(atmp * atmp + btmp * btmp)]++;
                 }
 
                 if (editPipette && editID == EUID_Lab_LCCurve) {
@@ -4806,8 +4851,7 @@ void ImProcFunctions::chromiLuminanceCurve (PipetteBuffer *pipetteBuffer, int pW
 
                 //update histo LC
                 if (pW != 1) { //only with improccoordinator
-                    int posl = Lprov1 * 327.68f;
-                    hist16Llad[posl]++;
+                    histLCurve[Lprov1 * histLFactor]++;
                 }
 
                 Chprov1 = sqrt (SQR (atmp) + SQR (btmp)) / 327.68f;
@@ -4893,13 +4937,6 @@ void ImProcFunctions::chromiLuminanceCurve (PipetteBuffer *pipetteBuffer, int pW
             }
         }
     } // end of parallelization
-
-    if (pW != 1) { //only with improccoordinator
-        //update histogram C  with data chromaticity and not with CC curve
-        hist16Clad.compressTo (histCCurve);
-        //update histogram L with data luminance
-        hist16Llad.compressTo (histLCurve);
-    }
 
 #ifdef _DEBUG
 
@@ -5111,7 +5148,9 @@ void ImProcFunctions::EPDToneMapCIE (CieImage *ncie, float a_w, float c_, int Wi
 
     EdgePreservingDecomposition epd (Wid, Hei);
 
+#ifdef _OPENMP
     #pragma omp parallel for
+#endif
 
     for (int i = 0; i < Hei; i++)
         for (int j = 0; j < Wid; j++) {
@@ -5137,7 +5176,9 @@ void ImProcFunctions::EPDToneMapCIE (CieImage *ncie, float a_w, float c_, int Wi
     //Restore past range, also desaturate a bit per Mantiuk's Color correction for tone mapping.
     float s = (1.0f + 38.7889f) * powf (Compression, 1.5856f) / (1.0f + 38.7889f * powf (Compression, 1.5856f));
 #ifndef _DEBUG
+#ifdef _OPENMP
     #pragma omp parallel for schedule(dynamic,10)
+#endif
 #endif
 
     for (int i = 0; i < Hei; i++)
@@ -5218,11 +5259,15 @@ void ImProcFunctions::EPDToneMap (LabImage *lab, unsigned int Iterates, int skip
     //Due to the taking of logarithms, L must be nonnegative. Further, scale to 0 to 1 using nominal range of L, 0 to 15 bit.
     float minL = FLT_MAX;
     float maxL = 0.f;
+#ifdef _OPENMP
     #pragma omp parallel
+#endif
     {
         float lminL = FLT_MAX;
         float lmaxL = 0.f;
+#ifdef _OPENMP
         #pragma omp for
+#endif
 
         for (size_t i = 0; i < N; i++) {
             if (L[i] < lminL) {
@@ -5234,7 +5279,9 @@ void ImProcFunctions::EPDToneMap (LabImage *lab, unsigned int Iterates, int skip
             }
         }
 
+#ifdef _OPENMP
         #pragma omp critical
+#endif
         {
             if (lminL < minL) {
                 minL = lminL;
@@ -5254,7 +5301,9 @@ void ImProcFunctions::EPDToneMap (LabImage *lab, unsigned int Iterates, int skip
         maxL = 1.f;
     }
 
+#ifdef _OPENMP
     #pragma omp parallel for
+#endif
 
     for (size_t i = 0; i < N; ++i)
         //{L[i] = (L[i] - minL)/32767.0f;
@@ -5315,7 +5364,7 @@ void ImProcFunctions::getAutoExp  (const LUTu &histogram, int histcompr, double 
     histogram.getSumAndAverage (sum, ave);
 
     //find median of luminance
-    int median = 0, count = histogram[0];
+    size_t median = 0, count = histogram[0];
 
     while (count < sum / 2) {
         median++;
