@@ -327,6 +327,55 @@ public:
     static const double ColabSkin70_7_32_spect[97];//Skin L 77
     static const double ColabSky60_0_m31_spect[97];//Sky L=60
     static const double ColabSky42_0_m24_spect[97];//Sky L=42
+    static const double J570_BlueB6_spect[97];//blue Cyan
+    static const double J570_BlueB15_spect[97];//blue Cyan
+    static const double J570_BlueC2_spect[97];//blue Cyan
+    static const double J570_BlueC14_spect[97];//blue Cyan
+    static const double J570_BlueC16_spect[97];//blue Cyan
+    static const double J570_BlueF1_spect[97];//blue Cyan
+    static const double J570_BlueF2_spect[97];//blue Cyan
+    static const double J570_BlueF10_spect[97];//blue Cyan
+    static const double J570_BlueF13_spect[97];//blue Cyan
+    static const double J570_BlueG9_spect[97];//blue Cyan
+    static const double J570_BlueG19_spect[97];//blue Cyan
+    static const double J570_BlueI5_spect[97];//blue Cyan
+    static const double J570_BlueH15_spect[97];//blue Cyan
+    static const double J570_BlueI3_spect[97];//blue Cyan
+    static const double J570_BlueI19_spect[97];//blue Cyan
+    static const double J570_BlueJ4_spect[97];//blue Cyan
+    static const double J570_BlueJ6_spect[97];//blue Cyan
+    static const double J570_BlueJ11_spect[97];//blue Cyan
+    static const double J570_BlueJ13_spect[97];//blue Cyan
+    static const double J570_BlueK5_spect[97];//blue Cyan
+    static const double J570_BlueN1_spect[97];//blue Cyan
+    static const double J570_BlueN4_spect[97];//blue Cyan
+    static const double J570_BlueO19_spect[97];//blue Cyan
+    static const double J570_BlueU8_spect[97];//blue Cyan
+    static const double J570_NeuN8_spect[97];//neutral
+    static const double J570_NeuN9_spect[97];//neutral
+    static const double J570_NeuO8_spect[97];//neutral
+    static const double J570_NeuO11_spect[97];//neutral
+    static const double J570_NeuD5_spect[97];//neutral
+    static const double J570_NeuE11_spect[97];//neutral
+    static const double J570_NeuK16_spect[97];//neutral
+    static const double J570_NeuM3_spect[97];//neutral
+    static const double J570_NeuN18_spect[97];//neutral
+    static const double J570_NeuQ1_spect[97];//neutral
+    static const double J570_NeuS7_spect[97];//neutral
+    static const double J570_NeuV10_spect[97];//neutral
+    static const double J570_NeuW18_spect[97];//neutral
+    static const double J570_NeuZ14_spect[97];//neutral
+    static const double J570_NeuC18_spect[97];//neutral
+    static const double J570_NeuD17_spect[97];//neutral
+    static const double J570_NeuJ11_spect[97];//neutral
+    static const double J570_NeuL4_spect[97];//neutral
+    static const double Colorlab_n72_n2_spect[97];
+    static const double Colorlab_10_n70_spect[97];
+    static const double Colorlab_n33_n70_spect[97];
+    static const double Colorlab_n8_n74_spect[97];
+    static const double Colorlab_19_n69_spect[97];
+    static const double Colorlab_n80_10_spect[97];
+    static const double Colorlab_n80_26_spect[97];
 
     static void spectrum_to_xyz_daylight(double _m1, double _m2, double &x, double &y, double &z);
     static void spectrum_to_xyz_blackbody(double _temp, double &x, double &y, double &z);

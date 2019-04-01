@@ -279,11 +279,11 @@ void ImProcCoordinator::updatePreviewImage(int todo, Crop* cropCall)
         todo |= M_INIT;
 
         bool autowb0 = false;
-      //  bool autoitc = false;
+        //  bool autoitc = false;
         autowb0 = (params.wb.method == "autold" || params.wb.method == "aut"  || params.wb.method == "autosdw" || params.wb.method == "autedgsdw" || params.wb.method == "autitcgreen" || params.wb.method == "autedgrob" || params.wb.method == "autedg" || params.wb.method == "autorobust");
-      //  autoitc = (params.wb.method == "autitcgreen");
-      //  bool gamma = false;
-      //  bool cat = false;
+        //  autoitc = (params.wb.method == "autitcgreen");
+        //  bool gamma = false;
+        //  bool cat = false;
 //        if (params.wb.wbcat02Method == "cam" && autoitc) {
 //            cat = true;
 //        }
@@ -360,12 +360,12 @@ void ImProcCoordinator::updatePreviewImage(int todo, Crop* cropCall)
                 // imgsrc->getAutoWBMultipliers (rm, gm, bm);
 
                 currWBitc = imgsrc->getWB();
-                double tempref = currWBitc.getTemp();
+                double tempref = currWBitc.getTemp() * (1. + params.wb.tempBias);
                 double greenref = currWBitc.getGreen();
-               // printf("tempref=%f greref=%f\n", tempref, greenref);
+                // printf("tempref=%f greref=%f\n", tempref, greenref);
 
                 imgsrc->getAutoWBMultipliersloc(tempref, greenref, tempitc, greenitc, studgood, 0, 0, fh, fw, 0, 0, fh, fw, rm, gm, bm, params.localwb, params.wb, params.icm, params.raw);
-               // printf("studgoodimproc=%f \n", studgood);
+                // printf("studgoodimproc=%f \n", studgood);
 
                 if (params.wb.method ==  "autitcgreen") {
                     params.wb.temperature = tempitc;
@@ -375,7 +375,13 @@ void ImProcCoordinator::updatePreviewImage(int todo, Crop* cropCall)
                 }
 
                 if (rm != -1.) {
-                    autoWB.update(rm, gm, bm, params.wb.equal, params.wb.tempBias);
+                    double bias = params.wb.tempBias;
+
+                    if (params.wb.method ==  "autitcgreen") {
+                        bias = 0.;
+                    }
+
+                    autoWB.update(rm, gm, bm, params.wb.equal, bias);
                     //double temper = autoWB.getTemp();
                     //double gre = autoWB.getGreen();
                     //printf("temper=%f gre=%f \n", temper, gre);

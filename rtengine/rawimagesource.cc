@@ -7284,19 +7284,19 @@ void RawImageSource::ItcWB(bool extra, double &tempref, double &greenref, const 
     /*
     copyright Jacques Desmis 6 - 2018 jdesmis@gmail.com
 
-    This algorithm try to find temperature correlation between 20 to 40 color between 98 spectral color and about 20 to 40 color found in the image, I just found the idea in the web "correlate with chroma" instead of RGB grey point,but I don't use any algo found on the web.
+    This algorithm try to find temperature correlation between 20 to 200 color between 200 spectral color and about 20 to 55 color found in the image, I just found the idea in the web "correlate with chroma" instead of RGB grey point,but I don't use any algo found on the web.
 
     I have test many many algo to find the first one that work :)
     Probably (sure) there are improvment to do...
 
     I have create a table temperature with temp and white point with 100 values between 2000K and 12000K we can obviously  change these values, more...with different steps
-    I have create or recuparate and transformed 155 spectral colors from Colorchecker24, others color and my 468 colors target, or from web flowers, etc. with a step of 5nm, I think it is largey enough.
-    I think this value of 155 is now complete: I tested correlation with 60, 90, 100, 120, 155...better student increase with number of color, but now it seems stabilized
+    I have create or recuparate and transformed 200 spectral colors from Colorchecker24, others color and my 468 colors target, or from web flowers, etc. with a step of 5nm, I think it is largey enough.
+    I think this value of 200 is now complete: I tested correlation with 60, 90, 100, 120, 155...better student increase with number of color, but now it seems stabilized
     Of course we can increase this number :)
 
     1) for the cuurent raw file we create a table for each temp of RGB multipliers
     2) then, I choose the "camera temp" to initialize calculation (why not)
-    3) for this temp, I calculated XYZ values for the 98 spectrals datas
+    3) for this temp, I calculated XYZ values for the 200 spectrals datas
     4) then I create for the image an "histogram", but for xyY (Cie 1931 color space)
     5) for each pixel (in fact to accelerate only 1/10 for and 1/10 for y), I determine for each couple xy, the number of occurences
     6) I sort this result in ascending order
@@ -7332,12 +7332,13 @@ void RawImageSource::ItcWB(bool extra, double &tempref, double &greenref, const 
     You must avoid when illuminant is non standard (fluorescent, LED...) and also, when the subject is lost in the image (some target to generate profiles).
 
     You can change 4 parameters in option.cc
-    Itcwb_thres : 20 by default ==> number of color used in final algorithm - between 10 and max 40
+    Itcwb_thres : 34 by default ==> number of color used in final algorithm - between 10 and max 55
     Itcwb_sort : false by default, can improve algo if true, ==> sort value in something near chroma order, instead of histogram number
     Itcwb_greenrange : 0 amplitude of green variation - between 0 to 2
     Itcwb_greendeltatemp : 1 - delta temp in green iterate loop for "extra" - between 0 to 4
     Itcwb_forceextra : false - if true force algorithm "extra" ("extra" is used when cmaera wbsettings are wrong) to all images
-
+    Itcwb_sizereference : 3 by default, can be set to 5 ==> size of reference color comapre to size of histogram real color
+    itcwb_delta : 1 by defaut can be set between 0 to 5 ==> delta temp to build histogram xy - if camera temp is not probably good
     */
     BENCHFUN
     TMatrix wprof = ICCStore::getInstance()->workingSpaceMatrix("sRGB");
@@ -7692,7 +7693,7 @@ void RawImageSource::ItcWB(bool extra, double &tempref, double &greenref, const 
     int *good_spectral = nullptr;
     // float studgood = 1000.f;
 
-    int Nc = 155 + 1;//155 number of reference spectral colors, I think it is enough to retrieve good values
+    int Nc = 200 + 1;//200 number of reference spectral colors, I think it is enough to retrieve good values
     Tx = new float*[Nc];
 
     for (int i = 0; i < Nc; i++) {
@@ -7845,10 +7846,10 @@ void RawImageSource::ItcWB(bool extra, double &tempref, double &greenref, const 
     bool separated = true;
     int w = -1;
     //printf("greenrefraw=%f\n", greenref);
-    reff_spect_xxyy(N_t, 2 * Nc);
-    reff_spect_xxyy_prov(N_t, 2 * Nc);
-    reff_spect_yy_camera(N_t, 2 * Nc);
-    reff_spect_xx_camera(N_t, 2 * Nc);
+    reff_spect_xxyy(N_t, 2 * Nc + 2);
+    reff_spect_xxyy_prov(N_t, 2 * Nc + 2);
+    reff_spect_yy_camera(N_t, 2 * Nc + 2);
+    reff_spect_xx_camera(N_t, 2 * Nc + 2);
 
     // reffYY(N_t, 2 * Nc);//in case of
     //reffYY_prov(N_t, 2 * Nc);
@@ -7866,34 +7867,60 @@ void RawImageSource::ItcWB(bool extra, double &tempref, double &greenref, const 
             reff_spect_yy_camera[j][repref] = TY[j] / (TX[j] + TY[j] +  TZ[j]); // y from xyY
         }
 
-        //initialize calculation of xy current for tempref
-        for (int y = 0; y < bfh ; y += 10) {
-            for (int x = 0; x < bfw ; x += 10) {
-                int yy = y / 10;
-                int xx = x / 10 ;
-                float x_c = 0.f, y_c = 0.f, Y_c = 0.f;
-                float x_x = 0.f, y_y = 0.f, z_z = 0.f;
-                float RR =  rmm[repref] * redloc[y][x];
-                float GG =  gmm[repref] * greenloc[y][x];
-                float BB =  bmm[repref] * blueloc[y][x];
-                Color::rgbxyY(RR, GG, BB, x_c, y_c, Y_c, x_x, y_y, z_z, wp);
-                xc[yy][xx] = x_c;
-                yc[yy][xx] = y_c;
-                Yc[yy][xx] = Y_c;
+        int deltarepref = settings->itcwb_delta;
+
+        for (int nn = 0; nn <= 2; nn++) {
+            //three loop to refine color if temp camera is probably not very good
+            int drep = 0;
+
+            if (nn == 0) {
+                drep = -deltarepref;
             }
 
+            if (nn == 2) {
+                drep = +deltarepref;
+            }
+
+            int rep = repref + drep;
+
+            if (rep > N_t) {
+                rep = N_t;
+            }
+
+            if (rep < 0) {
+                rep = 0;
+            }
+
+            //initialize calculation of xy current for tempref
+            for (int y = 0; y < bfh ; y += 10) {
+                for (int x = 0; x < bfw ; x += 10) {
+                    int yy = y / 10;
+                    int xx = x / 10 ;
+                    float x_c = 0.f, y_c = 0.f, Y_c = 0.f;
+                    float x_x = 0.f, y_y = 0.f, z_z = 0.f;
+                    float RR =  rmm[rep] * redloc[y][x];
+                    float GG =  gmm[rep] * greenloc[y][x];
+                    float BB =  bmm[rep] * blueloc[y][x];
+                    Color::rgbxyY(RR, GG, BB, x_c, y_c, Y_c, x_x, y_y, z_z, wp);
+                    xc[yy][xx] = x_c;
+                    yc[yy][xx] = y_c;
+                    Yc[yy][xx] = Y_c;
+                }
+
+            }
+
+            //histogram xy depend of temp...but in most cases D45 ..D65..
+            //calculate for this image the mean values for each family of color, near histogram x y (number)
+            //xy vary from x 0..0.77  y 0..0.82
+            //neutral values are near x=0.34 0.33 0.315 0.37 y =0.35 0.36 0.34
+            //skin are about x 0.45  0.49 y 0.4 0.47
+            //blue sky x=0.25 y=0.28  and x=0.29 y=0.32
+            // step about 0.02   x 0.32 0.34  y= 0.34 0.36 skin    --  sky x 0.24 0.30 y 0.28 0.32
+            //big step about 0.2
+
+            histoxyY(bfhitc, bfwitc, xc, yc, Yc, xxx,  yyy, YYY, histxy, area, inter);
         }
 
-        //histogram xy depend of temp...but in most cases D45 ..D65..
-        //calculate for this image the mean values for each family of color, near histogram x y (number)
-        //xy vary from x 0..0.77  y 0..0.82
-        //neutral values are near x=0.34 0.33 0.315 0.37 y =0.35 0.36 0.34
-        //skin are about x 0.45  0.49 y 0.4 0.47
-        //blue sky x=0.25 y=0.28  and x=0.29 y=0.32
-        // step about 0.02   x 0.32 0.34  y= 0.34 0.36 skin    --  sky x 0.24 0.30 y 0.28 0.32
-        //big step about 0.2
-
-        histoxyY(bfhitc, bfwitc, xc, yc, Yc, xxx,  yyy, YYY, histxy, area, inter);
         //calculate x y Y
         int sizcurrref = siza;//choice of number of correlate colors in image
         histcurrref(N_t, sizcurrref);
@@ -7923,6 +7950,10 @@ void RawImageSource::ItcWB(bool extra, double &tempref, double &greenref, const 
 
         //sort in ascending order
         std::sort(Wbhis, Wbhis + siza, Wbhis[0]);
+
+        for (int nh = 0; nh < siza; nh++) {
+            printf("nh=%i", Wbhis[nh].index);
+        }
 
         //part to improve
         for (int nh = 0; nh < siza; nh++) {
@@ -7967,8 +7998,8 @@ void RawImageSource::ItcWB(bool extra, double &tempref, double &greenref, const 
         printf("sizcurr2ref=%i sizcur_30=%i siecur_4=%i \n", sizcurr2ref, sizcu30, sizcu4);
         sizcu4 = sizcu30;//arbitrary mini size if 30 result, ==> in full image 3000 pixels
 
-        if (sizcu4 > 40) {
-            sizcu4 = 40;
+        if (sizcu4 > 55) {
+            sizcu4 = 55;
         }
 
         chrom wbchro[sizcu4];
@@ -7983,7 +8014,7 @@ void RawImageSource::ItcWB(bool extra, double &tempref, double &greenref, const 
             xx_curref[j][repref] = xxx[Wbhis[siza - (j + 1)].index] / histcurrref[j][repref];
             yy_curref[j][repref] = yyy[Wbhis[siza - (j + 1)].index] / histcurrref[j][repref];
             YY_curref[j][repref] = YYY[Wbhis[siza - (j + 1)].index] / histcurrref[j][repref];
-
+            printf("xx=%f yy=%f\n", xx_curref[j][repref], yy_curref[j][repref]);
         }
 
         estimchrom = 0.f;
@@ -8018,8 +8049,8 @@ void RawImageSource::ItcWB(bool extra, double &tempref, double &greenref, const 
             maxval = 10;
         }
 
-        if (maxval > 40) {
-            maxval = 40;
+        if (maxval > 55) {
+            maxval = 55;
         }
 
         if (sizcurr2ref > maxval) {
@@ -8039,24 +8070,40 @@ void RawImageSource::ItcWB(bool extra, double &tempref, double &greenref, const 
         }
 
         //calculate deltaE xx to find best values of spectrals datas
+        int maxnb = settings->itcwb_sizereference;
 
-        for (int i = 0; i < w; i++) {
-            float mindeltaE = 100000.f;
-            int kN = 0;
+        if (maxnb > 5) {
+            maxnb = 5;
+        }
 
-            for (int j = 0; j < Nc ; j++) {
-                if (good_spectral[j] == 0) {
-                    float deltaE = SQR(xx_curref_reduc[i][repref] -  reff_spect_xx_camera[j][repref]) + SQR(yy_curref_reduc[i][repref] -  reff_spect_yy_camera[j][repref]);
+        if (maxnb < 1) {
+            maxnb = 1;
+        }
 
-                    if (deltaE < mindeltaE) {
-                        mindeltaE = deltaE;
-                        kN = j;
+
+        if (settings->itcwb_thres > 39) {
+            maxnb = 200 / settings->itcwb_thres;
+        }
+
+        for (int nb = 1; nb <= maxnb; nb ++) { //max 5 iterations for Itcwb_thres=33, after trial 3 is good in most cases but in some cases 5
+            for (int i = 0; i < w; i++) {
+                float mindeltaE = 100000.f;
+                int kN = 0;
+
+                for (int j = 0; j < Nc ; j++) {
+                    if (good_spectral[j] == 0) {
+                        float deltaE = SQR(xx_curref_reduc[i][repref] -  reff_spect_xx_camera[j][repref]) + SQR(yy_curref_reduc[i][repref] -  reff_spect_yy_camera[j][repref]);
+
+                        if (deltaE < mindeltaE) {
+                            mindeltaE = deltaE;
+                            kN = j;
+                        }
                     }
                 }
-            }
 
-            good_spectral[kN] = 1;//good spectral are spectral color that match color histogram xy
-            //printf("k=%i ", kN);
+                good_spectral[kN] = 1;//good spectral are spectral color that match color histogram xy
+                //printf("k=%i ", kN);
+            }
         }
 
 //reconvert to RGB for "reduction"
