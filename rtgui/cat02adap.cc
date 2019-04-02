@@ -222,10 +222,13 @@ void CAT02Adaptation::adjusterAutoToggled(Adjuster* a, bool newval)
     }
 }
 
-void CAT02Adaptation::cat02AmountChanged(int amount, bool ciecamEnabled)
+void CAT02Adaptation::cat02AmountChanged(int amoun, bool ciecamEnabled)
 {
         idle_register.add(
-        [this, amount, ciecamEnabled]() -> bool {
+        [this, amoun, ciecamEnabled]() -> bool {
+            int amo = amoun;
+            amount->setValue(amo);
+
             bool necie = ciecamEnabled;
             if (necie) {
                 labena->show();

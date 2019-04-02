@@ -61,7 +61,7 @@ public:
     void adjusterChanged2(ThresholdAdjuster* a, int newBottomL, int newTopL, int newBottomR, int newTopR);
 
     void enabledChanged();
-    void cat02AmountChanged(int amount, bool ciecamEnabled);
+    void cat02AmountChanged(int amoun, bool ciecamEnabled);
     void cat02LuminanceScalingChanged(double scaling);
 
     void trimValues(rtengine::procparams::ProcParams* pp);
