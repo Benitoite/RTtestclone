@@ -1,7 +1,7 @@
 /*
  *  This file is part of RawTherapee.
  *
- *  Copyright (c) 2004-2010 Gabor Horvath <hgabor@rawtherapee.com>
+ *  Copyright (c) 2019 Jean-Christophe FRISCH <natureh.510@gmail.com>
  *
  *  RawTherapee is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -17,114 +17,10 @@
  *  along with RawTherapee.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "edit.h"
-
-ObjectMOBuffer::ObjectMOBuffer(EditDataProvider *dataProvider) : objectMap(nullptr), objectMode(OM_255), dataProvider(dataProvider) {}
-
-ObjectMOBuffer::~ObjectMOBuffer()
-{
-    flush();
-}
-
-
-/* Upgrade or downgrade the objectModeType */
-void ObjectMOBuffer::setObjectMode(ObjectMode newType)
-{
-    if (!objectMap) {
-        objectMode = newType;
-        return;
-    }
-
-    int w = objectMap->get_width ();
-    int h = objectMap->get_height ();
-    if (w && h) {
-        switch (newType) {
-        case (OM_255):
-            if (objectMode==OM_65535) {
-                objectMap->unreference();
-                objectMap = Cairo::ImageSurface::create(Cairo::FORMAT_A8, w, h);
-            }
-            break;
-
-        case (OM_65535):
-            if (objectMode==OM_255) {
-                objectMap->unreference();
-                objectMap = Cairo::ImageSurface::create(Cairo::FORMAT_RGB16_565, w, h);
-            }
-            break;
-        }
-    }
-    objectMode = newType;
-}
-
-void ObjectMOBuffer::flush()
-{
-    if (objectMap ) {
-        objectMap.clear();
-    }
-}
-
-EditSubscriber *ObjectMOBuffer::getEditSubscriber () {
-    if (dataProvider) {
-        return dataProvider->getCurrSubscriber();
-    } else {
-        return nullptr;
-    }
-}
-
-
-// Resize buffers if they already exist
-void ObjectMOBuffer::resize(int newWidth, int newHeight)
-{
-    if (!dataProvider) {
-        return;
-    }
-
-    if (const auto currSubscriber = dataProvider->getCurrSubscriber ()) {
-        if (currSubscriber->getEditingType() == ET_OBJECTS) {
-            if (objectMap && (objectMap->get_width() != newWidth || objectMap->get_height() != newHeight)) {
-                objectMap.clear();
-            }
-
-            if (!objectMap && newWidth>0 && newHeight>0) {
-                objectMap = Cairo::ImageSurface::create(objectMode==OM_255?Cairo::FORMAT_A8:Cairo::FORMAT_RGB16_565, newWidth, newHeight);
-            }
-
-        } else {
-            flush();
-        }
-    } else {
-        flush();
-    }
-}
-
-int ObjectMOBuffer::getObjectID(const rtengine::Coord& location)
-{
-    int id = 0;
-
-    if (!objectMap || location.x < 0 || location.y < 0 || location.x >= objectMap->get_width() || location.y >= objectMap->get_height()) {
-        return -1;
-    }
-
-    if (objectMode == OM_255) {
-        id = (unsigned char)(*( objectMap->get_data() + location.y * objectMap->get_stride() + location.x ));
-    } else {
-        id = (unsigned short)(*( objectMap->get_data() + location.y * objectMap->get_stride() + location.x ));
-    }
-
-    return id - 1;
-}
-
-bool ObjectMOBuffer::bufferCreated()
-{
-    EditSubscriber* subscriber;
-
-    if (dataProvider && (subscriber = dataProvider->getCurrSubscriber())) {
-        return subscriber->getEditingType() == ET_OBJECTS ? bool(objectMap) : false;
-    }
-
-    return false;
-}
+#include "editwidgets.h"
+#include "editbuffer.h"
+#include "editcallbacks.h"
+#include "../rtengine/rt_math.h"
 
 RGBColor Geometry::getInnerLineColor ()
 {
@@ -835,23 +731,23 @@ OPIcon::OPIcon(Glib::ustring normalImage, Glib::ustring activeImage, Glib::ustri
                Glib::ustring  draggedImage, Glib::ustring insensitiveImage, DrivenPoint drivenPoint) : drivenPoint(drivenPoint)
 {
     if (!normalImage.empty()) {
-        normalImg->setImage(normalImage);
+        normalImg = Cairo::RefPtr<RTSurface>(new RTSurface(normalImage));
     }
 
     if (!prelightImage.empty()) {
-        prelightImg->setImage(prelightImage);
+        prelightImg = Cairo::RefPtr<RTSurface>(new RTSurface(prelightImage));
     }
 
     if (!activeImage.empty()) {
-        activeImg->setImage(activeImage);
+        activeImg = Cairo::RefPtr<RTSurface>(new RTSurface(activeImage));
     }
 
     if (!draggedImage.empty()) {
-        draggedImg->setImage(draggedImage);
+        draggedImg = Cairo::RefPtr<RTSurface>(new RTSurface(draggedImage));
     }
 
     if (!insensitiveImage.empty()) {
-        insensitiveImg->setImage(insensitiveImage);
+        insensitiveImg = Cairo::RefPtr<RTSurface>(new RTSurface(insensitiveImage));
     }
 }
 
@@ -1037,117 +933,3 @@ void OPIcon::drawToMOChannel(Cairo::RefPtr<Cairo::Context> &cr, unsigned short i
 }
 
 #endif
-
-EditSubscriber::EditSubscriber (EditType editType) : ID(EUID_None), editingType(editType), bufferType(BT_SINGLEPLANE_FLOAT), provider(nullptr), action(ES_ACTION_NONE) {}
-
-void EditSubscriber::setEditProvider(EditDataProvider *provider)
-{
-    this->provider = provider;
-}
-
-void EditSubscriber::setEditID(EditUniqueID ID, BufferType buffType)
-{
-    this->ID = ID;
-    bufferType = buffType;
-}
-
-bool EditSubscriber::isCurrentSubscriber()
-{
-    //if (provider && provider->getCurrSubscriber())
-    //  return provider->getCurrSubscriber()->getEditID() == ID;
-
-    if (provider) {
-        return provider->getCurrSubscriber() == this;
-    }
-
-    return false;
-}
-
-void EditSubscriber::subscribe()
-{
-    if (provider) {
-        provider->subscribe(this);
-    }
-}
-
-void EditSubscriber::unsubscribe()
-{
-    if (provider) {
-        provider->unsubscribe();
-    }
-}
-
-void EditSubscriber::switchOffEditMode()
-{
-    unsubscribe();
-}
-
-EditUniqueID EditSubscriber::getEditID()
-{
-    return ID;
-}
-
-EditType EditSubscriber::getEditingType()
-{
-    return editingType;
-}
-
-BufferType EditSubscriber::getPipetteBufferType()
-{
-    return bufferType;
-}
-
-bool EditSubscriber::isDragging()
-{
-    return action == ES_ACTION_DRAGGING;
-}
-
-bool EditSubscriber::isPicking()
-{
-    return action == ES_ACTION_PICKING;
-}
-
-//--------------------------------------------------------------------------------------------------
-
-
-EditDataProvider::EditDataProvider() : currSubscriber(nullptr), object(0), posScreen(-1, -1), posImage(-1, -1),
-    deltaScreen(0, 0), deltaImage(0, 0), deltaPrevScreen(0, 0), deltaPrevImage(0, 0)
-{
-    pipetteVal[0] = pipetteVal[1] = pipetteVal[2] = 0.f;
-}
-
-void EditDataProvider::subscribe(EditSubscriber *subscriber)
-{
-    if (currSubscriber) {
-        currSubscriber->switchOffEditMode();
-    }
-
-    currSubscriber = subscriber;
-}
-
-void EditDataProvider::unsubscribe()
-{
-    currSubscriber = nullptr;
-}
-
-void EditDataProvider::switchOffEditMode()
-{
-    if (currSubscriber) {
-        currSubscriber->switchOffEditMode ();
-    }
-}
-
-CursorShape EditDataProvider::getCursor(int objectID)
-{
-    if (currSubscriber) {
-        currSubscriber->getCursor(objectID);
-    }
-
-    return CSHandOpen;
-}
-
-EditSubscriber* EditDataProvider::getCurrSubscriber()
-{
-    return currSubscriber;
-}
-

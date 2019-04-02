@@ -1,7 +1,7 @@
 /*
  *  This file is part of RawTherapee.
  *
- *  Copyright (c) 2004-2010 Gabor Horvath <hgabor@rawtherapee.com>
+ *  Copyright (c) 2019 Jean-Christophe FRISCH <natureh.510@gmail.com>
  *
  *  RawTherapee is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -17,21 +17,15 @@
  *  along with RawTherapee.  If not, see <http://www.gnu.org/licenses/>.
  */
 #pragma once
-#include <gtkmm.h>
-#include "../rtengine/imagefloat.h"
-#include "editid.h"
-#include "cursormanager.h"
-#include "../rtengine/rt_math.h"
-#include "../rtengine/coord.h"
-#include "guiutils.h"
-#include "options.h"
 
 #ifdef GUIVERSION
-#include "rtsurface.h"
-#endif
 
-class EditDataProvider;
-class EditSubscriber;
+#include "rtsurface.h"
+#include "editbuffer.h"
+#include "editcoordsys.h"
+#include "../rtengine/coord.h"
+
+class ObjectMOBuffer;
 
 /** @file
  *
@@ -157,79 +151,6 @@ class EditSubscriber;
  *
  */
 
-
-
-class ObjectMOBuffer
-{
-private:
-
-    // Used to draw the objects where the color correspond to the object's ID, in order to find the correct object when hovering
-    Cairo::RefPtr<Cairo::ImageSurface> objectMap;
-    ObjectMode objectMode;
-
-protected:
-
-    // To avoid duplicated information, we points to a EditDataProvider that contains the current EditSubscriber
-    // instead of pointing to the EditSubscriber directly
-    EditDataProvider* dataProvider;
-
-    void createBuffer(int width, int height);
-    void resize(int newWidth, int newHeight);
-    void flush();
-    EditSubscriber *getEditSubscriber ();
-
-public:
-    explicit ObjectMOBuffer (EditDataProvider *dataProvider);
-    ~ObjectMOBuffer();
-
-    EditDataProvider* getDataProvider ();
-    void setObjectMode (ObjectMode newType);
-    ObjectMode getObjectMode ();
-
-    Cairo::RefPtr<Cairo::ImageSurface>& getObjectMap ();
-
-    // return true if the buffer has been allocated
-    bool bufferCreated();
-
-    int getObjectID(const rtengine::Coord& location);
-};
-
-
-/** @brief Coordinate system where the widgets will be drawn
- *
- * The EditCoordSystem is used to define a screen and an image coordinate system.
- */
-class EditCoordSystem
-{
-public:
-    virtual ~EditCoordSystem() {}
-
-    /// Convert the widget's DrawingArea (i.e. preview area) coords to the edit buffer coords
-    virtual void screenCoordToCropBuffer (int phyx, int phyy, int& cropx, int& cropy) = 0;
-    /// Convert the widget's DrawingArea (i.e. preview area) coords to the full image coords
-    virtual void screenCoordToImage (int phyx, int phyy, int& imgx, int& imgy) = 0;
-    /// Convert the image coords to the widget's DrawingArea (i.e. preview area) coords
-    virtual void imageCoordToScreen (int imgx, int imgy, int& phyx, int& phyy) = 0;
-    /// Convert the image coords to the crop's canvas coords (full image + padding)
-    virtual void imageCoordToCropCanvas (int imgx, int imgy, int& phyx, int& phyy) = 0;
-    /// Convert the image coords to the edit buffer coords  (includes borders)
-    virtual void imageCoordToCropBuffer (int imgx, int imgy, int& phyx, int& phyy) = 0;
-    /// Convert the image coords to the displayed image coords  (no borders here)
-    virtual void imageCoordToCropImage (int imgx, int imgy, int& phyx, int& phyy) = 0;
-    /// Convert a size value from the preview's scale to the image's scale
-    virtual int scaleValueToImage (int value) = 0;
-    /// Convert a size value from the preview's scale to the image's scale
-    virtual float scaleValueToImage (float value) = 0;
-    /// Convert a size value from the preview's scale to the image's scale
-    virtual double scaleValueToImage (double value) = 0;
-    /// Convert a size value from the image's scale to the preview's scale
-    virtual int scaleValueToCanvas (int value) = 0;
-    /// Convert a size value from the image's scale to the preview's scale
-    virtual float scaleValueToCanvas (float value) = 0;
-    /// Convert a size value from the image's scale to the preview's scale
-    virtual double scaleValueToCanvas (double value) = 0;
-};
-
 class RGBColor
 {
     double r;
@@ -338,8 +259,6 @@ public:
     virtual void drawToMOChannel   (Cairo::RefPtr<Cairo::Context> &cr, unsigned short id, ObjectMOBuffer *objectBuffer, EditCoordSystem &coordSystem) = 0;
 };
 
-#ifdef GUIVERSION
-
 class Circle : public Geometry
 {
 public:
@@ -444,173 +363,6 @@ class OPAdjuster : public Geometry    // OP stands for "On Preview"
 {
 
 };
-
-#endif
-
-/// @brief Method for client tools needing Edit information
-class EditSubscriber
-{
-
-public:
-
-private:
-    EditUniqueID ID; /// this will be used in improcfun to locate the data that has to be stored in the buffer; it must be unique in RT
-    EditType editingType;
-    BufferType bufferType;
-    EditDataProvider *provider;
-
-protected:
-    std::vector<Geometry*> visibleGeometry;    /// displayed geometry
-    std::vector<Geometry*> mouseOverGeometry;  /// mouseOver geometry, drawn in a hidden buffer
-    enum {
-        ES_ACTION_NONE,      ///
-        ES_ACTION_DRAGGING,  /// set action to this value in the buttonPressed event to start dragging and ask for drag event
-        ES_ACTION_PICKING    /// set action to this value in the buttonPressed event whenever the user is picking something through a single click. In this case, the pickX events will be called INSTEAD of buttonXReleased !
-    } action;                /// object mode only, ignored in Pipette mode
-
-public:
-    explicit EditSubscriber (EditType editType);
-    virtual ~EditSubscriber () {}
-
-    void               setEditProvider(EditDataProvider *provider);
-    EditDataProvider*  getEditProvider ();
-    void               setEditID(EditUniqueID ID, BufferType buffType);
-    bool               isCurrentSubscriber();
-    virtual void       subscribe();
-    virtual void       unsubscribe();
-    virtual void       switchOffEditMode ();    /// Occurs when the user want to stop the editing mode
-    EditUniqueID       getEditID();
-    EditType           getEditingType();
-    BufferType         getPipetteBufferType();
-    bool               isDragging();            /// Returns true if something is being dragged and drag events has to be sent (object mode only)
-    bool               isPicking();             /// Returns true if something is being picked
-
-    /** @brief Get the cursor to be displayed when above handles
-    @param objectID object currently "hovered" */
-    virtual CursorShape getCursor (const int objectID);
-
-    /** @brief Triggered when the mouse is moving over an object
-    This method is also triggered when the cursor is moving over the image in ET_PIPETTE mode
-    @param modifierKey Gtk's event modifier key (GDK_CONTROL_MASK | GDK_SHIFT_MASK | ...)
-    @return true if the preview has to be redrawn, false otherwise */
-    virtual bool mouseOver (const int modifierKey);
-
-    /** @brief Triggered when mouse button 1 is pressed, together with the CTRL modifier key if the subscriber is of type ET_PIPETTE
-    Once the key is pressed, RT will enter in drag1 mode on subsequent mouse movements
-    @param modifierKey Gtk's event modifier key (GDK_CONTROL_MASK | GDK_SHIFT_MASK | ...)
-    @return true if the preview has to be redrawn, false otherwise */
-    virtual bool button1Pressed (const int modifierKey);
-
-    /** @brief Triggered when mouse button 1 is released
-    @return true if the preview has to be redrawn, false otherwise */
-    virtual bool button1Released ();
-
-    /** @brief Triggered when mouse button 2 is pressed (middle button)
-    Once the key is pressed, RT will enter in drag2 mode on subsequent mouse movements
-    @param modifierKey Gtk's event modifier key (GDK_CONTROL_MASK | GDK_SHIFT_MASK | ...)
-    @return true if the preview has to be redrawn, false otherwise */
-    virtual bool button2Pressed (const int modifierKey);
-
-    /** @brief Triggered when mouse button 2 is released (middle button)
-    @return true if the preview has to be redrawn, false otherwise */
-    virtual bool button2Released ();
-
-    /** @brief Triggered when mouse button 3 is pressed (right button)
-    Once the key is pressed, RT will enter in drag3 mode on subsequent mouse movements
-    @param modifierKey Gtk's event modifier key (GDK_CONTROL_MASK | GDK_SHIFT_MASK | ...)
-    @return true if the preview has to be redrawn, false otherwise */
-    virtual bool button3Pressed (const int modifierKey);
-
-    /** @brief Triggered when mouse button 3 is released (right button)
-    @return true if the preview has to be redrawn, false otherwise */
-    virtual bool button3Released ();
-
-    /** @brief Triggered when the user is moving while holding down mouse button 1
-    @param modifierKey Gtk's event modifier key (GDK_CONTROL_MASK | GDK_SHIFT_MASK | ...)
-    @return true if the preview has to be redrawn, false otherwise */
-    virtual bool drag1 (const int modifierKey);
-
-    /** @brief Triggered when the user is moving while holding down mouse button 2
-    @param modifierKey Gtk's event modifier key (GDK_CONTROL_MASK | GDK_SHIFT_MASK | ...)
-    @return true if the preview has to be redrawn, false otherwise */
-    virtual bool drag2 (const int modifierKey);
-
-    /** @brief Triggered when the user is moving while holding down mouse button 3
-    @param modifierKey Gtk's event modifier key (GDK_CONTROL_MASK | GDK_SHIFT_MASK | ...)
-    @return true if the preview has to be redrawn, false otherwise */
-    virtual bool drag3 (const int modifierKey);
-
-    /** @brief Triggered when the user is releasing mouse button 1 while in action==ES_ACTION_PICKING mode
-    No modifier key is provided, since having a different modifier key than on button press will set picked to false.
-    @param picked True if the cursor is still above the the same object than on button pressed and with the same modifier keys.
-                  If false, the user moved the cursor away or the modifier key is different, so the element is considered as NOT selected.
-    @return true if the preview has to be redrawn, false otherwise */
-    virtual bool pick1 (const bool picked);
-
-    /** @brief Triggered when the user is releasing mouse button 2 while in action==ES_ACTION_PICKING mode
-    @param picked True if the cursor is still above the the same object than on button pressed and with the same modifier keys.
-                  If false, the user moved the cursor away or the modifier key is different, so the element is considered as NOT selected.
-    @return true if the preview has to be redrawn, false otherwise */
-    virtual bool pick2 (const bool picked);
-
-    /** @brief Triggered when the user is releasing mouse button 3 while in action==ES_ACTION_PICKING mode
-    @param picked True if the cursor is still above the the same object than on button pressed and with the same modifier keys.
-                  If false, the user moved the cursor away or the modifier key is different, so the element is considered as NOT selected.
-    @return true if the preview has to be redrawn, false otherwise */
-    virtual bool pick3 (const bool picked);
-
-    /** @brief Get the geometry to be shown to the user */
-    const std::vector<Geometry*>& getVisibleGeometry ();
-
-    /** @brief Get the geometry to be drawn in the "mouse over" channel, hidden from the user */
-    const std::vector<Geometry*>& getMouseOverGeometry ();
-};
-
-/** @brief Class to handle the furniture of data to the subscribers.
- *
- * It is admitted that only one Subscriber can ask data at a time. If the Subscriber is of type ET_PIPETTE, it will have to
- * trigger the usual event so that the image will be reprocessed to compute the buffer of the current subscriber.
- */
-class EditDataProvider
-{
-
-private:
-    EditSubscriber *currSubscriber;
-
-public:
-    int object;            /// ET_OBJECTS mode: Object detected under the cursor, 0 otherwise; ET_PIPETTE mode: 1 if above the image, 0 otherwise
-    float pipetteVal[3];   /// Current pipette values; if bufferType==BT_SINGLEPLANE_FLOAT, #2 & #3 will be set to 0
-
-    rtengine::Coord posScreen;       /// Location of the mouse button press, in preview image space
-    rtengine::Coord posImage;        /// Location of the mouse button press, in the full image space
-    rtengine::Coord deltaScreen;     /// Delta relative to posScreen
-    rtengine::Coord deltaImage;      /// Delta relative to posImage
-    rtengine::Coord deltaPrevScreen; /// Delta relative to the previous mouse location, in preview image space
-    rtengine::Coord deltaPrevImage;  /// Delta relative to the previous mouse location, in the full image space
-
-    EditDataProvider();
-    virtual ~EditDataProvider() {}
-
-    virtual void        subscribe(EditSubscriber *subscriber);
-    virtual void        unsubscribe();         /// Occurs when the subscriber has been switched off first
-    virtual void        switchOffEditMode ();  /// Occurs when the user want to stop the editing mode
-    virtual CursorShape getCursor(int objectID);
-    int                 getPipetteRectSize ();
-    EditSubscriber*     getCurrSubscriber();
-    virtual void        getImageSize (int &w, int&h) = 0;
-};
-
-inline EditDataProvider* ObjectMOBuffer::getDataProvider () {
-    return dataProvider;
-}
-
-inline ObjectMode ObjectMOBuffer::getObjectMode () {
-    return objectMode;
-}
-
-inline Cairo::RefPtr<Cairo::ImageSurface>& ObjectMOBuffer::getObjectMap () {
-    return objectMap;
-}
 
 inline void RGBColor::setColor (double r, double g, double b) {
     this->r = r;
@@ -718,78 +470,6 @@ inline void Geometry::setActive (bool active) {
     }
 }
 
-inline EditDataProvider* EditSubscriber::getEditProvider () {
-    return provider;
-}
-
-inline CursorShape EditSubscriber::getCursor (const int objectID) {
-    return CSHandOpen;
-}
-
-inline bool EditSubscriber::mouseOver (const int modifierKey) {
-    return false;
-}
-
-inline bool EditSubscriber::button1Pressed (const int modifierKey) {
-    return false;
-}
-
-inline bool EditSubscriber::button1Released () {
-    return false;
-}
-
-inline bool EditSubscriber::button2Pressed (const int modifierKey) {
-    return false;
-}
-
-inline bool EditSubscriber::button2Released () {
-    return false;
-}
-
-inline bool EditSubscriber::button3Pressed (const int modifierKey) {
-    return false;
-}
-
-inline bool EditSubscriber::button3Released () {
-    return false;
-}
-
-inline bool EditSubscriber::drag1 (const int modifierKey) {
-    return false;
-}
-
-inline bool EditSubscriber::drag2 (const int modifierKey) {
-    return false;
-}
-
-inline bool EditSubscriber::drag3 (const int modifierKey) {
-    return false;
-}
-
-inline bool EditSubscriber::pick1 (const bool picked) {
-    return false;
-}
-
-inline bool EditSubscriber::pick2 (const bool picked) {
-    return false;
-}
-
-inline bool EditSubscriber::pick3 (const bool picked) {
-    return false;
-}
-
-inline const std::vector<Geometry*>& EditSubscriber::getVisibleGeometry () {
-    return visibleGeometry;
-}
-
-inline const std::vector<Geometry*>& EditSubscriber::getMouseOverGeometry () {
-    return mouseOverGeometry;
-}
-
-inline int EditDataProvider::getPipetteRectSize () {
-    return 8; // TODO: make a GUI
-}
-
 inline Geometry::Geometry () :
         innerLineColor (char (255), char (255), char (255)), outerLineColor (
                 char (0), char (0), char (0)), flags (
@@ -820,8 +500,6 @@ inline RGBAColor::RGBAColor (double r, double g, double b, double a) :
 inline RGBAColor::RGBAColor (char r, char g, char b, char a) :
         RGBColor (r, g, b), a (double (a) / 255.) {
 }
-
-#ifdef GUIVERSION
 
 inline Circle::Circle () :
         center (100, 100), radius (10), filled (false), radiusInImageSpace (
@@ -861,3 +539,4 @@ inline Line::Line (int beginX, int beginY, int endX, int endY) :
 }
 
 #endif
+

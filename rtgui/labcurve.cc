@@ -20,10 +20,9 @@
 
 #include "labcurve.h"
 
-#include "edit.h"
-
 #include "../rtengine/improcfun.h"
 #include "../rtengine/procparams.h"
+#include "editcallbacks.h"
 
 using namespace rtengine;
 using namespace rtengine::procparams;
@@ -300,31 +299,31 @@ void LCurve::autoOpenCurve ()
     bool active = lshape->openIfNonlinear();
 
     if (!active) {
-        ashape->openIfNonlinear();
+        active = ashape->openIfNonlinear();
     }
 
     if (!active) {
-        bshape->openIfNonlinear();
+        active = bshape->openIfNonlinear();
     }
 
     if (!active) {
-        ccshape->openIfNonlinear();
+        active = ccshape->openIfNonlinear();
     }
 
     if (!active) {
-        chshape->openIfNonlinear();
+        active = chshape->openIfNonlinear();
     }
 
     if (!active) {
-        lhshape->openIfNonlinear();
+        active = lhshape->openIfNonlinear();
     }
 
     if (!active) {
-        hhshape->openIfNonlinear();
+        active = hhshape->openIfNonlinear();
     }
 
     if (!active) {
-        lcshape->openIfNonlinear();
+        active = lcshape->openIfNonlinear();
     }
 
     if (!active) {
