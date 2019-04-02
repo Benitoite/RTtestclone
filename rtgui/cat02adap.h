@@ -31,9 +31,6 @@ private:
     bool lastAutoAmount;
     bool lastAutoLuminanceScaling;
     IdleRegister idle_register;
-    int nextAmount;
-    bool nextciecam;
-    double nextLuminanceScaling;
     Gtk::Label* labena;
     Gtk::Label* labdis;
 

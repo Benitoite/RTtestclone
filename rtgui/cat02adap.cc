@@ -21,9 +21,11 @@
 #include <iomanip>
 #include "guiutils.h"
 #include "eventmapper.h"
+#include "options.h"
 
 using namespace rtengine;
 using namespace rtengine::procparams;
+extern Options options;
 
 CAT02Adaptation::CAT02Adaptation(): FoldableToolPanel(this, "cat02adap", M("TP_CAT02ADAPTATION_LABEL"), true, true)
 {
