@@ -33,14 +33,14 @@ extern const Settings* settings;
 namespace
 {
 
-void ciecamcat02loc_float(LabImage* lab, LabImage* dest, int tempa, double gree, int cat_02, const ColorManagementParams &cmp, const ColorAppearanceParams &cap)
+void ciecamcat02loc_float(LabImage* lab, int tempa, double gree, int cat_02, const ColorManagementParams &cmp, const ColorAppearanceParams &cap)
 {
     BENCHFUN
 #ifdef _DEBUG
     MyTime t1e, t2e;
     t1e.set();
 #endif
-    printf("Call ciecamcat02\n");
+  //  printf("Call ciecamcat02\n");
     int width = lab->W, height = lab->H;
     float Yw;
     Yw = 1.0f;
@@ -64,7 +64,6 @@ void ciecamcat02loc_float(LabImage* lab, LabImage* dest, int tempa, double gree,
     nc = 1.00f;
     //viewing condition for surround
     f2 = 1.0f, c2 = 0.69f, nc2 = 1.0f;
-    //with which algorithm
     //  alg = 0;
 
 
@@ -90,7 +89,6 @@ void ciecamcat02loc_float(LabImage* lab, LabImage* dest, int tempa, double gree,
     float yb = 18.f;
     float d, dj;
 
-//    const int gamu = 0; //(params->colorappearance.gamut) ? 1 : 0;
     xw = 100.0f * Xw;
     yw = 100.0f * Yw;
     zw = 100.0f * Zw;
@@ -260,9 +258,9 @@ void ciecamcat02loc_float(LabImage* lab, LabImage* dest, int tempa, double gree,
                     float Ll, aa, bb;
                     //convert xyz=>lab
                     Color::XYZ2Lab(x,  y,  z, Ll, aa, bb);
-                    dest->L[i][j] = Ll;
-                    dest->a[i][j] = aa;
-                    dest->b[i][j] = bb;
+                    lab->L[i][j] = Ll;
+                    lab->a[i][j] = aa;
+                    lab->b[i][j] = bb;
 
 #endif
                 }
@@ -293,9 +291,9 @@ void ciecamcat02loc_float(LabImage* lab, LabImage* dest, int tempa, double gree,
                 //convert xyz=>lab
                 Color::XYZ2Lab(xbuffer[j], ybuffer[j], zbuffer[j], Ll, aa, bb);
 
-                dest->L[i][j] = Ll;
-                dest->a[i][j] = aa;
-                dest->b[i][j] = bb;
+                lab->L[i][j] = Ll;
+                lab->a[i][j] = aa;
+                lab->b[i][j] = bb;
             }
 
 #endif
@@ -312,7 +310,7 @@ void ciecamcat02loc_float(LabImage* lab, LabImage* dest, int tempa, double gree,
 #endif
 }
 
-} // namespace
+}
 
 
 void cat02adaptationAutoCompute(ImageSource *imgsrc,  CAT02AdaptationParams &cat02Param, const WBParams &wbparam, const ToneCurveParams &toneparam, const RAWParams &rawparam)
@@ -355,7 +353,7 @@ void cat02adaptationAutoCompute(ImageSource *imgsrc,  CAT02AdaptationParams &cat
     int cat0 = 100;
 
     //printf("temp=%i \n", params.wb.temperature);
-    if (wbparam.temperature < 4000  || wbparam.temperature > 15000) { //15000 arbitrary value
+    if (wbparam.temperature < 4000  || wbparam.temperature > 15000) { //15000 arbitrary value  4000 limite illuminant D light
         float kunder = 1.f;
 
         if (wbparam.temperature > 20000) {
@@ -373,11 +371,11 @@ void cat02adaptationAutoCompute(ImageSource *imgsrc,  CAT02AdaptationParams &cat
         } else if (ada < 100.f) {
             cat0 = 50 * kunder;
         } else if (ada < 300.f) {
-            cat0 = 80 * kunder;
+            cat0 = 75 * kunder;
         } else if (ada < 500.f) {
-            cat0 = 90 * kunder;
+            cat0 = 82 * kunder;
         } else if (ada < 3000.f) {
-            cat0 = 95 * kunder;
+            cat0 = 90 * kunder;
         }
     } else {
         if (ada < 5.f) {
@@ -419,7 +417,7 @@ void cat02adaptationAutoCompute(ImageSource *imgsrc,  CAT02AdaptationParams &cat
 
     float dT = fabs((Tref - 5000.) / 1000.f);
     float dG = wbparam.green - 1.;
-    gree0 = 1.f - 0.00055f * dT * dG * cat02Param.amount;//empirical formula
+    gree0 = 1.f - 0.00055f * dT * dG * cat02Param.amount;//empirical formula gree0 = 1 if green = 1.f
 
     if (cat02Param.autoLuminanceScaling) {
         cat02Param.luminanceScaling = gree0;
@@ -436,11 +434,8 @@ void cat02adaptation(Imagefloat *image, float gain, const ProcParams &params)
     const WBParams &wbp = params.wb;
 
     if (cat.amount > 1  && !cap.enabled  && cat.enabled) { //
-        //    printf("OK cat02 CAT\n");
         LabImage *bufcat02 = nullptr;
         bufcat02 = new LabImage(image->getWidth(), image->getHeight());
-        LabImage *bufcat02fin = nullptr;
-        bufcat02fin = new LabImage(image->getWidth(), image->getHeight());
         TMatrix wiprof = ICCStore::getInstance()->workingSpaceInverseMatrix("WideGamut");//Widegamut gives generaly best results than Prophoto (blue) or sRGBD65
         TMatrix wprof = ICCStore::getInstance()->workingSpaceMatrix("WideGamut");
 
@@ -466,10 +461,6 @@ void cat02adaptation(Imagefloat *image, float gain, const ProcParams &params)
                 bufcat02->L[y][x] = 0.f;
                 bufcat02->a[y][x] = 0.f;
                 bufcat02->b[y][x] = 0.f;
-                bufcat02fin->L[y][x] = 0.f;
-                bufcat02fin->a[y][x] = 0.f;
-                bufcat02fin->b[y][x] = 0.f;
-
             }
 
 #ifdef _OPENMP
@@ -489,7 +480,7 @@ void cat02adaptation(Imagefloat *image, float gain, const ProcParams &params)
                 bufcat02->b[y][x] = bR;
             }
 
-        ciecamcat02loc_float(bufcat02, bufcat02fin, wbp.temperature, cat.luminanceScaling, cat.amount, cmp, cap);
+        ciecamcat02loc_float(bufcat02, wbp.temperature, cat.luminanceScaling, cat.amount, cmp, cap);
 #ifdef _OPENMP
         #pragma omp parallel for schedule(dynamic,16)
 #endif
@@ -498,9 +489,9 @@ void cat02adaptation(Imagefloat *image, float gain, const ProcParams &params)
             for (int x = 0; x < image->getWidth(); x++) {
                 float XR, YR, ZR;
                 float LL, aa, bb;
-                LL = bufcat02fin->L[y][x];
-                aa = bufcat02fin->a[y][x];
-                bb = bufcat02fin->b[y][x];
+                LL = bufcat02->L[y][x];
+                aa = bufcat02->a[y][x];
+                bb = bufcat02->b[y][x];
 
                 Color::Lab2XYZ(LL, aa, bb, XR, YR, ZR);
                 Color::xyz2rgb(XR, YR, ZR, image->r(y, x), image->g(y, x), image->b(y, x), wip);
@@ -514,7 +505,6 @@ void cat02adaptation(Imagefloat *image, float gain, const ProcParams &params)
             }
 
         delete bufcat02;
-        delete bufcat02fin;
     }
 }
 

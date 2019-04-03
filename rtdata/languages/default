@@ -1373,7 +1373,7 @@ TP_CAT02ADAPTATION_LUMINANCE_SCALING;Luminance Y scaling
 TP_CAT02ADAPTATION_CIECAM_ENABLED;Ciecam enabled
 TP_CAT02ADAPTATION_CIECAM_DISABLED;Ciecam disabled
 TP_CAT02ADAPTATION_AUTO_AMOUNT_TOOLTIP;If the check-box is checked, RawTherapee calculates an optimum value, which is then used by CAT02\nTo set the value manually, uncheck the check-box first.
-TP_CAT02ADAPTATION_AMOUNT_TOOLTIP;Performs a chromatic adaptation, between the chosen temperature and 5000K.\n80% to 100% should satisfy the majority of cases.\nIf the absolute luminance conditions (scene or viewing) are very low, you can lower the value till 1.\nDisabled when Ciecam02 enabled.
+TP_CAT02ADAPTATION_AMOUNT_TOOLTIP;Performs a chromatic adaptation, between the chosen temperature and 5000K.\n80% to 100% should satisfy the majority of cases.\nIf the absolute luminance conditions (scene or viewing) are very low, you can lower the value till 1.\n\nOnly usable for Daylight and Blackbody illuminants.\n\nDisabled when Ciecam02 enabled.
 TP_CAT02ADAPTATION_AUTO_LUMINANCE_SCALING_TOOLTIP;Auto computation of the luminance scaling factor in function of chromatic adaptation level.\nDisabled when Ciecam02 enabled.
 TP_CAT02ADAPTATION_LUMINANCE_SCALING_TOOLTIP;Scaling factor for the luminance Y channel (to adapt to the viewing conditions).
 TP_CBDL_AFT;After Black-and-White

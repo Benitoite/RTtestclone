@@ -27,7 +27,7 @@ using namespace rtengine;
 using namespace rtengine::procparams;
 extern Options options;
 
-CAT02Adaptation::CAT02Adaptation(): FoldableToolPanel(this, "cat02adap", M("TP_CAT02ADAPTATION_LABEL"), true, true)
+CAT02Adaptation::CAT02Adaptation(): FoldableToolPanel(this, "cat02adap", M("TP_CAT02ADAPTATION_LABEL"), false, true) // disable 1:1
 {
     auto m = ProcEventMapper::getInstance();
     EvCAT02AdaptationEnabled = m->newEvent(ALLNORAW, "HISTORY_MSG_CAT02ADAPTATION_ENABLED");
@@ -36,7 +36,7 @@ CAT02Adaptation::CAT02Adaptation(): FoldableToolPanel(this, "cat02adap", M("TP_C
     EvCAT02AdaptationLuminanceScaling = m->newEvent(ALLNORAW, "HISTORY_MSG_CAT02ADAPTATION_LUMINANCE_SCALING");
     EvCAT02AdaptationAutoLuminanceScaling = m->newEvent(ALLNORAW, "HISTORY_MSG_CAT02ADAPTATION_AUTO_LUMINANCE_SCALING");
     
-    amount = Gtk::manage(new Adjuster(M("TP_CAT02ADAPTATION_AMOUNT"), 0, 100, 1, 0));
+    amount = Gtk::manage(new Adjuster(M("TP_CAT02ADAPTATION_AMOUNT"), 0, 100, 1, 2));//2 by default to avoid effect in rare cases where illuminant is not with CRI #100
 
     if (amount->delay < options.adjusterMaxDelay) {
         amount->delay = options.adjusterMaxDelay;
