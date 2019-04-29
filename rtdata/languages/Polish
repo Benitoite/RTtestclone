@@ -13,9 +13,6 @@ ABOUT_TAB_CREDITS;Zasługi
 ABOUT_TAB_LICENSE;Licencja
 ABOUT_TAB_RELEASENOTES;Notatki eksploatacyjne
 ABOUT_TAB_SPLASH;Ekran powitalny
-BATCHQUEUE_AUTOSTART;Autostart
-BATCHQUEUE_AUTOSTARTHINT;Rozpocznij przetwarzanie automatycznie gdy pojawi się nowe zadanie.
-BATCHQUEUE_DESTFILENAME;Ścieżka i nazwa pliku
 BATCH_PROCESSING;Przetwarzanie wsadowe
 CURVEEDITOR_CURVE;Krzywa
 CURVEEDITOR_CURVES;Krzywe
@@ -241,9 +238,9 @@ HISTORY_MSG_30;RLD - Promień
 HISTORY_MSG_31;RLD - Siła
 HISTORY_MSG_32;RLD - Tłumienie
 HISTORY_MSG_33;RLD - Powtórzenia
-HISTORY_MSG_34;LCP - Korekcja dystorsji
-HISTORY_MSG_35;LCP - Korekcja winietowania
-HISTORY_MSG_36;LCP - Korekcja aberacji
+HISTORY_MSG_34;Korekcja dystorsji
+HISTORY_MSG_35;Korekcja winietowania
+HISTORY_MSG_36;Korekcja aberacji
 HISTORY_MSG_37;Automatyczna ekspozycja
 HISTORY_MSG_38;Metoda balansu bieli
 HISTORY_MSG_39;BB - Temperatura
@@ -527,14 +524,14 @@ MAIN_BUTTON_SAVE_TOOLTIP;Zapisz bieżące zdjęcie<b>Ctrl+S</b>
 MAIN_BUTTON_SENDTOEDITOR_TOOLTIP;Otwórz bieżące zdjęcie w zewnętrznym edytorze.\nSkrót: <b>Ctrl+e</b>
 MAIN_BUTTON_SHOWHIDESIDEPANELS_TOOLTIP;Pokaż/Ukryj wszystkie panele boczne.\nSkrót: <b>m</b>
 MAIN_BUTTON_UNFULLSCREEN;Zwolnij ekran
-MAIN_FRAME_BATCHQUEUE;Kolejka
-MAIN_FRAME_BATCHQUEUE_TOOLTIP;Przetwarzanie wsadowe\nSkrót: <b>Ctrl-F3</b>
 MAIN_FRAME_EDITOR;Edytor
 MAIN_FRAME_EDITOR_TOOLTIP;Edytor.\nSkrót: <b>Ctrl-F4</b>
 MAIN_FRAME_FILEBROWSER;Przeglądarka plików
 MAIN_FRAME_FILEBROWSER_TOOLTIP; Przeglądarka plików.\nSkrót: <b>Ctrl-F2</b>
 MAIN_FRAME_PLACES;Miejsca 
 MAIN_FRAME_PLACES_ADD;Dodaj
+MAIN_FRAME_QUEUE;Kolejka
+MAIN_FRAME_QUEUE_TOOLTIP;Przetwarzanie wsadowe\nSkrót: <b>Ctrl-F3</b>
 MAIN_FRAME_RECENT;Ostatnio używane foldery
 MAIN_MSG_ALREADYEXISTS;Plik już istnieje.
 MAIN_MSG_CANNOTLOAD;Nie można wczytać obrazu
@@ -694,7 +691,6 @@ PREFERENCES_DIRSOFTWARE;Katalog instalacyjny
 PREFERENCES_EDITORLAYOUT;Układ edytora
 PREFERENCES_EXTERNALEDITOR;Zewnętrzny edytor
 PREFERENCES_FBROWSEROPTS;Opcje przeglądarki plików
-PREFERENCES_FILEFORMAT;Format pliku
 PREFERENCES_FLATFIELDFOUND;Znaleziono
 PREFERENCES_FLATFIELDSDIR;Katalog z pustymi polami
 PREFERENCES_FLATFIELDSHOTS;kadry
@@ -721,11 +717,6 @@ PREFERENCES_MENUGROUPRANK;Grupuj operacje oceny
 PREFERENCES_MENUOPTIONS;Opcje menu
 PREFERENCES_MULTITAB;Tryb wielu zakładek
 PREFERENCES_MULTITABDUALMON;Tryb wielu zakładek (na drugim monitorze jeśli dostępny)
-PREFERENCES_OUTDIR;Katalog wyjściowy
-PREFERENCES_OUTDIRFOLDER;Zapisz do katalogu
-PREFERENCES_OUTDIRFOLDERHINT;Umieszcza zapisywane zdjęcia w wybranym katalogu
-PREFERENCES_OUTDIRTEMPLATE;Użyj schemat
-PREFERENCES_OUTDIRTEMPLATEHINT;Dozwolone są następujące kody formatujące:\n<b>%f</b>, <b>%d1</b>, <b>%d2</b>, ..., <b>%p1</b>, <b>%p2</b>, ..., <b>%r</b>, <b>%s1</b>, <b>%s2</b>, ...\n\nKody formatujące odnoszą się do różnych elementów ścieżki zdjęcia, atrybutów zdjęcia oraz do arbitralnego ciągu numerycznego operacji wsadowej.\n\nPrzykładowo, jeśli zdjęcie obrabiane ma następującą ścieżkę:\n<b><i>/home/andrzej/zdjecia/2010-10-31/dsc0042.nef</i></b>\nznaczenie kodów formatujących jest następujące:\n<b>%d4</b> = <i>home</i>\n<b>%d3</b> = <i>andrzej</i>\n<b>%d2</b> = <i>zdjecia</i>\n<b>%d1</b> = <i>2010-10-31</i>\n<b>%f</b> = <i>dsc0042</i>\n<b>%p1</b> = <i>/home/tom/photos/2010-10-31/</i>\n<b>%p2</b> = <i>/home/andrzej/zdjecia/</i>\n<b>%p3</b> = <i>/home/andrzej/</i>\n<b>%p4</b> = <i>/home/</i>\n\n<b>%r</b> zostanie zastąpione oceną zdjęcia. Jeśli zdjęcie nie posiada oceny, %r zostanie zastąpione liczbą '0'. Jeśli zdjęcie leży w śmietniku, %r zostanie zastąpione znakiem 'x'.\n\n<b>%s1</b>, <b>%s2</b>, etc. zostanie zastąpione ciągniem numerycznym dopełnionym od jednej do dziewięciu cyfr. Ciąg ten zostanie rozpocznięty od "1" za każdym razem gdy kolejka przetwarzania zostanie uruchomiona, i liczba jest zwiększona o "1" dla każdego zapisanego obrazu.\n\nJeśli chcesz zapisać obraz wyjściowy obok obrazu wejściowego, napisz:\n<b>%p1/%f</b>\n\nJeśli chcesz zapisać obraz wyjściowy w folderze o nazwie "<i>wywolane</i>" znajdującego się w katalogu zawierającym otwarty obraz, napisz:\n<b>%p1/wywolane/%f</b>\n\nJeśli chcesz zapisać obraz wyjściowy w folderze o nazwie "<i>/home/andrzej/zdjecia/wywolane/2010-10-31</i>", napisz:\n<b>%p2/wywolane/%d1/%f</b>
 PREFERENCES_OVERLAY_FILENAMES;Nakładaj nazwy pliku na miniatury
 PREFERENCES_OVERWRITEOUTPUTFILE;Nadpisuj istniejące pliki
 PREFERENCES_PANFACTORLABEL;Współczynnik
@@ -749,9 +740,9 @@ PREFERENCES_SHOWEXPOSURECOMPENSATION;Pokaż korektę ekspozycji
 PREFERENCES_SHTHRESHOLD;Próg dla niedoświetleń
 PREFERENCES_SINGLETAB;Tryb pojedynczej zakładki
 PREFERENCES_SINGLETABVERTAB;Tryb pojedynczej zakładki, pionowy układ
-PREFERENCES_SND_BATCHQUEUEDONE;Zakończono przetwarzanie wsadowe
 PREFERENCES_SND_HELP;Należy wprowadzić ścieżkę do pliku, bądź pozostawić niewypełnione (brak dźwięków).\nW systemie Windows można stosować "SystemDefault", "SystemAsterisk" itp. dla dźwięków systemowych.\nW systemie Linux można stosować "complete", "window-attention" etc. dla dzwięków systemowych.
 PREFERENCES_SND_LNGEDITPROCDONE;Praca edytora wykonana
+PREFERENCES_SND_QUEUEDONE;Zakończono przetwarzanie wsadowe
 PREFERENCES_SND_THRESHOLDSECS;po sekundach
 PREFERENCES_STARTUPIMDIR;Katalog startowy
 PREFERENCES_TAB_BROWSER;Przeglądarka plików
@@ -797,6 +788,13 @@ PROGRESSBAR_SNAPSHOT_ADDED;Dodano migawkę
 PROGRESSDLG_PROFILECHANGEDINBROWSER;Profil zmieniony w przeglądarce
 QINFO_ISO;ISO
 QINFO_NOEXIF;Dane Exif niedostępne.
+QUEUE_AUTOSTART;Autostart
+QUEUE_AUTOSTART_TOOLTIP;Rozpocznij przetwarzanie automatycznie gdy pojawi się nowe zadanie.
+QUEUE_DESTFILENAME;Ścieżka i nazwa pliku
+QUEUE_FORMAT_TITLE;Format pliku
+QUEUE_LOCATION_FOLDER;Zapisz do katalogu
+QUEUE_LOCATION_TEMPLATE;Użyj schemat
+QUEUE_LOCATION_TEMPLATE_TOOLTIP;Dozwolone są następujące kody formatujące:\n<b>%f</b>, <b>%d1</b>, <b>%d2</b>, ..., <b>%p1</b>, <b>%p2</b>, ..., <b>%r</b>, <b>%s1</b>, <b>%s2</b>, ...\n\nKody formatujące odnoszą się do różnych elementów ścieżki zdjęcia, atrybutów zdjęcia oraz do arbitralnego ciągu numerycznego operacji wsadowej.\n\nPrzykładowo, jeśli zdjęcie obrabiane ma następującą ścieżkę:\n<b><i>/home/andrzej/zdjecia/2010-10-31/dsc0042.nef</i></b>\nznaczenie kodów formatujących jest następujące:\n<b>%d4</b> = <i>home</i>\n<b>%d3</b> = <i>andrzej</i>\n<b>%d2</b> = <i>zdjecia</i>\n<b>%d1</b> = <i>2010-10-31</i>\n<b>%f</b> = <i>dsc0042</i>\n<b>%p1</b> = <i>/home/tom/photos/2010-10-31/</i>\n<b>%p2</b> = <i>/home/andrzej/zdjecia/</i>\n<b>%p3</b> = <i>/home/andrzej/</i>\n<b>%p4</b> = <i>/home/</i>\n\n<b>%r</b> zostanie zastąpione oceną zdjęcia. Jeśli zdjęcie nie posiada oceny, %r zostanie zastąpione liczbą '0'. Jeśli zdjęcie leży w śmietniku, %r zostanie zastąpione znakiem 'x'.\n\n<b>%s1</b>, <b>%s2</b>, etc. zostanie zastąpione ciągniem numerycznym dopełnionym od jednej do dziewięciu cyfr. Ciąg ten zostanie rozpocznięty od "1" za każdym razem gdy kolejka przetwarzania zostanie uruchomiona, i liczba jest zwiększona o "1" dla każdego zapisanego obrazu.\n\nJeśli chcesz zapisać obraz wyjściowy obok obrazu wejściowego, napisz:\n<b>%p1/%f</b>\n\nJeśli chcesz zapisać obraz wyjściowy w folderze o nazwie "<i>wywolane</i>" znajdującego się w katalogu zawierającym otwarty obraz, napisz:\n<b>%p1/wywolane/%f</b>\n\nJeśli chcesz zapisać obraz wyjściowy w folderze o nazwie "<i>/home/andrzej/zdjecia/wywolane/2010-10-31</i>", napisz:\n<b>%p2/wywolane/%d1/%f</b>
 SAVEDLG_AUTOSUFFIX;Automatycznie dodaj przyrostek, jeżeli plik już istnieje
 SAVEDLG_FILEFORMAT;Format pliku
 SAVEDLG_FORCEFORMATOPTS;Wymuś opcje zapisu
@@ -887,7 +885,6 @@ TP_CHMIXER_BLUE;Niebieski
 TP_CHMIXER_GREEN;Zielony
 TP_CHMIXER_LABEL;Mieszacz kanałów
 TP_CHMIXER_RED;Czerwony
-TP_CHROMATABERR_LABEL;Aberracja chromatyczna
 TP_COARSETRAF_TOOLTIP_HFLIP;Odbij w poziomie
 TP_COARSETRAF_TOOLTIP_ROTLEFT;Obróć w lewo.\n\nSkróty:\n<b>[</b> - Tryb wielu zakładek,\n<b>Alt-[</b> - Tryb jednej zakładki.
 TP_COARSETRAF_TOOLTIP_ROTRIGHT;Obróć w prawo.\n\nSkróty:\n<b>]</b> - Tryb wielu zakładek,\n<b>Alt-]</b> - Tryb jednej zakładki.
@@ -1204,7 +1201,7 @@ TP_PREPROCESS_NO_FOUND;Nic nie znaleziono
 TP_RAWCACORR_AUTO;Autokorekcja
 TP_RAWCACORR_CABLUE;Niebieski
 TP_RAWCACORR_CARED;Czerwony
-TP_RAWEXPOS_BLACKS;Poziomy czerni
+TP_RAWCACORR_LABEL;Korekcja aberracji chromatycznej
 TP_RAWEXPOS_BLACK_0;Zielony 1 (główny)
 TP_RAWEXPOS_BLACK_1;Czerwony
 TP_RAWEXPOS_BLACK_2;Niebieski
@@ -1365,7 +1362,6 @@ ZOOMPANEL_ZOOMOUT;Oddal\nSkrót: <b>-</b>
 !!!!!!!!!!!!!!!!!!!!!!!!!
 
 !ADJUSTER_RESET_TO_DEFAULT;<b>Click</b> - reset to default value.\n<b>Ctrl</b>+<b>click</b> - reset to initial value.
-!BATCHQUEUE_STARTSTOPHINT;Start or stop processing the images in the queue.\n\nShortcut: <b>Ctrl</b>+<b>s</b>
 !CURVEEDITOR_AXIS_IN;I:
 !CURVEEDITOR_AXIS_LEFT_TAN;LT:
 !CURVEEDITOR_AXIS_OUT;O:
@@ -1752,6 +1748,7 @@ ZOOMPANEL_ZOOMOUT;Oddal\nSkrót: <b>-</b>
 !PREFERENCES_APPEARANCE_COLORPICKERFONT;Color picker font
 !PREFERENCES_APPEARANCE_CROPMASKCOLOR;Crop mask color
 !PREFERENCES_APPEARANCE_MAINFONT;Main font
+!PREFERENCES_APPEARANCE_PSEUDOHIDPI;Pseudo-HiDPI mode
 !PREFERENCES_APPEARANCE_THEME;Theme
 !PREFERENCES_AUTOSAVE_TP_OPEN;Save tool collapsed/expanded state on exit
 !PREFERENCES_CACHECLEAR;Clear
@@ -1834,6 +1831,8 @@ ZOOMPANEL_ZOOMOUT;Oddal\nSkrót: <b>-</b>
 !QINFO_FRAMECOUNT;%2 frames
 !QINFO_HDR;HDR / %2 frame(s)
 !QINFO_PIXELSHIFT;Pixel Shift / %2 frame(s)
+!QUEUE_LOCATION_TITLE;Output Location
+!QUEUE_STARTSTOP_TOOLTIP;Start or stop processing the images in the queue.\n\nShortcut: <b>Ctrl</b>+<b>s</b>
 !SAMPLEFORMAT_0;Unknown data format
 !SAMPLEFORMAT_1;8-bit unsigned
 !SAMPLEFORMAT_2;16-bit unsigned
