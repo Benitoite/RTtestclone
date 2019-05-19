@@ -7566,7 +7566,7 @@ void RawImageSource::ItcWB(bool extra, double &tempref, double &greenref, const 
     } WbTxyz;
     //we can change step to increase precision if need  - also in Colortemp.cc with same changes
     //I don't know how to pass this structure to Colortemp !
-    WbTxyz Txyz[110] = {//temperature Xwb Zwb 110 values  x wb and y wb are calculated after
+    WbTxyz Txyz[118] = {//temperature Xwb Zwb 118 values  x wb and y wb are calculated after
         {2001., 1.273842, 0.145295},
         {2101., 1.244008, 0.167533},
         {2201., 1.217338, 0.190697},
@@ -7617,14 +7617,22 @@ void RawImageSource::ItcWB(bool extra, double &tempref, double &greenref, const 
         {4702., 0.971681, 0.762949},
         {4752., 0.969335, 0.773285},
         {4802., 0.969069, 0.783899},
+        {4827., 0.967570, 0.788836},
         {4852., 0.967011, 0.793982},
-        {4902., 0.966702, 0.804537},
+        {4877., 0.966465, 0.799108},
+        {4902., 0.965933, 0.804214},
+        {4927., 0.965414, 0.809229},
         {4952., 0.964908, 0.814366},
-        {5002., 0.964561, 0.824854},
+        {4977., 0.964415, 0.819412},
+        {5002., 0.963934, 0.824438},
+        {5027., 0.963465, 0.829444},
         {5052., 0.963008, 0.834429},
-        {5102., 0.962627, 0.844842},
+        {5077., 0.962563, 0.839395},
+        {5102., 0.962129, 0.844339},
+        {5127., 0.961706, 0.849263},
         {5152., 0.961294, 0.854166},
-        {5202., 0.960883, 0.864497},
+        {5177., 0.960893, 0.859049},
+        {5202., 0.960501, 0.863911},
         {5252., 0.959749, 0.873572},
         {5302., 0.959313, 0.883815},
         {5352., 0.958361, 0.892644},
@@ -8249,7 +8257,7 @@ void RawImageSource::ItcWB(bool extra, double &tempref, double &greenref, const 
 
         for (int i = 0; i < N_g; i++) {//init variables with
             Tgstud[i].student = 1000.f;//max value to initialize
-            Tgstud[i].tempref = 53;
+            Tgstud[i].tempref = 57;
             Tgstud[i].greenref = 39;
 
         }

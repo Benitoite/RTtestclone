@@ -3356,7 +3356,7 @@ void ColorTemp::cat02_to_xyzfloatraw(float & x, float & y, float & z, float r, f
 
 
 
-//tempxy : return x and y of xyY for 155 or more refreence color, and for T temperature from 2000K to 12000K
+//tempxy : return x and y of xyY for 200 or more refreence color, and for T temperature from 2000K to 12000K
 // we can change step for temperature and increase number  for T > 7500K if necessary
 //these values Temp, x, y are references for all calculations and very precise.
 //copyright J.Desmis august  2017 and june 2018
@@ -3419,7 +3419,7 @@ void ColorTemp::tempxy(bool separated, int &repref, float **Tx, float **Ty, floa
         double ZZ;
     } WbTxyz;
     //probbaly can be "passed" with rawimagesource.cc but I don't know how to do.
-    WbTxyz Txyz[110] = {//temperature Xwb Zwb 110 values  x wb and y wb are calculated after
+    WbTxyz Txyz[118] = {//temperature Xwb Zwb 118 values  x wb and y wb are calculated after
         {2001., 1.273842, 0.145295},
         {2101., 1.244008, 0.167533},
         {2201., 1.217338, 0.190697},
@@ -3470,14 +3470,22 @@ void ColorTemp::tempxy(bool separated, int &repref, float **Tx, float **Ty, floa
         {4702., 0.971681, 0.762949},
         {4752., 0.969335, 0.773285},
         {4802., 0.969069, 0.783899},
+        {4827., 0.967570, 0.788836},
         {4852., 0.967011, 0.793982},
-        {4902., 0.966702, 0.804537},
+        {4877., 0.966465, 0.799108},
+        {4902., 0.965933, 0.804214},
+        {4927., 0.965414, 0.809229},
         {4952., 0.964908, 0.814366},
-        {5002., 0.964561, 0.824854},
+        {4977., 0.964415, 0.819412},
+        {5002., 0.963934, 0.824438},
+        {5027., 0.963465, 0.829444},
         {5052., 0.963008, 0.834429},
-        {5102., 0.962627, 0.844842},
+        {5077., 0.962563, 0.839395},
+        {5102., 0.962129, 0.844339},
+        {5127., 0.961706, 0.849263},
         {5152., 0.961294, 0.854166},
-        {5202., 0.960883, 0.864497},
+        {5177., 0.960893, 0.859049},
+        {5202., 0.960501, 0.863911},
         {5252., 0.959749, 0.873572},
         {5302., 0.959313, 0.883815},
         {5352., 0.958361, 0.892644},
