@@ -3623,7 +3623,7 @@ void ColorTemp::tempxy(bool separated, int &repref, float **Tx, float **Ty, floa
             for (int i = 0; i < N_c; i++) {
                 spectrum_to_color_xyz_daylight(spec_colorforxcyc[i], m11, m22, TX[i], TY[i], TZ[i]);
 
-                float XX = TX[i] * 65535.f;
+/*                float XX = TX[i] * 65535.f;
                 float YY = TY[i] * 65535.f;
                 float ZZ = TZ[i] * 65535.f;
                 float L, a, b;
@@ -3635,11 +3635,11 @@ void ColorTemp::tempxy(bool separated, int &repref, float **Tx, float **Ty, floa
                 wbchro[i].chroa = a / 327.68f;
                 wbchro[i].chrob = b / 327.68f;
                 wbchro[i].nn = i;
-
+*/
 
 
             }
-
+/*
             std::sort(wbchro, wbchro + N_c + 1, wbchro[0]);
             float ab5 = 0.f;
             int n5 = 0;
@@ -3689,6 +3689,7 @@ void ColorTemp::tempxy(bool separated, int &repref, float **Tx, float **Ty, floa
             printf("aa=%f bb=%f\n", aa, bb);
             //very low 15 --, 16 -+, 17 + -, 18 +-, 20 ++, 22 -+, 73 ++, 98 ++, 99 -+, 101 -+, 129 ++, 130 -+, 131 --,
             //low 8 +-, 9 --, 10 --, 12 --, 19 -+, 21 -+, 24 -+, 25 ++, 27 ++, 30 ++, 33++, 34 ++, 36 ++, 37++,38 +-,
+            */
         }
     }
 

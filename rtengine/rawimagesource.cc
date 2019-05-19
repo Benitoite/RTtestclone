@@ -7952,7 +7952,7 @@ void RawImageSource::ItcWB(bool extra, double &tempref, double &greenref, const 
         std::sort(Wbhis, Wbhis + siza, Wbhis[0]);
 
         for (int nh = 0; nh < siza; nh++) {
-            printf("nh=%i", Wbhis[nh].index);
+//            printf("nh=%i", Wbhis[nh].index);
         }
 
         //part to improve
@@ -7995,7 +7995,7 @@ void RawImageSource::ItcWB(bool extra, double &tempref, double &greenref, const 
         int sizcu30 = sizcurrref - n30;
         int sizcu4 = sizcurrref - n4;
 
-        printf("sizcurr2ref=%i sizcur_30=%i siecur_4=%i \n", sizcurr2ref, sizcu30, sizcu4);
+//        printf("sizcurr2ref=%i sizcur_30=%i siecur_4=%i \n", sizcurr2ref, sizcu30, sizcu4);
         sizcu4 = sizcu30;//arbitrary mini size if 30 result, ==> in full image 3000 pixels
 
         if (sizcu4 > 55) {
@@ -8014,7 +8014,7 @@ void RawImageSource::ItcWB(bool extra, double &tempref, double &greenref, const 
             xx_curref[j][repref] = xxx[Wbhis[siza - (j + 1)].index] / histcurrref[j][repref];
             yy_curref[j][repref] = yyy[Wbhis[siza - (j + 1)].index] / histcurrref[j][repref];
             YY_curref[j][repref] = YYY[Wbhis[siza - (j + 1)].index] / histcurrref[j][repref];
-            printf("xx=%f yy=%f\n", xx_curref[j][repref], yy_curref[j][repref]);
+//            printf("xx=%f yy=%f\n", xx_curref[j][repref], yy_curref[j][repref]);
         }
 
         estimchrom = 0.f;
@@ -8380,7 +8380,7 @@ void RawImageSource::ItcWB(bool extra, double &tempref, double &greenref, const 
         std::sort(Tgstud, Tgstud + N_g, Tgstud[0]);
 
         for (int j = 0; j < 20; j++) {
-            printf("reftemp=%i refgreen=%i stud=%f \n", Tgstud[j].tempref, Tgstud[j].greenref, Tgstud[j].student);
+   //         printf("reftemp=%i refgreen=%i stud=%f \n", Tgstud[j].tempref, Tgstud[j].greenref, Tgstud[j].student);
         }
 
         //now search the value of green the nearest of 1 with a good student value
