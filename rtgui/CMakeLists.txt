@@ -27,6 +27,7 @@ set(NONCLISOURCEFILES
     cacheimagedata.cc
     cachemanager.cc
     cacorrection.cc
+    cat02adap.cc
     checkbox.cc
     chmixer.cc
     clipboard.cc
@@ -162,7 +163,6 @@ set(NONCLISOURCEFILES
     xtransprocess.cc
     xtransrawexposure.cc
     zoompanel.cc
-    cat02adap.cc
 )
 
 include_directories(BEFORE "${CMAKE_CURRENT_BINARY_DIR}")
