@@ -1311,7 +1311,8 @@ CAT02AdaptationParams::CAT02AdaptationParams() :
     amount(2),
     autoAmount(true),
     luminanceScaling(1.0),
-    autoLuminanceScaling(true)
+    autoLuminanceScaling(true),
+    surround("Average")
 
 {
 }
@@ -1323,7 +1324,8 @@ bool CAT02AdaptationParams::operator ==(const CAT02AdaptationParams& other) cons
         && autoAmount == other.autoAmount
         && amount == other.amount
         && luminanceScaling == other.luminanceScaling
-        && autoLuminanceScaling == other.autoLuminanceScaling;
+        && autoLuminanceScaling == other.autoLuminanceScaling
+        && surround == other.surround;
 
 }
 
@@ -3225,8 +3227,8 @@ int ProcParams::save(const Glib::ustring& fname, const Glib::ustring& fname2, bo
         saveToKeyfile(!pedited || pedited->cat02adap.autoAmount, "CAT02Adaptation", "AutoAmount", cat02adap.autoAmount, keyFile);
         saveToKeyfile(!pedited || pedited->cat02adap.luminanceScaling, "CAT02Adaptation", "LuminanceScaling", cat02adap.luminanceScaling, keyFile);
         saveToKeyfile(!pedited || pedited->cat02adap.autoLuminanceScaling, "CAT02Adaptation", "AutoLuminanceScaling", cat02adap.autoLuminanceScaling, keyFile);
-		
-		
+        saveToKeyfile(!pedited || pedited->cat02adap.surround, "CAT02Adaptation", "Surround", cat02adap.surround, keyFile);
+        
 // Impulse denoise
         saveToKeyfile(!pedited || pedited->impulseDenoise.enabled, "Impulse Denoising", "Enabled", impulseDenoise.enabled, keyFile);
         saveToKeyfile(!pedited || pedited->impulseDenoise.thresh, "Impulse Denoising", "Threshold", impulseDenoise.thresh, keyFile);
@@ -4205,9 +4207,9 @@ int ProcParams::load(const Glib::ustring& fname, ParamsEdited* pedited)
             assignFromKeyfile(keyFile, "CAT02Adaptation", "AutoAmount", pedited, cat02adap.autoAmount, pedited->cat02adap.autoAmount);
             assignFromKeyfile(keyFile, "CAT02Adaptation", "LuminanceScaling", pedited, cat02adap.luminanceScaling, pedited->cat02adap.luminanceScaling);
             assignFromKeyfile(keyFile, "CAT02Adaptation", "AutoLuminanceScaling", pedited, cat02adap.autoLuminanceScaling, pedited->cat02adap.autoLuminanceScaling);
+            assignFromKeyfile(keyFile, "CAT02Adaptation", "Surround", pedited, cat02adap.surround, pedited->cat02adap.surround);
         }
-		
-		
+
         if (keyFile.has_group("Impulse Denoising")) {
             assignFromKeyfile(keyFile, "Impulse Denoising", "Enabled", pedited, impulseDenoise.enabled, pedited->impulseDenoise.enabled);
             assignFromKeyfile(keyFile, "Impulse Denoising", "Threshold", pedited, impulseDenoise.thresh, pedited->impulseDenoise.thresh);

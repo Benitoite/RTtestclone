@@ -254,8 +254,8 @@ void ParamsEdited::set(bool v)
     cat02adap.autoAmount = v;
     cat02adap.luminanceScaling = v;
     cat02adap.autoLuminanceScaling = v;
-	
-	
+    cat02adap.surround = v;
+
     //colorShift.a               = v;
     //colorShift.b               = v;
     //lumaDenoise.enabled        = v;
@@ -830,6 +830,7 @@ void ParamsEdited::initFrom(const std::vector<rtengine::procparams::ProcParams>&
         cat02adap.autoAmount = cat02adap.autoAmount && p.cat02adap.autoAmount == other.cat02adap.autoAmount;
         cat02adap.luminanceScaling = cat02adap.luminanceScaling && p.cat02adap.luminanceScaling == other.cat02adap.luminanceScaling;
         cat02adap.autoLuminanceScaling = cat02adap.autoLuminanceScaling && p.cat02adap.autoLuminanceScaling == other.cat02adap.autoLuminanceScaling;
+        cat02adap.surround = cat02adap.surround && p.cat02adap.surround == other.cat02adap.surround;
 
         //colorShift.a = colorShift.a && p.colorShift.a == other.colorShift.a;
         //colorShift.b = colorShift.b && p.colorShift.b == other.colorShift.b;
@@ -1855,8 +1856,11 @@ void ParamsEdited::combine(rtengine::procparams::ProcParams& toEdit, const rteng
     if (cat02adap.autoLuminanceScaling) {
         toEdit.cat02adap.autoLuminanceScaling   = mods.cat02adap.autoLuminanceScaling;
     }
-	
-	
+
+    if (cat02adap.surround) {
+        toEdit.cat02adap.surround  = mods.cat02adap.surround;
+    }
+
     //if (colorShift.a)                     toEdit.colorShift.a = dontforceSet && options.baBehav[ADDSET_CS_BLUEYELLOW] ? toEdit.colorShift.a + mods.colorShift.a : mods.colorShift.a;
     //if (colorShift.b)                     toEdit.colorShift.b = dontforceSet && options.baBehav[ADDSET_CS_GREENMAGENTA] ? toEdit.colorShift.b + mods.colorShift.b : mods.colorShift.b;
     //if (lumaDenoise.enabled)              toEdit.lumaDenoise.enabled = mods.lumaDenoise.enabled;

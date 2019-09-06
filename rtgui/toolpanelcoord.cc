@@ -106,6 +106,7 @@ ToolPanelCoordinator::ToolPanelCoordinator (bool batch) : ipc (nullptr), favorit
     favorites.resize(options.favorites.size(), nullptr);
 
     addfavoritePanel (colorPanel, whitebalance);
+    addfavoritePanel (exposurePanel, toneCurve);
     addfavoritePanel (colorPanel, cat02adap);
     addfavoritePanel (colorPanel, vibrance);
     addfavoritePanel (colorPanel, chmixer);

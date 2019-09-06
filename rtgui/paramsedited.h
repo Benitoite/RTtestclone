@@ -235,6 +235,7 @@ struct CAT02AdaptationParamsEdited
     bool autoAmount;
     bool luminanceScaling;
     bool autoLuminanceScaling;
+    bool surround;
 };
 
 struct ColorAppearanceParamsEdited {

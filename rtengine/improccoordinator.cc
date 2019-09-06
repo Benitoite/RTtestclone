@@ -424,9 +424,9 @@ void ImProcCoordinator::updatePreviewImage(int todo, bool panningRelatedChange)
 
             cat02adaptationAutoCompute(imgsrc, params->cat02adap, params->wb, params->toneCurve, params->raw);
             if (acatListener) {
-                if (params->cat02adap.autoAmount) {
+             //   if (params->cat02adap.autoAmount) {
                     acatListener->cat02AmountChanged(params->cat02adap.amount, params->colorappearance.enabled);
-                }
+             //   }
             
                 if (params->cat02adap.autoLuminanceScaling) {
                 acatListener->cat02LuminanceScalingChanged(params->cat02adap.luminanceScaling);

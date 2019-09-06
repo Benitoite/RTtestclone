@@ -35,6 +35,7 @@ CAT02Adaptation::CAT02Adaptation(): FoldableToolPanel(this, "cat02adap", M("TP_C
     EvCAT02AdaptationAutoAmount = m->newEvent(ALLNORAW, "HISTORY_MSG_CAT02ADAPTATION_AUTO_AMOUNT");
     EvCAT02AdaptationLuminanceScaling = m->newEvent(ALLNORAW, "HISTORY_MSG_CAT02ADAPTATION_LUMINANCE_SCALING");
     EvCAT02AdaptationAutoLuminanceScaling = m->newEvent(ALLNORAW, "HISTORY_MSG_CAT02ADAPTATION_AUTO_LUMINANCE_SCALING");
+    EvCAT02AdaptationSurround = m->newEvent(ALLNORAW, "HISTORY_MSG_CAT02ADAPTATION_SURROUND");
     
     amount = Gtk::manage(new Adjuster(M("TP_CAT02ADAPTATION_AMOUNT"), 0, 100, 1, 2));//2 by default to avoid effect in rare cases where illuminant is not with CRI #100
 
@@ -66,6 +67,20 @@ CAT02Adaptation::CAT02Adaptation(): FoldableToolPanel(this, "cat02adap", M("TP_C
     luminanceScaling->setAdjusterListener(this);
 
     pack_start(*luminanceScaling);
+
+    Gtk::HBox* surrHBox = Gtk::manage (new Gtk::HBox ());
+    surrHBox->set_spacing (2);
+    surrHBox->set_tooltip_markup (M ("TP_CAT02ADAPTATION_SURROUND_TOOLTIP"));
+    Gtk::Label* surrLabel = Gtk::manage (new Gtk::Label (M ("TP_CAT02ADAPTATION_SURROUND") + ":"));
+    surrHBox->pack_start (*surrLabel, Gtk::PACK_SHRINK);
+    surround = Gtk::manage (new MyComboBoxText ());
+    surround->append (M ("TP_COLORAPP_SURROUND_AVER"));
+    surround->append (M ("TP_COLORAPP_SURROUND_DIM"));
+    surround->append (M ("TP_COLORAPP_SURROUND_DARK"));
+    surround->set_active (0);
+    surrHBox->pack_start (*surround);
+    pack_start (*surrHBox);
+    surroundconn = surround->signal_changed().connect ( sigc::mem_fun (*this, &CAT02Adaptation::surroundChanged) );
 
     pack_start(*labena);
     pack_start(*labdis);
@@ -99,6 +114,20 @@ void CAT02Adaptation::read(const ProcParams* pp, const ParamsEdited* pedited)
     amount->setAutoValue(pp->cat02adap.autoAmount);
     luminanceScaling->setValue(pp->cat02adap.luminanceScaling);
     luminanceScaling->setAutoValue(pp->cat02adap.autoLuminanceScaling);
+    surroundconn.block (true);
+
+    if (pedited && !pedited->cat02adap.surround) {
+        surround->set_active (3);
+    } else if (pp->cat02adap.surround == "Average") {
+        surround->set_active (0);
+    } else if (pp->cat02adap.surround == "Dim") {
+        surround->set_active (1);
+    } else if (pp->cat02adap.surround == "Dark") {
+        surround->set_active (2);
+    }
+
+    surroundconn.block (false);
+    surroundChanged();
 
     enableListener();
 }
@@ -118,9 +147,28 @@ void CAT02Adaptation::write(ProcParams* pp, ParamsEdited* pedited)
         pedited->cat02adap.autoAmount  = !amount->getAutoInconsistent();
         pedited->cat02adap.luminanceScaling        = luminanceScaling->getEditedState();
         pedited->cat02adap.autoLuminanceScaling  = !luminanceScaling->getAutoInconsistent();
+        pedited->cat02adap.surround      = surround->get_active_text() != M ("GENERAL_UNCHANGED");
 
     }
+    
+    if (surround->get_active_row_number() == 0) {
+        pp->cat02adap.surround = "Average";
+    } else if (surround->get_active_row_number() == 1) {
+        pp->cat02adap.surround = "Dim";
+    } else if (surround->get_active_row_number() == 2) {
+        pp->cat02adap.surround = "Dark";
+    }
+   
 }
+
+void CAT02Adaptation::surroundChanged ()
+{
+
+    if (listener && (multiImage || getEnabled()) ) {
+        listener->panelChanged (EvCAT02AdaptationSurround, surround->get_active_text ());
+    }
+}
+
 
 void CAT02Adaptation::setDefaults(const ProcParams* defParams, const ParamsEdited* pedited)
 {
@@ -275,6 +323,8 @@ void CAT02Adaptation::setBatchMode(bool batchMode)
     ToolPanel::setBatchMode(batchMode);
     amount->showEditedCB();
     luminanceScaling->showEditedCB();
+    surround->append (M ("GENERAL_UNCHANGED"));
+    
 }
 
 void CAT02Adaptation::trimValues(rtengine::procparams::ProcParams* pp)

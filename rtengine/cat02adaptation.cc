@@ -33,7 +33,7 @@ extern const Settings* settings;
 namespace
 {
 
-void ciecamcat02loc_float(LabImage* lab, int tempa, double gree, int cat_02, const ColorManagementParams &cmp, const ColorAppearanceParams &cap)
+void ciecamcat02loc_float(LabImage* lab, int tempa, double gree, int cat_02, Glib::ustring surround, const ColorManagementParams &cmp, const ColorAppearanceParams &cap)
 {
     BENCHFUN
 #ifdef _DEBUG
@@ -63,9 +63,13 @@ void ciecamcat02loc_float(LabImage* lab, int tempa, double gree, int cat_02, con
     c  = 0.69f;
     nc = 1.00f;
     //viewing condition for surround
-    f2 = 1.0f, c2 = 0.69f, nc2 = 1.0f;
-    //  alg = 0;
-
+    if(surround == "Average") {
+        f2 = 1.0f, c2 = 0.69f, nc2 = 1.0f;
+    } else if(surround == "Dim") {
+        f2 = 0.9f, c2 = 0.59f, nc2 = 0.9f;
+    } else if(surround == "Dark") {
+        f2 = 0.8f, c2 = 0.525f, nc2 = 0.8f;
+    }
 
     xwd = 100.f * Xwout;
     zwd = 100.f * Zwout;
@@ -480,7 +484,7 @@ void cat02adaptation(Imagefloat *image, float gain, const ProcParams &params)
                 bufcat02->b[y][x] = bR;
             }
 
-        ciecamcat02loc_float(bufcat02, wbp.temperature, cat.luminanceScaling, cat.amount, cmp, cap);
+        ciecamcat02loc_float(bufcat02, wbp.temperature, cat.luminanceScaling, cat.amount, cat.surround, cmp, cap);
 #ifdef _OPENMP
         #pragma omp parallel for schedule(dynamic,16)
 #endif

@@ -614,6 +614,7 @@ struct CAT02AdaptationParams {
     bool    autoAmount;
     double  luminanceScaling; 
     bool    autoLuminanceScaling;
+    Glib::ustring surround;
     CAT02AdaptationParams();
 
     bool operator ==(const CAT02AdaptationParams& other) const;

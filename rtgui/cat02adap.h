@@ -33,12 +33,15 @@ private:
     IdleRegister idle_register;
     Gtk::Label* labena;
     Gtk::Label* labdis;
+    MyComboBoxText*   surround;
+    sigc::connection  surroundconn;
 
     rtengine::ProcEvent EvCAT02AdaptationEnabled;
     rtengine::ProcEvent EvCAT02AdaptationAmount;
     rtengine::ProcEvent EvCAT02AdaptationAutoAmount;
     rtengine::ProcEvent EvCAT02AdaptationLuminanceScaling;
     rtengine::ProcEvent EvCAT02AdaptationAutoLuminanceScaling;
+    rtengine::ProcEvent EvCAT02AdaptationSurround;
     
 public:
     CAT02Adaptation();
@@ -56,6 +59,7 @@ public:
     void adjusterChanged(ThresholdAdjuster* a, int newBottom, int newTop);
     void adjusterChanged(ThresholdAdjuster* a, int newBottomLeft, int newTopLeft, int newBottomRight, int newTopRight);
     void adjusterChanged2(ThresholdAdjuster* a, int newBottomL, int newTopL, int newBottomR, int newTopR);
+    void surroundChanged     ();
 
     void enabledChanged();
     void cat02AmountChanged(int amoun, bool ciecamEnabled);

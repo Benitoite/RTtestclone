@@ -732,6 +732,7 @@ HISTORY_MSG_CAT02ADAPTATION_AMOUNT;CAT02 Adaptation - Amount
 HISTORY_MSG_CAT02ADAPTATION_AUTO_AMOUNT;CAT02 Adaptation - Auto amount
 HISTORY_MSG_CAT02ADAPTATION_LUMINANCE_SCALING;CAT02 Adaptation - Luminance scaling
 HISTORY_MSG_CAT02ADAPTATION_AUTO_LUMINANCE_SCALING;CAT02 Adaptation - Auto Luminance Scaling
+HISTORY_MSG_CAT02ADAPTATION_SURROUND;CAT02 Adaptation - Surround
 HISTORY_MSG_COLORTONING_LABGRID_VALUE;CT - Color correction
 HISTORY_MSG_COLORTONING_LABREGION_AB;CT - Color correction
 HISTORY_MSG_COLORTONING_LABREGION_CHANNEL;CT - Channel
@@ -1376,6 +1377,8 @@ TP_CAT02ADAPTATION_AMOUNT;Amount
 TP_CAT02ADAPTATION_LUMINANCE_SCALING;Luminance Y scaling
 TP_CAT02ADAPTATION_CIECAM_ENABLED;Ciecam enabled
 TP_CAT02ADAPTATION_CIECAM_DISABLED;Ciecam disabled
+TP_CAT02ADAPTATION_SURROUND;Surround Output Divice
+TP_CAT02ADAPTATION_SURROUND_TOOLTIP;Changes tones and 'colors White Balance' to take into account the viewing conditions of the output device.\n\n<b>Average</b>: Average light environment (standard). The image will not change.\n\n<b>Dim</b>: Dim environment (TV). The image will become slightly dark.\n\n<b>Dark</b>: Dark environment (projector). The image will become more dark.\n
 TP_CAT02ADAPTATION_AUTO_AMOUNT_TOOLTIP;If the check-box is checked, RawTherapee calculates an optimum value, which is then used by CAT02\nTo set the value manually, uncheck the check-box first.
 TP_CAT02ADAPTATION_AMOUNT_TOOLTIP;Performs a chromatic adaptation, between the chosen temperature and 5000K.\n80% to 100% should satisfy the majority of cases.\nIf the absolute luminance conditions (scene or viewing) are very low, you can lower the value till 1.\n\nOnly usable for Daylight and Blackbody illuminants.\n\nDisabled when Ciecam02 enabled.
 TP_CAT02ADAPTATION_AUTO_LUMINANCE_SCALING_TOOLTIP;Auto computation of the luminance scaling factor in function of chromatic adaptation level.\nDisabled when Ciecam02 enabled.
