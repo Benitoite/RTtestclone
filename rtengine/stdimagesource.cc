@@ -19,18 +19,19 @@
 #include "stdimagesource.h"
 
 #include "color.h"
-#include "curves.h"
 #include "iccstore.h"
+#include "image8.h"
+#include "image16.h"
+#include "imagefloat.h"
 #include "imageio.h"
 #include "mytime.h"
 #include "procparams.h"
+#include "utils.h"
 
 #undef THREAD_PRIORITY_NORMAL
 
 namespace rtengine
 {
-
-extern const Settings* settings;
 
 template<class T> void freeArray (T** a, int H)
 {
@@ -191,8 +192,8 @@ int StdImageSource::load (const Glib::ustring &fname)
     return 0;
 }
 
-//void StdImageSource::getImage (const ColorTemp &ctemp, int tran, Imagefloat* image, const PreviewProps &pp, const ToneCurveParams &hrp, const RAWParams &raw)
-void StdImageSource::getImage(const ColorTemp &ctemp, int tran, Imagefloat* image, const PreviewProps &pp, const ProcParams &params)
+void StdImageSource::getImage (const ColorTemp &ctemp, int tran, Imagefloat* image, const PreviewProps &pp, const ToneCurveParams &hrp, const RAWParams &raw, const ProcParams &params)
+
 {
     
     // the code will use OpenMP as of now.

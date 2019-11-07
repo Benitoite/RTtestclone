@@ -16,6 +16,10 @@
  *  You should have received a copy of the GNU General Public License
  *  along with RawTherapee.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include "cieimage.h"
+#include "dcp.h"
+#include "imagefloat.h"
+#include "labimage.h"
 #include "rtengine.h"
 #include "colortemp.h"
 #include "imagesource.h"
@@ -25,7 +29,8 @@
 #include "clutstore.h"
 #include "processingjob.h"
 #include "procparams.h"
-#include <glibmm.h>
+#include <glibmm/ustring.h>
+#include <glibmm/thread.h>
 #include "../rtgui/options.h"
 #include "rawimagesource.h"
 #include "../rtgui/multilangmgr.h"
@@ -35,7 +40,6 @@
 
 namespace rtengine
 {
-extern const Settings* settings;
 
 namespace
 {
@@ -241,7 +245,6 @@ private:
             bool dehacontlutili = false;
             bool mapcontlutili = false;
             bool useHsl = false;
-//        multi_array2D<float, 3> conversionBuffer(1, 1);
             multi_array2D<float, 4> conversionBuffer (1, 1);
             imgsrc->retinexPrepareBuffers (params.icm, params.retinex, conversionBuffer, dummy);
             imgsrc->retinexPrepareCurves (params.retinex, cdcurve, mapcurve, dehatransmissionCurve, dehagaintransmissionCurve, dehacontlutili, mapcontlutili, useHsl, dummy, dummy );
@@ -371,7 +374,7 @@ private:
                             int beg_tileW = wcr * tileWskip + tileWskip / 2.f - crW / 2.f;
                             int beg_tileH = hcr * tileHskip + tileHskip / 2.f - crH / 2.f;
                             PreviewProps ppP (beg_tileW, beg_tileH, crW, crH, skipP);
-                            imgsrc->getImage(currWB, tr, origCropPart, ppP, params);
+                            imgsrc->getImage(currWB, tr, origCropPart, ppP, params.toneCurve, params.raw, params);
                             //baseImg->getStdImage(currWB, tr, origCropPart, ppP, true, params.toneCurve);
 
                             // we only need image reduced to 1/4 here
@@ -595,7 +598,7 @@ private:
                     for (int wcr = 0; wcr <= 2; wcr++) {
                         for (int hcr = 0; hcr <= 2; hcr++) {
                             PreviewProps ppP (coordW[wcr], coordH[hcr], crW, crH, 1);
-                            imgsrc->getImage(currWB, tr, origCropPart, ppP, params);
+                            imgsrc->getImage(currWB, tr, origCropPart, ppP, params.toneCurve, params.raw, params);
                             //baseImg->getStdImage(currWB, tr, origCropPart, ppP, true, params.toneCurve);
 
 
@@ -755,7 +758,8 @@ private:
         }
 
         baseImg = new Imagefloat (fw, fh);
-        imgsrc->getImage(currWB, tr, baseImg, pp, params);
+     //   imgsrc->getImage(currWB, tr, baseImg, pp, params);
+        imgsrc->getImage(currWB, tr, baseImg, pp, params.toneCurve, params.raw, params);
 
         if (pl) {
             pl->setProgress (0.50);
@@ -1003,7 +1007,7 @@ private:
         }
 
         autor = -9000.f; // This will ask to compute the "auto" values for the B&W tool (have to be inferior to -5000)
-        DCPProfile::ApplyState as;
+        DCPProfileApplyState as;
         DCPProfile *dcpProf = imgsrc->getDCP (params.icm, as);
 
         LUTu histToneCurve;

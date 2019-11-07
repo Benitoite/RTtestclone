@@ -1,7 +1,11 @@
 #include <algorithm>
 
+#include <glibmm/fileutils.h>
+#include <glibmm/miscutils.h>
+
 #include "clutstore.h"
 
+#include "colortemp.h"
 #include "iccstore.h"
 #include "imagefloat.h"
 #include "opthelper.h"
@@ -54,7 +58,7 @@ bool loadFile(
         rtengine::procparams::ColorManagementParams icm;
         icm.workingProfile = working_color_space;
 
-        img_src.getImage(curr_wb, TR_NONE, img_float.get(), pp, pparams);
+        img_src.getImage(curr_wb, TR_NONE, img_float.get(), pp, rtengine::procparams::ToneCurveParams(), rtengine::procparams::RAWParams(), pparams);
 
         if (!working_color_space.empty()) {
             img_src.convertColorSpace(img_float.get(), pparams.icm, curr_wb);

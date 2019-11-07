@@ -19,6 +19,7 @@
 
 #include "previewimage.h"
 
+#include "color.h"
 #include "iimage.h"
 #include "iimage.h"
 #include "procparams.h"
@@ -120,7 +121,7 @@ PreviewImage::PreviewImage (const Glib::ustring &fname, const Glib::ustring &ext
             double contrastThresholdDummy = 0.0;
             rawImage.demosaic(params.raw, false, contrastThresholdDummy);
             Imagefloat image(fw, fh);
-            rawImage.getImage(wb, TR_NONE, &image, pp, params);
+            rawImage.getImage (wb, TR_NONE, &image, pp, params.toneCurve, params.raw, params);
             rtengine::Image8 output(fw, fh);
             rawImage.convertColorSpace(&image, params.icm, wb);
 #ifdef _OPENMP

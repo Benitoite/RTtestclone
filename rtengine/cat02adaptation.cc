@@ -24,6 +24,7 @@
 #include "ciecam02.h"
 #include "improcfun.h"
 #include "StopWatch.h"
+#include "colortemp.h"
 
 namespace rtengine
 {
