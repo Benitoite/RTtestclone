@@ -854,6 +854,7 @@ struct CoarseTransformParams {
   * Common transformation parameters
   */
 struct CommonTransformParams {
+    Glib::ustring method;
     bool autofill;
 
     CommonTransformParams();
