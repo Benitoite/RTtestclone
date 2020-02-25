@@ -32,7 +32,7 @@ CAT02Adaptation::CAT02Adaptation(): FoldableToolPanel(this, "cat02adap", M("TP_C
     auto m = ProcEventMapper::getInstance();
     EvCAT02AdaptationEnabled = m->newEvent(ALLNORAW, "HISTORY_MSG_CAT02ADAPTATION_ENABLED");
     EvCAT02AdaptationAmount = m->newEvent(ALLNORAW, "HISTORY_MSG_CAT02ADAPTATION_AMOUNT");
-    EvCAT02AdaptationAutoAmount = m->newEvent(ALLNORAW, "HISTORY_MSG_CAT02ADAPTATION_AUTO_AMOUNT");
+    EvCAT02AdaptationAutoAmount = m->newEvent(M_VOID, "HISTORY_MSG_CAT02ADAPTATION_AUTO_AMOUNT");
     EvCAT02AdaptationLuminanceScaling = m->newEvent(ALLNORAW, "HISTORY_MSG_CAT02ADAPTATION_LUMINANCE_SCALING");
     EvCAT02AdaptationAutoLuminanceScaling = m->newEvent(ALLNORAW, "HISTORY_MSG_CAT02ADAPTATION_AUTO_LUMINANCE_SCALING");
     EvCAT02AdaptationSurround = m->newEvent(ALLNORAW, "HISTORY_MSG_CAT02ADAPTATION_SURROUND");

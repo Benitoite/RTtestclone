@@ -405,6 +405,9 @@ void cat02adaptationAutoCompute(ImageSource *imgsrc,  CAT02AdaptationParams &cat
         }
     }
 
+    float kcompensation = 0.8f; // to adjust between result with CIECAM02 and this branch
+    cat0 *= kcompensation;
+
     if (cat02Param.autoAmount) {
         cat02Param.amount = cat0;
     }
