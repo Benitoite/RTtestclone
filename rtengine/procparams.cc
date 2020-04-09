@@ -1546,6 +1546,7 @@ DirPyrDenoiseParams::DirPyrDenoiseParams() :
     perform(false),
     luma(0),
     Ldetail(0),
+    Ldetailthr(0),
     chroma(15),
     redchro(0),
     bluechro(0),
@@ -1573,6 +1574,7 @@ bool DirPyrDenoiseParams::operator ==(const DirPyrDenoiseParams& other) const
         && perform == other.perform
         && luma == other.luma
         && Ldetail == other.Ldetail
+        && Ldetailthr == other.Ldetailthr
         && chroma == other.chroma
         && redchro == other.redchro
         && bluechro == other.bluechro
@@ -3331,6 +3333,7 @@ int ProcParams::save(const Glib::ustring& fname, const Glib::ustring& fname2, bo
         saveToKeyfile(!pedited || pedited->dirpyrDenoise.median, "Directional Pyramid Denoising", "Median", dirpyrDenoise.median, keyFile);
         saveToKeyfile(!pedited || pedited->dirpyrDenoise.luma, "Directional Pyramid Denoising", "Luma", dirpyrDenoise.luma, keyFile);
         saveToKeyfile(!pedited || pedited->dirpyrDenoise.Ldetail, "Directional Pyramid Denoising", "Ldetail", dirpyrDenoise.Ldetail, keyFile);
+        saveToKeyfile(!pedited || pedited->dirpyrDenoise.Ldetailthr, "Directional Pyramid Denoising", "Ldetailthr", dirpyrDenoise.Ldetailthr, keyFile);
         saveToKeyfile(!pedited || pedited->dirpyrDenoise.chroma, "Directional Pyramid Denoising", "Chroma", dirpyrDenoise.chroma, keyFile);
         saveToKeyfile(!pedited || pedited->dirpyrDenoise.dmethod, "Directional Pyramid Denoising", "Method", dirpyrDenoise.dmethod, keyFile);
         saveToKeyfile(!pedited || pedited->dirpyrDenoise.Lmethod, "Directional Pyramid Denoising", "LMethod", dirpyrDenoise.Lmethod, keyFile);
@@ -4333,6 +4336,7 @@ int ProcParams::load(const Glib::ustring& fname, ParamsEdited* pedited)
             assignFromKeyfile(keyFile, "Directional Pyramid Denoising", "Median", pedited, dirpyrDenoise.median, pedited->dirpyrDenoise.median);
             assignFromKeyfile(keyFile, "Directional Pyramid Denoising", "Luma", pedited, dirpyrDenoise.luma, pedited->dirpyrDenoise.luma);
             assignFromKeyfile(keyFile, "Directional Pyramid Denoising", "Ldetail", pedited, dirpyrDenoise.Ldetail, pedited->dirpyrDenoise.Ldetail);
+            assignFromKeyfile(keyFile, "Directional Pyramid Denoising", "Ldetailthr", pedited, dirpyrDenoise.Ldetailthr, pedited->dirpyrDenoise.Ldetailthr);
             assignFromKeyfile(keyFile, "Directional Pyramid Denoising", "Chroma", pedited, dirpyrDenoise.chroma, pedited->dirpyrDenoise.chroma);
             assignFromKeyfile(keyFile, "Directional Pyramid Denoising", "Method", pedited, dirpyrDenoise.dmethod, pedited->dirpyrDenoise.dmethod);
             assignFromKeyfile(keyFile, "Directional Pyramid Denoising", "LMethod", pedited, dirpyrDenoise.Lmethod, pedited->dirpyrDenoise.Lmethod);

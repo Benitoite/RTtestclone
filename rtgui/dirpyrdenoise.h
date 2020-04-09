@@ -76,15 +76,19 @@ public:
     void smethodChanged      ();
     void colorForValue (double valX, double valY, enum ColorCaller::ElemType elemType, int callerId, ColorCaller* caller) override;
 
-    void setAdjusterBehavior (bool lumaadd, bool lumdetadd, bool chromaadd, bool chromaredadd, bool chromablueadd, bool gammaadd, bool passesadd);
+    void setAdjusterBehavior (bool lumaadd, bool lumdetadd, bool lumdetthradd, bool chromaadd, bool chromaredadd, bool chromablueadd, bool gammaadd, bool passesadd);
     void trimValues          (rtengine::procparams::ProcParams* pp) override;
     Glib::ustring getSettingString ();
 
 private:
+    rtengine::ProcEvent Evdenoisdetailthr;
+
+
     CurveEditorGroup* NoiscurveEditorG;
     CurveEditorGroup* CCcurveEditorG;
     Adjuster* luma;
     Adjuster* Ldetail;
+    Adjuster* Ldetailthr;
     Adjuster* chroma;
     Adjuster* redchro;
     Adjuster* bluechro;

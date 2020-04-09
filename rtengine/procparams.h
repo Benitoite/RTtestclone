@@ -733,6 +733,7 @@ struct DirPyrDenoiseParams {
     bool    perform;
     double  luma;
     double  Ldetail;
+    double  Ldetailthr;
     double  chroma;
     double  redchro;
     double  bluechro;

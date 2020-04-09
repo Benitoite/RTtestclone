@@ -282,6 +282,7 @@ void ParamsEdited::set(bool v)
     dirpyrDenoise.median      = v;
     dirpyrDenoise.luma         = v;
     dirpyrDenoise.Ldetail      = v;
+    dirpyrDenoise.Ldetailthr      = v;
     dirpyrDenoise.chroma       = v;
     dirpyrDenoise.redchro      = v;
     dirpyrDenoise.bluechro     = v;
@@ -891,6 +892,7 @@ void ParamsEdited::initFrom(const std::vector<rtengine::procparams::ProcParams>&
         dirpyrDenoise.lcurve = dirpyrDenoise.lcurve && p.dirpyrDenoise.lcurve == other.dirpyrDenoise.lcurve;
         dirpyrDenoise.cccurve = dirpyrDenoise.cccurve && p.dirpyrDenoise.cccurve == other.dirpyrDenoise.cccurve;
         dirpyrDenoise.Ldetail = dirpyrDenoise.Ldetail && p.dirpyrDenoise.Ldetail == other.dirpyrDenoise.Ldetail;
+        dirpyrDenoise.Ldetailthr = dirpyrDenoise.Ldetailthr && p.dirpyrDenoise.Ldetailthr == other.dirpyrDenoise.Ldetailthr;
         dirpyrDenoise.chroma = dirpyrDenoise.chroma && p.dirpyrDenoise.chroma == other.dirpyrDenoise.chroma;
         dirpyrDenoise.redchro = dirpyrDenoise.redchro && p.dirpyrDenoise.redchro == other.dirpyrDenoise.redchro;
         dirpyrDenoise.bluechro = dirpyrDenoise.bluechro && p.dirpyrDenoise.bluechro == other.dirpyrDenoise.bluechro;
@@ -2164,6 +2166,10 @@ void ParamsEdited::combine(rtengine::procparams::ProcParams& toEdit, const rteng
 
     if (dirpyrDenoise.Ldetail) {
         toEdit.dirpyrDenoise.Ldetail = dontforceSet && options.baBehav[ADDSET_DIRPYRDN_LUMDET] ? toEdit.dirpyrDenoise.Ldetail + mods.dirpyrDenoise.Ldetail : mods.dirpyrDenoise.Ldetail;
+    }
+
+    if (dirpyrDenoise.Ldetailthr) {
+        toEdit.dirpyrDenoise.Ldetailthr = dontforceSet && options.baBehav[ADDSET_DIRPYRDN_LUMDETTHR] ? toEdit.dirpyrDenoise.Ldetailthr + mods.dirpyrDenoise.Ldetailthr : mods.dirpyrDenoise.Ldetailthr;
     }
 
     if (dirpyrDenoise.chroma) {

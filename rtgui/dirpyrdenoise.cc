@@ -26,6 +26,7 @@
 #include "editbuffer.h"
 #include "guiutils.h"
 #include "options.h"
+#include "eventmapper.h"
 
 #include "../rtengine/color.h"
 #include "../rtengine/procparams.h"
@@ -37,6 +38,10 @@ DirPyrDenoise::DirPyrDenoise () : FoldableToolPanel(this, "dirpyrdenoise", M("TP
 {
     std::vector<GradientMilestone> milestones;
     CurveListener::setMulti(true);
+    auto m = ProcEventMapper::getInstance();
+    Evdenoisdetailthr = m->newEvent(ALLNORAW, "HISTORY_MSG_DENOISDETAILTHR");
+    
+    
     nextnresid = 0.;
     nexthighresid = 0.;
     nextchroma = 15.;
@@ -62,7 +67,8 @@ DirPyrDenoise::DirPyrDenoise () : FoldableToolPanel(this, "dirpyrdenoise", M("TP
     Lmethodconn = Lmethod->signal_changed().connect ( sigc::mem_fun(*this, &DirPyrDenoise::LmethodChanged) );
 
     luma  = Gtk::manage (new Adjuster (M("TP_DIRPYRDENOISE_LUMINANCE_SMOOTHING"), 0, 100, 0.01, 0));
-    Ldetail  = Gtk::manage (new Adjuster (M("TP_DIRPYRDENOISE_LUMINANCE_DETAIL"), 0, 100, 0.01, 50));
+    Ldetail  = Gtk::manage (new Adjuster (M("TP_DIRPYRDENOISE_LUMINANCE_DETAIL"), 0, 100, 0.01, 0.));
+    Ldetailthr  = Gtk::manage (new Adjuster (M("TP_DIRPYRDENOISE_LUMINANCE_DETAILTHR"), 0., 100., 0.01, 0.));
     NoiscurveEditorG = new CurveEditorGroup (options.lastDenoiseCurvesDir, M("TP_DIRPYRDENOISE_LUMINANCE_CURVE"));
     //curveEditorG = new CurveEditorGroup (options.lastLabCurvesDir);
     NoiscurveEditorG->setCurveListener (this);
@@ -136,6 +142,7 @@ DirPyrDenoise::DirPyrDenoise () : FoldableToolPanel(this, "dirpyrdenoise", M("TP
 
     luma->setAdjusterListener (this);
     Ldetail->setAdjusterListener (this);
+    Ldetailthr->setAdjusterListener (this);
     chroma->setAdjusterListener (this);
     redchro->setAdjusterListener (this);
     bluechro->setAdjusterListener (this);
@@ -154,6 +161,7 @@ DirPyrDenoise::DirPyrDenoise () : FoldableToolPanel(this, "dirpyrdenoise", M("TP
 
     luma->hide();
     Ldetail->show();
+    Ldetailthr->show();
 
     NoiseLabels->show();
     TileLabels->show();
@@ -243,6 +251,7 @@ DirPyrDenoise::DirPyrDenoise () : FoldableToolPanel(this, "dirpyrdenoise", M("TP
     lumaVBox->pack_start (*luma);
     lumaVBox->pack_start (*NoiscurveEditorG, Gtk::PACK_SHRINK, 4);
     lumaVBox->pack_start (*Ldetail);
+    lumaVBox->pack_start (*Ldetailthr);
     lumaFrame->add(*lumaVBox);
     pack_start (*lumaFrame);
 
@@ -565,6 +574,7 @@ void DirPyrDenoise::read (const ProcParams* pp, const ParamsEdited* pedited)
 
         luma->setEditedState       (pedited->dirpyrDenoise.luma ? Edited : UnEdited);
         Ldetail->setEditedState    (pedited->dirpyrDenoise.Ldetail ? Edited : UnEdited);
+        Ldetailthr->setEditedState    (pedited->dirpyrDenoise.Ldetailthr ? Edited : UnEdited);
         chroma->setEditedState     (pedited->dirpyrDenoise.chroma ? Edited : UnEdited);
         redchro->setEditedState    (pedited->dirpyrDenoise.redchro ? Edited : UnEdited);
         bluechro->setEditedState   (pedited->dirpyrDenoise.bluechro ? Edited : UnEdited);
@@ -588,6 +598,7 @@ void DirPyrDenoise::read (const ProcParams* pp, const ParamsEdited* pedited)
 //  lastperform = pp->dirpyrDenoise.perform;
     luma->setValue    (pp->dirpyrDenoise.luma);
     Ldetail->setValue (pp->dirpyrDenoise.Ldetail);
+    Ldetailthr->setValue (pp->dirpyrDenoise.Ldetailthr);
     chroma->setValue  (pp->dirpyrDenoise.chroma);
     redchro->setValue  (pp->dirpyrDenoise.redchro);
     bluechro->setValue  (pp->dirpyrDenoise.bluechro);
@@ -627,6 +638,7 @@ void DirPyrDenoise::write (ProcParams* pp, ParamsEdited* pedited)
 
     pp->dirpyrDenoise.luma      = luma->getValue ();
     pp->dirpyrDenoise.Ldetail   = Ldetail->getValue ();
+    pp->dirpyrDenoise.Ldetailthr   = Ldetailthr->getValue ();
     pp->dirpyrDenoise.chroma    = chroma->getValue ();
     pp->dirpyrDenoise.redchro   = redchro->getValue ();
     pp->dirpyrDenoise.bluechro  = bluechro->getValue ();
@@ -649,6 +661,7 @@ void DirPyrDenoise::write (ProcParams* pp, ParamsEdited* pedited)
         pedited->dirpyrDenoise.methodmed  = methodmed->get_active_row_number() != 5;
         pedited->dirpyrDenoise.luma     = luma->getEditedState ();
         pedited->dirpyrDenoise.Ldetail  = Ldetail->getEditedState ();
+        pedited->dirpyrDenoise.Ldetailthr  = Ldetailthr->getEditedState ();
         pedited->dirpyrDenoise.chroma   = chroma->getEditedState ();
         pedited->dirpyrDenoise.redchro  = redchro->getEditedState ();
         pedited->dirpyrDenoise.bluechro = bluechro->getEditedState ();
@@ -943,6 +956,7 @@ void DirPyrDenoise::setDefaults (const ProcParams* defParams, const ParamsEdited
 
     luma->setDefault    (defParams->dirpyrDenoise.luma);
     Ldetail->setDefault (defParams->dirpyrDenoise.Ldetail);
+    Ldetailthr->setDefault (defParams->dirpyrDenoise.Ldetailthr);
     chroma->setDefault  (defParams->dirpyrDenoise.chroma);
     redchro->setDefault  (defParams->dirpyrDenoise.redchro);
     bluechro->setDefault  (defParams->dirpyrDenoise.bluechro);
@@ -952,6 +966,7 @@ void DirPyrDenoise::setDefaults (const ProcParams* defParams, const ParamsEdited
     if (pedited) {
         luma->setDefaultEditedState     (pedited->dirpyrDenoise.luma ? Edited : UnEdited);
         Ldetail->setDefaultEditedState  (pedited->dirpyrDenoise.Ldetail ? Edited : UnEdited);
+        Ldetailthr->setDefaultEditedState  (pedited->dirpyrDenoise.Ldetailthr ? Edited : UnEdited);
         chroma->setDefaultEditedState   (pedited->dirpyrDenoise.chroma ? Edited : UnEdited);
         redchro->setDefaultEditedState   (pedited->dirpyrDenoise.redchro ? Edited : UnEdited);
         bluechro->setDefaultEditedState   (pedited->dirpyrDenoise.bluechro ? Edited : UnEdited);
@@ -960,6 +975,7 @@ void DirPyrDenoise::setDefaults (const ProcParams* defParams, const ParamsEdited
     } else {
         luma->setDefaultEditedState     (Irrelevant);
         Ldetail->setDefaultEditedState  (Irrelevant);
+        Ldetailthr->setDefaultEditedState  (Irrelevant);
         chroma->setDefaultEditedState   (Irrelevant);
         redchro->setDefaultEditedState   (Irrelevant);
         bluechro->setDefaultEditedState   (Irrelevant);
@@ -975,6 +991,8 @@ void DirPyrDenoise::adjusterChanged(Adjuster* a, double newval)
     if (listener && getEnabled()) {
         if (a == Ldetail) {
             listener->panelChanged (EvDPDNLdetail, costr);
+        } else if (a == Ldetailthr) {
+            listener->panelChanged (Evdenoisdetailthr, costr);
         } else if (a == luma) {
             listener->panelChanged (EvDPDNLuma, costr);
         } else if (a == chroma) {
@@ -1063,6 +1081,7 @@ void DirPyrDenoise::setBatchMode (bool batchMode)
     ToolPanel::setBatchMode (batchMode);
     luma->showEditedCB ();
     Ldetail->showEditedCB ();
+    Ldetailthr->showEditedCB ();
     chroma->showEditedCB ();
     redchro->showEditedCB ();
     bluechro->showEditedCB ();
@@ -1082,11 +1101,12 @@ void DirPyrDenoise::setBatchMode (bool batchMode)
 
 }
 
-void DirPyrDenoise::setAdjusterBehavior (bool lumaadd, bool lumdetadd, bool chromaadd, bool chromaredadd, bool chromablueadd, bool gammaadd, bool passesadd)
+void DirPyrDenoise::setAdjusterBehavior (bool lumaadd, bool lumdetadd, bool lumdetthradd, bool chromaadd, bool chromaredadd, bool chromablueadd, bool gammaadd, bool passesadd)
 {
 
     luma->setAddMode(lumaadd);
     Ldetail->setAddMode(lumdetadd);
+    Ldetailthr->setAddMode(lumdetadd);
     chroma->setAddMode(chromaadd);
     redchro->setAddMode(chromaredadd);
     bluechro->setAddMode(chromablueadd);
@@ -1144,6 +1164,7 @@ void DirPyrDenoise::trimValues (rtengine::procparams::ProcParams* pp)
 
     luma->trimValue(pp->dirpyrDenoise.luma);
     Ldetail->trimValue(pp->dirpyrDenoise.Ldetail);
+    Ldetailthr->trimValue(pp->dirpyrDenoise.Ldetailthr);
     chroma->trimValue(pp->dirpyrDenoise.chroma);
     redchro->trimValue(pp->dirpyrDenoise.redchro);
     bluechro->trimValue(pp->dirpyrDenoise.bluechro);

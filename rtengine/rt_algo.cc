@@ -488,4 +488,6 @@ void buildBlendMask(const float* const * luminance, float **blend, int W, int H,
     }
 }
 
+
+
 }

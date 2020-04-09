@@ -304,6 +304,7 @@ struct DirPyrDenoiseParamsEdited {
     bool enhance;
     bool median;
     bool Ldetail;
+    bool Ldetailthr;
     bool luma;
     bool chroma;
     bool redchro;
